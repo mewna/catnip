@@ -74,7 +74,7 @@ public class MewShard extends AbstractVerticle {
         if(socketRef.get() != null) {
             socketRef.get().close((short) 4000);
         }
-        heartbeatAcked.set(false);
+        heartbeatAcked.set(true);
     }
     
     // Socket

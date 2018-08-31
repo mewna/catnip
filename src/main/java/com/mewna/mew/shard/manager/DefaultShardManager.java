@@ -115,6 +115,10 @@ public class DefaultShardManager implements ShardManager {
     
     @Override
     public void addToConnectQueue(final int shard) {
-        connectQueue.add(shard);
+        if(!connectQueue.contains(shard)) {
+            connectQueue.add(shard);
+        } else {
+            logger.warn("Ignoring duplicate queue for shard {}", shard);
+        }
     }
 }

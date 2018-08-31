@@ -15,8 +15,6 @@ public interface ShardManager {
     
     void start();
     
-    Deque<Integer> getConnectQueue();
-    
     void addToConnectQueue(int shard);
     
     Mew getMew();
