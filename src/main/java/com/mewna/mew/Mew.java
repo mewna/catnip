@@ -1,7 +1,7 @@
 package com.mewna.mew;
 
-import com.mewna.mew.shard.MewShard;
-import com.mewna.mew.shard.MewShard.ShardConnectState;
+import com.mewna.mew.rest.Rest;
+import com.mewna.mew.rest.RestRequester;
 import com.mewna.mew.shard.manager.DefaultShardManager;
 import com.mewna.mew.shard.manager.ShardManager;
 import com.mewna.mew.shard.session.DefaultSessionManager;
@@ -9,9 +9,8 @@ import com.mewna.mew.shard.session.SessionManager;
 import com.mewna.mew.util.ratelimit.MemoryRatelimiter;
 import com.mewna.mew.util.ratelimit.Ratelimiter;
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.eventbus.MessageCodec;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -40,6 +39,14 @@ public class Mew {
     @Getter
     @Setter
     private Ratelimiter gatewayRatelimiter = new MemoryRatelimiter();
+    
+    @Getter
+    private final RestRequester restRequester = new RestRequester(this);
+    
+    // TODO: Add to builder
+    @Getter
+    @Setter
+    private Rest rest = new Rest(this);
     
     public static String getGatewayUrl() {
         // TODO: Allow injecting other gateway URLs for eg. mocks?

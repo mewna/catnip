@@ -210,6 +210,7 @@ public class MewShard extends AbstractVerticle {
                 break;
             }
         }
+        Mew.eventBus().send(type, data);
     }
     
     private void handleHeartbeat(final Message<JsonObject> msg, final JsonObject event) {
