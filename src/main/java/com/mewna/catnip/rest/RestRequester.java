@@ -175,6 +175,9 @@ public class RestRequester {
         }
         
         void updateFromHeaders(final MultiMap headers) {
+            if(!(headers.contains("X-Ratelimit-Limit") && headers.contains("X-Ratelimit-Remaining") && headers.contains("X-Ratelimit-Reset"))) {
+                return;
+            }
             limit = Integer.parseInt(headers.get("X-Ratelimit-Limit"));
             remaining = Integer.parseInt(headers.get("X-Ratelimit-Remaining"));
             reset = TimeUnit.SECONDS.toMillis(Integer.parseInt(headers.get("X-Ratelimit-Reset")));
