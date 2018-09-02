@@ -1,18 +1,22 @@
 package com.mewna.catnip.shard;
 
 import com.mewna.catnip.Catnip;
+import io.netty.buffer.ByteBuf;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.WebSocket;
 import io.vertx.core.http.WebSocketFrame;
-import io.vertx.core.json.DecodeException;
+import io.vertx.core.http.impl.ws.WebSocketFrameImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -29,7 +33,9 @@ public class CatnipShard extends AbstractVerticle {
     private final int id;
     private final int limit;
     
-    private final HttpClient client = Catnip.vertx().createHttpClient();
+    private final HttpClient client = Catnip.vertx().createHttpClient(new HttpClientOptions()
+            .setMaxWebsocketFrameSize(Integer.MAX_VALUE)
+            .setMaxWebsocketMessageSize(Integer.MAX_VALUE));
     
     private final AtomicReference<WebSocket> socketRef = new AtomicReference<>(null);
     private final AtomicBoolean heartbeatAcked = new AtomicBoolean(true);
@@ -38,11 +44,42 @@ public class CatnipShard extends AbstractVerticle {
     
     private final DispatchEmitter emitter = new DispatchEmitter();
     
+    /**
+     * Shard control - start, stop, etc
+     *
+     * @param id Shard ID
+     *
+     * @return Control address for the given shard
+     */
+    public static String getControlAddress(final int id) {
+        return String.format("catnip:shard:%s:control", id);
+    }
+    
+    public static JsonObject getBasePayload(final GatewayOp op) {
+        return getBasePayload(op, (JsonObject) null);
+    }
+    
+    public static JsonObject getBasePayload(final GatewayOp op, final JsonObject payload) {
+        return new JsonObject()
+                .put("op", op.getOp())
+                .put("d", payload)
+                ;
+    }
+    
+    public static JsonObject getBasePayload(final GatewayOp op, final Integer payload) {
+        return new JsonObject()
+                .put("op", op.getOp())
+                .put("d", payload)
+                ;
+    }
+    
     @Override
     public void start() {
         Catnip.eventBus().consumer(getControlAddress(id), this::handleControlMessage);
         Catnip.eventBus().consumer(getWebsocketMessageSendAddress(), this::handleSocketSend);
     }
+    
+    // Socket
     
     @Override
     public void stop() {
@@ -79,19 +116,43 @@ public class CatnipShard extends AbstractVerticle {
         heartbeatAcked.set(true);
     }
     
-    // Socket
+    // Payload handling
     
     private void connectSocket(final Message<JsonObject> msg) {
         client.websocketAbs(Catnip.getGatewayUrl(), null, null, null,
                 socket -> {
-                    socket.frameHandler(frame -> handleSocketFrame(msg, frame));
-                    socket.closeHandler(this::handleSocketClose);
+                    socket.frameHandler(frame -> {
+                        {
+                            String closeReason;
+                            int closeStatusCode;
+                            final ByteBuf binaryData = frame.binaryData().getByteBuf();
+                            int length = ((WebSocketFrameImpl)frame).length();
+                            if (length < 2) {
+                                closeStatusCode = 1000;
+                                closeReason = null;
+                            } else {
+                                int index = binaryData.readerIndex();
+                                closeStatusCode = binaryData.getShort(index);
+                                if (length == 2) {
+                                    closeReason = null;
+                                } else {
+                                    closeReason = binaryData.toString(index + 2, length - 2, StandardCharsets.UTF_8);
+                                }
+                            }
+                            logger.warn("  code: {}", closeStatusCode);
+                            logger.warn("reason: {}", closeReason);
+                        }
+                        handleSocketFrame(msg, frame);
+                    })
+                            .closeHandler(this::handleSocketClose)
+                            .exceptionHandler(Throwable::printStackTrace);
                     socketRef.set(socket);
                 },
                 failure -> {
                     socketRef.set(null);
+                    logger.error("Couldn't connect socket:", failure);
+                    Catnip.eventBus().<JsonObject>send("RAW_STATUS", new JsonObject().put("status", "down:fail-connect").put("shard", id));
                     Catnip.vertx().setTimer(5500L, __ -> msg.reply(new JsonObject().put("state", FAILED.name())));
-                    failure.printStackTrace();
                 });
     }
     
@@ -136,15 +197,22 @@ public class CatnipShard extends AbstractVerticle {
                 }
                 // Emit messages for subconsumers
                 Catnip.eventBus().<JsonObject>send(getWebsocketMessageRecvAddress(op), event);
+                Catnip.eventBus().<JsonObject>send("RAW_WS", event);
             }
-        } catch(final DecodeException e) {
+        } catch(final Exception e) {
             e.printStackTrace();
         }
     }
     
     private void handleSocketClose(final Void __) {
-        socketRef.set(null);
-        catnip.shardManager().addToConnectQueue(id);
+        logger.warn("Socket closing!");
+        try {
+            Catnip.eventBus().<JsonObject>send("RAW_STATUS", new JsonObject().put("status", "down:socket-close").put("shard", id));
+            socketRef.set(null);
+            catnip.shardManager().addToConnectQueue(id);
+        } catch(final Exception e) {
+            logger.error("Failure closing socket:", e);
+        }
     }
     
     private void handleSocketSend(final Message<JsonObject> msg) {
@@ -153,8 +221,6 @@ public class CatnipShard extends AbstractVerticle {
             webSocket.writeTextMessage(msg.body().encode());
         }
     }
-    
-    // Payload handling
     
     private void handleHello(final Message<JsonObject> msg, final JsonObject event) {
         final JsonObject payload = event.getJsonObject("d");
@@ -216,8 +282,11 @@ public class CatnipShard extends AbstractVerticle {
         }
         
         emitter.emit(event);
+        Catnip.eventBus().<JsonObject>send("RAW_DISPATCH", event);
         //Catnip.eventBus().send(type, data);
     }
+    
+    // Addresses
     
     private void handleHeartbeat(final Message<JsonObject> msg, final JsonObject event) {
         //heartbeatAcked.set(false);
@@ -245,24 +314,13 @@ public class CatnipShard extends AbstractVerticle {
         }
     }
     
+    // Payloads
+    
     private void handleReconnectRequest(final Message<JsonObject> msg, final JsonObject event) {
         // Just immediately disconnect
         if(socketRef.get() != null) {
             socketRef.get().close();
         }
-    }
-    
-    // Addresses
-    
-    /**
-     * Shard control - start, stop, etc
-     *
-     * @param id Shard ID
-     *
-     * @return Control address for the given shard
-     */
-    public static String getControlAddress(final int id) {
-        return String.format("catnip:shard:%s:control", id);
     }
     
     /**
@@ -278,26 +336,6 @@ public class CatnipShard extends AbstractVerticle {
     
     public String getWebsocketMessageSendAddress() {
         return String.format("catnip:gateway:ws-outgoing:%s", id);
-    }
-    
-    // Payloads
-    
-    public static JsonObject getBasePayload(final GatewayOp op) {
-        return getBasePayload(op, (JsonObject) null);
-    }
-    
-    public static JsonObject getBasePayload(final GatewayOp op, final JsonObject payload) {
-        return new JsonObject()
-                .put("op", op.getOp())
-                .put("d", payload)
-                ;
-    }
-    
-    public static JsonObject getBasePayload(final GatewayOp op, final Integer payload) {
-        return new JsonObject()
-                .put("op", op.getOp())
-                .put("d", payload)
-                ;
     }
     
     private JsonObject identify() {

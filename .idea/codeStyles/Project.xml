@@ -9,6 +9,12 @@
     <JSCodeStyleSettings>
       <option name="SPACE_BEFORE_FUNCTION_LEFT_PARENTH" value="false" />
     </JSCodeStyleSettings>
+    <JavaCodeStyleSettings>
+      <option name="GENERATE_FINAL_LOCALS" value="true" />
+      <option name="GENERATE_FINAL_PARAMETERS" value="true" />
+      <option name="JD_ADD_BLANK_AFTER_PARM_COMMENTS" value="true" />
+      <option name="JD_ADD_BLANK_AFTER_RETURN" value="true" />
+    </JavaCodeStyleSettings>
     <MarkdownNavigatorCodeStyleSettings>
       <option name="RIGHT_MARGIN" value="72" />
     </MarkdownNavigatorCodeStyleSettings>
@@ -26,6 +32,24 @@
     <editorconfig>
       <option name="ENABLED" value="false" />
     </editorconfig>
+    <codeStyleSettings language="JAVA">
+      <option name="KEEP_BLANK_LINES_IN_DECLARATIONS" value="1" />
+      <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
+      <option name="KEEP_BLANK_LINES_BEFORE_RBRACE" value="0" />
+      <option name="SPACE_BEFORE_IF_PARENTHESES" value="false" />
+      <option name="SPACE_BEFORE_WHILE_PARENTHESES" value="false" />
+      <option name="SPACE_BEFORE_FOR_PARENTHESES" value="false" />
+      <option name="SPACE_BEFORE_TRY_PARENTHESES" value="false" />
+      <option name="SPACE_BEFORE_CATCH_PARENTHESES" value="false" />
+      <option name="SPACE_BEFORE_SWITCH_PARENTHESES" value="false" />
+      <option name="SPACE_BEFORE_SYNCHRONIZED_PARENTHESES" value="false" />
+      <option name="SPACE_BEFORE_ARRAY_INITIALIZER_LBRACE" value="true" />
+      <option name="VARIABLE_ANNOTATION_WRAP" value="2" />
+      <indentOptions>
+        <option name="SMART_TABS" value="true" />
+        <option name="KEEP_INDENTS_ON_EMPTY_LINES" value="true" />
+      </indentOptions>
+    </codeStyleSettings>
     <codeStyleSettings language="JavaScript">
       <option name="SPACE_BEFORE_IF_PARENTHESES" value="false" />
       <option name="SPACE_BEFORE_WHILE_PARENTHESES" value="false" />
