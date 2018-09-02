@@ -3,6 +3,7 @@ package com.mewna.catnip.entity;
 import io.vertx.core.json.JsonObject;
 import lombok.*;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 /**
@@ -17,15 +18,15 @@ import java.util.List;
 public class Message {
     private MessageType type;
     private boolean tts;
-    private String timestamp;
+    private OffsetDateTime timestamp;
     private boolean pinned;
     private String nonce;
     private List<User> mentionedUsers;
     private List<String> mentionedRoles;
     private Member member;
     private String id;
-    private List<JsonObject> embeds;
-    private String editedTimestamp;
+    private List<Embed> embeds;
+    private OffsetDateTime editedTimestamp;
     private String content;
     private String channelId;
     private User author;
