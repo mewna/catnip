@@ -1,4 +1,7 @@
 .idea/*.xml
 .idea/markdown-navigator
+.idea/copyright/*.xml
+.idea/dictionaries/*.xml
+.idea/libraries
 catnip.iml
 target/
