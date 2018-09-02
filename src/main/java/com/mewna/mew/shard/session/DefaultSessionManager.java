@@ -30,4 +30,14 @@ public class DefaultSessionManager implements SessionManager {
     public int getSeqnum(final int shardId) {
         return seqnums.get(shardId);
     }
+    
+    @Override
+    public void clearSession(final int shardId) {
+        sessions.remove(shardId);
+    }
+    
+    @Override
+    public void clearSeqnum(final int shardId) {
+        seqnums.remove(shardId);
+    }
 }

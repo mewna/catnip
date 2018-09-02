@@ -16,8 +16,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Deque;
@@ -44,8 +42,6 @@ public class RestRequester {
     private final Mew mew;
     private final Collection<Bucket> submittedBuckets = new ConcurrentHashSet<>();
     
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-    
     public RestRequester(final Mew mew) {
         this.mew = mew;
     }
@@ -66,7 +62,6 @@ public class RestRequester {
             final JsonObject json = result.bodyAsJsonObject();
             final MultiMap headers = result.headers();
             if(headers.contains("X-Ratelimit-Global")) {
-                logger.warn("Hit global ratelimit, updating bucket");
                 // We hit a global ratelimit, update
                 final Bucket global = getBucket("GLOBAL");
                 final long retry = Long.parseLong(headers.get("Retry-After"));
@@ -124,7 +119,6 @@ public class RestRequester {
                 }
             } else {
                 final long wait = bucket.getReset() - System.currentTimeMillis();
-                logger.warn("{} > Hit ratelimit, delay {}ms", route.getRoute(), wait + 500L);
                 // Add an extra 500ms buffer to be safe
                 Mew.vertx().setTimer(wait + 500L, __ -> {
                     bucket.reset();
@@ -134,7 +128,6 @@ public class RestRequester {
         } else {
             // Global rl, retry later
             final long wait = global.getReset() - System.currentTimeMillis();
-            logger.warn("GLOBAL > Hit ratelimit, delay {}ms", route.getRoute(), wait + 500L);
             // Add an extra 500ms buffer to be safe
             Mew.vertx().setTimer(wait + 500L, __ -> {
                 global.reset();
@@ -185,8 +178,6 @@ public class RestRequester {
             limit = Integer.parseInt(headers.get("X-Ratelimit-Limit"));
             remaining = Integer.parseInt(headers.get("X-Ratelimit-Remaining"));
             reset = TimeUnit.SECONDS.toMillis(Integer.parseInt(headers.get("X-Ratelimit-Reset")));
-            logger.warn("{} > limit = {}, remaining = {}, reset = {} ({}ms), queue = {}", route, limit, remaining, reset,
-                    reset - System.currentTimeMillis(), queue.size());
         }
         
         void queue(final Future<JsonObject> future, final OutboundRequest request) {

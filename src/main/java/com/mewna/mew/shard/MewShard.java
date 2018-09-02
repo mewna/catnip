@@ -36,6 +36,8 @@ public class MewShard extends AbstractVerticle {
     
     private final Logger logger = LoggerFactory.getLogger(getClass());
     
+    private final DispatchEmitter emitter = new DispatchEmitter();
+    
     @Override
     public void start() {
         Mew.eventBus().consumer(getControlAddress(id), this::handleControlMessage);
@@ -88,7 +90,7 @@ public class MewShard extends AbstractVerticle {
                 },
                 failure -> {
                     socketRef.set(null);
-                    msg.reply(FAILED);
+                    Mew.vertx().setTimer(5500L, __ -> msg.reply(new JsonObject().put("state", FAILED.name())));
                 });
     }
     
@@ -203,6 +205,7 @@ public class MewShard extends AbstractVerticle {
                 break;
             }
             case "RESUMED": {
+                // RESUME is fine, just reply immediately
                 msg.reply(new JsonObject().put("state", RESUMED.name()));
                 break;
             }
@@ -210,7 +213,9 @@ public class MewShard extends AbstractVerticle {
                 break;
             }
         }
-        Mew.eventBus().send(type, data);
+        
+        emitter.emit(event);
+        //Mew.eventBus().send(type, data);
     }
     
     private void handleHeartbeat(final Message<JsonObject> msg, final JsonObject event) {
@@ -233,8 +238,8 @@ public class MewShard extends AbstractVerticle {
             // Can't resume, clear old data
             if(socketRef.get() != null) {
                 socketRef.get().close();
-                mew.sessionManager().storeSession(id, null);
-                mew.sessionManager().storeSeqnum(id, -1);
+                mew.sessionManager().clearSession(id);
+                mew.sessionManager().clearSeqnum(id);
             }
         }
     }

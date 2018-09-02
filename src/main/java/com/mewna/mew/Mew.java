@@ -1,23 +1,29 @@
 package com.mewna.mew;
 
+import com.mewna.mew.entity.Message;
 import com.mewna.mew.rest.Rest;
 import com.mewna.mew.rest.RestRequester;
 import com.mewna.mew.shard.manager.DefaultShardManager;
 import com.mewna.mew.shard.manager.ShardManager;
 import com.mewna.mew.shard.session.DefaultSessionManager;
 import com.mewna.mew.shard.session.SessionManager;
+import com.mewna.mew.util.JsonPojoCodec;
 import com.mewna.mew.util.ratelimit.MemoryRatelimiter;
 import com.mewna.mew.util.ratelimit.Ratelimiter;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
+ * Possible names:
+ * - solace
+ * - sapphire
+ * - mew (lol no)
+ * - catnip
+ * - sakura
+ *
  * @author amy
  * @since 8/31/18.
  */
@@ -25,8 +31,8 @@ import org.slf4j.LoggerFactory;
 public class Mew {
     @Getter
     private static final Vertx vertx = Vertx.vertx();
-    private final Logger logger = LoggerFactory.getLogger(Mew.class);
-    
+    @Getter
+    private final RestRequester _requester = new RestRequester(this);
     @Getter
     @Setter
     private String token;
@@ -39,10 +45,6 @@ public class Mew {
     @Getter
     @Setter
     private Ratelimiter gatewayRatelimiter = new MemoryRatelimiter();
-    
-    @Getter
-    private final RestRequester restRequester = new RestRequester(this);
-    
     // TODO: Add to builder
     @Getter
     @Setter
@@ -62,8 +64,22 @@ public class Mew {
         return vertx.eventBus();
     }
     
-    public void boot() {
+    public Mew setup() {
+        // Register codecs
+        // God I hate having to do this
+        // This is necessary to make Vert.x allow passing arbitrary objects
+        // over the bus tho, since it doesn't obey typical Java serialization
+        // stuff (for reasons I don't really get) and won't just dump stuff to
+        // JSON when it doesn't have a codec
+        // *sigh*
+        eventBus().registerDefaultCodec(Message.class, new JsonPojoCodec<>(Message.class));
+        
         shardManager.setMew(this);
+        return this;
+    }
+    
+    public Mew startShards() {
         shardManager.start();
+        return this;
     }
 }

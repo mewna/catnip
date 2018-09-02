@@ -3,7 +3,6 @@ package com.mewna.mew.rest;
 import com.google.common.collect.ImmutableMap;
 import com.mewna.mew.Mew;
 import com.mewna.mew.rest.RestRequester.OutboundRequest;
-import com.mewna.mew.rest.Routes.Route;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
@@ -20,7 +19,8 @@ public class Rest {
         this.mew = mew;
     }
     
-    public Future<JsonObject> createMessage(final Route route, final String message) {
-        return mew.restRequester().queue(new OutboundRequest(route, ImmutableMap.of(), new JsonObject().put("content", message)));
+    public Future<JsonObject> createMessage(final String channelId, final String message) {
+        return mew._requester().queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId),
+                ImmutableMap.of(), new JsonObject().put("content", message)));
     }
 }

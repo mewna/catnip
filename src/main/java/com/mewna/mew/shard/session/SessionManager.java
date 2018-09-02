@@ -12,4 +12,8 @@ public interface SessionManager {
     void storeSeqnum(int shardId, int seqnum);
     
     int getSeqnum(int shardId);
+    
+    void clearSession(int shardId);
+    
+    void clearSeqnum(int shardId);
 }
