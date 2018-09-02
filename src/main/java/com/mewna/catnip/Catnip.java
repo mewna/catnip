@@ -65,6 +65,8 @@ public class Catnip {
         // stuff (for reasons I don't really get) and won't just dump stuff to
         // JSON when it doesn't have a codec
         // *sigh*
+        // This is mainly important for distributed catnip; locally it'll just
+        // not apply any transformations
         eventBus().registerDefaultCodec(Message.class, new JsonPojoCodec<>(Message.class));
         
         shardManager.setCatnip(this);
