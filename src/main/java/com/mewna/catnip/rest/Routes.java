@@ -54,8 +54,10 @@ public final class Routes {
             return route.equalsIgnoreCase(((Route) o).route);
         }
     }
-    
+
     // @formatter:off
+    public static final Route GET_GATEWAY_BOT                     = new Route(GET,    "/gateway/bot");
+
     public static final Route DELETE_CHANNEL                      = new Route(DELETE, "/channels/{channel.id}", "channel.id");
     public static final Route GET_CHANNEL                         = new Route(GET,    "/channels/{channel.id}", "channel.id");
     public static final Route MODIFY_CHANNEL                      = new Route(PATCH,  "/channels/{channel.id}", "channel.id");
@@ -77,13 +79,10 @@ public final class Routes {
     public static final Route GET_PINNED_MESSAGES                 = new Route(GET,    "/channels/{channel.id}/pins", "channel.id");
     public static final Route DELETE_PINNED_CHANNEL_MESSAGE       = new Route(DELETE, "/channels/{channel.id}/pins/{message.id}", "channel.id");
     public static final Route ADD_PINNED_CHANNEL_MESSAGE          = new Route(PUT,    "/channels/{channel.id}/pins/{message.id}", "channel.id");
-    public static final Route GROUP_DM_REMOVE_RECIPIENT           = new Route(DELETE, "/channels/{channel.id}/recipients/{user.id}", "channel.id");
-    public static final Route GROUP_DM_ADD_RECIPIENT              = new Route(PUT,    "/channels/{channel.id}/recipients/{user.id}", "channel.id");
     public static final Route TRIGGER_TYPING_INDICATOR            = new Route(POST,   "/channels/{channel.id}/typing", "channel.id");
     public static final Route GET_CHANNEL_WEBHOOKS                = new Route(GET,    "/channels/{channel.id}/webhooks", "channel.id");
     public static final Route CREATE_WEBHOOK                      = new Route(POST,   "/channels/{channel.id}/webhooks", "channel.id");
-    public static final Route GET_GATEWAY                         = new Route(GET,    "/gateway");
-    public static final Route GET_GATEWAY_BOT                     = new Route(GET,    "/gateway/bot");
+
     public static final Route CREATE_GUILD                        = new Route(POST,   "/guilds");
     public static final Route DELETE_GUILD                        = new Route(DELETE, "/guilds/{guild.id}", "guild.id");
     public static final Route GET_GUILD                           = new Route(GET,    "/guilds/{guild.id}", "guild.id");
@@ -120,19 +119,19 @@ public final class Routes {
     public static final Route DELETE_GUILD_ROLE                   = new Route(DELETE, "/guilds/{guild.id}/roles/{role.id}", "guild.id");
     public static final Route MODIFY_GUILD_ROLE                   = new Route(PATCH,  "/guilds/{guild.id}/roles/{role.id}", "guild.id");
     public static final Route GET_GUILD_WEBHOOKS                  = new Route(GET,    "/guilds/{guild.id}/webhooks", "guild.id");
+
     public static final Route DELETE_INVITE                       = new Route(DELETE, "/invites/{invite.code}");
     public static final Route GET_INVITE                          = new Route(GET,    "/invites/{invite.code}");
     public static final Route ACCEPT_INVITE                       = new Route(POST,   "/invites/{invite.code}");
-    public static final Route GET_CURRENT_APPLICATION_INFORMATION = new Route(GET,    "/oauth2/applications/@me");
+
     public static final Route GET_CURRENT_USER                    = new Route(GET,    "/users/@me");
     public static final Route MODIFY_CURRENT_USER                 = new Route(PATCH,  "/users/@me");
     public static final Route GET_USER_DMS                        = new Route(GET,    "/users/@me/channels");
-    public static final Route CREATE_GROUP_DM                     = new Route(POST,   "/users/@me/channels");
     public static final Route CREATE_DM                           = new Route(POST,   "/users/@me/channels");
-    public static final Route GET_USER_CONNECTIONS                = new Route(GET,    "/users/@me/connections");
-    public static final Route GET_CURRENT_USER_GUILDS             = new Route(GET,    "/users/@me/guilds");
     public static final Route LEAVE_GUILD                         = new Route(DELETE, "/users/@me/guilds/{guild.id}");
     public static final Route GET_USER                            = new Route(GET,    "/users/{user.id}");
+
+    public static final Route GET_CURRENT_APPLICATION_INFORMATION = new Route(GET,    "/oauth2/applications/@me");
     public static final Route LIST_VOICE_REGIONS                  = new Route(GET,    "/voice/regions");
     // @formatter:on
 }
