@@ -1,6 +1,6 @@
-package com.mewna.mew.shard;
+package com.mewna.catnip.shard;
 
-import com.mewna.mew.Mew;
+import com.mewna.catnip.Catnip;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpClient;
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.mewna.mew.shard.MewShard.ShardConnectState.*;
+import static com.mewna.catnip.shard.CatnipShard.ShardConnectState.*;
 
 /**
  * @author amy
@@ -24,12 +24,12 @@ import static com.mewna.mew.shard.MewShard.ShardConnectState.*;
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 @RequiredArgsConstructor
-public class MewShard extends AbstractVerticle {
-    private final Mew mew;
+public class CatnipShard extends AbstractVerticle {
+    private final Catnip catnip;
     private final int id;
     private final int limit;
     
-    private final HttpClient client = Mew.vertx().createHttpClient();
+    private final HttpClient client = Catnip.vertx().createHttpClient();
     
     private final AtomicReference<WebSocket> socketRef = new AtomicReference<>(null);
     private final AtomicBoolean heartbeatAcked = new AtomicBoolean(true);
@@ -40,8 +40,8 @@ public class MewShard extends AbstractVerticle {
     
     @Override
     public void start() {
-        Mew.eventBus().consumer(getControlAddress(id), this::handleControlMessage);
-        Mew.eventBus().consumer(getWebsocketMessageSendAddress(), this::handleSocketSend);
+        Catnip.eventBus().consumer(getControlAddress(id), this::handleControlMessage);
+        Catnip.eventBus().consumer(getWebsocketMessageSendAddress(), this::handleSocketSend);
     }
     
     @Override
@@ -82,7 +82,7 @@ public class MewShard extends AbstractVerticle {
     // Socket
     
     private void connectSocket(final Message<JsonObject> msg) {
-        client.websocketAbs(Mew.getGatewayUrl(), null, null, null,
+        client.websocketAbs(Catnip.getGatewayUrl(), null, null, null,
                 socket -> {
                     socket.frameHandler(frame -> handleSocketFrame(msg, frame));
                     socket.closeHandler(this::handleSocketClose);
@@ -90,7 +90,7 @@ public class MewShard extends AbstractVerticle {
                 },
                 failure -> {
                     socketRef.set(null);
-                    Mew.vertx().setTimer(5500L, __ -> msg.reply(new JsonObject().put("state", FAILED.name())));
+                    Catnip.vertx().setTimer(5500L, __ -> msg.reply(new JsonObject().put("state", FAILED.name())));
                 });
     }
     
@@ -134,7 +134,7 @@ public class MewShard extends AbstractVerticle {
                     }
                 }
                 // Emit messages for subconsumers
-                Mew.eventBus().<JsonObject>send(getWebsocketMessageRecvAddress(op), event);
+                Catnip.eventBus().<JsonObject>send(getWebsocketMessageRecvAddress(op), event);
             }
         } catch(final DecodeException e) {
             e.printStackTrace();
@@ -143,7 +143,7 @@ public class MewShard extends AbstractVerticle {
     
     private void handleSocketClose(final Void __) {
         socketRef.set(null);
-        mew.shardManager().addToConnectQueue(id);
+        catnip.shardManager().addToConnectQueue(id);
     }
     
     private void handleSocketSend(final Message<JsonObject> msg) {
@@ -159,27 +159,27 @@ public class MewShard extends AbstractVerticle {
         final JsonObject payload = event.getJsonObject("d");
         // TODO: Handle trace here
         
-        Mew.vertx().setPeriodic(payload.getInteger("heartbeat_interval"), timerId -> {
+        Catnip.vertx().setPeriodic(payload.getInteger("heartbeat_interval"), timerId -> {
             if(socketRef.get() != null) {
                 if(!heartbeatAcked.get()) {
                     // Zombie
                     logger.warn("Shard {} zombied, queueing reconnect!", id);
-                    Mew.eventBus().send(getControlAddress(id), new JsonObject().put("mode", "STOP"));
+                    Catnip.eventBus().send(getControlAddress(id), new JsonObject().put("mode", "STOP"));
                     return;
                 }
-                Mew.eventBus().send(getWebsocketMessageSendAddress(),
-                        getBasePayload(GatewayOp.HEARTBEAT, mew.sessionManager().getSeqnum(id)));
+                Catnip.eventBus().send(getWebsocketMessageSendAddress(),
+                        getBasePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().getSeqnum(id)));
                 heartbeatAcked.set(false);
             } else {
-                Mew.vertx().cancelTimer(timerId);
+                Catnip.vertx().cancelTimer(timerId);
             }
         });
         
         // Check if we can RESUME instead
-        if(mew.sessionManager().getSession(id) != null && mew.sessionManager().getSeqnum(id) > 0) {
-            Mew.eventBus().send(getWebsocketMessageSendAddress(), resume());
+        if(catnip.sessionManager().getSession(id) != null && catnip.sessionManager().getSeqnum(id) > 0) {
+            Catnip.eventBus().send(getWebsocketMessageSendAddress(), resume());
         } else {
-            Mew.eventBus().send(getWebsocketMessageSendAddress(), identify());
+            Catnip.eventBus().send(getWebsocketMessageSendAddress(), identify());
         }
     }
     
@@ -194,14 +194,14 @@ public class MewShard extends AbstractVerticle {
         // Update trace and seqnum as needed
         // TODO: Update trace here
         if(event.getValue("s", null) != null) {
-            mew.sessionManager().storeSeqnum(id, event.getInteger("s"));
+            catnip.sessionManager().storeSeqnum(id, event.getInteger("s"));
         }
         
         switch(type) {
             case "READY": {
                 // Reply after IDENTIFY ratelimit
-                mew.sessionManager().storeSession(id, data.getString("session_id"));
-                Mew.vertx().setTimer(5500L, __ -> msg.reply(new JsonObject().put("state", READY.name())));
+                catnip.sessionManager().storeSession(id, data.getString("session_id"));
+                Catnip.vertx().setTimer(5500L, __ -> msg.reply(new JsonObject().put("state", READY.name())));
                 break;
             }
             case "RESUMED": {
@@ -215,13 +215,13 @@ public class MewShard extends AbstractVerticle {
         }
         
         emitter.emit(event);
-        //Mew.eventBus().send(type, data);
+        //Catnip.eventBus().send(type, data);
     }
     
     private void handleHeartbeat(final Message<JsonObject> msg, final JsonObject event) {
         //heartbeatAcked.set(false);
-        Mew.eventBus().send(getWebsocketMessageSendAddress(),
-                getBasePayload(GatewayOp.HEARTBEAT, mew.sessionManager().getSeqnum(id)));
+        Catnip.eventBus().send(getWebsocketMessageSendAddress(),
+                getBasePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().getSeqnum(id)));
     }
     
     private void handleHeartbeatAck(final Message<JsonObject> msg, final JsonObject event) {
@@ -238,8 +238,8 @@ public class MewShard extends AbstractVerticle {
             // Can't resume, clear old data
             if(socketRef.get() != null) {
                 socketRef.get().close();
-                mew.sessionManager().clearSession(id);
-                mew.sessionManager().clearSeqnum(id);
+                catnip.sessionManager().clearSession(id);
+                catnip.sessionManager().clearSeqnum(id);
             }
         }
     }
@@ -261,7 +261,7 @@ public class MewShard extends AbstractVerticle {
      * @return Control address for the given shard
      */
     public static String getControlAddress(final int id) {
-        return String.format("mew:shard:%s:control", id);
+        return String.format("catnip:shard:%s:control", id);
     }
     
     /**
@@ -272,11 +272,11 @@ public class MewShard extends AbstractVerticle {
      * @return Socket payload recv. msg. address
      */
     public String getWebsocketMessageRecvAddress(final GatewayOp op) {
-        return String.format("mew:gateway:ws-incoming:%s:%s", id, op);
+        return String.format("catnip:gateway:ws-incoming:%s:%s", id, op);
     }
     
     public String getWebsocketMessageSendAddress() {
-        return String.format("mew:gateway:ws-outgoing:%s", id);
+        return String.format("catnip:gateway:ws-outgoing:%s", id);
     }
     
     // Payloads
@@ -301,28 +301,28 @@ public class MewShard extends AbstractVerticle {
     
     private JsonObject identify() {
         return getBasePayload(GatewayOp.IDENTIFY, new JsonObject()
-                .put("token", mew.token())
+                .put("token", catnip.token())
                 .put("compress", false)
                 .put("large_threshold", 250)
                 .put("shard", new JsonArray().add(id).add(limit))
                 .put("properties", new JsonObject()
                         .put("$os", "JVM")
-                        .put("$browser", "mew")
-                        .put("$device", "mew")
+                        .put("$browser", "catnip")
+                        .put("$device", "catnip")
                 )
         );
     }
     
     private JsonObject resume() {
         return getBasePayload(GatewayOp.RESUME, new JsonObject()
-                .put("token", mew.token())
+                .put("token", catnip.token())
                 .put("compress", false)
-                .put("session_id", mew.sessionManager().getSession(id))
-                .put("seq", mew.sessionManager().getSeqnum(id))
+                .put("session_id", catnip.sessionManager().getSession(id))
+                .put("seq", catnip.sessionManager().getSeqnum(id))
                 .put("properties", new JsonObject()
                         .put("$os", "JVM")
-                        .put("$browser", "mew")
-                        .put("$device", "mew")
+                        .put("$browser", "catnip")
+                        .put("$device", "catnip")
                 )
         );
     }

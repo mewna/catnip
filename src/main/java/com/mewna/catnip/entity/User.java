@@ -1,4 +1,4 @@
-package com.mewna.mew.entity;
+package com.mewna.catnip.entity;
 
 import lombok.*;
 

@@ -1,15 +1,15 @@
-package com.mewna.mew;
+package com.mewna.catnip;
 
-import com.mewna.mew.entity.Message;
-import com.mewna.mew.rest.Rest;
-import com.mewna.mew.rest.RestRequester;
-import com.mewna.mew.shard.manager.DefaultShardManager;
-import com.mewna.mew.shard.manager.ShardManager;
-import com.mewna.mew.shard.session.DefaultSessionManager;
-import com.mewna.mew.shard.session.SessionManager;
-import com.mewna.mew.util.JsonPojoCodec;
-import com.mewna.mew.util.ratelimit.MemoryRatelimiter;
-import com.mewna.mew.util.ratelimit.Ratelimiter;
+import com.mewna.catnip.entity.Message;
+import com.mewna.catnip.rest.Rest;
+import com.mewna.catnip.rest.RestRequester;
+import com.mewna.catnip.shard.manager.DefaultShardManager;
+import com.mewna.catnip.shard.manager.ShardManager;
+import com.mewna.catnip.shard.session.DefaultSessionManager;
+import com.mewna.catnip.shard.session.SessionManager;
+import com.mewna.catnip.util.JsonPojoCodec;
+import com.mewna.catnip.util.ratelimit.MemoryRatelimiter;
+import com.mewna.catnip.util.ratelimit.Ratelimiter;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import lombok.Getter;
@@ -17,18 +17,11 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 /**
- * Possible names:
- * - solace
- * - sapphire
- * - mew (lol no)
- * - catnip
- * - sakura
- *
  * @author amy
  * @since 8/31/18.
  */
 @Accessors(fluent = true, chain = true)
-public class Mew {
+public class Catnip {
     @Getter
     private static final Vertx vertx = Vertx.vertx();
     @Getter
@@ -64,7 +57,7 @@ public class Mew {
         return vertx.eventBus();
     }
     
-    public Mew setup() {
+    public Catnip setup() {
         // Register codecs
         // God I hate having to do this
         // This is necessary to make Vert.x allow passing arbitrary objects
@@ -74,11 +67,11 @@ public class Mew {
         // *sigh*
         eventBus().registerDefaultCodec(Message.class, new JsonPojoCodec<>(Message.class));
         
-        shardManager.setMew(this);
+        shardManager.setCatnip(this);
         return this;
     }
     
-    public Mew startShards() {
+    public Catnip startShards() {
         shardManager.start();
         return this;
     }

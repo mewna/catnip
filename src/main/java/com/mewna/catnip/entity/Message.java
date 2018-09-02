@@ -1,4 +1,4 @@
-package com.mewna.mew.entity;
+package com.mewna.catnip.entity;
 
 import io.vertx.core.json.JsonObject;
 import lombok.*;

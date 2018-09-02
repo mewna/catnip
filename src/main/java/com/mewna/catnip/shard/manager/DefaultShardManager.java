@@ -1,8 +1,8 @@
-package com.mewna.mew.shard.manager;
+package com.mewna.catnip.shard.manager;
 
-import com.mewna.mew.Mew;
-import com.mewna.mew.shard.MewShard;
-import com.mewna.mew.shard.MewShard.ShardConnectState;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.shard.CatnipShard;
+import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import lombok.Getter;
@@ -18,17 +18,17 @@ import java.util.LinkedList;
  * @since 8/15/18.
  */
 public class DefaultShardManager implements ShardManager {
-    private static final String POLL_QUEUE = "mew:shard:manager:poll";
+    private static final String POLL_QUEUE = "catnip:shard:manager:poll";
     
     private final Logger logger = LoggerFactory.getLogger(getClass());
     
     private final int customShardCount;
-    private final WebClient client = WebClient.create(Mew.vertx());
+    private final WebClient client = WebClient.create(Catnip.vertx());
     @Getter
     private final Deque<Integer> connectQueue = new LinkedList<>();
     @Getter
     @Setter
-    private Mew mew;
+    private Catnip catnip;
     
     public DefaultShardManager() {
         this(-1);
@@ -48,7 +48,7 @@ public class DefaultShardManager implements ShardManager {
     public void start() {
         if(customShardCount == -1) {
             // Load shard count from API
-            client.getAbs(Mew.getShardCountUrl()).putHeader("Authorization", "Bot " + mew.token()).ssl(true)
+            client.getAbs(Catnip.getShardCountUrl()).putHeader("Authorization", "Bot " + catnip.token()).ssl(true)
                     .send(ar -> {
                         if(ar.succeeded()) {
                             final int recommendedShards = ar.result().bodyAsJsonObject().getInteger("shards");
@@ -67,24 +67,24 @@ public class DefaultShardManager implements ShardManager {
         // Deploy verticles
         for(int id = 0; id < count; id++) {
             //noinspection TypeMayBeWeakened
-            final MewShard shard = new MewShard(mew, id, count);
-            Mew.vertx().deployVerticle(shard);
+            final CatnipShard shard = new CatnipShard(catnip, id, count);
+            Catnip.vertx().deployVerticle(shard);
             connectQueue.addLast(id);
             logger.info("Deployed shard {}", id);
         }
         // Start verticles
-        Mew.eventBus().consumer(POLL_QUEUE, msg -> connect());
+        Catnip.eventBus().consumer(POLL_QUEUE, msg -> connect());
         connect();
     }
     
     private void connect() {
         if(connectQueue.isEmpty()) {
-            Mew.vertx().setTimer(1000L, __ -> Mew.eventBus().send(POLL_QUEUE, null));
+            Catnip.vertx().setTimer(1000L, __ -> Catnip.eventBus().send(POLL_QUEUE, null));
             return;
         }
         final int nextId = connectQueue.removeFirst();
         logger.info("Connecting shard {}", nextId);
-        Mew.eventBus().<JsonObject>send(MewShard.getControlAddress(nextId), new JsonObject().put("mode", "START"),
+        Catnip.eventBus().<JsonObject>send(CatnipShard.getControlAddress(nextId), new JsonObject().put("mode", "START"),
                 reply -> {
                     if(reply.succeeded()) {
                         switch(ShardConnectState.valueOf(reply.result().body().getString("state"))) {
@@ -103,12 +103,12 @@ public class DefaultShardManager implements ShardManager {
                                 break;
                             }
                         }
-                        Mew.eventBus().send(POLL_QUEUE, null);
+                        Catnip.eventBus().send(POLL_QUEUE, null);
                     } else {
                         // TODO: Logging
                         logger.warn("Failed connecting shard {} entirely, re-queueing", nextId);
                         addToConnectQueue(nextId);
-                        Mew.eventBus().send(POLL_QUEUE, null);
+                        Catnip.eventBus().send(POLL_QUEUE, null);
                     }
                 });
     }

@@ -1,6 +1,9 @@
-package com.mewna.mew.shard;
+package com.mewna.catnip.shard;
 
 /**
+ *
+ * Question: "WHY IS THIS NOT ENUM AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+ * Answer: "Vert.x uses strings for event consumption"
  * @author amy
  * @since 9/2/18.
  */

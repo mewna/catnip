@@ -1,4 +1,4 @@
-package com.mewna.mew.rest;
+package com.mewna.catnip.rest;
 
 import io.vertx.core.http.HttpMethod;
 import lombok.Getter;

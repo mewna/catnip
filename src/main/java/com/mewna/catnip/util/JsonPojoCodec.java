@@ -1,4 +1,4 @@
-package com.mewna.mew.util;
+package com.mewna.catnip.util;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageCodec;

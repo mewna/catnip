@@ -1,4 +1,4 @@
-package com.mewna.mew.shard;
+package com.mewna.catnip.shard;
 
 import lombok.Getter;
 

@@ -1,4 +1,4 @@
-package com.mewna.mew.shard.session;
+package com.mewna.catnip.shard.session;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

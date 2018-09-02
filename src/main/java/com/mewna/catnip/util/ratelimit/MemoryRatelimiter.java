@@ -1,4 +1,4 @@
-package com.mewna.mew.util.ratelimit;
+package com.mewna.catnip.util.ratelimit;
 
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.tuple.ImmutablePair;

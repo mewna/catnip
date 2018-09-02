@@ -1,8 +1,8 @@
-package com.mewna.mew.rest;
+package com.mewna.catnip.rest;
 
 import com.google.common.collect.ImmutableMap;
-import com.mewna.mew.Mew;
-import com.mewna.mew.rest.RestRequester.OutboundRequest;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
@@ -13,14 +13,14 @@ import lombok.Getter;
  */
 public class Rest {
     @Getter
-    private final Mew mew;
+    private final Catnip catnip;
     
-    public Rest(final Mew mew) {
-        this.mew = mew;
+    public Rest(final Catnip catnip) {
+        this.catnip = catnip;
     }
     
     public Future<JsonObject> createMessage(final String channelId, final String message) {
-        return mew._requester().queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId),
+        return catnip._requester().queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId),
                 ImmutableMap.of(), new JsonObject().put("content", message)));
     }
 }

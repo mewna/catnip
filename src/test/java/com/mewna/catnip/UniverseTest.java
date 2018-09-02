@@ -1,4 +1,4 @@
-package com.mewna.mew;
+package com.mewna.catnip;
 
 import org.junit.jupiter.api.Test;
 

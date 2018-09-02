@@ -1,17 +1,17 @@
-package com.mewna.mew.shard;
+package com.mewna.catnip.shard;
 
 import com.google.common.collect.ImmutableList;
-import com.mewna.mew.Mew;
-import com.mewna.mew.entity.Member;
-import com.mewna.mew.entity.Message;
-import com.mewna.mew.entity.Message.MessageType;
-import com.mewna.mew.entity.User;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.Member;
+import com.mewna.catnip.entity.Message;
+import com.mewna.catnip.entity.Message.MessageType;
+import com.mewna.catnip.entity.User;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.mewna.mew.shard.DiscordEvent.*;
+import static com.mewna.catnip.shard.DiscordEvent.*;
 
 /**
  * @author amy
@@ -78,6 +78,6 @@ class DispatchEmitter {
                 .guildId(data.getString("guild_id", null))
                 .build();
         
-        Mew.eventBus().send(MESSAGE_CREATE, message);
+        Catnip.eventBus().send(MESSAGE_CREATE, message);
     }
 }

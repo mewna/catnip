@@ -1,8 +1,6 @@
-package com.mewna.mew.shard.manager;
+package com.mewna.catnip.shard.manager;
 
-import com.mewna.mew.Mew;
-
-import java.util.Deque;
+import com.mewna.catnip.Catnip;
 
 /**
  * @author amy
@@ -17,7 +15,7 @@ public interface ShardManager {
     
     void addToConnectQueue(int shard);
     
-    Mew getMew();
+    Catnip getCatnip();
     
-    void setMew(Mew flow);
+    void setCatnip(Catnip flow);
 }

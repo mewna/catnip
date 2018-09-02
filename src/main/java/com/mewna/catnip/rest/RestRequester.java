@@ -1,7 +1,7 @@
-package com.mewna.mew.rest;
+package com.mewna.catnip.rest;
 
-import com.mewna.mew.Mew;
-import com.mewna.mew.rest.Routes.Route;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.rest.Routes.Route;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
@@ -37,13 +37,13 @@ public class RestRequester {
     private static final String API_HOST = "https://discordapp.com";
     
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
-    private final WebClient client = WebClient.create(Mew.vertx());
+    private final WebClient client = WebClient.create(Catnip.vertx());
     
-    private final Mew mew;
+    private final Catnip catnip;
     private final Collection<Bucket> submittedBuckets = new ConcurrentHashSet<>();
     
-    public RestRequester(final Mew mew) {
-        this.mew = mew;
+    public RestRequester(final Catnip catnip) {
+        this.catnip = catnip;
     }
     
     Future<JsonObject> queue(final OutboundRequest r) {
@@ -69,7 +69,7 @@ public class RestRequester {
                 global.setLimit(1);
                 // 500ms buffer for safety
                 final long globalReset = System.currentTimeMillis() + retry + 500L;
-                // Mew.vertx().setTimer(globalReset, __ -> global.reset());
+                // Catnip.vertx().setTimer(globalReset, __ -> global.reset());
                 global.setReset(TimeUnit.MILLISECONDS.toSeconds(globalReset));
                 bucket.retry(r);
             } else {
@@ -111,7 +111,7 @@ public class RestRequester {
                 // Do request and update bucket
                 final HttpRequest<Buffer> req = client.requestAbs(bucketRoute.getMethod(),
                         API_HOST + API_BASE + route.getRoute()).ssl(true)
-                        .putHeader("Authorization", "Bot " + mew.token());
+                        .putHeader("Authorization", "Bot " + catnip.token());
                 if(route.getMethod() != HttpMethod.GET) {
                     req.sendJsonObject(r.data, res -> handleResponse(r, bucket, res));
                 } else {
@@ -120,7 +120,7 @@ public class RestRequester {
             } else {
                 final long wait = bucket.getReset() - System.currentTimeMillis();
                 // Add an extra 500ms buffer to be safe
-                Mew.vertx().setTimer(wait + 500L, __ -> {
+                Catnip.vertx().setTimer(wait + 500L, __ -> {
                     bucket.reset();
                     bucket.retry(r);
                 });
@@ -129,7 +129,7 @@ public class RestRequester {
             // Global rl, retry later
             final long wait = global.getReset() - System.currentTimeMillis();
             // Add an extra 500ms buffer to be safe
-            Mew.vertx().setTimer(wait + 500L, __ -> {
+            Catnip.vertx().setTimer(wait + 500L, __ -> {
                 global.reset();
                 bucket.retry(r);
             });
