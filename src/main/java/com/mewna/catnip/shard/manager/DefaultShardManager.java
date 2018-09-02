@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Deque;
-import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
  * @author amy
@@ -25,7 +25,7 @@ public class DefaultShardManager implements ShardManager {
     private final int customShardCount;
     private final WebClient client = WebClient.create(Catnip.vertx());
     @Getter
-    private final Deque<Integer> connectQueue = new LinkedList<>();
+    private final Deque<Integer> connectQueue = new ConcurrentLinkedDeque<>();
     @Getter
     @Setter
     private Catnip catnip;
@@ -73,24 +73,32 @@ public class DefaultShardManager implements ShardManager {
             logger.info("Deployed shard {}", id);
         }
         // Start verticles
-        Catnip.eventBus().consumer(POLL_QUEUE, msg -> connect());
-        connect();
+        Catnip.eventBus().consumer(POLL_QUEUE, msg -> {
+            logger.info("    Message headers: {}", msg.headers().entries());
+            logger.info("      Message addr.: {}", msg.address());
+            logger.info("Message reply addr.: {}", msg.address());
+            connect();
+        });
+        Catnip.eventBus().send(POLL_QUEUE, null);
     }
     
     private void connect() {
+        logger.info("{}", connectQueue);
         if(connectQueue.isEmpty()) {
+            logger.warn("Ignoring connect - queue length = 0");
             Catnip.vertx().setTimer(1000L, __ -> Catnip.eventBus().send(POLL_QUEUE, null));
             return;
         }
         final int nextId = connectQueue.removeFirst();
-        logger.info("Connecting shard {}", nextId);
+        logger.info("Connecting shard {} (queue len {})", nextId, connectQueue.size());
+        logger.debug(" >> Started connect: {}", nextId);
         Catnip.eventBus().<JsonObject>send(CatnipShard.getControlAddress(nextId), new JsonObject().put("mode", "START"),
                 reply -> {
                     if(reply.succeeded()) {
-                        switch(ShardConnectState.valueOf(reply.result().body().getString("state"))) {
+                        final ShardConnectState state = ShardConnectState.valueOf(reply.result().body().getString("state"));
+                        switch(state) {
                             case READY:
                             case RESUMED: {
-                                // TODO: Emit?
                                 logger.info("Connected shard {} with state {}", nextId, reply.result().body());
                                 break;
                             }
@@ -100,16 +108,15 @@ public class DefaultShardManager implements ShardManager {
                                 break;
                             }
                             default: {
+                                logger.error("Got unexpected / unknown shard connect state: {}", state);
                                 break;
                             }
                         }
-                        Catnip.eventBus().send(POLL_QUEUE, null);
                     } else {
-                        // TODO: Logging
                         logger.warn("Failed connecting shard {} entirely, re-queueing", nextId);
                         addToConnectQueue(nextId);
-                        Catnip.eventBus().send(POLL_QUEUE, null);
                     }
+                    Catnip.eventBus().send(POLL_QUEUE, null);
                 });
     }
     
