@@ -1,22 +1,18 @@
 package com.mewna.catnip.shard;
 
 import com.mewna.catnip.Catnip;
-import io.netty.buffer.ByteBuf;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.WebSocket;
 import io.vertx.core.http.WebSocketFrame;
-import io.vertx.core.http.impl.ws.WebSocketFrameImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -121,29 +117,7 @@ public class CatnipShard extends AbstractVerticle {
     private void connectSocket(final Message<JsonObject> msg) {
         client.websocketAbs(Catnip.getGatewayUrl(), null, null, null,
                 socket -> {
-                    socket.frameHandler(frame -> {
-                        {
-                            String closeReason;
-                            int closeStatusCode;
-                            final ByteBuf binaryData = frame.binaryData().getByteBuf();
-                            int length = ((WebSocketFrameImpl)frame).length();
-                            if (length < 2) {
-                                closeStatusCode = 1000;
-                                closeReason = null;
-                            } else {
-                                int index = binaryData.readerIndex();
-                                closeStatusCode = binaryData.getShort(index);
-                                if (length == 2) {
-                                    closeReason = null;
-                                } else {
-                                    closeReason = binaryData.toString(index + 2, length - 2, StandardCharsets.UTF_8);
-                                }
-                            }
-                            logger.warn("  code: {}", closeStatusCode);
-                            logger.warn("reason: {}", closeReason);
-                        }
-                        handleSocketFrame(msg, frame);
-                    })
+                    socket.frameHandler(frame -> handleSocketFrame(msg, frame))
                             .closeHandler(this::handleSocketClose)
                             .exceptionHandler(Throwable::printStackTrace);
                     socketRef.set(socket);
