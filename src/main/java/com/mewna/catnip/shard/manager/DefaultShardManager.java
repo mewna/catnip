@@ -78,7 +78,6 @@ public class DefaultShardManager implements ShardManager {
     }
     
     private void connect() {
-        logger.info("{}", connectQueue);
         if(connectQueue.isEmpty()) {
             Catnip.vertx().setTimer(1000L, __ -> Catnip.eventBus().send(POLL_QUEUE, null));
             return;
