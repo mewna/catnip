@@ -1,5 +1,8 @@
 package com.mewna.catnip.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Julia Rogers
  * @since 9/2/18
@@ -35,7 +38,7 @@ public enum Permission {
     MANAGE_WEBHOOKS(0x20000000, true),
     MEANAGE_EMOJI(0x40000000, false);
 
-    Permission(int value, boolean channel) {
+    Permission(final int value, final boolean channel) {
         this.value = value;
         this.channel = channel;
     }
@@ -49,5 +52,19 @@ public enum Permission {
 
     public boolean appliesToChannel() {
         return channel;
+    }
+
+    /* Static convenience methods */
+
+    public static List<Permission> toList(final long asLong) {
+        final List<Permission> perms = new ArrayList<>();
+
+        for (final Permission p : values()) {
+            if ((asLong & p.value) == p.value) {
+                perms.add(p);
+            }
+        }
+
+        return perms;
     }
 }
