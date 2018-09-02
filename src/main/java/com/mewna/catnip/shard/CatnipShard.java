@@ -91,6 +91,7 @@ public class CatnipShard extends AbstractVerticle {
                 failure -> {
                     socketRef.set(null);
                     Catnip.vertx().setTimer(5500L, __ -> msg.reply(new JsonObject().put("state", FAILED.name())));
+                    failure.printStackTrace();
                 });
     }
     
