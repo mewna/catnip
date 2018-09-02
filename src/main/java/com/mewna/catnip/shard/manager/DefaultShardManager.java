@@ -73,25 +73,18 @@ public class DefaultShardManager implements ShardManager {
             logger.info("Deployed shard {}", id);
         }
         // Start verticles
-        Catnip.eventBus().consumer(POLL_QUEUE, msg -> {
-            logger.info("    Message headers: {}", msg.headers().entries());
-            logger.info("      Message addr.: {}", msg.address());
-            logger.info("Message reply addr.: {}", msg.address());
-            connect();
-        });
+        Catnip.eventBus().consumer(POLL_QUEUE, msg -> connect());
         Catnip.eventBus().send(POLL_QUEUE, null);
     }
     
     private void connect() {
         logger.info("{}", connectQueue);
         if(connectQueue.isEmpty()) {
-            logger.warn("Ignoring connect - queue length = 0");
             Catnip.vertx().setTimer(1000L, __ -> Catnip.eventBus().send(POLL_QUEUE, null));
             return;
         }
         final int nextId = connectQueue.removeFirst();
         logger.info("Connecting shard {} (queue len {})", nextId, connectQueue.size());
-        logger.debug(" >> Started connect: {}", nextId);
         Catnip.eventBus().<JsonObject>send(CatnipShard.getControlAddress(nextId), new JsonObject().put("mode", "START"),
                 reply -> {
                     if(reply.succeeded()) {
