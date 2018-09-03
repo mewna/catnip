@@ -4,6 +4,9 @@ import io.vertx.core.http.HttpMethod;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
+
 import static io.vertx.core.http.HttpMethod.*;
 
 /**
@@ -28,26 +31,32 @@ public final class Routes {
         public Route() {
         }
         
-        public Route(final HttpMethod method, final String baseRoute) {
+        public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute) {
             this(method, baseRoute, null);
         }
         
-        public Route(final HttpMethod method, final String baseRoute, final String majorParam) {
+        public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute, @Nonnull final String majorParam) {
             this.method = method;
             this.baseRoute = baseRoute;
             this.majorParam = majorParam;
         }
         
+        @Nonnull
+        @CheckReturnValue
         @SuppressWarnings("TypeMayBeWeakened")
-        public Route withMajorParam(final String value) {
+        public Route withMajorParam(@Nonnull final String value) {
             return new Route(method, baseRoute.replace('{' + majorParam + '}', value));
         }
-        
+    
+        @Nonnull
+        @CheckReturnValue
         @SuppressWarnings("TypeMayBeWeakened")
-        Route compile(final String param, final String value) {
+        Route compile(@Nonnull final String param, @Nonnull final String value) {
             return new Route(method, baseRoute.replace('{' + param + '}', value));
         }
-        
+    
+        @Nonnull
+        @CheckReturnValue
         Route copy() {
             return new Route(method, baseRoute, majorParam);
         }
