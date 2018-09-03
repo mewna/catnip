@@ -18,6 +18,27 @@ Catnip.eventBus().<Message>consumer(DiscordEvent.MESSAGE_CREATE, event -> {
 catnip.startShards();
 ```
 
+catnip returns `CompletableFuture`s from all REST methods. For example,
+editing your ping message to include time it took to create the
+message:
+
+```Java
+final Catnip catnip = new Catnip().token(System.getenv("TOKEN")).setup();
+Catnip.eventBus().<Message>consumer(DiscordEvent.MESSAGE_CREATE, event -> {
+    final Message msg = event.body();
+    if(msg.content().equalsIgnoreCase("!ping")) {
+        final long start = System.currentTimeMillis();
+        catnip.rest().createMessage(msg.channelId(), "pong!")
+                .thenAccept(ping -> {
+                    final long end = System.currentTimeMillis();
+                    catnip.rest().editMessage(msg.channelId(), ping.id(),
+                            "pong! (took " + (end - start) + "ms)");
+                });
+    }
+});
+catnip.startShards();
+```
+
 ## Features
 
 - Automatic sharding
