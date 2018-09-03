@@ -3,6 +3,8 @@
 A Discord API wrapper in Java. Fully async / reactive, built on top of
 [vert.x](https://vertx.io).
 
+We have a Discord! https://discord.gg/kCsBCjK
+
 ## Basic usage
 
 This is the simplest possible bot you can make right now:
