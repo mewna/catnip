@@ -30,7 +30,7 @@ public class CatnipImpl implements Catnip {
     @Getter
     private static final Vertx _vertx = Vertx.vertx();
     @Getter
-    private final RestRequester _requester = new RestRequester(this);
+    private final RestRequester requester = new RestRequester(this);
     @Getter
     @Setter
     private String token;
