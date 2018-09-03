@@ -82,9 +82,13 @@ public class RestRequester {
                 bucket.submit();
             }
         } else {
-            // Fail request, resubmit to queue
-            r.future.fail(res.cause());
-            bucket.retry(r);
+            // Fail request, resubmit to queue if failed less than 3 times, complete with error otherwise.
+            r.failed();
+            if(r.failedAttempts() >= 3) {
+                r.future.fail(res.cause());
+            } else {
+                bucket.retry(r);
+            }
         }
     }
     
@@ -149,6 +153,7 @@ public class RestRequester {
         private JsonObject data;
         @Setter
         private Future<ResponsePayload> future;
+        private int failedAttempts;
         
         public OutboundRequest() {
         }
@@ -157,6 +162,14 @@ public class RestRequester {
             this.route = route;
             this.params = params;
             this.data = data;
+        }
+        
+        public void failed() {
+            failedAttempts++;
+        }
+        
+        public int failedAttempts() {
+            return failedAttempts;
         }
     }
     
