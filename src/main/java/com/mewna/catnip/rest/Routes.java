@@ -6,6 +6,7 @@ import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import static io.vertx.core.http.HttpMethod.*;
 
@@ -35,7 +36,7 @@ public final class Routes {
             this(method, baseRoute, null);
         }
         
-        public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute, @Nonnull final String majorParam) {
+        public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute, @Nullable final String majorParam) {
             this.method = method;
             this.baseRoute = baseRoute;
             this.majorParam = majorParam;
@@ -45,6 +46,9 @@ public final class Routes {
         @CheckReturnValue
         @SuppressWarnings("TypeMayBeWeakened")
         public Route withMajorParam(@Nonnull final String value) {
+            if(majorParam == null) {
+                throw new IllegalStateException("This route takes no major params!");
+            }
             return new Route(method, baseRoute.replace('{' + majorParam + '}', value));
         }
     

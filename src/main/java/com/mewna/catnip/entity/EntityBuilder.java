@@ -151,7 +151,7 @@ public final class EntityBuilder {
     public static Message createMessage(@Nonnull final JsonObject data) {
         // TODO: This WILL go :fire: if a user is mentioned in a message, because a User object can't hold Member data
         final List<User> mentionedUsers = data.getJsonArray("mentions").stream().filter(e -> e instanceof JsonObject)
-                .map(e -> ((JsonObject) e).mapTo(User.class)).collect(Collectors.toList());
+                .map(e -> (JsonObject) e).map(EntityBuilder::createUser).collect(Collectors.toList());
 
         final User author = createUser(data.getJsonObject("author"));
 

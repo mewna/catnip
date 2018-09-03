@@ -4,8 +4,10 @@ import com.google.common.collect.ImmutableMap;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.EntityBuilder;
 import com.mewna.catnip.entity.Message;
+import com.mewna.catnip.entity.MessageBuilder;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 
@@ -24,11 +26,25 @@ public class Rest {
         this.catnip = catnip;
     }
     
+    public Future<Message> createMessage(@Nonnull final String channelId, @Nonnull final String content) {
+        return createMessage(channelId, new MessageBuilder().content(content).build());
+    }
+    
     @Nonnull
-    public Future<Message> createMessage(@Nonnull final String channelId, @Nonnull final String message) {
+    public Future<Message> createMessage(@Nonnull final String channelId, @Nonnull final Message message) {
+        final JsonObject json = new JsonObject();
+        if(message.content() != null && !message.content().isEmpty()) {
+            json.put("content", message.content());
+        }
+        if(message.embeds() != null && !message.embeds().isEmpty()) {
+            json.put("embeds", new JsonArray(message.embeds()));
+        }
+        if(json.getValue("embeds", null) == null && json.getValue("content", null) == null) {
+            throw new IllegalArgumentException("Can't build a message with no content and no embeds!");
+        }
+        
         return catnip._requester().queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId),
-                ImmutableMap.of(), new JsonObject().put("content", message)))
-                .map(EntityBuilder::createMessage);
+                ImmutableMap.of(), json)).map(EntityBuilder::createMessage);
     }
     
     @Nonnull
