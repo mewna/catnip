@@ -56,6 +56,9 @@ public final class Routes {
         @CheckReturnValue
         @SuppressWarnings("TypeMayBeWeakened")
         Route compile(@Nonnull final String param, @Nonnull final String value) {
+            if(param.equalsIgnoreCase(majorParam)) {
+                return this;
+            }
             return new Route(method, baseRoute.replace('{' + param + '}', value));
         }
     
