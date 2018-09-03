@@ -11,8 +11,8 @@ This is the simplest possible bot you can make right now:
 final Catnip catnip = new Catnip().token(System.getenv("TOKEN")).setup();
 Catnip.eventBus().<Message>consumer(DiscordEvent.MESSAGE_CREATE, event -> {
     final Message msg = event.body();
-    if(msg.getContent().equalsIgnoreCase("!ping")) {
-        catnip.rest().createMessage(msg.getChannelId(), "pong!");
+    if(msg.content().equalsIgnoreCase("!ping")) {
+        catnip.rest().createMessage(msg.channelId(), "pong!");
     }
 });
 catnip.startShards();
