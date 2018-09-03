@@ -121,7 +121,7 @@ public final class EntityBuilder {
     }
 
     public static Member createMember(final User user, final JsonObject data) {
-        return createMember(user.getId(), data);
+        return createMember(user.id(), data);
     }
 
     public static Member createMember(final JsonObject data) {

@@ -1,6 +1,7 @@
 package com.mewna.catnip.entity;
 
 import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
+@Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Embed {
