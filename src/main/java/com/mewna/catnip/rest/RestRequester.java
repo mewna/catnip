@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
 
 import java.util.Collection;
@@ -48,7 +49,7 @@ public class RestRequester {
         client = WebClient.create(catnip.vertx());
     }
     
-    CompletableFuture<ResponsePayload> queue(final OutboundRequest r) {
+    public CompletableFuture<ResponsePayload> queue(final OutboundRequest r) {
         final Future<ResponsePayload> future = Future.future();
         getBucket(r.route.baseRoute()).queue(future, r);
         return VertxCompletableFuture.from(catnip.vertx(), future);
@@ -139,18 +140,19 @@ public class RestRequester {
     }
     
     @Getter
+    @Accessors(fluent = true)
     @SuppressWarnings("unused")
-    static final class OutboundRequest {
+    public static final class OutboundRequest {
         private Route route;
         private Map<String, String> params;
         private JsonObject data;
         @Setter
         private Future<ResponsePayload> future;
         
-        OutboundRequest() {
+        public OutboundRequest() {
         }
         
-        OutboundRequest(final Route route, final Map<String, String> params, final JsonObject data) {
+        public OutboundRequest(final Route route, final Map<String, String> params, final JsonObject data) {
             this.route = route;
             this.params = params;
             this.data = data;
@@ -186,7 +188,7 @@ public class RestRequester {
         }
         
         void queue(final Future<ResponsePayload> future, final OutboundRequest request) {
-            request.setFuture(future);
+            request.future(future);
             queue.addLast(request);
             submit();
         }
