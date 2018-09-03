@@ -96,7 +96,7 @@ public class RestRequester {
             route = route.compile(stringStringEntry.getKey(), stringStringEntry.getValue());
         }
         
-        // TODO: Delete messages has its own endpoint
+        // TODO: Delete messages has its own ratelimit
         final Bucket bucket = getBucket(bucketRoute.baseRoute());
         final Bucket global = getBucket("GLOBAL");
         
