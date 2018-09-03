@@ -52,7 +52,7 @@ public class Message {
         MessageType(final int id) {
             this.id = id;
         }
-    
+        
         @Nonnull
         @CheckReturnValue
         public static MessageType byId(final int id) {
