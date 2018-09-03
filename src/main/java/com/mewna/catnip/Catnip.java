@@ -8,6 +8,10 @@ import com.mewna.catnip.util.ratelimit.Ratelimiter;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * @author amy
  * @since 9/3/18.
@@ -17,31 +21,46 @@ public interface Catnip {
         return new CatnipImpl().setup();
     }
     
+    @Nonnull
     Vertx vertx();
     
+    @Nonnull
+    @CheckReturnValue
     EventBus eventBus();
     
+    @Nonnull
     Catnip startShards();
     
     // Implementations are lombok-generated
     
+    @Nullable
     String token();
     
-    Catnip token(String token);
+    @Nonnull
+    Catnip token(@Nonnull String token);
     
+    @Nonnull
     ShardManager shardManager();
     
-    Catnip shardManager(ShardManager shardManager);
+    @Nonnull
+    Catnip shardManager(@Nonnull ShardManager shardManager);
     
+    @Nonnull
     SessionManager sessionManager();
     
-    Catnip sessionManager(SessionManager sessionManager);
+    @Nonnull
+    Catnip sessionManager(@Nonnull SessionManager sessionManager);
     
+    @Nonnull
     Ratelimiter gatewayRatelimiter();
     
-    Catnip gatewayRatelimiter(Ratelimiter ratelimiter);
+    @Nonnull
+    Catnip gatewayRatelimiter(@Nonnull Ratelimiter ratelimiter);
     
+    @Nonnull
+    @CheckReturnValue
     Rest rest();
     
-    Catnip rest(Rest rest);
+    @Nonnull
+    Catnip rest(@Nonnull Rest rest);
 }

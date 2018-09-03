@@ -65,16 +65,19 @@ public class CatnipImpl implements Catnip {
     
     @Nonnull
     @CheckReturnValue
-    public static EventBus _eventBus() {
+    private static EventBus _eventBus() {
         return _vertx.eventBus();
     }
     
+    @Nonnull
     @Override
     public Vertx vertx() {
         return _vertx();
     }
     
+    @Nonnull
     @Override
+    @CheckReturnValue
     public EventBus eventBus() {
         return _eventBus();
     }
