@@ -1,5 +1,6 @@
 package com.mewna.catnip.shard;
 
+import com.mewna.catnip.Catnip;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.entity.EntityBuilder;
 import io.vertx.core.json.JsonObject;
@@ -11,6 +12,12 @@ import static com.mewna.catnip.shard.DiscordEvent.*;
  * @since 9/2/18.
  */
 class DispatchEmitter {
+    private final Catnip catnip;
+    
+    DispatchEmitter(final Catnip catnip) {
+        this.catnip = catnip;
+    }
+    
     void emit(final JsonObject payload) {
         final String type = payload.getString("t");
         final JsonObject data = payload.getJsonObject("d");
@@ -39,6 +46,6 @@ class DispatchEmitter {
     }
     
     private void emitMessageCreate(final JsonObject data) {
-        CatnipImpl._eventBus().send(MESSAGE_CREATE, EntityBuilder.createMessage(data));
+        catnip.eventBus().send(MESSAGE_CREATE, EntityBuilder.createMessage(data));
     }
 }

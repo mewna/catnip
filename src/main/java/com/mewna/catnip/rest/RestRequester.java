@@ -39,19 +39,19 @@ public class RestRequester {
     private static final int API_VERSION = 6;
     public static final String API_BASE = "/api/v" + API_VERSION;
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
-    private final WebClient client = WebClient.create(CatnipImpl._vertx());
-    
     private final Catnip catnip;
+    private final WebClient client;
     private final Collection<Bucket> submittedBuckets = new ConcurrentHashSet<>();
     
     public RestRequester(final Catnip catnip) {
         this.catnip = catnip;
+        client = WebClient.create(catnip.vertx());
     }
     
     CompletableFuture<ResponsePayload> queue(final OutboundRequest r) {
         final Future<ResponsePayload> future = Future.future();
         getBucket(r.route.baseRoute()).queue(future, r);
-        return VertxCompletableFuture.from(CatnipImpl._vertx(), future);
+        return VertxCompletableFuture.from(catnip.vertx(), future);
     }
     
     private Bucket getBucket(final String key) {
