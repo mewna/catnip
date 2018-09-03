@@ -16,6 +16,7 @@
         <slf4j.version>1.7.25</slf4j.version>
         <commons.lang.version>3.7</commons.lang.version>
         <guava.version>24.1-jre</guava.version>
+        <jsr305.version>3.0.2</jsr305.version>
 
         <junit.version>5.2.0</junit.version>
     </properties>
@@ -78,6 +79,14 @@
             <artifactId>guava</artifactId>
             <version>${guava.version}</version>
         </dependency>
+
+        <!-- JSR 305 -->
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>${jsr305.version}</version>
+        </dependency>
+
 
         <!-- JUnit Jupiter -->
         <dependency>

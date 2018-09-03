@@ -21,11 +21,12 @@ public class Rest {
         this.catnip = catnip;
     }
     
-    public Future<JsonObject> createMessage(final String channelId, final String message) {
+    public Future<Message> createMessage(final String channelId, final String message) {
         return catnip._requester().queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId),
-                ImmutableMap.of(), new JsonObject().put("content", message)));
+                ImmutableMap.of(), new JsonObject().put("content", message)))
+                .map(EntityBuilder::createMessage);
     }
-
+    
     public Future<Message> getMessage(final String channelId, final String messageId) {
         return catnip._requester().queue(new OutboundRequest(Routes.GET_CHANNEL_MESSAGE.withMajorParam(channelId).compile("message.id", messageId),
                 ImmutableMap.of(), null
