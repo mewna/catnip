@@ -1,9 +1,9 @@
 package com.mewna.catnip.rest;
 
 import com.mewna.catnip.internal.CatnipImpl;
-import com.mewna.catnip.rest.type.RestChannel;
-import com.mewna.catnip.rest.type.RestGuild;
-import com.mewna.catnip.rest.type.RestUser;
+import com.mewna.catnip.rest.handler.RestChannel;
+import com.mewna.catnip.rest.handler.RestGuild;
+import com.mewna.catnip.rest.handler.RestUser;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
