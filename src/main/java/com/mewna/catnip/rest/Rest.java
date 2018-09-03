@@ -2,7 +2,7 @@ package com.mewna.catnip.rest;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.mewna.catnip.Catnip;
+import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.entity.*;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import io.vertx.core.json.JsonArray;
@@ -24,9 +24,9 @@ import java.util.function.Function;
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class Rest {
     @Getter
-    private final Catnip catnip;
+    private final CatnipImpl catnip;
     
-    public Rest(final Catnip catnip) {
+    public Rest(final CatnipImpl catnip) {
         this.catnip = catnip;
     }
     
