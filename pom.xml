@@ -7,6 +7,7 @@
     <groupId>com.mewna.catnip</groupId>
     <artifactId>catnip</artifactId>
     <version>0.1.1</version>
+    <!-- Note: we need to update RestRequester when version is automatically set in a field -->
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
