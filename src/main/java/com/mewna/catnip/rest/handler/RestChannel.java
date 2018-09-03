@@ -86,4 +86,10 @@ public class RestChannel extends RestHandler {
                 .thenApply(ResponsePayload::object)
                 .thenApply(EntityBuilder::createMessage);
     }
+    
+    @Nonnull
+    public CompletableFuture<Void> deleteMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
+        return catnip.requester().queue(new OutboundRequest(Routes.DELETE_MESSAGE.withMajorParam(channelId),
+                ImmutableMap.of("message.id", messageId), null)).thenApply(__ -> null);
+    }
 }

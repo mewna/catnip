@@ -115,7 +115,8 @@ public class RestRequester {
                 final HttpRequest<Buffer> req = client.requestAbs(bucketRoute.method(),
                         API_HOST + API_BASE + route.baseRoute()).ssl(true)
                         .putHeader("Authorization", "Bot " + catnip.token());
-                if(route.method() != HttpMethod.GET) {
+                // GET and DELETE don't have payloads, but the rest do
+                if(route.method() != HttpMethod.GET && route.method() != HttpMethod.DELETE) {
                     req.sendJsonObject(r.data, res -> handleResponse(r, bucket, res));
                 } else {
                     req.send(res -> handleResponse(r, bucket, res));
