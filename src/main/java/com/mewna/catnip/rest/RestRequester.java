@@ -33,8 +33,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class RestRequester {
     private static final int API_VERSION = 6;
-    private static final String API_BASE = "/api/v" + API_VERSION;
-    private static final String API_HOST = "https://discordapp.com";
+    public static final String API_BASE = "/api/v" + API_VERSION;
+    public static final String API_HOST = "https://discordapp.com";
     
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
     private final WebClient client = WebClient.create(Catnip.vertx());
@@ -48,7 +48,7 @@ public class RestRequester {
     
     Future<JsonObject> queue(final OutboundRequest r) {
         final Future<JsonObject> future = Future.future();
-        getBucket(r.route.getRoute()).queue(future, r);
+        getBucket(r.route.baseRoute()).queue(future, r);
         return future;
     }
     
@@ -94,7 +94,7 @@ public class RestRequester {
         }
         
         // TODO: Delete messages has its own endpoint
-        final Bucket bucket = getBucket(bucketRoute.getRoute());
+        final Bucket bucket = getBucket(bucketRoute.baseRoute());
         final Bucket global = getBucket("GLOBAL");
         
         if(global.getRemaining() == 0 && global.getReset() < System.currentTimeMillis()) {
@@ -109,10 +109,10 @@ public class RestRequester {
             }
             if(bucket.getRemaining() > 0) {
                 // Do request and update bucket
-                final HttpRequest<Buffer> req = client.requestAbs(bucketRoute.getMethod(),
-                        API_HOST + API_BASE + route.getRoute()).ssl(true)
+                final HttpRequest<Buffer> req = client.requestAbs(bucketRoute.method(),
+                        API_HOST + API_BASE + route.baseRoute()).ssl(true)
                         .putHeader("Authorization", "Bot " + catnip.token());
-                if(route.getMethod() != HttpMethod.GET) {
+                if(route.method() != HttpMethod.GET) {
                     req.sendJsonObject(r.data, res -> handleResponse(r, bucket, res));
                 } else {
                     req.send(res -> handleResponse(r, bucket, res));
