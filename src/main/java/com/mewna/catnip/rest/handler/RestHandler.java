@@ -20,13 +20,17 @@ import java.util.function.Function;
  * @author amy
  * @since 9/3/18.
  */
-@RequiredArgsConstructor
 abstract class RestHandler {
     @Getter(AccessLevel.PROTECTED)
-    private final EntityBuilder entityBuilder = new EntityBuilder();
+    private final EntityBuilder entityBuilder;
     
     @Getter(AccessLevel.PROTECTED)
     private final CatnipImpl catnip;
+    
+    RestHandler(final CatnipImpl catnip) {
+        this.catnip = catnip;
+        entityBuilder = new EntityBuilder(catnip);
+    }
     
     @Nonnull
     @CheckReturnValue

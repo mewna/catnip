@@ -11,6 +11,7 @@ import com.mewna.catnip.entity.Embed.Provider;
 import com.mewna.catnip.entity.Embed.Thumbnail;
 import com.mewna.catnip.entity.Embed.Video;
 import com.mewna.catnip.entity.Message.MessageType;
+import com.mewna.catnip.internal.CatnipImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -26,6 +27,12 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public final class EntityBuilder {
+    private final CatnipImpl catnip;
+    
+    public EntityBuilder(final CatnipImpl catnip) {
+        this.catnip = catnip;
+    }
+    
     @Nonnull
     @CheckReturnValue
     public Embed createEmbed(final JsonObject data) {
