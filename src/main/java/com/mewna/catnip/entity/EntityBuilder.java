@@ -1,6 +1,15 @@
 package com.mewna.catnip.entity;
 
 import com.google.common.collect.ImmutableList;
+import com.mewna.catnip.entity.Embed.Author;
+import com.mewna.catnip.entity.Embed.EmbedType;
+import com.mewna.catnip.entity.Embed.Field;
+import com.mewna.catnip.entity.Embed.Footer;
+import com.mewna.catnip.entity.Embed.Image;
+import com.mewna.catnip.entity.Embed.Provider;
+import com.mewna.catnip.entity.Embed.Thumbnail;
+import com.mewna.catnip.entity.Embed.Video;
+import com.mewna.catnip.entity.Message.MessageType;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -12,6 +21,7 @@ import java.util.stream.Collectors;
  * @author natanbc
  * @since 9/2/18.
  */
+@SuppressWarnings({"WeakerAccess", "unused"})
 public final class EntityBuilder {
     private EntityBuilder() {}
 
@@ -19,14 +29,14 @@ public final class EntityBuilder {
         final String timestampRaw = data.getString("timestamp");
 
         final JsonObject footerRaw = data.getJsonObject("footer");
-        final Embed.Footer footer = footerRaw == null ? null : Embed.Footer.builder()
+        final Footer footer = footerRaw == null ? null : Footer.builder()
                 .text(footerRaw.getString("text"))
                 .iconUrl(footerRaw.getString("icon_url"))
                 .proxyIconUrl(footerRaw.getString("proxy_icon_url"))
                 .build();
 
         final JsonObject imageRaw = data.getJsonObject("image");
-        final Embed.Image image = imageRaw == null ? null : Embed.Image.builder()
+        final Image image = imageRaw == null ? null : Image.builder()
                 .url(imageRaw.getString("url"))
                 .proxyUrl(imageRaw.getString("proxy_url"))
                 .height(imageRaw.getInteger("height", -1))
@@ -34,7 +44,7 @@ public final class EntityBuilder {
                 .build();
 
         final JsonObject thumbnailRaw = data.getJsonObject("thumbnail");
-        final Embed.Thumbnail thumbnail = thumbnailRaw == null ? null : Embed.Thumbnail.builder()
+        final Thumbnail thumbnail = thumbnailRaw == null ? null : Thumbnail.builder()
                 .url(thumbnailRaw.getString("url"))
                 .proxyUrl(thumbnailRaw.getString("proxy_url"))
                 .height(thumbnailRaw.getInteger("height", -1))
@@ -42,20 +52,20 @@ public final class EntityBuilder {
                 .build();
 
         final JsonObject videoRaw = data.getJsonObject("video");
-        final Embed.Video video = videoRaw == null ? null : Embed.Video.builder()
+        final Video video = videoRaw == null ? null : Video.builder()
                 .url(videoRaw.getString("url"))
                 .height(videoRaw.getInteger("height", -1))
                 .width(videoRaw.getInteger("width", -1))
                 .build();
 
         final JsonObject providerRaw = data.getJsonObject("provider");
-        final Embed.Provider provider = providerRaw == null ? null : Embed.Provider.builder()
+        final Provider provider = providerRaw == null ? null : Provider.builder()
                 .name(providerRaw.getString("name"))
                 .url(providerRaw.getString("url"))
                 .build();
 
         final JsonObject authorRaw = data.getJsonObject("author");
-        final Embed.Author author = authorRaw == null ? null : Embed.Author.builder()
+        final Author author = authorRaw == null ? null : Author.builder()
                 .name(authorRaw.getString("name"))
                 .url(authorRaw.getString("url"))
                 .iconUrl(authorRaw.getString("icon_url"))
@@ -63,7 +73,7 @@ public final class EntityBuilder {
                 .build();
 
         final JsonArray fieldsRaw = data.getJsonArray("fields", new JsonArray());
-        final List<Embed.Field> fields = new ArrayList<>(fieldsRaw.size());
+        final Collection<Field> fields = new ArrayList<>(fieldsRaw.size());
         for(final Object object : fieldsRaw) {
             if(!(object instanceof JsonObject)) {
                 throw new IllegalArgumentException("Expected all embed fields to be JsonObjects, but found " +
@@ -71,7 +81,7 @@ public final class EntityBuilder {
                 );
             }
             final JsonObject fieldObject = (JsonObject)object;
-            fields.add(Embed.Field.builder()
+            fields.add(Field.builder()
                     .name(fieldObject.getString("name"))
                     .value(fieldObject.getString("value"))
                     .inline(fieldObject.getBoolean("inline", false))
@@ -82,7 +92,7 @@ public final class EntityBuilder {
 
         return Embed.builder()
                 .title(data.getString("title"))
-                .type(Embed.EmbedType.byKey(data.getString("type")))
+                .type(EmbedType.byKey(data.getString("type")))
                 .description(data.getString("description"))
                 .url(data.getString("url"))
                 .timestamp(timestampRaw == null ? null : OffsetDateTime.parse(timestampRaw))
@@ -98,7 +108,13 @@ public final class EntityBuilder {
     }
 
     public static User createUser(final JsonObject data) {
-        return data.mapTo(User.class);
+        return User.builder()
+                .username(data.getString("username"))
+                .id(data.getString("id"))
+                .discriminator(data.getString("discriminator"))
+                .avatar(data.getString("avatar", null))
+                .bot(data.getBoolean("bot", false))
+                .build();
     }
 
     public static Member createMember(final String id, final JsonObject data) {
@@ -111,7 +127,7 @@ public final class EntityBuilder {
     }
 
     public static Member createMember(final User user, final JsonObject data) {
-        return createMember(user.getId(), data);
+        return createMember(user.id(), data);
     }
 
     public static Member createMember(final JsonObject data) {
@@ -119,6 +135,7 @@ public final class EntityBuilder {
     }
 
     public static Message createMessage(final JsonObject data) {
+        // TODO: This WILL go :fire: if a user is mentioned in a message, because a User object can't hold Member data
         final List<User> mentionedUsers = data.getJsonArray("mentions").stream().filter(e -> e instanceof JsonObject)
                 .map(e -> ((JsonObject) e).mapTo(User.class)).collect(Collectors.toList());
 
@@ -142,7 +159,7 @@ public final class EntityBuilder {
         }
 
         return Message.builder()
-                .type(Message.MessageType.byId(data.getInteger("type")))
+                .type(MessageType.byId(data.getInteger("type")))
                 .tts(data.getBoolean("tts"))
                 .timestamp(timestampRaw == null ? null : OffsetDateTime.parse(timestampRaw))
                 .pinned(data.getBoolean("pinned"))

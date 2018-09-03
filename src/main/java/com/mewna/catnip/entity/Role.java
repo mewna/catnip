@@ -1,6 +1,7 @@
 package com.mewna.catnip.entity;
 
 import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.util.Set;
 
@@ -11,6 +12,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Builder
+@Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Role {
