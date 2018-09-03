@@ -118,7 +118,9 @@ public class RestRequester {
                 // Do request and update bucket
                 final HttpRequest<Buffer> req = client.requestAbs(bucketRoute.method(),
                         API_HOST + API_BASE + route.baseRoute()).ssl(true)
-                        .putHeader("Authorization", "Bot " + catnip.token());
+                        .putHeader("Authorization", "Bot " + catnip.token())
+                        //TODO: version
+                        .putHeader("User-Agent", "DiscordBot (https://github.com/mewna/catnip, 0.1.1)");
                 // GET and DELETE don't have payloads, but the rest do
                 if(route.method() != HttpMethod.GET && route.method() != HttpMethod.DELETE) {
                     req.sendJsonObject(r.data, res -> handleResponse(r, bucket, res));
