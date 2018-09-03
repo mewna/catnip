@@ -46,8 +46,8 @@ public class RestRequester {
         this.catnip = catnip;
     }
     
-    Future<JsonObject> queue(final OutboundRequest r) {
-        final Future<JsonObject> future = Future.future();
+    Future<ResponsePayload> queue(final OutboundRequest r) {
+        final Future<ResponsePayload> future = Future.future();
         getBucket(r.route.baseRoute()).queue(future, r);
         return future;
     }
@@ -59,7 +59,7 @@ public class RestRequester {
     private void handleResponse(final OutboundRequest r, final Bucket bucket, final AsyncResult<HttpResponse<Buffer>> res) {
         if(res.succeeded()) {
             final HttpResponse<Buffer> result = res.result();
-            final JsonObject json = result.bodyAsJsonObject();
+            final ResponsePayload payload = new ResponsePayload(result.bodyAsBuffer());
             final MultiMap headers = result.headers();
             if(headers.contains("X-Ratelimit-Global")) {
                 // We hit a global ratelimit, update
@@ -74,7 +74,7 @@ public class RestRequester {
                 bucket.retry(r);
             } else {
                 bucket.updateFromHeaders(headers);
-                r.future.complete(json);
+                r.future.complete(payload);
                 bucket.finishRequest();
                 bucket.submit();
             }
@@ -143,7 +143,7 @@ public class RestRequester {
         private Map<String, String> params;
         private JsonObject data;
         @Setter
-        private Future<JsonObject> future;
+        private Future<ResponsePayload> future;
         
         OutboundRequest() {
         }
@@ -183,7 +183,7 @@ public class RestRequester {
             reset = TimeUnit.SECONDS.toMillis(Integer.parseInt(headers.get("X-Ratelimit-Reset")));
         }
         
-        void queue(final Future<JsonObject> future, final OutboundRequest request) {
+        void queue(final Future<ResponsePayload> future, final OutboundRequest request) {
             request.setFuture(future);
             queue.addLast(request);
             submit();

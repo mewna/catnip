@@ -3,8 +3,7 @@ package com.mewna.catnip.entity;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Julia Rogers
@@ -54,8 +53,8 @@ public enum Permission {
 
     /* Static convenience methods */
 
-    public static List<Permission> toList(final long asLong) {
-        final List<Permission> perms = new ArrayList<>();
+    public static Set<Permission> toSet(final long asLong) {
+        final Set<Permission> perms = EnumSet.noneOf(Permission.class);
 
         for (final Permission p : values()) {
             if ((asLong & p.value) == p.value) {

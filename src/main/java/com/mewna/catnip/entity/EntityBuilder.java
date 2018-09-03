@@ -1,6 +1,7 @@
 package com.mewna.catnip.entity;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.entity.Embed.Author;
 import com.mewna.catnip.entity.Embed.EmbedType;
 import com.mewna.catnip.entity.Embed.Field;
@@ -110,6 +111,21 @@ public final class EntityBuilder {
                 .fields(ImmutableList.copyOf(fields))
                 .build();
     }
+    
+    @Nonnull
+    @CheckReturnValue
+    public static Role createRole(@Nonnull final JsonObject data) {
+        return Role.builder()
+                .id(data.getString("id"))
+                .name(data.getString("name"))
+                .color(data.getInteger("color"))
+                .hoist(data.getBoolean("hoist"))
+                .position(data.getInteger("position"))
+                .permissions(Permission.toSet(data.getLong("permissions")))
+                .managed(data.getBoolean("managed"))
+                .mentionable(data.getBoolean("mentionable"))
+                .build();
+    }
 
     @Nonnull
     @CheckReturnValue
@@ -126,11 +142,14 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public static Member createMember(@Nonnull final String id, @Nonnull final JsonObject data) {
+        final String joinedAtRaw = data.getString("joined_at");
         return Member.builder()
                 .id(id)
                 .deaf(data.getBoolean("deaf"))
                 .mute(data.getBoolean("mute"))
-                .nick(data.getString("nick", null))
+                .nick(data.getString("nick"))
+                .joinedAt(joinedAtRaw == null ? null : OffsetDateTime.parse(joinedAtRaw))
+                .roles(ImmutableSet.of()) //TODO: fetch roles from cache? or at least give the ids
                 .build();
     }
     
@@ -149,7 +168,6 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public static Message createMessage(@Nonnull final JsonObject data) {
-        // TODO: This WILL go :fire: if a user is mentioned in a message, because a User object can't hold Member data
         final List<User> mentionedUsers = data.getJsonArray("mentions").stream().filter(e -> e instanceof JsonObject)
                 .map(e -> (JsonObject) e).map(EntityBuilder::createUser).collect(Collectors.toList());
 
