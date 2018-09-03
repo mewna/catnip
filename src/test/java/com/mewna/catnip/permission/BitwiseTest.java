@@ -3,6 +3,7 @@ package com.mewna.catnip.permission;
 import com.mewna.catnip.entity.Permission;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +41,7 @@ public class BitwiseTest {
                 MANAGE_MESSAGES
         );
         
-        final List<Permission> result = toList(toTest);
+        final List<Permission> result = new ArrayList<>(toSet(toTest));
         
         Collections.sort(expected);
         Collections.sort(result);
