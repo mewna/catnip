@@ -1,6 +1,7 @@
 package com.mewna.catnip.shard.manager;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
 import io.vertx.core.json.JsonObject;
@@ -11,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnegative;
-import java.nio.file.Path;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -25,7 +25,7 @@ public class DefaultShardManager implements ShardManager {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     
     private final int customShardCount;
-    private final WebClient client = WebClient.create(Catnip.vertx());
+    private final WebClient client = WebClient.create(CatnipImpl._vertx());
     @Getter
     private final Deque<Integer> connectQueue = new ConcurrentLinkedDeque<>();
     @Getter
@@ -50,7 +50,7 @@ public class DefaultShardManager implements ShardManager {
     public void start() {
         if(customShardCount == -1) {
             // Load shard count from API
-            client.getAbs(Catnip.getShardCountUrl()).putHeader("Authorization", "Bot " + catnip.token()).ssl(true)
+            client.getAbs(CatnipImpl.getShardCountUrl()).putHeader("Authorization", "Bot " + catnip.token()).ssl(true)
                     .send(ar -> {
                         if(ar.succeeded()) {
                             final JsonObject body = ar.result().bodyAsJsonObject();
@@ -75,23 +75,23 @@ public class DefaultShardManager implements ShardManager {
         for(int id = 0; id < count; id++) {
             //noinspection TypeMayBeWeakened
             final CatnipShard shard = new CatnipShard(catnip, id, count);
-            Catnip.vertx().deployVerticle(shard);
+            CatnipImpl._vertx().deployVerticle(shard);
             connectQueue.addLast(id);
             logger.info("Deployed shard {}", id);
         }
         // Start verticles
-        Catnip.eventBus().consumer(POLL_QUEUE, msg -> connect());
-        Catnip.eventBus().send(POLL_QUEUE, null);
+        CatnipImpl._eventBus().consumer(POLL_QUEUE, msg -> connect());
+        CatnipImpl._eventBus().send(POLL_QUEUE, null);
     }
     
     private void connect() {
         if(connectQueue.isEmpty()) {
-            Catnip.vertx().setTimer(1000L, __ -> Catnip.eventBus().send(POLL_QUEUE, null));
+            CatnipImpl._vertx().setTimer(1000L, __ -> CatnipImpl._eventBus().send(POLL_QUEUE, null));
             return;
         }
         final int nextId = connectQueue.removeFirst();
         logger.info("Connecting shard {} (queue len {})", nextId, connectQueue.size());
-        Catnip.eventBus().<JsonObject>send(CatnipShard.getControlAddress(nextId), new JsonObject().put("mode", "START"),
+        CatnipImpl._eventBus().<JsonObject>send(CatnipShard.getControlAddress(nextId), new JsonObject().put("mode", "START"),
                 reply -> {
                     if(reply.succeeded()) {
                         final ShardConnectState state = ShardConnectState.valueOf(reply.result().body().getString("state"));
@@ -115,7 +115,7 @@ public class DefaultShardManager implements ShardManager {
                         logger.warn("Failed connecting shard {} entirely, re-queueing", nextId);
                         addToConnectQueue(nextId);
                     }
-                    Catnip.eventBus().send(POLL_QUEUE, null);
+                    CatnipImpl._eventBus().send(POLL_QUEUE, null);
                 });
     }
     

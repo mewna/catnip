@@ -1,6 +1,7 @@
 package com.mewna.catnip.rest;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.Routes.Route;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -38,7 +39,7 @@ public class RestRequester {
     private static final int API_VERSION = 6;
     public static final String API_BASE = "/api/v" + API_VERSION;
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
-    private final WebClient client = WebClient.create(Catnip.vertx());
+    private final WebClient client = WebClient.create(CatnipImpl._vertx());
     
     private final Catnip catnip;
     private final Collection<Bucket> submittedBuckets = new ConcurrentHashSet<>();
@@ -50,7 +51,7 @@ public class RestRequester {
     CompletableFuture<ResponsePayload> queue(final OutboundRequest r) {
         final Future<ResponsePayload> future = Future.future();
         getBucket(r.route.baseRoute()).queue(future, r);
-        return VertxCompletableFuture.from(Catnip.vertx(), future);
+        return VertxCompletableFuture.from(CatnipImpl._vertx(), future);
     }
     
     private Bucket getBucket(final String key) {
@@ -70,7 +71,7 @@ public class RestRequester {
                 global.setLimit(1);
                 // 500ms buffer for safety
                 final long globalReset = System.currentTimeMillis() + retry + 500L;
-                // Catnip.vertx().setTimer(globalReset, __ -> global.reset());
+                // CatnipImpl.vertx().setTimer(globalReset, __ -> global.reset());
                 global.setReset(TimeUnit.MILLISECONDS.toSeconds(globalReset));
                 bucket.retry(r);
             } else {
@@ -121,7 +122,7 @@ public class RestRequester {
             } else {
                 final long wait = bucket.getReset() - System.currentTimeMillis();
                 // Add an extra 500ms buffer to be safe
-                Catnip.vertx().setTimer(wait + 500L, __ -> {
+                CatnipImpl._vertx().setTimer(wait + 500L, __ -> {
                     bucket.reset();
                     bucket.retry(r);
                 });
@@ -130,7 +131,7 @@ public class RestRequester {
             // Global rl, retry later
             final long wait = global.getReset() - System.currentTimeMillis();
             // Add an extra 500ms buffer to be safe
-            Catnip.vertx().setTimer(wait + 500L, __ -> {
+            CatnipImpl._vertx().setTimer(wait + 500L, __ -> {
                 global.reset();
                 bucket.retry(r);
             });
