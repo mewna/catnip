@@ -1,6 +1,7 @@
 package com.mewna.catnip.rest;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.Routes.Route;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -16,11 +17,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
+import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
 
 import java.util.Collection;
 import java.util.Deque;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
@@ -32,24 +36,23 @@ import java.util.concurrent.TimeUnit;
  * @since 8/31/18.
  */
 public class RestRequester {
+    public static final String API_HOST = "https://discordapp.com";
     private static final int API_VERSION = 6;
     public static final String API_BASE = "/api/v" + API_VERSION;
-    public static final String API_HOST = "https://discordapp.com";
-    
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
-    private final WebClient client = WebClient.create(Catnip.vertx());
-    
     private final Catnip catnip;
+    private final WebClient client;
     private final Collection<Bucket> submittedBuckets = new ConcurrentHashSet<>();
     
     public RestRequester(final Catnip catnip) {
         this.catnip = catnip;
+        client = WebClient.create(catnip.vertx());
     }
     
-    Future<ResponsePayload> queue(final OutboundRequest r) {
+    public CompletableFuture<ResponsePayload> queue(final OutboundRequest r) {
         final Future<ResponsePayload> future = Future.future();
         getBucket(r.route.baseRoute()).queue(future, r);
-        return future;
+        return VertxCompletableFuture.from(catnip.vertx(), future);
     }
     
     private Bucket getBucket(final String key) {
@@ -69,7 +72,7 @@ public class RestRequester {
                 global.setLimit(1);
                 // 500ms buffer for safety
                 final long globalReset = System.currentTimeMillis() + retry + 500L;
-                // Catnip.vertx().setTimer(globalReset, __ -> global.reset());
+                // CatnipImpl.vertx().setTimer(globalReset, __ -> global.reset());
                 global.setReset(TimeUnit.MILLISECONDS.toSeconds(globalReset));
                 bucket.retry(r);
             } else {
@@ -112,7 +115,8 @@ public class RestRequester {
                 final HttpRequest<Buffer> req = client.requestAbs(bucketRoute.method(),
                         API_HOST + API_BASE + route.baseRoute()).ssl(true)
                         .putHeader("Authorization", "Bot " + catnip.token());
-                if(route.method() != HttpMethod.GET) {
+                // GET and DELETE don't have payloads, but the rest do
+                if(route.method() != HttpMethod.GET && route.method() != HttpMethod.DELETE) {
                     req.sendJsonObject(r.data, res -> handleResponse(r, bucket, res));
                 } else {
                     req.send(res -> handleResponse(r, bucket, res));
@@ -120,7 +124,7 @@ public class RestRequester {
             } else {
                 final long wait = bucket.getReset() - System.currentTimeMillis();
                 // Add an extra 500ms buffer to be safe
-                Catnip.vertx().setTimer(wait + 500L, __ -> {
+                CatnipImpl._vertx().setTimer(wait + 500L, __ -> {
                     bucket.reset();
                     bucket.retry(r);
                 });
@@ -129,7 +133,7 @@ public class RestRequester {
             // Global rl, retry later
             final long wait = global.getReset() - System.currentTimeMillis();
             // Add an extra 500ms buffer to be safe
-            Catnip.vertx().setTimer(wait + 500L, __ -> {
+            CatnipImpl._vertx().setTimer(wait + 500L, __ -> {
                 global.reset();
                 bucket.retry(r);
             });
@@ -137,18 +141,19 @@ public class RestRequester {
     }
     
     @Getter
+    @Accessors(fluent = true)
     @SuppressWarnings("unused")
-    static final class OutboundRequest {
+    public static final class OutboundRequest {
         private Route route;
         private Map<String, String> params;
         private JsonObject data;
         @Setter
         private Future<ResponsePayload> future;
         
-        OutboundRequest() {
+        public OutboundRequest() {
         }
         
-        OutboundRequest(final Route route, final Map<String, String> params, final JsonObject data) {
+        public OutboundRequest(final Route route, final Map<String, String> params, final JsonObject data) {
             this.route = route;
             this.params = params;
             this.data = data;
@@ -184,7 +189,7 @@ public class RestRequester {
         }
         
         void queue(final Future<ResponsePayload> future, final OutboundRequest request) {
-            request.setFuture(future);
+            request.future(future);
             queue.addLast(request);
             submit();
         }

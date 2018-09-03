@@ -13,6 +13,7 @@
 
         <lombok.version>1.16.20</lombok.version>
         <vertx.version>3.5.3</vertx.version>
+        <vertx-completable-future.version>vertx-completable-future-0.1.2</vertx-completable-future.version>
         <slf4j.version>1.7.25</slf4j.version>
         <commons.lang.version>3.7</commons.lang.version>
         <guava.version>24.1-jre</guava.version>
@@ -20,6 +21,13 @@
 
         <junit.version>5.2.0</junit.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
     <dependencyManagement>
         <dependencies>
@@ -57,6 +65,13 @@
             <artifactId>vertx-web-client</artifactId>
             <version>${vertx.version}</version>
             <classifier>sources</classifier>
+        </dependency>
+
+        <!-- Vert.x CompletableFutures -->
+        <dependency>
+            <groupId>com.github.cescoffier</groupId>
+            <artifactId>vertx-completable-future</artifactId>
+            <version>${vertx-completable-future.version}</version>
         </dependency>
 
         <!-- slf4j -->

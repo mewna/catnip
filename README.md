@@ -8,11 +8,32 @@ A Discord API wrapper in Java. Fully async / reactive, built on top of
 This is the simplest possible bot you can make right now:
 
 ```Java
-final Catnip catnip = new Catnip().token(System.getenv("TOKEN")).setup();
-Catnip.eventBus().<Message>consumer(DiscordEvent.MESSAGE_CREATE, event -> {
+final Catnip catnip = Catnip.catnip().token(System.getenv("TOKEN"));
+catnip.eventBus().<Message>consumer(DiscordEvent.MESSAGE_CREATE, event -> {
     final Message msg = event.body();
     if(msg.content().equalsIgnoreCase("!ping")) {
-        catnip.rest().createMessage(msg.channelId(), "pong!");
+        catnip.rest().channel().createMessage(msg.channelId(), "pong!");
+    }
+});
+catnip.startShards();
+```
+
+catnip returns `CompletableFuture`s from all REST methods. For example,
+editing your ping message to include time it took to create the
+message:
+
+```Java
+final Catnip catnip = Catnip.catnip().token(System.getenv("TOKEN"));
+catnip.eventBus().<Message>consumer(DiscordEvent.MESSAGE_CREATE, event -> {
+    final Message msg = event.body();
+    if(msg.content().equalsIgnoreCase("!ping")) {
+        final long start = System.currentTimeMillis();
+        catnip.rest().channel().createMessage(msg.channelId(), "pong!")
+                .thenAccept(ping -> {
+                    final long end = System.currentTimeMillis();
+                    catnip.rest().channel().editMessage(msg.channelId(), ping.id(),
+                            "pong! (took " + (end - start) + "ms)");
+                });
     }
 });
 catnip.startShards();
