@@ -11,6 +11,7 @@ import com.mewna.catnip.entity.Embed.Provider;
 import com.mewna.catnip.entity.Embed.Thumbnail;
 import com.mewna.catnip.entity.Embed.Video;
 import com.mewna.catnip.entity.Message.MessageType;
+import com.mewna.catnip.entity.impl.UserImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -26,20 +27,21 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public final class EntityBuilder {
-    private EntityBuilder() {}
+    private EntityBuilder() {
+    }
     
     @Nonnull
     @CheckReturnValue
     public static Embed createEmbed(final JsonObject data) {
         final String timestampRaw = data.getString("timestamp");
-
+        
         final JsonObject footerRaw = data.getJsonObject("footer");
         final Footer footer = footerRaw == null ? null : Footer.builder()
                 .text(footerRaw.getString("text"))
                 .iconUrl(footerRaw.getString("icon_url"))
                 .proxyIconUrl(footerRaw.getString("proxy_icon_url"))
                 .build();
-
+        
         final JsonObject imageRaw = data.getJsonObject("image");
         final Image image = imageRaw == null ? null : Image.builder()
                 .url(imageRaw.getString("url"))
@@ -47,7 +49,7 @@ public final class EntityBuilder {
                 .height(imageRaw.getInteger("height", -1))
                 .width(imageRaw.getInteger("width", -1))
                 .build();
-
+        
         final JsonObject thumbnailRaw = data.getJsonObject("thumbnail");
         final Thumbnail thumbnail = thumbnailRaw == null ? null : Thumbnail.builder()
                 .url(thumbnailRaw.getString("url"))
@@ -55,20 +57,20 @@ public final class EntityBuilder {
                 .height(thumbnailRaw.getInteger("height", -1))
                 .width(thumbnailRaw.getInteger("width", -1))
                 .build();
-
+        
         final JsonObject videoRaw = data.getJsonObject("video");
         final Video video = videoRaw == null ? null : Video.builder()
                 .url(videoRaw.getString("url"))
                 .height(videoRaw.getInteger("height", -1))
                 .width(videoRaw.getInteger("width", -1))
                 .build();
-
+        
         final JsonObject providerRaw = data.getJsonObject("provider");
         final Provider provider = providerRaw == null ? null : Provider.builder()
                 .name(providerRaw.getString("name"))
                 .url(providerRaw.getString("url"))
                 .build();
-
+        
         final JsonObject authorRaw = data.getJsonObject("author");
         final Author author = authorRaw == null ? null : Author.builder()
                 .name(authorRaw.getString("name"))
@@ -76,7 +78,7 @@ public final class EntityBuilder {
                 .iconUrl(authorRaw.getString("icon_url"))
                 .proxyIconUrl(authorRaw.getString("proxy_icon_url"))
                 .build();
-
+        
         final JsonArray fieldsRaw = data.getJsonArray("fields", new JsonArray());
         final Collection<Field> fields = new ArrayList<>(fieldsRaw.size());
         for(final Object object : fieldsRaw) {
@@ -85,7 +87,7 @@ public final class EntityBuilder {
                         (object == null ? "null" : object.getClass())
                 );
             }
-            final JsonObject fieldObject = (JsonObject)object;
+            final JsonObject fieldObject = (JsonObject) object;
             fields.add(Field.builder()
                     .name(fieldObject.getString("name"))
                     .value(fieldObject.getString("value"))
@@ -93,8 +95,7 @@ public final class EntityBuilder {
                     .build()
             );
         }
-
-
+        
         return Embed.builder()
                 .title(data.getString("title"))
                 .type(EmbedType.byKey(data.getString("type")))
@@ -126,11 +127,11 @@ public final class EntityBuilder {
                 .mentionable(data.getBoolean("mentionable"))
                 .build();
     }
-
+    
     @Nonnull
     @CheckReturnValue
     public static User createUser(@Nonnull final JsonObject data) {
-        return User.builder()
+        return UserImpl.builder()
                 .username(data.getString("username"))
                 .id(data.getString("id"))
                 .discriminator(data.getString("discriminator"))
@@ -138,7 +139,7 @@ public final class EntityBuilder {
                 .bot(data.getBoolean("bot", false))
                 .build();
     }
-
+    
     @Nonnull
     @CheckReturnValue
     public static Member createMember(@Nonnull final String id, @Nonnull final JsonObject data) {
@@ -170,15 +171,15 @@ public final class EntityBuilder {
     public static Message createMessage(@Nonnull final JsonObject data) {
         final List<User> mentionedUsers = data.getJsonArray("mentions").stream().filter(e -> e instanceof JsonObject)
                 .map(e -> (JsonObject) e).map(EntityBuilder::createUser).collect(Collectors.toList());
-
+        
         final User author = createUser(data.getJsonObject("author"));
-
+        
         final JsonObject memberRaw = data.getJsonObject("member");
         final Member member = memberRaw == null ? null : createMember(author, memberRaw);
-
+        
         final String timestampRaw = data.getString("timestamp");
         final String editedTimestampRaw = data.getString("edited_timestamp");
-
+        
         final JsonArray embedsRaw = data.getJsonArray("embeds", new JsonArray());
         final Collection<Embed> embeds = new ArrayList<>(embedsRaw.size());
         for(final Object object : embedsRaw) {
@@ -187,9 +188,9 @@ public final class EntityBuilder {
                         (object == null ? "null" : object.getClass())
                 );
             }
-            embeds.add(createEmbed((JsonObject)object));
+            embeds.add(createEmbed((JsonObject) object));
         }
-
+        
         return Message.builder()
                 .type(MessageType.byId(data.getInteger("type")))
                 .tts(data.getBoolean("tts"))

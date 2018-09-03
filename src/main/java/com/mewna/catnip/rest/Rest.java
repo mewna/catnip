@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.*;
+import com.mewna.catnip.entity.impl.UserImpl;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
@@ -112,7 +113,7 @@ public class Rest {
                             (object == null ? "null" : object.getClass())
                     );
                 }
-                result.add(builder.apply((JsonObject)object));
+                result.add(builder.apply((JsonObject) object));
             }
             return ImmutableList.copyOf(result);
         };

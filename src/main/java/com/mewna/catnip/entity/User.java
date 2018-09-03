@@ -1,78 +1,99 @@
 package com.mewna.catnip.entity;
 
-import lombok.*;
-import lombok.experimental.Accessors;
-
-import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Objects;
 
 /**
- * @author amy
- * @since 9/1/18.
+ * @author Julia Rogers
+ * @since 9/2/18
  */
-@Getter
-@Setter
-@Builder
-@Accessors(fluent = true)
-@NoArgsConstructor
-@AllArgsConstructor
-public class User {
-    private String username;
-    private String id;
-    private String discriminator;
-    private String avatar;
-    private boolean bot;
+public interface User {
     
-    @CheckReturnValue
-    public boolean isAvatarAnimated() {
-        return avatar != null && avatar.startsWith("a_");
-    }
+    /**
+     * Whether the user's avatar is animated.
+     *
+     * @return True if the avatar is animated, false otherwise.
+     */
+    boolean isAvatarAnimated();
     
-    @Nonnull
-    @CheckReturnValue
-    public String defaultAvatarUrl() {
-        final int avatarId = Short.parseShort(discriminator) % 5;
-        return String.format("https://cdn.discordapp.com/embed/avatars/%s.png", avatarId);
-    }
+    /**
+     * The URL for the default avatar for this user.
+     *
+     * @return String containing the URL to the default avatar. Never null.
+     */
+    String defaultAvatarUrl();
     
-    @Nullable
-    @CheckReturnValue
-    public String avatarUrl(@Nonnull final ImageOptions options) {
-        if(avatar == null) {
-            return null;
-        }
-        if(options.getType() == ImageType.GIF && !avatar.startsWith("a_")) {
-            throw new IllegalArgumentException("Cannot build gif avatar URL for non gif avatar!");
-        }
-        return options.buildUrl(
-                String.format("https://cdn.discordapp.com/avatars/%s/%s", id, avatar)
-        );
-    }
+    /**
+     * The URL for the user's set avatar. Can be null if the user has not set an avatar.
+     * <br>See {@link User#defaultAvatarUrl()} and {@link User#effectiveAvatarUrl()}.
+     *
+     * @param options {@link com.mewna.catnip.entity.ImageOptions Image Options}.
+     *
+     * @return String containing the URL to their avatar, options considered. Can be null.
+     */
+    String avatarUrl(final ImageOptions options);
     
-    @Nullable
-    @CheckReturnValue
-    public String avatarUrl() {
-        return avatarUrl(defaultOptions());
-    }
+    /**
+     * The URL for the user's set avatar. Can be null if the user has not set an avatar.
+     * <br>See {@link User#defaultAvatarUrl()} and {@link User#effectiveAvatarUrl()}.
+     *
+     * @return String containing the URL to their avatar. Can be null.
+     */
+    String avatarUrl();
     
-    @Nonnull
-    @CheckReturnValue
-    public String effectiveAvatarUrl(@Nonnull final ImageOptions options) {
-        return avatar == null ? defaultAvatarUrl() : Objects.requireNonNull(
-                avatarUrl(options),
-                "Avatar url is null but avatar hash is present (??)"
-        );
-    }
+    /**
+     * The URL for the user's effective avatar, as displayed in the Discord client.
+     * <br>Convenience method for getting the user's default avatar
+     * when {@link User#avatarUrl()} is null.
+     *
+     * @param options {@link com.mewna.catnip.entity.ImageOptions Image Options}.
+     *
+     * @return String containing a URL to their effective avatar, options considered. Never null.
+     */
+    String effectiveAvatarUrl(final ImageOptions options);
     
-    @Nonnull
-    @CheckReturnValue
-    public String effectiveAvatarUrl() {
-        return effectiveAvatarUrl(defaultOptions());
-    }
+    /**
+     * The URL for the user's effective avatar, as displayed in the Discord client.
+     * <br>Convenience method for getting the user's default avatar
+     * when {@link User#avatarUrl()} is null.
+     *
+     * @return String containing a URL to their effective avatar. Never null.
+     */
+    String effectiveAvatarUrl();
     
-    private ImageOptions defaultOptions() {
-        return new ImageOptions().type(isAvatarAnimated() ? ImageType.GIF : null);
-    }
+    /**
+     * The username of the user.
+     *
+     * @return User's name. Never null.
+     */
+    String username();
+    
+    /**
+     * The unique snowflake ID of the user.
+     *
+     * @return User's ID. never null.
+     */
+    String id();
+    
+    /**
+     * Discriminator of the user, used to tell Amy#0001 from Amy#0002.
+     *
+     * @return 4 digit discriminator as a string. Never null.
+     */
+    String discriminator();
+    
+    /**
+     * User's avatar hash.
+     * <br><b>This does not return their avatar URL nor image directly.</b>
+     * See {@link User#avatarUrl()} for a more useful method.
+     *
+     * @return User's hashed avatar string. Can be null.
+     */
+    String avatar();
+    
+    /**
+     * Whether the user is a bot, or webhook/fake user.
+     *
+     * @return True if the user is a bot, false if the user is a human.
+     */
+    boolean bot();
 }
