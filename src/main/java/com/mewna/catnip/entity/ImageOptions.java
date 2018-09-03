@@ -5,6 +5,7 @@ import lombok.Getter;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * @author natanbc
@@ -17,7 +18,7 @@ public class ImageOptions {
     
     @Nonnull
     @CheckReturnValue
-    public ImageOptions type(ImageType type) {
+    public ImageOptions type(@Nullable ImageType type) {
         if(type == null) {
             type = ImageType.PNG;
         }

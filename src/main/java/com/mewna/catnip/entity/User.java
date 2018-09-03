@@ -54,7 +54,7 @@ public class User {
     @Nullable
     @CheckReturnValue
     public String avatarUrl() {
-        return avatarUrl(new ImageOptions());
+        return avatarUrl(defaultOptions());
     }
     
     @Nonnull
@@ -69,6 +69,10 @@ public class User {
     @Nonnull
     @CheckReturnValue
     public String effectiveAvatarUrl() {
-        return effectiveAvatarUrl(new ImageOptions());
+        return effectiveAvatarUrl(defaultOptions());
+    }
+    
+    private ImageOptions defaultOptions() {
+        return new ImageOptions().type(isAvatarAnimated() ? ImageType.GIF : null);
     }
 }
