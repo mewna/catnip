@@ -126,7 +126,8 @@ public class CatnipShard extends AbstractVerticle {
                     socketRef.set(null);
                     logger.error("Couldn't connect socket:", failure);
                     Catnip.eventBus().<JsonObject>send("RAW_STATUS", new JsonObject().put("status", "down:fail-connect").put("shard", id));
-                    Catnip.vertx().setTimer(5500L, __ -> msg.reply(new JsonObject().put("state", FAILED.name())));
+                    // If we totally fail to connect socket, don't need to worry as much
+                    Catnip.vertx().setTimer(500L, __ -> msg.reply(new JsonObject().put("state", FAILED.name())));
                 });
     }
     
@@ -242,7 +243,13 @@ public class CatnipShard extends AbstractVerticle {
             case "READY": {
                 // Reply after IDENTIFY ratelimit
                 catnip.sessionManager().session(id, data.getString("session_id"));
-                Catnip.vertx().setTimer(5500L, __ -> msg.reply(new JsonObject().put("state", READY.name())));
+                if(id == limit - 1) {
+                    // No need to delay
+                    msg.reply(new JsonObject().put("state", READY.name()));
+                } else {
+                    // More shards to go, delay
+                    Catnip.vertx().setTimer(5500L, __ -> msg.reply(new JsonObject().put("state", READY.name())));
+                }
                 break;
             }
             case "RESUMED": {
