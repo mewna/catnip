@@ -3,6 +3,10 @@ package com.mewna.catnip.shard;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
 /**
  * @author amy
  * @since 8/15/18.
@@ -34,7 +38,9 @@ public enum GatewayOp {
         return name();
     }
     
-    public static GatewayOp byId(final int id) {
+    @Nonnull
+    @CheckReturnValue
+    public static GatewayOp byId(@Nonnegative final int id) {
         return values()[id];
     }
 }

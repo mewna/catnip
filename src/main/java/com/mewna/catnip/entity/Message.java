@@ -4,6 +4,8 @@ import io.vertx.core.json.JsonObject;
 import lombok.*;
 import lombok.experimental.Accessors;
 
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -50,7 +52,9 @@ public class Message {
         MessageType(final int id) {
             this.id = id;
         }
-        
+    
+        @Nonnull
+        @CheckReturnValue
         public static MessageType byId(final int id) {
             for(final MessageType m : values()) {
                 if(m.id == id) {

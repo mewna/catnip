@@ -2,11 +2,17 @@ package com.mewna.catnip.entity;
 
 import lombok.Getter;
 
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
 @Getter
 public class ImageOptions {
     private ImageType type = ImageType.PNG;
     private int size = -1;
     
+    @Nonnull
+    @CheckReturnValue
     public ImageOptions type(ImageType type) {
         if(type == null) {
             type = ImageType.PNG;
@@ -15,23 +21,33 @@ public class ImageOptions {
         return this;
     }
     
+    @Nonnull
+    @CheckReturnValue
     public ImageOptions gif() {
         return type(ImageType.GIF);
     }
     
+    @Nonnull
+    @CheckReturnValue
     public ImageOptions jpg() {
         return type(ImageType.JPG);
     }
     
+    @Nonnull
+    @CheckReturnValue
     public ImageOptions png() {
         return type(ImageType.PNG);
     }
     
+    @Nonnull
+    @CheckReturnValue
     public ImageOptions webp() {
         return type(ImageType.WEBP);
     }
     
-    public ImageOptions size(final int size) {
+    @Nonnull
+    @CheckReturnValue
+    public ImageOptions size(@Nonnegative final int size) {
         if(size < 16) {
             throw new IllegalArgumentException("Size must be greater than or equal to 16");
         }
@@ -45,7 +61,9 @@ public class ImageOptions {
         return this;
     }
     
-    public String buildUrl(final String base) {
+    @Nonnull
+    @CheckReturnValue
+    public String buildUrl(@Nonnull final String base) {
         return base + '.' + type.getFileExtension() + (size == -1 ? "" : "?size=" + size);
     }
     

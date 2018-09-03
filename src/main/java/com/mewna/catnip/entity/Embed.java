@@ -3,6 +3,8 @@ package com.mewna.catnip.entity;
 import lombok.*;
 import lombok.experimental.Accessors;
 
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -45,7 +47,9 @@ public class Embed {
             this.key = key;
         }
 
-        public static EmbedType byKey(final String key) {
+        @Nonnull
+        @CheckReturnValue
+        public static EmbedType byKey(@Nonnull final String key) {
             for(final EmbedType type : values()) {
                 if(type.key.equals(key)) {
                     return type;
