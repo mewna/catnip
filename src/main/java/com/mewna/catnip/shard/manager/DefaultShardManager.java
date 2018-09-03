@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnegative;
+import java.nio.file.Path;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -52,8 +53,13 @@ public class DefaultShardManager implements ShardManager {
             client.getAbs(Catnip.getShardCountUrl()).putHeader("Authorization", "Bot " + catnip.token()).ssl(true)
                     .send(ar -> {
                         if(ar.succeeded()) {
-                            final int recommendedShards = ar.result().bodyAsJsonObject().getInteger("shards");
-                            loadShards(recommendedShards);
+                            final JsonObject body = ar.result().bodyAsJsonObject();
+                            final int shards = body.getInteger("shards", -1);
+                            if(shards != -1) {
+                                loadShards(shards);
+                            } else {
+                                throw new IllegalStateException("Invalid token provided (Gateway JSON response doesn't have `shards` key)!");
+                            }
                         } else {
                             throw new IllegalStateException("Couldn't load shard count from API!");
                         }
