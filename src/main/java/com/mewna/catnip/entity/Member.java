@@ -3,6 +3,7 @@ package com.mewna.catnip.entity;
 import lombok.*;
 import lombok.experimental.Accessors;
 
+import java.time.OffsetDateTime;
 import java.util.Set;
 
 /**
@@ -21,5 +22,5 @@ public class Member {
     private Set<String> roles;
     private boolean mute;
     private boolean deaf;
-    private String joinedAt;
+    private OffsetDateTime joinedAt;
 }
