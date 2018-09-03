@@ -25,6 +25,11 @@ public class User {
     private String avatar;
     private boolean bot;
     
+    @CheckReturnValue
+    public boolean isAvatarAnimated() {
+        return avatar != null && avatar.startsWith("a_");
+    }
+    
     @Nonnull
     @CheckReturnValue
     public String defaultAvatarUrl() {
@@ -35,8 +40,14 @@ public class User {
     @Nullable
     @CheckReturnValue
     public String avatarUrl(@Nonnull final ImageOptions options) {
-        return avatar == null ? null : options.buildUrl(
-                String.format("https://cdn.discordapp.com/avatars/%s/%s.png", id, avatar)
+        if(avatar == null) {
+            return null;
+        }
+        if(options.getType() == ImageType.GIF && !avatar.startsWith("a_")) {
+            throw new IllegalArgumentException("Cannot build gif avatar URL for non gif avatar!");
+        }
+        return options.buildUrl(
+                String.format("https://cdn.discordapp.com/avatars/%s/%s", id, avatar)
         );
     }
     
