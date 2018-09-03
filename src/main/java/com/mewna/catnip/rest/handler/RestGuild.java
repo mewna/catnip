@@ -18,16 +18,14 @@ import java.util.concurrent.CompletableFuture;
  */
 @SuppressWarnings("unused")
 public class RestGuild extends RestHandler {
-    private final CatnipImpl catnip;
-    
     public RestGuild(final CatnipImpl catnip) {
-        this.catnip = catnip;
+        super(catnip);
     }
     
     @Nonnull
     @CheckReturnValue
     public CompletableFuture<List<Role>> getGuildRoles(@Nonnull final String guildId) {
-        return catnip.requester()
+        return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.GET_GUILD_ROLES.withMajorParam(guildId),
                         ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
