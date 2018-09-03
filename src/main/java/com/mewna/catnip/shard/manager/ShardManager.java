@@ -2,6 +2,9 @@ package com.mewna.catnip.shard.manager;
 
 import com.mewna.catnip.Catnip;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
 /**
  * @author amy
  * @since 8/15/18.
@@ -13,9 +16,9 @@ public interface ShardManager {
     
     void start();
     
-    void addToConnectQueue(int shard);
+    void addToConnectQueue(@Nonnegative int shard);
     
     Catnip getCatnip();
     
-    void setCatnip(Catnip flow);
+    void setCatnip(@Nonnull Catnip flow);
 }

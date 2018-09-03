@@ -17,6 +17,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
+
 /**
  * @author amy
  * @since 8/31/18.
@@ -44,21 +47,28 @@ public class Catnip {
     @Setter
     private Rest rest = new Rest(this);
     
+    @Nonnull
+    @CheckReturnValue
     public static String getGatewayUrl() {
         // TODO: Allow injecting other gateway URLs for eg. mocks?
         return "wss://gateway.discord.gg/?v=6&encoding=json";
     }
     
+    @Nonnull
+    @CheckReturnValue
     public static String getShardCountUrl() {
         // TODO: Allow injecting other endpoints for eg. mocks?
         //return "https://discordapp.com/api/v6/gateway/bot";
         return RestRequester.API_HOST + RestRequester.API_BASE + Routes.GET_GATEWAY_BOT.baseRoute();
     }
     
+    @Nonnull
+    @CheckReturnValue
     public static EventBus eventBus() {
         return vertx.eventBus();
     }
     
+    @Nonnull
     public Catnip setup() {
         // Register codecs
         // God I hate having to do this
@@ -75,6 +85,7 @@ public class Catnip {
         return this;
     }
     
+    @Nonnull
     public Catnip startShards() {
         shardManager.start();
         return this;
