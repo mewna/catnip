@@ -5,13 +5,13 @@ package com.mewna.catnip.shard.session;
  * @since 8/16/18.
  */
 public interface SessionManager {
-    void storeSession(int shardId, String session);
+    void session(int shardId, String session);
     
-    String getSession(int shardId);
+    String session(int shardId);
     
-    void storeSeqnum(int shardId, int seqnum);
+    void seqnum(int shardId, int seqnum);
     
-    int getSeqnum(int shardId);
+    int seqnum(int shardId);
     
     void clearSession(int shardId);
     

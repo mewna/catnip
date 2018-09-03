@@ -12,22 +12,22 @@ public class DefaultSessionManager implements SessionManager {
     private final Map<Integer, Integer> seqnums = new ConcurrentHashMap<>();
     
     @Override
-    public void storeSession(final int shardId, final String session) {
+    public void session(final int shardId, final String session) {
         sessions.put(shardId, session);
     }
     
     @Override
-    public String getSession(final int shardId) {
+    public String session(final int shardId) {
         return sessions.get(shardId);
     }
     
     @Override
-    public void storeSeqnum(final int shardId, final int seqnum) {
+    public void seqnum(final int shardId, final int seqnum) {
         seqnums.put(shardId, seqnum);
     }
     
     @Override
-    public int getSeqnum(final int shardId) {
+    public int seqnum(final int shardId) {
         return seqnums.get(shardId);
     }
     

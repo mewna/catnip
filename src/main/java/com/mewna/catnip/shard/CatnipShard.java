@@ -57,14 +57,14 @@ public class CatnipShard extends AbstractVerticle {
     
     public static JsonObject getBasePayload(final GatewayOp op, final JsonObject payload) {
         return new JsonObject()
-                .put("op", op.getOp())
+                .put("op", op.opcode())
                 .put("d", payload)
                 ;
     }
     
     public static JsonObject getBasePayload(final GatewayOp op, final Integer payload) {
         return new JsonObject()
-                .put("op", op.getOp())
+                .put("op", op.opcode())
                 .put("d", payload)
                 ;
     }
@@ -135,7 +135,7 @@ public class CatnipShard extends AbstractVerticle {
         try {
             if(frame.isText()) {
                 final JsonObject event = new JsonObject(frame.textData());
-                final GatewayOp op = GatewayOp.getById(event.getInteger("op"));
+                final GatewayOp op = GatewayOp.byId(event.getInteger("op"));
                 // We pass `msg` for consistency (and for the off-chance it's
                 // needed), but REALLY you don't wanna do anything with it. It
                 // gets passed *entirely* so that we can reply to the shard
@@ -209,7 +209,7 @@ public class CatnipShard extends AbstractVerticle {
                     return;
                 }
                 Catnip.eventBus().send(getWebsocketMessageSendAddress(),
-                        getBasePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().getSeqnum(id)));
+                        getBasePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().seqnum(id)));
                 heartbeatAcked.set(false);
             } else {
                 Catnip.vertx().cancelTimer(timerId);
@@ -217,7 +217,7 @@ public class CatnipShard extends AbstractVerticle {
         });
         
         // Check if we can RESUME instead
-        if(catnip.sessionManager().getSession(id) != null && catnip.sessionManager().getSeqnum(id) > 0) {
+        if(catnip.sessionManager().session(id) != null && catnip.sessionManager().seqnum(id) > 0) {
             Catnip.eventBus().send(getWebsocketMessageSendAddress(), resume());
         } else {
             Catnip.eventBus().send(getWebsocketMessageSendAddress(), identify());
@@ -235,13 +235,13 @@ public class CatnipShard extends AbstractVerticle {
         // Update trace and seqnum as needed
         // TODO: Update trace here
         if(event.getValue("s", null) != null) {
-            catnip.sessionManager().storeSeqnum(id, event.getInteger("s"));
+            catnip.sessionManager().seqnum(id, event.getInteger("s"));
         }
         
         switch(type) {
             case "READY": {
                 // Reply after IDENTIFY ratelimit
-                catnip.sessionManager().storeSession(id, data.getString("session_id"));
+                catnip.sessionManager().session(id, data.getString("session_id"));
                 Catnip.vertx().setTimer(5500L, __ -> msg.reply(new JsonObject().put("state", READY.name())));
                 break;
             }
@@ -265,7 +265,7 @@ public class CatnipShard extends AbstractVerticle {
     private void handleHeartbeat(final Message<JsonObject> msg, final JsonObject event) {
         //heartbeatAcked.set(false);
         Catnip.eventBus().send(getWebsocketMessageSendAddress(),
-                getBasePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().getSeqnum(id)));
+                getBasePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().seqnum(id)));
     }
     
     private void handleHeartbeatAck(final Message<JsonObject> msg, final JsonObject event) {
@@ -330,8 +330,8 @@ public class CatnipShard extends AbstractVerticle {
         return getBasePayload(GatewayOp.RESUME, new JsonObject()
                 .put("token", catnip.token())
                 .put("compress", false)
-                .put("session_id", catnip.sessionManager().getSession(id))
-                .put("seq", catnip.sessionManager().getSeqnum(id))
+                .put("session_id", catnip.sessionManager().session(id))
+                .put("seq", catnip.sessionManager().seqnum(id))
                 .put("properties", new JsonObject()
                         .put("$os", "JVM")
                         .put("$browser", "catnip")
