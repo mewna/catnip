@@ -89,18 +89,20 @@ public class CatnipShard extends AbstractVerticle {
         catnip.eventBus().consumer(websocketMessageQueueAddress(), this::handleSocketQueue);
         catnip.eventBus().consumer(websocketMessagePollAddress(), msg -> {
             if(socketRef.get() != null) {
-                if(!messageQueue.isEmpty()) {
+                while(!messageQueue.isEmpty()) {
                     // We only do up to 110 messages/min, to allow for room just in case
                     final ImmutablePair<Boolean, Long> check = catnip.gatewayRatelimiter()
                             .checkRatelimit(String.format("catnip:gateway:%s:outgoing-send", id), 60_000L, 110);
-                    if(!check.left) {
-                        // We're good, send now
-                        final JsonObject payload = messageQueue.pop();
-                        catnip.eventBus().send(websocketMessageSendAddress(), payload);
+                    if(check.left) {
+                        //we got ratelimited, stop sending
+                        break;
                     }
+                    final JsonObject payload = messageQueue.pop();
+                    catnip.eventBus().send(websocketMessageSendAddress(), payload);
                 }
             }
-            catnip.eventBus().send(websocketMessagePollAddress(), null);
+            //poll again in half a second
+            catnip.vertx().setTimer(500, __ -> catnip.eventBus().send(websocketMessagePollAddress(), null));
         });
         // Start gateway poll
         catnip.eventBus().send(websocketMessagePollAddress(), null);
