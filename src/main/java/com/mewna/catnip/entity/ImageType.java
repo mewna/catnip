@@ -3,6 +3,10 @@ package com.mewna.catnip.entity;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
+/**
+ * @author natanbc
+ * @since 9/2/18.
+ */
 public enum ImageType {
     GIF, JPG, PNG, WEBP;
     
