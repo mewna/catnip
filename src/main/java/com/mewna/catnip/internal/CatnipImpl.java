@@ -64,12 +64,6 @@ public class CatnipImpl implements Catnip {
     }
     
     @Nonnull
-    @CheckReturnValue
-    private static EventBus _eventBus() {
-        return _vertx.eventBus();
-    }
-    
-    @Nonnull
     @Override
     public Vertx vertx() {
         return _vertx();
@@ -79,7 +73,7 @@ public class CatnipImpl implements Catnip {
     @Override
     @CheckReturnValue
     public EventBus eventBus() {
-        return _eventBus();
+        return _vertx().eventBus();
     }
     
     @Nonnull
@@ -93,7 +87,7 @@ public class CatnipImpl implements Catnip {
         // *sigh*
         // This is mainly important for distributed catnip; locally it'll just
         // not apply any transformations
-        _eventBus().registerDefaultCodec(Message.class, new JsonPojoCodec<>(Message.class));
+        eventBus().registerDefaultCodec(Message.class, new JsonPojoCodec<>(Message.class));
         
         shardManager.setCatnip(this);
         return this;

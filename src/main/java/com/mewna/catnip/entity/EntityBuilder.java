@@ -26,11 +26,9 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public final class EntityBuilder {
-    private EntityBuilder() {}
-    
     @Nonnull
     @CheckReturnValue
-    public static Embed createEmbed(final JsonObject data) {
+    public Embed createEmbed(final JsonObject data) {
         final String timestampRaw = data.getString("timestamp");
 
         final JsonObject footerRaw = data.getJsonObject("footer");
@@ -114,7 +112,7 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public static Role createRole(@Nonnull final JsonObject data) {
+    public Role createRole(@Nonnull final JsonObject data) {
         return Role.builder()
                 .id(data.getString("id"))
                 .name(data.getString("name"))
@@ -129,7 +127,7 @@ public final class EntityBuilder {
 
     @Nonnull
     @CheckReturnValue
-    public static User createUser(@Nonnull final JsonObject data) {
+    public User createUser(@Nonnull final JsonObject data) {
         return User.builder()
                 .username(data.getString("username"))
                 .id(data.getString("id"))
@@ -141,7 +139,7 @@ public final class EntityBuilder {
 
     @Nonnull
     @CheckReturnValue
-    public static Member createMember(@Nonnull final String id, @Nonnull final JsonObject data) {
+    public Member createMember(@Nonnull final String id, @Nonnull final JsonObject data) {
         final String joinedAtRaw = data.getString("joined_at");
         return Member.builder()
                 .id(id)
@@ -155,21 +153,21 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public static Member createMember(@Nonnull final User user, @Nonnull final JsonObject data) {
+    public Member createMember(@Nonnull final User user, @Nonnull final JsonObject data) {
         return createMember(user.id(), data);
     }
     
     @Nonnull
     @CheckReturnValue
-    public static Member createMember(@Nonnull final JsonObject data) {
+    public Member createMember(@Nonnull final JsonObject data) {
         return createMember(createUser(data.getJsonObject("user")), data);
     }
     
     @Nonnull
     @CheckReturnValue
-    public static Message createMessage(@Nonnull final JsonObject data) {
+    public Message createMessage(@Nonnull final JsonObject data) {
         final List<User> mentionedUsers = data.getJsonArray("mentions").stream().filter(e -> e instanceof JsonObject)
-                .map(e -> (JsonObject) e).map(EntityBuilder::createUser).collect(Collectors.toList());
+                .map(e -> (JsonObject) e).map(this::createUser).collect(Collectors.toList());
 
         final User author = createUser(data.getJsonObject("author"));
 
