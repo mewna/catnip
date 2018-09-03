@@ -1,13 +1,13 @@
 package com.mewna.catnip.permission;
 
 import com.mewna.catnip.entity.Permission;
-
-import static com.mewna.catnip.entity.Permission.*;
-
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
+import static com.mewna.catnip.entity.Permission.*;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -18,14 +18,14 @@ public class BitwiseTest {
         final Permission[] perms = values();
         final int expected = 2146958847;
         int total = 0;
-
-        for (Permission p : perms) {
-            total |= p.getValue();
+        
+        for(final Permission p : perms) {
+            total |= p.value();
         }
-
+        
         assertEquals(expected, total);
     }
-
+    
     @Test
     public void testFromLong() {
         final long toTest = 805314622L;
@@ -39,12 +39,12 @@ public class BitwiseTest {
                 MANAGE_WEBHOOKS,
                 MANAGE_MESSAGES
         );
-
+        
         final List<Permission> result = toList(toTest);
-
+        
         Collections.sort(expected);
         Collections.sort(result);
-
+        
         assertArrayEquals(expected.toArray(), result.toArray());
     }
 }

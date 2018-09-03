@@ -2,6 +2,7 @@ package com.mewna.catnip.rest;
 
 import io.vertx.core.http.HttpMethod;
 import lombok.Getter;
+import lombok.experimental.Accessors;
 
 import static io.vertx.core.http.HttpMethod.*;
 
@@ -14,36 +15,41 @@ public final class Routes {
     private Routes() {
     }
     
-    @Getter
+    @Accessors(fluent = true)
     @SuppressWarnings({"WeakerAccess", "unused"})
     public static final class Route {
+        @Getter
         private HttpMethod method;
-        private String route;
+        @Getter
+        private String baseRoute;
+        @Getter
         private String majorParam;
         
         public Route() {
         }
         
-        public Route(final HttpMethod method, final String route) {
-            this(method, route, null);
+        public Route(final HttpMethod method, final String baseRoute) {
+            this(method, baseRoute, null);
         }
         
-        public Route(final HttpMethod method, final String route, final String majorParam) {
+        public Route(final HttpMethod method, final String baseRoute, final String majorParam) {
             this.method = method;
-            this.route = route;
+            this.baseRoute = baseRoute;
             this.majorParam = majorParam;
         }
         
+        @SuppressWarnings("TypeMayBeWeakened")
         public Route withMajorParam(final String value) {
-            return new Route(method, route.replace('{' + majorParam + '}', value));
+            return new Route(method, baseRoute.replace('{' + majorParam + '}', value));
         }
         
+        @SuppressWarnings("TypeMayBeWeakened")
         Route compile(final String param, final String value) {
-            return new Route(method, route.replace('{' + param + '}', value));
+            return new Route(method, baseRoute.replace('{' + param + '}', value));
         }
         
         Route copy() {
-            return new Route(method, route, majorParam);
+            return new Route(method, baseRoute, majorParam);
         }
     
         @Override
@@ -51,7 +57,7 @@ public final class Routes {
             if(!(o instanceof Route)) {
                 return false;
             }
-            return route.equalsIgnoreCase(((Route) o).route);
+            return baseRoute.equalsIgnoreCase(((Route) o).baseRoute);
         }
     }
 

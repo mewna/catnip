@@ -1,6 +1,7 @@
 package com.mewna.catnip.entity;
 
 import lombok.*;
+import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -14,6 +15,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Builder
+@Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {

@@ -1,5 +1,8 @@
 package com.mewna.catnip.entity;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,6 +10,7 @@ import java.util.List;
  * @author Julia Rogers
  * @since 9/2/18
  */
+@Accessors(fluent = true)
 public enum Permission {
     CREATE_INSTANT_INVITE(0x00000001, true),
     KICK_MEMBERS(0x00000002, false),
@@ -43,16 +47,10 @@ public enum Permission {
         this.channel = channel;
     }
 
+    @Getter
     private final int value;
+    @Getter
     private final boolean channel;
-
-    public int getValue() {
-        return value;
-    }
-
-    public boolean appliesToChannel() {
-        return channel;
-    }
 
     /* Static convenience methods */
 

@@ -3,6 +3,7 @@ package com.mewna.catnip;
 import com.mewna.catnip.entity.Message;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
+import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.shard.manager.DefaultShardManager;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.session.DefaultSessionManager;
@@ -50,7 +51,8 @@ public class Catnip {
     
     public static String getShardCountUrl() {
         // TODO: Allow injecting other endpoints for eg. mocks?
-        return "https://discordapp.com/api/v6/gateway/bot";
+        //return "https://discordapp.com/api/v6/gateway/bot";
+        return RestRequester.API_HOST + RestRequester.API_BASE + Routes.GET_GATEWAY_BOT.baseRoute();
     }
     
     public static EventBus eventBus() {
