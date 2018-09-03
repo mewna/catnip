@@ -87,6 +87,9 @@ public class Catnip {
     
     @Nonnull
     public Catnip startShards() {
+        if(token == null || token.isEmpty()) {
+            throw new IllegalStateException("Provided token is empty!");
+        }
         shardManager.start();
         return this;
     }
