@@ -10,6 +10,7 @@ import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnegative;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -113,7 +114,7 @@ public class DefaultShardManager implements ShardManager {
     }
     
     @Override
-    public void addToConnectQueue(final int shard) {
+    public void addToConnectQueue(@Nonnegative final int shard) {
         if(!connectQueue.contains(shard)) {
             connectQueue.add(shard);
         } else {

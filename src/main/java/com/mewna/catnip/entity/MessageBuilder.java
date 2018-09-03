@@ -1,5 +1,8 @@
 package com.mewna.catnip.entity;
 
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collections;
 
 /**
@@ -20,19 +23,28 @@ public class MessageBuilder {
         throw new UnsupportedOperationException("Build-from-message is currently unsupported.");
     }
     
-    public MessageBuilder content(final String content) {
+    @Nonnull
+    @CheckReturnValue
+    public MessageBuilder content(@Nullable final String content) {
         this.content = content;
         return this;
     }
-    public MessageBuilder embed(final Embed embed) {
+    
+    @Nonnull
+    @CheckReturnValue
+    public MessageBuilder embed(@Nullable final Embed embed) {
         this.embed = embed;
         return this;
     }
     
+    @Nonnull
+    @CheckReturnValue
     public Message build() {
         final Message m = new Message();
         m.content(content);
-        m.embeds(Collections.singletonList(embed));
+        if(embed != null) {
+            m.embeds(Collections.singletonList(embed));
+        }
         return m;
     }
 }

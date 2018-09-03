@@ -13,6 +13,8 @@ import com.mewna.catnip.entity.Message.MessageType;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,7 +26,9 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"WeakerAccess", "unused"})
 public final class EntityBuilder {
     private EntityBuilder() {}
-
+    
+    @Nonnull
+    @CheckReturnValue
     public static Embed createEmbed(final JsonObject data) {
         final String timestampRaw = data.getString("timestamp");
 
@@ -107,7 +111,9 @@ public final class EntityBuilder {
                 .build();
     }
 
-    public static User createUser(final JsonObject data) {
+    @Nonnull
+    @CheckReturnValue
+    public static User createUser(@Nonnull final JsonObject data) {
         return User.builder()
                 .username(data.getString("username"))
                 .id(data.getString("id"))
@@ -117,7 +123,9 @@ public final class EntityBuilder {
                 .build();
     }
 
-    public static Member createMember(final String id, final JsonObject data) {
+    @Nonnull
+    @CheckReturnValue
+    public static Member createMember(@Nonnull final String id, @Nonnull final JsonObject data) {
         return Member.builder()
                 .id(id)
                 .deaf(data.getBoolean("deaf"))
@@ -125,16 +133,22 @@ public final class EntityBuilder {
                 .nick(data.getString("nick", null))
                 .build();
     }
-
-    public static Member createMember(final User user, final JsonObject data) {
+    
+    @Nonnull
+    @CheckReturnValue
+    public static Member createMember(@Nonnull final User user, @Nonnull final JsonObject data) {
         return createMember(user.id(), data);
     }
-
-    public static Member createMember(final JsonObject data) {
+    
+    @Nonnull
+    @CheckReturnValue
+    public static Member createMember(@Nonnull final JsonObject data) {
         return createMember(createUser(data.getJsonObject("user")), data);
     }
-
-    public static Message createMessage(final JsonObject data) {
+    
+    @Nonnull
+    @CheckReturnValue
+    public static Message createMessage(@Nonnull final JsonObject data) {
         // TODO: This WILL go :fire: if a user is mentioned in a message, because a User object can't hold Member data
         final List<User> mentionedUsers = data.getJsonArray("mentions").stream().filter(e -> e instanceof JsonObject)
                 .map(e -> ((JsonObject) e).mapTo(User.class)).collect(Collectors.toList());
