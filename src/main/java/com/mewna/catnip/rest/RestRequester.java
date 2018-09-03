@@ -19,6 +19,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Deque;
@@ -36,6 +38,8 @@ import java.util.concurrent.TimeUnit;
  * @since 8/31/18.
  */
 public class RestRequester {
+    private static final Logger logger = LoggerFactory.getLogger(RestRequester.class);
+    
     public static final String API_HOST = "https://discordapp.com";
     private static final int API_VERSION = 6;
     public static final String API_BASE = "/api/v" + API_VERSION;
@@ -62,6 +66,14 @@ public class RestRequester {
     private void handleResponse(final OutboundRequest r, final Bucket bucket, final AsyncResult<HttpResponse<Buffer>> res) {
         if(res.succeeded()) {
             final HttpResponse<Buffer> result = res.result();
+            if(result.statusCode() == 429) {
+                logger.error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
+                        r.route.baseRoute(),
+                        result.getHeader("X-Ratelimit-Global"),
+                        result.getHeader("X-Ratelimit-Limit"),
+                        result.getHeader("X-Ratelimit-Reset")
+                );
+            }
             final ResponsePayload payload = new ResponsePayload(result.bodyAsBuffer());
             final MultiMap headers = result.headers();
             if(headers.contains("X-Ratelimit-Global")) {
