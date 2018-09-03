@@ -20,7 +20,8 @@ public class MessageBuilder {
     }
     
     public MessageBuilder(final Message from) {
-        throw new UnsupportedOperationException("Build-from-message is currently unsupported.");
+        content = from.content();
+        embed = !from.embeds().isEmpty() ? from.embeds().get(0) : null;
     }
     
     @Nonnull
