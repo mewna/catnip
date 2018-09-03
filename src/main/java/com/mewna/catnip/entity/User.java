@@ -1,6 +1,7 @@
 package com.mewna.catnip.entity;
 
 import lombok.*;
+import lombok.experimental.Accessors;
 
 /**
  * @author amy
@@ -9,6 +10,7 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
+@Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {

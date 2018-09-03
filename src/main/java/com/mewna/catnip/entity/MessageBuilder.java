@@ -31,8 +31,8 @@ public class MessageBuilder {
     
     public Message build() {
         final Message m = new Message();
-        m.setContent(content);
-        m.setEmbeds(Collections.singletonList(embed));
+        m.content(content);
+        m.embeds(Collections.singletonList(embed));
         return m;
     }
 }
