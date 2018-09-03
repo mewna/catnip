@@ -16,11 +16,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
 
 import java.util.Collection;
 import java.util.Deque;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
@@ -32,10 +34,9 @@ import java.util.concurrent.TimeUnit;
  * @since 8/31/18.
  */
 public class RestRequester {
+    public static final String API_HOST = "https://discordapp.com";
     private static final int API_VERSION = 6;
     public static final String API_BASE = "/api/v" + API_VERSION;
-    public static final String API_HOST = "https://discordapp.com";
-    
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
     private final WebClient client = WebClient.create(Catnip.vertx());
     
@@ -46,10 +47,10 @@ public class RestRequester {
         this.catnip = catnip;
     }
     
-    Future<ResponsePayload> queue(final OutboundRequest r) {
+    CompletableFuture<ResponsePayload> queue(final OutboundRequest r) {
         final Future<ResponsePayload> future = Future.future();
         getBucket(r.route.baseRoute()).queue(future, r);
-        return future;
+        return VertxCompletableFuture.from(Catnip.vertx(), future);
     }
     
     private Bucket getBucket(final String key) {

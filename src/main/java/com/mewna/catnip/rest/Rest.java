@@ -8,7 +8,6 @@ import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
-import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -50,8 +49,7 @@ public class Rest {
     
     @Nonnull
     public CompletableFuture<Message> createMessage(@Nonnull final String channelId, @Nonnull final String content) {
-        return VertxCompletableFuture.from(Catnip.vertx(),
-                createMessage(channelId, new MessageBuilder().content(content).build()));
+        return createMessage(channelId, new MessageBuilder().content(content).build());
     }
     
     @Nonnull
@@ -67,18 +65,20 @@ public class Rest {
             throw new IllegalArgumentException("Can't build a message with no content and no embeds!");
         }
         
-        return VertxCompletableFuture.from(Catnip.vertx(), catnip._requester().
-                queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId),
-                        ImmutableMap.of(), json)).map(ResponsePayload::object).map(EntityBuilder::createMessage));
+        return catnip._requester().
+                queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json))
+                .thenApply(ResponsePayload::object)
+                .thenApply(EntityBuilder::createMessage);
     }
     
     @Nonnull
     @CheckReturnValue
     public CompletableFuture<Message> getMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
-        return VertxCompletableFuture.from(Catnip.vertx(), catnip._requester().queue(
+        return catnip._requester().queue(
                 new OutboundRequest(Routes.GET_CHANNEL_MESSAGE.withMajorParam(channelId),
                         ImmutableMap.of("message.id", messageId), null))
-                .map(ResponsePayload::object).map(EntityBuilder::createMessage));
+                .thenApply(ResponsePayload::object)
+                .thenApply(EntityBuilder::createMessage);
     }
     
     @Nonnull
@@ -100,26 +100,29 @@ public class Rest {
         if(json.getValue("embeds", null) == null && json.getValue("content", null) == null) {
             throw new IllegalArgumentException("Can't build a message with no content and no embeds!");
         }
-        return VertxCompletableFuture.from(Catnip.vertx(), catnip._requester()
+        return catnip._requester()
                 .queue(new OutboundRequest(Routes.EDIT_MESSAGE.withMajorParam(channelId),
                         ImmutableMap.of("message.id", messageId), json))
-                .map(ResponsePayload::object).map(EntityBuilder::createMessage));
+                .thenApply(ResponsePayload::object)
+                .thenApply(EntityBuilder::createMessage);
     }
     
     @Nonnull
     @CheckReturnValue
     public CompletableFuture<User> getUser(@Nonnull final String userId) {
-        return VertxCompletableFuture.from(Catnip.vertx(), catnip._requester().queue(new OutboundRequest(Routes.GET_USER,
+        return catnip._requester().queue(new OutboundRequest(Routes.GET_USER,
                 ImmutableMap.of("user.id", userId), null))
-                .map(ResponsePayload::object).map(EntityBuilder::createUser));
+                .thenApply(ResponsePayload::object)
+                .thenApply(EntityBuilder::createUser);
     }
     
     @Nonnull
     @CheckReturnValue
     public CompletableFuture<List<Role>> getGuildRoles(@Nonnull final String guildId) {
-        return VertxCompletableFuture.from(Catnip.vertx(), catnip._requester()
+        return catnip._requester()
                 .queue(new OutboundRequest(Routes.GET_GUILD_ROLES.withMajorParam(guildId),
                         ImmutableMap.of(), null))
-                .map(ResponsePayload::array).map(mapObjectContents(EntityBuilder::createRole)));
+                .thenApply(ResponsePayload::array)
+                .thenApply(mapObjectContents(EntityBuilder::createRole));
     }
 }
