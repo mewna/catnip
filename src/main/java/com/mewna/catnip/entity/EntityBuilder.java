@@ -2,14 +2,8 @@ package com.mewna.catnip.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.mewna.catnip.entity.Embed.Author;
-import com.mewna.catnip.entity.Embed.EmbedType;
-import com.mewna.catnip.entity.Embed.Field;
-import com.mewna.catnip.entity.Embed.Footer;
-import com.mewna.catnip.entity.Embed.Image;
-import com.mewna.catnip.entity.Embed.Provider;
-import com.mewna.catnip.entity.Embed.Thumbnail;
-import com.mewna.catnip.entity.Embed.Video;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.Embed.*;
 import com.mewna.catnip.entity.Message.MessageType;
 import com.mewna.catnip.entity.impl.UserImpl;
 import io.vertx.core.json.JsonArray;
@@ -18,7 +12,9 @@ import io.vertx.core.json.JsonObject;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -27,12 +23,15 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public final class EntityBuilder {
-    private EntityBuilder() {
+    private final Catnip catnip;
+    
+    public EntityBuilder(final Catnip catnip) {
+        this.catnip = catnip;
     }
     
     @Nonnull
     @CheckReturnValue
-    public static Embed createEmbed(final JsonObject data) {
+    public Embed createEmbed(final JsonObject data) {
         final String timestampRaw = data.getString("timestamp");
         
         final JsonObject footerRaw = data.getJsonObject("footer");
@@ -115,7 +114,7 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public static Role createRole(@Nonnull final JsonObject data) {
+    public Role createRole(@Nonnull final JsonObject data) {
         return Role.builder()
                 .id(data.getString("id"))
                 .name(data.getString("name"))
@@ -130,7 +129,7 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public static User createUser(@Nonnull final JsonObject data) {
+    public User createUser(@Nonnull final JsonObject data) {
         return UserImpl.builder()
                 .username(data.getString("username"))
                 .id(data.getString("id"))
@@ -142,7 +141,7 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public static Member createMember(@Nonnull final String id, @Nonnull final JsonObject data) {
+    public Member createMember(@Nonnull final String id, @Nonnull final JsonObject data) {
         final String joinedAtRaw = data.getString("joined_at");
         return Member.builder()
                 .id(id)
@@ -156,21 +155,21 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public static Member createMember(@Nonnull final User user, @Nonnull final JsonObject data) {
+    public Member createMember(@Nonnull final User user, @Nonnull final JsonObject data) {
         return createMember(user.id(), data);
     }
     
     @Nonnull
     @CheckReturnValue
-    public static Member createMember(@Nonnull final JsonObject data) {
+    public Member createMember(@Nonnull final JsonObject data) {
         return createMember(createUser(data.getJsonObject("user")), data);
     }
     
     @Nonnull
     @CheckReturnValue
-    public static Message createMessage(@Nonnull final JsonObject data) {
+    public Message createMessage(@Nonnull final JsonObject data) {
         final List<User> mentionedUsers = data.getJsonArray("mentions").stream().filter(e -> e instanceof JsonObject)
-                .map(e -> (JsonObject) e).map(EntityBuilder::createUser).collect(Collectors.toList());
+                .map(e -> (JsonObject) e).map(this::createUser).collect(Collectors.toList());
         
         final User author = createUser(data.getJsonObject("author"));
         
