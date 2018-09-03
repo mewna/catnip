@@ -1,11 +1,10 @@
-package com.mewna.catnip.rest.type;
+package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
 import com.mewna.catnip.entity.EntityBuilder;
 import com.mewna.catnip.entity.Role;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
-import com.mewna.catnip.rest.RestRequester;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
 

@@ -1,4 +1,4 @@
-package com.mewna.catnip.rest.type;
+package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
 import com.mewna.catnip.entity.EntityBuilder;

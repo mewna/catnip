@@ -1,4 +1,4 @@
-package com.mewna.catnip.rest.type;
+package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableList;
 import io.vertx.core.json.JsonArray;
