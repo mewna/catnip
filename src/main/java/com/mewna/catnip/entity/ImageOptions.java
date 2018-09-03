@@ -6,6 +6,10 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 
+/**
+ * @author natanbc
+ * @since 9/2/18.
+ */
 @Getter
 public class ImageOptions {
     private ImageType type = ImageType.PNG;
