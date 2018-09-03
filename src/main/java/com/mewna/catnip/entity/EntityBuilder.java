@@ -108,7 +108,13 @@ public final class EntityBuilder {
     }
 
     public static User createUser(final JsonObject data) {
-        return data.mapTo(User.class);
+        return User.builder()
+                .username(data.getString("username"))
+                .id(data.getString("id"))
+                .discriminator(data.getString("discriminator"))
+                .avatar(data.getString("avatar", null))
+                .bot(data.getBoolean("bot", false))
+                .build();
     }
 
     public static Member createMember(final String id, final JsonObject data) {
