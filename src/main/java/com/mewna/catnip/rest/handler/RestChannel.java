@@ -1,7 +1,6 @@
 package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
-import com.mewna.catnip.entity.EntityBuilder;
 import com.mewna.catnip.entity.Message;
 import com.mewna.catnip.entity.MessageBuilder;
 import com.mewna.catnip.internal.CatnipImpl;
@@ -48,7 +47,7 @@ public class RestChannel extends RestHandler {
         return catnip.requester().
                 queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json))
                 .thenApply(ResponsePayload::object)
-                .thenApply(EntityBuilder::createMessage);
+                .thenApply(getEntityBuilder()::createMessage);
     }
     
     @Nonnull
@@ -58,7 +57,7 @@ public class RestChannel extends RestHandler {
                 new OutboundRequest(Routes.GET_CHANNEL_MESSAGE.withMajorParam(channelId),
                         ImmutableMap.of("message.id", messageId), null))
                 .thenApply(ResponsePayload::object)
-                .thenApply(EntityBuilder::createMessage);
+                .thenApply(getEntityBuilder()::createMessage);
     }
     
     @Nonnull
@@ -84,7 +83,7 @@ public class RestChannel extends RestHandler {
                 .queue(new OutboundRequest(Routes.EDIT_MESSAGE.withMajorParam(channelId),
                         ImmutableMap.of("message.id", messageId), json))
                 .thenApply(ResponsePayload::object)
-                .thenApply(EntityBuilder::createMessage);
+                .thenApply(getEntityBuilder()::createMessage);
     }
     
     @Nonnull

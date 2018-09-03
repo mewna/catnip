@@ -1,8 +1,11 @@
 package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableList;
+import com.mewna.catnip.entity.EntityBuilder;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import lombok.AccessLevel;
+import lombok.Getter;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -16,9 +19,12 @@ import java.util.function.Function;
  * @since 9/3/18.
  */
 abstract class RestHandler {
+    @Getter(AccessLevel.PROTECTED)
+    private final EntityBuilder entityBuilder = new EntityBuilder();
+    
     @Nonnull
     @CheckReturnValue
-    static <T> Function<JsonArray, List<T>> mapObjectContents(@Nonnull final Function<JsonObject, T> builder) {
+    <T> Function<JsonArray, List<T>> mapObjectContents(@Nonnull final Function<JsonObject, T> builder) {
         return array -> {
             final Collection<T> result = new ArrayList<>(array.size());
             for(final Object object : array) {

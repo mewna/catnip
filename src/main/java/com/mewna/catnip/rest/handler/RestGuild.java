@@ -1,7 +1,6 @@
 package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
-import com.mewna.catnip.entity.EntityBuilder;
 import com.mewna.catnip.entity.Role;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
@@ -32,6 +31,6 @@ public class RestGuild extends RestHandler {
                 .queue(new OutboundRequest(Routes.GET_GUILD_ROLES.withMajorParam(guildId),
                         ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
-                .thenApply(mapObjectContents(EntityBuilder::createRole));
+                .thenApply(mapObjectContents(getEntityBuilder()::createRole));
     }
 }
