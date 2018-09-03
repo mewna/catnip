@@ -20,10 +20,8 @@ import java.util.concurrent.CompletableFuture;
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class RestChannel extends RestHandler {
-    private final CatnipImpl catnip;
-    
     public RestChannel(final CatnipImpl catnip) {
-        this.catnip = catnip;
+        super(catnip);
     }
     
     @Nonnull
@@ -44,7 +42,7 @@ public class RestChannel extends RestHandler {
             throw new IllegalArgumentException("Can't build a message with no content and no embeds!");
         }
         
-        return catnip.requester().
+        return getCatnip().requester().
                 queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createMessage);
@@ -53,7 +51,7 @@ public class RestChannel extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletableFuture<Message> getMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
-        return catnip.requester().queue(
+        return getCatnip().requester().queue(
                 new OutboundRequest(Routes.GET_CHANNEL_MESSAGE.withMajorParam(channelId),
                         ImmutableMap.of("message.id", messageId), null))
                 .thenApply(ResponsePayload::object)
@@ -79,7 +77,7 @@ public class RestChannel extends RestHandler {
         if(json.getValue("embeds", null) == null && json.getValue("content", null) == null) {
             throw new IllegalArgumentException("Can't build a message with no content and no embeds!");
         }
-        return catnip.requester()
+        return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.EDIT_MESSAGE.withMajorParam(channelId),
                         ImmutableMap.of("message.id", messageId), json))
                 .thenApply(ResponsePayload::object)
@@ -88,7 +86,7 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     public CompletableFuture<Void> deleteMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
-        return catnip.requester().queue(new OutboundRequest(Routes.DELETE_MESSAGE.withMajorParam(channelId),
+        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_MESSAGE.withMajorParam(channelId),
                 ImmutableMap.of("message.id", messageId), null)).thenApply(__ -> null);
     }
 }

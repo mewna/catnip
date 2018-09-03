@@ -17,16 +17,14 @@ import java.util.concurrent.CompletableFuture;
  */
 @SuppressWarnings("unused")
 public class RestUser extends RestHandler {
-    private final CatnipImpl catnip;
-    
     public RestUser(final CatnipImpl catnip) {
-        this.catnip = catnip;
+        super(catnip);
     }
     
     @Nonnull
     @CheckReturnValue
     public CompletableFuture<User> getUser(@Nonnull final String userId) {
-        return catnip.requester().queue(new OutboundRequest(Routes.GET_USER,
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_USER,
                 ImmutableMap.of("user.id", userId), null))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createUser);
