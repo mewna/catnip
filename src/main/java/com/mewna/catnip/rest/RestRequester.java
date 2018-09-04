@@ -19,8 +19,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Deque;
@@ -38,8 +36,6 @@ import java.util.concurrent.TimeUnit;
  * @since 8/31/18.
  */
 public class RestRequester {
-    private static final Logger logger = LoggerFactory.getLogger(RestRequester.class);
-    
     public static final String API_HOST = "https://discordapp.com";
     private static final int API_VERSION = 6;
     public static final String API_BASE = "/api/v" + API_VERSION;
@@ -67,7 +63,7 @@ public class RestRequester {
         if(res.succeeded()) {
             final HttpResponse<Buffer> result = res.result();
             if(result.statusCode() == 429) {
-                logger.error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
+                catnip.logAdapter().error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
                         r.route.baseRoute(),
                         result.getHeader("X-Ratelimit-Global"),
                         result.getHeader("X-Ratelimit-Limit"),
@@ -178,11 +174,11 @@ public class RestRequester {
             this.data = data;
         }
         
-        public void failed() {
+        void failed() {
             failedAttempts++;
         }
         
-        public int failedAttempts() {
+        int failedAttempts() {
             return failedAttempts;
         }
     }

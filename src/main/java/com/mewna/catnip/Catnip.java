@@ -1,10 +1,11 @@
 package com.mewna.catnip;
 
 import com.mewna.catnip.internal.CatnipImpl;
+import com.mewna.catnip.internal.logging.LogAdapter;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.session.SessionManager;
-import com.mewna.catnip.util.ratelimit.Ratelimiter;
+import com.mewna.catnip.internal.ratelimit.Ratelimiter;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 
@@ -63,4 +64,10 @@ public interface Catnip {
     
     @Nonnull
     Catnip rest(@Nonnull Rest rest);
+    
+    @Nonnull
+    LogAdapter logAdapter();
+    
+    @Nonnull
+    Catnip logAdapter(LogAdapter adapter);
 }
