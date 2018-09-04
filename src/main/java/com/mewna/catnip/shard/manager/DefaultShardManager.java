@@ -1,7 +1,6 @@
 package com.mewna.catnip.shard.manager;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
 import io.vertx.core.json.JsonObject;
@@ -21,9 +20,10 @@ public class DefaultShardManager implements ShardManager {
     private static final String POLL_QUEUE = "catnip:shard:manager:poll";
     
     private final int customShardCount;
-    private final WebClient client = WebClient.create(CatnipImpl._vertx());
     @Getter
     private final Deque<Integer> connectQueue = new ConcurrentLinkedDeque<>();
+    @Getter
+    private WebClient client;
     @Getter
     @Setter
     private Catnip catnip;
@@ -44,9 +44,10 @@ public class DefaultShardManager implements ShardManager {
     
     @Override
     public void start() {
+        client = WebClient.create(catnip.vertx());
         if(customShardCount == -1) {
             // Load shard count from API
-            client.getAbs(CatnipImpl.getShardCountUrl()).putHeader("Authorization", "Bot " + catnip.token()).ssl(true)
+            client.getAbs(Catnip.getShardCountUrl()).putHeader("Authorization", "Bot " + catnip.token()).ssl(true)
                     .send(ar -> {
                         if(ar.succeeded()) {
                             final JsonObject body = ar.result().bodyAsJsonObject();
