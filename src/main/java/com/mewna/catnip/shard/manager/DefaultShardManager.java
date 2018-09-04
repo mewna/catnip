@@ -8,8 +8,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import lombok.Getter;
 import lombok.Setter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnegative;
 import java.util.Deque;
@@ -21,8 +19,6 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  */
 public class DefaultShardManager implements ShardManager {
     private static final String POLL_QUEUE = "catnip:shard:manager:poll";
-    
-    private final Logger logger = LoggerFactory.getLogger(getClass());
     
     private final int customShardCount;
     private final WebClient client = WebClient.create(CatnipImpl._vertx());
@@ -70,14 +66,14 @@ public class DefaultShardManager implements ShardManager {
     }
     
     private void loadShards(final int count) {
-        logger.info("Booting {} shards", count);
+        catnip.logAdapter().info("Booting {} shards", count);
         // Deploy verticles
         for(int id = 0; id < count; id++) {
             //noinspection TypeMayBeWeakened
             final CatnipShard shard = new CatnipShard(catnip, id, count);
             catnip.vertx().deployVerticle(shard);
             connectQueue.addLast(id);
-            logger.info("Deployed shard {}", id);
+            catnip.logAdapter().info("Deployed shard {}", id);
         }
         // Start verticles
         catnip.eventBus().consumer(POLL_QUEUE, msg -> connect());
@@ -90,7 +86,7 @@ public class DefaultShardManager implements ShardManager {
             return;
         }
         final int nextId = connectQueue.removeFirst();
-        logger.info("Connecting shard {} (queue len {})", nextId, connectQueue.size());
+        catnip.logAdapter().info("Connecting shard {} (queue len {})", nextId, connectQueue.size());
         catnip.eventBus().<JsonObject>send(CatnipShard.getControlAddress(nextId), new JsonObject().put("mode", "START"),
                 reply -> {
                     if(reply.succeeded()) {
@@ -98,21 +94,21 @@ public class DefaultShardManager implements ShardManager {
                         switch(state) {
                             case READY:
                             case RESUMED: {
-                                logger.info("Connected shard {} with state {}", nextId, reply.result().body());
+                                catnip.logAdapter().info("Connected shard {} with state {}", nextId, reply.result().body());
                                 break;
                             }
                             case FAILED: {
-                                logger.warn("Failed connecting shard {}, re-queueing", nextId);
+                                catnip.logAdapter().warn("Failed connecting shard {}, re-queueing", nextId);
                                 addToConnectQueue(nextId);
                                 break;
                             }
                             default: {
-                                logger.error("Got unexpected / unknown shard connect state: {}", state);
+                                catnip.logAdapter().error("Got unexpected / unknown shard connect state: {}", state);
                                 break;
                             }
                         }
                     } else {
-                        logger.warn("Failed connecting shard {} entirely, re-queueing", nextId);
+                        catnip.logAdapter().warn("Failed connecting shard {} entirely, re-queueing", nextId);
                         addToConnectQueue(nextId);
                     }
                     catnip.eventBus().send(POLL_QUEUE, null);
@@ -124,7 +120,7 @@ public class DefaultShardManager implements ShardManager {
         if(!connectQueue.contains(shard)) {
             connectQueue.add(shard);
         } else {
-            logger.warn("Ignoring duplicate queue for shard {}", shard);
+            catnip.logAdapter().warn("Ignoring duplicate queue for shard {}", shard);
         }
     }
 }

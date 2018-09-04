@@ -11,8 +11,6 @@ import io.vertx.core.http.WebSocketFrame;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -35,8 +33,6 @@ public class CatnipShard extends AbstractVerticle {
     
     private final AtomicReference<WebSocket> socketRef = new AtomicReference<>(null);
     private final AtomicBoolean heartbeatAcked = new AtomicBoolean(true);
-    
-    private final Logger logger = LoggerFactory.getLogger(getClass());
     
     private final DispatchEmitter emitter;
     
@@ -155,7 +151,7 @@ public class CatnipShard extends AbstractVerticle {
                 },
                 failure -> {
                     socketRef.set(null);
-                    logger.error("Couldn't connect socket:", failure);
+                    catnip.logAdapter().error("Couldn't connect socket:", failure);
                     catnip.eventBus().<JsonObject>send("RAW_STATUS", new JsonObject().put("status", "down:fail-connect").put("shard", id));
                     // If we totally fail to connect socket, don't need to worry as much
                     catnip.vertx().setTimer(500L, __ -> msg.reply(new JsonObject().put("state", FAILED.name())));
@@ -211,13 +207,13 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void handleSocketClose(final Void __) {
-        logger.warn("Socket closing!");
+        catnip.logAdapter().warn("Socket closing!");
         try {
             catnip.eventBus().<JsonObject>send("RAW_STATUS", new JsonObject().put("status", "down:socket-close").put("shard", id));
             socketRef.set(null);
             catnip.shardManager().addToConnectQueue(id);
         } catch(final Exception e) {
-            logger.error("Failure closing socket:", e);
+            catnip.logAdapter().error("Failure closing socket:", e);
         }
     }
     
@@ -240,7 +236,7 @@ public class CatnipShard extends AbstractVerticle {
             if(socketRef.get() != null) {
                 if(!heartbeatAcked.get()) {
                     // Zombie
-                    logger.warn("Shard {} zombied, queueing reconnect!", id);
+                    catnip.logAdapter().warn("Shard {} zombied, queueing reconnect!", id);
                     catnip.eventBus().send(getControlAddress(id), new JsonObject().put("mode", "STOP"));
                     return;
                 }

@@ -1,4 +1,4 @@
-package com.mewna.catnip.util.ratelimit;
+package com.mewna.catnip.internal.ratelimit;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 

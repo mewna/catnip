@@ -2,6 +2,8 @@ package com.mewna.catnip.internal;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.Message;
+import com.mewna.catnip.internal.logging.DefaultLogAdapter;
+import com.mewna.catnip.internal.logging.LogAdapter;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
 import com.mewna.catnip.rest.Routes;
@@ -10,8 +12,8 @@ import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.session.DefaultSessionManager;
 import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.util.JsonPojoCodec;
-import com.mewna.catnip.util.ratelimit.MemoryRatelimiter;
-import com.mewna.catnip.util.ratelimit.Ratelimiter;
+import com.mewna.catnip.internal.ratelimit.MemoryRatelimiter;
+import com.mewna.catnip.internal.ratelimit.Ratelimiter;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import lombok.Getter;
@@ -29,6 +31,7 @@ import javax.annotation.Nonnull;
 public class CatnipImpl implements Catnip {
     @Getter
     private static final Vertx _vertx = Vertx.vertx();
+    // TODO: Allow changing the backend
     @Getter
     private final RestRequester requester = new RestRequester(this);
     @Getter
@@ -43,10 +46,12 @@ public class CatnipImpl implements Catnip {
     @Getter
     @Setter
     private Ratelimiter gatewayRatelimiter = new MemoryRatelimiter();
-    // TODO: Add to builder
     @Getter
     @Setter
     private Rest rest = new Rest(this);
+    @Getter
+    @Setter
+    private LogAdapter logAdapter = new DefaultLogAdapter();
     
     @Nonnull
     @CheckReturnValue
@@ -89,7 +94,6 @@ public class CatnipImpl implements Catnip {
         // not apply any transformations
         eventBus().registerDefaultCodec(Message.class, new JsonPojoCodec<>(Message.class));
         
-        shardManager.setCatnip(this);
         return this;
     }
     
@@ -98,6 +102,7 @@ public class CatnipImpl implements Catnip {
         if(token == null || token.isEmpty()) {
             throw new IllegalStateException("Provided token is empty!");
         }
+        shardManager.setCatnip(this);
         shardManager.start();
         return this;
     }
