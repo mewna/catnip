@@ -1,8 +1,9 @@
 package com.mewna.catnip.shard;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.internal.CatnipImpl;
+import com.mewna.catnip.util.BufferOutputStream;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
@@ -10,12 +11,19 @@ import io.vertx.core.http.WebSocket;
 import io.vertx.core.http.WebSocketFrame;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import java.io.IOException;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterOutputStream;
 
 import static com.mewna.catnip.shard.CatnipShard.ShardConnectState.*;
 
@@ -25,14 +33,17 @@ import static com.mewna.catnip.shard.CatnipShard.ShardConnectState.*;
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class CatnipShard extends AbstractVerticle {
+    public static final int ZLIB_SUFFIX = 0x0000FFFF;
+    
     private final Catnip catnip;
     private final int id;
     private final int limit;
     
     private final HttpClient client;
     
-    private final AtomicReference<WebSocket> socketRef = new AtomicReference<>(null);
+    private final AtomicReference<ShardState> stateRef = new AtomicReference<>(null);
     private final AtomicBoolean heartbeatAcked = new AtomicBoolean(true);
+    private final byte[] decompressBuffer = new byte[1024];
     
     private final DispatchEmitter emitter;
     
@@ -84,7 +95,7 @@ public class CatnipShard extends AbstractVerticle {
         catnip.eventBus().consumer(websocketMessageSendAddress(), this::handleSocketSend);
         catnip.eventBus().consumer(websocketMessageQueueAddress(), this::handleSocketQueue);
         catnip.eventBus().consumer(websocketMessagePollAddress(), msg -> {
-            if(socketRef.get() != null) {
+            if(stateRef.get() != null) {
                 while(!messageQueue.isEmpty()) {
                     // We only do up to 110 messages/min, to allow for room just in case
                     final ImmutablePair<Boolean, Long> check = catnip.gatewayRatelimiter()
@@ -132,8 +143,8 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void doStop() {
-        if(socketRef.get() != null) {
-            socketRef.get().close((short) 4000);
+        if(stateRef.get() != null) {
+            stateRef.get().socket().close((short) 4000);
         }
         messageQueue.clear();
         heartbeatAcked.set(true);
@@ -147,10 +158,10 @@ public class CatnipShard extends AbstractVerticle {
                     socket.frameHandler(frame -> handleSocketFrame(msg, frame))
                             .closeHandler(this::handleSocketClose)
                             .exceptionHandler(Throwable::printStackTrace);
-                    socketRef.set(socket);
+                    stateRef.set(new ShardState(socket));
                 },
                 failure -> {
-                    socketRef.set(null);
+                    stateRef.set(null);
                     catnip.logAdapter().error("Couldn't connect socket:", failure);
                     catnip.eventBus().<JsonObject>send("RAW_STATUS", new JsonObject().put("status", "down:fail-connect").put("shard", id));
                     // If we totally fail to connect socket, don't need to worry as much
@@ -158,59 +169,101 @@ public class CatnipShard extends AbstractVerticle {
                 });
     }
     
-    private void handleSocketFrame(final Message<JsonObject> msg, final WebSocketFrame frame) {
-        // TODO: Support zlib
-        try {
-            if(frame.isText()) {
-                final JsonObject event = new JsonObject(frame.textData());
-                final GatewayOp op = GatewayOp.byId(event.getInteger("op"));
-                // We pass `msg` for consistency (and for the off-chance it's
-                // needed), but REALLY you don't wanna do anything with it. It
-                // gets passed *entirely* so that we can reply to the shard
-                // manager directly.
-                switch(op) {
-                    case HELLO: {
-                        handleHello(msg, event);
-                        break;
-                    }
-                    case DISPATCH: {
-                        handleDispatch(msg, event);
-                        break;
-                    }
-                    case HEARTBEAT: {
-                        handleHeartbeat(msg, event);
-                        break;
-                    }
-                    case HEARTBEAT_ACK: {
-                        handleHeartbeatAck(msg, event);
-                        break;
-                    }
-                    case INVALID_SESSION: {
-                        handleInvalidSession(msg, event);
-                        break;
-                    }
-                    case RECONNECT: {
-                        handleReconnectRequest(msg, event);
-                        break;
-                    }
-                    default: {
-                        break;
+    private void handleBinaryData(final Message<JsonObject> msg, final Buffer binary) {
+        final ShardState state = stateRef.get();
+        if(state == null) {
+            return;
+        }
+        if(state.readBuffer() != null) {
+            state.readBuffer().appendBuffer(binary);
+        }
+        if(binary.getInt(binary.length() - 4) == ZLIB_SUFFIX) {
+            final Buffer decompressed = Buffer.buffer();
+            final Buffer dataToDecompress = state.readBuffer() == null ? binary : state.readBuffer();
+            try(final InflaterOutputStream ios = new InflaterOutputStream(new BufferOutputStream(decompressed), state.inflater())) {
+                synchronized(decompressBuffer) {
+                    int r = 0;
+                    while(r < dataToDecompress.length()) {
+                        //how many bytes we can read
+                        final int read = Math.min(decompressBuffer.length, dataToDecompress.length() - r);
+                        dataToDecompress.getBytes(r, r + read, decompressBuffer);
+                        //decompress
+                        ios.write(decompressBuffer, 0, read);
+                        r += read;
                     }
                 }
-                // Emit messages for subconsumers
-                catnip.eventBus().<JsonObject>send(websocketMessageRecvAddress(op), event);
-                catnip.eventBus().<JsonObject>send("RAW_WS", event);
+            } catch(final IOException e) {
+                catnip.logAdapter().error("Error decompressing payload", e);
+                return;
+            } finally {
+                state.readBuffer(null);
+            }
+            handleSocketData(msg, decompressed.toJsonObject());
+        } else {
+            if(state.readBuffer() == null) {
+                state.readBuffer(binary);
+            }
+        }
+    }
+    
+    private void handleSocketFrame(final Message<JsonObject> msg, final WebSocketFrame frame) {
+        try {
+            if(frame.isText()) {
+                handleSocketData(msg, new JsonObject(frame.textData()));
+            }
+            if(frame.isBinary()) {
+                handleBinaryData(msg, frame.binaryData());
             }
         } catch(final Exception e) {
             e.printStackTrace();
         }
     }
     
+    private void handleSocketData(final Message<JsonObject> msg, final JsonObject event) {
+        final GatewayOp op = GatewayOp.byId(event.getInteger("op"));
+        // We pass `msg` for consistency (and for the off-chance it's
+        // needed), but REALLY you don't wanna do anything with it. It
+        // gets passed *entirely* so that we can reply to the shard
+        // manager directly.
+        switch(op) {
+            case HELLO: {
+                handleHello(msg, event);
+                break;
+            }
+            case DISPATCH: {
+                handleDispatch(msg, event);
+                break;
+            }
+            case HEARTBEAT: {
+                handleHeartbeat(msg, event);
+                break;
+            }
+            case HEARTBEAT_ACK: {
+                handleHeartbeatAck(msg, event);
+                break;
+            }
+            case INVALID_SESSION: {
+                handleInvalidSession(msg, event);
+                break;
+            }
+            case RECONNECT: {
+                handleReconnectRequest(msg, event);
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+        // Emit messages for subconsumers
+        catnip.eventBus().<JsonObject>send(websocketMessageRecvAddress(op), event);
+        catnip.eventBus().<JsonObject>send("RAW_WS", event);
+    }
+    
     private void handleSocketClose(final Void __) {
         catnip.logAdapter().warn("Socket closing!");
         try {
             catnip.eventBus().<JsonObject>send("RAW_STATUS", new JsonObject().put("status", "down:socket-close").put("shard", id));
-            socketRef.set(null);
+            stateRef.set(null);
             catnip.shardManager().addToConnectQueue(id);
         } catch(final Exception e) {
             catnip.logAdapter().error("Failure closing socket:", e);
@@ -222,9 +275,9 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void handleSocketSend(final Message<JsonObject> msg) {
-        final WebSocket webSocket = socketRef.get();
-        if(webSocket != null) {
-            webSocket.writeTextMessage(msg.body().encode());
+        final ShardState shardState = stateRef.get();
+        if(shardState != null) {
+            shardState.socket().writeTextMessage(msg.body().encode());
         }
     }
     
@@ -233,7 +286,7 @@ public class CatnipShard extends AbstractVerticle {
         // TODO: Handle trace here
         
         catnip.vertx().setPeriodic(payload.getInteger("heartbeat_interval"), timerId -> {
-            if(socketRef.get() != null) {
+            if(stateRef.get() != null) {
                 if(!heartbeatAcked.get()) {
                     // Zombie
                     catnip.logAdapter().warn("Shard {} zombied, queueing reconnect!", id);
@@ -313,13 +366,13 @@ public class CatnipShard extends AbstractVerticle {
     private void handleInvalidSession(final Message<JsonObject> msg, final JsonObject event) {
         if(event.getBoolean("d")) {
             // Can resume
-            if(socketRef.get() != null) {
-                socketRef.get().close();
+            if(stateRef.get() != null) {
+                stateRef.get().socket().close();
             }
         } else {
             // Can't resume, clear old data
-            if(socketRef.get() != null) {
-                socketRef.get().close();
+            if(stateRef.get() != null) {
+                stateRef.get().socket().close();
                 catnip.sessionManager().clearSession(id);
                 catnip.sessionManager().clearSeqnum(id);
             }
@@ -330,8 +383,8 @@ public class CatnipShard extends AbstractVerticle {
     
     private void handleReconnectRequest(final Message<JsonObject> msg, final JsonObject event) {
         // Just immediately disconnect
-        if(socketRef.get() != null) {
-            socketRef.get().close();
+        if(stateRef.get() != null) {
+            stateRef.get().socket().close();
         }
     }
     
@@ -392,5 +445,21 @@ public class CatnipShard extends AbstractVerticle {
         FAILED,
         READY,
         RESUMED,
+    }
+    
+    @AllArgsConstructor
+    @Accessors(fluent = true)
+    private static final class ShardState {
+        @Getter
+        private final WebSocket socket;
+        @Getter
+        private final Inflater inflater;
+        @Getter
+        @Setter
+        private Buffer readBuffer;
+        
+        ShardState(final WebSocket socket) {
+            this(socket, new Inflater(), null);
+        }
     }
 }
