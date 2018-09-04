@@ -1,4 +1,4 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.impl;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;

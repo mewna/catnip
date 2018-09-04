@@ -121,7 +121,7 @@ public class CatnipShard extends AbstractVerticle {
                 break;
             }
             default: {
-                // TODO: Logging
+                catnip.logAdapter().warn("Shard {} Got unknown control message: {}", id, body.encodePrettily());
                 break;
             }
         }
