@@ -8,6 +8,7 @@ import java.util.Set;
  * @author amy
  * @since 9/4/18.
  */
+@SuppressWarnings("unused")
 public interface Member {
     @Nonnull
     String id();

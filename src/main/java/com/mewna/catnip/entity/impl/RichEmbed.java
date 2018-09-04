@@ -18,7 +18,7 @@ import java.util.List;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Embed {
+public class RichEmbed {
     private String title;
     private EmbedType type;
     private String description;
