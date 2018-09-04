@@ -50,4 +50,4 @@ catnip.startShards();
 
 - Create entity classes for guilds, channels, ...
 - Finish handling all `DISPATCH` events (see `DispatchEmitter`)
-- Full REST API coverage (see `Rest`)
+- Full REST API coverage (see `Rest`, #3)
