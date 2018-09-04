@@ -1,6 +1,5 @@
 package com.mewna.catnip.entity;
 
-import com.mewna.catnip.entity.impl.MessageImpl;
 import lombok.Getter;
 
 import javax.annotation.CheckReturnValue;

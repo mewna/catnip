@@ -31,7 +31,7 @@ public class MessageImpl implements Message {
     private List<String> mentionedRoles;
     private Member member;
     private String id;
-    private List<Embed> embeds;
+    private List<RichEmbed> embeds;
     private OffsetDateTime editedTimestamp;
     private String content;
     private String channelId;

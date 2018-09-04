@@ -10,6 +10,7 @@ import io.vertx.core.json.JsonObject;
  */
 public class JsonPojoCodec<T> implements MessageCodec<T, T> {
     private final Class<T> type;
+    private int i = 0;
     
     @SuppressWarnings("unchecked")
     public JsonPojoCodec(final Class<T> type) {
@@ -36,7 +37,10 @@ public class JsonPojoCodec<T> implements MessageCodec<T, T> {
     
     @Override
     public String name() {
-        return "JsonPojoCodec";
+        // This is kinda dumb, but ensures no dupe codec names
+        final String result = "JsonPojoCodec-" + i;
+        i++;
+        return result;
     }
     
     @Override

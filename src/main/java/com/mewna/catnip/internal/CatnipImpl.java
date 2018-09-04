@@ -1,7 +1,10 @@
 package com.mewna.catnip.internal;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.impl.MemberImpl;
 import com.mewna.catnip.entity.impl.MessageImpl;
+import com.mewna.catnip.entity.impl.RoleImpl;
+import com.mewna.catnip.entity.impl.UserImpl;
 import com.mewna.catnip.internal.logging.DefaultLogAdapter;
 import com.mewna.catnip.internal.logging.LogAdapter;
 import com.mewna.catnip.rest.Rest;
@@ -93,6 +96,9 @@ public class CatnipImpl implements Catnip {
         // This is mainly important for distributed catnip; locally it'll just
         // not apply any transformations
         eventBus().registerDefaultCodec(MessageImpl.class, new JsonPojoCodec<>(MessageImpl.class));
+        eventBus().registerDefaultCodec(UserImpl.class, new JsonPojoCodec<>(UserImpl.class));
+        eventBus().registerDefaultCodec(RoleImpl.class, new JsonPojoCodec<>(RoleImpl.class));
+        eventBus().registerDefaultCodec(MemberImpl.class, new JsonPojoCodec<>(MemberImpl.class));
         
         return this;
     }

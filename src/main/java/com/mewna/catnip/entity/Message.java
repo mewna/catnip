@@ -1,6 +1,6 @@
 package com.mewna.catnip.entity;
 
-import com.mewna.catnip.entity.impl.Embed;
+import com.mewna.catnip.entity.impl.RichEmbed;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
@@ -39,7 +39,7 @@ public interface Message {
     String id();
     
     @Nonnull
-    List<Embed> embeds();
+    List<RichEmbed> embeds();
     
     @Nullable
     OffsetDateTime editedTimestamp();
