@@ -1,4 +1,7 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.builder;
+
+import com.mewna.catnip.entity.impl.Embed;
+import com.mewna.catnip.entity.impl.MessageImpl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -19,7 +22,7 @@ public class MessageBuilder {
     public MessageBuilder() {
     }
     
-    public MessageBuilder(final Message from) {
+    public MessageBuilder(final MessageImpl from) {
         content = from.content();
         embed = !from.embeds().isEmpty() ? from.embeds().get(0) : null;
     }
@@ -40,8 +43,8 @@ public class MessageBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Message build() {
-        final Message m = new Message();
+    public MessageImpl build() {
+        final MessageImpl m = new MessageImpl();
         m.content(content);
         if(embed != null) {
             m.embeds(Collections.singletonList(embed));

@@ -1,6 +1,6 @@
 package com.mewna.catnip.permission;
 
-import com.mewna.catnip.entity.Permission;
+import com.mewna.catnip.entity.impl.Permission;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static com.mewna.catnip.entity.Permission.*;
+import static com.mewna.catnip.entity.impl.Permission.*;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

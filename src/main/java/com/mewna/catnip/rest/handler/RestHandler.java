@@ -1,13 +1,12 @@
 package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableList;
-import com.mewna.catnip.entity.EntityBuilder;
+import com.mewna.catnip.entity.builder.EntityBuilder;
 import com.mewna.catnip.internal.CatnipImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

@@ -7,7 +7,6 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.impl.ConcurrentHashSet;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpRequest;
@@ -29,7 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 
-import static io.vertx.core.http.HttpMethod.*;
+import static io.vertx.core.http.HttpMethod.DELETE;
+import static io.vertx.core.http.HttpMethod.GET;
 
 /**
  * TODO: Refactor this out into interface and implementation to allow plugging in other impls
@@ -138,7 +138,6 @@ public class RestRequester {
             route = route.compile(stringStringEntry.getKey(), stringStringEntry.getValue());
         }
         
-        // TODO: Delete messages has its own ratelimit
         final Bucket bucket = getBucket(bucketRoute.baseRoute());
         final Bucket global = getBucket("GLOBAL");
         
@@ -146,7 +145,6 @@ public class RestRequester {
             global.reset();
         }
         
-        // TODO: Handle global ratelimit
         if(global.getRemaining() > 0) {
             // Can request
             if(bucket.getRemaining() == 0 && bucket.getReset() < System.currentTimeMillis()) {
@@ -156,8 +154,8 @@ public class RestRequester {
             // ratelimit, which isn't accurately reflected in the responses
             // from the API. Instead, we just try anyway and re-queue if we get
             // a 429.
-            // We hit *roughly* one 429 / reaction if we're adding many
-            // reactions. I *think* this is ok?
+            // Assuming you're messing with N reactions, where N > 1, you'll
+            // run into ~(N-1) 429s. I *think* this is okay?
             final boolean hasMemeReactionRatelimits = route.method() != GET
                     && route.baseRoute().contains("/reactions/");
             if(bucket.getRemaining() > 0 || hasMemeReactionRatelimits) {

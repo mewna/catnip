@@ -1,10 +1,14 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.builder;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.Embed.*;
-import com.mewna.catnip.entity.Message.MessageType;
+import com.mewna.catnip.entity.Member;
+import com.mewna.catnip.entity.MessageType;
+import com.mewna.catnip.entity.Role;
+import com.mewna.catnip.entity.User;
+import com.mewna.catnip.entity.impl.*;
+import com.mewna.catnip.entity.impl.Embed.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -114,7 +118,7 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public Role createRole(@Nonnull final JsonObject data) {
-        return Role.builder()
+        return RoleImpl.builder()
                 .id(data.getString("id"))
                 .name(data.getString("name"))
                 .color(data.getInteger("color"))
@@ -129,7 +133,7 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public User createUser(@Nonnull final JsonObject data) {
-        return User.builder()
+        return UserImpl.builder()
                 .username(data.getString("username"))
                 .id(data.getString("id"))
                 .discriminator(data.getString("discriminator"))
@@ -142,13 +146,13 @@ public final class EntityBuilder {
     @CheckReturnValue
     public Member createMember(@Nonnull final String id, @Nonnull final JsonObject data) {
         final String joinedAtRaw = data.getString("joined_at");
-        return Member.builder()
+        return MemberImpl.builder()
                 .id(id)
                 .deaf(data.getBoolean("deaf"))
                 .mute(data.getBoolean("mute"))
                 .nick(data.getString("nick"))
                 .joinedAt(joinedAtRaw == null ? null : OffsetDateTime.parse(joinedAtRaw))
-                .roles(ImmutableSet.of()) //TODO: fetch roles from cache? or at least give the ids
+                .roles(ImmutableSet.of()) // TODO: fetch roles from cache? or at least give the ids
                 .build();
     }
     
@@ -166,7 +170,7 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Message createMessage(@Nonnull final JsonObject data) {
+    public MessageImpl createMessage(@Nonnull final JsonObject data) {
         final List<User> mentionedUsers = data.getJsonArray("mentions").stream().filter(e -> e instanceof JsonObject)
                 .map(e -> (JsonObject) e).map(this::createUser).collect(Collectors.toList());
         
@@ -189,7 +193,7 @@ public final class EntityBuilder {
             embeds.add(createEmbed((JsonObject) object));
         }
         
-        return Message.builder()
+        return MessageImpl.builder()
                 .type(MessageType.byId(data.getInteger("type")))
                 .tts(data.getBoolean("tts"))
                 .timestamp(timestampRaw == null ? null : OffsetDateTime.parse(timestampRaw))
