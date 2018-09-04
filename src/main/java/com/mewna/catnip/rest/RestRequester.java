@@ -1,7 +1,6 @@
 package com.mewna.catnip.rest;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.Routes.Route;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -177,7 +176,7 @@ public class RestRequester {
                 final long wait = bucket.getReset() - System.currentTimeMillis() + 500L;
                 catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
                         bucketRoute.baseRoute(), route.baseRoute(), wait);
-                CatnipImpl._vertx().setTimer(wait, __ -> {
+                catnip.vertx().setTimer(wait, __ -> {
                     bucket.reset();
                     bucket.retry(r);
                 });
@@ -188,7 +187,7 @@ public class RestRequester {
             final long wait = global.getReset() - System.currentTimeMillis() + 500L;
             catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
                     bucketRoute.baseRoute(), route.baseRoute(), wait);
-            CatnipImpl._vertx().setTimer(wait, __ -> {
+            catnip.vertx().setTimer(wait, __ -> {
                 global.reset();
                 bucket.retry(r);
             });

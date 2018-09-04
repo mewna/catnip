@@ -142,7 +142,7 @@ public class CatnipShard extends AbstractVerticle {
     // Payload handling
     
     private void connectSocket(final Message<JsonObject> msg) {
-        client.websocketAbs(CatnipImpl.getGatewayUrl(), null, null, null,
+        client.websocketAbs(Catnip.getGatewayUrl(), null, null, null,
                 socket -> {
                     socket.frameHandler(frame -> handleSocketFrame(msg, frame))
                             .closeHandler(this::handleSocketClose)
