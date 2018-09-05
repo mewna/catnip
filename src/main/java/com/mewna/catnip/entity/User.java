@@ -28,7 +28,9 @@ public interface User {
     
     /**
      * The URL for the user's set avatar. Can be null if the user has not set an avatar.
-     * <br>See {@link User#defaultAvatarUrl()} and {@link User#effectiveAvatarUrl()}.
+     *
+     * @see User#defaultAvatarUrl() Getting the user's default fallback avatar
+     * @see User#effectiveAvatarUrl() Getting the user's effective avatar
      *
      * @param options {@link ImageOptions Image Options}.
      *
@@ -39,7 +41,9 @@ public interface User {
     
     /**
      * The URL for the user's set avatar. Can be null if the user has not set an avatar.
-     * <br>See {@link User#defaultAvatarUrl()} and {@link User#effectiveAvatarUrl()}.
+     *
+     * @see User#defaultAvatarUrl() Getting the user's default fallback avatar
+     * @see User#effectiveAvatarUrl() Getting the user's effective avatar
      *
      * @return String containing the URL to their avatar. Can be null.
      */
@@ -95,7 +99,8 @@ public interface User {
     /**
      * User's avatar hash.
      * <br><b>This does not return their avatar URL nor image directly.</b>
-     * See {@link User#avatarUrl()} for a more useful method.
+     *
+     * @see User#avatarUrl() Getting the user's avatar
      *
      * @return User's hashed avatar string. Can be null.
      */
