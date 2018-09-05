@@ -17,7 +17,7 @@ public enum ImageType {
     }
     
     ImageType() {
-        this(null);
+        this("png");
     }
     
     @Nonnull
