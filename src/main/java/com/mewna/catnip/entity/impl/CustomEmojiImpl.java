@@ -1,16 +1,17 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.Role;
+import com.mewna.catnip.entity.Emoji.CustomEmoji;
+import com.mewna.catnip.entity.User;
 import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
-import java.util.Set;
+import java.util.List;
 
 /**
- * @author Julia Rogers
- * @since 9/2/18
+ * @author natanbc
+ * @since 9/5/18.
  */
 @Getter
 @Setter
@@ -18,17 +19,16 @@ import java.util.Set;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoleImpl implements Role, RequiresCatnip {
+public class CustomEmojiImpl implements CustomEmoji, RequiresCatnip {
     private transient Catnip catnip;
     
     private String id;
     private String name;
-    private int color;
-    private boolean hoist;
-    private int position;
-    private Set<Permission> permissions;
+    private List<String> roles;
+    private User user;
+    private boolean requiresColons;
     private boolean managed;
-    private boolean mentionable;
+    private boolean animated;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
@@ -42,11 +42,11 @@ public class RoleImpl implements Role, RequiresCatnip {
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Role && ((Role)obj).id().equals(id);
+        return obj instanceof CustomEmoji && ((CustomEmoji)obj).id().equals(id);
     }
     
     @Override
     public String toString() {
-        return String.format("Role (%s)", name);
+        return String.format("CustomEmoji (<%s:%s:%s>)", animated ? "a" : "", name, id);
     }
 }

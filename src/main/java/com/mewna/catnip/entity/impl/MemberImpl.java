@@ -5,6 +5,7 @@ import com.mewna.catnip.entity.Member;
 import lombok.*;
 import lombok.experimental.Accessors;
 
+import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
 import java.util.Set;
 
@@ -29,7 +30,22 @@ public class MemberImpl implements Member, RequiresCatnip {
     private boolean mute;
     
     @Override
-    public void catnip(final Catnip catnip) {
+    public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
+    }
+    
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+    
+    @Override
+    public boolean equals(final Object obj) {
+        return obj instanceof Member && ((Member)obj).id().equals(id);
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("Member (%s)", nick);
     }
 }
