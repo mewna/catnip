@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.Embed.*;
 import com.mewna.catnip.entity.Message.MessageType;
-import com.mewna.catnip.entity.impl.UserImpl;
+import com.mewna.catnip.internal.UserImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
