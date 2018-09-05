@@ -1,7 +1,7 @@
 package com.mewna.catnip.shard;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.builder.EntityBuilder;
+import com.mewna.catnip.entity.impl.EntityBuilder;
 import io.vertx.core.json.JsonObject;
 
 import static com.mewna.catnip.shard.DiscordEvent.*;

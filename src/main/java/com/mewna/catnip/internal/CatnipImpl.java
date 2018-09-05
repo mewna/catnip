@@ -73,10 +73,10 @@ public class CatnipImpl implements Catnip {
         // *sigh*
         // This is mainly important for distributed catnip; locally it'll just
         // not apply any transformations
-        eventBus().registerDefaultCodec(MessageImpl.class, new JsonPojoCodec<>(MessageImpl.class));
-        eventBus().registerDefaultCodec(UserImpl.class, new JsonPojoCodec<>(UserImpl.class));
-        eventBus().registerDefaultCodec(RoleImpl.class, new JsonPojoCodec<>(RoleImpl.class));
-        eventBus().registerDefaultCodec(MemberImpl.class, new JsonPojoCodec<>(MemberImpl.class));
+        eventBus().registerDefaultCodec(MessageImpl.class, new JsonPojoCodec<>(this, MessageImpl.class));
+        eventBus().registerDefaultCodec(UserImpl.class, new JsonPojoCodec<>(this, UserImpl.class));
+        eventBus().registerDefaultCodec(RoleImpl.class, new JsonPojoCodec<>(this, RoleImpl.class));
+        eventBus().registerDefaultCodec(MemberImpl.class, new JsonPojoCodec<>(this, MemberImpl.class));
         
         return this;
     }

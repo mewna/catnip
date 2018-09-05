@@ -1,5 +1,6 @@
 package com.mewna.catnip.entity.impl;
 
+import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.Member;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -17,11 +18,18 @@ import java.util.Set;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberImpl implements Member {
+public class MemberImpl implements Member, RequiresCatnip {
+    private transient Catnip catnip;
+    
     private String id;
     private String nick;
     private Set<String> roles;
-    private boolean mute;
-    private boolean deaf;
     private OffsetDateTime joinedAt;
+    private boolean deaf;
+    private boolean mute;
+    
+    @Override
+    public void catnip(final Catnip catnip) {
+        this.catnip = catnip;
+    }
 }

@@ -1,9 +1,9 @@
 package com.mewna.catnip.entity.impl;
 
+import com.mewna.catnip.entity.Embed;
 import lombok.*;
 import lombok.experimental.Accessors;
 
-import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -18,123 +18,105 @@ import java.util.List;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class RichEmbed {
+public class EmbedImpl implements Embed {
     private String title;
     private EmbedType type;
     private String description;
     private String url;
     private OffsetDateTime timestamp;
     private Integer color;
-    private Footer footer;
-    private Image image;
-    private Thumbnail thumbnail;
-    private Video video;
-    private Provider provider;
-    private Author author;
-    private List<Field> fields;
-
-    public enum EmbedType {
-        IMAGE("image"),
-        VIDEO("video"),
-        LINK("link"),
-        RICH("rich"),
-        UNKNOWN("");
-
-        @Getter
-        private final String key;
-
-        EmbedType(final String key) {
-            this.key = key;
-        }
-
-        @Nonnull
-        @CheckReturnValue
-        public static EmbedType byKey(@Nonnull final String key) {
-            for(final EmbedType type : values()) {
-                if(type.key.equals(key)) {
-                    return type;
-                }
-            }
-            return UNKNOWN;
-        }
+    private Embed.Footer footer;
+    private Embed.Image image;
+    private Embed.Thumbnail thumbnail;
+    private Embed.Video video;
+    private Embed.Provider provider;
+    private Embed.Author author;
+    private List<? extends Embed.Field> fields;
+    
+    @Override
+    @Nonnull
+    @SuppressWarnings("unchecked")
+    public List<Embed.Field> fields() {
+        return (List<Embed.Field>)fields;
     }
-
+    
     @Getter
     @Setter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Author {
+    public static class Author implements Embed.Author {
         private String name;
         private String url;
         private String iconUrl;
         private String proxyIconUrl;
     }
-
+    
     @Getter
     @Setter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Field {
+    public static class Field implements Embed.Field {
         private String name;
         private String value;
         private boolean inline;
     }
-
+    
     @Getter
     @Setter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Footer {
+    public static class Footer implements Embed.Footer {
         private String text;
         private String iconUrl;
         private String proxyIconUrl;
     }
-
+    
     @Getter
     @Setter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Image {
+    public static class Image implements Embed.Image {
         private String url;
         private String proxyUrl;
         private int height;
         private int width;
     }
-
+    
     @Getter
     @Setter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Provider {
+    public static class Provider implements Embed.Provider {
         private String name;
         private String url;
     }
-
+    
     @Getter
     @Setter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Thumbnail {
+    public static class Thumbnail implements Embed.Thumbnail {
         private String url;
         private String proxyUrl;
         private int height;
         private int width;
     }
-
+    
     @Getter
     @Setter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Video {
+    public static class Video implements Embed.Video {
         private String url;
         private int height;
         private int width;
     }
 }
+

@@ -1,5 +1,6 @@
 package com.mewna.catnip.entity.impl;
 
+import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.User;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.ImageType;
@@ -23,7 +24,9 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuppressWarnings({"WeakerAccess", "unused"})
-public class UserImpl implements User {
+public class UserImpl implements User, RequiresCatnip {
+    private transient Catnip catnip;
+    
     private String username;
     private String id;
     private String discriminator;
@@ -75,6 +78,11 @@ public class UserImpl implements User {
     @CheckReturnValue
     public String effectiveAvatarUrl() {
         return effectiveAvatarUrl(defaultOptions());
+    }
+    
+    @Override
+    public void catnip(final Catnip catnip) {
+        this.catnip = catnip;
     }
     
     private ImageOptions defaultOptions() {
