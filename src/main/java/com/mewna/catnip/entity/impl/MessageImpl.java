@@ -68,7 +68,9 @@ public class MessageImpl implements Message, RequiresCatnip {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Attachment implements Message.Attachment {
+    public static class Attachment implements Message.Attachment, RequiresCatnip {
+        private transient Catnip catnip;
+        
         private String id;
         private String fileName;
         private int size;
@@ -77,6 +79,11 @@ public class MessageImpl implements Message, RequiresCatnip {
         private int height;
         private int width;
     
+        @Override
+        public void catnip(@Nonnull final Catnip catnip) {
+            this.catnip = catnip;
+        }
+        
         @Override
         public int hashCode() {
             return id.hashCode();
