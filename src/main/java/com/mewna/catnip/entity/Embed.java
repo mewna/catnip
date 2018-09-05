@@ -14,7 +14,6 @@ import java.util.List;
  * @since 9/2/18.
  */
 public interface Embed {
-    @Nullable
     @CheckReturnValue
     String title();
     
@@ -22,43 +21,33 @@ public interface Embed {
     @CheckReturnValue
     EmbedType type();
     
-    @Nullable
     @CheckReturnValue
     String description();
     
-    @Nullable
     @CheckReturnValue
     String url();
     
-    @Nullable
     @CheckReturnValue
     OffsetDateTime timestamp();
     
-    @Nullable
     @CheckReturnValue
     Integer color();
     
-    @Nullable
     @CheckReturnValue
     Footer footer();
     
-    @Nullable
     @CheckReturnValue
     Image image();
     
-    @Nullable
     @CheckReturnValue
     Thumbnail thumbnail();
     
-    @Nullable
     @CheckReturnValue
     Video video();
     
-    @Nullable
     @CheckReturnValue
     Provider provider();
     
-    @Nullable
     @CheckReturnValue
     Author author();
     
@@ -97,15 +86,12 @@ public interface Embed {
         @CheckReturnValue
         String name();
         
-        @Nullable
         @CheckReturnValue
         String url();
         
-        @Nullable
         @CheckReturnValue
         String iconUrl();
         
-        @Nullable
         @CheckReturnValue
         String proxyIconUrl();
     }
@@ -128,11 +114,9 @@ public interface Embed {
         @CheckReturnValue
         String text();
         
-        @Nullable
         @CheckReturnValue
         String iconUrl();
         
-        @Nullable
         @CheckReturnValue
         String proxyIconUrl();
     }
@@ -142,7 +126,6 @@ public interface Embed {
         @CheckReturnValue
         String url();
     
-        @Nullable
         @CheckReturnValue
         String proxyUrl();
         
@@ -154,7 +137,6 @@ public interface Embed {
     }
 
     interface Provider {
-        @Nullable
         @CheckReturnValue
         String name();
     
@@ -168,7 +150,6 @@ public interface Embed {
         @CheckReturnValue
         String url();
     
-        @Nullable
         @CheckReturnValue
         String proxyUrl();
         
