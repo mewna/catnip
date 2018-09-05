@@ -77,7 +77,7 @@ public interface Catnip {
     @CheckReturnValue
     static String getGatewayUrl() {
         // TODO: Allow injecting other gateway URLs for eg. mocks?
-        return "wss://gateway.discord.gg/?v=6&encoding=json";
+        return "wss://gateway.discord.gg/?v=6&encoding=json&compress=zlib-stream";
     }
     
     @Nonnull
