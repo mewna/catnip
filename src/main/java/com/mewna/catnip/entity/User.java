@@ -2,6 +2,9 @@ package com.mewna.catnip.entity;
 
 import com.mewna.catnip.entity.util.ImageOptions;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * @author amy
  * @since 9/4/18
@@ -20,6 +23,7 @@ public interface User {
      *
      * @return String containing the URL to the default avatar. Never null.
      */
+    @Nonnull
     String defaultAvatarUrl();
     
     /**
@@ -30,6 +34,7 @@ public interface User {
      *
      * @return String containing the URL to their avatar, options considered. Can be null.
      */
+    @Nullable
     String avatarUrl(final ImageOptions options);
     
     /**
@@ -38,6 +43,7 @@ public interface User {
      *
      * @return String containing the URL to their avatar. Can be null.
      */
+    @Nullable
     String avatarUrl();
     
     /**
@@ -49,6 +55,7 @@ public interface User {
      *
      * @return String containing a URL to their effective avatar, options considered. Never null.
      */
+    @Nonnull
     String effectiveAvatarUrl(final ImageOptions options);
     
     /**
@@ -58,6 +65,7 @@ public interface User {
      *
      * @return String containing a URL to their effective avatar. Never null.
      */
+    @Nonnull
     String effectiveAvatarUrl();
     
     /**
@@ -65,6 +73,7 @@ public interface User {
      *
      * @return User's name. Never null.
      */
+    @Nonnull
     String username();
     
     /**
@@ -72,6 +81,7 @@ public interface User {
      *
      * @return User's ID. never null.
      */
+    @Nonnull
     String id();
     
     /**
@@ -79,6 +89,7 @@ public interface User {
      *
      * @return 4 digit discriminator as a string. Never null.
      */
+    @Nonnull
     String discriminator();
     
     /**
@@ -88,6 +99,7 @@ public interface User {
      *
      * @return User's hashed avatar string. Can be null.
      */
+    @Nullable
     String avatar();
     
     /**
