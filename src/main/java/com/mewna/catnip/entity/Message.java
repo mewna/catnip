@@ -1,7 +1,7 @@
 package com.mewna.catnip.entity;
 
-import io.vertx.core.json.JsonObject;
-
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
@@ -143,12 +143,20 @@ public interface Message extends Snowflake {
     
     /**
      * List of files sent with the message.
-     * //TODO: Make an Attachment object
      *
      * @return List of files sent with the message. Never null.
      */
     @Nonnull
-    List<JsonObject> attachments();
+    List<Attachment> attachments();
+    
+    /**
+     * List of reactions added to the message.
+     * <br>This list will <b>not</b> be updated.
+     *
+     * @return List of reactions added to the message. Never null.
+     */
+    @Nonnull
+    List<Reaction> reactions();
     
     /**
      * The snowflake ID of the guild this message was sent in.
@@ -157,4 +165,57 @@ public interface Message extends Snowflake {
      */
     @Nullable
     String guildId();
+    
+    /**
+     * The snowflake ID of the webhook this message was sent by.
+     *
+     * @return String representing the webhook ID. Null if not sent by a webhook.
+     */
+    @Nullable
+    String webhookId();
+    
+    interface Attachment {
+        @Nonnull
+        @CheckReturnValue
+        String id();
+    
+        @Nonnull
+        @CheckReturnValue
+        String fileName();
+        
+        @CheckReturnValue
+        int size();
+    
+        @Nonnull
+        @CheckReturnValue
+        String url();
+    
+        @Nonnull
+        @CheckReturnValue
+        String proxyUrl();
+        
+        @CheckReturnValue
+        int height();
+        
+        @CheckReturnValue
+        int width();
+        
+        @CheckReturnValue
+        default boolean image() {
+            return height() > 0 && width() > 0;
+        }
+    }
+    
+    interface Reaction {
+        @Nonnegative
+        @CheckReturnValue
+        int count();
+        
+        @CheckReturnValue
+        boolean self();
+        
+        @Nonnull
+        @CheckReturnValue
+        Emoji emoji();
+    }
 }
