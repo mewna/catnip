@@ -1,7 +1,6 @@
 package com.mewna.catnip.shard;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.internal.CatnipImpl;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpClient;
