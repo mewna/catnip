@@ -1,4 +1,4 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.impl;
 
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -18,7 +18,7 @@ import java.util.List;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Embed {
+public class RichEmbed {
     private String title;
     private EmbedType type;
     private String description;

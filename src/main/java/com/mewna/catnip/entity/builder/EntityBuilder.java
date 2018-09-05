@@ -1,11 +1,13 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.builder;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.Embed.*;
+import com.mewna.catnip.entity.*;
 import com.mewna.catnip.entity.Message.MessageType;
-import com.mewna.catnip.internal.UserImpl;
+import com.mewna.catnip.entity.impl.Permission;
+import com.mewna.catnip.entity.impl.RichEmbed.*;
+import com.mewna.catnip.entity.impl.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public final class EntityBuilder {
+    @SuppressWarnings("FieldCanBeLocal")
     private final Catnip catnip;
     
     public EntityBuilder(final Catnip catnip) {
@@ -31,7 +34,69 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Embed createEmbed(final JsonObject data) {
+    private JsonObject embedFooterToJson(final Footer footer) {
+        return new JsonObject().put("icon_url", footer.iconUrl()).put("text", footer.text());
+    }
+    @Nonnull
+    @CheckReturnValue
+    private JsonObject embedImageToJson(final Image image) {
+        return new JsonObject().put("url", image.url());
+    }
+    @Nonnull
+    @CheckReturnValue
+    private JsonObject embedThumbnailToJson(final Thumbnail thumbnail) {
+        return new JsonObject().put("url", thumbnail.url());
+    }
+    @Nonnull
+    @CheckReturnValue
+    private JsonObject embedAuthorToJson(final Author author) {
+        return new JsonObject().put("name", author.name()).put("url", author.url()).put("icon_url", author.iconUrl());
+    }
+    @Nonnull
+    @CheckReturnValue
+    private JsonObject embedFieldToJson(final Field field) {
+        return new JsonObject().put("name", field.name()).put("value", field.value()).put("inline", field.inline());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public JsonObject embedToJson(final RichEmbed embed) {
+        final JsonObject o = new JsonObject();
+        
+        if(embed.title() != null) {
+            o.put("title", embed.title());
+        }
+        if(embed.description() != null) {
+            o.put("description", embed.description());
+        }
+        if(embed.url() != null) {
+            o.put("url", embed.url());
+        }
+        if(embed.color() != null) {
+            o.put("color", embed.color());
+        }
+        if(embed.footer() != null) {
+            o.put("footer", embedFooterToJson(embed.footer()));
+        }
+        if(embed.image() != null) {
+            o.put("image", embedImageToJson(embed.image()));
+        }
+        if(embed.thumbnail() != null) {
+            o.put("thumbnail", embedThumbnailToJson(embed.thumbnail()));
+        }
+        if(embed.author() != null) {
+            o.put("author", embedAuthorToJson(embed.author()));
+        }
+        if(embed.fields() != null) {
+            o.put("fields", new JsonArray(embed.fields().stream().map(this::embedFieldToJson).collect(Collectors.toList())));
+        }
+        
+        return o;
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public RichEmbed createEmbed(final JsonObject data) {
         final String timestampRaw = data.getString("timestamp");
         
         final JsonObject footerRaw = data.getJsonObject("footer");
@@ -95,7 +160,7 @@ public final class EntityBuilder {
             );
         }
         
-        return Embed.builder()
+        return RichEmbed.builder()
                 .title(data.getString("title"))
                 .type(EmbedType.byKey(data.getString("type")))
                 .description(data.getString("description"))
@@ -115,7 +180,7 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public Role createRole(@Nonnull final JsonObject data) {
-        return Role.builder()
+        return RoleImpl.builder()
                 .id(data.getString("id"))
                 .name(data.getString("name"))
                 .color(data.getInteger("color"))
@@ -143,13 +208,13 @@ public final class EntityBuilder {
     @CheckReturnValue
     public Member createMember(@Nonnull final String id, @Nonnull final JsonObject data) {
         final String joinedAtRaw = data.getString("joined_at");
-        return Member.builder()
+        return MemberImpl.builder()
                 .id(id)
                 .deaf(data.getBoolean("deaf"))
                 .mute(data.getBoolean("mute"))
                 .nick(data.getString("nick"))
                 .joinedAt(joinedAtRaw == null ? null : OffsetDateTime.parse(joinedAtRaw))
-                .roles(ImmutableSet.of()) //TODO: fetch roles from cache? or at least give the ids
+                .roles(ImmutableSet.of()) // TODO: fetch roles from cache? or at least give the ids
                 .build();
     }
     
@@ -180,7 +245,7 @@ public final class EntityBuilder {
         final String editedTimestampRaw = data.getString("edited_timestamp");
         
         final JsonArray embedsRaw = data.getJsonArray("embeds", new JsonArray());
-        final Collection<Embed> embeds = new ArrayList<>(embedsRaw.size());
+        final Collection<RichEmbed> embeds = new ArrayList<>(embedsRaw.size());
         for(final Object object : embedsRaw) {
             if(!(object instanceof JsonObject)) {
                 throw new IllegalArgumentException("Expected all embeds to be JsonObjects, but found " +
@@ -190,7 +255,7 @@ public final class EntityBuilder {
             embeds.add(createEmbed((JsonObject) object));
         }
         
-        return Message.builder()
+        return MessageImpl.builder()
                 .type(MessageType.byId(data.getInteger("type")))
                 .tts(data.getBoolean("tts"))
                 .timestamp(timestampRaw == null ? null : OffsetDateTime.parse(timestampRaw))

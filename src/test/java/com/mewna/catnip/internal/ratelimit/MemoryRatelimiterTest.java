@@ -1,6 +1,6 @@
-package com.mewna.catnip.util.ratelimit;
+package com.mewna.catnip.internal.ratelimit;
 
-import com.mewna.catnip.util.ratelimit.MemoryRatelimiter.Bucket;
+import com.mewna.catnip.internal.ratelimit.MemoryRatelimiter.Bucket;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.Test;
 

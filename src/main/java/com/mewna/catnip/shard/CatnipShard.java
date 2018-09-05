@@ -10,9 +10,10 @@ import io.vertx.core.http.WebSocket;
 import io.vertx.core.http.WebSocketFrame;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import java.util.Deque;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -33,9 +34,9 @@ public class CatnipShard extends AbstractVerticle {
     private final AtomicReference<WebSocket> socketRef = new AtomicReference<>(null);
     private final AtomicBoolean heartbeatAcked = new AtomicBoolean(true);
     
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-    
     private final DispatchEmitter emitter;
+    
+    private final Deque<JsonObject> messageQueue = new ConcurrentLinkedDeque<>();
     
     public CatnipShard(final Catnip catnip, final int id, final int limit) {
         this.catnip = catnip;
@@ -80,16 +81,33 @@ public class CatnipShard extends AbstractVerticle {
     @Override
     public void start() {
         catnip.eventBus().consumer(getControlAddress(id), this::handleControlMessage);
-        catnip.eventBus().consumer(getWebsocketMessageSendAddress(), this::handleSocketSend);
+        catnip.eventBus().consumer(websocketMessageSendAddress(), this::handleSocketSend);
+        catnip.eventBus().consumer(websocketMessageQueueAddress(), this::handleSocketQueue);
+        catnip.eventBus().consumer(websocketMessagePollAddress(), msg -> {
+            if(socketRef.get() != null) {
+                while(!messageQueue.isEmpty()) {
+                    // We only do up to 110 messages/min, to allow for room just in case
+                    final ImmutablePair<Boolean, Long> check = catnip.gatewayRatelimiter()
+                            .checkRatelimit(String.format("catnip:gateway:%s:outgoing-send", id), 60_000L, 110);
+                    if(check.left) {
+                        //we got ratelimited, stop sending
+                        break;
+                    }
+                    final JsonObject payload = messageQueue.pop();
+                    catnip.eventBus().send(websocketMessageSendAddress(), payload);
+                }
+            }
+            //poll again in half a second
+            catnip.vertx().setTimer(500, __ -> catnip.eventBus().send(websocketMessagePollAddress(), null));
+        });
+        // Start gateway poll
+        catnip.eventBus().send(websocketMessagePollAddress(), null);
     }
-    
-    // Socket
     
     @Override
     public void stop() {
     }
     
-    // Control
     private void handleControlMessage(final Message<JsonObject> msg) {
         final JsonObject body = msg.body();
         final String mode = body.getString("mode");
@@ -103,7 +121,7 @@ public class CatnipShard extends AbstractVerticle {
                 break;
             }
             default: {
-                // TODO: Logging
+                catnip.logAdapter().warn("Shard {} Got unknown control message: {}", id, body.encodePrettily());
                 break;
             }
         }
@@ -117,13 +135,14 @@ public class CatnipShard extends AbstractVerticle {
         if(socketRef.get() != null) {
             socketRef.get().close((short) 4000);
         }
+        messageQueue.clear();
         heartbeatAcked.set(true);
     }
     
     // Payload handling
     
     private void connectSocket(final Message<JsonObject> msg) {
-        client.websocketAbs(CatnipImpl.getGatewayUrl(), null, null, null,
+        client.websocketAbs(Catnip.getGatewayUrl(), null, null, null,
                 socket -> {
                     socket.frameHandler(frame -> handleSocketFrame(msg, frame))
                             .closeHandler(this::handleSocketClose)
@@ -132,7 +151,7 @@ public class CatnipShard extends AbstractVerticle {
                 },
                 failure -> {
                     socketRef.set(null);
-                    logger.error("Couldn't connect socket:", failure);
+                    catnip.logAdapter().error("Couldn't connect socket:", failure);
                     catnip.eventBus().<JsonObject>send("RAW_STATUS", new JsonObject().put("status", "down:fail-connect").put("shard", id));
                     // If we totally fail to connect socket, don't need to worry as much
                     catnip.vertx().setTimer(500L, __ -> msg.reply(new JsonObject().put("state", FAILED.name())));
@@ -179,7 +198,7 @@ public class CatnipShard extends AbstractVerticle {
                     }
                 }
                 // Emit messages for subconsumers
-                catnip.eventBus().<JsonObject>send(getWebsocketMessageRecvAddress(op), event);
+                catnip.eventBus().<JsonObject>send(websocketMessageRecvAddress(op), event);
                 catnip.eventBus().<JsonObject>send("RAW_WS", event);
             }
         } catch(final Exception e) {
@@ -188,14 +207,18 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void handleSocketClose(final Void __) {
-        logger.warn("Socket closing!");
+        catnip.logAdapter().warn("Socket closing!");
         try {
             catnip.eventBus().<JsonObject>send("RAW_STATUS", new JsonObject().put("status", "down:socket-close").put("shard", id));
             socketRef.set(null);
             catnip.shardManager().addToConnectQueue(id);
         } catch(final Exception e) {
-            logger.error("Failure closing socket:", e);
+            catnip.logAdapter().error("Failure closing socket:", e);
         }
+    }
+    
+    private void handleSocketQueue(final Message<JsonObject> msg) {
+        messageQueue.addLast(msg.body());
     }
     
     private void handleSocketSend(final Message<JsonObject> msg) {
@@ -213,11 +236,11 @@ public class CatnipShard extends AbstractVerticle {
             if(socketRef.get() != null) {
                 if(!heartbeatAcked.get()) {
                     // Zombie
-                    logger.warn("Shard {} zombied, queueing reconnect!", id);
+                    catnip.logAdapter().warn("Shard {} zombied, queueing reconnect!", id);
                     catnip.eventBus().send(getControlAddress(id), new JsonObject().put("mode", "STOP"));
                     return;
                 }
-                catnip.eventBus().send(getWebsocketMessageSendAddress(),
+                catnip.eventBus().send(websocketMessageSendAddress(),
                         getBasePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().seqnum(id)));
                 heartbeatAcked.set(false);
             } else {
@@ -227,9 +250,9 @@ public class CatnipShard extends AbstractVerticle {
         
         // Check if we can RESUME instead
         if(catnip.sessionManager().session(id) != null && catnip.sessionManager().seqnum(id) > 0) {
-            catnip.eventBus().send(getWebsocketMessageSendAddress(), resume());
+            catnip.eventBus().send(websocketMessageSendAddress(), resume());
         } else {
-            catnip.eventBus().send(getWebsocketMessageSendAddress(), identify());
+            catnip.eventBus().send(websocketMessageSendAddress(), identify());
         }
     }
     
@@ -279,7 +302,7 @@ public class CatnipShard extends AbstractVerticle {
     
     private void handleHeartbeat(final Message<JsonObject> msg, final JsonObject event) {
         //heartbeatAcked.set(false);
-        catnip.eventBus().send(getWebsocketMessageSendAddress(),
+        catnip.eventBus().send(websocketMessageSendAddress(),
                 getBasePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().seqnum(id)));
     }
     
@@ -319,12 +342,20 @@ public class CatnipShard extends AbstractVerticle {
      *
      * @return Socket payload recv. msg. address
      */
-    public String getWebsocketMessageRecvAddress(final GatewayOp op) {
+    public String websocketMessageRecvAddress(final GatewayOp op) {
         return String.format("catnip:gateway:ws-incoming:%s:%s", id, op);
     }
     
-    public String getWebsocketMessageSendAddress() {
+    public String websocketMessageSendAddress() {
         return String.format("catnip:gateway:ws-outgoing:%s", id);
+    }
+    
+    public String websocketMessageQueueAddress() {
+        return String.format("catnip:gateway:ws-outgoing:%s:queue", id);
+    }
+    
+    private String websocketMessagePollAddress() {
+        return String.format("catnip:gateway:ws-outgoing:%s:poll", id);
     }
     
     private JsonObject identify() {

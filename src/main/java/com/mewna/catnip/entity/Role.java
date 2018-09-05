@@ -1,27 +1,30 @@
 package com.mewna.catnip.entity;
 
-import lombok.*;
-import lombok.experimental.Accessors;
+import com.mewna.catnip.entity.impl.Permission;
 
+import javax.annotation.Nonnull;
 import java.util.Set;
 
 /**
- * @author Julia Rogers
- * @since 9/2/18
+ * @author amy
+ * @since 9/4/18.
  */
-@Getter
-@Setter
-@Builder
-@Accessors(fluent = true)
-@NoArgsConstructor
-@AllArgsConstructor
-public class Role {
-    private String id;
-    private String name;
-    private int color;
-    private boolean hoist;
-    private int position;
-    private Set<Permission> permissions;
-    private boolean managed;
-    private boolean mentionable;
+@SuppressWarnings("unused")
+public interface Role {
+    @Nonnull
+    String id();
+    
+    @Nonnull
+    String name();
+    
+    int color();
+    
+    boolean hoist();
+    
+    @Nonnull
+    Set<Permission> permissions();
+    
+    boolean managed();
+    
+    boolean mentionable();
 }
