@@ -1,12 +1,14 @@
 package com.mewna.catnip.entity.builder;
 
-import com.mewna.catnip.entity.impl.RichEmbed;
-import com.mewna.catnip.entity.impl.RichEmbed.*;
+import com.mewna.catnip.entity.Embed;
+import com.mewna.catnip.entity.impl.EmbedImpl;
+import com.mewna.catnip.entity.impl.EmbedImpl.*;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -30,7 +32,7 @@ public class EmbedBuilder {
     public EmbedBuilder() {
     }
     
-    public EmbedBuilder(final RichEmbed embed) {
+    public EmbedBuilder(final Embed embed) {
         throw new UnsupportedOperationException("Building embeds from existing embeds is currently unsupported");
     }
     
@@ -136,8 +138,8 @@ public class EmbedBuilder {
         return this;
     }
     
-    public RichEmbed build() {
-        final RichEmbedBuilder builder = RichEmbed.builder();
+    public Embed build() {
+        final EmbedImplBuilder builder = EmbedImpl.builder();
         if(title != null && !title.isEmpty()) {
             builder.title(title);
         }
@@ -162,7 +164,9 @@ public class EmbedBuilder {
         if(author != null) {
             builder.author(author);
         }
-        if(!fields.isEmpty()) {
+        if(fields.isEmpty()) {
+            builder.fields(Collections.emptyList());
+        } else {
             if(fields.size() > 25) {
                 throw new IllegalStateException("Tried to add an embed field, but we're at the cap (25)!");
             }

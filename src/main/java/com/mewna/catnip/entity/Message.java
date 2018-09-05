@@ -1,6 +1,5 @@
 package com.mewna.catnip.entity;
 
-import com.mewna.catnip.entity.impl.RichEmbed;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
@@ -12,7 +11,7 @@ import java.util.List;
  * @author amy
  * @since 9/4/18.
  */
-public interface Message {
+public interface Message extends Snowflake {
     /**
      * The type of message. Use this to tell normal messages from system messages.
      *
@@ -44,6 +43,13 @@ public interface Message {
      * @return True if the message is pinned, false otherwise.
      */
     boolean pinned();
+    
+    /**
+     * Whether the message mentions everyone.
+     *
+     * @return True if the message mentions everyone, false otherwise.
+     */
+    boolean mentionsEveryone();
     
     /**
      * The message's nonce snowflake.
@@ -97,7 +103,7 @@ public interface Message {
      * @return List of embeds. Never null.
      */
     @Nonnull
-    List<RichEmbed> embeds();
+    List<Embed> embeds();
     
     /**
      * When the message was last edited, if ever.
