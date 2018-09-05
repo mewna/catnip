@@ -5,7 +5,11 @@ import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.*;
 import com.mewna.catnip.entity.Embed.EmbedType;
+import com.mewna.catnip.entity.Emoji.CustomEmoji;
+import com.mewna.catnip.entity.Emoji.UnicodeEmoji;
 import com.mewna.catnip.entity.impl.EmbedImpl.*;
+import com.mewna.catnip.entity.impl.MessageImpl.Attachment;
+import com.mewna.catnip.entity.impl.MessageImpl.Reaction;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -240,6 +244,73 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public UnicodeEmoji createUnicodeEmoji(@Nonnull final JsonObject data) {
+        return UnicodeEmojiImpl.builder()
+                .catnip(catnip)
+                .name(data.getString("name"))
+                .requiresColons(data.getBoolean("require_colons", true))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CustomEmoji createCustomEmoji(@Nonnull final JsonObject data) {
+        final JsonArray rolesRaw = data.getJsonArray("mention_roles", EMPTY_JSON_ARRAY);
+        final Collection<String> roles = new ArrayList<>(rolesRaw.size());
+        for(final Object object : rolesRaw) {
+            if(!(object instanceof String)) {
+                throw new IllegalArgumentException("Expected all role ids to be strings, but found " +
+                        (object == null ? "null" : object.getClass()));
+            }
+            roles.add((String)object);
+        }
+        
+        final JsonObject userRaw = data.getJsonObject("user");
+        
+        return CustomEmojiImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .name(data.getString("name"))
+                .roles(ImmutableList.copyOf(roles))
+                .user(userRaw == null ? null : createUser(userRaw))
+                .requiresColons(data.getBoolean("require_colons", true))
+                .managed(data.getBoolean("managed", false))
+                .animated(data.getBoolean("animated", false))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Emoji createEmoji(@Nonnull final JsonObject data) {
+        return data.getValue("id") == null ? createUnicodeEmoji(data) : createCustomEmoji(data);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Message.Attachment createAttachment(@Nonnull final JsonObject data) {
+        return Attachment.builder()
+                .id(data.getString("id"))
+                .fileName(data.getString("filename"))
+                .size(data.getInteger("size"))
+                .url(data.getString("url"))
+                .proxyUrl(data.getString("proxy_url"))
+                .height(data.getInteger("height", -1))
+                .width(data.getInteger("width", -1))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Message.Reaction createReaction(@Nonnull final JsonObject data) {
+        return Reaction.builder()
+                .count(data.getInteger("count"))
+                .self(data.getBoolean("self", false))
+                .emoji(createEmoji(data.getJsonObject("emoji")))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public Message createMessage(@Nonnull final JsonObject data) {
         final List<User> mentionedUsers = data.getJsonArray("mentions").stream().filter(e -> e instanceof JsonObject)
                 .map(e -> (JsonObject) e).map(this::createUser).collect(Collectors.toList());
@@ -272,6 +343,26 @@ public final class EntityBuilder {
             mentionedRoles.add((String)object);
         }
         
+        final JsonArray attachmentsRaw = data.getJsonArray("attachments", EMPTY_JSON_ARRAY);
+        final Collection<Message.Attachment> attachments = new ArrayList<>(attachmentsRaw.size());
+        for(final Object object : attachmentsRaw) {
+            if(!(object instanceof JsonObject)) {
+                throw new IllegalArgumentException("Expected all attachments to be JsonObjects, but found " +
+                        (object == null ? "null" : object.getClass()));
+            }
+            attachments.add(createAttachment((JsonObject) object));
+        }
+    
+        final JsonArray reactionsRaw = data.getJsonArray("reactions", EMPTY_JSON_ARRAY);
+        final Collection<Message.Reaction> reactions = new ArrayList<>(reactionsRaw.size());
+        for(final Object object : reactionsRaw) {
+            if(!(object instanceof JsonObject)) {
+                throw new IllegalArgumentException("Expected all reactions to be JsonObjects, but found " +
+                        (object == null ? "null" : object.getClass()));
+            }
+            reactions.add(createReaction((JsonObject) object));
+        }
+        
         return MessageImpl.builder()
                 .catnip(catnip)
                 .id(data.getString("id"))
@@ -284,10 +375,12 @@ public final class EntityBuilder {
                 .mentionsEveryone(data.getBoolean("mention_everyone", false))
                 .mentionedUsers(mentionedUsers)
                 .mentionedRoles(ImmutableList.copyOf(mentionedRoles))
-                .attachments(ImmutableList.of())
+                .attachments(ImmutableList.copyOf(attachments))
                 .embeds(ImmutableList.copyOf(embeds))
+                .reactions(ImmutableList.copyOf(reactions))
                 .nonce(data.getString("nonce"))
                 .pinned(data.getBoolean("pinned"))
+                .webhookId(data.getString("webhook_id"))
                 .type(MessageType.byId(data.getInteger("type")))
                 
                 //not actually documented

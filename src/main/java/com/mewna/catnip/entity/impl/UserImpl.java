@@ -81,11 +81,26 @@ public class UserImpl implements User, RequiresCatnip {
     }
     
     @Override
-    public void catnip(final Catnip catnip) {
+    public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
     }
     
     private ImageOptions defaultOptions() {
         return new ImageOptions().type(isAvatarAnimated() ? ImageType.GIF : null);
+    }
+    
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+    
+    @Override
+    public boolean equals(final Object obj) {
+        return obj instanceof User && ((User)obj).id().equals(id);
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("User (%s#%s)", username, discriminator);
     }
 }
