@@ -14,7 +14,7 @@ final Catnip catnip = Catnip.catnip().token(System.getenv("TOKEN"));
 catnip.eventBus().<Message>consumer(DiscordEvent.MESSAGE_CREATE, event -> {
     final Message msg = event.body();
     if(msg.content().equalsIgnoreCase("!ping")) {
-        catnip.rest().channel().createMessage(msg.channelId(), "pong!");
+        catnip.rest().channel().sendMessage(msg.channelId(), "pong!");
     }
 });
 catnip.startShards();
@@ -30,7 +30,7 @@ catnip.eventBus().<Message>consumer(DiscordEvent.MESSAGE_CREATE, event -> {
     final Message msg = event.body();
     if(msg.content().equalsIgnoreCase("!ping")) {
         final long start = System.currentTimeMillis();
-        catnip.rest().channel().createMessage(msg.channelId(), "pong!")
+        catnip.rest().channel().sendMessage(msg.channelId(), "pong!")
                 .thenAccept(ping -> {
                     final long end = System.currentTimeMillis();
                     catnip.rest().channel().editMessage(msg.channelId(), ping.id(),
