@@ -3,7 +3,7 @@ package com.mewna.catnip.rest.handler;
 import com.google.common.collect.ImmutableMap;
 import com.mewna.catnip.entity.Message;
 import com.mewna.catnip.entity.builder.MessageBuilder;
-import com.mewna.catnip.entity.impl.RichEmbed;
+import com.mewna.catnip.entity.Embed;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
@@ -43,7 +43,7 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<Message> sendMessage(@Nonnull final String channelId, @Nonnull final RichEmbed embed) {
+    public CompletableFuture<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Embed embed) {
         return sendMessage(channelId, new MessageBuilder().embed(embed).build());
     }
     

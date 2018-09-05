@@ -1,5 +1,7 @@
 package com.mewna.catnip.util;
 
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.impl.RequiresCatnip;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageCodec;
 import io.vertx.core.json.JsonObject;
@@ -9,11 +11,12 @@ import io.vertx.core.json.JsonObject;
  * @since 9/2/18.
  */
 public class JsonPojoCodec<T> implements MessageCodec<T, T> {
+    private final Catnip catnip;
     private final Class<T> type;
-    private int i = 0;
     
     @SuppressWarnings("unchecked")
-    public JsonPojoCodec(final Class<T> type) {
+    public JsonPojoCodec(final Catnip catnip, final Class<T> type) {
+        this.catnip = catnip;
         this.type = type;
     }
     
@@ -27,20 +30,24 @@ public class JsonPojoCodec<T> implements MessageCodec<T, T> {
         final Buffer out = Buffer.buffer();
         buffer.readFromBuffer(pos, out);
         final JsonObject data = new JsonObject(out.getString(0, out.length()));
-        return data.mapTo(type);
+        final T object = data.mapTo(type);
+        if(object instanceof RequiresCatnip) {
+            ((RequiresCatnip) object).catnip(catnip);
+        }
+        return object;
     }
     
     @Override
     public T transform(final T t) {
+        if(t instanceof RequiresCatnip) {
+            ((RequiresCatnip) t).catnip(catnip);
+        }
         return t;
     }
     
     @Override
     public String name() {
-        // This is kinda dumb, but ensures no dupe codec names
-        final String result = "JsonPojoCodec-" + i;
-        i++;
-        return result;
+        return "JsonPojoCodec-" + type.getName();
     }
     
     @Override

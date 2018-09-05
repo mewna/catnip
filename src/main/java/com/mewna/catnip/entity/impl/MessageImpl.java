@@ -1,9 +1,7 @@
 package com.mewna.catnip.entity.impl;
 
-import com.mewna.catnip.entity.Member;
-import com.mewna.catnip.entity.Message;
-import com.mewna.catnip.entity.MessageType;
-import com.mewna.catnip.entity.User;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.*;
 import io.vertx.core.json.JsonObject;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -21,21 +19,31 @@ import java.util.List;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class MessageImpl implements Message {
-    private MessageType type;
-    private boolean tts;
-    private OffsetDateTime timestamp;
-    private boolean pinned;
-    private String nonce;
-    private List<User> mentionedUsers;
-    private List<String> mentionedRoles;
-    private Member member;
+public class MessageImpl implements Message, RequiresCatnip {
+    private transient Catnip catnip;
+    
     private String id;
-    private List<RichEmbed> embeds;
-    private OffsetDateTime editedTimestamp;
-    private String content;
     private String channelId;
     private User author;
+    private String content;
+    private OffsetDateTime timestamp;
+    private OffsetDateTime editedTimestamp;
+    private boolean tts;
+    private boolean mentionsEveryone;
+    private List<User> mentionedUsers;
+    private List<String> mentionedRoles;
     private List<JsonObject> attachments;
+    private List<Embed> embeds;
+    private String nonce;
+    private boolean pinned;
+    private MessageType type;
+    
+    //not present in discord docs
+    private Member member;
     private String guildId;
+    
+    @Override
+    public void catnip(final Catnip catnip) {
+        this.catnip = catnip;
+    }
 }
