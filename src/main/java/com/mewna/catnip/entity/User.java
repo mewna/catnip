@@ -2,8 +2,6 @@ package com.mewna.catnip.entity;
 
 import com.mewna.catnip.entity.util.ImageOptions;
 
-import javax.annotation.Nonnull;
-
 /**
  * @author amy
  * @since 9/4/18
