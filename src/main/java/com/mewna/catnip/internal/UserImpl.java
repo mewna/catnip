@@ -1,4 +1,4 @@
-package com.mewna.catnip.entity.impl;
+package com.mewna.catnip.internal;
 
 import com.mewna.catnip.entity.ImageOptions;
 import com.mewna.catnip.entity.ImageType;
