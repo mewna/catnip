@@ -5,8 +5,8 @@ import com.mewna.catnip.entity.util.ImageOptions;
 import javax.annotation.Nonnull;
 
 /**
- * @author Julia Rogers
- * @since 9/2/18
+ * @author amy
+ * @since 9/4/18
  */
 public interface User {
     
