@@ -1,4 +1,4 @@
-package com.mewna.catnip.internal;
+package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.entity.User;
 import com.mewna.catnip.entity.util.ImageOptions;
@@ -15,12 +15,14 @@ import java.util.Objects;
  * @author amy
  * @since 9/1/18.
  */
+
 @Getter
 @Setter
 @Builder
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class UserImpl implements User {
     private String username;
     private String id;

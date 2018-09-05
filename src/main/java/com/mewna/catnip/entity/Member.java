@@ -1,26 +1,28 @@
 package com.mewna.catnip.entity;
 
-import lombok.*;
-import lombok.experimental.Accessors;
-
+import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
 import java.util.Set;
 
 /**
  * @author amy
- * @since 9/1/18.
+ * @since 9/4/18.
  */
-@Getter
-@Setter
-@Builder
-@Accessors(fluent = true)
-@NoArgsConstructor
-@AllArgsConstructor
-public class Member {
-    private String id;
-    private String nick;
-    private Set<String> roles;
-    private boolean mute;
-    private boolean deaf;
-    private OffsetDateTime joinedAt;
+@SuppressWarnings("unused")
+public interface Member {
+    @Nonnull
+    String id();
+    
+    @Nonnull
+    String nick();
+    
+    @Nonnull
+    Set<String> roles();
+    
+    boolean mute();
+    
+    boolean deaf();
+    
+    @Nonnull
+    OffsetDateTime joinedAt();
 }

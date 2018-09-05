@@ -3,6 +3,8 @@
 A Discord API wrapper in Java. Fully async / reactive, built on top of
 [vert.x](https://vertx.io).
 
+We have a Discord! https://discord.gg/kCsBCjK
+
 ## Basic usage
 
 This is the simplest possible bot you can make right now:
@@ -48,4 +50,4 @@ catnip.startShards();
 
 - Create entity classes for guilds, channels, ...
 - Finish handling all `DISPATCH` events (see `DispatchEmitter`)
-- Full REST API coverage (see `Rest`)
+- Full REST API coverage (see `Rest`, #3)

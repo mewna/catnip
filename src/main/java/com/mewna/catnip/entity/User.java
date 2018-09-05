@@ -1,5 +1,7 @@
 package com.mewna.catnip.entity;
 
+import com.mewna.catnip.entity.util.ImageOptions;
+
 import javax.annotation.Nonnull;
 
 /**
@@ -26,7 +28,7 @@ public interface User {
      * The URL for the user's set avatar. Can be null if the user has not set an avatar.
      * <br>See {@link User#defaultAvatarUrl()} and {@link User#effectiveAvatarUrl()}.
      *
-     * @param options {@link com.mewna.catnip.entity.ImageOptions Image Options}.
+     * @param options {@link ImageOptions Image Options}.
      *
      * @return String containing the URL to their avatar, options considered. Can be null.
      */
@@ -45,7 +47,7 @@ public interface User {
      * <br>Convenience method for getting the user's default avatar
      * when {@link User#avatarUrl()} is null.
      *
-     * @param options {@link com.mewna.catnip.entity.ImageOptions Image Options}.
+     * @param options {@link ImageOptions Image Options}.
      *
      * @return String containing a URL to their effective avatar, options considered. Never null.
      */

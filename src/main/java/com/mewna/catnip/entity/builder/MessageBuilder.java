@@ -1,4 +1,8 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.builder;
+
+import com.mewna.catnip.entity.Message;
+import com.mewna.catnip.entity.impl.MessageImpl;
+import com.mewna.catnip.entity.impl.RichEmbed;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -14,7 +18,7 @@ import java.util.Collections;
 @SuppressWarnings("unused")
 public class MessageBuilder {
     private String content;
-    private Embed embed;
+    private RichEmbed embed;
     
     public MessageBuilder() {
     }
@@ -33,7 +37,7 @@ public class MessageBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public MessageBuilder embed(@Nullable final Embed embed) {
+    public MessageBuilder embed(@Nullable final RichEmbed embed) {
         this.embed = embed;
         return this;
     }
@@ -41,7 +45,7 @@ public class MessageBuilder {
     @Nonnull
     @CheckReturnValue
     public Message build() {
-        final Message m = new Message();
+        final MessageImpl m = new MessageImpl();
         m.content(content);
         if(embed != null) {
             m.embeds(Collections.singletonList(embed));
