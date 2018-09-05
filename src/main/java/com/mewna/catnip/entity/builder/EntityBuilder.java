@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.*;
-import com.mewna.catnip.entity.impl.*;
 import com.mewna.catnip.entity.impl.RichEmbed.*;
+import com.mewna.catnip.entity.impl.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 

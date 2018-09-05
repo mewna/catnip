@@ -1,7 +1,6 @@
 package com.mewna.catnip.shard.manager;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.internal.CatnipImpl;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
