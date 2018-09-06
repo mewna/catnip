@@ -139,7 +139,7 @@ public class EmbedBuilder {
     }
     
     public Embed build() {
-    	int len = 0;
+        int len = 0;
         final EmbedImplBuilder builder = EmbedImpl.builder();
         if(title != null && !title.isEmpty()) {
             if(title.length() > 256){
@@ -183,7 +183,7 @@ public class EmbedBuilder {
             builder.author(author);
         }
         if(fields.isEmpty()) {
-        	builder.fields(Collections.emptyList());
+            builder.fields(Collections.emptyList());
         } else {
             if(fields.size() > 25) {
                 throw new IllegalStateException("Tried to add an embed field, but we're at the cap (25)!");
@@ -200,9 +200,9 @@ public class EmbedBuilder {
             }
             builder.fields(fields);
         }
-         if(len > 6000){
-             throw new IllegalStateException("Total embed length exceeds 6000 characters!");
-            }
+        if(len > 6000){
+        	    throw new IllegalStateException("Total embed length exceeds 6000 characters!");
+        }
         return builder.build();
     }
 }
