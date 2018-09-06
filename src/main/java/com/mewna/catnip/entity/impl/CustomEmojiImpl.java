@@ -47,6 +47,6 @@ public class CustomEmojiImpl implements CustomEmoji, RequiresCatnip {
     
     @Override
     public String toString() {
-        return String.format("CustomEmoji (<%s:%s:%s>)", animated ? "a" : "", name, id);
+        return String.format("CustomEmoji (%s)", forMessage());
     }
 }

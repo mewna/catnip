@@ -1,6 +1,7 @@
 package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
+import com.mewna.catnip.entity.Emoji;
 import com.mewna.catnip.entity.Message;
 import com.mewna.catnip.entity.builder.MessageBuilder;
 import com.mewna.catnip.entity.Embed;
@@ -114,5 +115,25 @@ public class RestChannel extends RestHandler {
         return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_REACTION.withMajorParam(channelId),
                 ImmutableMap.of("message.id", messageId, "emoji", encodeUTF8(emoji)), new JsonObject()))
                 .thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> addReaction(@Nonnull final String channelId, @Nonnull final String messageId,
+                                               @Nonnull final Emoji emoji) {
+        return addReaction(channelId, messageId, emoji.forReaction());
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> deleteOwnReaction(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                     @Nonnull final String emoji) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_OWN_REACTION.withMajorParam(channelId),
+                ImmutableMap.of("message.id", messageId, "emoji", encodeUTF8(emoji)), null))
+                .thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> deleteOwnReaction(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                     @Nonnull final Emoji emoji) {
+        return deleteOwnReaction(channelId, messageId, emoji.forReaction());
     }
 }
