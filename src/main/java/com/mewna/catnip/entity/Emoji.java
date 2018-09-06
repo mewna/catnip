@@ -95,6 +95,24 @@ public interface Emoji extends Snowflake {
         return !custom();
     }
     
+    /**
+     * A string that may be sent in a message and will render this emoji, if the user has permission to.
+     *
+     * @return A string that yields this emoji when inside a message.
+     */
+    @Nonnull
+    @CheckReturnValue
+    String forMessage();
+    
+    /**
+     * A string that may be added as a reaction to a message, if the user has permission to.
+     *
+     * @return A string that yields this emoji when added as a reaction.
+     */
+    @Nonnull
+    @CheckReturnValue
+    String forReaction();
+    
     interface CustomEmoji extends Emoji {
         @Override
         @Nonnull
@@ -105,6 +123,20 @@ public interface Emoji extends Snowflake {
         @CheckReturnValue
         default boolean custom() {
             return true;
+        }
+    
+        @Override
+        @Nonnull
+        @CheckReturnValue
+        default String forMessage() {
+            return String.format("<%s:%s:%s>", animated() ? "a" : "", name(), id());
+        }
+    
+        @Override
+        @Nonnull
+        @CheckReturnValue
+        default String forReaction() {
+            return String.format("%s:%s", name(), id());
         }
     }
     
@@ -144,6 +176,20 @@ public interface Emoji extends Snowflake {
         @CheckReturnValue
         default boolean custom() {
             return false;
+        }
+    
+        @Override
+        @Nonnull
+        @CheckReturnValue
+        default String forMessage() {
+            return name();
+        }
+    
+        @Override
+        @Nonnull
+        @CheckReturnValue
+        default String forReaction() {
+            return name();
         }
     }
 }

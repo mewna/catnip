@@ -118,6 +118,11 @@ public final class Routes {
     public static final Route CREATE_GUILD_CHANNEL                = new Route(POST,   "/guilds/{guild.id}/channels", "guild.id");
     public static final Route GET_GUILD_EMBED                     = new Route(GET,    "/guilds/{guild.id}/embed", "guild.id");
     public static final Route MODIFY_GUILD_EMBED                  = new Route(PATCH,  "/guilds/{guild.id}/embed", "guild.id");
+    public static final Route LIST_GUILD_EMOJIS                   = new Route(GET,    "/guilds/{guild.id}/emojis", "guild.id");
+    public static final Route GET_GUILD_EMOJI                     = new Route(GET,    "/guilds/{guild.id}/emojis/{emoji.id}", "guild.id");
+    public static final Route CREATE_GUILD_EMOJI                  = new Route(POST,   "/guilds/{guild.id}/emojis", "guild.id");
+    public static final Route MODIFY_GUILD_EMOJI                  = new Route(PATCH,  "/guilds/{guild.id}/emojis/{emoji.id}", "guild.id");
+    public static final Route DELETE_GUILD_EMOJI                  = new Route(DELETE, "/guilds/{guild.id}/emojis/{emoji.id}", "guild.id");
     public static final Route GET_GUILD_INTEGRATIONS              = new Route(GET,    "/guilds/{guild.id}/integrations", "guild.id");
     public static final Route CREATE_GUILD_INTEGRATION            = new Route(POST,   "/guilds/{guild.id}/integrations", "guild.id");
     public static final Route DELETE_GUILD_INTEGRATION            = new Route(DELETE, "/guilds/{guild.id}/integrations/{integration.id}", "guild.id");

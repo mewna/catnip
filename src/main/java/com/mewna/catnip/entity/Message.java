@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author amy
@@ -173,6 +174,32 @@ public interface Message extends Snowflake {
      */
     @Nullable
     String webhookId();
+    
+    /**
+     * Adds a reaction to this message.
+     * <br>Note: this object will <b>not</b> be updated.
+     *
+     * @param emoji Emoji to react with.
+     *
+     * @return Future for the reaction.
+     */
+    @Nonnull
+    default CompletableFuture<Void> react(@Nonnull final Emoji emoji) {
+        return catnip().rest().channel().addReaction(channelId(), id(), emoji);
+    }
+    
+    /**
+     * Adds a reaction to this message.
+     * <br>Note: this object will <b>not</b> be updated.
+     *
+     * @param emoji Emoji to react with.
+     *
+     * @return Future for the reaction.
+     */
+    @Nonnull
+    default CompletableFuture<Void> react(@Nonnull final String emoji) {
+        return catnip().rest().channel().addReaction(channelId(), id(), emoji);
+    }
     
     interface Attachment extends Snowflake {
         /**
