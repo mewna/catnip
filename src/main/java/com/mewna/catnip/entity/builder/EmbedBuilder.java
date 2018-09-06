@@ -139,6 +139,7 @@ public class EmbedBuilder {
     }
     
     public Embed build() {
+    	int len = 0;
         final EmbedImplBuilder builder = EmbedImpl.builder();
         if(title != null && !title.isEmpty()) {
             if(title.length() > 256){
