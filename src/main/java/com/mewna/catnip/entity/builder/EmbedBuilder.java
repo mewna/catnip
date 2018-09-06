@@ -200,8 +200,8 @@ public class EmbedBuilder {
             }
             builder.fields(fields);
         }
-        if(len > 6000){
-        	    throw new IllegalStateException("Total embed length exceeds 6000 characters!");
+        if(len > 6000) {
+            throw new IllegalStateException("Total embed length exceeds 6000 characters!");
         }
         return builder.build();
     }
