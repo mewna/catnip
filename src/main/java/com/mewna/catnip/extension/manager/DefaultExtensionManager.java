@@ -32,6 +32,7 @@ public class DefaultExtensionManager implements ExtensionManager {
     public void unloadExtension(@Nonnull final Extension extension) {
         if(loadedExtensions.contains(extension)) {
             catnip.vertx().undeploy(extension.deploymentID());
+            loadedExtensions.remove(extension);
         }
     }
     
