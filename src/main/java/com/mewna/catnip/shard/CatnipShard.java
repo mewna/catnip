@@ -101,14 +101,14 @@ public class CatnipShard extends AbstractVerticle {
                     final ImmutablePair<Boolean, Long> check = catnip.gatewayRatelimiter()
                             .checkRatelimit(String.format("catnip:gateway:%s:outgoing-send", id), 60_000L, 110);
                     if(check.left) {
-                        //we got ratelimited, stop sending
+                        // We got ratelimited, stop sending
                         break;
                     }
                     final JsonObject payload = messageQueue.pop();
                     catnip.eventBus().send(websocketMessageSendAddress(), payload);
                 }
             }
-            //poll again in half a second
+            // Poll again in half a second
             catnip.vertx().setTimer(500, __ -> catnip.eventBus().send(websocketMessagePollAddress(), null));
         });
         // Start gateway poll
