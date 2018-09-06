@@ -139,12 +139,22 @@ public class EmbedBuilder {
     }
     
     public Embed build() {
+        int len = 0;
         final EmbedImplBuilder builder = EmbedImpl.builder();
         if(title != null && !title.isEmpty()) {
+            if(title.length() > 256) {
+                throw new IllegalStateException("Title exceeds 256 characters!");
+            }
+            len += title.length();
             builder.title(title);
+            
         }
         if(description != null && !description.isEmpty()) {
+            if(description.length() > 2048) {
+                throw new IllegalStateException("Description exceeds 2048 characters!");
+            }
             builder.description(description);
+            len += description.length();
         }
         if(url != null && !url.isEmpty()) {
             builder.url(url);
@@ -153,7 +163,11 @@ public class EmbedBuilder {
             builder.color(color);
         }
         if(footer != null) {
+            if(footer.text().length() > 2048) {
+                throw new IllegalStateException("Footer text exceeds 2048 characters!");
+            }
             builder.footer(footer);
+            len += footer.text().length();
         }
         if(image != null) {
             builder.image(image);
@@ -162,6 +176,10 @@ public class EmbedBuilder {
             builder.thumbnail(thumbnail);
         }
         if(author != null) {
+            if(author.name().length() > 256) {
+                throw new IllegalStateException("Author's name exceeds 256 characters!");
+            }
+            len += author.name().length();
             builder.author(author);
         }
         if(fields.isEmpty()) {
@@ -170,7 +188,20 @@ public class EmbedBuilder {
             if(fields.size() > 25) {
                 throw new IllegalStateException("Tried to add an embed field, but we're at the cap (25)!");
             }
+            for(Field field : fields) {
+                if(field.name().length() > 256) {
+                    throw new IllegalStateException("Field name exceeds 256 characters!");
+                }
+                if(field.value().length() > 1024) {
+                    throw new IllegalStateException("Field value exceeds 1024 characters!");
+                }
+                len += field.name().length();
+                len += field.value().length();
+            }
             builder.fields(fields);
+        }
+        if(len > 6000) {
+            throw new IllegalStateException("Total embed length exceeds 6000 characters!");
         }
         return builder.build();
     }
