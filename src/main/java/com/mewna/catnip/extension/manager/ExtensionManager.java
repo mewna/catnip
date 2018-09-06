@@ -12,6 +12,23 @@ import java.util.Set;
  * of this class will, among other things, pay attention to the caveats
  * mentioned in the {@link Extension} docs, to ensure compatibility with the
  * {@link DefaultExtensionManager}.
+ * <p/>
+ * TODO: Come up with some way of indicating which extension an event is for
+ * <br />
+ * This likely means having to do some fuckery with listen addresses; probably
+ * ends up being something like
+ * <ul>
+ * <li>event is created</li>
+ * <li>existing extension names are gathered</li>
+ * <li>event is fired to "EVENT_NAME:ext:#{EXTENSION_NAME}"</li>
+ * <li>extensions listen similarly, to prevent recv'ing events meant
+ * for other extensions</li>
+ * </ul>
+ * Hopefully, this will allow for cross-extension coordination, without
+ * requiring them to have each other as explicit source-level dependencies. The
+ * idea is to create something along the lines of Erlang-style
+ * message-passing, so that an event sender doesn't need to have any knowledge
+ * of what the receiver is like (extension-code-wise).
  *
  * @author amy
  * @since 9/6/18
