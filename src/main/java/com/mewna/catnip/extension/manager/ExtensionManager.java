@@ -33,6 +33,7 @@ import java.util.Set;
  * @author amy
  * @since 9/6/18
  */
+@SuppressWarnings("unused")
 public interface ExtensionManager {
     /**
      * Load the given extension instance. Note than an extension may not be
