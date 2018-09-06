@@ -1,13 +1,14 @@
 package com.mewna.catnip;
 
+import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.internal.logging.LogAdapter;
+import com.mewna.catnip.internal.ratelimit.Ratelimiter;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.session.SessionManager;
-import com.mewna.catnip.internal.ratelimit.Ratelimiter;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 
@@ -19,13 +20,32 @@ import javax.annotation.Nullable;
  * @author amy
  * @since 9/3/18.
  */
+@SuppressWarnings("unused")
 public interface Catnip {
     static Catnip catnip() {
         return new CatnipImpl().setup();
     }
     
     @Nonnull
+    @CheckReturnValue
+    static String getGatewayUrl() {
+        // TODO: Allow injecting other gateway URLs for eg. mocks?
+        return "wss://gateway.discord.gg/?v=6&encoding=json&compress=zlib-stream";
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    static String getShardCountUrl() {
+        // TODO: Allow injecting other endpoints for eg. mocks?
+        //return "https://discordapp.com/api/v6/gateway/bot";
+        return RestRequester.API_HOST + RestRequester.API_BASE + Routes.GET_GATEWAY_BOT.baseRoute();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     Vertx vertx();
+    
+    // Implementations are lombok-generated
     
     @Nonnull
     @CheckReturnValue
@@ -33,8 +53,6 @@ public interface Catnip {
     
     @Nonnull
     Catnip startShards();
-    
-    // Implementations are lombok-generated
     
     @Nullable
     String token();
@@ -71,20 +89,12 @@ public interface Catnip {
     LogAdapter logAdapter();
     
     @Nonnull
-    Catnip logAdapter(LogAdapter adapter);
+    Catnip logAdapter(@Nonnull LogAdapter adapter);
+    
+    // TODO: Provide convenience methods for extension un/loading like #eventBus()
+    @Nonnull
+    ExtensionManager extensionManager();
     
     @Nonnull
-    @CheckReturnValue
-    static String getGatewayUrl() {
-        // TODO: Allow injecting other gateway URLs for eg. mocks?
-        return "wss://gateway.discord.gg/?v=6&encoding=json&compress=zlib-stream";
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    static String getShardCountUrl() {
-        // TODO: Allow injecting other endpoints for eg. mocks?
-        //return "https://discordapp.com/api/v6/gateway/bot";
-        return RestRequester.API_HOST + RestRequester.API_BASE + Routes.GET_GATEWAY_BOT.baseRoute();
-    }
+    Catnip extensionManager(@Nonnull ExtensionManager extensionManager);
 }

@@ -36,6 +36,10 @@ import javax.annotation.Nullable;
  * are provided as convenience methods for when a {@link Future} is not needed,
  * and will automatically be available if implementations are based off of
  * {@link AbstractExtension} or {@link AbstractVerticle}.
+ * <p/>
+ * Note that the lifecycle callbacks are called <strong>SYNCHRONOUSLY</strong>
+ * by vert.x, and as such you should take care to not block the event loop in
+ * those callbacks!
  *
  * @author amy
  * @since 9/6/18
