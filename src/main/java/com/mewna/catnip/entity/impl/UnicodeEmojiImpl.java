@@ -40,6 +40,6 @@ public class UnicodeEmojiImpl implements UnicodeEmoji, RequiresCatnip {
     
     @Override
     public String toString() {
-        return String.format("UnicodeEmoji (%s)", name);
+        return String.format("UnicodeEmoji (%s)", forMessage());
     }
 }
