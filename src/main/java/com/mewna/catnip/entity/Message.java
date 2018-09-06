@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author amy
@@ -174,32 +175,90 @@ public interface Message extends Snowflake {
     @Nullable
     String webhookId();
     
-    interface Attachment {
-        @Nonnull
-        @CheckReturnValue
-        String id();
+    /**
+     * Adds a reaction to this message.
+     * <br>Note: this object will <b>not</b> be updated.
+     *
+     * @param emoji Emoji to react with.
+     *
+     * @return Future for the reaction.
+     */
+    @Nonnull
+    default CompletableFuture<Void> react(@Nonnull final Emoji emoji) {
+        return catnip().rest().channel().addReaction(channelId(), id(), emoji);
+    }
     
+    /**
+     * Adds a reaction to this message.
+     * <br>Note: this object will <b>not</b> be updated.
+     *
+     * @param emoji Emoji to react with.
+     *
+     * @return Future for the reaction.
+     */
+    @Nonnull
+    default CompletableFuture<Void> react(@Nonnull final String emoji) {
+        return catnip().rest().channel().addReaction(channelId(), id(), emoji);
+    }
+    
+    interface Attachment extends Snowflake {
+        /**
+         * The name of the file represented by this attachment.
+         *
+         * @return String representing the file name. Never null.
+         */
         @Nonnull
         @CheckReturnValue
         String fileName();
-        
+    
+        /**
+         * The size of the file represented by this attachment, in bytes.
+         *
+         * @return Integer representing the file size. Never negative.
+         */
+        @Nonnegative
         @CheckReturnValue
         int size();
     
+        /**
+         *The source URL for the file.
+         *
+         * @return String representing the source URL. Never null.
+         */
         @Nonnull
         @CheckReturnValue
         String url();
     
+        /**
+         *The proxied URL for the file.
+         *
+         * @return String representing the proxied URL. Never null.
+         */
         @Nonnull
         @CheckReturnValue
         String proxyUrl();
-        
+    
+        /**
+         * The height of this attachment, if it's an image.
+         *
+         * @return Integer representing the height, or -1 if this attachment is not an image.
+         */
         @CheckReturnValue
         int height();
-        
+    
+        /**
+         * The width of this attachment, if it's an image.
+         *
+         * @return Integer representing the width, or -1 if this attachment is not an image.
+         */
         @CheckReturnValue
         int width();
-        
+    
+        /**
+         * Whether this attachment is an image.
+         *
+         * @return True if this attachment is an image, false otherwise.
+         */
         @CheckReturnValue
         default boolean image() {
             return height() > 0 && width() > 0;
@@ -207,13 +266,28 @@ public interface Message extends Snowflake {
     }
     
     interface Reaction {
+        /**
+         * The count of reactions.
+         *
+         * @return Integer representing how many reactions were added.
+         */
         @Nonnegative
         @CheckReturnValue
         int count();
-        
+    
+        /**
+         * Whether the current logged in account added this reaction.
+         *
+         * @return True if the current account added this reaction, false otherwise.
+         */
         @CheckReturnValue
         boolean self();
-        
+    
+        /**
+         * The emoji representing this reaction.
+         *
+         * @return Emoji object of this reaction.
+         */
         @Nonnull
         @CheckReturnValue
         Emoji emoji();

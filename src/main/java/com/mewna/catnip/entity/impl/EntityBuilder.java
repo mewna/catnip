@@ -289,6 +289,7 @@ public final class EntityBuilder {
     @CheckReturnValue
     public Message.Attachment createAttachment(@Nonnull final JsonObject data) {
         return Attachment.builder()
+                .catnip(catnip)
                 .id(data.getString("id"))
                 .fileName(data.getString("filename"))
                 .size(data.getInteger("size"))
