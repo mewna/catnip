@@ -17,7 +17,6 @@ import java.util.List;
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class EmbedBuilder {
-    
     // @formatter:off
     private String title;
     private String description;
@@ -140,7 +139,6 @@ public class EmbedBuilder {
     }
     
     public Embed build() {
-        int len = 0;
         final EmbedImplBuilder builder = EmbedImpl.builder();
         if(title != null && !title.isEmpty()) {
             if(title.length() > 256){
@@ -184,25 +182,25 @@ public class EmbedBuilder {
             builder.author(author);
         }
         if(fields.isEmpty()) {
-            builder.fields(Collections.emptyList());
+        	builder.fields(Collections.emptyList());
         } else {
             if(fields.size() > 25) {
                 throw new IllegalStateException("Tried to add an embed field, but we're at the cap (25)!");
             }
-            for(Field item : fields) {
-                if (item.name().length() > 256){
+            for(Field field : fields) {
+                if(field.name().length() > 256){
                     throw new IllegalStateException("Field name exceeds 256 characters!");
                 }
-            if(item.value().length() > 1024){
-                throw new IllegalStateException("Field value exceeds 1024 characters!");
+                if(field.value().length() > 1024){
+                    throw new IllegalStateException("Field value exceeds 1024 characters!");
                 }
-            len += item.name().length();
-            len += item.value().length();
+                len += field.name().length();
+                len += field.value().length();
             }
             builder.fields(fields);
         }
          if(len > 6000){
-                throw new IllegalStateException("Total embed length exceeds 6000 characters!");
+             throw new IllegalStateException("Total embed length exceeds 6000 characters!");
             }
         return builder.build();
     }
