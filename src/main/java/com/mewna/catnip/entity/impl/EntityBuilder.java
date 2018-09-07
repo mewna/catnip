@@ -7,6 +7,10 @@ import com.mewna.catnip.entity.*;
 import com.mewna.catnip.entity.Embed.EmbedType;
 import com.mewna.catnip.entity.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.Emoji.UnicodeEmoji;
+import com.mewna.catnip.entity.Guild.ContentFilterLevel;
+import com.mewna.catnip.entity.Guild.MFALevel;
+import com.mewna.catnip.entity.Guild.NotificationLevel;
+import com.mewna.catnip.entity.Guild.VerificationLevel;
 import com.mewna.catnip.entity.impl.EmbedImpl.*;
 import com.mewna.catnip.entity.impl.MessageImpl.Attachment;
 import com.mewna.catnip.entity.impl.MessageImpl.Reaction;
@@ -19,7 +23,9 @@ import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -35,6 +41,12 @@ public final class EntityBuilder {
     
     public EntityBuilder(final Catnip catnip) {
         this.catnip = catnip;
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    private OffsetDateTime parseTimestamp(@Nullable final CharSequence raw) {
+        return raw == null ? null : OffsetDateTime.parse(raw);
     }
     
     @Nonnull
@@ -105,9 +117,17 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    private Field createField(@Nonnull final JsonObject data) {
+        return Field.builder()
+                .name(data.getString("name"))
+                .value(data.getString("value"))
+                .inline(data.getBoolean("inline", false))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public Embed createEmbed(final JsonObject data) {
-        final String timestampRaw = data.getString("timestamp");
-        
         final JsonObject footerRaw = data.getJsonObject("footer");
         final Footer footer = isInvalid(footerRaw, "text") ? null : Footer.builder()
                 .text(footerRaw.getString("text"))
@@ -152,29 +172,14 @@ public final class EntityBuilder {
                 .proxyIconUrl(authorRaw.getString("proxy_icon_url"))
                 .build();
         
-        final JsonArray fieldsRaw = data.getJsonArray("fields", EMPTY_JSON_ARRAY);
-        final Collection<Field> fields = new ArrayList<>(fieldsRaw.size());
-        for(final Object object : fieldsRaw) {
-            if(!(object instanceof JsonObject)) {
-                throw new IllegalArgumentException("Expected all embed fields to be JsonObjects, but found " +
-                        (object == null ? "null" : object.getClass())
-                );
-            }
-            final JsonObject fieldObject = (JsonObject) object;
-            fields.add(Field.builder()
-                    .name(fieldObject.getString("name"))
-                    .value(fieldObject.getString("value"))
-                    .inline(fieldObject.getBoolean("inline", false))
-                    .build()
-            );
-        }
+        final Collection<Field> fields = mapArrayObjects(data.getJsonArray("fields"), this::createField);
         
         return EmbedImpl.builder()
                 .title(data.getString("title"))
                 .type(EmbedType.byKey(data.getString("type")))
                 .description(data.getString("description"))
                 .url(data.getString("url"))
-                .timestamp(timestampRaw == null ? null : OffsetDateTime.parse(timestampRaw))
+                .timestamp(parseTimestamp(data.getString("timestamp")))
                 .color(data.getInteger("color", null))
                 .footer(footer)
                 .image(image)
@@ -218,13 +223,12 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public Member createMember(@Nonnull final String id, @Nonnull final JsonObject data) {
-        final String joinedAtRaw = data.getString("joined_at");
         return MemberImpl.builder()
                 .catnip(catnip)
                 .id(id)
                 .nick(data.getString("nick"))
                 .roles(ImmutableSet.of()) // TODO: fetch roles from cache? or at least give the ids
-                .joinedAt(joinedAtRaw == null ? null : OffsetDateTime.parse(joinedAtRaw))
+                .joinedAt(parseTimestamp(data.getString("joined_at")))
                 .deaf(data.getBoolean("deaf"))
                 .mute(data.getBoolean("mute"))
                 .build();
@@ -255,16 +259,7 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public CustomEmoji createCustomEmoji(@Nonnull final JsonObject data) {
-        final JsonArray rolesRaw = data.getJsonArray("mention_roles", EMPTY_JSON_ARRAY);
-        final Collection<String> roles = new ArrayList<>(rolesRaw.size());
-        for(final Object object : rolesRaw) {
-            if(!(object instanceof String)) {
-                throw new IllegalArgumentException("Expected all role ids to be strings, but found " +
-                        (object == null ? "null" : object.getClass()));
-            }
-            roles.add((String)object);
-        }
-        
+        final Collection<String> roles = stringArrayToCollection(data.getJsonArray("roles"));
         final JsonObject userRaw = data.getJsonObject("user");
         
         return CustomEmojiImpl.builder()
@@ -313,56 +308,16 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public Message createMessage(@Nonnull final JsonObject data) {
-        final List<User> mentionedUsers = data.getJsonArray("mentions").stream().filter(e -> e instanceof JsonObject)
-                .map(e -> (JsonObject) e).map(this::createUser).collect(Collectors.toList());
-        
         final User author = createUser(data.getJsonObject("author"));
         
         final JsonObject memberRaw = data.getJsonObject("member");
         final Member member = memberRaw == null ? null : createMember(author, memberRaw);
-        
-        final String timestampRaw = data.getString("timestamp");
-        final String editedTimestampRaw = data.getString("edited_timestamp");
-        
-        final JsonArray embedsRaw = data.getJsonArray("embeds", EMPTY_JSON_ARRAY);
-        final Collection<Embed> embeds = new ArrayList<>(embedsRaw.size());
-        for(final Object object : embedsRaw) {
-            if(!(object instanceof JsonObject)) {
-                throw new IllegalArgumentException("Expected all embeds to be JsonObjects, but found " +
-                        (object == null ? "null" : object.getClass()));
-            }
-            embeds.add(createEmbed((JsonObject) object));
-        }
-        
-        final JsonArray mentionedRolesRaw = data.getJsonArray("mention_roles", EMPTY_JSON_ARRAY);
-        final Collection<String> mentionedRoles = new ArrayList<>(mentionedRolesRaw.size());
-        for(final Object object : mentionedRolesRaw) {
-            if(!(object instanceof String)) {
-                throw new IllegalArgumentException("Expected all role mentions to be strings, but found " +
-                        (object == null ? "null" : object.getClass()));
-            }
-            mentionedRoles.add((String)object);
-        }
-        
-        final JsonArray attachmentsRaw = data.getJsonArray("attachments", EMPTY_JSON_ARRAY);
-        final Collection<Message.Attachment> attachments = new ArrayList<>(attachmentsRaw.size());
-        for(final Object object : attachmentsRaw) {
-            if(!(object instanceof JsonObject)) {
-                throw new IllegalArgumentException("Expected all attachments to be JsonObjects, but found " +
-                        (object == null ? "null" : object.getClass()));
-            }
-            attachments.add(createAttachment((JsonObject) object));
-        }
     
-        final JsonArray reactionsRaw = data.getJsonArray("reactions", EMPTY_JSON_ARRAY);
-        final Collection<Message.Reaction> reactions = new ArrayList<>(reactionsRaw.size());
-        for(final Object object : reactionsRaw) {
-            if(!(object instanceof JsonObject)) {
-                throw new IllegalArgumentException("Expected all reactions to be JsonObjects, but found " +
-                        (object == null ? "null" : object.getClass()));
-            }
-            reactions.add(createReaction((JsonObject) object));
-        }
+        final Collection<User> mentionedUsers = mapArrayObjects(data.getJsonArray("mentions"), this::createUser);
+        final Collection<Embed> embeds = mapArrayObjects(data.getJsonArray("embeds"), this::createEmbed);
+        final Collection<String> mentionedRoles = stringArrayToCollection(data.getJsonArray("mention_roles"));
+        final Collection<Message.Attachment> attachments = mapArrayObjects(data.getJsonArray("attachments"), this::createAttachment);
+        final Collection<Message.Reaction> reactions = mapArrayObjects(data.getJsonArray("reactions"), this::createReaction);
         
         return MessageImpl.builder()
                 .catnip(catnip)
@@ -370,11 +325,11 @@ public final class EntityBuilder {
                 .channelId(data.getString("channel_id"))
                 .author(author)
                 .content(data.getString("content"))
-                .timestamp(timestampRaw == null ? null : OffsetDateTime.parse(timestampRaw))
-                .editedTimestamp(editedTimestampRaw == null ? null : OffsetDateTime.parse(editedTimestampRaw))
+                .timestamp(parseTimestamp(data.getString("timestamp")))
+                .editedTimestamp(parseTimestamp(data.getString("edited_timestamp")))
                 .tts(data.getBoolean("tts"))
                 .mentionsEveryone(data.getBoolean("mention_everyone", false))
-                .mentionedUsers(mentionedUsers)
+                .mentionedUsers(ImmutableList.copyOf(mentionedUsers))
                 .mentionedRoles(ImmutableList.copyOf(mentionedRoles))
                 .attachments(ImmutableList.copyOf(attachments))
                 .embeds(ImmutableList.copyOf(embeds))
@@ -390,8 +345,78 @@ public final class EntityBuilder {
                 .build();
     }
     
+    @Nonnull
+    @CheckReturnValue
+    public Guild createGuild(@Nonnull final JsonObject data) {
+        return GuildImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .name(data.getString("name"))
+                .icon(data.getString("icon"))
+                .splash(data.getString("splash"))
+                .owned(data.getBoolean("owner", false))
+                .ownerId(data.getString("owner_id"))
+                .permissions(Permission.toSet(data.getLong("permissions", 0L)))
+                .region(data.getString("region"))
+                .afkChannelId(data.getString("afk_channel_id"))
+                .afkTimeout(data.getInteger("afk_timeout"))
+                .embedEnabled(data.getBoolean("embed_enabled", false))
+                .embedChannelId(data.getString("embed_channel_id"))
+                .verificationLevel(VerificationLevel.byKey(data.getInteger("verification_level", 0)))
+                .defaultMessageNotifications(NotificationLevel.byKey(data.getInteger("default_message_notifications", 0)))
+                .explicitContentFilter(ContentFilterLevel.byKey(data.getInteger("explicit_content_filter", 0)))
+                .roles(ImmutableList.copyOf(mapArrayObjects(data.getJsonArray("roles"), this::createRole)))
+                .emojis(ImmutableList.copyOf(mapArrayObjects(data.getJsonArray("emojis"), this::createCustomEmoji)))
+                .features(ImmutableList.copyOf(stringArrayToCollection(data.getJsonArray("features"))))
+                .mfaLevel(MFALevel.byKey(data.getInteger("mfa_level", 0)))
+                .applicationId(data.getString("application_id"))
+                .widgetEnabled(data.getBoolean("widget_enabled", false))
+                .widgetChannelId(data.getString("widget_channel_id"))
+                .systemChannelId(data.getString("system_channel_id"))
+                .joinedAt(parseTimestamp(data.getString("joined_at")))
+                .large(data.getBoolean("large", false))
+                .unavailable(data.getBoolean("unavailable", false))
+                .memberCount(data.getInteger("member_count", -1))
+                .members(ImmutableList.copyOf(mapArrayObjects(data.getJsonArray("members"), this::createMember)))
+                .build();
+    }
+    
     @CheckReturnValue
     private static boolean isInvalid(@Nullable final JsonObject object, @Nonnull final String key) {
         return object == null || !object.containsKey(key);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    private static <T> Collection<T> mapArrayObjects(@Nullable final JsonArray array, @Nonnull final Function<JsonObject, T> mapper) {
+        if(array == null) {
+            return Collections.emptyList();
+        }
+        final Collection<T> ret = new ArrayList<>(array.size());
+        for(final Object object : array) {
+            if(!(object instanceof JsonObject)) {
+                throw new IllegalArgumentException("Expected all values to be JsonObjects, but found " +
+                        (object == null ? "null" : object.getClass()));
+            }
+            ret.add(mapper.apply((JsonObject)object));
+        }
+        return ret;
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    private static Collection<String> stringArrayToCollection(@Nullable final JsonArray array) {
+        if(array == null) {
+            return Collections.emptyList();
+        }
+        final Collection<String> ret = new ArrayList<>(array.size());
+        for(final Object object : array) {
+            if(!(object instanceof String)) {
+                throw new IllegalArgumentException("Expected all values to be strings, but found " +
+                        (object == null ? "null" : object.getClass()));
+            }
+            ret.add((String)object);
+        }
+        return ret;
     }
 }
