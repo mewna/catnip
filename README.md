@@ -5,6 +5,12 @@ A Discord API wrapper in Java. Fully async / reactive, built on top of
 
 We have a Discord! https://discord.gg/kCsBCjK
 
+## Installation
+
+Run `mvn clean test install`
+
+If this is too hard for you and / or you use gradle, get it on Jitpack here: https://jitpack.io/#mewna/catnip
+
 ## Basic usage
 
 This is the simplest possible bot you can make right now:
