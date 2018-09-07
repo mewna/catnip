@@ -376,7 +376,7 @@ public final class EntityBuilder {
                 .joinedAt(parseTimestamp(data.getString("joined_at")))
                 .large(data.getBoolean("large", false))
                 .unavailable(data.getBoolean("unavailable", false))
-                .memberCount(data.getInteger("member_count"))
+                .memberCount(data.getInteger("member_count", -1))
                 .members(ImmutableList.copyOf(mapArrayObjects(data.getJsonArray("members"), this::createMember)))
                 .build();
     }
