@@ -22,8 +22,8 @@ public class MemoryRatelimiterTest {
         final String key = "test";
         final long limit = 10;
         final long period = 500L;
-        
-        test.put(key, new Bucket(limit, limit, System.currentTimeMillis()));
+
+        test.put(key, new Bucket(limit, limit, System.currentTimeMillis() + period));
         for(int i = 0; i < limit; i++) {
             final ImmutablePair<Boolean, Long> res = MemoryRatelimiter.checkRatelimitInternal(test, key, period, limit);
             assertEquals(false, res.left);

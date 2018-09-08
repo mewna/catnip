@@ -15,24 +15,19 @@ public final class MemoryRatelimiter implements Ratelimiter {
     
     static ImmutablePair<Boolean, Long> checkRatelimitInternal(final Map<String, Bucket> buckets, final String id,
                                                                final long period, final long limit) {
+        final long now = System.currentTimeMillis();
         if(buckets.containsKey(id)) {
             final Bucket bucket = buckets.get(id);
-            if(bucket.remaining <= 0) {
-                // handle reset
-                final long now = System.currentTimeMillis();
-                if(bucket.resetAt > now) {
-                    return ImmutablePair.of(true, 0L);
-                } else {
-                    bucket.remaining = bucket.limit;
-                }
+            if(bucket.resetAt < now) { // handle reset
+                bucket.remaining = bucket.limit; //TODO(shred): assert bucket.limit == limit for safety/sanity?
+                bucket.resetAt = now + period;
+            } else if(bucket.remaining <= 0) { //no permits available
+                return ImmutablePair.of(true, 0L);
             }
             bucket.remaining--;
-            if(bucket.remaining <= 0) {
-                bucket.resetAt = bucket.resetAt + period;
-            }
             return ImmutablePair.of(false, bucket.remaining);
         } else {
-            buckets.put(id, new Bucket(limit, limit - 1, System.currentTimeMillis()));
+            buckets.put(id, new Bucket(limit, limit - 1, now + period));
             return ImmutablePair.of(false, limit - 1);
         }
     }
