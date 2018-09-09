@@ -5,10 +5,9 @@ import io.vertx.core.json.JsonObject;
 import lombok.Value;
 import lombok.experimental.Accessors;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -84,14 +83,14 @@ public class CachingBuffer extends AbstractBuffer {
     private final class BufferState {
         private int id;
         private final Set<String> readyGuilds;
-        private final List<JsonObject> buffer = new CopyOnWriteArrayList<>();
+        private final Deque<JsonObject> buffer = new ConcurrentLinkedDeque<>();
         
         void recvGuild(final String id) {
             readyGuilds.remove(id);
         }
         
         void buffer(final JsonObject event) {
-            buffer.add(event);
+            buffer.addLast(event);
         }
         
         void replay() {
