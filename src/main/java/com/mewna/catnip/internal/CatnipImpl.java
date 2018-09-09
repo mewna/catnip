@@ -91,7 +91,8 @@ public class CatnipImpl implements Catnip {
         if(token == null || token.isEmpty()) {
             throw new IllegalStateException("Provided token is empty!");
         }
-        shardManager.setCatnip(this);
+        shardManager.catnip(this);
+        eventBuffer.catnip(this);
         shardManager.start();
         return this;
     }

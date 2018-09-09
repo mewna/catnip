@@ -26,12 +26,12 @@ public class CachingBuffer extends AbstractBuffer {
     
     @Override
     public void buffer(final JsonObject event) {
-        final JsonObject data = event.getJsonObject("shard");
-        final int id = data.getInteger("id");
-        //final int limit = data.getInteger("limit");
+        final JsonObject shardData = event.getJsonObject("shard");
+        final int id = shardData.getInteger("id");
+        //final int limit = shardData.getInteger("limit");
         final String type = event.getString("t");
         
-        final JsonObject d = data.getJsonObject("d");
+        final JsonObject d = event.getJsonObject("d");
         switch(type) {
             case DiscordEvent.READY: {
                 final Set<String> guilds = d.getJsonArray("guilds").stream()
