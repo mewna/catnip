@@ -1,10 +1,10 @@
 package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
+import com.mewna.catnip.entity.Embed;
 import com.mewna.catnip.entity.Emoji;
 import com.mewna.catnip.entity.Message;
 import com.mewna.catnip.entity.builder.MessageBuilder;
-import com.mewna.catnip.entity.Embed;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
@@ -12,9 +12,14 @@ import com.mewna.catnip.rest.Routes;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -135,5 +140,33 @@ public class RestChannel extends RestHandler {
     public CompletableFuture<Void> deleteOwnReaction(@Nonnull final String channelId, @Nonnull final String messageId,
                                                      @Nonnull final Emoji emoji) {
         return deleteOwnReaction(channelId, messageId, emoji.forReaction());
+    }
+    
+    @Nonnull
+    public CompletableFuture<List<Message>> getChannelMessages(@Nonnull final String channelId, @Nullable final String before,
+                                                               @Nullable final String after, @Nullable final String around,
+                                                               @Nonnegative final int limit) {
+        final Collection<String> params = new ArrayList<>();
+        if(limit > 0) {
+            params.add("limit=" + limit);
+        }
+        if(after != null) {
+            params.add("after=" + after);
+        }
+        if(around != null) {
+            params.add("around=" + around);
+        }
+        if(before != null) {
+            params.add("before=" + before);
+        }
+        String query = String.join("&", params);
+        if(!query.isEmpty()) {
+            query = '?' + query;
+        }
+        return getCatnip().requester()
+                .queue(new OutboundRequest(Routes.GET_CHANNEL_MESSAGES.withMajorParam(channelId).withQueryString(query),
+                        ImmutableMap.of(), null))
+                .thenApply(ResponsePayload::array)
+                .thenApply(getEntityBuilder()::createManyMessages);
     }
 }

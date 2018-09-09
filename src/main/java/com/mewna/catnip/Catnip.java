@@ -7,6 +7,7 @@ import com.mewna.catnip.internal.ratelimit.Ratelimiter;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
 import com.mewna.catnip.rest.Routes;
+import com.mewna.catnip.shard.event.EventBuffer;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.session.SessionManager;
 import io.vertx.core.Vertx;
@@ -90,6 +91,12 @@ public interface Catnip {
     
     @Nonnull
     Catnip logAdapter(@Nonnull LogAdapter adapter);
+
+    @Nonnull
+    EventBuffer eventBuffer();
+    
+    @Nonnull
+    Catnip eventBuffer(@Nonnull EventBuffer eventBuffer);
     
     // TODO: Provide convenience methods for extension un/loading like #eventBus()
     @Nonnull
