@@ -351,7 +351,7 @@ public class CatnipShard extends AbstractVerticle {
         // This allows a buffer to know WHERE an event is coming from, so that
         // it can be accurate in the case of ex. buffering events until a shard
         // has finished booting.
-        event.put("shard", id).put("limit", limit);
+        event.put("shard", new JsonObject().put("id", id).put("limit", limit));
         catnip.eventBuffer().buffer(event);
         catnip.eventBus().<JsonObject>send("RAW_DISPATCH", event);
         //catnip.eventBus().send(type, data);
