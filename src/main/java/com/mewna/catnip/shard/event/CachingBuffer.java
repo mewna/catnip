@@ -30,7 +30,7 @@ public class CachingBuffer extends AbstractBuffer {
         final int id = data.getInteger("id");
         //final int limit = data.getInteger("limit");
         final String type = event.getString("t");
-    
+        
         final JsonObject d = data.getJsonObject("d");
         switch(type) {
             case DiscordEvent.READY: {
@@ -63,6 +63,9 @@ public class CachingBuffer extends AbstractBuffer {
                 }
                 break;
             }
+            // TODO: Buffer events ONLY if a guild hasn't been created yet
+            // This will prevent a single "stuck" guild from blocking everything,
+            // as we learned from JDA.
             default: {
                 // Buffer and replay later
                 final BufferState bufferState = buffers.get(id);
@@ -86,7 +89,7 @@ public class CachingBuffer extends AbstractBuffer {
         void recvGuild(final String id) {
             readyGuilds.remove(id);
         }
-    
+        
         void buffer(final JsonObject event) {
             buffer.add(event);
         }
