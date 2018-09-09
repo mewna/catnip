@@ -70,7 +70,16 @@ public class CachingBuffer extends AbstractBuffer {
                 // Buffer and replay later
                 final BufferState bufferState = buffers.get(id);
                 if(bufferState != null) {
-                    bufferState.buffer(event);
+                    final String guildId = d.getString("guild_id", null);
+                    if(guildId != null) {
+                        if(bufferState.readyGuilds().contains(guildId)) {
+                            bufferState.buffer(event);
+                        } else {
+                            emitter().emit(event);
+                        }
+                    } else {
+                        emitter().emit(event);
+                    }
                 } else {
                     emitter().emit(event);
                 }
