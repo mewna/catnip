@@ -95,7 +95,9 @@ public class CachingBuffer extends AbstractBuffer {
         }
         
         void replay() {
+            final int count = buffer.size();
             buffer.forEach(emitter()::emit);
+            catnip().logAdapter().info("Replayed {} buffered events", count);
         }
     }
 }
