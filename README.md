@@ -1,5 +1,8 @@
 # catnip
 
+[![CircleCI](https://circleci.com/gh/mewna/catnip.svg?style=svg)](https://circleci.com/gh/mewna/catnip)
+[![powered by potato](https://img.shields.io/badge/powered%20by-potato-%23db325c.svg)](https://mewna.com/)
+
 A Discord API wrapper in Java. Fully async / reactive, built on top of
 [vert.x](https://vertx.io).
 
