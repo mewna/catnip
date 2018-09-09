@@ -45,7 +45,7 @@ public class CatnipShard extends AbstractVerticle {
     private final AtomicBoolean heartbeatAcked = new AtomicBoolean(true);
     private final byte[] decompressBuffer = new byte[1024];
     
-    private final DispatchEmitter emitter;
+    //private final DispatchEmitter emitter;
     
     private final Deque<JsonObject> messageQueue = new ConcurrentLinkedDeque<>();
     
@@ -57,7 +57,7 @@ public class CatnipShard extends AbstractVerticle {
         client = catnip.vertx().createHttpClient(new HttpClientOptions()
                 .setMaxWebsocketFrameSize(Integer.MAX_VALUE)
                 .setMaxWebsocketMessageSize(Integer.MAX_VALUE));
-        emitter = new DispatchEmitter(catnip);
+        //emitter = new DispatchEmitter(catnip);
     }
     
     /**
@@ -101,14 +101,14 @@ public class CatnipShard extends AbstractVerticle {
                     final ImmutablePair<Boolean, Long> check = catnip.gatewayRatelimiter()
                             .checkRatelimit(String.format("catnip:gateway:%s:outgoing-send", id), 60_000L, 110);
                     if(check.left) {
-                        //we got ratelimited, stop sending
+                        // We got ratelimited, stop sending
                         break;
                     }
                     final JsonObject payload = messageQueue.pop();
                     catnip.eventBus().send(websocketMessageSendAddress(), payload);
                 }
             }
-            //poll again in half a second
+            // Poll again in half a second
             catnip.vertx().setTimer(500, __ -> catnip.eventBus().send(websocketMessagePollAddress(), null));
         });
         // Start gateway poll
@@ -345,8 +345,14 @@ public class CatnipShard extends AbstractVerticle {
                 break;
             }
         }
-        
-        emitter.emit(event);
+    
+    
+        //emitter.emit(event);
+        // This allows a buffer to know WHERE an event is coming from, so that
+        // it can be accurate in the case of ex. buffering events until a shard
+        // has finished booting.
+        event.put("shard", id).put("limit", limit);
+        catnip.eventBuffer().buffer(event);
         catnip.eventBus().<JsonObject>send("RAW_DISPATCH", event);
         //catnip.eventBus().send(type, data);
     }
