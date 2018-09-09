@@ -67,6 +67,10 @@ public final class Routes {
         Route copy() {
             return new Route(method, baseRoute, majorParam);
         }
+        
+        public Route withQueryString(final String qs) {
+            return new Route(method, baseRoute + qs, majorParam);
+        }
     
         @Override
         public boolean equals(final Object o) {
