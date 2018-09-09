@@ -7,6 +7,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnegative;
 import java.util.Deque;
@@ -16,6 +17,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  * @author amy
  * @since 8/15/18.
  */
+@Accessors(fluent = true)
 public class DefaultShardManager implements ShardManager {
     private static final String POLL_QUEUE = "catnip:shard:manager:poll";
     
@@ -38,7 +40,7 @@ public class DefaultShardManager implements ShardManager {
     }
     
     @Override
-    public int getShardCount() {
+    public int shardCount() {
         return 0;
     }
     

@@ -10,15 +10,14 @@ import javax.annotation.Nonnull;
  * @since 8/15/18.
  */
 public interface ShardManager {
-    String CONNECT_QUEUE = "flow:gateway:connect-queue";
-    
-    int getShardCount();
+    int shardCount();
     
     void start();
     
     void addToConnectQueue(@Nonnegative int shard);
     
-    Catnip getCatnip();
+    @Nonnull
+    Catnip catnip();
     
-    void setCatnip(@Nonnull Catnip catnip);
+    ShardManager catnip(@Nonnull Catnip catnip);
 }

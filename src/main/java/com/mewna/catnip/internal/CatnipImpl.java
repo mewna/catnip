@@ -13,6 +13,8 @@ import com.mewna.catnip.internal.ratelimit.MemoryRatelimiter;
 import com.mewna.catnip.internal.ratelimit.Ratelimiter;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
+import com.mewna.catnip.shard.event.EventBuffer;
+import com.mewna.catnip.shard.event.NoopBuffer;
 import com.mewna.catnip.shard.manager.DefaultShardManager;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.session.DefaultSessionManager;
@@ -33,6 +35,7 @@ import javax.annotation.Nonnull;
  * @author amy
  * @since 8/31/18.
  */
+@SuppressWarnings("OverlyCoupledClass")
 @Accessors(fluent = true, chain = true)
 public class CatnipImpl implements Catnip {
     @Getter
@@ -61,6 +64,9 @@ public class CatnipImpl implements Catnip {
     @Getter
     @Setter
     private ExtensionManager extensionManager = new DefaultExtensionManager(this);
+    @Getter
+    @Setter
+    private EventBuffer eventBuffer = new NoopBuffer();
     
     @Nonnull
     @Override
@@ -93,7 +99,8 @@ public class CatnipImpl implements Catnip {
         if(token == null || token.isEmpty()) {
             throw new IllegalStateException("Provided token is empty!");
         }
-        shardManager.setCatnip(this);
+        shardManager.catnip(this);
+        eventBuffer.catnip(this);
         shardManager.start();
         return this;
     }

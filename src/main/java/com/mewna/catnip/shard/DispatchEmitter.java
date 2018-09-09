@@ -10,16 +10,16 @@ import static com.mewna.catnip.shard.DiscordEvent.*;
  * @author amy
  * @since 9/2/18.
  */
-class DispatchEmitter {
+public class DispatchEmitter {
     private final Catnip catnip;
     private final EntityBuilder entityBuilder;
     
-    DispatchEmitter(final Catnip catnip) {
+    public DispatchEmitter(final Catnip catnip) {
         this.catnip = catnip;
         entityBuilder = new EntityBuilder(catnip);
     }
     
-    void emit(final JsonObject payload) {
+    public void emit(final JsonObject payload) {
         final String type = payload.getString("t");
         final JsonObject data = payload.getJsonObject("d");
         

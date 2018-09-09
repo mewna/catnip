@@ -43,6 +43,45 @@ public final class EntityBuilder {
         this.catnip = catnip;
     }
     
+    @CheckReturnValue
+    private static boolean isInvalid(@Nullable final JsonObject object, @Nonnull final String key) {
+        return object == null || !object.containsKey(key);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    private static <T> Collection<T> mapArrayObjects(@Nullable final JsonArray array, @Nonnull final Function<JsonObject, T> mapper) {
+        if(array == null) {
+            return Collections.emptyList();
+        }
+        final Collection<T> ret = new ArrayList<>(array.size());
+        for(final Object object : array) {
+            if(!(object instanceof JsonObject)) {
+                throw new IllegalArgumentException("Expected all values to be JsonObjects, but found " +
+                        (object == null ? "null" : object.getClass()));
+            }
+            ret.add(mapper.apply((JsonObject) object));
+        }
+        return ret;
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    private static Collection<String> stringArrayToCollection(@Nullable final JsonArray array) {
+        if(array == null) {
+            return Collections.emptyList();
+        }
+        final Collection<String> ret = new ArrayList<>(array.size());
+        for(final Object object : array) {
+            if(!(object instanceof String)) {
+                throw new IllegalArgumentException("Expected all values to be strings, but found " +
+                        (object == null ? "null" : object.getClass()));
+            }
+            ret.add((String) object);
+        }
+        return ret;
+    }
+    
     @Nullable
     @CheckReturnValue
     private OffsetDateTime parseTimestamp(@Nullable final CharSequence raw) {
@@ -312,7 +351,7 @@ public final class EntityBuilder {
         
         final JsonObject memberRaw = data.getJsonObject("member");
         final Member member = memberRaw == null ? null : createMember(author, memberRaw);
-    
+        
         final Collection<User> mentionedUsers = mapArrayObjects(data.getJsonArray("mentions"), this::createUser);
         final Collection<Embed> embeds = mapArrayObjects(data.getJsonArray("embeds"), this::createEmbed);
         final Collection<String> mentionedRoles = stringArrayToCollection(data.getJsonArray("mention_roles"));
@@ -339,10 +378,16 @@ public final class EntityBuilder {
                 .webhookId(data.getString("webhook_id"))
                 .type(MessageType.byId(data.getInteger("type")))
                 
-                //not actually documented
+                // Not actually documented (part of lazy guild changes)
                 .member(member)
                 .guildId(data.getString("guild_id"))
                 .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public List<Message> createManyMessages(@Nonnull final JsonArray data) {
+        return data.stream().map(e -> (JsonObject) e).map(this::createMessage).collect(Collectors.toList());
     }
     
     @Nonnull
@@ -379,44 +424,5 @@ public final class EntityBuilder {
                 .memberCount(data.getInteger("member_count", -1))
                 .members(ImmutableList.copyOf(mapArrayObjects(data.getJsonArray("members"), this::createMember)))
                 .build();
-    }
-    
-    @CheckReturnValue
-    private static boolean isInvalid(@Nullable final JsonObject object, @Nonnull final String key) {
-        return object == null || !object.containsKey(key);
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    private static <T> Collection<T> mapArrayObjects(@Nullable final JsonArray array, @Nonnull final Function<JsonObject, T> mapper) {
-        if(array == null) {
-            return Collections.emptyList();
-        }
-        final Collection<T> ret = new ArrayList<>(array.size());
-        for(final Object object : array) {
-            if(!(object instanceof JsonObject)) {
-                throw new IllegalArgumentException("Expected all values to be JsonObjects, but found " +
-                        (object == null ? "null" : object.getClass()));
-            }
-            ret.add(mapper.apply((JsonObject)object));
-        }
-        return ret;
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    private static Collection<String> stringArrayToCollection(@Nullable final JsonArray array) {
-        if(array == null) {
-            return Collections.emptyList();
-        }
-        final Collection<String> ret = new ArrayList<>(array.size());
-        for(final Object object : array) {
-            if(!(object instanceof String)) {
-                throw new IllegalArgumentException("Expected all values to be strings, but found " +
-                        (object == null ? "null" : object.getClass()));
-            }
-            ret.add((String)object);
-        }
-        return ret;
     }
 }
