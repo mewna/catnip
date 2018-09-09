@@ -5,6 +5,8 @@ import com.mewna.catnip.entity.impl.MemberImpl;
 import com.mewna.catnip.entity.impl.MessageImpl;
 import com.mewna.catnip.entity.impl.RoleImpl;
 import com.mewna.catnip.entity.impl.UserImpl;
+import com.mewna.catnip.extension.manager.DefaultExtensionManager;
+import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.internal.logging.DefaultLogAdapter;
 import com.mewna.catnip.internal.logging.LogAdapter;
 import com.mewna.catnip.internal.ratelimit.MemoryRatelimiter;
@@ -28,9 +30,12 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
 /**
+ * TODO: This thing has a giant number of dependencies - how to split it up?
+ *
  * @author amy
  * @since 8/31/18.
  */
+@SuppressWarnings("OverlyCoupledClass")
 @Accessors(fluent = true, chain = true)
 public class CatnipImpl implements Catnip {
     @Getter
@@ -56,6 +61,9 @@ public class CatnipImpl implements Catnip {
     @Getter
     @Setter
     private LogAdapter logAdapter = new DefaultLogAdapter();
+    @Getter
+    @Setter
+    private ExtensionManager extensionManager = new DefaultExtensionManager(this);
     @Getter
     @Setter
     private EventBuffer eventBuffer = new NoopBuffer();
