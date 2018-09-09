@@ -5,6 +5,7 @@ import com.mewna.catnip.internal.logging.LogAdapter;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
 import com.mewna.catnip.rest.Routes;
+import com.mewna.catnip.shard.event.EventBuffer;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.internal.ratelimit.Ratelimiter;
@@ -71,7 +72,13 @@ public interface Catnip {
     LogAdapter logAdapter();
     
     @Nonnull
-    Catnip logAdapter(LogAdapter adapter);
+    Catnip logAdapter(@Nonnull LogAdapter adapter);
+    
+    @Nonnull
+    EventBuffer eventBuffer();
+    
+    @Nonnull
+    Catnip eventBuffer(@Nonnull EventBuffer eventBuffer);
     
     @Nonnull
     @CheckReturnValue
