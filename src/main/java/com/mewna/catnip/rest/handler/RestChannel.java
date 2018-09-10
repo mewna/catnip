@@ -144,6 +144,7 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
+    @CheckReturnValue
     public CompletableFuture<List<Message>> getChannelMessages(@Nonnull final String channelId, @Nullable final String before,
                                                                @Nullable final String after, @Nullable final String around,
                                                                @Nonnegative final int limit) {
@@ -170,5 +171,12 @@ public class RestChannel extends RestHandler {
                 .thenApply(ResponsePayload::array)
                 .thenApply(getEntityBuilder()::createManyMessages)
                 .thenApply(Collections::unmodifiableList);
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> triggerTypingIndicator(@Nonnull final String channelId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.TRIGGER_TYPING_INDICATOR.withMajorParam(channelId),
+                ImmutableMap.of(), null))
+                .thenApply(__ -> null);
     }
 }
