@@ -23,6 +23,7 @@ public class DefaultExtensionManager implements ExtensionManager {
     @Override
     public void loadExtension(@Nonnull final Extension extension) {
         if(!loadedExtensions.contains(extension)) {
+            extension.catnip(catnip);
             catnip.vertx().deployVerticle(extension);
             loadedExtensions.add(extension);
         }
