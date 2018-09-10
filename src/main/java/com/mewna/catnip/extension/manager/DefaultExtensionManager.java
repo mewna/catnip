@@ -21,20 +21,22 @@ public class DefaultExtensionManager implements ExtensionManager {
     private final Collection<Extension> loadedExtensions = new ConcurrentHashSet<>();
     
     @Override
-    public void loadExtension(@Nonnull final Extension extension) {
+    public ExtensionManager loadExtension(@Nonnull final Extension extension) {
         if(!loadedExtensions.contains(extension)) {
             extension.catnip(catnip);
             catnip.vertx().deployVerticle(extension);
             loadedExtensions.add(extension);
         }
+        return this;
     }
     
     @Override
-    public void unloadExtension(@Nonnull final Extension extension) {
+    public ExtensionManager unloadExtension(@Nonnull final Extension extension) {
         if(loadedExtensions.contains(extension)) {
             catnip.vertx().undeploy(extension.deploymentID());
             loadedExtensions.remove(extension);
         }
+        return this;
     }
     
     @Nonnull
