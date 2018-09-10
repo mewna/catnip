@@ -4,7 +4,9 @@ import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.extension.Extension;
 import io.vertx.core.impl.ConcurrentHashSet;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -15,8 +17,10 @@ import java.util.stream.Collectors;
  * @author amy
  * @since 9/6/18
  */
+@Accessors(fluent = true)
 @RequiredArgsConstructor
 public class DefaultExtensionManager implements ExtensionManager {
+    @Getter
     private final Catnip catnip;
     private final Collection<Extension> loadedExtensions = new ConcurrentHashSet<>();
     

@@ -1,5 +1,6 @@
 package com.mewna.catnip.extension.manager;
 
+import com.mewna.catnip.Catnip;
 import com.mewna.catnip.extension.Extension;
 
 import javax.annotation.Nonnull;
@@ -75,4 +76,6 @@ public interface ExtensionManager {
      */
     @Nonnull
     Set<Extension> matchingExtensions(@Nonnull Class<? extends Extension> extensionClass);
+    
+    Catnip catnip();
 }
