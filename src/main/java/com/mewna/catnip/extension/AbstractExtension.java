@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
  * @author amy
  * @since 9/6/18
  */
-@Accessors(fluent = true)
+@Accessors(fluent = true, chain = true)
 @SuppressWarnings("WeakerAccess")
 @RequiredArgsConstructor
 public abstract class AbstractExtension extends AbstractVerticle implements Extension {
