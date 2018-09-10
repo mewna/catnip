@@ -5,6 +5,7 @@ import com.mewna.catnip.entity.impl.MemberImpl;
 import com.mewna.catnip.entity.impl.MessageImpl;
 import com.mewna.catnip.entity.impl.RoleImpl;
 import com.mewna.catnip.entity.impl.UserImpl;
+import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.DefaultExtensionManager;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.internal.logging.DefaultLogAdapter;
@@ -73,6 +74,13 @@ public class CatnipImpl implements Catnip {
     @CheckReturnValue
     public EventBus eventBus() {
         return vertx.eventBus();
+    }
+    
+    @Nonnull
+    @Override
+    public Catnip loadExtension(@Nonnull final Extension extension) {
+        extensionManager.loadExtension(extension);
+        return this;
     }
     
     @Nonnull
