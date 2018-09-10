@@ -1,5 +1,6 @@
 package com.mewna.catnip;
 
+import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.internal.logging.LogAdapter;
@@ -104,4 +105,7 @@ public interface Catnip {
     
     @Nonnull
     Catnip extensionManager(@Nonnull ExtensionManager extensionManager);
+    
+    @Nonnull
+    Catnip loadExtension(@Nonnull Extension extension);
 }
