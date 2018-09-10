@@ -19,6 +19,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -167,6 +168,7 @@ public class RestChannel extends RestHandler {
                 .queue(new OutboundRequest(Routes.GET_CHANNEL_MESSAGES.withMajorParam(channelId).withQueryString(query),
                         ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
-                .thenApply(getEntityBuilder()::createManyMessages);
+                .thenApply(getEntityBuilder()::createManyMessages)
+                .thenApply(Collections::unmodifiableList);
     }
 }

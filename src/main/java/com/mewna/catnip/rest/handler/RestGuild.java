@@ -10,6 +10,7 @@ import com.mewna.catnip.rest.Routes;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -30,7 +31,8 @@ public class RestGuild extends RestHandler {
                 .queue(new OutboundRequest(Routes.GET_GUILD_ROLES.withMajorParam(guildId),
                         ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
-                .thenApply(mapObjectContents(getEntityBuilder()::createRole));
+                .thenApply(mapObjectContents(getEntityBuilder()::createRole))
+                .thenApply(Collections::unmodifiableList);
     }
     
     @Nonnull
