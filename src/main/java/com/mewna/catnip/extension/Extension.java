@@ -76,7 +76,7 @@ public interface Extension extends Verticle {
      *
      * @param catnip The catnip instance to inject. May not be {@code null}.
      */
-    void catnip(@Nonnull Catnip catnip);
+    Extension catnip(@Nonnull Catnip catnip);
     
     // TODO: Verify that AbstractVerticle counts as implementing this
     String deploymentID();
