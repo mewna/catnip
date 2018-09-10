@@ -42,7 +42,7 @@ public interface ExtensionManager {
      *
      * @param extension The extension to load.
      */
-    void loadExtension(@Nonnull Extension extension);
+    ExtensionManager loadExtension(@Nonnull Extension extension);
     
     /**
      * Unload the given extension instance. If the extension is not already
@@ -50,7 +50,7 @@ public interface ExtensionManager {
      *
      * @param extension The extension to unload.
      */
-    void unloadExtension(@Nonnull Extension extension);
+    ExtensionManager unloadExtension(@Nonnull Extension extension);
     
     /**
      * Get all loaded extensions whose names match the specified regex. This
