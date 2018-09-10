@@ -13,6 +13,7 @@ import io.vertx.core.json.JsonObject;
 import javax.annotation.Nonnull;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -33,7 +34,8 @@ public class RestEmoji extends RestHandler {
                         ImmutableMap.of(), null
                 ))
                 .thenApply(ResponsePayload::array)
-                .thenApply(mapObjectContents(getEntityBuilder()::createEmoji));
+                .thenApply(mapObjectContents(getEntityBuilder()::createEmoji))
+                .thenApply(Collections::unmodifiableList);
     }
     
     @Nonnull
