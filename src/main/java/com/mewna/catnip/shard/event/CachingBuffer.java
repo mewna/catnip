@@ -1,27 +1,47 @@
 package com.mewna.catnip.shard.event;
 
+import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.shard.DiscordEvent;
 import io.vertx.core.json.JsonObject;
 import lombok.Value;
 import lombok.experimental.Accessors;
 
-import java.util.Deque;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
+import static com.mewna.catnip.shard.DiscordEvent.*;
+
 /**
  * An implementation of {@link EventBuffer} used for the case of caching all
- * guilds sent in the {@code READY} payload. This doc needs to be filled out
- * way more than this eventually.
+ * guilds sent in the {@code READY} payload, as well as for caching data as it
+ * comes over the websocket connection.
+ *
+ * TODO: Actually cache data lol
  *
  * @author amy
  * @since 9/9/18.
  */
 @SuppressWarnings("unused")
 public class CachingBuffer extends AbstractBuffer {
+    private static final List<String> CACHE_EVENTS = ImmutableList.copyOf(new String[] {
+            // Channels
+            CHANNEL_CREATE, CHANNEL_UPDATE, CHANNEL_DELETE,
+            // Guilds
+            GUILD_CREATE, GUILD_UPDATE, GUILD_DELETE,
+            // Roles
+            GUILD_ROLE_CREATE, GUILD_ROLE_UPDATE, GUILD_ROLE_DELETE,
+            // Members
+            GUILD_MEMBER_ADD, GUILD_MEMBER_REMOVE, GUILD_MEMBER_UPDATE,
+            // Member chunking
+            GUILD_MEMBERS_CHUNK,
+            // Users
+            USER_UPDATE, PRESENCE_UPDATE,
+            // Voice
+            VOICE_STATE_UPDATE,
+    });
+    
     private final Map<Integer, BufferState> buffers = new ConcurrentHashMap<>();
     
     @Override
