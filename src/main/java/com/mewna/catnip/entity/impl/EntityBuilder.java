@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.*;
+import com.mewna.catnip.entity.Channel.ChannelType;
 import com.mewna.catnip.entity.Embed.EmbedType;
 import com.mewna.catnip.entity.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.Emoji.UnicodeEmoji;
@@ -232,6 +233,91 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public TextChannel createTextChannel(@Nonnull final JsonObject data) {
+        return TextChannelImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .type(ChannelType.TEXT)
+                .name(data.getString("name"))
+                .guildId(data.getString("guild_id"))
+                .position(data.getInteger("position", -1))
+                .parentId(data.getString("parent_id"))
+                .topic(data.getString("topic"))
+                .nsfw(data.getBoolean("nsfw", false))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public VoiceChannel createVoiceChannel(@Nonnull final JsonObject data) {
+        return VoiceChannelImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .type(ChannelType.VOICE)
+                .name(data.getString("name"))
+                .guildId(data.getString("guild_id"))
+                .position(data.getInteger("position", -1))
+                .parentId(data.getString("parent_id"))
+                .bitrate(data.getInteger("bitrate", 0))
+                .userLimit(data.getInteger("user_limit", 0))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Category createCategory(@Nonnull final JsonObject data) {
+        return CategoryImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .type(ChannelType.CATEGORY)
+                .name(data.getString("name"))
+                .guildId(data.getString("guild_id"))
+                .position(data.getInteger("position", -1))
+                .parentId(data.getString("parent_id"))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public UserDMChannel createUserDM(@Nonnull final JsonObject data) {
+        return UserDMChannelImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .type(ChannelType.VOICE)
+                .recipient(createUser(data.getJsonArray("recipients").getJsonObject(0)))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public GroupDMChannel createGroupDM(@Nonnull final JsonObject data) {
+        return GroupDMChannelImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .type(ChannelType.VOICE)
+                .recipients(ImmutableList.copyOf(mapArrayObjects(data.getJsonArray("recipients"), this::createUser)))
+                .icon(data.getString("icon"))
+                .ownerId(data.getString("owner_id"))
+                .applicationId(data.getString("application_id"))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Channel createChannel(@Nonnull final JsonObject data) {
+        ChannelType type = ChannelType.byKey(data.getInteger("type"));
+        switch(type) {
+            case TEXT: return createTextChannel(data);
+            case DM: return createUserDM(data);
+            case VOICE: return createVoiceChannel(data);
+            case GROUP_DM: return createGroupDM(data);
+            case CATEGORY: return createCategory(data);
+            default: throw new UnsupportedOperationException("Unsupported channel type " + type);
+        }
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public Role createRole(@Nonnull final JsonObject data) {
         return RoleImpl.builder()
                 .catnip(catnip)
@@ -423,6 +509,7 @@ public final class EntityBuilder {
                 .unavailable(data.getBoolean("unavailable", false))
                 .memberCount(data.getInteger("member_count", -1))
                 .members(ImmutableList.copyOf(mapArrayObjects(data.getJsonArray("members"), this::createMember)))
+                .channels(ImmutableList.copyOf(mapArrayObjects(data.getJsonArray("channels"), this::createChannel)))
                 .build();
     }
 }

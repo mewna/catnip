@@ -1,6 +1,7 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.Channel;
 import com.mewna.catnip.entity.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.Guild;
 import com.mewna.catnip.entity.Member;
@@ -58,6 +59,7 @@ public class GuildImpl implements Guild, RequiresCatnip {
     private boolean unavailable;
     private int memberCount;
     private List<Member> members;
+    private List<Channel> channels;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {

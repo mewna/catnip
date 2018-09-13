@@ -140,9 +140,12 @@ public interface Guild extends Snowflake {
     @CheckReturnValue
     List<Member> members();
     
+    @Nonnull
+    @CheckReturnValue
+    List<Channel> channels();
+    
     /* TODO:
         - voice_states
-        - channels
         - presences
      */
     
