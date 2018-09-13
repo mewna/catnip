@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
  * @author amy
  * @since 9/4/18
  */
-public interface User {
+public interface User extends Snowflake {
     
     /**
      * Whether the user's avatar is animated.
