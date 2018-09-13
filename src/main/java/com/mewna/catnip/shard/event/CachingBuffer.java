@@ -83,9 +83,6 @@ public class CachingBuffer extends AbstractBuffer {
                 }
                 break;
             }
-            // TODO: Buffer events ONLY if a guild hasn't been created yet
-            // This will prevent a single "stuck" guild from blocking everything,
-            // as we learned from JDA.
             default: {
                 // Buffer and replay later
                 final BufferState bufferState = buffers.get(id);
@@ -95,12 +92,15 @@ public class CachingBuffer extends AbstractBuffer {
                         if(bufferState.readyGuilds().contains(guildId)) {
                             bufferState.buffer(event);
                         } else {
+                            // Emit if the payload is for a non-buffered guild
                             emitter().emit(event);
                         }
                     } else {
+                        // Emit if the payload has no guild id
                         emitter().emit(event);
                     }
                 } else {
+                    // Emit if not buffering right now
                     emitter().emit(event);
                 }
                 break;

@@ -99,7 +99,6 @@ public interface Catnip {
     @Nonnull
     Catnip eventBuffer(@Nonnull EventBuffer eventBuffer);
     
-    // TODO: Provide convenience methods for extension un/loading like #eventBus()
     @Nonnull
     ExtensionManager extensionManager();
     
