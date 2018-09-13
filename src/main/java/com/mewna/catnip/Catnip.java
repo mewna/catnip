@@ -28,6 +28,10 @@ public interface Catnip {
         return new CatnipImpl().setup();
     }
     
+    static Catnip catnip(@Nonnull final Vertx vertx) {
+        return new CatnipImpl(vertx).setup();
+    }
+    
     @Nonnull
     @CheckReturnValue
     static String getGatewayUrl() {
