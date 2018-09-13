@@ -7,6 +7,7 @@ import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
+import com.mewna.catnip.rest.guild.PartialGuild;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -43,5 +44,23 @@ public class RestGuild extends RestHandler {
                         ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createGuild);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<Guild> createGuild(@Nonnull final PartialGuild guild) {
+        return getCatnip().requester()
+                .queue(new OutboundRequest(Routes.CREATE_GUILD,
+                        ImmutableMap.of(), guild.toJson()))
+                .thenApply(ResponsePayload::object)
+                .thenApply(getEntityBuilder()::createGuild);
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> deleteGuild(@Nonnull final String guildId) {
+        return getCatnip().requester()
+                .queue(new OutboundRequest(Routes.DELETE_GUILD.withMajorParam(guildId),
+                        ImmutableMap.of(), null))
+                .thenApply(__ -> null);
     }
 }

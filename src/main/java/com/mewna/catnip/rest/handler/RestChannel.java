@@ -9,6 +9,7 @@ import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
+import com.mewna.catnip.rest.invite.InviteCreateOptions;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
@@ -178,5 +179,15 @@ public class RestChannel extends RestHandler {
         return getCatnip().requester().queue(new OutboundRequest(Routes.TRIGGER_TYPING_INDICATOR.withMajorParam(channelId),
                 ImmutableMap.of(), null))
                 .thenApply(__ -> null);
+    }
+    
+    //TODO invite object
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<String> createInvite(@Nonnull final String channelId, @Nullable final InviteCreateOptions options) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_CHANNEL_INVITE.withMajorParam(channelId),
+                ImmutableMap.of(), (options == null ? InviteCreateOptions.create() : options).toJson()))
+                .thenApply(ResponsePayload::object)
+                .thenApply(o->o.getString("code"));
     }
 }

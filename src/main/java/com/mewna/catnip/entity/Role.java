@@ -10,7 +10,7 @@ import java.util.Set;
  * @since 9/4/18.
  */
 @SuppressWarnings("unused")
-public interface Role {
+public interface Role extends Snowflake {
     /**
      * The unique snowflake ID of this role.
      *
