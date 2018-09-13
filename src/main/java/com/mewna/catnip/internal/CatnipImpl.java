@@ -40,7 +40,7 @@ import javax.annotation.Nonnull;
 @Accessors(fluent = true, chain = true)
 public class CatnipImpl implements Catnip {
     @Getter
-    private final Vertx vertx = Vertx.vertx();
+    private final Vertx vertx;
     // TODO: Allow changing the backend
     @Getter
     private final RestRequester requester = new RestRequester(this);
@@ -68,6 +68,14 @@ public class CatnipImpl implements Catnip {
     @Getter
     @Setter
     private EventBuffer eventBuffer = new NoopBuffer();
+    
+    public CatnipImpl() {
+        this(Vertx.vertx());
+    }
+    
+    public CatnipImpl(@Nonnull final Vertx vertx) {
+        this.vertx = vertx;
+    }
     
     @Nonnull
     @Override
