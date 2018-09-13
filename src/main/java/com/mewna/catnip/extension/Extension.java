@@ -78,6 +78,5 @@ public interface Extension extends Verticle {
      */
     Extension catnip(@Nonnull Catnip catnip);
     
-    // TODO: Verify that AbstractVerticle counts as implementing this
     String deploymentID();
 }
