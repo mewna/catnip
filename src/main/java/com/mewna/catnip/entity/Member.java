@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author amy
@@ -60,4 +61,13 @@ public interface Member extends Snowflake {
      */
     @Nonnull
     OffsetDateTime joinedAt();
+    
+    /**
+     * Creates a DM channel with this member's user.
+     *
+     * @return Future with the result of the DM creation.
+     */
+    default CompletableFuture<DMChannel> createDM() {
+        return catnip().rest().channel().createDM(id());
+    }
 }

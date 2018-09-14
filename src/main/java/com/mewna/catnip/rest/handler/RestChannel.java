@@ -1,9 +1,7 @@
 package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
-import com.mewna.catnip.entity.Embed;
-import com.mewna.catnip.entity.Emoji;
-import com.mewna.catnip.entity.Message;
+import com.mewna.catnip.entity.*;
 import com.mewna.catnip.entity.builder.MessageBuilder;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
@@ -170,7 +168,7 @@ public class RestChannel extends RestHandler {
                 .queue(new OutboundRequest(Routes.GET_CHANNEL_MESSAGES.withMajorParam(channelId).withQueryString(query),
                         ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
-                .thenApply(getEntityBuilder()::createManyMessages)
+                .thenApply(mapObjectContents(getEntityBuilder()::createMessage))
                 .thenApply(Collections::unmodifiableList);
     }
     
@@ -189,5 +187,32 @@ public class RestChannel extends RestHandler {
                 ImmutableMap.of(), (options == null ? InviteCreateOptions.create() : options).toJson()))
                 .thenApply(ResponsePayload::object)
                 .thenApply(o->o.getString("code"));
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<Channel> getChannelById(@Nonnull final String channelId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_CHANNEL.withMajorParam(channelId),
+                ImmutableMap.of(), null))
+                .thenApply(ResponsePayload::object)
+                .thenApply(getEntityBuilder()::createChannel);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<DMChannel> createDM(@Nonnull final String recipientId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_DM,
+                ImmutableMap.of(), new JsonObject().put("recipient_id", recipientId)))
+                .thenApply(ResponsePayload::object)
+                .thenApply(getEntityBuilder()::createUserDM);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<Channel> deleteChannel(@Nonnull final String channelId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_CHANNEL.withMajorParam(channelId),
+                ImmutableMap.of(), null))
+                .thenApply(ResponsePayload::object)
+                .thenApply(getEntityBuilder()::createChannel);
     }
 }

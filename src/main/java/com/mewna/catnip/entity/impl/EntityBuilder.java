@@ -472,12 +472,6 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public List<Message> createManyMessages(@Nonnull final JsonArray data) {
-        return data.stream().map(e -> (JsonObject) e).map(this::createMessage).collect(Collectors.toList());
-    }
-    
-    @Nonnull
-    @CheckReturnValue
     public Guild createGuild(@Nonnull final JsonObject data) {
         return GuildImpl.builder()
                 .catnip(catnip)
