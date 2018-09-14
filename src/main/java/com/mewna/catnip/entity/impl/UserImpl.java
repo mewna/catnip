@@ -4,6 +4,7 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.User;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.ImageType;
+import com.mewna.catnip.util.CDNFormat;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -33,30 +34,22 @@ public class UserImpl implements User, RequiresCatnip {
     private String avatar;
     private boolean bot;
     
+    @Override
     @CheckReturnValue
-    public boolean isAvatarAnimated() {
+    public boolean animatedAvatar() {
         return avatar != null && avatar.startsWith("a_");
     }
     
     @Nonnull
     @CheckReturnValue
     public String defaultAvatarUrl() {
-        final int avatarId = Short.parseShort(discriminator) % 5;
-        return String.format("https://cdn.discordapp.com/embed/avatars/%s.png", avatarId);
+        return CDNFormat.defaultAvatarUrl(discriminator);
     }
     
     @Nullable
     @CheckReturnValue
     public String avatarUrl(@Nonnull final ImageOptions options) {
-        if(avatar == null) {
-            return null;
-        }
-        if(options.getType() == ImageType.GIF && !avatar.startsWith("a_")) {
-            throw new IllegalArgumentException("Cannot build gif avatar URL for non gif avatar!");
-        }
-        return options.buildUrl(
-                String.format("https://cdn.discordapp.com/avatars/%s/%s", id, avatar)
-        );
+        return CDNFormat.avatarUrl(id, avatar, options);
     }
     
     @Nullable
@@ -86,7 +79,7 @@ public class UserImpl implements User, RequiresCatnip {
     }
     
     private ImageOptions defaultOptions() {
-        return new ImageOptions().type(isAvatarAnimated() ? ImageType.GIF : null);
+        return new ImageOptions().type(animatedAvatar() ? ImageType.GIF : null);
     }
     
     @Override

@@ -179,16 +179,6 @@ public class RestChannel extends RestHandler {
                 .thenApply(__ -> null);
     }
     
-    //TODO invite object
-    @Nonnull
-    @CheckReturnValue
-    public CompletableFuture<String> createInvite(@Nonnull final String channelId, @Nullable final InviteCreateOptions options) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_CHANNEL_INVITE.withMajorParam(channelId),
-                ImmutableMap.of(), (options == null ? InviteCreateOptions.create() : options).toJson()))
-                .thenApply(ResponsePayload::object)
-                .thenApply(o->o.getString("code"));
-    }
-    
     @Nonnull
     @CheckReturnValue
     public CompletableFuture<Channel> getChannelById(@Nonnull final String channelId) {
@@ -214,5 +204,23 @@ public class RestChannel extends RestHandler {
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createChannel);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<CreatedInvite> createInvite(@Nonnull final String channelId, @Nullable final InviteCreateOptions options) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_CHANNEL_INVITE.withMajorParam(channelId),
+                ImmutableMap.of(), (options == null ? InviteCreateOptions.create() : options).toJson()))
+                .thenApply(ResponsePayload::object)
+                .thenApply(getEntityBuilder()::createCreatedInvite);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<List<CreatedInvite>> getChannelInvites(@Nonnull final String channelId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_CHANNEL_INVITES.withMajorParam(channelId),
+                ImmutableMap.of(), null))
+                .thenApply(ResponsePayload::array)
+                .thenApply(mapObjectContents(getEntityBuilder()::createCreatedInvite));
     }
 }
