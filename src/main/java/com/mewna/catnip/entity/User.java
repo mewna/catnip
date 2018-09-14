@@ -18,7 +18,7 @@ public interface User extends Snowflake {
      * @return True if the avatar is animated, false otherwise.
      */
     @CheckReturnValue
-    boolean isAvatarAnimated();
+    boolean animatedAvatar();
     
     /**
      * The URL for the default avatar for this user.

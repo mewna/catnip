@@ -2,6 +2,7 @@ package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
 import com.mewna.catnip.entity.Channel;
+import com.mewna.catnip.entity.CreatedInvite;
 import com.mewna.catnip.entity.Guild;
 import com.mewna.catnip.entity.Role;
 import com.mewna.catnip.internal.CatnipImpl;
@@ -73,5 +74,14 @@ public class RestGuild extends RestHandler {
                         ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
                 .thenApply(mapObjectContents(getEntityBuilder()::createChannel));
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<List<CreatedInvite>> getGuildInvites(@Nonnull final String guildId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_INVITES.withMajorParam(guildId),
+                ImmutableMap.of(), null))
+                .thenApply(ResponsePayload::array)
+                .thenApply(mapObjectContents(getEntityBuilder()::createCreatedInvite));
     }
 }

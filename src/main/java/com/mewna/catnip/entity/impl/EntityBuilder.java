@@ -12,7 +12,13 @@ import com.mewna.catnip.entity.Guild.ContentFilterLevel;
 import com.mewna.catnip.entity.Guild.MFALevel;
 import com.mewna.catnip.entity.Guild.NotificationLevel;
 import com.mewna.catnip.entity.Guild.VerificationLevel;
+import com.mewna.catnip.entity.Invite.InviteChannel;
+import com.mewna.catnip.entity.Invite.InviteGuild;
+import com.mewna.catnip.entity.Invite.Inviter;
 import com.mewna.catnip.entity.impl.EmbedImpl.*;
+import com.mewna.catnip.entity.impl.InviteImpl.InviteChannelImpl;
+import com.mewna.catnip.entity.impl.InviteImpl.InviteGuildImpl;
+import com.mewna.catnip.entity.impl.InviteImpl.InviterImpl;
 import com.mewna.catnip.entity.impl.MessageImpl.Attachment;
 import com.mewna.catnip.entity.impl.MessageImpl.Reaction;
 import io.vertx.core.json.JsonArray;
@@ -504,6 +510,80 @@ public final class EntityBuilder {
                 .memberCount(data.getInteger("member_count", -1))
                 .members(ImmutableList.copyOf(mapArrayObjects(data.getJsonArray("members"), this::createMember)))
                 .channels(ImmutableList.copyOf(mapArrayObjects(data.getJsonArray("channels"), this::createChannel)))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Invite createInvite(@Nonnull final JsonObject data) {
+        if(data.containsKey("uses")) {
+            return createCreatedInvite(data);
+        }
+        return InviteImpl.builder()
+                .catnip(catnip)
+                .code(data.getString("code"))
+                .inviter(createInviter(data.getJsonObject("inviter")))
+                .guild(createInviteGuild(data.getJsonObject("guild")))
+                .channel(createInviteChannel(data.getJsonObject("channel")))
+                .approximatePresenceCount(data.getInteger("approximate_presence_count", -1))
+                .approximateMemberCount(data.getInteger("approximate_member_count", -1))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CreatedInvite createCreatedInvite(@Nonnull final JsonObject data) {
+        return CreatedInviteImpl.builder()
+                .catnip(catnip)
+                .code(data.getString("code"))
+                .inviter(createInviter(data.getJsonObject("inviter")))
+                .guild(createInviteGuild(data.getJsonObject("guild")))
+                .channel(createInviteChannel(data.getJsonObject("channel")))
+                .approximatePresenceCount(data.getInteger("approximate_presence_count", -1))
+                .approximateMemberCount(data.getInteger("approximate_member_count", -1))
+                .uses(data.getInteger("uses"))
+                .maxUses(data.getInteger("max_uses"))
+                .maxAge(data.getInteger("max_age"))
+                .temporary(data.getBoolean("temporary", false))
+                .createdAt(parseTimestamp(data.getString("created_at")))
+                .revoked(data.getBoolean("revoked", false))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public InviteChannel createInviteChannel(@Nonnull final JsonObject data) {
+        return InviteChannelImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .name(data.getString("name"))
+                .type(ChannelType.byKey(data.getInteger("type")))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public InviteGuild createInviteGuild(@Nonnull final JsonObject data) {
+        return InviteGuildImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .name(data.getString("name"))
+                .icon(data.getString("icon"))
+                .splash(data.getString("splash"))
+                .features(ImmutableList.copyOf(stringArrayToCollection(data.getJsonArray("features"))))
+                .verificationLevel(VerificationLevel.byKey(data.getInteger("verification_level", 0)))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Inviter createInviter(@Nonnull final JsonObject data) {
+        return InviterImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .username(data.getString("username"))
+                .discriminator(data.getString("discriminator"))
+                .avatar(data.getString("avatar"))
                 .build();
     }
 }

@@ -8,6 +8,7 @@ import com.mewna.catnip.entity.Member;
 import com.mewna.catnip.entity.Role;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.ImageType;
+import com.mewna.catnip.util.CDNFormat;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -70,29 +71,13 @@ public class GuildImpl implements Guild, RequiresCatnip {
     @Nullable
     @CheckReturnValue
     public String iconUrl(@Nonnull final ImageOptions options) {
-        if(icon == null) {
-            return null;
-        }
-        if(options.getType() == ImageType.GIF) {
-            throw new IllegalArgumentException("Guild icons may not be GIFs");
-        }
-        return options.buildUrl(
-                String.format("https://cdn.discordapp.com/icons/%s/%s", id, icon)
-        );
+        return CDNFormat.iconUrl(id, icon, options);
     }
     
     @Override
     @Nullable
     @CheckReturnValue
     public String splashUrl(@Nonnull final ImageOptions options) {
-        if(splash == null) {
-            return null;
-        }
-        if(options.getType() == ImageType.GIF) {
-            throw new IllegalArgumentException("Guild icons may not be GIFs");
-        }
-        return options.buildUrl(
-                String.format("https://cdn.discordapp.com/splashes/%s/%s", id, splash)
-        );
+        return CDNFormat.splashUrl(id, splash, options);
     }
 }
