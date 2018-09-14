@@ -1,5 +1,9 @@
 package com.mewna.catnip.entity;
 
+/**
+ * @author natanbc
+ * @since 9/12/18
+ */
 public interface Category extends Channel {
     @Override
     default boolean isText() {

@@ -2,20 +2,22 @@ package com.mewna.catnip.entity;
 
 import com.mewna.catnip.entity.util.ImageOptions;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author amy
  * @since 9/4/18
  */
 public interface User extends Snowflake {
-    
     /**
      * Whether the user's avatar is animated.
      *
      * @return True if the avatar is animated, false otherwise.
      */
+    @CheckReturnValue
     boolean isAvatarAnimated();
     
     /**
@@ -24,6 +26,7 @@ public interface User extends Snowflake {
      * @return String containing the URL to the default avatar. Never null.
      */
     @Nonnull
+    @CheckReturnValue
     String defaultAvatarUrl();
     
     /**
@@ -37,7 +40,8 @@ public interface User extends Snowflake {
      * @return String containing the URL to their avatar, options considered. Can be null.
      */
     @Nullable
-    String avatarUrl(final ImageOptions options);
+    @CheckReturnValue
+    String avatarUrl(@Nonnull final ImageOptions options);
     
     /**
      * The URL for the user's set avatar. Can be null if the user has not set an avatar.
@@ -48,6 +52,7 @@ public interface User extends Snowflake {
      * @return String containing the URL to their avatar. Can be null.
      */
     @Nullable
+    @CheckReturnValue
     String avatarUrl();
     
     /**
@@ -60,7 +65,8 @@ public interface User extends Snowflake {
      * @return String containing a URL to their effective avatar, options considered. Never null.
      */
     @Nonnull
-    String effectiveAvatarUrl(final ImageOptions options);
+    @CheckReturnValue
+    String effectiveAvatarUrl(@Nonnull final ImageOptions options);
     
     /**
      * The URL for the user's effective avatar, as displayed in the Discord client.
@@ -70,6 +76,7 @@ public interface User extends Snowflake {
      * @return String containing a URL to their effective avatar. Never null.
      */
     @Nonnull
+    @CheckReturnValue
     String effectiveAvatarUrl();
     
     /**
@@ -78,6 +85,7 @@ public interface User extends Snowflake {
      * @return User's name. Never null.
      */
     @Nonnull
+    @CheckReturnValue
     String username();
     
     /**
@@ -86,6 +94,7 @@ public interface User extends Snowflake {
      * @return User's ID. never null.
      */
     @Nonnull
+    @CheckReturnValue
     String id();
     
     /**
@@ -94,6 +103,7 @@ public interface User extends Snowflake {
      * @return 4 digit discriminator as a string. Never null.
      */
     @Nonnull
+    @CheckReturnValue
     String discriminator();
     
     /**
@@ -105,6 +115,7 @@ public interface User extends Snowflake {
      * @return User's hashed avatar string. Can be null.
      */
     @Nullable
+    @CheckReturnValue
     String avatar();
     
     /**
@@ -112,5 +123,15 @@ public interface User extends Snowflake {
      *
      * @return True if the user is a bot, false if the user is a human.
      */
+    @CheckReturnValue
     boolean bot();
+    
+    /**
+     * Creates a DM channel with this user.
+     *
+     * @return Future with the result of the DM creation.
+     */
+    default CompletableFuture<DMChannel> createDM() {
+        return catnip().rest().channel().createDM(id());
+    }
 }

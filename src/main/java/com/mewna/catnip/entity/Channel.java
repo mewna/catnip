@@ -3,6 +3,7 @@ package com.mewna.catnip.entity;
 import lombok.Getter;
 
 import javax.annotation.Nonnull;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author natanbc
@@ -11,6 +12,10 @@ import javax.annotation.Nonnull;
 @SuppressWarnings("ClassReferencesSubclass")
 public interface Channel extends Snowflake {
     ChannelType type();
+    
+    default CompletableFuture<Channel> delete() {
+        return catnip().rest().channel().deleteChannel(id());
+    }
     
     default boolean isText() {
         return type() == ChannelType.TEXT;
