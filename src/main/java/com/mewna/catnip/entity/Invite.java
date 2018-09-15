@@ -15,13 +15,26 @@ import java.util.concurrent.CompletableFuture;
  * @since 9/14/18
  */
 public interface Invite extends Entity {
+    @Nonnull
+    @CheckReturnValue
     String code();
+    
+    @Nonnull
+    @CheckReturnValue
     Inviter inviter();
+    
+    @Nonnull
+    @CheckReturnValue
     InviteGuild guild();
+    
+    @Nonnull
+    @CheckReturnValue
     InviteChannel channel();
+    
     int approximatePresenceCount();
     int approximateMemberCount();
     
+    @Nonnull
     default CompletableFuture<Invite> delete() {
         return catnip().rest().invite().deleteInvite(code());
     }
