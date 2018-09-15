@@ -10,6 +10,7 @@ import lombok.Getter;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -33,7 +34,7 @@ abstract class RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    <T> Function<JsonArray, List<T>> mapObjectContents(@Nonnull final Function<JsonObject, T> builder) {
+    static <T> Function<JsonArray, List<T>> mapObjectContents(@Nonnull final Function<JsonObject, T> builder) {
         return array -> {
             final Collection<T> result = new ArrayList<>(array.size());
             for(final Object object : array) {
@@ -46,5 +47,10 @@ abstract class RestHandler {
             }
             return ImmutableList.copyOf(result);
         };
+    }
+    
+    @SuppressWarnings("unchecked")
+    static <T> T uncheckedCast(@Nullable final Object object) {
+        return (T)object;
     }
 }

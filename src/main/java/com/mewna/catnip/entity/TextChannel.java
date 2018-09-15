@@ -4,7 +4,7 @@ package com.mewna.catnip.entity;
  * @author natanbc
  * @since 9/12/18
  */
-public interface TextChannel extends GuildChannel {
+public interface TextChannel extends GuildChannel, MessageChannel {
     String topic();
     boolean nsfw();
     

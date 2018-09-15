@@ -10,8 +10,10 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author natanbc
@@ -148,6 +150,53 @@ public interface Guild extends Snowflake {
         - voice_states
         - presences
      */
+    
+    default CompletableFuture<List<Role>> fetchRoles() {
+        return catnip().rest().guild().getGuildRoles(id());
+    }
+    
+    default CompletableFuture<List<GuildChannel>> fetchChannels() {
+        return catnip().rest().guild().getGuildChannels(id());
+    }
+    
+    default CompletableFuture<List<CreatedInvite>> fetchInvites() {
+        return catnip().rest().guild().getGuildInvites(id());
+    }
+    
+    default CompletableFuture<List<CustomEmoji>> fetchEmojis() {
+        return catnip().rest().emoji().listGuildEmojis(id());
+    }
+    
+    default CompletableFuture<CustomEmoji> fetchEmoji(@Nonnull final String emojiId) {
+        return catnip().rest().emoji().getGuildEmoji(id(), emojiId);
+    }
+    
+    default CompletableFuture<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final byte[] image,
+                                                       @Nonnull final Collection<String> roles) {
+        return catnip().rest().emoji().createGuildEmoji(id(), name, image, roles);
+    }
+    
+    default CompletableFuture<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final String base64Image,
+                                                       @Nonnull final Collection<String> roles) {
+        return catnip().rest().emoji().createGuildEmoji(id(), name, base64Image, roles);
+    }
+    
+    default CompletableFuture<CustomEmoji> modifyEmoji(@Nonnull final String emojiId, @Nonnull final String name,
+                                                       @Nonnull final Collection<String> roles) {
+        return catnip().rest().emoji().modifyGuildEmoji(id(), emojiId, name, roles);
+    }
+    
+    default CompletableFuture<Void> deleteEmoji(@Nonnull final String emojiId) {
+        return catnip().rest().emoji().deleteGuildEmoji(id(), emojiId);
+    }
+    
+    default CompletableFuture<Void> leave() {
+        return catnip().rest().user().leaveGuild(id());
+    }
+    
+    default CompletableFuture<Void> delete() {
+        return catnip().rest().guild().deleteGuild(id());
+    }
     
     enum NotificationLevel {
         ALL_MESSAGES(0),

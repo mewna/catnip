@@ -68,6 +68,6 @@ public interface Member extends Snowflake {
      * @return Future with the result of the DM creation.
      */
     default CompletableFuture<DMChannel> createDM() {
-        return catnip().rest().channel().createDM(id());
+        return catnip().rest().user().createDM(id());
     }
 }

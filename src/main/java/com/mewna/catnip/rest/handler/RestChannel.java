@@ -90,6 +90,12 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     public CompletableFuture<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                  @Nonnull final Embed embed) {
+        return editMessage(channelId, messageId, new MessageBuilder().embed(embed).build());
+    }
+    
+    @Nonnull
+    public CompletableFuture<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
                                                   @Nonnull final Message message) {
         final JsonObject json = new JsonObject();
         if(message.content() != null && !message.content().isEmpty()) {
@@ -186,15 +192,6 @@ public class RestChannel extends RestHandler {
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createChannel);
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    public CompletableFuture<DMChannel> createDM(@Nonnull final String recipientId) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_DM,
-                ImmutableMap.of(), new JsonObject().put("recipient_id", recipientId)))
-                .thenApply(ResponsePayload::object)
-                .thenApply(getEntityBuilder()::createUserDM);
     }
     
     @Nonnull

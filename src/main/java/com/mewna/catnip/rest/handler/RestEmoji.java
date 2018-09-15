@@ -27,26 +27,26 @@ public class RestEmoji extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<List<Emoji>> listGuildEmojis(@Nonnull final String guildId) {
+    public CompletableFuture<List<CustomEmoji>> listGuildEmojis(@Nonnull final String guildId) {
         return getCatnip().requester().queue(
                 new OutboundRequest(
                         Routes.LIST_GUILD_EMOJIS.withMajorParam(guildId),
                         ImmutableMap.of(), null
                 ))
                 .thenApply(ResponsePayload::array)
-                .thenApply(mapObjectContents(getEntityBuilder()::createEmoji))
+                .thenApply(mapObjectContents(getEntityBuilder()::createCustomEmoji))
                 .thenApply(Collections::unmodifiableList);
     }
     
     @Nonnull
-    public CompletableFuture<Emoji> getGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId) {
+    public CompletableFuture<CustomEmoji> getGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId) {
         return getCatnip().requester().queue(
                 new OutboundRequest(
                         Routes.GET_GUILD_EMOJI.withMajorParam(guildId),
                         ImmutableMap.of("emoji.id", emojiId), null
                 ))
                 .thenApply(ResponsePayload::object)
-                .thenApply(getEntityBuilder()::createEmoji);
+                .thenApply(getEntityBuilder()::createCustomEmoji);
     }
     
     @Nonnull
