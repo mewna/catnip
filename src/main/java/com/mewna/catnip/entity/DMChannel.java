@@ -4,7 +4,7 @@ package com.mewna.catnip.entity;
  * @author natanbc
  * @since 9/12/18
  */
-public interface DMChannel extends Channel {
+public interface DMChannel extends Channel, MessageChannel {
     @Override
     default boolean isDM() {
         return true;

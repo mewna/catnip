@@ -22,6 +22,8 @@ public class Rest {
     private final RestEmoji emoji;
     @Getter
     private final RestInvite invite;
+    @Getter
+    private final RestVoice voice;
     
     public Rest(final CatnipImpl catnip) {
         channel = new RestChannel(catnip);
@@ -29,5 +31,6 @@ public class Rest {
         user = new RestUser(catnip);
         emoji = new RestEmoji(catnip);
         invite = new RestInvite(catnip);
+        voice = new RestVoice(catnip);
     }
 }

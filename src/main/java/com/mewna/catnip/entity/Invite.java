@@ -8,6 +8,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author natanbc
@@ -20,6 +21,10 @@ public interface Invite extends Entity {
     InviteChannel channel();
     int approximatePresenceCount();
     int approximateMemberCount();
+    
+    default CompletableFuture<Invite> delete() {
+        return catnip().rest().invite().deleteInvite(code());
+    }
     
     interface Inviter extends Snowflake {
         @Nonnull

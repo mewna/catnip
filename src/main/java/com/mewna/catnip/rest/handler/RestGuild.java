@@ -1,10 +1,7 @@
 package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
-import com.mewna.catnip.entity.Channel;
-import com.mewna.catnip.entity.CreatedInvite;
-import com.mewna.catnip.entity.Guild;
-import com.mewna.catnip.entity.Role;
+import com.mewna.catnip.entity.*;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
@@ -68,12 +65,15 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<List<Channel>> getGuildChannels(@Nonnull final String guildId) {
+    public CompletableFuture<List<GuildChannel>> getGuildChannels(@Nonnull final String guildId) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.GET_GUILD_CHANNELS.withMajorParam(guildId),
                         ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
-                .thenApply(mapObjectContents(getEntityBuilder()::createChannel));
+                .thenApply(mapObjectContents(getEntityBuilder()::createChannel))
+                //all elements are guaranteed to be instances of GuildChannel,
+                //so it's safe to do a cast, plus this way we avoid copying the list.
+                .thenApply(RestHandler::uncheckedCast);
     }
     
     @Nonnull

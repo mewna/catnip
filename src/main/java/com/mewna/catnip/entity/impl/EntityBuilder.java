@@ -586,4 +586,18 @@ public final class EntityBuilder {
                 .avatar(data.getString("avatar"))
                 .build();
     }
+    
+    @Nonnull
+    @CheckReturnValue
+    public VoiceRegion createVoiceRegion(@Nonnull final JsonObject data) {
+        return VoiceRegionImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .name(data.getString("name"))
+                .vip(data.getBoolean("vip", false))
+                .optimal(data.getBoolean("optimal", false))
+                .deprecated(data.getBoolean("deprecated", false))
+                .custom(data.getBoolean("custom", false))
+                .build();
+    }
 }
