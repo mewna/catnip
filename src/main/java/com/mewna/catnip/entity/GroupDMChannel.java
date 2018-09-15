@@ -1,5 +1,7 @@
 package com.mewna.catnip.entity;
 
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
@@ -7,17 +9,28 @@ import java.util.List;
  * @since 9/12/18
  */
 public interface GroupDMChannel extends DMChannel {
+    @Nonnull
+    @CheckReturnValue
     List<User> recipients();
+    
+    @CheckReturnValue
     String icon();
+    
+    @Nonnull
+    @CheckReturnValue
     String ownerId();
+    
+    @CheckReturnValue
     String applicationId();
     
     @Override
+    @CheckReturnValue
     default boolean isUserDM() {
         return false;
     }
     
     @Override
+    @CheckReturnValue
     default boolean isGroupDM() {
         return true;
     }

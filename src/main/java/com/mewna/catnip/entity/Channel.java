@@ -2,6 +2,7 @@ package com.mewna.catnip.entity;
 
 import lombok.Getter;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.util.concurrent.CompletableFuture;
 
@@ -11,40 +12,52 @@ import java.util.concurrent.CompletableFuture;
  */
 @SuppressWarnings("ClassReferencesSubclass")
 public interface Channel extends Snowflake {
+    @Nonnull
+    @CheckReturnValue
     ChannelType type();
     
+    @Nonnull
     default CompletableFuture<Channel> delete() {
         return catnip().rest().channel().deleteChannel(id());
     }
     
+    @CheckReturnValue
     default boolean isText() {
         return type() == ChannelType.TEXT;
     }
     
+    @CheckReturnValue
     default boolean isVoice() {
         return type() == ChannelType.VOICE;
     }
     
+    @CheckReturnValue
     default boolean isCategory() {
         return type() == ChannelType.CATEGORY;
     }
     
+    @CheckReturnValue
     default boolean isGuild() {
         return type().isGuild();
     }
     
+    @CheckReturnValue
     default boolean isUserDM() {
         return type() == ChannelType.DM;
     }
     
+    @CheckReturnValue
     default boolean isGroupDM() {
         return type() == ChannelType.GROUP_DM;
     }
     
+    @CheckReturnValue
     default boolean isDM() {
         return !type().isGuild();
     }
     
+    @Nonnull
+    @CheckReturnValue
     default GuildChannel asGuildChannel() {
         if(!isGuild()) {
             throw new UnsupportedOperationException("Not a guild channel");
@@ -52,6 +65,8 @@ public interface Channel extends Snowflake {
         return (GuildChannel)this;
     }
     
+    @Nonnull
+    @CheckReturnValue
     default TextChannel asTextChannel() {
         if(!isText()) {
             throw new UnsupportedOperationException("Not a text channel");
@@ -59,6 +74,8 @@ public interface Channel extends Snowflake {
         return (TextChannel)this;
     }
     
+    @Nonnull
+    @CheckReturnValue
     default VoiceChannel asVoiceChannel() {
         if(!isVoice()) {
             throw new UnsupportedOperationException("Not a voice channel");
@@ -66,6 +83,8 @@ public interface Channel extends Snowflake {
         return (VoiceChannel)this;
     }
     
+    @Nonnull
+    @CheckReturnValue
     default Category asCategory() {
         if(!isCategory()) {
             throw new UnsupportedOperationException("Not a category");
@@ -73,6 +92,8 @@ public interface Channel extends Snowflake {
         return (Category)this;
     }
     
+    @Nonnull
+    @CheckReturnValue
     default DMChannel asDMChannel() {
         if(!isDM()) {
             throw new UnsupportedOperationException("Not a DM channel");
@@ -80,6 +101,8 @@ public interface Channel extends Snowflake {
         return (DMChannel)this;
     }
     
+    @Nonnull
+    @CheckReturnValue
     default UserDMChannel asUserDMChannel() {
         if(!isUserDM()) {
             throw new UnsupportedOperationException("Not an user DM channel");
@@ -87,6 +110,8 @@ public interface Channel extends Snowflake {
         return (UserDMChannel)this;
     }
     
+    @Nonnull
+    @CheckReturnValue
     default GroupDMChannel asGroupDMChannel() {
         if(!isGroupDM()) {
             throw new UnsupportedOperationException("Not a group DM channel");

@@ -17,7 +17,6 @@ import java.util.Objects;
  * @author amy
  * @since 9/1/18.
  */
-
 @Getter
 @Setter
 @Builder
@@ -33,6 +32,11 @@ public class UserImpl implements User, RequiresCatnip {
     private String discriminator;
     private String avatar;
     private boolean bot;
+    
+    @Override
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
+    }
     
     @Override
     @CheckReturnValue
@@ -71,11 +75,6 @@ public class UserImpl implements User, RequiresCatnip {
     @CheckReturnValue
     public String effectiveAvatarUrl() {
         return effectiveAvatarUrl(defaultOptions());
-    }
-    
-    @Override
-    public void catnip(@Nonnull final Catnip catnip) {
-        this.catnip = catnip;
     }
     
     private ImageOptions defaultOptions() {

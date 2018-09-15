@@ -600,4 +600,19 @@ public final class EntityBuilder {
                 .custom(data.getBoolean("custom", false))
                 .build();
     }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Webhook createWebhook(@Nonnull final JsonObject data) {
+        return WebhookImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .guildId(data.getString("guild_id"))
+                .channelId(data.getString("channel_id"))
+                .user(createUser(data.getJsonObject("user")))
+                .name(data.getString("name"))
+                .avatar(data.getString("avatar"))
+                .token(data.getString("token"))
+                .build();
+    }
 }

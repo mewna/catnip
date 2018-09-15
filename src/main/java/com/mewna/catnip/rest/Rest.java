@@ -24,6 +24,8 @@ public class Rest {
     private final RestInvite invite;
     @Getter
     private final RestVoice voice;
+    @Getter
+    private final RestWebhook webhook;
     
     public Rest(final CatnipImpl catnip) {
         channel = new RestChannel(catnip);
@@ -32,5 +34,6 @@ public class Rest {
         emoji = new RestEmoji(catnip);
         invite = new RestInvite(catnip);
         voice = new RestVoice(catnip);
+        webhook = new RestWebhook(catnip);
     }
 }

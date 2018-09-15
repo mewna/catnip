@@ -13,29 +13,37 @@ import java.util.concurrent.CompletableFuture;
  * @since 9/12/18
  */
 public interface GuildChannel extends Channel {
+    @Nonnull
+    @CheckReturnValue
     String name();
+    
+    @Nonnull
+    @CheckReturnValue
     String guildId();
+    
+    @CheckReturnValue
     int position();
+    
+    @Nullable
+    @CheckReturnValue
     String parentId();
     
     @Override
+    @CheckReturnValue
     default boolean isDM() {
         return false;
     }
     
     @Override
+    @CheckReturnValue
     default boolean isGroupDM() {
         return false;
     }
     
     @Override
+    @CheckReturnValue
     default boolean isGuild() {
         return true;
-    }
-    
-    @Override
-    default GuildChannel asGuildChannel() {
-        return this;
     }
     
     @Nonnull
