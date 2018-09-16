@@ -1,6 +1,7 @@
 package com.mewna.catnip.rest.guild;
 
 import com.mewna.catnip.util.JsonConvertible;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,11 +10,15 @@ import lombok.experimental.Accessors;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
 
 @Accessors(fluent = true)
 @Getter
 @Setter
 public abstract class ChannelData implements JsonConvertible {
+    private final Map<RoleData, PermissionOverrideData> overrides = new HashMap<>();
     private final int type;
     private final String name;
     private Integer position;
@@ -45,6 +50,33 @@ public abstract class ChannelData implements JsonConvertible {
         return new VoiceChannelData(name.trim());
     }
     
+    @Nonnull
+    @CheckReturnValue
+    public PermissionOverrideData createOverride(@Nonnull final RoleData role) {
+        return overrides.computeIfAbsent(role, PermissionOverrideData::new);
+    }
+    
+    @Nonnull
+    public ChannelData configureOverride(@Nonnull final RoleData role, @Nonnull final Consumer<PermissionOverrideData> configurator) {
+        configurator.accept(createOverride(role));
+        return this;
+    }
+    
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
+    
+    @Override
+    public boolean equals(final Object obj) {
+        return obj == this;
+    }
+    
+    @Override
+    public String toString() {
+        return "ChannelData (name = " + name + ')';
+    }
+    
     @Override
     @Nonnull
     @CheckReturnValue
@@ -67,7 +99,13 @@ public abstract class ChannelData implements JsonConvertible {
         if(userLimit != null) {
             object.put("user_limit", userLimit);
         }
-        
+        if(!overrides.isEmpty()) {
+            final JsonArray array = new JsonArray();
+            for(final PermissionOverrideData override : overrides.values()) {
+                array.add(override.toJson());
+            }
+            object.put("permission_overwrites", array);
+        }
         return object;
     }
     

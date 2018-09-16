@@ -1,11 +1,13 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.PermissionOverride;
 import com.mewna.catnip.entity.VoiceChannel;
 import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * @author natanbc
@@ -26,6 +28,7 @@ public class VoiceChannelImpl implements VoiceChannel, RequiresCatnip {
     private String guildId;
     private int position;
     private String parentId;
+    private List<PermissionOverride> overrides;
     private int bitrate;
     private int userLimit;
     

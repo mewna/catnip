@@ -1,9 +1,14 @@
 package com.mewna.catnip.entity;
 
+import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.Emoji.CustomEmoji;
-import com.mewna.catnip.entity.impl.Permission;
+import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.entity.util.ImageOptions;
+import io.vertx.core.json.JsonObject;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -12,6 +17,7 @@ import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -220,6 +226,12 @@ public interface Guild extends Snowflake {
         return catnip().rest().guild().deleteGuild(id());
     }
     
+    @Nonnull
+    @CheckReturnValue
+    default GuildEditFields edit() {
+        return new GuildEditFields(this);
+    }
+    
     enum NotificationLevel {
         ALL_MESSAGES(0),
         ONLY_MENTIONS(1);
@@ -309,6 +321,80 @@ public interface Guild extends Snowflake {
                 }
             }
             throw new IllegalArgumentException("No verification level for key " + key);
+        }
+    }
+    
+    @Getter
+    @Setter
+    @Accessors(fluent = true)
+    class GuildEditFields {
+        private final Guild guild;
+        private String name;
+        private String region;
+        private VerificationLevel verificationLevel;
+        private NotificationLevel defaultMessageNotifications;
+        private ContentFilterLevel explicitContentFilter;
+        private String afkChannelId;
+        private Integer afkTimeout;
+        private String icon;
+        private String ownerId;
+        private String splash;
+        private String systemChannelId;
+        
+        public GuildEditFields(@Nullable final Guild guild) {
+            this.guild = guild;
+        }
+    
+        public GuildEditFields() {
+            this(null);
+        }
+        
+        @Nonnull
+        public CompletableFuture<Guild> submit() {
+            if(guild == null) {
+                throw new IllegalStateException("Cannot submit edit without a guild object! Please use RestGuild directly instead");
+            }
+            return guild.catnip().rest().guild().modifyGuild(guild.id(), this);
+        }
+    
+        @Nonnull
+        @CheckReturnValue
+        public JsonObject payload() {
+            final JsonObject payload = new JsonObject();
+            if(name != null && (guild == null || !Objects.equals(name, guild.name()))) {
+                payload.put("name", name);
+            }
+            if(region != null && (guild == null || !Objects.equals(region, guild.region()))) {
+                payload.put("region", region);
+            }
+            if(verificationLevel != null && (guild == null || !Objects.equals(verificationLevel, guild.verificationLevel()))) {
+                payload.put("verification_level", verificationLevel.getKey());
+            }
+            if(defaultMessageNotifications != null && (guild == null || !Objects.equals(defaultMessageNotifications, guild.defaultMessageNotifications()))) {
+                payload.put("default_message_notifications", defaultMessageNotifications.getKey());
+            }
+            if(explicitContentFilter != null && (guild == null || !Objects.equals(explicitContentFilter, guild.explicitContentFilter()))) {
+                payload.put("explicit_content_filter", explicitContentFilter.getKey());
+            }
+            if(afkChannelId != null && (guild == null || !Objects.equals(afkChannelId, guild.afkChannelId()))) {
+                payload.put("afk_channel_id", afkChannelId);
+            }
+            if(afkTimeout != null && (guild == null || !Objects.equals(afkTimeout, guild.afkTimeout()))) {
+                payload.put("afk_timeout", afkTimeout);
+            }
+            if(icon != null && (guild == null || !Objects.equals(icon, guild.icon()))) {
+                payload.put("icon", icon);
+            }
+            if(ownerId != null && (guild == null || !Objects.equals(ownerId, guild.ownerId()))) {
+                payload.put("owner_id", ownerId);
+            }
+            if(splash != null && (guild == null || !Objects.equals(splash, guild.splash()))) {
+                payload.put("splash", splash);
+            }
+            if(systemChannelId != null && (guild == null || !Objects.equals(systemChannelId, guild.systemChannelId()))) {
+                payload.put("system_channel_id", systemChannelId);
+            }
+            return payload;
         }
     }
 }

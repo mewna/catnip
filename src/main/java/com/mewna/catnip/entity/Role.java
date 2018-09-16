@@ -1,6 +1,6 @@
 package com.mewna.catnip.entity;
 
-import com.mewna.catnip.entity.impl.Permission;
+import com.mewna.catnip.entity.util.Permission;
 
 import javax.annotation.Nonnull;
 import java.util.Set;

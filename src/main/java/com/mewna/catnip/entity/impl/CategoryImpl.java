@@ -2,10 +2,12 @@ package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.Category;
+import com.mewna.catnip.entity.PermissionOverride;
 import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * @author natanbc
@@ -26,6 +28,7 @@ public class CategoryImpl implements Category, RequiresCatnip {
     private String guildId;
     private int position;
     private String parentId;
+    private List<PermissionOverride> overrides;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {

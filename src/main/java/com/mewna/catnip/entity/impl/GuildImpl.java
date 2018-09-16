@@ -7,7 +7,7 @@ import com.mewna.catnip.entity.Guild;
 import com.mewna.catnip.entity.Member;
 import com.mewna.catnip.entity.Role;
 import com.mewna.catnip.entity.util.ImageOptions;
-import com.mewna.catnip.entity.util.ImageType;
+import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.CDNFormat;
 import lombok.*;
 import lombok.experimental.Accessors;

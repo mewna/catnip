@@ -2,6 +2,7 @@ package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
 import com.mewna.catnip.entity.Webhook;
+import com.mewna.catnip.entity.Webhook.WebhookEditFields;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
@@ -24,8 +25,8 @@ public class RestWebhook extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletableFuture<Webhook> getWebhook(@Nonnull final String webhookId) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_WEBHOOK,
-                ImmutableMap.of("webhook.id", webhookId), null))
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_WEBHOOK.withMajorParam(webhookId),
+                ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createWebhook);
     }
@@ -50,9 +51,18 @@ public class RestWebhook extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
+    public CompletableFuture<Webhook> modifyWebhook(@Nonnull final String webhookId, @Nonnull final WebhookEditFields fields) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.MODIFY_WEBHOOK.withMajorParam(webhookId),
+                ImmutableMap.of(), fields.payload()))
+                .thenApply(ResponsePayload::object)
+                .thenApply(getEntityBuilder()::createWebhook);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public CompletableFuture<Void> deleteWebhook(@Nonnull final String webhookId) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_WEBHOOK,
-                ImmutableMap.of("webhook.id", webhookId), null))
+        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_WEBHOOK.withMajorParam(webhookId),
+                ImmutableMap.of(), null))
                 .thenApply(__ -> null);
     }
 }
