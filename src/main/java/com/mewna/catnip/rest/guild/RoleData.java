@@ -1,5 +1,6 @@
 package com.mewna.catnip.rest.guild;
 
+import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.JsonConvertible;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
@@ -9,6 +10,10 @@ import lombok.experimental.Accessors;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.function.LongUnaryOperator;
 
 @Accessors(fluent = true)
 @Getter
@@ -35,6 +40,52 @@ public class RoleData implements JsonConvertible {
             return new PublicRoleData();
         }
         return new RoleData(id);
+    }
+    
+    @Nonnull
+    public RoleData permissions(@Nullable final Long permissions) {
+        this.permissions = permissions;
+        return this;
+    }
+    
+    @Nonnull
+    public RoleData permissions(@Nonnull final Permission... permissions) {
+        return permissions(Permission.from(permissions));
+    }
+    
+    @Nonnull
+    public RoleData permissions(@Nonnull final Iterable<Permission> permissions) {
+        return permissions(Permission.from(permissions));
+    }
+    
+    @Nonnull
+    public RoleData addPermissions(@Nonnull final Permission... permissions) {
+        return addPermissions(Arrays.asList(permissions));
+    }
+    
+    @Nonnull
+    public RoleData addPermissions(@Nonnull final Iterable<Permission> permissions) {
+        //1101 | 0010
+        //1111
+        return updatePermissions(v->v | Permission.from(permissions));
+    }
+    
+    @Nonnull
+    public RoleData removePermissions(@Nonnull final Permission... permissions) {
+        return addPermissions(Arrays.asList(permissions));
+    }
+    
+    @Nonnull
+    public RoleData removePermissions(@Nonnull final Iterable<Permission> permissions) {
+        //1111 & ~0010
+        //1111 & 1101
+        //1101
+        return updatePermissions(v->v & ~Permission.from(permissions));
+    }
+    
+    @Nonnull
+    public RoleData updatePermissions(@Nonnull final LongUnaryOperator updater) {
+        return permissions(updater.applyAsLong(permissions == null ? 0 : permissions));
     }
     
     @Override
