@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.*;
+import com.mewna.catnip.entity.Channel.ChannelType;
 import com.mewna.catnip.entity.Embed.EmbedType;
 import com.mewna.catnip.entity.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.Emoji.UnicodeEmoji;
@@ -11,9 +12,17 @@ import com.mewna.catnip.entity.Guild.ContentFilterLevel;
 import com.mewna.catnip.entity.Guild.MFALevel;
 import com.mewna.catnip.entity.Guild.NotificationLevel;
 import com.mewna.catnip.entity.Guild.VerificationLevel;
+import com.mewna.catnip.entity.Invite.InviteChannel;
+import com.mewna.catnip.entity.Invite.InviteGuild;
+import com.mewna.catnip.entity.Invite.Inviter;
+import com.mewna.catnip.entity.PermissionOverride.OverrideType;
 import com.mewna.catnip.entity.impl.EmbedImpl.*;
+import com.mewna.catnip.entity.impl.InviteImpl.InviteChannelImpl;
+import com.mewna.catnip.entity.impl.InviteImpl.InviteGuildImpl;
+import com.mewna.catnip.entity.impl.InviteImpl.InviterImpl;
 import com.mewna.catnip.entity.impl.MessageImpl.Attachment;
 import com.mewna.catnip.entity.impl.MessageImpl.Reaction;
+import com.mewna.catnip.entity.util.Permission;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -50,7 +59,7 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    private static <T> Collection<T> mapArrayObjects(@Nullable final JsonArray array, @Nonnull final Function<JsonObject, T> mapper) {
+    private static <T> List<T> immutableListOf(@Nullable final JsonArray array, @Nonnull final Function<JsonObject, T> mapper) {
         if(array == null) {
             return Collections.emptyList();
         }
@@ -62,12 +71,12 @@ public final class EntityBuilder {
             }
             ret.add(mapper.apply((JsonObject) object));
         }
-        return ret;
+        return ImmutableList.copyOf(ret);
     }
     
     @Nonnull
     @CheckReturnValue
-    private static Collection<String> stringArrayToCollection(@Nullable final JsonArray array) {
+    private static List<String> stringListOf(@Nullable final JsonArray array) {
         if(array == null) {
             return Collections.emptyList();
         }
@@ -79,7 +88,7 @@ public final class EntityBuilder {
             }
             ret.add((String) object);
         }
-        return ret;
+        return ImmutableList.copyOf(ret);
     }
     
     @Nullable
@@ -211,8 +220,6 @@ public final class EntityBuilder {
                 .proxyIconUrl(authorRaw.getString("proxy_icon_url"))
                 .build();
         
-        final Collection<Field> fields = mapArrayObjects(data.getJsonArray("fields"), this::createField);
-        
         return EmbedImpl.builder()
                 .title(data.getString("title"))
                 .type(EmbedType.byKey(data.getString("type")))
@@ -226,7 +233,127 @@ public final class EntityBuilder {
                 .video(video)
                 .provider(provider)
                 .author(author)
-                .fields(ImmutableList.copyOf(fields))
+                .fields(immutableListOf(data.getJsonArray("fields"), this::createField))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public TextChannel createTextChannel(@Nonnull final JsonObject data) {
+        return TextChannelImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .type(ChannelType.TEXT)
+                .name(data.getString("name"))
+                .guildId(data.getString("guild_id"))
+                .position(data.getInteger("position", -1))
+                .parentId(data.getString("parent_id"))
+                .overrides(immutableListOf(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
+                .topic(data.getString("topic"))
+                .nsfw(data.getBoolean("nsfw", false))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public VoiceChannel createVoiceChannel(@Nonnull final JsonObject data) {
+        return VoiceChannelImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .type(ChannelType.VOICE)
+                .name(data.getString("name"))
+                .guildId(data.getString("guild_id"))
+                .position(data.getInteger("position", -1))
+                .parentId(data.getString("parent_id"))
+                .overrides(immutableListOf(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
+                .bitrate(data.getInteger("bitrate", 0))
+                .userLimit(data.getInteger("user_limit", 0))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Category createCategory(@Nonnull final JsonObject data) {
+        return CategoryImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .type(ChannelType.CATEGORY)
+                .name(data.getString("name"))
+                .guildId(data.getString("guild_id"))
+                .position(data.getInteger("position", -1))
+                .parentId(data.getString("parent_id"))
+                .overrides(immutableListOf(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public UserDMChannel createUserDM(@Nonnull final JsonObject data) {
+        return UserDMChannelImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .type(ChannelType.VOICE)
+                .recipient(createUser(data.getJsonArray("recipients").getJsonObject(0)))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public GroupDMChannel createGroupDM(@Nonnull final JsonObject data) {
+        return GroupDMChannelImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .type(ChannelType.VOICE)
+                .recipients(immutableListOf(data.getJsonArray("recipients"), this::createUser))
+                .icon(data.getString("icon"))
+                .ownerId(data.getString("owner_id"))
+                .applicationId(data.getString("application_id"))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public GuildChannel createGuildChannel(@Nonnull final JsonObject data) {
+        final ChannelType type = ChannelType.byKey(data.getInteger("type"));
+        switch(type) {
+            case TEXT: return createTextChannel(data);
+            case VOICE: return createVoiceChannel(data);
+            case CATEGORY: return createCategory(data);
+            default: throw new UnsupportedOperationException("Unsupported channel type " + type);
+        }
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public DMChannel createDMChannel(@Nonnull final JsonObject data) {
+        final ChannelType type = ChannelType.byKey(data.getInteger("type"));
+        switch(type) {
+            case DM: return createUserDM(data);
+            case GROUP_DM: return createGroupDM(data);
+            default: throw new UnsupportedOperationException("Unsupported channel type " + type);
+        }
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Channel createChannel(@Nonnull final JsonObject data) {
+        final ChannelType type = ChannelType.byKey(data.getInteger("type"));
+        if(type.isGuild()) {
+            return createGuildChannel(data);
+        } else {
+            return createDMChannel(data);
+        }
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public PermissionOverride createPermissionOverride(@Nonnull final JsonObject data) {
+        return PermissionOverrideImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .type(OverrideType.byKey(data.getString("type")))
+                .allow(Permission.toSet(data.getLong("allow", 0L)))
+                .deny(Permission.toSet(data.getLong("deny", 0L)))
                 .build();
     }
     
@@ -298,14 +425,13 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public CustomEmoji createCustomEmoji(@Nonnull final JsonObject data) {
-        final Collection<String> roles = stringArrayToCollection(data.getJsonArray("roles"));
         final JsonObject userRaw = data.getJsonObject("user");
         
         return CustomEmojiImpl.builder()
                 .catnip(catnip)
                 .id(data.getString("id"))
                 .name(data.getString("name"))
-                .roles(ImmutableList.copyOf(roles))
+                .roles(stringListOf(data.getJsonArray("roles")))
                 .user(userRaw == null ? null : createUser(userRaw))
                 .requiresColons(data.getBoolean("require_colons", true))
                 .managed(data.getBoolean("managed", false))
@@ -352,12 +478,6 @@ public final class EntityBuilder {
         final JsonObject memberRaw = data.getJsonObject("member");
         final Member member = memberRaw == null ? null : createMember(author, memberRaw);
         
-        final Collection<User> mentionedUsers = mapArrayObjects(data.getJsonArray("mentions"), this::createUser);
-        final Collection<Embed> embeds = mapArrayObjects(data.getJsonArray("embeds"), this::createEmbed);
-        final Collection<String> mentionedRoles = stringArrayToCollection(data.getJsonArray("mention_roles"));
-        final Collection<Message.Attachment> attachments = mapArrayObjects(data.getJsonArray("attachments"), this::createAttachment);
-        final Collection<Message.Reaction> reactions = mapArrayObjects(data.getJsonArray("reactions"), this::createReaction);
-        
         return MessageImpl.builder()
                 .catnip(catnip)
                 .id(data.getString("id"))
@@ -368,11 +488,11 @@ public final class EntityBuilder {
                 .editedTimestamp(parseTimestamp(data.getString("edited_timestamp")))
                 .tts(data.getBoolean("tts"))
                 .mentionsEveryone(data.getBoolean("mention_everyone", false))
-                .mentionedUsers(ImmutableList.copyOf(mentionedUsers))
-                .mentionedRoles(ImmutableList.copyOf(mentionedRoles))
-                .attachments(ImmutableList.copyOf(attachments))
-                .embeds(ImmutableList.copyOf(embeds))
-                .reactions(ImmutableList.copyOf(reactions))
+                .mentionedUsers(immutableListOf(data.getJsonArray("mentions"), this::createUser))
+                .mentionedRoles(stringListOf(data.getJsonArray("mention_roles")))
+                .attachments(immutableListOf(data.getJsonArray("attachments"), this::createAttachment))
+                .embeds(immutableListOf(data.getJsonArray("embeds"), this::createEmbed))
+                .reactions(immutableListOf(data.getJsonArray("reactions"), this::createReaction))
                 .nonce(data.getString("nonce"))
                 .pinned(data.getBoolean("pinned"))
                 .webhookId(data.getString("webhook_id"))
@@ -382,12 +502,6 @@ public final class EntityBuilder {
                 .member(member)
                 .guildId(data.getString("guild_id"))
                 .build();
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    public List<Message> createManyMessages(@Nonnull final JsonArray data) {
-        return data.stream().map(e -> (JsonObject) e).map(this::createMessage).collect(Collectors.toList());
     }
     
     @Nonnull
@@ -410,9 +524,9 @@ public final class EntityBuilder {
                 .verificationLevel(VerificationLevel.byKey(data.getInteger("verification_level", 0)))
                 .defaultMessageNotifications(NotificationLevel.byKey(data.getInteger("default_message_notifications", 0)))
                 .explicitContentFilter(ContentFilterLevel.byKey(data.getInteger("explicit_content_filter", 0)))
-                .roles(ImmutableList.copyOf(mapArrayObjects(data.getJsonArray("roles"), this::createRole)))
-                .emojis(ImmutableList.copyOf(mapArrayObjects(data.getJsonArray("emojis"), this::createCustomEmoji)))
-                .features(ImmutableList.copyOf(stringArrayToCollection(data.getJsonArray("features"))))
+                .roles(immutableListOf(data.getJsonArray("roles"), this::createRole))
+                .emojis(immutableListOf(data.getJsonArray("emojis"), this::createCustomEmoji))
+                .features(stringListOf(data.getJsonArray("features")))
                 .mfaLevel(MFALevel.byKey(data.getInteger("mfa_level", 0)))
                 .applicationId(data.getString("application_id"))
                 .widgetEnabled(data.getBoolean("widget_enabled", false))
@@ -422,7 +536,111 @@ public final class EntityBuilder {
                 .large(data.getBoolean("large", false))
                 .unavailable(data.getBoolean("unavailable", false))
                 .memberCount(data.getInteger("member_count", -1))
-                .members(ImmutableList.copyOf(mapArrayObjects(data.getJsonArray("members"), this::createMember)))
+                .members(immutableListOf(data.getJsonArray("members"), this::createMember))
+                .channels(immutableListOf(data.getJsonArray("channels"), this::createChannel))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Invite createInvite(@Nonnull final JsonObject data) {
+        if(data.containsKey("uses")) {
+            return createCreatedInvite(data);
+        }
+        return InviteImpl.builder()
+                .catnip(catnip)
+                .code(data.getString("code"))
+                .inviter(createInviter(data.getJsonObject("inviter")))
+                .guild(createInviteGuild(data.getJsonObject("guild")))
+                .channel(createInviteChannel(data.getJsonObject("channel")))
+                .approximatePresenceCount(data.getInteger("approximate_presence_count", -1))
+                .approximateMemberCount(data.getInteger("approximate_member_count", -1))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CreatedInvite createCreatedInvite(@Nonnull final JsonObject data) {
+        return CreatedInviteImpl.builder()
+                .catnip(catnip)
+                .code(data.getString("code"))
+                .inviter(createInviter(data.getJsonObject("inviter")))
+                .guild(createInviteGuild(data.getJsonObject("guild")))
+                .channel(createInviteChannel(data.getJsonObject("channel")))
+                .approximatePresenceCount(data.getInteger("approximate_presence_count", -1))
+                .approximateMemberCount(data.getInteger("approximate_member_count", -1))
+                .uses(data.getInteger("uses"))
+                .maxUses(data.getInteger("max_uses"))
+                .maxAge(data.getInteger("max_age"))
+                .temporary(data.getBoolean("temporary", false))
+                .createdAt(parseTimestamp(data.getString("created_at")))
+                .revoked(data.getBoolean("revoked", false))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public InviteChannel createInviteChannel(@Nonnull final JsonObject data) {
+        return InviteChannelImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .name(data.getString("name"))
+                .type(ChannelType.byKey(data.getInteger("type")))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public InviteGuild createInviteGuild(@Nonnull final JsonObject data) {
+        return InviteGuildImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .name(data.getString("name"))
+                .icon(data.getString("icon"))
+                .splash(data.getString("splash"))
+                .features(stringListOf(data.getJsonArray("features")))
+                .verificationLevel(VerificationLevel.byKey(data.getInteger("verification_level", 0)))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Inviter createInviter(@Nonnull final JsonObject data) {
+        return InviterImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .username(data.getString("username"))
+                .discriminator(data.getString("discriminator"))
+                .avatar(data.getString("avatar"))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public VoiceRegion createVoiceRegion(@Nonnull final JsonObject data) {
+        return VoiceRegionImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .name(data.getString("name"))
+                .vip(data.getBoolean("vip", false))
+                .optimal(data.getBoolean("optimal", false))
+                .deprecated(data.getBoolean("deprecated", false))
+                .custom(data.getBoolean("custom", false))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Webhook createWebhook(@Nonnull final JsonObject data) {
+        return WebhookImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .guildId(data.getString("guild_id"))
+                .channelId(data.getString("channel_id"))
+                .user(createUser(data.getJsonObject("user")))
+                .name(data.getString("name"))
+                .avatar(data.getString("avatar"))
+                .token(data.getString("token"))
                 .build();
     }
 }

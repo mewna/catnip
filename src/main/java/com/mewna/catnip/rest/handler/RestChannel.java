@@ -1,14 +1,14 @@
 package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
-import com.mewna.catnip.entity.Embed;
-import com.mewna.catnip.entity.Emoji;
-import com.mewna.catnip.entity.Message;
+import com.mewna.catnip.entity.*;
+import com.mewna.catnip.entity.GuildChannel.ChannelEditFields;
 import com.mewna.catnip.entity.builder.MessageBuilder;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
+import com.mewna.catnip.rest.invite.InviteCreateOptions;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
@@ -91,6 +91,12 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     public CompletableFuture<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                  @Nonnull final Embed embed) {
+        return editMessage(channelId, messageId, new MessageBuilder().embed(embed).build());
+    }
+    
+    @Nonnull
+    public CompletableFuture<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
                                                   @Nonnull final Message message) {
         final JsonObject json = new JsonObject();
         if(message.content() != null && !message.content().isEmpty()) {
@@ -169,7 +175,7 @@ public class RestChannel extends RestHandler {
                 .queue(new OutboundRequest(Routes.GET_CHANNEL_MESSAGES.withMajorParam(channelId).withQueryString(query),
                         ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
-                .thenApply(getEntityBuilder()::createManyMessages)
+                .thenApply(mapObjectContents(getEntityBuilder()::createMessage))
                 .thenApply(Collections::unmodifiableList);
     }
     
@@ -178,5 +184,49 @@ public class RestChannel extends RestHandler {
         return getCatnip().requester().queue(new OutboundRequest(Routes.TRIGGER_TYPING_INDICATOR.withMajorParam(channelId),
                 ImmutableMap.of(), null))
                 .thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<Channel> getChannelById(@Nonnull final String channelId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_CHANNEL.withMajorParam(channelId),
+                ImmutableMap.of(), null))
+                .thenApply(ResponsePayload::object)
+                .thenApply(getEntityBuilder()::createChannel);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<Channel> deleteChannel(@Nonnull final String channelId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_CHANNEL.withMajorParam(channelId),
+                ImmutableMap.of(), null))
+                .thenApply(ResponsePayload::object)
+                .thenApply(getEntityBuilder()::createChannel);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<CreatedInvite> createInvite(@Nonnull final String channelId, @Nullable final InviteCreateOptions options) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_CHANNEL_INVITE.withMajorParam(channelId),
+                ImmutableMap.of(), (options == null ? InviteCreateOptions.create() : options).toJson()))
+                .thenApply(ResponsePayload::object)
+                .thenApply(getEntityBuilder()::createCreatedInvite);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<List<CreatedInvite>> getChannelInvites(@Nonnull final String channelId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_CHANNEL_INVITES.withMajorParam(channelId),
+                ImmutableMap.of(), null))
+                .thenApply(ResponsePayload::array)
+                .thenApply(mapObjectContents(getEntityBuilder()::createCreatedInvite));
+    }
+    
+    @Nonnull
+    public CompletableFuture<GuildChannel> modifyChannel(@Nonnull final String channelId, @Nonnull final ChannelEditFields fields) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.MODIFY_CHANNEL.withMajorParam(channelId),
+                ImmutableMap.of(), fields.payload()))
+                .thenApply(ResponsePayload::object)
+                .thenApply(getEntityBuilder()::createGuildChannel);
     }
 }

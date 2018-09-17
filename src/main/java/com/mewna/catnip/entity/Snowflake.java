@@ -6,6 +6,10 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
 
+/**
+ * @author natanbc
+ * @since 5/9/18.
+ */
 public interface Snowflake extends Entity {
     /**
      * The ID of this snowflake.

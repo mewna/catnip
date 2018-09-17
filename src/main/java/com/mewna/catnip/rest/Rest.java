@@ -1,10 +1,7 @@
 package com.mewna.catnip.rest;
 
 import com.mewna.catnip.internal.CatnipImpl;
-import com.mewna.catnip.rest.handler.RestChannel;
-import com.mewna.catnip.rest.handler.RestEmoji;
-import com.mewna.catnip.rest.handler.RestGuild;
-import com.mewna.catnip.rest.handler.RestUser;
+import com.mewna.catnip.rest.handler.*;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -23,11 +20,20 @@ public class Rest {
     private final RestUser user;
     @Getter
     private final RestEmoji emoji;
+    @Getter
+    private final RestInvite invite;
+    @Getter
+    private final RestVoice voice;
+    @Getter
+    private final RestWebhook webhook;
     
     public Rest(final CatnipImpl catnip) {
         channel = new RestChannel(catnip);
         guild = new RestGuild(catnip);
         user = new RestUser(catnip);
         emoji = new RestEmoji(catnip);
+        invite = new RestInvite(catnip);
+        voice = new RestVoice(catnip);
+        webhook = new RestWebhook(catnip);
     }
 }

@@ -201,6 +201,26 @@ public interface Message extends Snowflake {
         return catnip().rest().channel().addReaction(channelId(), id(), emoji);
     }
     
+    @Nonnull
+    default CompletableFuture<Void> delete() {
+        return catnip().rest().channel().deleteMessage(channelId(), id());
+    }
+    
+    @Nonnull
+    default CompletableFuture<Message> edit(@Nonnull final String content) {
+        return catnip().rest().channel().editMessage(channelId(), id(), content);
+    }
+    
+    @Nonnull
+    default CompletableFuture<Message> edit(@Nonnull final Embed embed) {
+        return catnip().rest().channel().editMessage(channelId(), id(), embed);
+    }
+    
+    @Nonnull
+    default CompletableFuture<Message> edit(@Nonnull final Message message) {
+        return catnip().rest().channel().editMessage(channelId(), id(), message);
+    }
+    
     interface Attachment extends Snowflake {
         /**
          * The name of the file represented by this attachment.
