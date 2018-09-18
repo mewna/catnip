@@ -100,6 +100,7 @@ public interface GuildChannel extends Channel {
         private Integer userLimit;
         private Map<String, PermissionOverrideData> overrides = new HashMap<>();
         private String parentId;
+        private Integer rateLimitPerUser;
     
         @Nonnull
         @CheckReturnValue
@@ -171,6 +172,7 @@ public interface GuildChannel extends Channel {
                 payload.put("permission_overwrites", object);
             }
             if(channel != null) {
+                //TODO: throw if fields set on an unsupported channel type? (eg nsfw on voice channel)
                 if(channel.isText()) {
                     final TextChannel text = channel.asTextChannel();
                     if(topic != null && !Objects.equals(topic, text.topic())) {
@@ -178,6 +180,9 @@ public interface GuildChannel extends Channel {
                     }
                     if(nsfw != null && !Objects.equals(nsfw, text.nsfw())) {
                         payload.put("nsfw", nsfw);
+                    }
+                    if(rateLimitPerUser != null && !Objects.equals(rateLimitPerUser, text.rateLimitPerUser())) {
+                        payload.put("rate_limit_per_user", rateLimitPerUser);
                     }
                 } else if(channel.isVoice()) {
                     final VoiceChannel voice = channel.asVoiceChannel();
@@ -200,6 +205,9 @@ public interface GuildChannel extends Channel {
                 }
                 if(userLimit != null) {
                     payload.put("user_limit", userLimit);
+                }
+                if(rateLimitPerUser != null) {
+                    payload.put("rate_limit_per_user", rateLimitPerUser);
                 }
             }
             return payload;
