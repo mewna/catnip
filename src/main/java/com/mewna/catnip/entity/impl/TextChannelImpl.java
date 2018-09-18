@@ -31,6 +31,7 @@ public class TextChannelImpl implements TextChannel, RequiresCatnip {
     private List<PermissionOverride> overrides;
     private String topic;
     private boolean nsfw;
+    private int rateLimitPerUser;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
