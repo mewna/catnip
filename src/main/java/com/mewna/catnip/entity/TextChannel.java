@@ -1,6 +1,7 @@
 package com.mewna.catnip.entity;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
@@ -17,6 +18,10 @@ public interface TextChannel extends GuildChannel, MessageChannel {
     
     @CheckReturnValue
     boolean nsfw();
+    
+    @CheckReturnValue
+    @Nonnegative
+    int rateLimitPerUser();
     
     @Override
     @CheckReturnValue

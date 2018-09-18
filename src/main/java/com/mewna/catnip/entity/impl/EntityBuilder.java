@@ -251,6 +251,7 @@ public final class EntityBuilder {
                 .overrides(immutableListOf(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
                 .topic(data.getString("topic"))
                 .nsfw(data.getBoolean("nsfw", false))
+                .rateLimitPerUser(data.getInteger("rate_limit_per_user", 0))
                 .build();
     }
     
