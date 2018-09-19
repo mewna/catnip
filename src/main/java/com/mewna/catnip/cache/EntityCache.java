@@ -1,10 +1,7 @@
 package com.mewna.catnip.cache;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.Guild;
-import com.mewna.catnip.entity.Member;
-import com.mewna.catnip.entity.Role;
-import com.mewna.catnip.entity.User;
+import com.mewna.catnip.entity.*;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
@@ -30,6 +27,9 @@ public interface EntityCache {
     
     @Nullable
     Role role(@Nonnull String guildId, @Nonnull String id);
+    
+    @Nullable
+    Channel channel(@Nonnull String guildId, @Nonnull String id);
     
     @Nonnull
     Catnip catnip();

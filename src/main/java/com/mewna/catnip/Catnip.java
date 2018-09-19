@@ -1,5 +1,6 @@
 package com.mewna.catnip;
 
+import com.mewna.catnip.cache.EntityCache;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.internal.CatnipImpl;
@@ -102,6 +103,12 @@ public interface Catnip {
     
     @Nonnull
     Catnip eventBuffer(@Nonnull EventBuffer eventBuffer);
+    
+    @Nonnull
+    EntityCache cache();
+    
+    @Nonnull
+    Catnip cache(@Nonnull EntityCache cache);
     
     @Nonnull
     ExtensionManager extensionManager();

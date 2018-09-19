@@ -7,6 +7,8 @@ import io.vertx.core.json.JsonObject;
 import static com.mewna.catnip.shard.DiscordEvent.*;
 
 /**
+ * TODO: This should be cache-aware so that we don't pay the cost of deserializing twice
+ *
  * @author amy
  * @since 9/2/18.
  */

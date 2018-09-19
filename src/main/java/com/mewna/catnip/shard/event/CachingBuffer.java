@@ -1,12 +1,14 @@
 package com.mewna.catnip.shard.event;
 
 import com.google.common.collect.ImmutableList;
-import com.mewna.catnip.shard.DiscordEvent;
 import io.vertx.core.json.JsonObject;
 import lombok.Value;
 import lombok.experimental.Accessors;
 
-import java.util.*;
+import java.util.Deque;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
@@ -17,7 +19,7 @@ import static com.mewna.catnip.shard.DiscordEvent.*;
  * An implementation of {@link EventBuffer} used for the case of caching all
  * guilds sent in the {@code READY} payload, as well as for caching data as it
  * comes over the websocket connection.
- *
+ * <p>
  * TODO: Actually cache data lol
  *
  * @author amy
@@ -44,6 +46,7 @@ public class CachingBuffer extends AbstractBuffer {
     
     private final Map<Integer, BufferState> buffers = new ConcurrentHashMap<>();
     
+    // TODO: THIS WILL NOT HANDLE GUILD MEMBER CHUNKS
     @Override
     public void buffer(final JsonObject event) {
         final JsonObject shardData = event.getJsonObject("shard");
@@ -53,14 +56,14 @@ public class CachingBuffer extends AbstractBuffer {
         
         final JsonObject d = event.getJsonObject("d");
         switch(type) {
-            case DiscordEvent.READY: {
+            case READY: {
                 final Set<String> guilds = d.getJsonArray("guilds").stream()
                         .map(e -> ((JsonObject) e).getString("id"))
                         .collect(Collectors.toSet());
                 buffers.put(id, new BufferState(id, guilds));
                 break;
             }
-            case DiscordEvent.GUILD_CREATE: {
+            case GUILD_CREATE: {
                 final String guild = d.getString("id");
                 final BufferState bufferState = buffers.get(id);
                 if(bufferState != null) {
@@ -93,18 +96,27 @@ public class CachingBuffer extends AbstractBuffer {
                             bufferState.buffer(event);
                         } else {
                             // Emit if the payload is for a non-buffered guild
+                            maybeCache(type, d);
                             emitter().emit(event);
                         }
                     } else {
                         // Emit if the payload has no guild id
+                        maybeCache(type, d);
                         emitter().emit(event);
                     }
                 } else {
                     // Emit if not buffering right now
+                    maybeCache(type, d);
                     emitter().emit(event);
                 }
                 break;
             }
+        }
+    }
+    
+    private void maybeCache(final String eventType, final JsonObject payload) {
+        if(CACHE_EVENTS.contains(eventType)) {
+            catnip().cache().updateCache(eventType, payload);
         }
     }
     
