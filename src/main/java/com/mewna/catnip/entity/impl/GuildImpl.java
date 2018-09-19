@@ -1,12 +1,14 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.Channel;
 import com.mewna.catnip.entity.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.Guild;
 import com.mewna.catnip.entity.Member;
 import com.mewna.catnip.entity.Role;
 import com.mewna.catnip.entity.util.ImageOptions;
-import com.mewna.catnip.entity.util.ImageType;
+import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.CDNFormat;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -58,6 +60,7 @@ public class GuildImpl implements Guild, RequiresCatnip {
     private boolean unavailable;
     private int memberCount;
     private List<Member> members;
+    private List<Channel> channels;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
@@ -68,29 +71,13 @@ public class GuildImpl implements Guild, RequiresCatnip {
     @Nullable
     @CheckReturnValue
     public String iconUrl(@Nonnull final ImageOptions options) {
-        if(icon == null) {
-            return null;
-        }
-        if(options.getType() == ImageType.GIF) {
-            throw new IllegalArgumentException("Guild icons may not be GIFs");
-        }
-        return options.buildUrl(
-                String.format("https://cdn.discordapp.com/icons/%s/%s", id, icon)
-        );
+        return CDNFormat.iconUrl(id, icon, options);
     }
     
     @Override
     @Nullable
     @CheckReturnValue
     public String splashUrl(@Nonnull final ImageOptions options) {
-        if(splash == null) {
-            return null;
-        }
-        if(options.getType() == ImageType.GIF) {
-            throw new IllegalArgumentException("Guild icons may not be GIFs");
-        }
-        return options.buildUrl(
-                String.format("https://cdn.discordapp.com/splashes/%s/%s", id, splash)
-        );
+        return CDNFormat.splashUrl(id, splash, options);
     }
 }
