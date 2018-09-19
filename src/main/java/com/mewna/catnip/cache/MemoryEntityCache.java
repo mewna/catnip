@@ -12,10 +12,8 @@ import lombok.experimental.Accessors;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -26,9 +24,9 @@ import static com.mewna.catnip.shard.DiscordEvent.*;
  * @since 9/18/18.
  */
 @Accessors(fluent = true, chain = true)
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "MismatchedQueryAndUpdateOfCollection"})
 public class MemoryEntityCache implements EntityCache {
-    // TODO: What even is efficiency amirite
+    // TODO: What even is efficiency
     
     private final Map<String, Guild> guildCache = new ConcurrentHashMap<>();
     private final Map<String, User> userCache = new ConcurrentHashMap<>();
@@ -54,6 +52,33 @@ public class MemoryEntityCache implements EntityCache {
         } else {
             catnip.logAdapter().warn("I don't know how to cache non-guild channel {}!", channel.id());
         }
+    }
+    
+    private void cacheRole(final Role role) {
+        Map<String, Role> roles = roleCache.get(role.guildId());
+        if(roles == null) {
+            roles = new ConcurrentHashMap<>();
+            roleCache.put(role.guildId(), roles);
+        }
+        roles.put(role.id(), role);
+        // TODO: Add to guild
+        catnip.logAdapter().debug("Cached role {} for guild {}", role.id(), role.guildId());
+    }
+    
+    private void cacheUser(final User user) {
+        userCache.put(user.id(), user);
+        catnip.logAdapter().debug("Cached user {}", user.id());
+    }
+    
+    private void cacheMember(final Member member) {
+        Map<String, Member> members = memberCache.get(member.guildId());
+        if(members == null) {
+            members = new ConcurrentHashMap<>();
+            memberCache.put(member.guildId(), members);
+        }
+        members.put(member.id(), member);
+        // TODO: Add to guild
+        catnip.logAdapter().debug("Cached member {} for guild {}", member.id(), member.guildId());
     }
     
     @Nonnull
@@ -99,7 +124,7 @@ public class MemoryEntityCache implements EntityCache {
                 final Guild guild = entityBuilder.createGuild(payload);
                 guildCache.put(guild.id(), guild);
                 guild.channels().forEach(this::cacheChannel);
-                // TODO: Cache roles
+                guild.roles().forEach(this::cacheRole);
                 // TODO: Cache members
                 // TODO: Cache users?
                 break;
@@ -111,22 +136,69 @@ public class MemoryEntityCache implements EntityCache {
             }
             // Roles
             case GUILD_ROLE_CREATE: {
+                final String guild = payload.getString("guild_id");
+                final JsonObject json = payload.getJsonObject("role");
+                final Role role = entityBuilder.createRole(guild, json);
+                cacheRole(role);
                 break;
             }
             case GUILD_ROLE_UPDATE: {
+                final String guild = payload.getString("guild_id");
+                final JsonObject json = payload.getJsonObject("role");
+                final Role role = entityBuilder.createRole(guild, json);
+                cacheRole(role);
                 break;
             }
             case GUILD_ROLE_DELETE: {
+                final String guild = payload.getString("guild_id");
+                final String role = payload.getString("role_id");
+                // TODO: Remove from guild object
+                Optional.ofNullable(roleCache.get(guild)).ifPresent(e -> e.remove(role));
+                catnip.logAdapter().debug("Deleted role {} for guild {}", role, guild);
                 break;
             }
             // Members
             case GUILD_MEMBER_ADD: {
-                break;
-            }
-            case GUILD_MEMBER_REMOVE: {
+                final Member member = entityBuilder.createMember(payload.getString("guild_id"), payload);
+                final User user = entityBuilder.createUser(payload.getJsonObject("user"));
+                cacheUser(user);
+                cacheMember(member);
                 break;
             }
             case GUILD_MEMBER_UPDATE: {
+                // This doesn't send an object like all the other events, so we build a fake
+                // payload object and create an entity from that
+                final JsonObject user = payload.getJsonObject("user");
+                final String id = user.getString("id");
+                final String guild = payload.getString("guild_id");
+    
+                final Map<String, Member> members = memberCache.get(guild);
+                if(members != null) {
+                    final Member old = members.get(id);
+                    if(old != null) {
+                        final JsonObject data = new JsonObject()
+                                .put("user", user)
+                                .put("roles", payload.getJsonArray("roles"))
+                                .put("nick", payload.getString("nick"))
+                                .put("deaf", old.deaf())
+                                .put("mute", old.mute())
+                                .put("joined_at", old.joinedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+                                ;
+                        final Member member = entityBuilder.createMember(guild, data);
+                        cacheMember(member);
+                    } else {
+                        catnip.logAdapter().warn("Got GUILD_MEMBER_UPDATE for {} in {}, but we don't have them cached?!", id, guild);
+                    }
+                } else {
+                    catnip.logAdapter().warn("Got GUILD_MEMBER_UPDATE for {} in {}, but we have no members cached?!", id, guild);
+                }
+    
+                break;
+            }
+            case GUILD_MEMBER_REMOVE: {
+                final String guild = payload.getString("guild_id");
+                final String user = payload.getJsonObject("user").getString("id");
+                Optional.ofNullable(memberCache.get(guild)).ifPresent(e -> e.remove(user));
                 break;
             }
             // Member chunking
