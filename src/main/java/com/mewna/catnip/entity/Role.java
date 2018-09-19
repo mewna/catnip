@@ -28,6 +28,14 @@ public interface Role extends Snowflake {
     String name();
     
     /**
+     * The id of the guild this role is from.
+     *
+     * @return String representing the guild ID.
+     */
+    @Nonnull
+    String guildId();
+    
+    /**
      * Integer representation of the role color.
      * <br>To use this, you must convert the integer to base-16, hex, format.
      * //TODO: Test default role color.

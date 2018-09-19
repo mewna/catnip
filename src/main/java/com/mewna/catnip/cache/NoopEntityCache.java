@@ -1,10 +1,7 @@
 package com.mewna.catnip.cache;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.Guild;
-import com.mewna.catnip.entity.Member;
-import com.mewna.catnip.entity.Role;
-import com.mewna.catnip.entity.User;
+import com.mewna.catnip.entity.*;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
@@ -51,6 +48,12 @@ public class NoopEntityCache implements EntityCache {
     @Nullable
     @Override
     public Role role(@Nonnull final String guildId, @Nonnull final String id) {
+        return null;
+    }
+    
+    @Nullable
+    @Override
+    public Channel channel(@Nonnull final String guildId, @Nonnull final String id) {
         return null;
     }
 }

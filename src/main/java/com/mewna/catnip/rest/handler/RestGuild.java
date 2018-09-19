@@ -32,7 +32,7 @@ public class RestGuild extends RestHandler {
                 .queue(new OutboundRequest(Routes.GET_GUILD_ROLES.withMajorParam(guildId),
                         ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
-                .thenApply(mapObjectContents(getEntityBuilder()::createRole))
+                .thenApply(mapObjectContents(e -> getEntityBuilder().createRole(guildId, e)))
                 .thenApply(Collections::unmodifiableList);
     }
     

@@ -23,6 +23,7 @@ public class RoleImpl implements Role, RequiresCatnip {
     private transient Catnip catnip;
     
     private String id;
+    private String guildId;
     private String name;
     private int color;
     private boolean hoist;

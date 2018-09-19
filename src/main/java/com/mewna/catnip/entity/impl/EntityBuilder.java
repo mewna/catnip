@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
  * @author natanbc
  * @since 9/2/18.
  */
-@SuppressWarnings({"WeakerAccess", "unused"})
+@SuppressWarnings({"WeakerAccess", "unused", "OverlyCoupledClass"})
 public final class EntityBuilder {
     private static final JsonArray EMPTY_JSON_ARRAY = new JsonArray();
     
@@ -360,10 +360,11 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Role createRole(@Nonnull final JsonObject data) {
+    public Role createRole(@Nonnull final String guildId, @Nonnull final JsonObject data) {
         return RoleImpl.builder()
                 .catnip(catnip)
                 .id(data.getString("id"))
+                .guildId(guildId)
                 .name(data.getString("name"))
                 .color(data.getInteger("color"))
                 .hoist(data.getBoolean("hoist"))
@@ -389,7 +390,7 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Member createMember(@Nonnull final String id, @Nonnull final JsonObject data) {
+    public Member createMember(@Nonnull final String guildId, @Nonnull final String id, @Nonnull final JsonObject data) {
         return MemberImpl.builder()
                 .catnip(catnip)
                 .id(id)
@@ -403,14 +404,14 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Member createMember(@Nonnull final User user, @Nonnull final JsonObject data) {
-        return createMember(user.id(), data);
+    public Member createMember(@Nonnull final String guildId, @Nonnull final User user, @Nonnull final JsonObject data) {
+        return createMember(guildId, user.id(), data);
     }
     
     @Nonnull
     @CheckReturnValue
-    public Member createMember(@Nonnull final JsonObject data) {
-        return createMember(createUser(data.getJsonObject("user")), data);
+    public Member createMember(@Nonnull final String guildId, @Nonnull final JsonObject data) {
+        return createMember(guildId, createUser(data.getJsonObject("user")), data);
     }
     
     @Nonnull
@@ -477,7 +478,8 @@ public final class EntityBuilder {
         final User author = createUser(data.getJsonObject("author"));
         
         final JsonObject memberRaw = data.getJsonObject("member");
-        final Member member = memberRaw == null ? null : createMember(author, memberRaw);
+        // If member exists, guild_id must also exist
+        final Member member = memberRaw == null ? null : createMember(data.getString("guild_id"), author, memberRaw);
         
         return MessageImpl.builder()
                 .catnip(catnip)
@@ -525,7 +527,7 @@ public final class EntityBuilder {
                 .verificationLevel(VerificationLevel.byKey(data.getInteger("verification_level", 0)))
                 .defaultMessageNotifications(NotificationLevel.byKey(data.getInteger("default_message_notifications", 0)))
                 .explicitContentFilter(ContentFilterLevel.byKey(data.getInteger("explicit_content_filter", 0)))
-                .roles(immutableListOf(data.getJsonArray("roles"), this::createRole))
+                .roles(immutableListOf(data.getJsonArray("roles"), e -> createRole(data.getString("id"), e)))
                 .emojis(immutableListOf(data.getJsonArray("emojis"), this::createCustomEmoji))
                 .features(stringListOf(data.getJsonArray("features")))
                 .mfaLevel(MFALevel.byKey(data.getInteger("mfa_level", 0)))
@@ -537,7 +539,7 @@ public final class EntityBuilder {
                 .large(data.getBoolean("large", false))
                 .unavailable(data.getBoolean("unavailable", false))
                 .memberCount(data.getInteger("member_count", -1))
-                .members(immutableListOf(data.getJsonArray("members"), this::createMember))
+                .members(immutableListOf(data.getJsonArray("members"), e -> createMember(data.getString("id"), e)))
                 .channels(immutableListOf(data.getJsonArray("channels"), this::createChannel))
                 .build();
     }
