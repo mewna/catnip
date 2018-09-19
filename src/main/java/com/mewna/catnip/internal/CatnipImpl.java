@@ -1,6 +1,8 @@
 package com.mewna.catnip.internal;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.cache.EntityCache;
+import com.mewna.catnip.cache.MemoryEntityCache;
 import com.mewna.catnip.entity.impl.MemberImpl;
 import com.mewna.catnip.entity.impl.MessageImpl;
 import com.mewna.catnip.entity.impl.RoleImpl;
@@ -68,6 +70,9 @@ public class CatnipImpl implements Catnip {
     @Getter
     @Setter
     private EventBuffer eventBuffer = new NoopBuffer();
+    @Getter
+    @Setter
+    private EntityCache cache = new MemoryEntityCache();
     
     public CatnipImpl() {
         this(Vertx.vertx());
@@ -118,6 +123,7 @@ public class CatnipImpl implements Catnip {
         }
         shardManager.catnip(this);
         eventBuffer.catnip(this);
+        cache.catnip(this);
         shardManager.start();
         return this;
     }
