@@ -1,17 +1,17 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.Role;
-import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.entity.PermissionOverride;
+import com.mewna.catnip.entity.TextChannel;
 import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
-import java.util.Set;
+import java.util.List;
 
 /**
- * @author Julia Rogers
- * @since 9/2/18
+ * @author natanbc
+ * @since 9/12/18
  */
 @Getter
 @Setter
@@ -19,17 +19,19 @@ import java.util.Set;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoleImpl implements Role, RequiresCatnip {
+public class TextChannelImpl implements TextChannel, RequiresCatnip {
     private transient Catnip catnip;
     
     private String id;
+    private ChannelType type;
     private String name;
-    private int color;
-    private boolean hoist;
+    private String guildId;
     private int position;
-    private Set<Permission> permissions;
-    private boolean managed;
-    private boolean mentionable;
+    private String parentId;
+    private List<PermissionOverride> overrides;
+    private String topic;
+    private boolean nsfw;
+    private int rateLimitPerUser;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
@@ -43,11 +45,11 @@ public class RoleImpl implements Role, RequiresCatnip {
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Role && ((Role)obj).id().equals(id);
+        return obj instanceof TextChannel && ((TextChannel)obj).id().equals(id);
     }
     
     @Override
     public String toString() {
-        return String.format("Role (%s)", name);
+        return String.format("TextChannel (%s)", name);
     }
 }

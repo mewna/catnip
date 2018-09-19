@@ -43,7 +43,7 @@ public class CatnipImpl implements Catnip {
     private final Vertx vertx;
     // TODO: Allow changing the backend
     @Getter
-    private final RestRequester requester = new RestRequester(this);
+    private final RestRequester requester;
     @Getter
     @Setter
     private String token;
@@ -75,6 +75,7 @@ public class CatnipImpl implements Catnip {
     
     public CatnipImpl(@Nonnull final Vertx vertx) {
         this.vertx = vertx;
+        requester = new RestRequester(this);
     }
     
     @Nonnull

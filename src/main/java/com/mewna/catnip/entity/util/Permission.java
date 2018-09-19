@@ -1,8 +1,9 @@
-package com.mewna.catnip.entity.impl;
+package com.mewna.catnip.entity.util;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 
 /**
@@ -39,7 +40,7 @@ public enum Permission {
     MANAGE_NICKNAME(0x08000000, false),
     MANAGE_ROLES(0x10000000, true),
     MANAGE_WEBHOOKS(0x20000000, true),
-    MEANAGE_EMOJI(0x40000000, false);
+    MANAGE_EMOJI(0x40000000, false);
 
     Permission(final int value, final boolean channel) {
         this.value = value;
@@ -63,5 +64,21 @@ public enum Permission {
         }
 
         return perms;
+    }
+    
+    public static long from(@Nonnull final Iterable<Permission> permissions) {
+        long result = 0;
+        for(final Permission permission : permissions) {
+            result |= permission.value;
+        }
+        return result;
+    }
+    
+    public static long from(@Nonnull final Permission... permissions) {
+        long result = 0;
+        for(final Permission permission : permissions) {
+            result |= permission.value;
+        }
+        return result;
     }
 }
