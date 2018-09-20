@@ -11,6 +11,7 @@ import java.util.Collection;
  * @author amy
  * @since 9/19/18.
  */
+@SuppressWarnings("UnusedReturnValue")
 public interface EntityCacheWorker extends EntityCache {
     /**
      * Update cache with a single gateway event.
