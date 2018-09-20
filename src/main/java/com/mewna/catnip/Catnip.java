@@ -1,6 +1,7 @@
 package com.mewna.catnip;
 
 import com.mewna.catnip.cache.EntityCache;
+import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.internal.CatnipImpl;
@@ -108,7 +109,10 @@ public interface Catnip {
     EntityCache cache();
     
     @Nonnull
-    Catnip cache(@Nonnull EntityCache cache);
+    EntityCacheWorker cacheWorker();
+    
+    @Nonnull
+    Catnip cache(@Nonnull EntityCacheWorker cache);
     
     @Nonnull
     ExtensionManager extensionManager();

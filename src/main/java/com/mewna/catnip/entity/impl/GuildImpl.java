@@ -1,5 +1,6 @@
 package com.mewna.catnip.entity.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.Channel;
 import com.mewna.catnip.entity.Emoji.CustomEmoji;
@@ -47,7 +48,6 @@ public class GuildImpl implements Guild, RequiresCatnip {
     private VerificationLevel verificationLevel;
     private NotificationLevel defaultMessageNotifications;
     private ContentFilterLevel explicitContentFilter;
-    private List<Role> roles;
     private List<CustomEmoji> emojis;
     private List<String> features;
     private MFALevel mfaLevel;
@@ -59,8 +59,6 @@ public class GuildImpl implements Guild, RequiresCatnip {
     private boolean large;
     private boolean unavailable;
     private int memberCount;
-    private List<Member> members;
-    private List<Channel> channels;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
@@ -79,5 +77,23 @@ public class GuildImpl implements Guild, RequiresCatnip {
     @CheckReturnValue
     public String splashUrl(@Nonnull final ImageOptions options) {
         return CDNFormat.splashUrl(id, splash, options);
+    }
+    
+    @Nonnull
+    @Override
+    public List<Role> roles() {
+        return catnip.cache().roles(id);
+    }
+    
+    @Nonnull
+    @Override
+    public List<Member> members() {
+        return null;
+    }
+    
+    @Nonnull
+    @Override
+    public List<Channel> channels() {
+        return null;
     }
 }
