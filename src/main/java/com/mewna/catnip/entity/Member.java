@@ -22,7 +22,7 @@ public interface Member extends Snowflake {
     String id();
     
     /**
-     * The id of the guild this role is from.
+     * The id of the guild this member is from.
      *
      * @return String representing the guild ID.
      */
