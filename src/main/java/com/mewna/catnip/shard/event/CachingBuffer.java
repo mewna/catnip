@@ -116,7 +116,7 @@ public class CachingBuffer extends AbstractBuffer {
     
     private void maybeCache(final String eventType, final JsonObject payload) {
         if(CACHE_EVENTS.contains(eventType)) {
-            catnip().cache().updateCache(eventType, payload);
+            catnip().cacheWorker().updateCache(eventType, payload);
         }
     }
     

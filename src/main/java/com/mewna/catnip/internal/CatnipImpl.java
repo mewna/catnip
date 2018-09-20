@@ -1,7 +1,7 @@
 package com.mewna.catnip.internal;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.cache.EntityCache;
+import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.MemoryEntityCache;
 import com.mewna.catnip.entity.impl.MemberImpl;
 import com.mewna.catnip.entity.impl.MessageImpl;
@@ -72,7 +72,7 @@ public class CatnipImpl implements Catnip {
     private EventBuffer eventBuffer = new NoopBuffer();
     @Getter
     @Setter
-    private EntityCache cache = new MemoryEntityCache();
+    private EntityCacheWorker cache = new MemoryEntityCache();
     
     public CatnipImpl() {
         this(Vertx.vertx());
@@ -114,6 +114,12 @@ public class CatnipImpl implements Catnip {
         eventBus().registerDefaultCodec(MemberImpl.class, new JsonPojoCodec<>(this, MemberImpl.class));
         
         return this;
+    }
+    
+    @Nonnull
+    @Override
+    public EntityCacheWorker cacheWorker() {
+        return cache;
     }
     
     @Nonnull

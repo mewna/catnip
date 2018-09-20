@@ -3,6 +3,7 @@ package com.mewna.catnip.entity.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.entity.*;
 import com.mewna.catnip.entity.Channel.ChannelType;
 import com.mewna.catnip.entity.Embed.EmbedType;
@@ -317,10 +318,14 @@ public final class EntityBuilder {
     public GuildChannel createGuildChannel(@Nonnull final JsonObject data) {
         final ChannelType type = ChannelType.byKey(data.getInteger("type"));
         switch(type) {
-            case TEXT: return createTextChannel(data);
-            case VOICE: return createVoiceChannel(data);
-            case CATEGORY: return createCategory(data);
-            default: throw new UnsupportedOperationException("Unsupported channel type " + type);
+            case TEXT:
+                return createTextChannel(data);
+            case VOICE:
+                return createVoiceChannel(data);
+            case CATEGORY:
+                return createCategory(data);
+            default:
+                throw new UnsupportedOperationException("Unsupported channel type " + type);
         }
     }
     
@@ -329,9 +334,12 @@ public final class EntityBuilder {
     public DMChannel createDMChannel(@Nonnull final JsonObject data) {
         final ChannelType type = ChannelType.byKey(data.getInteger("type"));
         switch(type) {
-            case DM: return createUserDM(data);
-            case GROUP_DM: return createGroupDM(data);
-            default: throw new UnsupportedOperationException("Unsupported channel type " + type);
+            case DM:
+                return createUserDM(data);
+            case GROUP_DM:
+                return createGroupDM(data);
+            default:
+                throw new UnsupportedOperationException("Unsupported channel type " + type);
         }
     }
     
@@ -507,6 +515,24 @@ public final class EntityBuilder {
                 .build();
     }
     
+    /**
+     * Unlike {@link #createGuild(JsonObject)}, this method caches parts of the
+     * guild as it goes, such as channels and members.
+     *
+     * @param data Guild object to cache.
+     *
+     * @return The created guild.
+     */
+    @Nonnull
+    @CheckReturnValue
+    public Guild createCachedGuild(@Nonnull final JsonObject data) {
+        ((EntityCacheWorker) catnip.cache()).bulkCacheRoles(immutableListOf(data.getJsonArray("roles"), e -> createRole(data.getString("id"), e)));
+        // TODO: This should take a guild ID param
+        ((EntityCacheWorker) catnip.cache()).bulkCacheChannels(immutableListOf(data.getJsonArray("roles"), this::createGuildChannel));
+        ((EntityCacheWorker) catnip.cache()).bulkCacheMembers(immutableListOf(data.getJsonArray("roles"), e -> createMember(data.getString("id"), e)));
+        return createGuild(data);
+    }
+    
     @Nonnull
     @CheckReturnValue
     public Guild createGuild(@Nonnull final JsonObject data) {
@@ -527,7 +553,7 @@ public final class EntityBuilder {
                 .verificationLevel(VerificationLevel.byKey(data.getInteger("verification_level", 0)))
                 .defaultMessageNotifications(NotificationLevel.byKey(data.getInteger("default_message_notifications", 0)))
                 .explicitContentFilter(ContentFilterLevel.byKey(data.getInteger("explicit_content_filter", 0)))
-                .roles(immutableListOf(data.getJsonArray("roles"), e -> createRole(data.getString("id"), e)))
+                //.roles(immutableListOf(data.getJsonArray("roles"), e -> createRole(data.getString("id"), e)))
                 .emojis(immutableListOf(data.getJsonArray("emojis"), this::createCustomEmoji))
                 .features(stringListOf(data.getJsonArray("features")))
                 .mfaLevel(MFALevel.byKey(data.getInteger("mfa_level", 0)))
@@ -539,8 +565,8 @@ public final class EntityBuilder {
                 .large(data.getBoolean("large", false))
                 .unavailable(data.getBoolean("unavailable", false))
                 .memberCount(data.getInteger("member_count", -1))
-                .members(immutableListOf(data.getJsonArray("members"), e -> createMember(data.getString("id"), e)))
-                .channels(immutableListOf(data.getJsonArray("channels"), this::createChannel))
+                //.members(immutableListOf(data.getJsonArray("members"), e -> createMember(data.getString("id"), e)))
+                //.channels(immutableListOf(data.getJsonArray("channels"), this::createChannel))
                 .build();
     }
     

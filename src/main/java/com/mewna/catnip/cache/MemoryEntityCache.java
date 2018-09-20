@@ -25,7 +25,7 @@ import static com.mewna.catnip.shard.DiscordEvent.*;
  */
 @Accessors(fluent = true, chain = true)
 @SuppressWarnings({"unused", "MismatchedQueryAndUpdateOfCollection"})
-public class MemoryEntityCache implements EntityCache {
+public class MemoryEntityCache implements EntityCacheWorker {
     // TODO: What even is efficiency
     
     private final Map<String, Guild> guildCache = new ConcurrentHashMap<>();
@@ -37,6 +37,23 @@ public class MemoryEntityCache implements EntityCache {
     @Getter
     private Catnip catnip;
     private EntityBuilder entityBuilder;
+    
+    @Nonnull
+    @CheckReturnValue
+    private static <T> Function<JsonArray, List<T>> mapObjectContents(@Nonnull final Function<JsonObject, T> builder) {
+        return array -> {
+            final Collection<T> result = new ArrayList<>(array.size());
+            for(final Object object : array) {
+                if(!(object instanceof JsonObject)) {
+                    throw new IllegalArgumentException("Expected array to contain only objects, but found " +
+                            (object == null ? "null" : object.getClass())
+                    );
+                }
+                result.add(builder.apply((JsonObject) object));
+            }
+            return ImmutableList.copyOf(result);
+        };
+    }
     
     private void cacheChannel(final Channel channel) {
         if(channel.isGuild()) {
@@ -115,22 +132,17 @@ public class MemoryEntityCache implements EntityCache {
             }
             // Guilds
             case GUILD_CREATE: {
-                final Guild guild = entityBuilder.createGuild(payload);
+                final Guild guild = entityBuilder.createCachedGuild(payload);
                 guildCache.put(guild.id(), guild);
-                guild.channels().forEach(this::cacheChannel);
                 break;
             }
             case GUILD_UPDATE: {
-                final Guild guild = entityBuilder.createGuild(payload);
+                final Guild guild = entityBuilder.createCachedGuild(payload);
                 guildCache.put(guild.id(), guild);
-                guild.channels().forEach(this::cacheChannel);
-                guild.roles().forEach(this::cacheRole);
-                // TODO: Cache members
-                // TODO: Cache users?
                 break;
             }
             case GUILD_DELETE: {
-                final Guild guild = entityBuilder.createGuild(payload);
+                final Guild guild = entityBuilder.createCachedGuild(payload);
                 guildCache.remove(guild.id());
                 break;
             }
@@ -171,7 +183,7 @@ public class MemoryEntityCache implements EntityCache {
                 final JsonObject user = payload.getJsonObject("user");
                 final String id = user.getString("id");
                 final String guild = payload.getString("guild_id");
-    
+                
                 final Map<String, Member> members = memberCache.get(guild);
                 if(members != null) {
                     final Member old = members.get(id);
@@ -182,8 +194,7 @@ public class MemoryEntityCache implements EntityCache {
                                 .put("nick", payload.getString("nick"))
                                 .put("deaf", old.deaf())
                                 .put("mute", old.mute())
-                                .put("joined_at", old.joinedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
-                                ;
+                                .put("joined_at", old.joinedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
                         final Member member = entityBuilder.createMember(guild, data);
                         cacheMember(member);
                     } else {
@@ -192,7 +203,7 @@ public class MemoryEntityCache implements EntityCache {
                 } else {
                     catnip.logAdapter().warn("Got GUILD_MEMBER_UPDATE for {} in {}, but we have no members cached?!", id, guild);
                 }
-    
+                
                 break;
             }
             case GUILD_MEMBER_REMOVE: {
@@ -222,6 +233,27 @@ public class MemoryEntityCache implements EntityCache {
         return this;
     }
     
+    @Nonnull
+    @Override
+    public EntityCache bulkCacheChannels(@Nonnull final Collection<GuildChannel> channels) {
+        channels.forEach(this::cacheChannel);
+        return this;
+    }
+    
+    @Nonnull
+    @Override
+    public EntityCache bulkCacheRoles(@Nonnull final Collection<Role> roles) {
+        roles.forEach(this::cacheRole);
+        return this;
+    }
+    
+    @Nonnull
+    @Override
+    public EntityCache bulkCacheMembers(@Nonnull final Collection<Member> members) {
+        members.forEach(this::cacheMember);
+        return this;
+    }
+    
     @Nullable
     @Override
     public Guild guild(@Nonnull final String id) {
@@ -240,10 +272,30 @@ public class MemoryEntityCache implements EntityCache {
         return null;
     }
     
+    @Nonnull
+    @Override
+    public List<Member> members(@Nonnull final String guildId) {
+        if(memberCache.containsKey(guildId)) {
+            return ImmutableList.copyOf(memberCache.get(guildId).values());
+        } else {
+            return ImmutableList.of();
+        }
+    }
+    
     @Nullable
     @Override
     public Role role(@Nonnull final String guildId, @Nonnull final String id) {
         return null;
+    }
+    
+    @Nonnull
+    @Override
+    public List<Role> roles(@Nonnull final String guildId) {
+        if(memberCache.containsKey(guildId)) {
+            return ImmutableList.copyOf(roleCache.get(guildId).values());
+        } else {
+            return ImmutableList.of();
+        }
     }
     
     @Nullable
@@ -254,26 +306,19 @@ public class MemoryEntityCache implements EntityCache {
     
     @Nonnull
     @Override
+    public List<Channel> channels(@Nonnull final String guildId) {
+        if(memberCache.containsKey(guildId)) {
+            return ImmutableList.copyOf(channelCache.get(guildId).values());
+        } else {
+            return ImmutableList.of();
+        }
+    }
+    
+    @Nonnull
+    @Override
     public EntityCache catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
         entityBuilder = new EntityBuilder(catnip);
         return this;
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    private static <T> Function<JsonArray, List<T>> mapObjectContents(@Nonnull final Function<JsonObject, T> builder) {
-        return array -> {
-            final Collection<T> result = new ArrayList<>(array.size());
-            for(final Object object : array) {
-                if(!(object instanceof JsonObject)) {
-                    throw new IllegalArgumentException("Expected array to contain only objects, but found " +
-                            (object == null ? "null" : object.getClass())
-                    );
-                }
-                result.add(builder.apply((JsonObject) object));
-            }
-            return ImmutableList.copyOf(result);
-        };
     }
 }
