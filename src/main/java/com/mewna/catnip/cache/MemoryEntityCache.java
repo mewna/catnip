@@ -247,8 +247,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
                     // - discriminator
                     // - avatar
                     // so we check the existing cache for a user, and update as needed
-                    // TODO: Cache game
-                    // TODO: Cache online-status
+                    // TODO: Cache online status and activity
                     final User updated = entityBuilder.createUser(new JsonObject()
                             .put("id", id)
                             .put("bot", old.bot())
