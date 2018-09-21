@@ -13,6 +13,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author amy
@@ -63,6 +64,12 @@ public class NoopEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
+    public EntityCache bulkCachePresences(@Nonnull final Map<String, Presence> presences) {
+        return this;
+    }
+    
+    @Nonnull
+    @Override
     public EntityCache bulkCacheVoiceStates(@Nonnull final Collection<VoiceState> voiceStates) {
         return this;
     }
@@ -76,6 +83,12 @@ public class NoopEntityCache implements EntityCacheWorker {
     @Nullable
     @Override
     public User user(@Nonnull final String id) {
+        return null;
+    }
+    
+    @Nullable
+    @Override
+    public Presence presence(@Nonnull final String id) {
         return null;
     }
     
