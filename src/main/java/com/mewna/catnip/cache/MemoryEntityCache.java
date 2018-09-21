@@ -140,17 +140,17 @@ public class MemoryEntityCache implements EntityCacheWorker {
             }
             // Guilds
             case GUILD_CREATE: {
-                final Guild guild = entityBuilder.createCachedGuild(payload);
+                final Guild guild = entityBuilder.createGuild(payload);
                 guildCache.put(guild.id(), guild);
                 break;
             }
             case GUILD_UPDATE: {
-                final Guild guild = entityBuilder.createCachedGuild(payload);
+                final Guild guild = entityBuilder.createGuild(payload);
                 guildCache.put(guild.id(), guild);
                 break;
             }
             case GUILD_DELETE: {
-                final Guild guild = entityBuilder.createCachedGuild(payload);
+                final Guild guild = entityBuilder.createGuild(payload);
                 guildCache.remove(guild.id());
                 break;
             }
