@@ -6,7 +6,7 @@
 
     <groupId>com.mewna.catnip</groupId>
     <artifactId>catnip</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
     <!-- Note: we need to update RestRequester when version is automatically set in a field -->
 
     <properties>
