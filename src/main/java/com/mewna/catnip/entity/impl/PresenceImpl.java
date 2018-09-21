@@ -5,6 +5,7 @@ import com.mewna.catnip.entity.Presence;
 import lombok.*;
 import lombok.experimental.Accessors;
 
+import javax.annotation.Nonnull;
 import java.util.Set;
 
 /**
@@ -17,11 +18,16 @@ import java.util.Set;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@SuppressWarnings("WeakerAccess")
 public class PresenceImpl implements Presence, RequiresCatnip {
     private transient Catnip catnip;
     
     private OnlineStatus status;
     private Activity activity;
+    
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
+    }
     
     @Getter
     @Setter

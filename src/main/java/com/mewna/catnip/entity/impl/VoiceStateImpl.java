@@ -6,6 +6,7 @@ import com.mewna.catnip.entity.VoiceState;
 import lombok.*;
 import lombok.experimental.Accessors;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -39,5 +40,9 @@ public class VoiceStateImpl implements VoiceState, RequiresCatnip {
         } else {
             return catnip.cache().member(guildId, userId);
         }
+    }
+    
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
     }
 }
