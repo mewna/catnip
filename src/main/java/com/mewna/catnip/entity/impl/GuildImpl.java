@@ -47,7 +47,7 @@ public class GuildImpl implements Guild, RequiresCatnip {
     private VerificationLevel verificationLevel;
     private NotificationLevel defaultMessageNotifications;
     private ContentFilterLevel explicitContentFilter;
-    private List<CustomEmoji> emojis;
+    //private List<CustomEmoji> emojis;
     private List<String> features;
     private MFALevel mfaLevel;
     private String applicationId;
@@ -94,5 +94,11 @@ public class GuildImpl implements Guild, RequiresCatnip {
     @Override
     public List<Channel> channels() {
         return catnip.cache().channels(id);
+    }
+    
+    @Nonnull
+    @Override
+    public List<CustomEmoji> emojis() {
+        return catnip.cache().emoji(id);
     }
 }
