@@ -36,8 +36,8 @@ public class MemoryEntityCache implements EntityCacheWorker {
     // TODO: How to handle DM channels?
     private final Map<String, Map<String, Channel>> channelCache = new ConcurrentHashMap<>();
     private final Map<String, Map<String, CustomEmoji>> emojiCache = new ConcurrentHashMap<>();
-    // Map guild -> {id -> voice state}
     private final Map<String, Map<String, VoiceState>> voiceStateCache = new ConcurrentHashMap<>();
+    private final Map<String, Presence> presenceCache = new ConcurrentHashMap<>();
     @Getter
     private Catnip catnip;
     private EntityBuilder entityBuilder;
@@ -107,6 +107,10 @@ public class MemoryEntityCache implements EntityCacheWorker {
         }
         emojiMap.put(emoji.id(), emoji);
         catnip.logAdapter().debug("Cached member {} for guild {}", emoji.id(), emoji.guildId());
+    }
+    
+    private void cachePresence(final String id, final Presence presence) {
+        presenceCache.put(id, presence);
     }
     
     private void cacheVoiceState(final VoiceState state) {
@@ -263,7 +267,6 @@ public class MemoryEntityCache implements EntityCacheWorker {
                     // - discriminator
                     // - avatar
                     // so we check the existing cache for a user, and update as needed
-                    // TODO: Cache online status and activity
                     final User updated = entityBuilder.createUser(new JsonObject()
                             .put("id", id)
                             .put("bot", old.bot())
@@ -272,6 +275,8 @@ public class MemoryEntityCache implements EntityCacheWorker {
                             .put("avatar", user.getString("avatar", old.avatar()))
                     );
                     cacheUser(updated);
+                    final Presence presence = entityBuilder.createPresence(payload);
+                    cachePresence(id, presence);
                 }
                 break;
             }

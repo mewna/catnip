@@ -1,6 +1,7 @@
 package com.mewna.catnip.internal;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.MemoryEntityCache;
 import com.mewna.catnip.entity.impl.MemberImpl;
@@ -31,6 +32,8 @@ import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * TODO: This thing has a giant number of dependencies - how to split it up?
@@ -73,6 +76,9 @@ public class CatnipImpl implements Catnip {
     @Getter
     @Setter
     private EntityCacheWorker cache = new MemoryEntityCache();
+    @Getter
+    @Setter
+    private Set<CacheFlag> cacheFlags = EnumSet.noneOf(CacheFlag.class);
     
     public CatnipImpl() {
         this(Vertx.vertx());
