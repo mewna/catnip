@@ -1,5 +1,6 @@
 package com.mewna.catnip.entity.impl;
 
+import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.Presence;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -16,7 +17,9 @@ import java.util.Set;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class PresenceImpl implements Presence {
+public class PresenceImpl implements Presence, RequiresCatnip {
+    private transient Catnip catnip;
+    
     private OnlineStatus status;
     private Activity activity;
     

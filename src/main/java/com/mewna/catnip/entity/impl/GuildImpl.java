@@ -98,6 +98,6 @@ public class GuildImpl implements Guild, RequiresCatnip {
     @Nonnull
     @Override
     public List<CustomEmoji> emojis() {
-        return catnip.cache().emoji(id);
+        return catnip.cache().emojis(id);
     }
 }

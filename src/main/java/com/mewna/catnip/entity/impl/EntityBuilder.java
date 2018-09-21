@@ -426,6 +426,7 @@ public final class EntityBuilder {
     @CheckReturnValue
     public Presence createPresence(@Nonnull final JsonObject data) {
         return PresenceImpl.builder()
+                .catnip(catnip)
                 .status(OnlineStatus.fromString(data.getString("status")))
                 .activity(createActivity(data.getJsonObject("game", null)))
                 .build();
@@ -545,6 +546,22 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public VoiceState createVoiceState(@Nonnull final JsonObject data) {
+        return VoiceStateImpl.builder()
+                .guildId(data.getString("guild_id"))
+                .channelId(data.getString("channel_id"))
+                .userId(data.getString("user_id"))
+                .sessionId(data.getString("session_id"))
+                .deaf(data.getBoolean("deaf"))
+                .mute(data.getBoolean("mute"))
+                .selfDeaf(data.getBoolean("self_deaf"))
+                .selfMute(data.getBoolean("self_mute"))
+                .suppress(data.getBoolean("suppress"))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public UnicodeEmoji createUnicodeEmoji(@Nonnull final JsonObject data) {
         return UnicodeEmojiImpl.builder()
                 .catnip(catnip)
@@ -600,7 +617,7 @@ public final class EntityBuilder {
         return Reaction.builder()
                 .count(data.getInteger("count"))
                 .self(data.getBoolean("self", false))
-                .emoji(createEmoji(guildId, data.getJsonObject("emoji")))
+                .emoji(createEmoji(guildId, data.getJsonObject("emojis")))
                 .build();
     }
     
@@ -640,6 +657,8 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public Guild createGuild(@Nonnull final JsonObject data) {
+        // As we don't store these fields on the guild object itself, we have
+        // to update them in the cache
         if(data.getJsonArray("roles") != null) {
             catnip.cacheWorker().bulkCacheRoles(immutableListOf(data.getJsonArray("roles"),
                     e -> createRole(data.getString("id"), e)));
@@ -657,6 +676,7 @@ public final class EntityBuilder {
                     e -> createCustomEmoji(data.getString("id"), e)));
         }
         // TODO: Handle `presences`
+        // TODO: Handle `voice_states`
         return GuildImpl.builder()
                 .catnip(catnip)
                 .id(data.getString("id"))

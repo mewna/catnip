@@ -304,7 +304,7 @@ public interface Message extends Snowflake {
         boolean self();
     
         /**
-         * The emoji representing this reaction.
+         * The emojis representing this reaction.
          *
          * @return Emoji object of this reaction.
          */

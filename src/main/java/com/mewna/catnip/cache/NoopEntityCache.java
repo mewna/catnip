@@ -61,6 +61,12 @@ public class NoopEntityCache implements EntityCacheWorker {
         return this;
     }
     
+    @Nonnull
+    @Override
+    public EntityCache bulkCacheVoiceStates(@Nonnull final Collection<VoiceState> voiceStates) {
+        return this;
+    }
+    
     @Nullable
     @Override
     public Guild guild(@Nonnull final String id) {
@@ -117,7 +123,19 @@ public class NoopEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public List<CustomEmoji> emoji(@Nonnull final String guildId) {
+    public List<CustomEmoji> emojis(@Nonnull final String guildId) {
+        return ImmutableList.of();
+    }
+    
+    @Nullable
+    @Override
+    public VoiceState voiceState(@Nullable final String guildId, @Nonnull final String id) {
+        return null;
+    }
+    
+    @Nonnull
+    @Override
+    public List<VoiceState> voiceStates(@Nonnull final String guildId) {
         return ImmutableList.of();
     }
 }
