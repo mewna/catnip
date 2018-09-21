@@ -1,6 +1,7 @@
 package com.mewna.catnip.cache;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.GuildChannel;
 import com.mewna.catnip.entity.Member;
 import com.mewna.catnip.entity.Role;
@@ -39,6 +40,9 @@ public interface EntityCacheWorker extends EntityCache {
     
     @Nonnull
     EntityCache bulkCacheMembers(@Nonnull Collection<Member> members);
+    
+    @Nonnull
+    EntityCache bulkCacheEmoji(@Nonnull Collection<CustomEmoji> emoji);
     
     @Nonnull
     Catnip catnip();

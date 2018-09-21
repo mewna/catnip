@@ -3,6 +3,7 @@ package com.mewna.catnip.cache;
 import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.*;
+import com.mewna.catnip.entity.Emoji.CustomEmoji;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
@@ -45,6 +46,12 @@ public class NoopEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
     public EntityCache bulkCacheMembers(@Nonnull final Collection<Member> members) {
+        return this;
+    }
+    
+    @Nonnull
+    @Override
+    public EntityCache bulkCacheEmoji(@Nonnull final Collection<CustomEmoji> emoji) {
         return this;
     }
     
@@ -93,6 +100,18 @@ public class NoopEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
     public List<Channel> channels(@Nonnull final String guildId) {
+        return ImmutableList.of();
+    }
+    
+    @Nullable
+    @Override
+    public CustomEmoji emoji(@Nonnull final String guildId, @Nonnull final String id) {
+        return null;
+    }
+    
+    @Nonnull
+    @Override
+    public List<CustomEmoji> emoji(@Nonnull final String guildId) {
         return ImmutableList.of();
     }
 }

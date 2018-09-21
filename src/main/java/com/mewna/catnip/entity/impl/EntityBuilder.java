@@ -458,12 +458,13 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public CustomEmoji createCustomEmoji(@Nonnull final JsonObject data) {
+    public CustomEmoji createCustomEmoji(@Nonnull final String guildId, @Nonnull final JsonObject data) {
         final JsonObject userRaw = data.getJsonObject("user");
         
         return CustomEmojiImpl.builder()
                 .catnip(catnip)
                 .id(data.getString("id"))
+                .guildId(guildId)
                 .name(data.getString("name"))
                 .roles(stringListOf(data.getJsonArray("roles")))
                 .user(userRaw == null ? null : createUser(userRaw))
@@ -475,8 +476,10 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Emoji createEmoji(@Nonnull final JsonObject data) {
-        return data.getValue("id") == null ? createUnicodeEmoji(data) : createCustomEmoji(data);
+    public Emoji createEmoji(@Nullable final String guildId, @Nonnull final JsonObject data) {
+        // If it has an id, then it has a guild attached, so the @Nonnull warning can be ignored
+        //noinspection ConstantConditions
+        return data.getValue("id") == null ? createUnicodeEmoji(data) : createCustomEmoji(guildId, data);
     }
     
     @Nonnull
@@ -496,11 +499,11 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Message.Reaction createReaction(@Nonnull final JsonObject data) {
+    public Message.Reaction createReaction(@Nonnull final String guildId, @Nonnull final JsonObject data) {
         return Reaction.builder()
                 .count(data.getInteger("count"))
                 .self(data.getBoolean("self", false))
-                .emoji(createEmoji(data.getJsonObject("emoji")))
+                .emoji(createEmoji(guildId, data.getJsonObject("emoji")))
                 .build();
     }
     
@@ -527,13 +530,11 @@ public final class EntityBuilder {
                 .mentionedRoles(stringListOf(data.getJsonArray("mention_roles")))
                 .attachments(immutableListOf(data.getJsonArray("attachments"), this::createAttachment))
                 .embeds(immutableListOf(data.getJsonArray("embeds"), this::createEmbed))
-                .reactions(immutableListOf(data.getJsonArray("reactions"), this::createReaction))
+                .reactions(immutableListOf(data.getJsonArray("reactions"), e -> createReaction(data.getString("guild_id"), e)))
                 .nonce(data.getString("nonce"))
                 .pinned(data.getBoolean("pinned"))
                 .webhookId(data.getString("webhook_id"))
                 .type(MessageType.byId(data.getInteger("type")))
-                
-                // Not actually documented (part of lazy guild changes)
                 .member(member)
                 .guildId(data.getString("guild_id"))
                 .build();
@@ -556,6 +557,8 @@ public final class EntityBuilder {
                 e -> createGuildChannel(data.getString("id"), e)));
         catnip.cacheWorker().bulkCacheMembers(immutableListOf(data.getJsonArray("members"),
                 e -> createMember(data.getString("id"), e)));
+        catnip.cacheWorker().bulkCacheEmoji(immutableListOf(data.getJsonArray("emojis"),
+                e -> createCustomEmoji(data.getString("id"), e)));
         return createGuild(data);
     }
     
@@ -580,7 +583,7 @@ public final class EntityBuilder {
                 .defaultMessageNotifications(NotificationLevel.byKey(data.getInteger("default_message_notifications", 0)))
                 .explicitContentFilter(ContentFilterLevel.byKey(data.getInteger("explicit_content_filter", 0)))
                 //.roles(immutableListOf(data.getJsonArray("roles"), e -> createRole(data.getString("id"), e)))
-                .emojis(immutableListOf(data.getJsonArray("emojis"), this::createCustomEmoji))
+                //.emojis(immutableListOf(data.getJsonArray("emojis"), e -> this::createCustomEmoji))
                 .features(stringListOf(data.getJsonArray("features")))
                 .mfaLevel(MFALevel.byKey(data.getInteger("mfa_level", 0)))
                 .applicationId(data.getString("application_id"))

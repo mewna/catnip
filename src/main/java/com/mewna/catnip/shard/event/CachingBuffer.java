@@ -34,6 +34,8 @@ public class CachingBuffer extends AbstractBuffer {
             GUILD_CREATE, GUILD_UPDATE, GUILD_DELETE,
             // Roles
             GUILD_ROLE_CREATE, GUILD_ROLE_UPDATE, GUILD_ROLE_DELETE,
+            // Emoji
+            GUILD_EMOJIS_UPDATE,
             // Members
             GUILD_MEMBER_ADD, GUILD_MEMBER_REMOVE, GUILD_MEMBER_UPDATE,
             // Member chunking

@@ -118,20 +118,29 @@ public interface Emoji extends Snowflake {
         @Nonnull
         @CheckReturnValue
         String id();
-    
+        
+        /**
+         * ID of guild that owns this emoji, or null if it has no guild.
+         *
+         * @return String representing the ID.
+         */
+        @Nonnull
+        @CheckReturnValue
+        String guildId();
+        
         @Override
         @CheckReturnValue
         default boolean custom() {
             return true;
         }
-    
+        
         @Override
         @Nonnull
         @CheckReturnValue
         default String forMessage() {
             return String.format("<%s:%s:%s>", animated() ? "a" : "", name(), id());
         }
-    
+        
         @Override
         @Nonnull
         @CheckReturnValue
@@ -159,13 +168,13 @@ public interface Emoji extends Snowflake {
         default User user() {
             return null;
         }
-    
+        
         @Override
         @CheckReturnValue
         default boolean managed() {
             return false;
         }
-    
+        
         @Override
         @CheckReturnValue
         default boolean animated() {
@@ -177,14 +186,14 @@ public interface Emoji extends Snowflake {
         default boolean custom() {
             return false;
         }
-    
+        
         @Override
         @Nonnull
         @CheckReturnValue
         default String forMessage() {
             return name();
         }
-    
+        
         @Override
         @Nonnull
         @CheckReturnValue
