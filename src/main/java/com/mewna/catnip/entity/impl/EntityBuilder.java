@@ -16,12 +16,18 @@ import com.mewna.catnip.entity.Invite.InviteChannel;
 import com.mewna.catnip.entity.Invite.InviteGuild;
 import com.mewna.catnip.entity.Invite.Inviter;
 import com.mewna.catnip.entity.PermissionOverride.OverrideType;
+import com.mewna.catnip.entity.Presence.*;
 import com.mewna.catnip.entity.impl.EmbedImpl.*;
 import com.mewna.catnip.entity.impl.InviteImpl.InviteChannelImpl;
 import com.mewna.catnip.entity.impl.InviteImpl.InviteGuildImpl;
 import com.mewna.catnip.entity.impl.InviteImpl.InviterImpl;
 import com.mewna.catnip.entity.impl.MessageImpl.Attachment;
 import com.mewna.catnip.entity.impl.MessageImpl.Reaction;
+import com.mewna.catnip.entity.impl.PresenceImpl.ActivityAssetsImpl;
+import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
+import com.mewna.catnip.entity.impl.PresenceImpl.ActivityPartyImpl;
+import com.mewna.catnip.entity.impl.PresenceImpl.ActivitySecretsImpl;
+import com.mewna.catnip.entity.impl.PresenceImpl.ActivityTimestampsImpl;
 import com.mewna.catnip.entity.util.Permission;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -30,10 +36,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -421,6 +424,96 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public Presence createPresence(@Nonnull final JsonObject data) {
+        return PresenceImpl.builder()
+                .status(OnlineStatus.fromString(data.getString("status")))
+                .activity(createActivity(data.getJsonObject("game", null)))
+                .build();
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    public Activity createActivity(@Nullable final JsonObject data) {
+        if(data == null) {
+            return null;
+        } else {
+            return ActivityImpl.builder()
+                    .name(data.getString("name"))
+                    .type(ActivityType.byId(data.getInteger("type")))
+                    .url(data.getString("url"))
+                    .timestamps(createTimestamps(data.getJsonObject("timestamps", null)))
+                    .applicationId(data.getString("application_id"))
+                    .details(data.getString("details"))
+                    .state(data.getString("state"))
+                    .party(createParty(data.getJsonObject("party", null)))
+                    .assets(createAssets(data.getJsonObject("assets", null)))
+                    .secrets(createSecrets(data.getJsonObject("secrets", null)))
+                    .instance(data.getBoolean("instance", false))
+                    .flags(ActivityFlag.fromInt(data.getInteger("flags")))
+                    .build();
+        }
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    public ActivityTimestamps createTimestamps(@Nullable final JsonObject data) {
+        if(data == null) {
+            return null;
+        } else {
+            return ActivityTimestampsImpl.builder()
+                    .start(data.getLong("start", -1L))
+                    .end(data.getLong("end", -1L))
+                    .build();
+        }
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    public ActivityParty createParty(@Nullable final JsonObject data) {
+        if(data == null) {
+            return null;
+        } else {
+            final JsonArray size = data.getJsonArray("size", new JsonArray(Arrays.asList(-1, -1)));
+            return ActivityPartyImpl.builder()
+                    .id(data.getString("id"))
+                    // Initialized to -1 if doesn't exist
+                    .currentSize(size.getInteger(0))
+                    .maxSize(size.getInteger(1))
+                    .build();
+        }
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    public ActivityAssets createAssets(@Nullable final JsonObject data) {
+        if(data == null) {
+            return null;
+        } else {
+            return ActivityAssetsImpl.builder()
+                    .largeImage(data.getString("large_image"))
+                    .largeText(data.getString("large_text"))
+                    .smallImage(data.getString("small_image"))
+                    .smallText(data.getString("small_text"))
+                    .build();
+        }
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    public ActivitySecrets createSecrets(@Nullable final JsonObject data) {
+        if(data == null) {
+            return null;
+        } else {
+            return ActivitySecretsImpl.builder()
+                    .join(data.getString("join"))
+                    .spectate(data.getString("spectate"))
+                    .match(data.getString("match"))
+                    .build();
+        }
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public Member createMember(@Nonnull final String guildId, @Nonnull final String id, @Nonnull final JsonObject data) {
         final JsonObject userData = data.getJsonObject("user");
         if(userData != null) {
@@ -563,6 +656,7 @@ public final class EntityBuilder {
             catnip.cacheWorker().bulkCacheEmoji(immutableListOf(data.getJsonArray("emojis"),
                     e -> createCustomEmoji(data.getString("id"), e)));
         }
+        // TODO: Handle `presences`
         return GuildImpl.builder()
                 .catnip(catnip)
                 .id(data.getString("id"))
@@ -596,7 +690,7 @@ public final class EntityBuilder {
                 //.channels(immutableListOf(data.getJsonArray("channels"), this::createChannel))
                 .build();
     }
-
+    
     @Nonnull
     @CheckReturnValue
     public Invite createInvite(@Nonnull final JsonObject data) {

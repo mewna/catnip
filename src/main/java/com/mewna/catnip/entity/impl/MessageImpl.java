@@ -39,8 +39,6 @@ public class MessageImpl implements Message, RequiresCatnip {
     private boolean pinned;
     private String webhookId;
     private MessageType type;
-    
-    //not present in discord docs
     private Member member;
     private String guildId;
     
