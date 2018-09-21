@@ -242,10 +242,12 @@ public class MemoryEntityCache implements EntityCacheWorker {
             }
             // Emojis
             case GUILD_EMOJIS_UPDATE: {
-                final String guild = payload.getString("guild_id");
-                final JsonArray emojis = payload.getJsonArray("emojis");
-                emojis.stream().map(e -> entityBuilder.createCustomEmoji(guild, (JsonObject) e)).forEach(this::cacheEmoji);
-                catnip.logAdapter().debug("Processed chunk of {} emojis for guild {}", emojis.size(), guild);
+                if(!catnip.cacheFlags().contains(CacheFlag.DROP_EMOJI)) {
+                    final String guild = payload.getString("guild_id");
+                    final JsonArray emojis = payload.getJsonArray("emojis");
+                    emojis.stream().map(e -> entityBuilder.createCustomEmoji(guild, (JsonObject) e)).forEach(this::cacheEmoji);
+                    catnip.logAdapter().debug("Processed chunk of {} emojis for guild {}", emojis.size(), guild);
+                }
                 break;
             }
             // Users
@@ -254,8 +256,6 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 break;
             }
             case PRESENCE_UPDATE: {
-                // TODO: This contains a PARTIAL object - will be a pain to update
-                // Just reference existing cache where possible?
                 final JsonObject user = payload.getJsonObject("user");
                 final String id = user.getString("id");
                 final User old = user(id);
@@ -275,15 +275,19 @@ public class MemoryEntityCache implements EntityCacheWorker {
                             .put("avatar", user.getString("avatar", old.avatar()))
                     );
                     cacheUser(updated);
-                    final Presence presence = entityBuilder.createPresence(payload);
-                    cachePresence(id, presence);
+                    if(!catnip.cacheFlags().contains(CacheFlag.DROP_GAME_STATUSES)) {
+                        final Presence presence = entityBuilder.createPresence(payload);
+                        cachePresence(id, presence);
+                    }
                 }
                 break;
             }
             // Voice
             case VOICE_STATE_UPDATE: {
-                final VoiceState state = entityBuilder.createVoiceState(payload);
-                cacheVoiceState(state);
+                if(!catnip.cacheFlags().contains(CacheFlag.DROP_VOICE_STATES)) {
+                    final VoiceState state = entityBuilder.createVoiceState(payload);
+                    cacheVoiceState(state);
+                }
                 break;
             }
         }
@@ -327,6 +331,13 @@ public class MemoryEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
+    public EntityCache bulkCachePresences(@Nonnull final Map<String, Presence> presences) {
+        presences.forEach(this::cachePresence);
+        return this;
+    }
+    
+    @Nonnull
+    @Override
     public EntityCache bulkCacheVoiceStates(@Nonnull final Collection<VoiceState> voiceStates) {
         voiceStates.forEach(this::cacheVoiceState);
         return this;
@@ -342,6 +353,12 @@ public class MemoryEntityCache implements EntityCacheWorker {
     @Override
     public User user(@Nonnull final String id) {
         return userCache.get(id);
+    }
+    
+    @Nullable
+    @Override
+    public Presence presence(@Nonnull final String id) {
+        return presenceCache.get(id);
     }
     
     @Nullable

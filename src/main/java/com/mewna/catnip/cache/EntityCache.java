@@ -37,6 +37,17 @@ public interface EntityCache {
     User user(@Nonnull String id);
     
     /**
+     * Get the presence for the user with the specified ID. May be
+     * {@code null}.
+     *
+     * @param id The ID of the user whose presence is to be fetched.
+     *
+     * @return The user's presence, or {@code null} if it isn't cached.
+     */
+    @Nullable
+    Presence presence(@Nonnull String id);
+    
+    /**
      * Get the member with the given ID from the guild with the given ID. May
      * be {@code null}.
      *

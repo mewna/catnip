@@ -7,6 +7,7 @@ import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * If you plan to write your own implementation of this class, be aware that
@@ -44,6 +45,9 @@ public interface EntityCacheWorker extends EntityCache {
     
     @Nonnull
     EntityCache bulkCacheEmoji(@Nonnull Collection<CustomEmoji> emoji);
+    
+    @Nonnull
+    EntityCache bulkCachePresences(@Nonnull Map<String, Presence> presences);
     
     @Nonnull
     EntityCache bulkCacheVoiceStates(@Nonnull Collection<VoiceState> voiceStates);

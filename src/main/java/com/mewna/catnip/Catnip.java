@@ -1,5 +1,6 @@
 package com.mewna.catnip;
 
+import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCache;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.extension.Extension;
@@ -19,6 +20,7 @@ import io.vertx.core.eventbus.EventBus;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Set;
 
 /**
  * @author amy
@@ -113,6 +115,12 @@ public interface Catnip {
     
     @Nonnull
     Catnip cache(@Nonnull EntityCacheWorker cache);
+    
+    @Nonnull
+    Set<CacheFlag> cacheFlags();
+    
+    @Nonnull
+    Catnip cacheFlags(@Nonnull Set<CacheFlag> cacheFlags);
     
     @Nonnull
     ExtensionManager extensionManager();
