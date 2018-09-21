@@ -47,7 +47,6 @@ public class GuildImpl implements Guild, RequiresCatnip {
     private VerificationLevel verificationLevel;
     private NotificationLevel defaultMessageNotifications;
     private ContentFilterLevel explicitContentFilter;
-    //private List<CustomEmoji> emojis;
     private List<String> features;
     private MFALevel mfaLevel;
     private String applicationId;

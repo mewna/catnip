@@ -540,31 +540,25 @@ public final class EntityBuilder {
                 .build();
     }
     
-    /**
-     * Unlike {@link #createGuild(JsonObject)}, this method caches parts of the
-     * guild as it goes, such as channels and members.
-     *
-     * @param data Guild object to cache.
-     *
-     * @return The created guild.
-     */
-    @Nonnull
-    @CheckReturnValue
-    public Guild createCachedGuild(@Nonnull final JsonObject data) {
-        catnip.cacheWorker().bulkCacheRoles(immutableListOf(data.getJsonArray("roles"),
-                e -> createRole(data.getString("id"), e)));
-        catnip.cacheWorker().bulkCacheChannels(immutableListOf(data.getJsonArray("channels"),
-                e -> createGuildChannel(data.getString("id"), e)));
-        catnip.cacheWorker().bulkCacheMembers(immutableListOf(data.getJsonArray("members"),
-                e -> createMember(data.getString("id"), e)));
-        catnip.cacheWorker().bulkCacheEmoji(immutableListOf(data.getJsonArray("emojis"),
-                e -> createCustomEmoji(data.getString("id"), e)));
-        return createGuild(data);
-    }
-    
     @Nonnull
     @CheckReturnValue
     public Guild createGuild(@Nonnull final JsonObject data) {
+        if(data.getJsonArray("roles") != null) {
+            catnip.cacheWorker().bulkCacheRoles(immutableListOf(data.getJsonArray("roles"),
+                    e -> createRole(data.getString("id"), e)));
+        }
+        if(data.getJsonArray("members") != null) {
+            catnip.cacheWorker().bulkCacheChannels(immutableListOf(data.getJsonArray("channels"),
+                    e -> createGuildChannel(data.getString("id"), e)));
+        }
+        if(data.getJsonArray("members") != null) {
+            catnip.cacheWorker().bulkCacheMembers(immutableListOf(data.getJsonArray("members"),
+                    e -> createMember(data.getString("id"), e)));
+        }
+        if(data.getJsonArray("emojis") != null) {
+            catnip.cacheWorker().bulkCacheEmoji(immutableListOf(data.getJsonArray("emojis"),
+                    e -> createCustomEmoji(data.getString("id"), e)));
+        }
         return GuildImpl.builder()
                 .catnip(catnip)
                 .id(data.getString("id"))
@@ -598,7 +592,7 @@ public final class EntityBuilder {
                 //.channels(immutableListOf(data.getJsonArray("channels"), this::createChannel))
                 .build();
     }
-    
+
     @Nonnull
     @CheckReturnValue
     public Invite createInvite(@Nonnull final JsonObject data) {
