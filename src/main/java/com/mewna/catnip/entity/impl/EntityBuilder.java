@@ -3,7 +3,6 @@ package com.mewna.catnip.entity.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.entity.*;
 import com.mewna.catnip.entity.Channel.ChannelType;
 import com.mewna.catnip.entity.Embed.EmbedType;
@@ -241,12 +240,18 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public TextChannel createTextChannel(@Nonnull final JsonObject data) {
+        return createTextChannel(data.getString("guild_id"), data);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public TextChannel createTextChannel(@Nullable final String guildId, @Nonnull final JsonObject data) {
         return TextChannelImpl.builder()
                 .catnip(catnip)
                 .id(data.getString("id"))
                 .type(ChannelType.TEXT)
                 .name(data.getString("name"))
-                .guildId(data.getString("guild_id"))
+                .guildId(guildId)
                 .position(data.getInteger("position", -1))
                 .parentId(data.getString("parent_id"))
                 .overrides(immutableListOf(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
@@ -259,12 +264,18 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public VoiceChannel createVoiceChannel(@Nonnull final JsonObject data) {
+        return createVoiceChannel(data.getString("guild_id"), data);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public VoiceChannel createVoiceChannel(@Nullable final String guildId, @Nonnull final JsonObject data) {
         return VoiceChannelImpl.builder()
                 .catnip(catnip)
                 .id(data.getString("id"))
                 .type(ChannelType.VOICE)
                 .name(data.getString("name"))
-                .guildId(data.getString("guild_id"))
+                .guildId(guildId)
                 .position(data.getInteger("position", -1))
                 .parentId(data.getString("parent_id"))
                 .overrides(immutableListOf(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
@@ -276,12 +287,18 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public Category createCategory(@Nonnull final JsonObject data) {
+        return createCategory(data.getString("guild_id"), data);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Category createCategory(@Nullable final String guildId, @Nonnull final JsonObject data) {
         return CategoryImpl.builder()
                 .catnip(catnip)
                 .id(data.getString("id"))
                 .type(ChannelType.CATEGORY)
                 .name(data.getString("name"))
-                .guildId(data.getString("guild_id"))
+                .guildId(guildId)
                 .position(data.getInteger("position", -1))
                 .parentId(data.getString("parent_id"))
                 .overrides(immutableListOf(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
@@ -316,14 +333,20 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public GuildChannel createGuildChannel(@Nonnull final JsonObject data) {
+        return createGuildChannel(data.getString("guild_id"), data);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public GuildChannel createGuildChannel(@Nonnull final String guildId, @Nonnull final JsonObject data) {
         final ChannelType type = ChannelType.byKey(data.getInteger("type"));
         switch(type) {
             case TEXT:
-                return createTextChannel(data);
+                return createTextChannel(guildId, data);
             case VOICE:
-                return createVoiceChannel(data);
+                return createVoiceChannel(guildId, data);
             case CATEGORY:
-                return createCategory(data);
+                return createCategory(guildId, data);
             default:
                 throw new UnsupportedOperationException("Unsupported channel type " + type);
         }
@@ -402,6 +425,7 @@ public final class EntityBuilder {
         return MemberImpl.builder()
                 .catnip(catnip)
                 .id(id)
+                .guildId(guildId)
                 .nick(data.getString("nick"))
                 .roles(ImmutableSet.of()) // TODO: fetch roles from cache? or at least give the ids
                 .joinedAt(parseTimestamp(data.getString("joined_at")))
@@ -526,10 +550,12 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public Guild createCachedGuild(@Nonnull final JsonObject data) {
-        ((EntityCacheWorker) catnip.cache()).bulkCacheRoles(immutableListOf(data.getJsonArray("roles"), e -> createRole(data.getString("id"), e)));
-        // TODO: This should take a guild ID param
-        ((EntityCacheWorker) catnip.cache()).bulkCacheChannels(immutableListOf(data.getJsonArray("roles"), this::createGuildChannel));
-        ((EntityCacheWorker) catnip.cache()).bulkCacheMembers(immutableListOf(data.getJsonArray("roles"), e -> createMember(data.getString("id"), e)));
+        catnip.cacheWorker().bulkCacheRoles(immutableListOf(data.getJsonArray("roles"),
+                e -> createRole(data.getString("id"), e)));
+        catnip.cacheWorker().bulkCacheChannels(immutableListOf(data.getJsonArray("channels"),
+                e -> createGuildChannel(data.getString("id"), e)));
+        catnip.cacheWorker().bulkCacheMembers(immutableListOf(data.getJsonArray("members"),
+                e -> createMember(data.getString("id"), e)));
         return createGuild(data);
     }
     

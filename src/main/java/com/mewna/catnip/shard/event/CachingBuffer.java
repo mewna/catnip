@@ -46,7 +46,6 @@ public class CachingBuffer extends AbstractBuffer {
     
     private final Map<Integer, BufferState> buffers = new ConcurrentHashMap<>();
     
-    // TODO: THIS WILL NOT HANDLE GUILD MEMBER CHUNKS
     @Override
     public void buffer(final JsonObject event) {
         final JsonObject shardData = event.getJsonObject("shard");
@@ -61,25 +60,34 @@ public class CachingBuffer extends AbstractBuffer {
                         .map(e -> ((JsonObject) e).getString("id"))
                         .collect(Collectors.toSet());
                 buffers.put(id, new BufferState(id, guilds));
+                catnip().logAdapter().info("Prepared new BufferState for shard {} with {} guilds.", id, guilds.size());
                 break;
             }
             case GUILD_CREATE: {
                 final String guild = d.getString("id");
+                catnip().logAdapter().info("Got possibly-BufferState-ed guild {}", guild);
                 final BufferState bufferState = buffers.get(id);
+                // Make sure to cache guild
+                maybeCache(type, d);
                 if(bufferState != null) {
                     if(bufferState.readyGuilds().isEmpty()) {
                         // No guilds left, can just dispatch normally
+                        catnip().logAdapter().info("BufferState for shard {} empty, removing and emitting.", id);
+                        buffers.remove(id);
                         emitter().emit(event);
                     } else {
                         // Remove READY guild if necessary, otherwise buffer
                         if(bufferState.readyGuilds().contains(guild)) {
                             bufferState.recvGuild(guild);
+                            catnip().logAdapter().info("Buffered guild {} for BufferState {}", guild, id);
                             // Replay all buffered events once we run out
                             if(bufferState.readyGuilds().isEmpty()) {
+                                catnip().logAdapter().info("BufferState for {} empty, replaying {} events...", id, bufferState.buffer().size());
                                 buffers.remove(id);
                                 bufferState.replay();
                             }
                         } else {
+                            catnip().logAdapter().info("Buffering event for BufferState {} @ {}", id, guild);
                             bufferState.buffer(event);
                         }
                     }

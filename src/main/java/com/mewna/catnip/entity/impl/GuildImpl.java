@@ -1,6 +1,5 @@
 package com.mewna.catnip.entity.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.Channel;
 import com.mewna.catnip.entity.Emoji.CustomEmoji;
@@ -88,12 +87,12 @@ public class GuildImpl implements Guild, RequiresCatnip {
     @Nonnull
     @Override
     public List<Member> members() {
-        return null;
+        return catnip.cache().members(id);
     }
     
     @Nonnull
     @Override
     public List<Channel> channels() {
-        return null;
+        return catnip.cache().channels(id);
     }
 }

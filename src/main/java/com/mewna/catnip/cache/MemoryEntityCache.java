@@ -64,7 +64,6 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 channelCache.put(gc.guildId(), channels);
             }
             channels.put(gc.id(), gc);
-            // TODO: Add to guild
             catnip.logAdapter().debug("Cached channel {} for guild {}", gc.id(), gc.guildId());
         } else {
             catnip.logAdapter().warn("I don't know how to cache non-guild channel {}!", channel.id());
@@ -78,7 +77,6 @@ public class MemoryEntityCache implements EntityCacheWorker {
             roleCache.put(role.guildId(), roles);
         }
         roles.put(role.id(), role);
-        // TODO: Add to guild
         catnip.logAdapter().debug("Cached role {} for guild {}", role.id(), role.guildId());
     }
     
@@ -94,7 +92,6 @@ public class MemoryEntityCache implements EntityCacheWorker {
             memberCache.put(member.guildId(), members);
         }
         members.put(member.id(), member);
-        // TODO: Add to guild
         catnip.logAdapter().debug("Cached member {} for guild {}", member.id(), member.guildId());
     }
     
@@ -123,7 +120,6 @@ public class MemoryEntityCache implements EntityCacheWorker {
                         channelCache.put(gc.guildId(), channels);
                     }
                     channels.remove(gc.id());
-                    // TODO: Remove from guild
                     catnip.logAdapter().debug("Deleted channel {} for guild {}", gc.id(), gc.guildId());
                 } else {
                     catnip.logAdapter().warn("I don't know how to delete non-guild channel {}!", channel.id());
@@ -164,7 +160,6 @@ public class MemoryEntityCache implements EntityCacheWorker {
             case GUILD_ROLE_DELETE: {
                 final String guild = payload.getString("guild_id");
                 final String role = payload.getString("role_id");
-                // TODO: Remove from guild object
                 Optional.ofNullable(roleCache.get(guild)).ifPresent(e -> e.remove(role));
                 catnip.logAdapter().debug("Deleted role {} for guild {}", role, guild);
                 break;
@@ -214,11 +209,15 @@ public class MemoryEntityCache implements EntityCacheWorker {
             }
             // Member chunking
             case GUILD_MEMBERS_CHUNK: {
+                final String guild = payload.getString("guild_id");
+                final JsonArray members = payload.getJsonArray("members");
+                members.stream().map(e -> entityBuilder.createMember(guild, (JsonObject) e)).forEach(this::cacheMember);
+                catnip.logAdapter().debug("Processed chunk of {} members for guild {}", members.size(), guild);
                 break;
             }
             // Users
             case USER_UPDATE: {
-                // TODO: This is self, do we care
+                // TODO: This is self, do we care?
                 break;
             }
             case PRESENCE_UPDATE: {
@@ -226,7 +225,8 @@ public class MemoryEntityCache implements EntityCacheWorker {
             }
             // Voice
             case VOICE_STATE_UPDATE: {
-                // TODO
+                // TODO: How to cache this?
+                // Bots can have a voice state in multiple guilds - how will we denote this?
                 break;
             }
         }
