@@ -36,6 +36,8 @@ public class MemoryEntityCache implements EntityCacheWorker {
     // TODO: How to handle DM channels?
     private final Map<String, Map<String, Channel>> channelCache = new ConcurrentHashMap<>();
     private final Map<String, Map<String, CustomEmoji>> emojiCache = new ConcurrentHashMap<>();
+    // Map guild -> {id -> voice state}
+    private final Map<String, Map<String, VoiceState>> voiceStateCache = new ConcurrentHashMap<>();
     @Getter
     private Catnip catnip;
     private EntityBuilder entityBuilder;
@@ -105,6 +107,20 @@ public class MemoryEntityCache implements EntityCacheWorker {
         }
         emojiMap.put(emoji.id(), emoji);
         catnip.logAdapter().debug("Cached member {} for guild {}", emoji.id(), emoji.guildId());
+    }
+    
+    private void cacheVoiceState(final VoiceState state) {
+        if(state.guildId() == null) {
+            catnip.logAdapter().warn("Not caching voice state for {} due to null guild", state.userId());
+            return;
+        }
+        Map<String, VoiceState> states = voiceStateCache.get(state.guildId());
+        if(states == null) {
+            states = new ConcurrentHashMap<>();
+            voiceStateCache.put(state.guildId(), states);
+        }
+        states.put(state.userId(), state);
+        catnip.logAdapter().debug("Cached voice state for {} in guild {}", state.userId(), state.guildId());
     }
     
     @Nonnull
@@ -261,8 +277,8 @@ public class MemoryEntityCache implements EntityCacheWorker {
             }
             // Voice
             case VOICE_STATE_UPDATE: {
-                // TODO: How to cache this?
-                // Bots can have a voice state in multiple guilds - how will we denote this?
+                final VoiceState state = entityBuilder.createVoiceState(payload);
+                cacheVoiceState(state);
                 break;
             }
         }
@@ -301,6 +317,13 @@ public class MemoryEntityCache implements EntityCacheWorker {
     @Override
     public EntityCache bulkCacheEmoji(@Nonnull final Collection<CustomEmoji> emoji) {
         emoji.forEach(this::cacheEmoji);
+        return this;
+    }
+    
+    @Nonnull
+    @Override
+    public EntityCache bulkCacheVoiceStates(@Nonnull final Collection<VoiceState> voiceStates) {
+        voiceStates.forEach(this::cacheVoiceState);
         return this;
     }
     
@@ -388,9 +411,29 @@ public class MemoryEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public List<CustomEmoji> emoji(@Nonnull final String guildId) {
+    public List<CustomEmoji> emojis(@Nonnull final String guildId) {
         if(emojiCache.containsKey(guildId)) {
             return ImmutableList.copyOf(emojiCache.get(guildId).values());
+        } else {
+            return ImmutableList.of();
+        }
+    }
+    
+    @Nullable
+    @Override
+    public VoiceState voiceState(@Nullable final String guildId, @Nonnull final String id) {
+        if(voiceStateCache.containsKey(guildId)) {
+            return voiceStateCache.get(guildId).get(id);
+        } else {
+            return null;
+        }
+    }
+    
+    @Nonnull
+    @Override
+    public List<VoiceState> voiceStates(@Nonnull final String guildId) {
+        if(voiceStateCache.containsKey(guildId)) {
+            return ImmutableList.copyOf(voiceStateCache.get(guildId).values());
         } else {
             return ImmutableList.of();
         }

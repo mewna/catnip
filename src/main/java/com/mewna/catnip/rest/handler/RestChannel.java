@@ -125,7 +125,7 @@ public class RestChannel extends RestHandler {
     public CompletableFuture<Void> addReaction(@Nonnull final String channelId, @Nonnull final String messageId,
                                                @Nonnull final String emoji) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_REACTION.withMajorParam(channelId),
-                ImmutableMap.of("message.id", messageId, "emoji", encodeUTF8(emoji)), new JsonObject()))
+                ImmutableMap.of("message.id", messageId, "emojis", encodeUTF8(emoji)), new JsonObject()))
                 .thenApply(__ -> null);
     }
     
@@ -139,7 +139,7 @@ public class RestChannel extends RestHandler {
     public CompletableFuture<Void> deleteOwnReaction(@Nonnull final String channelId, @Nonnull final String messageId,
                                                      @Nonnull final String emoji) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_OWN_REACTION.withMajorParam(channelId),
-                ImmutableMap.of("message.id", messageId, "emoji", encodeUTF8(emoji)), null))
+                ImmutableMap.of("message.id", messageId, "emojis", encodeUTF8(emoji)), null))
                 .thenApply(__ -> null);
     }
     

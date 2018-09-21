@@ -106,25 +106,50 @@ public interface EntityCache {
     List<Channel> channels(@Nonnull String guildId);
     
     /**
-     * Get the custom emoji with the given ID from the guild with the given ID.
+     * Get the custom emojis with the given ID from the guild with the given ID.
      * May be {@code null},
      *
-     * @param guildId The ID of the guild the desired custom emoji is from.
-     * @param id      The ID of the desired custom emoji.
+     * @param guildId The ID of the guild the desired custom emojis is from.
+     * @param id      The ID of the desired custom emojis.
      *
-     * @return The custom emoji, or {@code null} if it isn't cached.
+     * @return The custom emojis, or {@code null} if it isn't cached.
      */
     @Nullable
     CustomEmoji emoji(@Nonnull String guildId, @Nonnull String id);
     
     /**
-     * Get all custom emoji for the guild with the given ID. The list returned
-     * byu this method will never be {@code null}, but may be empty.
+     * Get all custom emojis for the guild with the given ID. The list returned
+     * by this method will never be {@code null}, but may be empty.
      *
-     * @param guildId The ID of the guild to fetch custom emoji for.
+     * @param guildId The ID of the guild to fetch custom emojis for.
      *
-     * @return A non-{@code null}, possibly-empty list of custom emoji.
+     * @return A non-{@code null}, possibly-empty list of custom emojis.
      */
     @Nonnull
-    List<CustomEmoji> emoji(@Nonnull String guildId);
+    List<CustomEmoji> emojis(@Nonnull String guildId);
+    
+    /**
+     * Get the voice state for the user with the given ID, possibly in the
+     * guild with the given ID. May be {@code null}.
+     *
+     * @param guildId The ID of the guild the voice state is from. May be
+     *                {@code null}
+     * @param id      The ID of the user whose voice state is desired. May not
+     *                be {@code null}.
+     *
+     * @return The requested voice state, or {@code null} if it isn't cached.
+     */
+    @Nullable
+    VoiceState voiceState(@Nullable String guildId, @Nonnull String id);
+    
+    /**
+     * Get all voice states for the guild with the given ID. The list returned
+     * by this method will never be {@code null}, but may be empty.
+     *
+     * @param guildId The ID of the guild to fetch voice states for.
+     *
+     * @return A non-{@code null}, possibly-empty list of voice states.
+     */
+    @Nonnull
+    List<VoiceState> voiceStates(@Nonnull String guildId);
 }

@@ -42,7 +42,7 @@ public class RestEmoji extends RestHandler {
         return getCatnip().requester().queue(
                 new OutboundRequest(
                         Routes.GET_GUILD_EMOJI.withMajorParam(guildId),
-                        ImmutableMap.of("emoji.id", emojiId), null
+                        ImmutableMap.of("emojis.id", emojiId), null
                 ))
                 .thenApply(ResponsePayload::object)
                 .thenApply(e -> getEntityBuilder().createCustomEmoji(guildId, e));
@@ -92,7 +92,7 @@ public class RestEmoji extends RestHandler {
         return getCatnip().requester().queue(
                 new OutboundRequest(
                         Routes.MODIFY_GUILD_EMOJI.withMajorParam(guildId),
-                        ImmutableMap.of("emoji.id", emojiId),
+                        ImmutableMap.of("emojis.id", emojiId),
                         new JsonObject()
                                 .put("name", name)
                                 .put("roles", rolesArray)
@@ -107,7 +107,7 @@ public class RestEmoji extends RestHandler {
         return getCatnip().requester().queue(
                 new OutboundRequest(
                         Routes.DELETE_GUILD_EMOJI.withMajorParam(guildId),
-                        ImmutableMap.of("emoji.id", emojiId), null
+                        ImmutableMap.of("emojis.id", emojiId), null
                 ))
                 .thenApply(__ -> null);
     }
