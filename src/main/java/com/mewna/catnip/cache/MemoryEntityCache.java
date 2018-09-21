@@ -190,27 +190,20 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 final JsonObject user = payload.getJsonObject("user");
                 final String id = user.getString("id");
                 final String guild = payload.getString("guild_id");
-                
-                final Map<String, Member> members = memberCache.get(guild);
-                if(members != null) {
-                    final Member old = members.get(id);
-                    if(old != null) {
-                        final JsonObject data = new JsonObject()
-                                .put("user", user)
-                                .put("roles", payload.getJsonArray("roles"))
-                                .put("nick", payload.getString("nick"))
-                                .put("deaf", old.deaf())
-                                .put("mute", old.mute())
-                                .put("joined_at", old.joinedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-                        final Member member = entityBuilder.createMember(guild, data);
-                        cacheMember(member);
-                    } else {
-                        catnip.logAdapter().warn("Got GUILD_MEMBER_UPDATE for {} in {}, but we don't have them cached?!", id, guild);
-                    }
+                final Member old = member(guild, id);
+                if(old != null) {
+                    final JsonObject data = new JsonObject()
+                            .put("user", user)
+                            .put("roles", payload.getJsonArray("roles"))
+                            .put("nick", payload.getString("nick"))
+                            .put("deaf", old.deaf())
+                            .put("mute", old.mute())
+                            .put("joined_at", old.joinedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+                    final Member member = entityBuilder.createMember(guild, data);
+                    cacheMember(member);
                 } else {
-                    catnip.logAdapter().warn("Got GUILD_MEMBER_UPDATE for {} in {}, but we have no members cached?!", id, guild);
+                    catnip.logAdapter().warn("Got GUILD_MEMBER_UPDATE for {} in {}, but we don't have them cached?!", id, guild);
                 }
-                
                 break;
             }
             case GUILD_MEMBER_REMOVE: {
@@ -241,6 +234,30 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 break;
             }
             case PRESENCE_UPDATE: {
+                // TODO: This contains a PARTIAL object - will be a pain to update
+                // Just reference existing cache where possible?
+                final JsonObject user = payload.getJsonObject("user");
+                final String id = user.getString("id");
+                final User old = user(id);
+                if(old == null) {
+                    catnip.logAdapter().warn("Received PRESENCE_UPDATE for uncached user {}!?", id);
+                } else {
+                    // This could potentially update:
+                    // - username
+                    // - discriminator
+                    // - avatar
+                    // so we check the existing cache for a user, and update as needed
+                    // TODO: Cache game
+                    // TODO: Cache online-status
+                    final User updated = entityBuilder.createUser(new JsonObject()
+                            .put("id", id)
+                            .put("bot", old.bot())
+                            .put("username", user.getString("username", old.username()))
+                            .put("discriminator", user.getString("discriminator", old.discriminator()))
+                            .put("avatar", user.getString("avatar", old.avatar()))
+                    );
+                    cacheUser(updated);
+                }
                 break;
             }
             // Voice
@@ -250,6 +267,13 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 break;
             }
         }
+        return this;
+    }
+    
+    @Nonnull
+    @Override
+    public EntityCache bulkCacheUsers(@Nonnull final Collection<User> users) {
+        users.forEach(this::cacheUser);
         return this;
     }
     

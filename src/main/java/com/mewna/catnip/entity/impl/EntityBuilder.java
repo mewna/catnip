@@ -422,6 +422,10 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public Member createMember(@Nonnull final String guildId, @Nonnull final String id, @Nonnull final JsonObject data) {
+        final JsonObject userData = data.getJsonObject("user");
+        if(userData != null) {
+            catnip.cacheWorker().bulkCacheUsers(Collections.singletonList(createUser(userData)));
+        }
         return MemberImpl.builder()
                 .catnip(catnip)
                 .id(id)

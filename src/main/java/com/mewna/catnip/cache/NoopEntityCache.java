@@ -33,6 +33,12 @@ public class NoopEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
+    public EntityCache bulkCacheUsers(@Nonnull final Collection<User> users) {
+        return this;
+    }
+    
+    @Nonnull
+    @Override
     public EntityCache bulkCacheChannels(@Nonnull final Collection<GuildChannel> channels) {
         return this;
     }
