@@ -5,6 +5,7 @@ import com.mewna.catnip.entity.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.GuildChannel;
 import com.mewna.catnip.entity.Member;
 import com.mewna.catnip.entity.Role;
+import com.mewna.catnip.entity.User;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
@@ -31,6 +32,9 @@ public interface EntityCacheWorker extends EntityCache {
     @Nonnull
     @SuppressWarnings("UnusedReturnValue")
     EntityCache updateCache(@Nonnull String eventType, @Nonnull JsonObject payload);
+    
+    @Nonnull
+    EntityCache bulkCacheUsers(@Nonnull Collection<User> users);
     
     @Nonnull
     EntityCache bulkCacheChannels(@Nonnull Collection<GuildChannel> channels);
