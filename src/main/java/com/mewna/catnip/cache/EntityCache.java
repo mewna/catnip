@@ -1,8 +1,7 @@
 package com.mewna.catnip.cache;
 
-import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.*;
-import io.vertx.core.json.JsonObject;
+import com.mewna.catnip.entity.Emoji.CustomEmoji;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -65,7 +64,8 @@ public interface EntityCache {
      * {@code null}.
      *
      * @param guildId The ID of the guild the desired role is from.
-     * @param id The ID of the desired role.
+     * @param id      The ID of the desired role.
+     *
      * @return The role, or {@code null} if it isn't cached.
      */
     @Nullable
@@ -87,7 +87,8 @@ public interface EntityCache {
      * be {@code null}.
      *
      * @param guildId The ID of the guild the desired channel is from.
-     * @param id The ID of the desired channel.
+     * @param id      The ID of the desired channel.
+     *
      * @return The channel, or {@code null} if it isn't cached.
      */
     @Nullable
@@ -103,4 +104,27 @@ public interface EntityCache {
      */
     @Nonnull
     List<Channel> channels(@Nonnull String guildId);
+    
+    /**
+     * Get the custom emoji with the given ID from the guild with the given ID.
+     * May be {@code null},
+     *
+     * @param guildId The ID of the guild the desired custom emoji is from.
+     * @param id      The ID of the desired custom emoji.
+     *
+     * @return The custom emoji, or {@code null} if it isn't cached.
+     */
+    @Nullable
+    CustomEmoji emoji(@Nonnull String guildId, @Nonnull String id);
+    
+    /**
+     * Get all custom emoji for the guild with the given ID. The list returned
+     * byu this method will never be {@code null}, but may be empty.
+     *
+     * @param guildId The ID of the guild to fetch custom emoji for.
+     *
+     * @return A non-{@code null}, possibly-empty list of custom emoji.
+     */
+    @Nonnull
+    List<CustomEmoji> emoji(@Nonnull String guildId);
 }

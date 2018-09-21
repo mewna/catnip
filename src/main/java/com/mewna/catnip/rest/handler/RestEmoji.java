@@ -1,7 +1,6 @@
 package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
-import com.mewna.catnip.entity.Emoji;
 import com.mewna.catnip.entity.Emoji.CustomEmoji;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
@@ -34,7 +33,7 @@ public class RestEmoji extends RestHandler {
                         ImmutableMap.of(), null
                 ))
                 .thenApply(ResponsePayload::array)
-                .thenApply(mapObjectContents(getEntityBuilder()::createCustomEmoji))
+                .thenApply(mapObjectContents(e -> getEntityBuilder().createCustomEmoji(guildId, e)))
                 .thenApply(Collections::unmodifiableList);
     }
     
@@ -46,12 +45,12 @@ public class RestEmoji extends RestHandler {
                         ImmutableMap.of("emoji.id", emojiId), null
                 ))
                 .thenApply(ResponsePayload::object)
-                .thenApply(getEntityBuilder()::createCustomEmoji);
+                .thenApply(e -> getEntityBuilder().createCustomEmoji(guildId, e));
     }
     
     @Nonnull
     public CompletableFuture<CustomEmoji> createGuildEmoji(@Nonnull final String guildId, @Nonnull final String name,
-                                                     @Nonnull final String base64Image, @Nonnull final Collection<String> roles) {
+                                                           @Nonnull final String base64Image, @Nonnull final Collection<String> roles) {
         final JsonArray rolesArray;
         if(roles.isEmpty()) {
             rolesArray = null;
@@ -70,13 +69,13 @@ public class RestEmoji extends RestHandler {
                                 .put("roles", rolesArray)
                 ))
                 .thenApply(ResponsePayload::object)
-                .thenApply(getEntityBuilder()::createEmoji)
+                .thenApply(e -> getEntityBuilder().createEmoji(guildId, e))
                 .thenApply(CustomEmoji.class::cast);
     }
     
     @Nonnull
     public CompletableFuture<CustomEmoji> createGuildEmoji(@Nonnull final String guildId, @Nonnull final String name,
-                                                     @Nonnull final byte[] image, @Nonnull final Collection<String> roles) {
+                                                           @Nonnull final byte[] image, @Nonnull final Collection<String> roles) {
         return createGuildEmoji(guildId, name, Base64.getEncoder().encodeToString(image), roles);
     }
     
@@ -99,7 +98,7 @@ public class RestEmoji extends RestHandler {
                                 .put("roles", rolesArray)
                 ))
                 .thenApply(ResponsePayload::object)
-                .thenApply(getEntityBuilder()::createEmoji)
+                .thenApply(e -> getEntityBuilder().createEmoji(guildId, e))
                 .thenApply(CustomEmoji.class::cast);
     }
     

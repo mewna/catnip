@@ -3,6 +3,7 @@ package com.mewna.catnip.cache;
 import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.*;
+import com.mewna.catnip.entity.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.impl.EntityBuilder;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -34,6 +35,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
     private final Map<String, Map<String, Role>> roleCache = new ConcurrentHashMap<>();
     // TODO: How to handle DM channels?
     private final Map<String, Map<String, Channel>> channelCache = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, CustomEmoji>> emojiCache = new ConcurrentHashMap<>();
     @Getter
     private Catnip catnip;
     private EntityBuilder entityBuilder;
@@ -93,6 +95,16 @@ public class MemoryEntityCache implements EntityCacheWorker {
         }
         members.put(member.id(), member);
         catnip.logAdapter().debug("Cached member {} for guild {}", member.id(), member.guildId());
+    }
+    
+    private void cacheEmoji(final CustomEmoji emoji) {
+        Map<String, CustomEmoji> emojiMap = emojiCache.get(emoji.guildId());
+        if(emojiMap == null) {
+            emojiMap = new ConcurrentHashMap<>();
+            emojiCache.put(emoji.guildId(), emojiMap);
+        }
+        emojiMap.put(emoji.id(), emoji);
+        catnip.logAdapter().debug("Cached member {} for guild {}", emoji.id(), emoji.guildId());
     }
     
     @Nonnull
@@ -215,6 +227,14 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 catnip.logAdapter().debug("Processed chunk of {} members for guild {}", members.size(), guild);
                 break;
             }
+            // Emojis
+            case GUILD_EMOJIS_UPDATE: {
+                final String guild = payload.getString("guild_id");
+                final JsonArray emojis = payload.getJsonArray("emojis");
+                emojis.stream().map(e -> entityBuilder.createCustomEmoji(guild, (JsonObject) e)).forEach(this::cacheEmoji);
+                catnip.logAdapter().debug("Processed chunk of {} emojis for guild {}", emojis.size(), guild);
+                break;
+            }
             // Users
             case USER_UPDATE: {
                 // TODO: This is self, do we care?
@@ -254,6 +274,13 @@ public class MemoryEntityCache implements EntityCacheWorker {
         return this;
     }
     
+    @Nonnull
+    @Override
+    public EntityCache bulkCacheEmoji(@Nonnull final Collection<CustomEmoji> emoji) {
+        emoji.forEach(this::cacheEmoji);
+        return this;
+    }
+    
     @Nullable
     @Override
     public Guild guild(@Nonnull final String id) {
@@ -269,7 +296,11 @@ public class MemoryEntityCache implements EntityCacheWorker {
     @Nullable
     @Override
     public Member member(@Nonnull final String guildId, @Nonnull final String id) {
-        return null;
+        if(memberCache.containsKey(guildId)) {
+            return memberCache.get(guildId).get(id);
+        } else {
+            return null;
+        }
     }
     
     @Nonnull
@@ -285,13 +316,17 @@ public class MemoryEntityCache implements EntityCacheWorker {
     @Nullable
     @Override
     public Role role(@Nonnull final String guildId, @Nonnull final String id) {
-        return null;
+        if(roleCache.containsKey(guildId)) {
+            return roleCache.get(guildId).get(id);
+        } else {
+            return null;
+        }
     }
     
     @Nonnull
     @Override
     public List<Role> roles(@Nonnull final String guildId) {
-        if(memberCache.containsKey(guildId)) {
+        if(roleCache.containsKey(guildId)) {
             return ImmutableList.copyOf(roleCache.get(guildId).values());
         } else {
             return ImmutableList.of();
@@ -301,14 +336,38 @@ public class MemoryEntityCache implements EntityCacheWorker {
     @Nullable
     @Override
     public Channel channel(@Nonnull final String guildId, @Nonnull final String id) {
-        return null;
+        if(channelCache.containsKey(guildId)) {
+            return channelCache.get(guildId).get(id);
+        } else {
+            return null;
+        }
     }
     
     @Nonnull
     @Override
     public List<Channel> channels(@Nonnull final String guildId) {
-        if(memberCache.containsKey(guildId)) {
+        if(channelCache.containsKey(guildId)) {
             return ImmutableList.copyOf(channelCache.get(guildId).values());
+        } else {
+            return ImmutableList.of();
+        }
+    }
+    
+    @Nullable
+    @Override
+    public CustomEmoji emoji(@Nonnull final String guildId, @Nonnull final String id) {
+        if(emojiCache.containsKey(guildId)) {
+            return emojiCache.get(guildId).get(id);
+        } else {
+            return null;
+        }
+    }
+    
+    @Nonnull
+    @Override
+    public List<CustomEmoji> emoji(@Nonnull final String guildId) {
+        if(emojiCache.containsKey(guildId)) {
+            return ImmutableList.copyOf(emojiCache.get(guildId).values());
         } else {
             return ImmutableList.of();
         }
