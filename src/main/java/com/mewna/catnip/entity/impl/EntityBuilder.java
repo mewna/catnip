@@ -547,7 +547,7 @@ public final class EntityBuilder {
             catnip.cacheWorker().bulkCacheRoles(immutableListOf(data.getJsonArray("roles"),
                     e -> createRole(data.getString("id"), e)));
         }
-        if(data.getJsonArray("members") != null) {
+        if(data.getJsonArray("channels") != null) {
             catnip.cacheWorker().bulkCacheChannels(immutableListOf(data.getJsonArray("channels"),
                     e -> createGuildChannel(data.getString("id"), e)));
         }
