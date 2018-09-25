@@ -8,6 +8,10 @@ import javax.annotation.Nullable;
 import static org.slf4j.event.Level.*;
 
 /**
+ * If, for some reason, you want to plug in your own logging framework that
+ * ISN'T logback, SLF4J, ..., then you can implement this interface. Check out
+ * {@link DefaultLogAdapter} for an example.
+ *
  * @author amy
  * @since 9/3/18.
  */

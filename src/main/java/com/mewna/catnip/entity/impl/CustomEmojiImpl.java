@@ -23,6 +23,7 @@ public class CustomEmojiImpl implements CustomEmoji, RequiresCatnip {
     private transient Catnip catnip;
     
     private String id;
+    private String guildId;
     private String name;
     private List<String> roles;
     private User user;

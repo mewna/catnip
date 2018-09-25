@@ -1,27 +1,53 @@
 package com.mewna.catnip.shard.event;
 
-import com.mewna.catnip.shard.DiscordEvent;
+import com.google.common.collect.ImmutableList;
 import io.vertx.core.json.JsonObject;
 import lombok.Value;
 import lombok.experimental.Accessors;
 
 import java.util.Deque;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
+import static com.mewna.catnip.shard.DiscordEvent.*;
+
 /**
  * An implementation of {@link EventBuffer} used for the case of caching all
- * guilds sent in the {@code READY} payload. This doc needs to be filled out
- * way more than this eventually.
+ * guilds sent in the {@code READY} payload, as well as for caching data as it
+ * comes over the websocket connection.
+ * <p>
+ * TODO: Actually cache data lol
  *
  * @author amy
  * @since 9/9/18.
  */
 @SuppressWarnings("unused")
 public class CachingBuffer extends AbstractBuffer {
+    private static final List<String> CACHE_EVENTS = ImmutableList.copyOf(new String[] {
+            // Lifecycle
+            READY,
+            // Channels
+            CHANNEL_CREATE, CHANNEL_UPDATE, CHANNEL_DELETE,
+            // Guilds
+            GUILD_CREATE, GUILD_UPDATE, GUILD_DELETE,
+            // Roles
+            GUILD_ROLE_CREATE, GUILD_ROLE_UPDATE, GUILD_ROLE_DELETE,
+            // Emoji
+            GUILD_EMOJIS_UPDATE,
+            // Members
+            GUILD_MEMBER_ADD, GUILD_MEMBER_REMOVE, GUILD_MEMBER_UPDATE,
+            // Member chunking
+            GUILD_MEMBERS_CHUNK,
+            // Users
+            USER_UPDATE, PRESENCE_UPDATE,
+            // Voice
+            VOICE_STATE_UPDATE,
+    });
+    
     private final Map<Integer, BufferState> buffers = new ConcurrentHashMap<>();
     
     @Override
@@ -33,39 +59,48 @@ public class CachingBuffer extends AbstractBuffer {
         
         final JsonObject d = event.getJsonObject("d");
         switch(type) {
-            case DiscordEvent.READY: {
+            case READY: {
                 final Set<String> guilds = d.getJsonArray("guilds").stream()
                         .map(e -> ((JsonObject) e).getString("id"))
                         .collect(Collectors.toSet());
                 buffers.put(id, new BufferState(id, guilds));
+                catnip().logAdapter().info("Prepared new BufferState for shard {} with {} guilds.", id, guilds.size());
+                // READY is also a cache event, as it does come with
+                // information about the current user
+                maybeCache(type, d);
                 break;
             }
-            case DiscordEvent.GUILD_CREATE: {
+            case GUILD_CREATE: {
                 final String guild = d.getString("id");
+                catnip().logAdapter().info("Got possibly-BufferState-ed guild {}", guild);
                 final BufferState bufferState = buffers.get(id);
+                // Make sure to cache guild
+                maybeCache(type, d);
                 if(bufferState != null) {
                     if(bufferState.readyGuilds().isEmpty()) {
                         // No guilds left, can just dispatch normally
+                        catnip().logAdapter().info("BufferState for shard {} empty, removing and emitting.", id);
+                        buffers.remove(id);
                         emitter().emit(event);
                     } else {
                         // Remove READY guild if necessary, otherwise buffer
                         if(bufferState.readyGuilds().contains(guild)) {
                             bufferState.recvGuild(guild);
+                            catnip().logAdapter().info("Buffered guild {} for BufferState {}", guild, id);
                             // Replay all buffered events once we run out
                             if(bufferState.readyGuilds().isEmpty()) {
+                                catnip().logAdapter().info("BufferState for {} empty, replaying {} events...", id, bufferState.buffer().size());
                                 buffers.remove(id);
                                 bufferState.replay();
                             }
                         } else {
+                            catnip().logAdapter().info("Buffering event for BufferState {} @ {}", id, guild);
                             bufferState.buffer(event);
                         }
                     }
                 }
                 break;
             }
-            // TODO: Buffer events ONLY if a guild hasn't been created yet
-            // This will prevent a single "stuck" guild from blocking everything,
-            // as we learned from JDA.
             default: {
                 // Buffer and replay later
                 final BufferState bufferState = buffers.get(id);
@@ -75,15 +110,31 @@ public class CachingBuffer extends AbstractBuffer {
                         if(bufferState.readyGuilds().contains(guildId)) {
                             bufferState.buffer(event);
                         } else {
+                            // Emit if the payload is for a non-buffered guild
+                            maybeCache(type, d);
                             emitter().emit(event);
                         }
                     } else {
+                        // Emit if the payload has no guild id
+                        maybeCache(type, d);
                         emitter().emit(event);
                     }
                 } else {
+                    // Emit if not buffering right now
+                    maybeCache(type, d);
                     emitter().emit(event);
                 }
                 break;
+            }
+        }
+    }
+    
+    private void maybeCache(final String eventType, final JsonObject payload) {
+        if(CACHE_EVENTS.contains(eventType)) {
+            try {
+                catnip().cacheWorker().updateCache(eventType, payload);
+            } catch(final Exception e) {
+                catnip().logAdapter().warn("Got error updating cache for payload {}", eventType, e);
             }
         }
     }

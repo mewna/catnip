@@ -1,6 +1,10 @@
 package com.mewna.catnip.internal;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.cache.CacheFlag;
+import com.mewna.catnip.cache.EntityCacheWorker;
+import com.mewna.catnip.cache.MemoryEntityCache;
+import com.mewna.catnip.entity.User;
 import com.mewna.catnip.entity.impl.MemberImpl;
 import com.mewna.catnip.entity.impl.MessageImpl;
 import com.mewna.catnip.entity.impl.RoleImpl;
@@ -14,8 +18,8 @@ import com.mewna.catnip.internal.ratelimit.MemoryRatelimiter;
 import com.mewna.catnip.internal.ratelimit.Ratelimiter;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
+import com.mewna.catnip.shard.event.CachingBuffer;
 import com.mewna.catnip.shard.event.EventBuffer;
-import com.mewna.catnip.shard.event.NoopBuffer;
 import com.mewna.catnip.shard.manager.DefaultShardManager;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.session.DefaultSessionManager;
@@ -29,6 +33,9 @@ import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * TODO: This thing has a giant number of dependencies - how to split it up?
@@ -67,7 +74,13 @@ public class CatnipImpl implements Catnip {
     private ExtensionManager extensionManager = new DefaultExtensionManager(this);
     @Getter
     @Setter
-    private EventBuffer eventBuffer = new NoopBuffer();
+    private EventBuffer eventBuffer = new CachingBuffer();
+    @Getter
+    @Setter
+    private EntityCacheWorker cache = new MemoryEntityCache();
+    @Getter
+    @Setter
+    private Set<CacheFlag> cacheFlags = EnumSet.noneOf(CacheFlag.class);
     
     public CatnipImpl() {
         this(Vertx.vertx());
@@ -92,6 +105,12 @@ public class CatnipImpl implements Catnip {
         return this;
     }
     
+    @Nullable
+    @Override
+    public User selfUser() {
+        return cache.selfUser();
+    }
+    
     @Nonnull
     public Catnip setup() {
         // Register codecs
@@ -112,12 +131,19 @@ public class CatnipImpl implements Catnip {
     }
     
     @Nonnull
+    @Override
+    public EntityCacheWorker cacheWorker() {
+        return cache;
+    }
+    
+    @Nonnull
     public Catnip startShards() {
         if(token == null || token.isEmpty()) {
             throw new IllegalStateException("Provided token is empty!");
         }
         shardManager.catnip(this);
         eventBuffer.catnip(this);
+        cache.catnip(this);
         shardManager.start();
         return this;
     }

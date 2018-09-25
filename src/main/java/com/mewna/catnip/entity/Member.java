@@ -22,6 +22,14 @@ public interface Member extends Snowflake {
     String id();
     
     /**
+     * The id of the guild this member is from.
+     *
+     * @return String representing the guild ID.
+     */
+    @Nonnull
+    String guildId();
+    
+    /**
      * The user's nickname in this guild.
      *
      * @return User's nickname. Null if not set.

@@ -16,12 +16,18 @@ import com.mewna.catnip.entity.Invite.InviteChannel;
 import com.mewna.catnip.entity.Invite.InviteGuild;
 import com.mewna.catnip.entity.Invite.Inviter;
 import com.mewna.catnip.entity.PermissionOverride.OverrideType;
+import com.mewna.catnip.entity.Presence.*;
 import com.mewna.catnip.entity.impl.EmbedImpl.*;
 import com.mewna.catnip.entity.impl.InviteImpl.InviteChannelImpl;
 import com.mewna.catnip.entity.impl.InviteImpl.InviteGuildImpl;
 import com.mewna.catnip.entity.impl.InviteImpl.InviterImpl;
 import com.mewna.catnip.entity.impl.MessageImpl.Attachment;
 import com.mewna.catnip.entity.impl.MessageImpl.Reaction;
+import com.mewna.catnip.entity.impl.PresenceImpl.ActivityAssetsImpl;
+import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
+import com.mewna.catnip.entity.impl.PresenceImpl.ActivityPartyImpl;
+import com.mewna.catnip.entity.impl.PresenceImpl.ActivitySecretsImpl;
+import com.mewna.catnip.entity.impl.PresenceImpl.ActivityTimestampsImpl;
 import com.mewna.catnip.entity.util.Permission;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -30,10 +36,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -41,7 +44,7 @@ import java.util.stream.Collectors;
  * @author natanbc
  * @since 9/2/18.
  */
-@SuppressWarnings({"WeakerAccess", "unused"})
+@SuppressWarnings({"WeakerAccess", "unused", "OverlyCoupledClass"})
 public final class EntityBuilder {
     private static final JsonArray EMPTY_JSON_ARRAY = new JsonArray();
     
@@ -240,12 +243,18 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public TextChannel createTextChannel(@Nonnull final JsonObject data) {
+        return createTextChannel(data.getString("guild_id"), data);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public TextChannel createTextChannel(@Nullable final String guildId, @Nonnull final JsonObject data) {
         return TextChannelImpl.builder()
                 .catnip(catnip)
                 .id(data.getString("id"))
                 .type(ChannelType.TEXT)
                 .name(data.getString("name"))
-                .guildId(data.getString("guild_id"))
+                .guildId(guildId)
                 .position(data.getInteger("position", -1))
                 .parentId(data.getString("parent_id"))
                 .overrides(immutableListOf(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
@@ -258,12 +267,18 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public VoiceChannel createVoiceChannel(@Nonnull final JsonObject data) {
+        return createVoiceChannel(data.getString("guild_id"), data);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public VoiceChannel createVoiceChannel(@Nullable final String guildId, @Nonnull final JsonObject data) {
         return VoiceChannelImpl.builder()
                 .catnip(catnip)
                 .id(data.getString("id"))
                 .type(ChannelType.VOICE)
                 .name(data.getString("name"))
-                .guildId(data.getString("guild_id"))
+                .guildId(guildId)
                 .position(data.getInteger("position", -1))
                 .parentId(data.getString("parent_id"))
                 .overrides(immutableListOf(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
@@ -275,12 +290,18 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public Category createCategory(@Nonnull final JsonObject data) {
+        return createCategory(data.getString("guild_id"), data);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Category createCategory(@Nullable final String guildId, @Nonnull final JsonObject data) {
         return CategoryImpl.builder()
                 .catnip(catnip)
                 .id(data.getString("id"))
                 .type(ChannelType.CATEGORY)
                 .name(data.getString("name"))
-                .guildId(data.getString("guild_id"))
+                .guildId(guildId)
                 .position(data.getInteger("position", -1))
                 .parentId(data.getString("parent_id"))
                 .overrides(immutableListOf(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
@@ -294,7 +315,7 @@ public final class EntityBuilder {
                 .catnip(catnip)
                 .id(data.getString("id"))
                 .type(ChannelType.VOICE)
-                .recipient(createUser(data.getJsonArray("recipients").getJsonObject(0)))
+                .userId(data.getJsonArray("recipients").getJsonObject(0).getString("id"))
                 .build();
     }
     
@@ -315,12 +336,22 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public GuildChannel createGuildChannel(@Nonnull final JsonObject data) {
+        return createGuildChannel(data.getString("guild_id"), data);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public GuildChannel createGuildChannel(@Nonnull final String guildId, @Nonnull final JsonObject data) {
         final ChannelType type = ChannelType.byKey(data.getInteger("type"));
         switch(type) {
-            case TEXT: return createTextChannel(data);
-            case VOICE: return createVoiceChannel(data);
-            case CATEGORY: return createCategory(data);
-            default: throw new UnsupportedOperationException("Unsupported channel type " + type);
+            case TEXT:
+                return createTextChannel(guildId, data);
+            case VOICE:
+                return createVoiceChannel(guildId, data);
+            case CATEGORY:
+                return createCategory(guildId, data);
+            default:
+                throw new UnsupportedOperationException("Unsupported channel type " + type);
         }
     }
     
@@ -329,9 +360,12 @@ public final class EntityBuilder {
     public DMChannel createDMChannel(@Nonnull final JsonObject data) {
         final ChannelType type = ChannelType.byKey(data.getInteger("type"));
         switch(type) {
-            case DM: return createUserDM(data);
-            case GROUP_DM: return createGroupDM(data);
-            default: throw new UnsupportedOperationException("Unsupported channel type " + type);
+            case DM:
+                return createUserDM(data);
+            case GROUP_DM:
+                return createGroupDM(data);
+            default:
+                throw new UnsupportedOperationException("Unsupported channel type " + type);
         }
     }
     
@@ -360,10 +394,11 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Role createRole(@Nonnull final JsonObject data) {
+    public Role createRole(@Nonnull final String guildId, @Nonnull final JsonObject data) {
         return RoleImpl.builder()
                 .catnip(catnip)
                 .id(data.getString("id"))
+                .guildId(guildId)
                 .name(data.getString("name"))
                 .color(data.getInteger("color"))
                 .hoist(data.getBoolean("hoist"))
@@ -389,10 +424,106 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Member createMember(@Nonnull final String id, @Nonnull final JsonObject data) {
+    public Presence createPresence(@Nonnull final JsonObject data) {
+        return PresenceImpl.builder()
+                .catnip(catnip)
+                .status(OnlineStatus.fromString(data.getString("status")))
+                .activity(createActivity(data.getJsonObject("game", null)))
+                .build();
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    public Activity createActivity(@Nullable final JsonObject data) {
+        if(data == null) {
+            return null;
+        } else {
+            return ActivityImpl.builder()
+                    .name(data.getString("name"))
+                    .type(ActivityType.byId(data.getInteger("type")))
+                    .url(data.getString("url"))
+                    .timestamps(createTimestamps(data.getJsonObject("timestamps", null)))
+                    .applicationId(data.getString("application_id"))
+                    .details(data.getString("details"))
+                    .state(data.getString("state"))
+                    .party(createParty(data.getJsonObject("party", null)))
+                    .assets(createAssets(data.getJsonObject("assets", null)))
+                    .secrets(createSecrets(data.getJsonObject("secrets", null)))
+                    .instance(data.getBoolean("instance", false))
+                    .flags(ActivityFlag.fromInt(data.getInteger("flags")))
+                    .build();
+        }
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    public ActivityTimestamps createTimestamps(@Nullable final JsonObject data) {
+        if(data == null) {
+            return null;
+        } else {
+            return ActivityTimestampsImpl.builder()
+                    .start(data.getLong("start", -1L))
+                    .end(data.getLong("end", -1L))
+                    .build();
+        }
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    public ActivityParty createParty(@Nullable final JsonObject data) {
+        if(data == null) {
+            return null;
+        } else {
+            final JsonArray size = data.getJsonArray("size", new JsonArray(Arrays.asList(-1, -1)));
+            return ActivityPartyImpl.builder()
+                    .id(data.getString("id"))
+                    // Initialized to -1 if doesn't exist
+                    .currentSize(size.getInteger(0))
+                    .maxSize(size.getInteger(1))
+                    .build();
+        }
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    public ActivityAssets createAssets(@Nullable final JsonObject data) {
+        if(data == null) {
+            return null;
+        } else {
+            return ActivityAssetsImpl.builder()
+                    .largeImage(data.getString("large_image"))
+                    .largeText(data.getString("large_text"))
+                    .smallImage(data.getString("small_image"))
+                    .smallText(data.getString("small_text"))
+                    .build();
+        }
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    public ActivitySecrets createSecrets(@Nullable final JsonObject data) {
+        if(data == null) {
+            return null;
+        } else {
+            return ActivitySecretsImpl.builder()
+                    .join(data.getString("join"))
+                    .spectate(data.getString("spectate"))
+                    .match(data.getString("match"))
+                    .build();
+        }
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Member createMember(@Nonnull final String guildId, @Nonnull final String id, @Nonnull final JsonObject data) {
+        final JsonObject userData = data.getJsonObject("user");
+        if(userData != null) {
+            catnip.cacheWorker().bulkCacheUsers(Collections.singletonList(createUser(userData)));
+        }
         return MemberImpl.builder()
                 .catnip(catnip)
                 .id(id)
+                .guildId(guildId)
                 .nick(data.getString("nick"))
                 .roles(ImmutableSet.of()) // TODO: fetch roles from cache? or at least give the ids
                 .joinedAt(parseTimestamp(data.getString("joined_at")))
@@ -403,14 +534,30 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Member createMember(@Nonnull final User user, @Nonnull final JsonObject data) {
-        return createMember(user.id(), data);
+    public Member createMember(@Nonnull final String guildId, @Nonnull final User user, @Nonnull final JsonObject data) {
+        return createMember(guildId, user.id(), data);
     }
     
     @Nonnull
     @CheckReturnValue
-    public Member createMember(@Nonnull final JsonObject data) {
-        return createMember(createUser(data.getJsonObject("user")), data);
+    public Member createMember(@Nonnull final String guildId, @Nonnull final JsonObject data) {
+        return createMember(guildId, createUser(data.getJsonObject("user")), data);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public VoiceState createVoiceState(@Nonnull final JsonObject data) {
+        return VoiceStateImpl.builder()
+                .guildId(data.getString("guild_id"))
+                .channelId(data.getString("channel_id"))
+                .userId(data.getString("user_id"))
+                .sessionId(data.getString("session_id"))
+                .deaf(data.getBoolean("deaf"))
+                .mute(data.getBoolean("mute"))
+                .selfDeaf(data.getBoolean("self_deaf"))
+                .selfMute(data.getBoolean("self_mute"))
+                .suppress(data.getBoolean("suppress"))
+                .build();
     }
     
     @Nonnull
@@ -425,12 +572,13 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public CustomEmoji createCustomEmoji(@Nonnull final JsonObject data) {
+    public CustomEmoji createCustomEmoji(@Nonnull final String guildId, @Nonnull final JsonObject data) {
         final JsonObject userRaw = data.getJsonObject("user");
         
         return CustomEmojiImpl.builder()
                 .catnip(catnip)
                 .id(data.getString("id"))
+                .guildId(guildId)
                 .name(data.getString("name"))
                 .roles(stringListOf(data.getJsonArray("roles")))
                 .user(userRaw == null ? null : createUser(userRaw))
@@ -442,8 +590,10 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Emoji createEmoji(@Nonnull final JsonObject data) {
-        return data.getValue("id") == null ? createUnicodeEmoji(data) : createCustomEmoji(data);
+    public Emoji createEmoji(@Nullable final String guildId, @Nonnull final JsonObject data) {
+        // If it has an id, then it has a guild attached, so the @Nonnull warning can be ignored
+        //noinspection ConstantConditions
+        return data.getValue("id") == null ? createUnicodeEmoji(data) : createCustomEmoji(guildId, data);
     }
     
     @Nonnull
@@ -463,11 +613,11 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Message.Reaction createReaction(@Nonnull final JsonObject data) {
+    public Message.Reaction createReaction(@Nonnull final String guildId, @Nonnull final JsonObject data) {
         return Reaction.builder()
                 .count(data.getInteger("count"))
                 .self(data.getBoolean("self", false))
-                .emoji(createEmoji(data.getJsonObject("emoji")))
+                .emoji(createEmoji(guildId, data.getJsonObject("emojis")))
                 .build();
     }
     
@@ -477,7 +627,8 @@ public final class EntityBuilder {
         final User author = createUser(data.getJsonObject("author"));
         
         final JsonObject memberRaw = data.getJsonObject("member");
-        final Member member = memberRaw == null ? null : createMember(author, memberRaw);
+        // If member exists, guild_id must also exist
+        final Member member = memberRaw == null ? null : createMember(data.getString("guild_id"), author, memberRaw);
         
         return MessageImpl.builder()
                 .catnip(catnip)
@@ -493,13 +644,11 @@ public final class EntityBuilder {
                 .mentionedRoles(stringListOf(data.getJsonArray("mention_roles")))
                 .attachments(immutableListOf(data.getJsonArray("attachments"), this::createAttachment))
                 .embeds(immutableListOf(data.getJsonArray("embeds"), this::createEmbed))
-                .reactions(immutableListOf(data.getJsonArray("reactions"), this::createReaction))
+                .reactions(immutableListOf(data.getJsonArray("reactions"), e -> createReaction(data.getString("guild_id"), e)))
                 .nonce(data.getString("nonce"))
                 .pinned(data.getBoolean("pinned"))
                 .webhookId(data.getString("webhook_id"))
                 .type(MessageType.byId(data.getInteger("type")))
-                
-                // Not actually documented (part of lazy guild changes)
                 .member(member)
                 .guildId(data.getString("guild_id"))
                 .build();
@@ -508,6 +657,26 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public Guild createGuild(@Nonnull final JsonObject data) {
+        // As we don't store these fields on the guild object itself, we have
+        // to update them in the cache
+        if(data.getJsonArray("roles") != null) {
+            catnip.cacheWorker().bulkCacheRoles(immutableListOf(data.getJsonArray("roles"),
+                    e -> createRole(data.getString("id"), e)));
+        }
+        if(data.getJsonArray("channels") != null) {
+            catnip.cacheWorker().bulkCacheChannels(immutableListOf(data.getJsonArray("channels"),
+                    e -> createGuildChannel(data.getString("id"), e)));
+        }
+        if(data.getJsonArray("members") != null) {
+            catnip.cacheWorker().bulkCacheMembers(immutableListOf(data.getJsonArray("members"),
+                    e -> createMember(data.getString("id"), e)));
+        }
+        if(data.getJsonArray("emojis") != null) {
+            catnip.cacheWorker().bulkCacheEmoji(immutableListOf(data.getJsonArray("emojis"),
+                    e -> createCustomEmoji(data.getString("id"), e)));
+        }
+        // TODO: Handle `presences`
+        // TODO: Handle `voice_states`
         return GuildImpl.builder()
                 .catnip(catnip)
                 .id(data.getString("id"))
@@ -525,8 +694,8 @@ public final class EntityBuilder {
                 .verificationLevel(VerificationLevel.byKey(data.getInteger("verification_level", 0)))
                 .defaultMessageNotifications(NotificationLevel.byKey(data.getInteger("default_message_notifications", 0)))
                 .explicitContentFilter(ContentFilterLevel.byKey(data.getInteger("explicit_content_filter", 0)))
-                .roles(immutableListOf(data.getJsonArray("roles"), this::createRole))
-                .emojis(immutableListOf(data.getJsonArray("emojis"), this::createCustomEmoji))
+                //.roles(immutableListOf(data.getJsonArray("roles"), e -> createRole(data.getString("id"), e)))
+                //.emojis(immutableListOf(data.getJsonArray("emojis"), e -> this::createCustomEmoji))
                 .features(stringListOf(data.getJsonArray("features")))
                 .mfaLevel(MFALevel.byKey(data.getInteger("mfa_level", 0)))
                 .applicationId(data.getString("application_id"))
@@ -537,8 +706,8 @@ public final class EntityBuilder {
                 .large(data.getBoolean("large", false))
                 .unavailable(data.getBoolean("unavailable", false))
                 .memberCount(data.getInteger("member_count", -1))
-                .members(immutableListOf(data.getJsonArray("members"), this::createMember))
-                .channels(immutableListOf(data.getJsonArray("channels"), this::createChannel))
+                //.members(immutableListOf(data.getJsonArray("members"), e -> createMember(data.getString("id"), e)))
+                //.channels(immutableListOf(data.getJsonArray("channels"), this::createChannel))
                 .build();
     }
     
