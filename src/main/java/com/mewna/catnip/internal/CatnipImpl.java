@@ -4,6 +4,7 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.MemoryEntityCache;
+import com.mewna.catnip.entity.User;
 import com.mewna.catnip.entity.impl.MemberImpl;
 import com.mewna.catnip.entity.impl.MessageImpl;
 import com.mewna.catnip.entity.impl.RoleImpl;
@@ -32,6 +33,7 @@ import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -101,6 +103,12 @@ public class CatnipImpl implements Catnip {
     public Catnip loadExtension(@Nonnull final Extension extension) {
         extensionManager.loadExtension(extension);
         return this;
+    }
+    
+    @Nullable
+    @Override
+    public User selfUser() {
+        return cache.selfUser();
     }
     
     @Nonnull

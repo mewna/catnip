@@ -163,4 +163,14 @@ public interface EntityCache {
      */
     @Nonnull
     List<VoiceState> voiceStates(@Nonnull String guildId);
+    
+    /**
+     * Return the currently logged-in user. This method may return {@code null}
+     * in the case of caching not being active, in which case you will have to
+     * fetch the current user manually via REST requests.
+     *
+     * @return The currently logged-in user, if cached, otherwise {@code null}.
+     */
+    @Nullable
+    User selfUser();
 }

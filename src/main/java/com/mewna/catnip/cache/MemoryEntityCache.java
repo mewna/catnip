@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import static com.mewna.catnip.shard.DiscordEvent.*;
@@ -39,6 +40,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
     private final Map<String, Map<String, CustomEmoji>> emojiCache = new ConcurrentHashMap<>();
     private final Map<String, Map<String, VoiceState>> voiceStateCache = new ConcurrentHashMap<>();
     private final Map<String, Presence> presenceCache = new ConcurrentHashMap<>();
+    private final AtomicReference<User> selfUser = new AtomicReference<>(null);
     @Getter
     private Catnip catnip;
     private EntityBuilder entityBuilder;
@@ -77,6 +79,12 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 channels = new ConcurrentHashMap<>();
                 channelCache.put(DM_CHANNEL_KEY, channels);
             }
+            // In this case in particular, this is safe because this method
+            // will call into this cache and try to fetch the user that way.
+            // The only possible way this could fail is if Discord sends us a
+            // DM for a user we don't have cached, which is unlikely
+            // TODO: Re-evaluate safety at some point
+            //noinspection ConstantConditions
             channels.put(dm.recipient().id(), channel);
             catnip.logAdapter().debug("Cached probably-DM channel {}", channel.id());
         } else {
@@ -144,6 +152,11 @@ public class MemoryEntityCache implements EntityCacheWorker {
     @Override
     public EntityCache updateCache(@Nonnull final String eventType, @Nonnull final JsonObject payload) {
         switch(eventType) {
+            // Lifecycle
+            case READY: {
+                selfUser.set(entityBuilder.createUser(payload.getJsonObject("user")));
+                break;
+            }
             // Channels
             case CHANNEL_CREATE: {
                 final Channel channel = entityBuilder.createChannel(payload);
@@ -263,11 +276,14 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 }
                 break;
             }
-            // Users
+            // Currently-logged-in user
             case USER_UPDATE: {
-                // TODO: This is self, do we care?
+                // Inner payload is always a user object, according to the
+                // docs, so we can just outright replace it.
+                selfUser.set(entityBuilder.createUser(payload));
                 break;
             }
+            // Users
             case PRESENCE_UPDATE: {
                 final JsonObject user = payload.getJsonObject("user");
                 final String id = user.getString("id");
@@ -472,6 +488,12 @@ public class MemoryEntityCache implements EntityCacheWorker {
         } else {
             return ImmutableList.of();
         }
+    }
+    
+    @Nullable
+    @Override
+    public User selfUser() {
+        return selfUser.get();
     }
     
     @Nonnull
