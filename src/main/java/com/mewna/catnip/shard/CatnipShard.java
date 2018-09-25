@@ -18,10 +18,13 @@ import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterOutputStream;
 
@@ -45,9 +48,9 @@ public class CatnipShard extends AbstractVerticle {
     private final AtomicBoolean heartbeatAcked = new AtomicBoolean(true);
     private final byte[] decompressBuffer = new byte[1024];
     
-    //private final DispatchEmitter emitter;
-    
     private final Deque<JsonObject> messageQueue = new ConcurrentLinkedDeque<>();
+    
+    private List<String> trace = new ArrayList<>();
     
     public CatnipShard(final Catnip catnip, final int id, final int limit) {
         this.catnip = catnip;
@@ -130,6 +133,9 @@ public class CatnipShard extends AbstractVerticle {
             case "STOP": {
                 doStop();
                 break;
+            }
+            case "TRACE": {
+                msg.reply(new JsonArray(trace));
             }
             default: {
                 catnip.logAdapter().warn("Shard {} Got unknown control message: {}", id, body.encodePrettily());
@@ -283,7 +289,7 @@ public class CatnipShard extends AbstractVerticle {
     
     private void handleHello(final Message<JsonObject> msg, final JsonObject event) {
         final JsonObject payload = event.getJsonObject("d");
-        // TODO: Handle trace here
+        trace = payload.getJsonArray("_trace").stream().map(e -> (String) e).collect(Collectors.toList());
         
         catnip.vertx().setPeriodic(payload.getInteger("heartbeat_interval"), timerId -> {
             if(stateRef.get() != null) {
@@ -318,7 +324,9 @@ public class CatnipShard extends AbstractVerticle {
         final String type = event.getString("t");
         
         // Update trace and seqnum as needed
-        // TODO: Update trace here
+        if(data.getJsonArray("_trace", null) != null) {
+            trace = data.getJsonArray("_trace").stream().map(e -> (String) e).collect(Collectors.toList());
+        }
         if(event.getValue("s", null) != null) {
             catnip.sessionManager().seqnum(id, event.getInteger("s"));
         }
@@ -345,8 +353,7 @@ public class CatnipShard extends AbstractVerticle {
                 break;
             }
         }
-    
-    
+        
         //emitter.emit(event);
         // This allows a buffer to know WHERE an event is coming from, so that
         // it can be accurate in the case of ex. buffering events until a shard
