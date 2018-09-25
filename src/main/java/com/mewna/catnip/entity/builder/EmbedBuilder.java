@@ -1,6 +1,11 @@
 package com.mewna.catnip.entity.builder;
 
 import com.mewna.catnip.entity.Embed;
+import com.mewna.catnip.entity.Embed.Author;
+import com.mewna.catnip.entity.Embed.Field;
+import com.mewna.catnip.entity.Embed.Footer;
+import com.mewna.catnip.entity.Embed.Image;
+import com.mewna.catnip.entity.Embed.Thumbnail;
 import com.mewna.catnip.entity.impl.EmbedImpl;
 import com.mewna.catnip.entity.impl.EmbedImpl.*;
 
@@ -33,7 +38,15 @@ public class EmbedBuilder {
     }
     
     public EmbedBuilder(final Embed embed) {
-        throw new UnsupportedOperationException("Building embeds from existing embeds is currently unsupported");
+        title = embed.title();
+        description = embed.description();
+        url = embed.url();
+        color = embed.color();
+        footer = embed.footer();
+        image = embed.image();
+        thumbnail = embed.thumbnail();
+        author = embed.author();
+        fields.addAll(embed.fields());
     }
     
     @Nonnull
@@ -73,7 +86,7 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder footer(@Nullable final String text, @Nullable final String iconUrl) {
-        return footer(new Footer(text, iconUrl, null));
+        return footer(new FooterImpl(text, iconUrl, null));
     }
     
     @Nonnull
@@ -86,14 +99,14 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder image(@Nullable final String url) {
-        image = new Image(url, null, 0, 0);
+        image = new ImageImpl(url, null, 0, 0);
         return this;
     }
     
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder thumbnail(@Nullable final String url) {
-        thumbnail = new Thumbnail(url, null, 0, 0);
+        thumbnail = new ThumbnailImpl(url, null, 0, 0);
         return this;
     }
     
@@ -112,7 +125,7 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder author(@Nullable final String name, @Nullable final String url, @Nullable final String iconUrl) {
-        return author(new Author(name, url, iconUrl, null));
+        return author(new AuthorImpl(name, url, iconUrl, null));
     }
     
     @Nonnull
@@ -125,7 +138,7 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder field(@Nonnull final String name, @Nonnull final String value, final boolean inline) {
-        return field(new Field(name, value, inline));
+        return field(new FieldImpl(name, value, inline));
     }
     
     @Nonnull
@@ -188,7 +201,7 @@ public class EmbedBuilder {
             if(fields.size() > 25) {
                 throw new IllegalStateException("Tried to add an embed field, but we're at the cap (25)!");
             }
-            for(Field field : fields) {
+            for(final Field field : fields) {
                 if(field.name().length() > 256) {
                     throw new IllegalStateException("Field name exceeds 256 characters!");
                 }
