@@ -60,11 +60,16 @@
             <artifactId>vertx-web-client</artifactId>
             <version>${vertx.version}</version>
         </dependency>
+
+        <!--
+        vert.x is retarded for multipart, so we use this instead
+        :sob:
+        someday we can remove this :(
+        -->
         <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-web-client</artifactId>
-            <version>${vertx.version}</version>
-            <classifier>sources</classifier>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>3.9.1</version>
         </dependency>
 
         <!-- Vert.x CompletableFutures -->

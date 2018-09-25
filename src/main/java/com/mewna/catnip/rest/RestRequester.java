@@ -7,7 +7,9 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.impl.ConcurrentHashSet;
+import io.vertx.core.impl.NoStackTraceThrowable;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.HttpResponse;
@@ -18,7 +20,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
+import okhttp3.*;
+import okio.BufferedSink;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.Map;
@@ -38,12 +43,17 @@ import static io.vertx.core.http.HttpMethod.GET;
  * @since 8/31/18.
  */
 public class RestRequester {
+    /**
+     * TODO: Allow injecting other URLs for eg. mocks
+     */
     public static final String API_HOST = "https://discordapp.com";
     private static final int API_VERSION = 6;
     public static final String API_BASE = "/api/v" + API_VERSION;
+    
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
     private final Catnip catnip;
     private final WebClient client;
+    private final OkHttpClient _http = new OkHttpClient();
     private final Collection<Bucket> submittedBuckets = new ConcurrentHashSet<>();
     
     public RestRequester(final Catnip catnip) {
@@ -63,16 +73,28 @@ public class RestRequester {
     
     private void handleResponse(final OutboundRequest r, final Bucket bucket, final AsyncResult<HttpResponse<Buffer>> res) {
         if(res.succeeded()) {
-            final HttpResponse<Buffer> result = res.result();
-            if(result.statusCode() < 200 || result.statusCode() > 299) {
-                if(result.statusCode() != 429) {
-                    catnip.logAdapter().warn("Got unexpected HTTP status: {} {}", result.statusCode(), result.statusMessage());
+            final HttpResponse<Buffer> response = res.result();
+            handleResponse(r, bucket, response.statusCode(), response.statusMessage(), response.bodyAsBuffer(),
+                    response.headers(), true, null);
+        } else {
+            handleResponse(r, bucket, -1, "", null, null, false, res.cause());
+        }
+    }
+    
+    private void handleResponse(final OutboundRequest r, final Bucket bucket, final int statusCode, final String statusMessage,
+                                final Buffer body, final MultiMap headers, final boolean succeeded,
+                                final Throwable failureCause) {
+        if(succeeded) {
+            //final HttpResponse<Buffer> result = res.result();
+            if(statusCode < 200 || statusCode > 299) {
+                if(statusCode != 429) {
+                    catnip.logAdapter().warn("Got unexpected HTTP status: {} {}", statusCode, statusMessage);
                 }
             }
             boolean ratelimited = false;
             final boolean hasMemeReactionRatelimits = r.route.method() != GET
                     && r.route.baseRoute().contains("/reactions/");
-            if(result.statusCode() == 429) {
+            if(statusCode == 429) {
                 ratelimited = true;
                 // Reactions are a HUGE meme
                 // We hit *roughly* one 429 / reaction if we're adding many
@@ -81,14 +103,13 @@ public class RestRequester {
                 if(!hasMemeReactionRatelimits) {
                     catnip.logAdapter().error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
                             r.route.baseRoute(),
-                            result.getHeader("X-Ratelimit-Global"),
-                            result.getHeader("X-Ratelimit-Limit"),
-                            result.getHeader("X-Ratelimit-Reset")
+                            headers.get("X-Ratelimit-Global"),
+                            headers.get("X-Ratelimit-Limit"),
+                            headers.get("X-Ratelimit-Reset")
                     );
                 }
             }
-            final ResponsePayload payload = new ResponsePayload(result.bodyAsBuffer());
-            final MultiMap headers = result.headers();
+            final ResponsePayload payload = new ResponsePayload(body);
             if(headers.contains("X-Ratelimit-Global")) {
                 // We hit a global ratelimit, update
                 final Bucket global = getBucket("GLOBAL");
@@ -121,7 +142,7 @@ public class RestRequester {
             // Fail request, resubmit to queue if failed less than 3 times, complete with error otherwise.
             r.failed();
             if(r.failedAttempts() >= 3) {
-                r.future.fail(res.cause());
+                r.future.fail(failureCause);
                 bucket.finishRequest();
                 bucket.submit();
             } else {
@@ -161,15 +182,89 @@ public class RestRequester {
             if(bucket.getRemaining() > 0 || hasMemeReactionRatelimits) {
                 // Do request and update bucket
                 catnip.logAdapter().debug("Making request: {} (bucket {})", API_BASE + route.baseRoute(), bucket.route);
-                final HttpRequest<Buffer> req = client.requestAbs(bucketRoute.method(),
-                        API_HOST + API_BASE + route.baseRoute()).ssl(true)
-                        .putHeader("Authorization", "Bot " + catnip.token())
-                        .putHeader("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')'); // 0.3.0)");
-                // GET and DELETE don't have payloads, but the rest do
-                if(route.method() != GET && route.method() != DELETE) {
-                    req.sendJsonObject(r.data, res -> handleResponse(r, bucket, res));
+                
+                if(r.binary != null) {
+                    // TODO: Use WebClient for this once v.x hits version 3.6.0
+                    // v.x is dumb and doesn't support this
+                    // We solve this by using OkHTTP instead because it's dumb
+                    try {
+                        @SuppressWarnings("UnnecessarilyQualifiedInnerClassAccess")
+                        final MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
+                        
+                        final RequestBody requestBody = new RequestBody() {
+                            @Override
+                            public MediaType contentType() {
+                                return MediaType.parse("application/octet-stream; charset=utf-8");
+                            }
+                            
+                            @Override
+                            public void writeTo(final BufferedSink sink) throws IOException {
+                                sink.write(r.binary.getBytes());
+                            }
+                        };
+                        
+                        builder.addFormDataPart("file0", r.filename, requestBody);
+                        final String payload;
+                        if(r.data != null) {
+                            payload = r.data.encode();
+                        } else {
+                            payload = new JsonObject().put("content", (String) null).put("embed", (String) null).encode();
+                        }
+                        builder.addFormDataPart("payload_json", payload);
+                        final MultipartBody body = builder.build();
+                        @SuppressWarnings("UnnecessarilyQualifiedInnerClassAccess")
+                        final Request.Builder rBuilder = new Request.Builder();
+                        final String br = route.baseRoute();
+                        final HttpMethod method = route.method();
+                        catnip.vertx().executeBlocking(future -> {
+                            try {
+                                final Response execute = _http.newCall(
+                                        rBuilder.url(API_HOST + API_BASE + br)
+                                                .method(method.name(), body)
+                                                .header("Authorization", "Bot " + catnip.token())
+                                                .header("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')')
+                                        .build()
+                                ).execute();
+                                final int code = execute.code();
+                                final String message = execute.message();
+                                if(execute.body() == null) {
+                                    handleResponse(r, bucket, code, message, null, null,
+                                            false, new NoStackTraceThrowable("body == null"));
+                                } else {
+                                    final String bodyString = execute.body().string();
+                                    
+                                    final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
+                                    execute.headers().toMultimap().forEach(headers::add);
+                                    handleResponse(r, bucket, code, message, Buffer.buffer(bodyString),
+                                            headers, true, null);
+                                    future.complete();
+                                }
+                            } catch(final IOException e) {
+                                future.fail(e);
+                            }
+                        }, bRes -> {
+                            if(!bRes.succeeded()) {
+                                handleResponse(r, bucket, -1, "", null, null,
+                                        false, bRes.cause());
+                            }
+                        });
+                    } catch(final Exception e) {
+                        e.printStackTrace();
+                    }
+                    
+                    // If we're doing a multipart request, we send the payload
+                    // as a part of the upload
                 } else {
-                    req.send(res -> handleResponse(r, bucket, res));
+                    final HttpRequest<Buffer> req = client.requestAbs(bucketRoute.method(),
+                            API_HOST + API_BASE + route.baseRoute()).ssl(true)
+                            .putHeader("Authorization", "Bot " + catnip.token())
+                            .putHeader("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')');
+                    // GET and DELETE don't have payloads, but the rest do
+                    if(route.method() != GET && route.method() != DELETE) {
+                        req.sendJsonObject(r.data, res -> handleResponse(r, bucket, res));
+                    } else {
+                        req.send(res -> handleResponse(r, bucket, res));
+                    }
                 }
             } else {
                 // Add an extra 500ms buffer to be safe
@@ -201,6 +296,11 @@ public class RestRequester {
         private Route route;
         private Map<String, String> params;
         private JsonObject data;
+        // Set this if you need multipart
+        @Setter
+        private Buffer binary;
+        @Setter
+        private String filename;
         @Setter
         private Future<ResponsePayload> future;
         private int failedAttempts;

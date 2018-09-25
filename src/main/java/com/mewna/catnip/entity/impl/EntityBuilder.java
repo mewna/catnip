@@ -5,7 +5,12 @@ import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.*;
 import com.mewna.catnip.entity.Channel.ChannelType;
+import com.mewna.catnip.entity.Embed.Author;
 import com.mewna.catnip.entity.Embed.EmbedType;
+import com.mewna.catnip.entity.Embed.Field;
+import com.mewna.catnip.entity.Embed.Footer;
+import com.mewna.catnip.entity.Embed.Image;
+import com.mewna.catnip.entity.Embed.Thumbnail;
 import com.mewna.catnip.entity.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.Emoji.UnicodeEmoji;
 import com.mewna.catnip.entity.Guild.ContentFilterLevel;
@@ -15,19 +20,17 @@ import com.mewna.catnip.entity.Guild.VerificationLevel;
 import com.mewna.catnip.entity.Invite.InviteChannel;
 import com.mewna.catnip.entity.Invite.InviteGuild;
 import com.mewna.catnip.entity.Invite.Inviter;
+import com.mewna.catnip.entity.Message.Attachment;
+import com.mewna.catnip.entity.Message.Reaction;
 import com.mewna.catnip.entity.PermissionOverride.OverrideType;
 import com.mewna.catnip.entity.Presence.*;
 import com.mewna.catnip.entity.impl.EmbedImpl.*;
 import com.mewna.catnip.entity.impl.InviteImpl.InviteChannelImpl;
 import com.mewna.catnip.entity.impl.InviteImpl.InviteGuildImpl;
 import com.mewna.catnip.entity.impl.InviteImpl.InviterImpl;
-import com.mewna.catnip.entity.impl.MessageImpl.Attachment;
-import com.mewna.catnip.entity.impl.MessageImpl.Reaction;
-import com.mewna.catnip.entity.impl.PresenceImpl.ActivityAssetsImpl;
-import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
-import com.mewna.catnip.entity.impl.PresenceImpl.ActivityPartyImpl;
-import com.mewna.catnip.entity.impl.PresenceImpl.ActivitySecretsImpl;
-import com.mewna.catnip.entity.impl.PresenceImpl.ActivityTimestampsImpl;
+import com.mewna.catnip.entity.impl.MessageImpl.AttachmentImpl;
+import com.mewna.catnip.entity.impl.MessageImpl.ReactionImpl;
+import com.mewna.catnip.entity.impl.PresenceImpl.*;
 import com.mewna.catnip.entity.util.Permission;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -102,31 +105,31 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    private JsonObject embedFooterToJson(final Embed.Footer footer) {
+    private JsonObject embedFooterToJson(final Footer footer) {
         return new JsonObject().put("icon_url", footer.iconUrl()).put("text", footer.text());
     }
     
     @Nonnull
     @CheckReturnValue
-    private JsonObject embedImageToJson(final Embed.Image image) {
+    private JsonObject embedImageToJson(final Image image) {
         return new JsonObject().put("url", image.url());
     }
     
     @Nonnull
     @CheckReturnValue
-    private JsonObject embedThumbnailToJson(final Embed.Thumbnail thumbnail) {
+    private JsonObject embedThumbnailToJson(final Thumbnail thumbnail) {
         return new JsonObject().put("url", thumbnail.url());
     }
     
     @Nonnull
     @CheckReturnValue
-    private JsonObject embedAuthorToJson(final Embed.Author author) {
+    private JsonObject embedAuthorToJson(final Author author) {
         return new JsonObject().put("name", author.name()).put("url", author.url()).put("icon_url", author.iconUrl());
     }
     
     @Nonnull
     @CheckReturnValue
-    private JsonObject embedFieldToJson(final Embed.Field field) {
+    private JsonObject embedFieldToJson(final Field field) {
         return new JsonObject().put("name", field.name()).put("value", field.value()).put("inline", field.inline());
     }
     
@@ -598,8 +601,8 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Message.Attachment createAttachment(@Nonnull final JsonObject data) {
-        return Attachment.builder()
+    public Attachment createAttachment(@Nonnull final JsonObject data) {
+        return AttachmentImpl.builder()
                 .catnip(catnip)
                 .id(data.getString("id"))
                 .fileName(data.getString("filename"))
@@ -613,8 +616,8 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Message.Reaction createReaction(@Nonnull final String guildId, @Nonnull final JsonObject data) {
-        return Reaction.builder()
+    public Reaction createReaction(@Nonnull final String guildId, @Nonnull final JsonObject data) {
+        return ReactionImpl.builder()
                 .count(data.getInteger("count"))
                 .self(data.getBoolean("self", false))
                 .emoji(createEmoji(guildId, data.getJsonObject("emojis")))
