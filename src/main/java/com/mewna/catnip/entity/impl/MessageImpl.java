@@ -2,6 +2,8 @@ package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.*;
+import com.mewna.catnip.entity.Message.Attachment;
+import com.mewna.catnip.entity.Message.Reaction;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -32,9 +34,9 @@ public class MessageImpl implements Message, RequiresCatnip {
     private boolean mentionsEveryone;
     private List<User> mentionedUsers;
     private List<String> mentionedRoles;
-    private List<? extends Message.Attachment> attachments;
+    private List<Attachment> attachments;
     private List<Embed> embeds;
-    private List<? extends Message.Reaction> reactions;
+    private List<Reaction> reactions;
     private String nonce;
     private boolean pinned;
     private String webhookId;
@@ -50,15 +52,15 @@ public class MessageImpl implements Message, RequiresCatnip {
     @Override
     @Nonnull
     @SuppressWarnings("unchecked")
-    public List<Message.Attachment> attachments() {
-        return (List<Message.Attachment>)attachments;
+    public List<Attachment> attachments() {
+        return attachments;
     }
     
     @Override
     @Nonnull
     @SuppressWarnings("unchecked")
-    public List<Message.Reaction> reactions() {
-        return (List<Message.Reaction>)reactions;
+    public List<Reaction> reactions() {
+        return reactions;
     }
     
     @Getter
@@ -66,7 +68,7 @@ public class MessageImpl implements Message, RequiresCatnip {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Attachment implements Message.Attachment, RequiresCatnip {
+    public static class AttachmentImpl implements Attachment, RequiresCatnip {
         private transient Catnip catnip;
         
         private String id;
@@ -89,7 +91,7 @@ public class MessageImpl implements Message, RequiresCatnip {
     
         @Override
         public boolean equals(final Object obj) {
-            return obj instanceof Message.Attachment && ((Message.Attachment)obj).id().equals(id);
+            return obj instanceof Attachment && ((Attachment)obj).id().equals(id);
         }
     
         @Override
@@ -103,7 +105,7 @@ public class MessageImpl implements Message, RequiresCatnip {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Reaction implements Message.Reaction {
+    public static class ReactionImpl implements Reaction {
         private int count;
         private boolean self;
         private Emoji emoji;
@@ -115,7 +117,7 @@ public class MessageImpl implements Message, RequiresCatnip {
     
         @Override
         public boolean equals(final Object obj) {
-            return obj instanceof Message.Reaction && ((Message.Reaction)obj).emoji().equals(emoji);
+            return obj instanceof Reaction && ((Reaction)obj).emoji().equals(emoji);
         }
     
         @Override

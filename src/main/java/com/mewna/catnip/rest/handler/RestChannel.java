@@ -9,6 +9,7 @@ import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.invite.InviteCreateOptions;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
@@ -69,6 +70,27 @@ public class RestChannel extends RestHandler {
         
         return getCatnip().requester().
                 queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json))
+                .thenApply(ResponsePayload::object)
+                .thenApply(getEntityBuilder()::createMessage);
+    }
+    
+    @Nonnull
+    public CompletableFuture<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Message message,
+                                                  @Nonnull final String filename, @Nonnull final byte[] file) {
+        final JsonObject json = new JsonObject();
+        if(message.content() != null && !message.content().isEmpty()) {
+            json.put("content", message.content());
+        }
+        if(message.embeds() != null && !message.embeds().isEmpty()) {
+            json.put("embed", getEntityBuilder().embedToJson(message.embeds().get(0)));
+        }
+        if(json.getValue("embed", null) == null && json.getValue("content", null) == null) {
+            throw new IllegalArgumentException("Can't build a message with no content and no embeds!");
+        }
+        
+        return getCatnip().requester().
+                queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json)
+                        .binary(Buffer.buffer(file)).filename(filename))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createMessage);
     }
