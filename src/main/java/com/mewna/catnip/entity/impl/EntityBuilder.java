@@ -168,8 +168,8 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    private Field createField(@Nonnull final JsonObject data) {
-        return Field.builder()
+    private FieldImpl createField(@Nonnull final JsonObject data) {
+        return FieldImpl.builder()
                 .name(data.getString("name"))
                 .value(data.getString("value"))
                 .inline(data.getBoolean("inline", false))
@@ -180,14 +180,14 @@ public final class EntityBuilder {
     @CheckReturnValue
     public Embed createEmbed(final JsonObject data) {
         final JsonObject footerRaw = data.getJsonObject("footer");
-        final Footer footer = isInvalid(footerRaw, "text") ? null : Footer.builder()
+        final FooterImpl footer = isInvalid(footerRaw, "text") ? null : FooterImpl.builder()
                 .text(footerRaw.getString("text"))
                 .iconUrl(footerRaw.getString("icon_url"))
                 .proxyIconUrl(footerRaw.getString("proxy_icon_url"))
                 .build();
         
         final JsonObject imageRaw = data.getJsonObject("image");
-        final Image image = isInvalid(imageRaw, "url") ? null : Image.builder()
+        final ImageImpl image = isInvalid(imageRaw, "url") ? null : ImageImpl.builder()
                 .url(imageRaw.getString("url"))
                 .proxyUrl(imageRaw.getString("proxy_url"))
                 .height(imageRaw.getInteger("height", -1))
@@ -195,7 +195,7 @@ public final class EntityBuilder {
                 .build();
         
         final JsonObject thumbnailRaw = data.getJsonObject("thumbnail");
-        final Thumbnail thumbnail = isInvalid(thumbnailRaw, "url") ? null : Thumbnail.builder()
+        final ThumbnailImpl thumbnail = isInvalid(thumbnailRaw, "url") ? null : ThumbnailImpl.builder()
                 .url(thumbnailRaw.getString("url"))
                 .proxyUrl(thumbnailRaw.getString("proxy_url"))
                 .height(thumbnailRaw.getInteger("height", -1))
@@ -203,20 +203,20 @@ public final class EntityBuilder {
                 .build();
         
         final JsonObject videoRaw = data.getJsonObject("video");
-        final Video video = isInvalid(videoRaw, "url") ? null : Video.builder()
+        final VideoImpl video = isInvalid(videoRaw, "url") ? null : VideoImpl.builder()
                 .url(videoRaw.getString("url"))
                 .height(videoRaw.getInteger("height", -1))
                 .width(videoRaw.getInteger("width", -1))
                 .build();
         
         final JsonObject providerRaw = data.getJsonObject("provider");
-        final Provider provider = isInvalid(providerRaw, "url") ? null : Provider.builder()
+        final ProviderImpl provider = isInvalid(providerRaw, "url") ? null : ProviderImpl.builder()
                 .name(providerRaw.getString("name"))
                 .url(providerRaw.getString("url"))
                 .build();
         
         final JsonObject authorRaw = data.getJsonObject("author");
-        final Author author = isInvalid(authorRaw, "name") ? null : Author.builder()
+        final AuthorImpl author = isInvalid(authorRaw, "name") ? null : AuthorImpl.builder()
                 .name(authorRaw.getString("name"))
                 .url(authorRaw.getString("url"))
                 .iconUrl(authorRaw.getString("icon_url"))
