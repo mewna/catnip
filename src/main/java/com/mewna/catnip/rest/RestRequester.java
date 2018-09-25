@@ -164,7 +164,7 @@ public class RestRequester {
                         API_HOST + API_BASE + route.baseRoute()).ssl(true)
                         .putHeader("Authorization", "Bot " + catnip.token())
                         // TODO: version filtering through maven
-                        .putHeader("User-Agent", "DiscordBot (https://github.com/mewna/catnip, 0.2.0)");
+                        .putHeader("User-Agent", "DiscordBot (https://github.com/mewna/catnip, 0.3.0)");
                 // GET and DELETE don't have payloads, but the rest do
                 if(route.method() != GET && route.method() != DELETE) {
                     req.sendJsonObject(r.data, res -> handleResponse(r, bucket, res));

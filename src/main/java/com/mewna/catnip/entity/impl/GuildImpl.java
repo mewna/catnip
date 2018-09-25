@@ -47,8 +47,6 @@ public class GuildImpl implements Guild, RequiresCatnip {
     private VerificationLevel verificationLevel;
     private NotificationLevel defaultMessageNotifications;
     private ContentFilterLevel explicitContentFilter;
-    private List<Role> roles;
-    private List<CustomEmoji> emojis;
     private List<String> features;
     private MFALevel mfaLevel;
     private String applicationId;
@@ -59,8 +57,6 @@ public class GuildImpl implements Guild, RequiresCatnip {
     private boolean large;
     private boolean unavailable;
     private int memberCount;
-    private List<Member> members;
-    private List<Channel> channels;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
@@ -79,5 +75,29 @@ public class GuildImpl implements Guild, RequiresCatnip {
     @CheckReturnValue
     public String splashUrl(@Nonnull final ImageOptions options) {
         return CDNFormat.splashUrl(id, splash, options);
+    }
+    
+    @Nonnull
+    @Override
+    public List<Role> roles() {
+        return catnip.cache().roles(id);
+    }
+    
+    @Nonnull
+    @Override
+    public List<Member> members() {
+        return catnip.cache().members(id);
+    }
+    
+    @Nonnull
+    @Override
+    public List<Channel> channels() {
+        return catnip.cache().channels(id);
+    }
+    
+    @Nonnull
+    @Override
+    public List<CustomEmoji> emojis() {
+        return catnip.cache().emojis(id);
     }
 }

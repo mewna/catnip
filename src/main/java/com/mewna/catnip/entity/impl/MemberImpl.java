@@ -23,6 +23,7 @@ public class MemberImpl implements Member, RequiresCatnip {
     private transient Catnip catnip;
     
     private String id;
+    private String guildId;
     private String nick;
     private Set<String> roles;
     private OffsetDateTime joinedAt;

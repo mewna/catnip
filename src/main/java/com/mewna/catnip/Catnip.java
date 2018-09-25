@@ -1,5 +1,9 @@
 package com.mewna.catnip;
 
+import com.mewna.catnip.cache.CacheFlag;
+import com.mewna.catnip.cache.EntityCache;
+import com.mewna.catnip.cache.EntityCacheWorker;
+import com.mewna.catnip.entity.User;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.internal.CatnipImpl;
@@ -17,6 +21,7 @@ import io.vertx.core.eventbus.EventBus;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Set;
 
 /**
  * @author amy
@@ -103,7 +108,21 @@ public interface Catnip {
     @Nonnull
     Catnip eventBuffer(@Nonnull EventBuffer eventBuffer);
     
-    // TODO: Provide convenience methods for extension un/loading like #eventBus()
+    @Nonnull
+    EntityCache cache();
+    
+    @Nonnull
+    EntityCacheWorker cacheWorker();
+    
+    @Nonnull
+    Catnip cache(@Nonnull EntityCacheWorker cache);
+    
+    @Nonnull
+    Set<CacheFlag> cacheFlags();
+    
+    @Nonnull
+    Catnip cacheFlags(@Nonnull Set<CacheFlag> cacheFlags);
+    
     @Nonnull
     ExtensionManager extensionManager();
     
@@ -112,4 +131,7 @@ public interface Catnip {
     
     @Nonnull
     Catnip loadExtension(@Nonnull Extension extension);
+    
+    @Nullable
+    User selfUser();
 }

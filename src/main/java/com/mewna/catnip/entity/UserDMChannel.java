@@ -1,14 +1,14 @@
 package com.mewna.catnip.entity;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * @author natanbc
  * @since 9/12/18
  */
 public interface UserDMChannel extends DMChannel {
-    @Nonnull
+    @Nullable
     @CheckReturnValue
     User recipient();
     
