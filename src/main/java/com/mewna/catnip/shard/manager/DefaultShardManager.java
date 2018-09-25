@@ -1,8 +1,11 @@
 package com.mewna.catnip.shard.manager;
 
+import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
+import io.vertx.core.Future;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import lombok.Getter;
@@ -10,8 +13,11 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import java.util.Deque;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.stream.Collectors;
 
 /**
  * @author amy
@@ -125,5 +131,22 @@ public class DefaultShardManager implements ShardManager {
         } else {
             catnip.logAdapter().warn("Ignoring duplicate queue for shard {}", shard);
         }
+    }
+    
+    @Nonnull
+    @Override
+    public Future<List<String>> trace(final int shard) {
+        final Future<List<String>> future = Future.future();
+        catnip.eventBus().<JsonArray>send(CatnipShard.getControlAddress(shard), new JsonObject().put("mode", "TRACE"),
+                reply -> {
+                    if(reply.succeeded()) {
+                        // ow
+                        future.complete(ImmutableList.copyOf(reply.result().body().stream()
+                                .map(e -> (String) e).collect(Collectors.toList())));
+                    } else {
+                        future.fail(reply.cause());
+                    }
+                });
+        return future;
     }
 }
