@@ -28,6 +28,8 @@ import static com.mewna.catnip.shard.DiscordEvent.*;
 @SuppressWarnings("unused")
 public class CachingBuffer extends AbstractBuffer {
     private static final List<String> CACHE_EVENTS = ImmutableList.copyOf(new String[] {
+            // Lifecycle
+            READY,
             // Channels
             CHANNEL_CREATE, CHANNEL_UPDATE, CHANNEL_DELETE,
             // Guilds
@@ -63,6 +65,9 @@ public class CachingBuffer extends AbstractBuffer {
                         .collect(Collectors.toSet());
                 buffers.put(id, new BufferState(id, guilds));
                 catnip().logAdapter().info("Prepared new BufferState for shard {} with {} guilds.", id, guilds.size());
+                // READY is also a cache event, as it does come with
+                // information about the current user
+                maybeCache(type, d);
                 break;
             }
             case GUILD_CREATE: {
@@ -126,7 +131,11 @@ public class CachingBuffer extends AbstractBuffer {
     
     private void maybeCache(final String eventType, final JsonObject payload) {
         if(CACHE_EVENTS.contains(eventType)) {
-            catnip().cacheWorker().updateCache(eventType, payload);
+            try {
+                catnip().cacheWorker().updateCache(eventType, payload);
+            } catch(final Exception e) {
+                catnip().logAdapter().warn("Got error updating cache for payload {}", eventType, e);
+            }
         }
     }
     

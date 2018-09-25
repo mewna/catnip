@@ -151,4 +151,10 @@ public class NoopEntityCache implements EntityCacheWorker {
     public List<VoiceState> voiceStates(@Nonnull final String guildId) {
         return ImmutableList.of();
     }
+    
+    @Nullable
+    @Override
+    public User selfUser() {
+        return null;
+    }
 }
