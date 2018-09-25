@@ -7,6 +7,7 @@ import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * @author natanbc
@@ -22,8 +23,8 @@ public class UserDMChannelImpl implements UserDMChannel, RequiresCatnip {
     private transient Catnip catnip;
     
     private String id;
+    private String userId;
     private ChannelType type;
-    private User recipient;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
@@ -37,11 +38,17 @@ public class UserDMChannelImpl implements UserDMChannel, RequiresCatnip {
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof UserDMChannel && ((UserDMChannel)obj).id().equals(id);
+        return obj instanceof UserDMChannel && ((UserDMChannel) obj).id().equals(id);
     }
     
     @Override
     public String toString() {
-        return String.format("UserDMChannel (%s)", recipient);
+        return String.format("UserDMChannel (%s)", recipient());
+    }
+    
+    @Nullable
+    @Override
+    public User recipient() {
+        return catnip.cache().user(userId);
     }
 }

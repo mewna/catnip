@@ -29,11 +29,12 @@ import static com.mewna.catnip.shard.DiscordEvent.*;
 public class MemoryEntityCache implements EntityCacheWorker {
     // TODO: What even is efficiency
     
+    private static final String DM_CHANNEL_KEY = "DMS";
+    
     private final Map<String, Guild> guildCache = new ConcurrentHashMap<>();
     private final Map<String, User> userCache = new ConcurrentHashMap<>();
     private final Map<String, Map<String, Member>> memberCache = new ConcurrentHashMap<>();
     private final Map<String, Map<String, Role>> roleCache = new ConcurrentHashMap<>();
-    // TODO: How to handle DM channels?
     private final Map<String, Map<String, Channel>> channelCache = new ConcurrentHashMap<>();
     private final Map<String, Map<String, CustomEmoji>> emojiCache = new ConcurrentHashMap<>();
     private final Map<String, Map<String, VoiceState>> voiceStateCache = new ConcurrentHashMap<>();
@@ -69,8 +70,20 @@ public class MemoryEntityCache implements EntityCacheWorker {
             }
             channels.put(gc.id(), gc);
             catnip.logAdapter().debug("Cached channel {} for guild {}", gc.id(), gc.guildId());
+        } else if(channel.isUserDM()) {
+            final UserDMChannel dm = (UserDMChannel) channel;
+            Map<String, Channel> channels = channelCache.get(DM_CHANNEL_KEY);
+            if(channels == null) {
+                channels = new ConcurrentHashMap<>();
+                channelCache.put(DM_CHANNEL_KEY, channels);
+            }
+            channels.put(dm.recipient().id(), channel);
+            catnip.logAdapter().debug("Cached probably-DM channel {}", channel.id());
         } else {
-            catnip.logAdapter().warn("I don't know how to cache non-guild channel {}!", channel.id());
+            catnip.logAdapter().warn("I don't know how to cache channel {}: isCategory={}, isDM={}, isGroupDM={}," +
+                            "isGuild={}, isText={}, isUserDM={}, isVoice={}",
+                    channel.id(), channel.isCategory(), channel.isDM(), channel.isGroupDM(), channel.isGuild(),
+                    channel.isText(), channel.isUserDM(), channel.isVoice());
         }
     }
     

@@ -315,7 +315,7 @@ public final class EntityBuilder {
                 .catnip(catnip)
                 .id(data.getString("id"))
                 .type(ChannelType.VOICE)
-                .recipient(createUser(data.getJsonArray("recipients").getJsonObject(0)))
+                .userId(data.getJsonArray("recipients").getJsonObject(0).getString("id"))
                 .build();
     }
     
