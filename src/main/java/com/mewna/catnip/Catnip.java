@@ -29,12 +29,20 @@ import java.util.Set;
  */
 @SuppressWarnings("unused")
 public interface Catnip {
-    static Catnip catnip() {
-        return new CatnipImpl().setup();
+    static Catnip catnip(@Nonnull final String token) {
+        return catnip(token, Vertx.vertx());
     }
     
-    static Catnip catnip(@Nonnull final Vertx vertx) {
-        return new CatnipImpl(vertx).setup();
+    static Catnip catnip(@Nonnull final CatnipOptions options) {
+        return catnip(options, Vertx.vertx());
+    }
+    
+    static Catnip catnip(@Nonnull final String token, @Nonnull final Vertx vertx) {
+        return catnip(new CatnipOptions(token), vertx);
+    }
+    
+    static Catnip catnip(@Nonnull final CatnipOptions options, @Nonnull final Vertx vertx) {
+        return new CatnipImpl(vertx, options).setup();
     }
     
     @Nonnull
@@ -65,48 +73,27 @@ public interface Catnip {
     @Nonnull
     Catnip startShards();
     
-    @Nullable
-    String token();
-    
     @Nonnull
-    Catnip token(@Nonnull String token);
-    
+    String token();
+
     @Nonnull
     ShardManager shardManager();
-    
-    @Nonnull
-    Catnip shardManager(@Nonnull ShardManager shardManager);
     
     @Nonnull
     SessionManager sessionManager();
     
     @Nonnull
-    Catnip sessionManager(@Nonnull SessionManager sessionManager);
-    
-    @Nonnull
     Ratelimiter gatewayRatelimiter();
-    
-    @Nonnull
-    Catnip gatewayRatelimiter(@Nonnull Ratelimiter ratelimiter);
     
     @Nonnull
     @CheckReturnValue
     Rest rest();
     
     @Nonnull
-    Catnip rest(@Nonnull Rest rest);
-    
-    @Nonnull
     LogAdapter logAdapter();
     
     @Nonnull
-    Catnip logAdapter(@Nonnull LogAdapter adapter);
-
-    @Nonnull
     EventBuffer eventBuffer();
-    
-    @Nonnull
-    Catnip eventBuffer(@Nonnull EventBuffer eventBuffer);
     
     @Nonnull
     EntityCache cache();
@@ -115,19 +102,10 @@ public interface Catnip {
     EntityCacheWorker cacheWorker();
     
     @Nonnull
-    Catnip cache(@Nonnull EntityCacheWorker cache);
-    
-    @Nonnull
     Set<CacheFlag> cacheFlags();
     
     @Nonnull
-    Catnip cacheFlags(@Nonnull Set<CacheFlag> cacheFlags);
-    
-    @Nonnull
     ExtensionManager extensionManager();
-    
-    @Nonnull
-    Catnip extensionManager(@Nonnull ExtensionManager extensionManager);
     
     @Nonnull
     Catnip loadExtension(@Nonnull Extension extension);

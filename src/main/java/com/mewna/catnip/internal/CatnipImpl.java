@@ -1,9 +1,9 @@
 package com.mewna.catnip.internal;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
-import com.mewna.catnip.cache.MemoryEntityCache;
 import com.mewna.catnip.entity.User;
 import com.mewna.catnip.entity.impl.MemberImpl;
 import com.mewna.catnip.entity.impl.MessageImpl;
@@ -12,29 +12,22 @@ import com.mewna.catnip.entity.impl.UserImpl;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.DefaultExtensionManager;
 import com.mewna.catnip.extension.manager.ExtensionManager;
-import com.mewna.catnip.internal.logging.DefaultLogAdapter;
 import com.mewna.catnip.internal.logging.LogAdapter;
-import com.mewna.catnip.internal.ratelimit.MemoryRatelimiter;
 import com.mewna.catnip.internal.ratelimit.Ratelimiter;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
-import com.mewna.catnip.shard.event.CachingBuffer;
 import com.mewna.catnip.shard.event.EventBuffer;
-import com.mewna.catnip.shard.manager.DefaultShardManager;
 import com.mewna.catnip.shard.manager.ShardManager;
-import com.mewna.catnip.shard.session.DefaultSessionManager;
 import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.util.JsonPojoCodec;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.EnumSet;
 import java.util.Set;
 
 /**
@@ -52,43 +45,37 @@ public class CatnipImpl implements Catnip {
     @Getter
     private final RestRequester requester;
     @Getter
-    @Setter
-    private String token;
+    private final String token;
     @Getter
-    @Setter
-    private ShardManager shardManager = new DefaultShardManager();
+    private final ShardManager shardManager;
     @Getter
-    @Setter
-    private SessionManager sessionManager = new DefaultSessionManager();
+    private final SessionManager sessionManager;
     @Getter
-    @Setter
-    private Ratelimiter gatewayRatelimiter = new MemoryRatelimiter();
+    private final Ratelimiter gatewayRatelimiter;
     @Getter
-    @Setter
-    private Rest rest = new Rest(this);
+    private final Rest rest = new Rest(this);
     @Getter
-    @Setter
-    private LogAdapter logAdapter = new DefaultLogAdapter();
+    private final LogAdapter logAdapter;
     @Getter
-    @Setter
-    private ExtensionManager extensionManager = new DefaultExtensionManager(this);
+    private final ExtensionManager extensionManager = new DefaultExtensionManager(this);
     @Getter
-    @Setter
-    private EventBuffer eventBuffer = new CachingBuffer();
+    private final EventBuffer eventBuffer;
     @Getter
-    @Setter
-    private EntityCacheWorker cache = new MemoryEntityCache();
+    private final EntityCacheWorker cache;
     @Getter
-    @Setter
-    private Set<CacheFlag> cacheFlags = EnumSet.noneOf(CacheFlag.class);
+    private final Set<CacheFlag> cacheFlags;
     
-    public CatnipImpl() {
-        this(Vertx.vertx());
-    }
-    
-    public CatnipImpl(@Nonnull final Vertx vertx) {
+    public CatnipImpl(@Nonnull final Vertx vertx, @Nonnull final CatnipOptions options) {
         this.vertx = vertx;
         requester = new RestRequester(this);
+        token = options.token();
+        shardManager = options.shardManager();
+        sessionManager = options.sessionManager();
+        gatewayRatelimiter = options.gatewayRatelimiter();
+        logAdapter = options.logAdapter();
+        eventBuffer = options.eventBuffer();
+        cache = options.cacheWorker();
+        cacheFlags = options.cacheFlags();
     }
     
     @Nonnull
