@@ -7,7 +7,6 @@
     <groupId>com.mewna.catnip</groupId>
     <artifactId>catnip</artifactId>
     <version>0.3.0</version>
-    <!-- Note: we need to update RestRequester when version is automatically set in a field -->
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -126,6 +125,20 @@
                     <target>8</target>
                 </configuration>
                 <version>3.6.1</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>templating-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <id>filter-src</id>
+                        <goals>
+                            <goal>filter-sources</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

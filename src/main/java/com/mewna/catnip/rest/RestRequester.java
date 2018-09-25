@@ -2,6 +2,7 @@ package com.mewna.catnip.rest;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.rest.Routes.Route;
+import com.mewna.catnip.util.CatnipMeta;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
@@ -163,8 +164,7 @@ public class RestRequester {
                 final HttpRequest<Buffer> req = client.requestAbs(bucketRoute.method(),
                         API_HOST + API_BASE + route.baseRoute()).ssl(true)
                         .putHeader("Authorization", "Bot " + catnip.token())
-                        // TODO: version filtering through maven
-                        .putHeader("User-Agent", "DiscordBot (https://github.com/mewna/catnip, 0.3.0)");
+                        .putHeader("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')'); // 0.3.0)");
                 // GET and DELETE don't have payloads, but the rest do
                 if(route.method() != GET && route.method() != DELETE) {
                     req.sendJsonObject(r.data, res -> handleResponse(r, bucket, res));
