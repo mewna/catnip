@@ -453,7 +453,7 @@ public final class EntityBuilder {
                     .assets(createAssets(data.getJsonObject("assets", null)))
                     .secrets(createSecrets(data.getJsonObject("secrets", null)))
                     .instance(data.getBoolean("instance", false))
-                    .flags(ActivityFlag.fromInt(data.getInteger("flags")))
+                    .flags(ActivityFlag.fromInt(data.getInteger("flags", 0)))
                     .build();
         }
     }
