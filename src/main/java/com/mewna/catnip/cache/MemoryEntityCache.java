@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.mewna.catnip.shard.DiscordEvent.*;
 
@@ -410,6 +411,12 @@ public class MemoryEntityCache implements EntityCacheWorker {
         }
     }
     
+    @Nonnull
+    @Override
+    public List<User> users() {
+        return ImmutableList.copyOf(userCache.values());
+    }
+    
     @Nullable
     @Override
     public Role role(@Nonnull final String guildId, @Nonnull final String id) {
@@ -448,6 +455,12 @@ public class MemoryEntityCache implements EntityCacheWorker {
         } else {
             return ImmutableList.of();
         }
+    }
+    
+    @Nonnull
+    @Override
+    public List<Channel> channels() {
+        return ImmutableList.copyOf(channelCache.values().stream().map(Map::values).flatMap(Collection::stream).collect(Collectors.toList()));
     }
     
     @Nullable

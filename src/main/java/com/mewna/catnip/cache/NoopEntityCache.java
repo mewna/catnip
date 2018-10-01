@@ -104,6 +104,12 @@ public class NoopEntityCache implements EntityCacheWorker {
         return ImmutableList.of();
     }
     
+    @Nonnull
+    @Override
+    public List<User> users() {
+        return ImmutableList.of();
+    }
+    
     @Nullable
     @Override
     public Role role(@Nonnull final String guildId, @Nonnull final String id) {
@@ -125,6 +131,12 @@ public class NoopEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
     public List<Channel> channels(@Nonnull final String guildId) {
+        return ImmutableList.of();
+    }
+    
+    @Nonnull
+    @Override
+    public List<Channel> channels() {
         return ImmutableList.of();
     }
     
