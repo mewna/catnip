@@ -71,6 +71,14 @@ public interface EntityCache {
     List<Member> members(@Nonnull String guildId);
     
     /**
+     * Get all users cached in this cache instance.
+     *
+     * @return A non-{@code null}, possibly-empty list of users.
+     */
+    @Nonnull
+    List<User> users();
+    
+    /**
      * Get the role with the given ID from the guild with the given ID. May be
      * {@code null}.
      *
@@ -115,6 +123,14 @@ public interface EntityCache {
      */
     @Nonnull
     List<Channel> channels(@Nonnull String guildId);
+    
+    /**
+     * Get all channels cached in this entity cache.
+     *
+     * @return A non-{@code null}, possibly-empty list of channels
+     */
+    @Nonnull
+    List<Channel> channels();
     
     /**
      * Get the custom emojis with the given ID from the guild with the given ID.
