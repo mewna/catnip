@@ -360,4 +360,16 @@ public class RestChannel extends RestHandler {
     public CompletableFuture<Void> deletePinnedMessage(@Nonnull final Message message) {
         return deletePinnedMessage(message.channelId(), message.id());
     }
+    
+    @Nonnull
+    public CompletableFuture<Void> addPinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.ADD_PINNED_CHANNEL_MESSAGE.withMajorParam(channelId),
+                ImmutableMap.of("message.id", messageId), null))
+                .thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> addPinnedMessage(@Nonnull final Message message) {
+        return addPinnedMessage(message.channelId(), message.id());
+    }
 }
