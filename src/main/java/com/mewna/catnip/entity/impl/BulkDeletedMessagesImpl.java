@@ -1,6 +1,7 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.message.BulkDeletedMessages;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -18,7 +19,7 @@ import java.util.List;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class BulkDeletedMessagesImpl implements BulkDeletedMessages {
+public class BulkDeletedMessagesImpl implements BulkDeletedMessages, RequiresCatnip {
     private transient Catnip catnip;
     
     private List<String> ids;

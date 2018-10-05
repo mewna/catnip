@@ -2,7 +2,7 @@ package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.message.DeletedMessage;
+import com.mewna.catnip.entity.guild.UnavailableGuild;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -18,12 +18,11 @@ import javax.annotation.Nonnull;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeletedMessageImpl implements DeletedMessage, RequiresCatnip {
+public class UnavailableGuildImpl implements UnavailableGuild, RequiresCatnip {
     private transient Catnip catnip;
     
     private String id;
-    private String channelId;
-    private String guildId;
+    private boolean unavailable;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
@@ -37,11 +36,11 @@ public class DeletedMessageImpl implements DeletedMessage, RequiresCatnip {
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof DeletedMessage && ((DeletedMessage) obj).id().equals(id);
+        return obj instanceof UnavailableGuild && ((UnavailableGuild) obj).id().equals(id);
     }
     
     @Override
     public String toString() {
-        return String.format("DeletedMessage (%s)", id);
+        return String.format("UnavailableGuild (%s)", id);
     }
 }
