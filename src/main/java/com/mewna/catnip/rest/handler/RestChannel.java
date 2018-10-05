@@ -5,9 +5,9 @@ import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.channel.GuildChannel.ChannelEditFields;
 import com.mewna.catnip.entity.builder.MessageBuilder;
+import com.mewna.catnip.entity.guild.PermissionOverride;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
-import com.mewna.catnip.entity.message.Message.Reaction;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
@@ -308,5 +308,17 @@ public class RestChannel extends RestHandler {
                 ImmutableMap.of(), fields.payload()))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createGuildChannel);
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> deletePermissionOverride(@Nonnull final String channelId, @Nonnull final String overwriteId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_CHANNEL_PERMISSION.withMajorParam(channelId),
+                ImmutableMap.of("overwrite.id", overwriteId), null))
+                .thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> deletePermissionOverride(@Nonnull final String channelId, @Nonnull final PermissionOverride overwrite) {
+        return deletePermissionOverride(channelId, overwrite.id());
     }
 }
