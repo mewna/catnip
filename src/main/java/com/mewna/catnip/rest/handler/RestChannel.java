@@ -7,8 +7,10 @@ import com.mewna.catnip.entity.channel.GuildChannel.ChannelEditFields;
 import com.mewna.catnip.entity.builder.MessageBuilder;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
+import com.mewna.catnip.entity.message.Message.Reaction;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.Emoji;
+import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
@@ -190,6 +192,41 @@ public class RestChannel extends RestHandler {
         return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_ALL_REACTIONS.withMajorParam(channelId),
                 ImmutableMap.of("message.id", messageId), null))
                 .thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<List<User>> getReactions(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                      @Nonnull final String emoji, @Nullable final String before,
+                                                      @Nullable final String after, @Nonnegative final int limit) {
+        final Collection<String> params = new ArrayList<>();
+        if (limit > 0) {
+            params.add("limit=" + limit);
+        }
+        if (before != null) {
+            params.add("before=" + before);
+        }
+        if (after != null) {
+            params.add("after=" + after);
+        }
+        String query = String.join("&", params);
+        if (!query.isEmpty()) {
+            query = '?' + query;
+        }
+        return getCatnip().requester()
+                .queue(new OutboundRequest(Routes.GET_REACTIONS.withMajorParam(channelId).withQueryString(query),
+                        ImmutableMap.of("message.id", messageId, "emojis", encodeUTF8(emoji)), null))
+                .thenApply(ResponsePayload::array)
+                .thenApply(mapObjectContents(getEntityBuilder()::createUser))
+                .thenApply(Collections::unmodifiableList);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<List<User>> getReactions(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                      @Nonnull final Emoji emoji, @Nullable final String before,
+                                                      @Nullable final String after, @Nonnegative final int limit) {
+        return getReactions(channelId, messageId, emoji.forReaction(), before, after, limit);
     }
     
     @Nonnull
