@@ -186,6 +186,13 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
+    public CompletableFuture<Void> deleteAllReactions(@Nonnull final String channelId, @Nonnull final String messageId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_ALL_REACTIONS.withMajorParam(channelId),
+                ImmutableMap.of("message.id", messageId), null))
+                .thenApply(__ -> null);
+    }
+    
+    @Nonnull
     @CheckReturnValue
     public CompletableFuture<List<Message>> getChannelMessages(@Nonnull final String channelId, @Nullable final String before,
                                                                @Nullable final String after, @Nullable final String around,
