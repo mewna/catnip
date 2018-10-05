@@ -15,6 +15,7 @@ import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.invite.InviteCreateOptions;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
@@ -146,6 +147,14 @@ public class RestChannel extends RestHandler {
     public CompletableFuture<Void> deleteMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_MESSAGE.withMajorParam(channelId),
                 ImmutableMap.of("message.id", messageId), null)).thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> deleteMessages(@Nonnull final String channelId, @Nonnull final List<String> messageIds) {
+        return getCatnip().requester()
+                .queue(new OutboundRequest(Routes.BULK_DELETE_MESSAGES.withMajorParam(channelId),
+                        ImmutableMap.of(), new JsonObject().put("messages", new JsonArray(messageIds))))
+                .thenApply(__ -> null);
     }
     
     @Nonnull
