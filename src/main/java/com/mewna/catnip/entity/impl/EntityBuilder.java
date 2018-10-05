@@ -1,6 +1,7 @@
 package com.mewna.catnip.entity.impl;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.*;
@@ -40,6 +41,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -67,7 +69,7 @@ public final class EntityBuilder {
     @CheckReturnValue
     private static <T> List<T> immutableListOf(@Nullable final JsonArray array, @Nonnull final Function<JsonObject, T> mapper) {
         if(array == null) {
-            return Collections.emptyList();
+            return ImmutableList.of();
         }
         final Collection<T> ret = new ArrayList<>(array.size());
         for(final Object object : array) {
@@ -80,6 +82,27 @@ public final class EntityBuilder {
         return ImmutableList.copyOf(ret);
     }
     
+    private static <T> Map<String, T> immutableIdMapOf(@Nullable final JsonArray array, @Nonnull final Function<JsonObject, T> mapper) {
+        if(array == null) {
+            return ImmutableMap.of();
+        }
+        
+        final Map<String, T> map = new HashMap<>(array.size());
+    
+        for(final Object object : array) {
+            if(!(object instanceof JsonObject)) {
+                throw new IllegalArgumentException("Expected all values to be JsonObjects, but found " +
+                        (object == null ? "null" : object.getClass()));
+            }
+            final JsonObject jsonObject = (JsonObject) object;
+            if(isInvalid(jsonObject, "id")) {
+                throw new IllegalArgumentException("Expected all values to have key id, but this one didn't!");
+            }
+            map.put(jsonObject.getString("id"), mapper.apply(jsonObject));
+        }
+        return ImmutableMap.copyOf(map);
+    }
+
     @Nonnull
     @CheckReturnValue
     private static List<String> stringListOf(@Nullable final JsonArray array) {
@@ -678,8 +701,12 @@ public final class EntityBuilder {
             catnip.cacheWorker().bulkCacheEmoji(immutableListOf(data.getJsonArray("emojis"),
                     e -> createCustomEmoji(data.getString("id"), e)));
         }
-        // TODO: Handle `presences`
-        // TODO: Handle `voice_states`
+        if(data.getJsonArray("presences") != null) {
+            catnip.cacheWorker().bulkCachePresences(immutableIdMapOf(data.getJsonArray("presences"), this::createPresence));
+        }
+        if(data.getJsonArray("voice_states") != null) {
+            catnip.cacheWorker().bulkCacheVoiceStates(immutableListOf(data.getJsonArray("voice_states"), this::createVoiceState));
+        }
         return GuildImpl.builder()
                 .catnip(catnip)
                 .id(data.getString("id"))
@@ -697,8 +724,6 @@ public final class EntityBuilder {
                 .verificationLevel(VerificationLevel.byKey(data.getInteger("verification_level", 0)))
                 .defaultMessageNotifications(NotificationLevel.byKey(data.getInteger("default_message_notifications", 0)))
                 .explicitContentFilter(ContentFilterLevel.byKey(data.getInteger("explicit_content_filter", 0)))
-                //.roles(immutableListOf(data.getJsonArray("roles"), e -> createRole(data.getString("id"), e)))
-                //.emojis(immutableListOf(data.getJsonArray("emojis"), e -> this::createCustomEmoji))
                 .features(stringListOf(data.getJsonArray("features")))
                 .mfaLevel(MFALevel.byKey(data.getInteger("mfa_level", 0)))
                 .applicationId(data.getString("application_id"))
@@ -709,8 +734,6 @@ public final class EntityBuilder {
                 .large(data.getBoolean("large", false))
                 .unavailable(data.getBoolean("unavailable", false))
                 .memberCount(data.getInteger("member_count", -1))
-                //.members(immutableListOf(data.getJsonArray("members"), e -> createMember(data.getString("id"), e)))
-                //.channels(immutableListOf(data.getJsonArray("channels"), this::createChannel))
                 .build();
     }
     
@@ -814,6 +837,27 @@ public final class EntityBuilder {
                 .name(data.getString("name"))
                 .avatar(data.getString("avatar"))
                 .token(data.getString("token"))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public DeletedMessage createDeletedMessage(@Nonnull final JsonObject data) {
+        return DeletedMessageImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .channelId(data.getString("channel_id"))
+                .guildId(data.getString("guild_id"))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public BulkDeletedMessages createBulkDeletedMessages(@Nonnull final JsonObject data) {
+        return BulkDeletedMessagesImpl.builder()
+                .ids(ImmutableList.copyOf(data.getJsonArray("ids").stream().map(e -> (String) e).collect(Collectors.toList())))
+                .channelId(data.getString("channel_id"))
+                .guildId(data.getString("guild_id"))
                 .build();
     }
 }
