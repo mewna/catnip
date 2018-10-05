@@ -6,11 +6,13 @@ import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.channel.GuildChannel.ChannelEditFields;
 import com.mewna.catnip.entity.builder.MessageBuilder;
 import com.mewna.catnip.entity.guild.PermissionOverride;
+import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
@@ -26,10 +28,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -320,5 +319,24 @@ public class RestChannel extends RestHandler {
     @Nonnull
     public CompletableFuture<Void> deletePermissionOverride(@Nonnull final String channelId, @Nonnull final PermissionOverride overwrite) {
         return deletePermissionOverride(channelId, overwrite.id());
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> editPermissionOverride(@Nonnull final String channelId, @Nonnull final String overwriteId,
+                                                          @Nonnull final Collection<Permission> allowed,
+                                                          @Nonnull final Collection<Permission> denied, final boolean isMember) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.EDIT_CHANNEL_PERMISSIONS.withMajorParam(channelId),
+                ImmutableMap.of("overwrite.id", overwriteId), new JsonObject()
+                .put("allow", Permission.from(allowed))
+                .put("deny", Permission.from(denied))
+                .put("type", isMember ? "member" : "role")))
+                .thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> editPermissionOverride(@Nonnull final String channelId, @Nonnull final PermissionOverride overwrite,
+                                                          @Nonnull final Collection<Permission> allowed,
+                                                          @Nonnull final Collection<Permission> denied) {
+        return editPermissionOverride(channelId, overwrite.id(), allowed, denied, overwrite.type() == OverrideType.MEMBER);
     }
 }
