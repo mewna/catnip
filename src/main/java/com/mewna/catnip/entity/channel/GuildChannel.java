@@ -1,6 +1,8 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.channel;
 
-import com.mewna.catnip.entity.PermissionOverride.OverrideType;
+import com.mewna.catnip.entity.misc.CreatedInvite;
+import com.mewna.catnip.entity.guild.PermissionOverride;
+import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
 import com.mewna.catnip.rest.guild.PermissionOverrideData;
 import com.mewna.catnip.rest.invite.InviteCreateOptions;
 import io.vertx.core.json.JsonObject;

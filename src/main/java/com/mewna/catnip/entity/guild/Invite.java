@@ -1,7 +1,9 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.guild;
 
-import com.mewna.catnip.entity.Channel.ChannelType;
-import com.mewna.catnip.entity.Guild.VerificationLevel;
+import com.mewna.catnip.entity.Entity;
+import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.channel.Channel.ChannelType;
+import com.mewna.catnip.entity.guild.Guild.VerificationLevel;
 import com.mewna.catnip.entity.util.ImageOptions;
 
 import javax.annotation.CheckReturnValue;

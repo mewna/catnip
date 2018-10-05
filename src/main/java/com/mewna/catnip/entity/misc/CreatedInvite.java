@@ -1,4 +1,6 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.misc;
+
+import com.mewna.catnip.entity.guild.Invite;
 
 import java.time.OffsetDateTime;
 

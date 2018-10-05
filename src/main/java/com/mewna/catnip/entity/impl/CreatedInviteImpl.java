@@ -1,7 +1,7 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.CreatedInvite;
+import com.mewna.catnip.entity.misc.CreatedInvite;
 import lombok.*;
 import lombok.experimental.Accessors;
 

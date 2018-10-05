@@ -1,7 +1,13 @@
 package com.mewna.catnip.cache;
 
-import com.mewna.catnip.entity.*;
-import com.mewna.catnip.entity.Emoji.CustomEmoji;
+import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
+import com.mewna.catnip.entity.channel.Channel;
+import com.mewna.catnip.entity.guild.Guild;
+import com.mewna.catnip.entity.guild.Member;
+import com.mewna.catnip.entity.guild.Role;
+import com.mewna.catnip.entity.user.Presence;
+import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.entity.user.VoiceState;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

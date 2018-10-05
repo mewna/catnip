@@ -1,7 +1,7 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.Emoji.UnicodeEmoji;
+import com.mewna.catnip.entity.misc.Emoji.UnicodeEmoji;
 import lombok.*;
 import lombok.experimental.Accessors;
 

@@ -3,7 +3,7 @@ package com.mewna.catnip;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCache;
 import com.mewna.catnip.cache.EntityCacheWorker;
-import com.mewna.catnip.entity.User;
+import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.internal.CatnipImpl;

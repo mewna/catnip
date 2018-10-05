@@ -2,8 +2,15 @@ package com.mewna.catnip.cache;
 
 import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.*;
-import com.mewna.catnip.entity.Emoji.CustomEmoji;
+import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
+import com.mewna.catnip.entity.channel.Channel;
+import com.mewna.catnip.entity.channel.GuildChannel;
+import com.mewna.catnip.entity.guild.Guild;
+import com.mewna.catnip.entity.guild.Member;
+import com.mewna.catnip.entity.guild.Role;
+import com.mewna.catnip.entity.user.Presence;
+import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.entity.user.VoiceState;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.Setter;

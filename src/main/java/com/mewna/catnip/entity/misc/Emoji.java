@@ -1,4 +1,7 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.misc;
+
+import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

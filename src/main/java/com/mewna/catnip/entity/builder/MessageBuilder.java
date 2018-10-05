@@ -1,8 +1,8 @@
 package com.mewna.catnip.entity.builder;
 
-import com.mewna.catnip.entity.Message;
+import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.impl.MessageImpl;
-import com.mewna.catnip.entity.Embed;
+import com.mewna.catnip.entity.message.Embed;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

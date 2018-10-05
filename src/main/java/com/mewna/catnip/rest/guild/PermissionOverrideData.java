@@ -1,10 +1,10 @@
 package com.mewna.catnip.rest.guild;
 
-import com.mewna.catnip.entity.Member;
-import com.mewna.catnip.entity.PermissionOverride;
-import com.mewna.catnip.entity.PermissionOverride.OverrideType;
-import com.mewna.catnip.entity.Role;
-import com.mewna.catnip.entity.User;
+import com.mewna.catnip.entity.guild.Member;
+import com.mewna.catnip.entity.guild.PermissionOverride;
+import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
+import com.mewna.catnip.entity.guild.Role;
+import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.JsonConvertible;
 import io.vertx.core.json.JsonObject;

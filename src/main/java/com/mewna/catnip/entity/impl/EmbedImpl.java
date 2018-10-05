@@ -1,13 +1,6 @@
 package com.mewna.catnip.entity.impl;
 
-import com.mewna.catnip.entity.Embed;
-import com.mewna.catnip.entity.Embed.Author;
-import com.mewna.catnip.entity.Embed.Field;
-import com.mewna.catnip.entity.Embed.Footer;
-import com.mewna.catnip.entity.Embed.Image;
-import com.mewna.catnip.entity.Embed.Provider;
-import com.mewna.catnip.entity.Embed.Thumbnail;
-import com.mewna.catnip.entity.Embed.Video;
+import com.mewna.catnip.entity.message.Embed;
 import lombok.*;
 import lombok.experimental.Accessors;
 

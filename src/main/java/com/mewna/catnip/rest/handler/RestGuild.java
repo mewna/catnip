@@ -1,8 +1,11 @@
 package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
-import com.mewna.catnip.entity.*;
-import com.mewna.catnip.entity.Guild.GuildEditFields;
+import com.mewna.catnip.entity.guild.Guild;
+import com.mewna.catnip.entity.guild.Guild.GuildEditFields;
+import com.mewna.catnip.entity.channel.GuildChannel;
+import com.mewna.catnip.entity.guild.Role;
+import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;

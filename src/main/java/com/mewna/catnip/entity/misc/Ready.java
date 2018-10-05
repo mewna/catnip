@@ -1,6 +1,7 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.misc;
 
 import com.mewna.catnip.entity.impl.RequiresCatnip;
+import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;

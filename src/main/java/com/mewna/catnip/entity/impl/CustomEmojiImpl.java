@@ -1,8 +1,8 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.Emoji.CustomEmoji;
-import com.mewna.catnip.entity.User;
+import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
+import com.mewna.catnip.entity.user.User;
 import lombok.*;
 import lombok.experimental.Accessors;
 

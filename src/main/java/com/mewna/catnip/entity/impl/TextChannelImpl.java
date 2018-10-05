@@ -1,8 +1,8 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.PermissionOverride;
-import com.mewna.catnip.entity.TextChannel;
+import com.mewna.catnip.entity.guild.PermissionOverride;
+import com.mewna.catnip.entity.channel.TextChannel;
 import lombok.*;
 import lombok.experimental.Accessors;
 

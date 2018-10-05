@@ -1,11 +1,11 @@
 package com.mewna.catnip.entity.builder;
 
-import com.mewna.catnip.entity.Embed;
-import com.mewna.catnip.entity.Embed.Author;
-import com.mewna.catnip.entity.Embed.Field;
-import com.mewna.catnip.entity.Embed.Footer;
-import com.mewna.catnip.entity.Embed.Image;
-import com.mewna.catnip.entity.Embed.Thumbnail;
+import com.mewna.catnip.entity.message.Embed;
+import com.mewna.catnip.entity.message.Embed.Author;
+import com.mewna.catnip.entity.message.Embed.Field;
+import com.mewna.catnip.entity.message.Embed.Footer;
+import com.mewna.catnip.entity.message.Embed.Image;
+import com.mewna.catnip.entity.message.Embed.Thumbnail;
 import com.mewna.catnip.entity.impl.EmbedImpl;
 import com.mewna.catnip.entity.impl.EmbedImpl.*;
 

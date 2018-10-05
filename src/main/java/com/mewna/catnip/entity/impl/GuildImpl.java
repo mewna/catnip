@@ -1,11 +1,11 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.Channel;
-import com.mewna.catnip.entity.Emoji.CustomEmoji;
-import com.mewna.catnip.entity.Guild;
-import com.mewna.catnip.entity.Member;
-import com.mewna.catnip.entity.Role;
+import com.mewna.catnip.entity.channel.Channel;
+import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
+import com.mewna.catnip.entity.guild.Guild;
+import com.mewna.catnip.entity.guild.Member;
+import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.CDNFormat;

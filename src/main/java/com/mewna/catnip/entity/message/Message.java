@@ -1,4 +1,9 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.message;
+
+import com.mewna.catnip.entity.*;
+import com.mewna.catnip.entity.guild.Member;
+import com.mewna.catnip.entity.misc.Emoji;
+import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;

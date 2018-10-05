@@ -1,5 +1,7 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.user;
 
+import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.util.ImageOptions;
 
 import javax.annotation.CheckReturnValue;

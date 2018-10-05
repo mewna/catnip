@@ -1,4 +1,6 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.channel;
+
+import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

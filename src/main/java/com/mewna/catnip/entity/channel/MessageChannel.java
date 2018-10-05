@@ -1,4 +1,8 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.channel;
+
+import com.mewna.catnip.entity.message.Embed;
+import com.mewna.catnip.entity.misc.Emoji;
+import com.mewna.catnip.entity.message.Message;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

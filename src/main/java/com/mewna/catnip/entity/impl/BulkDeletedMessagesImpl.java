@@ -1,7 +1,7 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.BulkDeletedMessages;
+import com.mewna.catnip.entity.message.BulkDeletedMessages;
 import lombok.*;
 import lombok.experimental.Accessors;
 
