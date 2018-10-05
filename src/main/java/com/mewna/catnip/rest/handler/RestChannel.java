@@ -5,8 +5,11 @@ import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.channel.GuildChannel.ChannelEditFields;
 import com.mewna.catnip.entity.builder.MessageBuilder;
+import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.guild.PermissionOverride;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
+import com.mewna.catnip.entity.impl.EntityBuilder;
+import com.mewna.catnip.entity.impl.WebhookImpl;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.misc.CreatedInvite;
@@ -371,5 +374,13 @@ public class RestChannel extends RestHandler {
     @Nonnull
     public CompletableFuture<Void> addPinnedMessage(@Nonnull final Message message) {
         return addPinnedMessage(message.channelId(), message.id());
+    }
+    
+    @Nonnull
+    public CompletableFuture<Webhook> createWebhook(@Nonnull final String channelId, @Nonnull final String name, @Nullable final String avatar) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_WEBHOOK.withMajorParam(channelId),
+                ImmutableMap.of(), new JsonObject().put("name", name).put("avatar", avatar)))
+                .thenApply(ResponsePayload::object)
+                .thenApply(getEntityBuilder()::createWebhook);
     }
 }
