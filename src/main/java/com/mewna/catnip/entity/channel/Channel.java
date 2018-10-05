@@ -1,5 +1,6 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.channel;
 
+import com.mewna.catnip.entity.Snowflake;
 import lombok.Getter;
 
 import javax.annotation.CheckReturnValue;

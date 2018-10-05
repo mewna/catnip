@@ -1,11 +1,14 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.guild;
 
-import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.Emoji.CustomEmoji;
+import com.mewna.catnip.entity.misc.CreatedInvite;
+import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
+import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.channel.Webhook;
+import com.mewna.catnip.entity.channel.Channel;
+import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.entity.util.ImageOptions;
 import io.vertx.core.json.JsonObject;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

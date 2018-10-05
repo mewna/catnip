@@ -1,5 +1,7 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.channel;
 
+import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.rest.RestRequester;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;

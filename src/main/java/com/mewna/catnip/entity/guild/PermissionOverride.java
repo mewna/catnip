@@ -1,5 +1,6 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.guild;
 
+import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.util.Permission;
 import lombok.Getter;
 

@@ -1,4 +1,4 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.user;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

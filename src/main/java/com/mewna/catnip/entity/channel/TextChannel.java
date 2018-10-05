@@ -1,4 +1,4 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.channel;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;

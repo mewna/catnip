@@ -1,4 +1,4 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.channel;
 
 import javax.annotation.CheckReturnValue;
 
@@ -6,13 +6,7 @@ import javax.annotation.CheckReturnValue;
  * @author natanbc
  * @since 9/12/18
  */
-public interface VoiceChannel extends GuildChannel {
-    @CheckReturnValue
-    int bitrate();
-    
-    @CheckReturnValue
-    int userLimit();
-    
+public interface Category extends GuildChannel {
     @Override
     @CheckReturnValue
     default boolean isText() {
@@ -22,12 +16,12 @@ public interface VoiceChannel extends GuildChannel {
     @Override
     @CheckReturnValue
     default boolean isVoice() {
-        return true;
+        return false;
     }
     
     @Override
     @CheckReturnValue
     default boolean isCategory() {
-        return false;
+        return true;
     }
 }

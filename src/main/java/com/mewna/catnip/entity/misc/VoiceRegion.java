@@ -1,4 +1,6 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.misc;
+
+import com.mewna.catnip.entity.Entity;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

@@ -1,8 +1,8 @@
 package com.mewna.catnip.rest.guild;
 
-import com.mewna.catnip.entity.Guild.ContentFilterLevel;
-import com.mewna.catnip.entity.Guild.NotificationLevel;
-import com.mewna.catnip.entity.Guild.VerificationLevel;
+import com.mewna.catnip.entity.guild.Guild.ContentFilterLevel;
+import com.mewna.catnip.entity.guild.Guild.NotificationLevel;
+import com.mewna.catnip.entity.guild.Guild.VerificationLevel;
 import com.mewna.catnip.util.JsonConvertible;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

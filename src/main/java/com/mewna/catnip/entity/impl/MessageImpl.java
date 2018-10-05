@@ -1,9 +1,12 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.*;
-import com.mewna.catnip.entity.Message.Attachment;
-import com.mewna.catnip.entity.Message.Reaction;
+import com.mewna.catnip.entity.guild.Member;
+import com.mewna.catnip.entity.message.Embed;
+import com.mewna.catnip.entity.message.Message;
+import com.mewna.catnip.entity.message.MessageType;
+import com.mewna.catnip.entity.misc.Emoji;
+import com.mewna.catnip.entity.user.User;
 import lombok.*;
 import lombok.experimental.Accessors;
 

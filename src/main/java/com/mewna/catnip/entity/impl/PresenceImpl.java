@@ -1,7 +1,7 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.Presence;
+import com.mewna.catnip.entity.user.Presence;
 import lombok.*;
 import lombok.experimental.Accessors;
 

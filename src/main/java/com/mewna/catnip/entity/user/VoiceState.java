@@ -1,4 +1,6 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.user;
+
+import com.mewna.catnip.entity.guild.Member;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

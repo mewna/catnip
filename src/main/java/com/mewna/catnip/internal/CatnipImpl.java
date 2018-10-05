@@ -4,7 +4,7 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
-import com.mewna.catnip.entity.User;
+import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.impl.MemberImpl;
 import com.mewna.catnip.entity.impl.MessageImpl;
 import com.mewna.catnip.entity.impl.RoleImpl;

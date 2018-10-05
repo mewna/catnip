@@ -1,4 +1,7 @@
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.guild;
+
+import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.channel.DMChannel;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

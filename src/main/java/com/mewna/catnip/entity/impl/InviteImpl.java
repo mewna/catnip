@@ -1,9 +1,9 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.Channel.ChannelType;
-import com.mewna.catnip.entity.Guild.VerificationLevel;
-import com.mewna.catnip.entity.Invite;
+import com.mewna.catnip.entity.channel.Channel.ChannelType;
+import com.mewna.catnip.entity.guild.Guild.VerificationLevel;
+import com.mewna.catnip.entity.guild.Invite;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.ImageType;
 import com.mewna.catnip.util.CDNFormat;
