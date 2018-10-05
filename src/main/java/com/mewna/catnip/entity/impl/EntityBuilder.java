@@ -441,6 +441,16 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public PartialRole createPartialRole(@Nonnull final String guildId, @Nonnull final String roleId) {
+        return PartialRoleImpl.builder()
+                .catnip(catnip)
+                .guildId(guildId)
+                .id(roleId)
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public User createUser(@Nonnull final JsonObject data) {
         return UserImpl.builder()
                 .catnip(catnip)
@@ -576,8 +586,21 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public PartialMember createPartialMember(@Nonnull final String guild, @Nonnull final JsonObject data) {
+        return PartialMemberImpl.builder()
+                .catnip(catnip)
+                .guildId(guild)
+                .user(createUser(data.getJsonObject("user")))
+                .roleIds(ImmutableSet.copyOf(data.getJsonArray("roles").stream().map(e->(String)e).collect(Collectors.toSet())))
+                .nick(data.getString("nick"))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public VoiceState createVoiceState(@Nonnull final JsonObject data) {
         return VoiceStateImpl.builder()
+                .catnip(catnip)
                 .guildId(data.getString("guild_id"))
                 .channelId(data.getString("channel_id"))
                 .userId(data.getString("user_id"))
@@ -744,6 +767,16 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public UnavailableGuild createUnavailableGuild(@Nonnull final JsonObject data) {
+        return UnavailableGuildImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .unavailable(data.getBoolean("unavailable"))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public Invite createInvite(@Nonnull final JsonObject data) {
         if(data.containsKey("uses")) {
             return createCreatedInvite(data);
@@ -860,6 +893,7 @@ public final class EntityBuilder {
     @CheckReturnValue
     public BulkDeletedMessages createBulkDeletedMessages(@Nonnull final JsonObject data) {
         return BulkDeletedMessagesImpl.builder()
+                .catnip(catnip)
                 .ids(ImmutableList.copyOf(data.getJsonArray("ids").stream().map(e -> (String) e).collect(Collectors.toList())))
                 .channelId(data.getString("channel_id"))
                 .guildId(data.getString("guild_id"))
@@ -870,6 +904,7 @@ public final class EntityBuilder {
     @CheckReturnValue
     public Ready createReady(@Nonnull final JsonObject data) {
         return ReadyImpl.builder()
+                .catnip(catnip)
                 .version(data.getInteger("v"))
                 .user(createUser(data.getJsonObject("user")))
                 .trace(ImmutableList.copyOf(data.getJsonArray("_trace").stream().map(e -> (String) e).collect(Collectors.toList())))
