@@ -82,26 +82,30 @@ public final class EntityBuilder {
         return ImmutableList.copyOf(ret);
     }
     
-    private static <T> Map<String, T> immutableIdMapOf(@Nullable final JsonArray array, @Nonnull final Function<JsonObject, T> mapper) {
+    private static <T> Map<String, T> immutableMapOf(@Nullable final JsonArray array,
+                                                       @Nonnull final Function<JsonObject, String> keyFunction,
+                                                       @Nonnull final Function<JsonObject, T> mapper) {
         if(array == null) {
             return ImmutableMap.of();
         }
-        
+    
         final Map<String, T> map = new HashMap<>(array.size());
-        
+    
         for(final Object object : array) {
             if(!(object instanceof JsonObject)) {
                 throw new IllegalArgumentException("Expected all values to be JsonObjects, but found " +
                         (object == null ? "null" : object.getClass()));
             }
             final JsonObject jsonObject = (JsonObject) object;
-            if(isInvalid(jsonObject, "id")) {
-                throw new IllegalArgumentException("Expected all values to have key id, but this one didn't!");
+            final String key = keyFunction.apply(jsonObject);
+            if(key == null || key.isEmpty()) {
+                throw new IllegalArgumentException("keyFunction returned null or empty string, which isn't allowed!");
             }
-            map.put(jsonObject.getString("id"), mapper.apply(jsonObject));
+            map.put(key, mapper.apply(jsonObject));
         }
         return ImmutableMap.copyOf(map);
     }
+    
     
     @Nonnull
     @CheckReturnValue
@@ -702,7 +706,8 @@ public final class EntityBuilder {
                     e -> createCustomEmoji(data.getString("id"), e)));
         }
         if(data.getJsonArray("presences") != null) {
-            catnip.cacheWorker().bulkCachePresences(immutableIdMapOf(data.getJsonArray("presences"), this::createPresence));
+            catnip.cacheWorker().bulkCachePresences(immutableMapOf(data.getJsonArray("presences"),
+                    o -> o.getJsonObject("user").getString("id"), this::createPresence));
         }
         if(data.getJsonArray("voice_states") != null) {
             catnip.cacheWorker().bulkCacheVoiceStates(immutableListOf(data.getJsonArray("voice_states"), this::createVoiceState));
