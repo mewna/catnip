@@ -4,11 +4,8 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
+import com.mewna.catnip.entity.impl.*;
 import com.mewna.catnip.entity.user.User;
-import com.mewna.catnip.entity.impl.MemberImpl;
-import com.mewna.catnip.entity.impl.MessageImpl;
-import com.mewna.catnip.entity.impl.RoleImpl;
-import com.mewna.catnip.entity.impl.UserImpl;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.DefaultExtensionManager;
 import com.mewna.catnip.extension.manager.ExtensionManager;
@@ -113,6 +110,8 @@ public class CatnipImpl implements Catnip {
         eventBus().registerDefaultCodec(UserImpl.class, new JsonPojoCodec<>(this, UserImpl.class));
         eventBus().registerDefaultCodec(RoleImpl.class, new JsonPojoCodec<>(this, RoleImpl.class));
         eventBus().registerDefaultCodec(MemberImpl.class, new JsonPojoCodec<>(this, MemberImpl.class));
+        eventBus().registerDefaultCodec(DeletedMessageImpl.class, new JsonPojoCodec<>(this, DeletedMessageImpl.class));
+        eventBus().registerDefaultCodec(BulkDeletedMessagesImpl.class, new JsonPojoCodec<>(this, BulkDeletedMessagesImpl.class));
         
         return this;
     }
