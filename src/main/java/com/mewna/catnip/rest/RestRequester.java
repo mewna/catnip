@@ -3,26 +3,20 @@ package com.mewna.catnip.rest;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.rest.Routes.Route;
 import com.mewna.catnip.util.CatnipMeta;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.impl.ConcurrentHashSet;
 import io.vertx.core.impl.NoStackTraceThrowable;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.client.HttpRequest;
-import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.Accessors;
 import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
 import okhttp3.*;
 import okio.BufferedSink;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Deque;
@@ -33,7 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 
-import static io.vertx.core.http.HttpMethod.DELETE;
 import static io.vertx.core.http.HttpMethod.GET;
 
 /**
@@ -69,16 +62,6 @@ public class RestRequester {
     
     private Bucket getBucket(final String key) {
         return buckets.computeIfAbsent(key, k -> new Bucket(k, 5, 1, -1));
-    }
-    
-    private void handleResponse(final OutboundRequest r, final Bucket bucket, final AsyncResult<HttpResponse<Buffer>> res) {
-        if(res.succeeded()) {
-            final HttpResponse<Buffer> response = res.result();
-            handleResponse(r, bucket, response.statusCode(), response.statusMessage(), response.bodyAsBuffer(),
-                    response.headers(), true, null);
-        } else {
-            handleResponse(r, bucket, -1, "", null, null, false, res.cause());
-        }
     }
     
     private void handleResponse(final OutboundRequest r, final Bucket bucket, final int statusCode, final String statusMessage,
@@ -182,26 +165,13 @@ public class RestRequester {
             if(bucket.getRemaining() > 0 || hasMemeReactionRatelimits) {
                 // Do request and update bucket
                 catnip.logAdapter().debug("Making request: {} (bucket {})", API_BASE + route.baseRoute(), bucket.route);
-                
+                // v.x is dumb and doesn't support multipart, so we use okhttp instead /shrug
                 if(r.binary != null) {
-                    // TODO: Use WebClient for this once v.x hits version 3.6.0
-                    // v.x is dumb and doesn't support this
-                    // We solve this by using OkHTTP instead because it's dumb
                     try {
                         @SuppressWarnings("UnnecessarilyQualifiedInnerClassAccess")
                         final MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
                         
-                        final RequestBody requestBody = new RequestBody() {
-                            @Override
-                            public MediaType contentType() {
-                                return MediaType.parse("application/octet-stream; charset=utf-8");
-                            }
-                            
-                            @Override
-                            public void writeTo(final BufferedSink sink) throws IOException {
-                                sink.write(r.binary.getBytes());
-                            }
-                        };
+                        final RequestBody requestBody = new MultipartRequestBody(r.binary());
                         
                         builder.addFormDataPart("file0", r.filename, requestBody);
                         final String payload;
@@ -212,59 +182,13 @@ public class RestRequester {
                         }
                         builder.addFormDataPart("payload_json", payload);
                         final MultipartBody body = builder.build();
-                        @SuppressWarnings("UnnecessarilyQualifiedInnerClassAccess")
-                        final Request.Builder rBuilder = new Request.Builder();
-                        final String br = route.baseRoute();
-                        final HttpMethod method = route.method();
-                        catnip.vertx().executeBlocking(future -> {
-                            try {
-                                final Response execute = _http.newCall(
-                                        rBuilder.url(API_HOST + API_BASE + br)
-                                                .method(method.name(), body)
-                                                .header("Authorization", "Bot " + catnip.token())
-                                                .header("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')')
-                                        .build()
-                                ).execute();
-                                final int code = execute.code();
-                                final String message = execute.message();
-                                if(execute.body() == null) {
-                                    handleResponse(r, bucket, code, message, null, null,
-                                            false, new NoStackTraceThrowable("body == null"));
-                                } else {
-                                    final String bodyString = execute.body().string();
-                                    
-                                    final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
-                                    execute.headers().toMultimap().forEach(headers::add);
-                                    handleResponse(r, bucket, code, message, Buffer.buffer(bodyString),
-                                            headers, true, null);
-                                    future.complete();
-                                }
-                            } catch(final IOException e) {
-                                future.fail(e);
-                            }
-                        }, bRes -> {
-                            if(!bRes.succeeded()) {
-                                handleResponse(r, bucket, -1, "", null, null,
-                                        false, bRes.cause());
-                            }
-                        });
+                        
+                        executeHttpRequest(r, route, bucket, body);
                     } catch(final Exception e) {
                         e.printStackTrace();
                     }
-                    
-                    // If we're doing a multipart request, we send the payload
-                    // as a part of the upload
                 } else {
-                    final HttpRequest<Buffer> req = client.requestAbs(bucketRoute.method(),
-                            API_HOST + API_BASE + route.baseRoute()).ssl(true)
-                            .putHeader("Authorization", "Bot " + catnip.token())
-                            .putHeader("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')');
-                    // GET and DELETE don't have payloads, but the rest do
-                    if(route.method() != GET && route.method() != DELETE) {
-                        req.sendJsonObject(r.data, res -> handleResponse(r, bucket, res));
-                    } else {
-                        req.send(res -> handleResponse(r, bucket, res));
-                    }
+                    executeHttpRequest(r, route, bucket, r.data != null ? RequestBody.create(MediaType.parse("application/json"), r.data.encode()) : null);
                 }
             } else {
                 // Add an extra 500ms buffer to be safe
@@ -287,6 +211,41 @@ public class RestRequester {
                 bucket.retry(r);
             });
         }
+    }
+    
+    private void executeHttpRequest(final OutboundRequest r, final Route route, final Bucket bucket, final RequestBody body) {
+        catnip.vertx().executeBlocking(future -> {
+            try {
+                final Response execute = _http.newCall(
+                        new Request.Builder().url(API_HOST + API_BASE + route.baseRoute())
+                                .method(route.method().name(), body)
+                                .header("Authorization", "Bot " + catnip.token())
+                                .header("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')')
+                                .build()
+                ).execute();
+                final int code = execute.code();
+                final String message = execute.message();
+                if(execute.body() == null) {
+                    handleResponse(r, bucket, code, message, null, null,
+                            false, new NoStackTraceThrowable("body == null"));
+                } else {
+                    final String bodyString = execute.body().string();
+                    
+                    final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
+                    execute.headers().toMultimap().forEach(headers::add);
+                    handleResponse(r, bucket, code, message, Buffer.buffer(bodyString),
+                            headers, true, null);
+                    future.complete();
+                }
+            } catch(final IOException e) {
+                future.fail(e);
+            }
+        }, bRes -> {
+            if(!bRes.succeeded()) {
+                handleResponse(r, bucket, -1, "", null, null,
+                        false, bRes.cause());
+            }
+        });
     }
     
     @Getter
@@ -320,6 +279,24 @@ public class RestRequester {
         
         int failedAttempts() {
             return failedAttempts;
+        }
+    }
+    
+    @RequiredArgsConstructor
+    private final class MultipartRequestBody extends RequestBody {
+        private final Buffer buffer;
+        
+        private final MediaType contentType = MediaType.parse("application/octet-stream; charset=utf-8");
+        
+        @Nullable
+        @Override
+        public MediaType contentType() {
+            return contentType;
+        }
+        
+        @Override
+        public void writeTo(final BufferedSink sink) throws IOException {
+            sink.write(buffer.getBytes());
         }
     }
     
