@@ -339,4 +339,13 @@ public class RestChannel extends RestHandler {
                                                           @Nonnull final Collection<Permission> denied) {
         return editPermissionOverride(channelId, overwrite.id(), allowed, denied, overwrite.type() == OverrideType.MEMBER);
     }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<List<Message>> getPinnedMessages(@Nonnull final String channelId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_PINNED_MESSAGES.withMajorParam(channelId),
+                ImmutableMap.of(), null))
+                .thenApply(ResponsePayload::array)
+                .thenApply(mapObjectContents(getEntityBuilder()::createMessage));
+    }
 }
