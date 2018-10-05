@@ -1,4 +1,4 @@
-package com.mewna.catnip.entity.impl;
+package com.mewna.catnip.entity;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.Entity;
