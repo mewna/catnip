@@ -106,14 +106,47 @@ public class CatnipImpl implements Catnip {
         // *sigh*
         // This is mainly important for distributed catnip; locally it'll just
         // not apply any transformations
-        eventBus().registerDefaultCodec(MessageImpl.class, new JsonPojoCodec<>(this, MessageImpl.class));
-        eventBus().registerDefaultCodec(UserImpl.class, new JsonPojoCodec<>(this, UserImpl.class));
-        eventBus().registerDefaultCodec(RoleImpl.class, new JsonPojoCodec<>(this, RoleImpl.class));
-        eventBus().registerDefaultCodec(MemberImpl.class, new JsonPojoCodec<>(this, MemberImpl.class));
-        eventBus().registerDefaultCodec(DeletedMessageImpl.class, new JsonPojoCodec<>(this, DeletedMessageImpl.class));
-        eventBus().registerDefaultCodec(BulkDeletedMessagesImpl.class, new JsonPojoCodec<>(this, BulkDeletedMessagesImpl.class));
+        
+        // Lifecycle
+        codec(ReadyImpl.class);
+        
+        // Messages
+        codec(MessageImpl.class);
+        codec(DeletedMessageImpl.class);
+        codec(BulkDeletedMessagesImpl.class);
+        
+        // Channels
+        codec(CategoryImpl.class);
+        codec(GroupDMChannelImpl.class);
+        codec(TextChannelImpl.class);
+        codec(UserDMChannelImpl.class);
+        codec(VoiceChannelImpl.class);
+        codec(WebhookImpl.class);
+        
+        // Guilds
+        codec(GuildImpl.class);
+        
+        // Roles
+        codec(RoleImpl.class);
+        codec(PartialRoleImpl.class);
+        codec(PermissionOverrideImpl.class);
+        
+        // Members
+        codec(MemberImpl.class);
+        codec(PartialMemberImpl.class);
+        
+        // Users
+        codec(UserImpl.class);
+        codec(PresenceImpl.class);
+        
+        // Voice
+        codec(VoiceStateImpl.class);
         
         return this;
+    }
+    
+    private <T> void codec(@Nonnull final Class<T> cls) {
+        eventBus().registerDefaultCodec(cls, new JsonPojoCodec<>(this, cls));
     }
     
     @Nonnull
