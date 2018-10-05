@@ -19,10 +19,13 @@ If this is too hard for you and / or you use gradle, get it on Jitpack here: htt
 This is the simplest possible bot you can make right now:
 
 ```Java
-final Catnip catnip = Catnip.catnip().token(System.getenv("TOKEN"));
+
+
+
+final Catnip catnip = Catnip.catnip("your token goes here");
 catnip.eventBus().<Message>consumer(DiscordEvent.MESSAGE_CREATE, event -> {
     final Message msg = event.body();
-    if(msg.content().equalsIgnoreCase("!ping")) {
+    if(msg.content().startsWith("!ping")) {
         catnip.rest().channel().sendMessage(msg.channelId(), "pong!");
     }
 });
@@ -34,7 +37,7 @@ editing your ping message to include time it took to create the
 message:
 
 ```Java
-final Catnip catnip = Catnip.catnip().token(System.getenv("TOKEN"));
+final Catnip catnip = Catnip.catnip("your token goes here");
 catnip.eventBus().<Message>consumer(DiscordEvent.MESSAGE_CREATE, event -> {
     final Message msg = event.body();
     if(msg.content().equalsIgnoreCase("!ping")) {
@@ -49,6 +52,8 @@ catnip.eventBus().<Message>consumer(DiscordEvent.MESSAGE_CREATE, event -> {
 });
 catnip.startShards();
 ```
+
+If you want to customize it more, look into the `CatnipOptions` class.
 
 ## Features
 
