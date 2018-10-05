@@ -1,6 +1,7 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.util.Permission;
 import lombok.*;

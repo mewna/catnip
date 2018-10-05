@@ -1,6 +1,7 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
 import com.mewna.catnip.entity.guild.Guild.VerificationLevel;
 import com.mewna.catnip.entity.guild.Invite;

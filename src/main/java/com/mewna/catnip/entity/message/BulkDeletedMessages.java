@@ -1,6 +1,6 @@
 package com.mewna.catnip.entity.message;
 
-import com.mewna.catnip.entity.impl.RequiresCatnip;
+import com.mewna.catnip.entity.RequiresCatnip;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

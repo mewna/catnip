@@ -1,7 +1,7 @@
 package com.mewna.catnip.util;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.impl.RequiresCatnip;
+import com.mewna.catnip.entity.RequiresCatnip;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageCodec;
 import io.vertx.core.json.JsonObject;
