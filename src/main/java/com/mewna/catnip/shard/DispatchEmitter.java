@@ -27,7 +27,7 @@ public class DispatchEmitter {
         
         switch(type) {
             case MESSAGE_CREATE: {
-                emitMessageCreate(data);
+                catnip.eventBus().send(MESSAGE_CREATE, entityBuilder.createMessage(data));
                 break;
             }
             case GUILD_CREATE: {
@@ -40,15 +40,16 @@ public class DispatchEmitter {
                 break;
             }
             case MESSAGE_DELETE: {
+                catnip.eventBus().send(MESSAGE_DELETE, entityBuilder.createDeletedMessage(data));
+                break;
+            }
+            case MESSAGE_DELETE_BULK: {
+                catnip.eventBus().send(MESSAGE_DELETE_BULK, entityBuilder.createBulkDeletedMessages(data));
                 break;
             }
             default: {
                 break;
             }
         }
-    }
-    
-    private void emitMessageCreate(final JsonObject data) {
-        catnip.eventBus().send(MESSAGE_CREATE, entityBuilder.createMessage(data));
     }
 }
