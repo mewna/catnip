@@ -7,13 +7,15 @@ import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.client.WebClient;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -31,7 +33,7 @@ public class DefaultShardManager implements ShardManager {
     @Getter
     private final Deque<Integer> connectQueue = new ConcurrentLinkedDeque<>();
     @Getter
-    private WebClient client;
+    private OkHttpClient client;
     @Getter
     @Setter
     private Catnip catnip;
@@ -52,23 +54,33 @@ public class DefaultShardManager implements ShardManager {
     
     @Override
     public void start() {
-        client = WebClient.create(catnip.vertx());
+        client = new OkHttpClient();
         if(customShardCount == -1) {
             // Load shard count from API
-            client.getAbs(Catnip.getShardCountUrl()).putHeader("Authorization", "Bot " + catnip.token()).ssl(true)
-                    .send(ar -> {
-                        if(ar.succeeded()) {
-                            final JsonObject body = ar.result().bodyAsJsonObject();
-                            final int shards = body.getInteger("shards", -1);
-                            if(shards != -1) {
-                                loadShards(shards);
-                            } else {
-                                throw new IllegalStateException("Invalid token provided (Gateway JSON response doesn't have `shards` key)!");
-                            }
-                        } else {
-                            throw new IllegalStateException("Couldn't load shard count from API!");
-                        }
-                    });
+            catnip.vertx().<JsonObject>executeBlocking(future -> {
+                try {
+                    @SuppressWarnings({"UnnecessarilyQualifiedInnerClassAccess", "ConstantConditions"})
+                    final String body = client.newCall(new Request.Builder()
+                            .get().url(Catnip.getShardCountUrl())
+                            .header("Authorization", "Bot " + catnip.token())
+                            .build()).execute().body().string();
+                    future.complete(new JsonObject(body));
+                } catch(final IOException | NullPointerException e) {
+                    future.fail(e);
+                }
+            }, res -> {
+                if(res.succeeded()) {
+                    final JsonObject body = res.result();
+                    final int shards = body.getInteger("shards", -1);
+                    if(shards != -1) {
+                        loadShards(shards);
+                    } else {
+                        throw new IllegalStateException("Invalid token provided (Gateway JSON response doesn't have `shards` key)!");
+                    }
+                } else {
+                    throw new IllegalStateException("Couldn't load shard count from API!", res.cause());
+                }
+            });
         } else {
             loadShards(customShardCount);
         }
