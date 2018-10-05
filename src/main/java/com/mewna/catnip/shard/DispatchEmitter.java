@@ -26,14 +26,15 @@ public class DispatchEmitter {
         final JsonObject data = payload.getJsonObject("d");
         
         switch(type) {
+            case READY: {
+                catnip.eventBus().send(READY, entityBuilder.createReady(data));
+                break;
+            }
             case MESSAGE_CREATE: {
                 catnip.eventBus().send(MESSAGE_CREATE, entityBuilder.createMessage(data));
                 break;
             }
             case GUILD_CREATE: {
-                break;
-            }
-            case READY: {
                 break;
             }
             case MESSAGE_UPDATE: {

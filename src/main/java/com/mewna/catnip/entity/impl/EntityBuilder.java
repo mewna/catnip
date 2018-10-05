@@ -6,12 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.*;
 import com.mewna.catnip.entity.Channel.ChannelType;
-import com.mewna.catnip.entity.Embed.Author;
-import com.mewna.catnip.entity.Embed.EmbedType;
-import com.mewna.catnip.entity.Embed.Field;
-import com.mewna.catnip.entity.Embed.Footer;
-import com.mewna.catnip.entity.Embed.Image;
-import com.mewna.catnip.entity.Embed.Thumbnail;
+import com.mewna.catnip.entity.Embed.*;
 import com.mewna.catnip.entity.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.Emoji.UnicodeEmoji;
 import com.mewna.catnip.entity.Guild.ContentFilterLevel;
@@ -41,7 +36,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -88,7 +82,7 @@ public final class EntityBuilder {
         }
         
         final Map<String, T> map = new HashMap<>(array.size());
-    
+        
         for(final Object object : array) {
             if(!(object instanceof JsonObject)) {
                 throw new IllegalArgumentException("Expected all values to be JsonObjects, but found " +
@@ -102,7 +96,7 @@ public final class EntityBuilder {
         }
         return ImmutableMap.copyOf(map);
     }
-
+    
     @Nonnull
     @CheckReturnValue
     private static List<String> stringListOf(@Nullable final JsonArray array) {
@@ -858,6 +852,16 @@ public final class EntityBuilder {
                 .ids(ImmutableList.copyOf(data.getJsonArray("ids").stream().map(e -> (String) e).collect(Collectors.toList())))
                 .channelId(data.getString("channel_id"))
                 .guildId(data.getString("guild_id"))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Ready createReady(@Nonnull final JsonObject data) {
+        return ReadyImpl.builder()
+                .version(data.getInteger("v"))
+                .user(createUser(data.getJsonObject("user")))
+                .trace(ImmutableList.copyOf(data.getJsonArray("_trace").stream().map(e -> (String) e).collect(Collectors.toList())))
                 .build();
     }
 }
