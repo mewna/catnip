@@ -9,7 +9,6 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.impl.ConcurrentHashSet;
 import io.vertx.core.impl.NoStackTraceThrowable;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.client.WebClient;
 import lombok.*;
 import lombok.experimental.Accessors;
 import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
@@ -45,13 +44,11 @@ public class RestRequester {
     
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
     private final Catnip catnip;
-    private final WebClient client;
     private final OkHttpClient _http = new OkHttpClient();
     private final Collection<Bucket> submittedBuckets = new ConcurrentHashSet<>();
     
     public RestRequester(final Catnip catnip) {
         this.catnip = catnip;
-        client = WebClient.create(catnip.vertx());
     }
     
     public CompletableFuture<ResponsePayload> queue(final OutboundRequest r) {
