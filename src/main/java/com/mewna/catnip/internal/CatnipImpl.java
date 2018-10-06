@@ -142,6 +142,7 @@ public class CatnipImpl implements Catnip {
         
         // Voice
         codec(VoiceStateImpl.class);
+        codec(VoiceServerUpdateImpl.class);
         
         return this;
     }
