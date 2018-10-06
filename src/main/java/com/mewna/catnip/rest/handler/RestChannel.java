@@ -367,7 +367,7 @@ public class RestChannel extends RestHandler {
     @Nonnull
     public CompletableFuture<Void> addPinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.ADD_PINNED_CHANNEL_MESSAGE.withMajorParam(channelId),
-                ImmutableMap.of("message.id", messageId), null))
+                ImmutableMap.of("message.id", messageId), new JsonObject()))
                 .thenApply(__ -> null);
     }
     
