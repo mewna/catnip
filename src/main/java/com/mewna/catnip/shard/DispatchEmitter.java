@@ -51,6 +51,7 @@ public class DispatchEmitter {
             }
             case TYPING_START: {
                 catnip.eventBus().send(type, entityBuilder.createTypingUser(data));
+                break;
             }
             
             // Channels
