@@ -81,6 +81,14 @@ public class DispatchEmitter {
                 catnip.eventBus().send(type, entityBuilder.createUnavailableGuild(data));
                 break;
             }
+            case GUILD_BAN_ADD: {
+                catnip.eventBus().send(type, entityBuilder.createGuildBan(data));
+                break;
+            }
+            case GUILD_BAN_REMOVE: {
+                catnip.eventBus().send(type, entityBuilder.createGuildBan(data));
+                break;
+            }
             
             // Roles
             case GUILD_ROLE_CREATE: {
