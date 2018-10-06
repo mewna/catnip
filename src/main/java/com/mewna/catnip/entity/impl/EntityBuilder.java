@@ -38,6 +38,7 @@ import com.mewna.catnip.entity.user.TypingUser;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.entity.voice.VoiceServerUpdate;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -625,6 +626,17 @@ public final class EntityBuilder {
                 .selfDeaf(data.getBoolean("self_deaf"))
                 .selfMute(data.getBoolean("self_mute"))
                 .suppress(data.getBoolean("suppress"))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public VoiceServerUpdate createVoiceServerUpdate(@Nonnull final JsonObject data) {
+        return VoiceServerUpdateImpl.builder()
+                .catnip(catnip)
+                .token(data.getString("token"))
+                .guildId(data.getString("guildId"))
+                .endpoint(data.getString("endpoint"))
                 .build();
     }
     

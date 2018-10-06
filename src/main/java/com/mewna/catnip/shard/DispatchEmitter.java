@@ -138,6 +138,10 @@ public class DispatchEmitter {
                 catnip.eventBus().send(type, entityBuilder.createVoiceState(data));
                 break;
             }
+            case VOICE_SERVER_UPDATE: {
+                catnip.eventBus().send(type, entityBuilder.createVoiceServerUpdate(data));
+                break;
+            }
             
             default: {
                 catnip.logAdapter().warn("Got unimplemented gateway event: {}", type);
