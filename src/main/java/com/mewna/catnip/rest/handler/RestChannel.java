@@ -5,16 +5,24 @@ import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.channel.GuildChannel.ChannelEditFields;
 import com.mewna.catnip.entity.builder.MessageBuilder;
+import com.mewna.catnip.entity.channel.Webhook;
+import com.mewna.catnip.entity.guild.PermissionOverride;
+import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
+import com.mewna.catnip.entity.impl.EntityBuilder;
+import com.mewna.catnip.entity.impl.WebhookImpl;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.Emoji;
+import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.invite.InviteCreateOptions;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
@@ -23,10 +31,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -149,6 +154,14 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
+    public CompletableFuture<Void> deleteMessages(@Nonnull final String channelId, @Nonnull final List<String> messageIds) {
+        return getCatnip().requester()
+                .queue(new OutboundRequest(Routes.BULK_DELETE_MESSAGES.withMajorParam(channelId),
+                        ImmutableMap.of(), new JsonObject().put("messages", new JsonArray(messageIds))))
+                .thenApply(__ -> null);
+    }
+    
+    @Nonnull
     public CompletableFuture<Void> addReaction(@Nonnull final String channelId, @Nonnull final String messageId,
                                                @Nonnull final String emoji) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_REACTION.withMajorParam(channelId),
@@ -174,6 +187,48 @@ public class RestChannel extends RestHandler {
     public CompletableFuture<Void> deleteOwnReaction(@Nonnull final String channelId, @Nonnull final String messageId,
                                                      @Nonnull final Emoji emoji) {
         return deleteOwnReaction(channelId, messageId, emoji.forReaction());
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> deleteAllReactions(@Nonnull final String channelId, @Nonnull final String messageId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_ALL_REACTIONS.withMajorParam(channelId),
+                ImmutableMap.of("message.id", messageId), null))
+                .thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<List<User>> getReactions(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                      @Nonnull final String emoji, @Nullable final String before,
+                                                      @Nullable final String after, @Nonnegative final int limit) {
+        final Collection<String> params = new ArrayList<>();
+        if (limit > 0) {
+            params.add("limit=" + limit);
+        }
+        if (before != null) {
+            params.add("before=" + before);
+        }
+        if (after != null) {
+            params.add("after=" + after);
+        }
+        String query = String.join("&", params);
+        if (!query.isEmpty()) {
+            query = '?' + query;
+        }
+        return getCatnip().requester()
+                .queue(new OutboundRequest(Routes.GET_REACTIONS.withMajorParam(channelId).withQueryString(query),
+                        ImmutableMap.of("message.id", messageId, "emojis", encodeUTF8(emoji)), null))
+                .thenApply(ResponsePayload::array)
+                .thenApply(mapObjectContents(getEntityBuilder()::createUser))
+                .thenApply(Collections::unmodifiableList);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<List<User>> getReactions(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                      @Nonnull final Emoji emoji, @Nullable final String before,
+                                                      @Nullable final String after, @Nonnegative final int limit) {
+        return getReactions(channelId, messageId, emoji.forReaction(), before, after, limit);
     }
     
     @Nonnull
@@ -255,5 +310,77 @@ public class RestChannel extends RestHandler {
                 ImmutableMap.of(), fields.payload()))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createGuildChannel);
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> deletePermissionOverride(@Nonnull final String channelId, @Nonnull final String overwriteId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_CHANNEL_PERMISSION.withMajorParam(channelId),
+                ImmutableMap.of("overwrite.id", overwriteId), null))
+                .thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> deletePermissionOverride(@Nonnull final String channelId, @Nonnull final PermissionOverride overwrite) {
+        return deletePermissionOverride(channelId, overwrite.id());
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> editPermissionOverride(@Nonnull final String channelId, @Nonnull final String overwriteId,
+                                                          @Nonnull final Collection<Permission> allowed,
+                                                          @Nonnull final Collection<Permission> denied, final boolean isMember) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.EDIT_CHANNEL_PERMISSIONS.withMajorParam(channelId),
+                ImmutableMap.of("overwrite.id", overwriteId), new JsonObject()
+                .put("allow", Permission.from(allowed))
+                .put("deny", Permission.from(denied))
+                .put("type", isMember ? "member" : "role")))
+                .thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> editPermissionOverride(@Nonnull final String channelId, @Nonnull final PermissionOverride overwrite,
+                                                          @Nonnull final Collection<Permission> allowed,
+                                                          @Nonnull final Collection<Permission> denied) {
+        return editPermissionOverride(channelId, overwrite.id(), allowed, denied, overwrite.type() == OverrideType.MEMBER);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<List<Message>> getPinnedMessages(@Nonnull final String channelId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_PINNED_MESSAGES.withMajorParam(channelId),
+                ImmutableMap.of(), null))
+                .thenApply(ResponsePayload::array)
+                .thenApply(mapObjectContents(getEntityBuilder()::createMessage));
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> deletePinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_PINNED_CHANNEL_MESSAGE.withMajorParam(channelId),
+                ImmutableMap.of("message.id", messageId), null))
+                .thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> deletePinnedMessage(@Nonnull final Message message) {
+        return deletePinnedMessage(message.channelId(), message.id());
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> addPinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.ADD_PINNED_CHANNEL_MESSAGE.withMajorParam(channelId),
+                ImmutableMap.of("message.id", messageId), new JsonObject()))
+                .thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> addPinnedMessage(@Nonnull final Message message) {
+        return addPinnedMessage(message.channelId(), message.id());
+    }
+    
+    @Nonnull
+    public CompletableFuture<Webhook> createWebhook(@Nonnull final String channelId, @Nonnull final String name, @Nullable final String avatar) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_WEBHOOK.withMajorParam(channelId),
+                ImmutableMap.of(), new JsonObject().put("name", name).put("avatar", avatar)))
+                .thenApply(ResponsePayload::object)
+                .thenApply(getEntityBuilder()::createWebhook);
     }
 }
