@@ -53,6 +53,18 @@ public class DispatchEmitter {
                 catnip.eventBus().send(type, entityBuilder.createTypingUser(data));
                 break;
             }
+            case MESSAGE_REACTION_REMOVE_ALL: {
+                
+                break;
+            }
+            case MESSAGE_REACTION_REMOVE: {
+                catnip.eventBus().send(type, entityBuilder.createReactionUpdate(data));
+                break;
+            }
+            case MESSAGE_REACTION_ADD: {
+                catnip.eventBus().send(type, entityBuilder.createReactionUpdate(data));
+                break;
+            }
             
             // Channels
             case CHANNEL_CREATE: {

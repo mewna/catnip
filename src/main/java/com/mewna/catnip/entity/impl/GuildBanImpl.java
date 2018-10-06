@@ -7,6 +7,8 @@ import com.mewna.catnip.entity.user.User;
 import lombok.*;
 import lombok.experimental.Accessors;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author amy
  * @since 10/6/18.
@@ -23,4 +25,8 @@ public class GuildBanImpl implements GuildBan, RequiresCatnip {
     private String guildId;
     
     private User user;
+    
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
+    }
 }
