@@ -19,9 +19,6 @@ If this is too hard for you and / or you use gradle, get it on Jitpack here: htt
 This is the simplest possible bot you can make right now:
 
 ```Java
-
-
-
 final Catnip catnip = Catnip.catnip("your token goes here");
 catnip.eventBus().<Message>consumer(DiscordEvent.MESSAGE_CREATE, event -> {
     final Message msg = event.body();
