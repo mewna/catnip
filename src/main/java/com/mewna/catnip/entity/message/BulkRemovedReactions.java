@@ -4,18 +4,17 @@ import com.mewna.catnip.entity.Entity;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 
 /**
  * @author amy
- * @since 10/4/18.
+ * @since 10/6/18.
  */
-public interface BulkDeletedMessages extends Entity {
-    @Nonnull
-    List<String> ids();
-    
+public interface BulkRemovedReactions extends Entity {
     @Nonnull
     String channelId();
+    
+    @Nonnull
+    String messageId();
     
     @Nullable
     String guildId();
