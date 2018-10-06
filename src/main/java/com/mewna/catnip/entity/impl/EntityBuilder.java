@@ -6,11 +6,6 @@ import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.channel.*;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
-import com.mewna.catnip.entity.message.*;
-import com.mewna.catnip.entity.message.Embed.*;
-import com.mewna.catnip.entity.misc.*;
-import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
-import com.mewna.catnip.entity.misc.Emoji.UnicodeEmoji;
 import com.mewna.catnip.entity.guild.*;
 import com.mewna.catnip.entity.guild.Guild.ContentFilterLevel;
 import com.mewna.catnip.entity.guild.Guild.MFALevel;
@@ -19,11 +14,7 @@ import com.mewna.catnip.entity.guild.Guild.VerificationLevel;
 import com.mewna.catnip.entity.guild.Invite.InviteChannel;
 import com.mewna.catnip.entity.guild.Invite.InviteGuild;
 import com.mewna.catnip.entity.guild.Invite.Inviter;
-import com.mewna.catnip.entity.message.Message.Attachment;
-import com.mewna.catnip.entity.message.Message.Reaction;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
-import com.mewna.catnip.entity.user.Presence;
-import com.mewna.catnip.entity.user.Presence.*;
 import com.mewna.catnip.entity.impl.EmbedImpl.*;
 import com.mewna.catnip.entity.impl.InviteImpl.InviteChannelImpl;
 import com.mewna.catnip.entity.impl.InviteImpl.InviteGuildImpl;
@@ -31,6 +22,19 @@ import com.mewna.catnip.entity.impl.InviteImpl.InviterImpl;
 import com.mewna.catnip.entity.impl.MessageImpl.AttachmentImpl;
 import com.mewna.catnip.entity.impl.MessageImpl.ReactionImpl;
 import com.mewna.catnip.entity.impl.PresenceImpl.*;
+import com.mewna.catnip.entity.message.*;
+import com.mewna.catnip.entity.message.Embed.*;
+import com.mewna.catnip.entity.message.Message.Attachment;
+import com.mewna.catnip.entity.message.Message.Reaction;
+import com.mewna.catnip.entity.misc.CreatedInvite;
+import com.mewna.catnip.entity.misc.Emoji;
+import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
+import com.mewna.catnip.entity.misc.Emoji.UnicodeEmoji;
+import com.mewna.catnip.entity.misc.Ready;
+import com.mewna.catnip.entity.misc.VoiceRegion;
+import com.mewna.catnip.entity.user.Presence;
+import com.mewna.catnip.entity.user.Presence.*;
+import com.mewna.catnip.entity.user.TypingUser;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.entity.util.Permission;
@@ -83,14 +87,14 @@ public final class EntityBuilder {
     }
     
     private static <T> Map<String, T> immutableMapOf(@Nullable final JsonArray array,
-                                                       @Nonnull final Function<JsonObject, String> keyFunction,
-                                                       @Nonnull final Function<JsonObject, T> mapper) {
+                                                     @Nonnull final Function<JsonObject, String> keyFunction,
+                                                     @Nonnull final Function<JsonObject, T> mapper) {
         if(array == null) {
             return ImmutableMap.of();
         }
-    
+        
         final Map<String, T> map = new HashMap<>(array.size());
-    
+        
         for(final Object object : array) {
             if(!(object instanceof JsonObject)) {
                 throw new IllegalArgumentException("Expected all values to be JsonObjects, but found " +
@@ -105,7 +109,6 @@ public final class EntityBuilder {
         }
         return ImmutableMap.copyOf(map);
     }
-    
     
     @Nonnull
     @CheckReturnValue
@@ -555,6 +558,18 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public TypingUser createTypingUser(@Nonnull final JsonObject data) {
+        return TypingUserImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("user_id"))
+                .channelId(data.getString("channel_id"))
+                .guildId(data.getString("guild_id"))
+                .timestamp(data.getLong("timestamp"))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public Member createMember(@Nonnull final String guildId, @Nonnull final String id, @Nonnull final JsonObject data) {
         final JsonObject userData = data.getJsonObject("user");
         if(userData != null) {
@@ -591,7 +606,7 @@ public final class EntityBuilder {
                 .catnip(catnip)
                 .guildId(guild)
                 .user(createUser(data.getJsonObject("user")))
-                .roleIds(ImmutableSet.copyOf(data.getJsonArray("roles").stream().map(e->(String)e).collect(Collectors.toSet())))
+                .roleIds(ImmutableSet.copyOf(data.getJsonArray("roles").stream().map(e -> (String) e).collect(Collectors.toSet())))
                 .nick(data.getString("nick"))
                 .build();
     }

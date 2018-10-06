@@ -49,6 +49,9 @@ public class DispatchEmitter {
                 catnip.eventBus().send(type, entityBuilder.createBulkDeletedMessages(data));
                 break;
             }
+            case TYPING_START: {
+                catnip.eventBus().send(type, entityBuilder.createTypingUser(data));
+            }
             
             // Channels
             case CHANNEL_CREATE: {
