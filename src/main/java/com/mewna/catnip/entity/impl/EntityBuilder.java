@@ -804,6 +804,16 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public GuildBan createGuildBan(@Nonnull final JsonObject data) {
+        return GuildBanImpl.builder()
+                .catnip(catnip)
+                .guildId(data.getString("guild_id"))
+                .user(createUser(data.getJsonObject("user")))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public Invite createInvite(@Nonnull final JsonObject data) {
         if(data.containsKey("uses")) {
             return createCreatedInvite(data);
