@@ -6,6 +6,8 @@ import com.mewna.catnip.entity.message.BulkRemovedReactions;
 import lombok.*;
 import lombok.experimental.Accessors;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author amy
  * @since 10/6/18.
@@ -22,4 +24,8 @@ public class BulkRemovedReactionsImpl implements BulkRemovedReactions, RequiresC
     private String channelId;
     private String messageId;
     private String guildId;
+    
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
+    }
 }
