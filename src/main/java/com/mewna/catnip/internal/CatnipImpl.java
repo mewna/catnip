@@ -114,6 +114,7 @@ public class CatnipImpl implements Catnip {
         codec(MessageImpl.class);
         codec(DeletedMessageImpl.class);
         codec(BulkDeletedMessagesImpl.class);
+        codec(TypingUserImpl.class);
         
         // Channels
         codec(CategoryImpl.class);
