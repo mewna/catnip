@@ -652,7 +652,7 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public CustomEmoji createCustomEmoji(@Nonnull final String guildId, @Nonnull final JsonObject data) {
+    public CustomEmoji createCustomEmoji(@Nullable final String guildId, @Nonnull final JsonObject data) {
         final JsonObject userRaw = data.getJsonObject("user");
         
         return CustomEmojiImpl.builder()
@@ -698,6 +698,19 @@ public final class EntityBuilder {
                 .count(data.getInteger("count"))
                 .self(data.getBoolean("self", false))
                 .emoji(createEmoji(guildId, data.getJsonObject("emojis")))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public ReactionUpdate createReactionUpdate(@Nonnull final JsonObject data) {
+        return ReactionUpdateImpl.builder()
+                .catnip(catnip)
+                .userId(data.getString("user_id"))
+                .channelId(data.getString("channel_id"))
+                .messageId(data.getString("message_id"))
+                .guildId(data.getString("guild_id"))
+                .emoji(createEmoji(null, data.getJsonObject("emoji")))
                 .build();
     }
     

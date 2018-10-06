@@ -6,6 +6,8 @@ import com.mewna.catnip.entity.voice.VoiceServerUpdate;
 import lombok.*;
 import lombok.experimental.Accessors;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author amy
  * @since 10/6/18.
@@ -22,4 +24,8 @@ public class VoiceServerUpdateImpl implements VoiceServerUpdate, RequiresCatnip 
     private String token;
     private String guildId;
     private String endpoint;
+    
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
+    }
 }

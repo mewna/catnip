@@ -124,10 +124,13 @@ public interface Emoji extends Snowflake {
         
         /**
          * ID of guild that owns this emojis, or null if it has no guild.
+         * <p />
+         * NOTE: This may be null in the case of a reaction, because the data
+         * may not be available to get the id for the emoji!
          *
          * @return String representing the ID.
          */
-        @Nonnull
+        @Nullable
         @CheckReturnValue
         String guildId();
         
