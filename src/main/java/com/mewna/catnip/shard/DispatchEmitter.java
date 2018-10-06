@@ -54,7 +54,7 @@ public class DispatchEmitter {
                 break;
             }
             case MESSAGE_REACTION_REMOVE_ALL: {
-                
+                catnip.eventBus().send(type, entityBuilder.createBulkRemovedReactions(data));
                 break;
             }
             case MESSAGE_REACTION_REMOVE: {

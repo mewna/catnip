@@ -5,6 +5,7 @@ import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.entity.impl.*;
+import com.mewna.catnip.entity.message.BulkRemovedReactions;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.DefaultExtensionManager;
@@ -115,6 +116,8 @@ public class CatnipImpl implements Catnip {
         codec(DeletedMessageImpl.class);
         codec(BulkDeletedMessagesImpl.class);
         codec(TypingUserImpl.class);
+        codec(ReactionUpdateImpl.class);
+        codec(BulkRemovedReactionsImpl.class);
         
         // Channels
         codec(CategoryImpl.class);

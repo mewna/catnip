@@ -716,6 +716,17 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public BulkRemovedReactions createBulkRemovedReactions(@Nonnull final JsonObject data) {
+        return BulkRemovedReactionsImpl.builder()
+                .catnip(catnip)
+                .channelId(data.getString("channel_id"))
+                .messageId(data.getString("message_id"))
+                .guildId(data.getString("guild_id"))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public Message createMessage(@Nonnull final JsonObject data) {
         final User author = createUser(data.getJsonObject("author"));
         
