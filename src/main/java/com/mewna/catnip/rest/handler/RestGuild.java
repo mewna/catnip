@@ -13,6 +13,7 @@ import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.guild.PartialGuild;
+import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -162,7 +163,6 @@ public class RestGuild extends RestHandler {
     }
     
     @Nonnull
-    @CheckReturnValue
     public CompletableFuture<Void> createGuildBan(@Nonnull final String guildId, @Nonnull final String userId,
                                                       @Nullable final String reason,
                                                       @Nonnegative final int deleteMessageDays) {
@@ -183,10 +183,16 @@ public class RestGuild extends RestHandler {
     }
     
     @Nonnull
-    @CheckReturnValue
     public CompletableFuture<Void> removeGuildBan(@Nonnull final String guildId, @Nonnull final String userId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BAN.withMajorParam(guildId),
                 ImmutableMap.of("user.id", userId), null))
                 .thenApply(e -> null);
+    }
+    
+    @Nonnull
+    public CompletableFuture<String> modifyCurrentUsersNick(final String guildId, final String nick) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.MODIFY_CURRENT_USERS_NICK.withQueryString(guildId),
+                ImmutableMap.of(), new JsonObject().put("nick", nick)))
+                .thenApply(ResponsePayload::string);
     }
 }
