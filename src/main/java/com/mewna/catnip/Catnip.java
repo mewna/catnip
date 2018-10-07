@@ -12,16 +12,20 @@ import com.mewna.catnip.internal.ratelimit.Ratelimiter;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
 import com.mewna.catnip.rest.Routes;
+import com.mewna.catnip.shard.DiscordEvent;
+import com.mewna.catnip.shard.DiscordEvent.EventType;
 import com.mewna.catnip.shard.event.EventBuffer;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.session.SessionManager;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.MessageConsumer;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * @author amy
@@ -112,4 +116,12 @@ public interface Catnip {
     
     @Nullable
     User selfUser();
+    
+    default <T> MessageConsumer<T> on(@Nonnull final EventType<T> type) {
+        return eventBus().consumer(type.key());
+    }
+    
+    default <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler) {
+        return eventBus().consumer(type.key(), message -> handler.accept(message.body()));
+    }
 }

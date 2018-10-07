@@ -29,23 +29,23 @@ import static com.mewna.catnip.shard.DiscordEvent.*;
 public class CachingBuffer extends AbstractBuffer {
     private static final List<String> CACHE_EVENTS = ImmutableList.copyOf(new String[] {
             // Lifecycle
-            READY,
+            Raw.READY,
             // Channels
-            CHANNEL_CREATE, CHANNEL_UPDATE, CHANNEL_DELETE,
+            Raw.CHANNEL_CREATE, Raw.CHANNEL_UPDATE, Raw.CHANNEL_DELETE,
             // Guilds
-            GUILD_CREATE, GUILD_UPDATE, GUILD_DELETE,
+            Raw.GUILD_CREATE, Raw.GUILD_UPDATE, Raw.GUILD_DELETE,
             // Roles
-            GUILD_ROLE_CREATE, GUILD_ROLE_UPDATE, GUILD_ROLE_DELETE,
+            Raw.GUILD_ROLE_CREATE, Raw.GUILD_ROLE_UPDATE, Raw.GUILD_ROLE_DELETE,
             // Emoji
-            GUILD_EMOJIS_UPDATE,
+            Raw.GUILD_EMOJIS_UPDATE,
             // Members
-            GUILD_MEMBER_ADD, GUILD_MEMBER_REMOVE, GUILD_MEMBER_UPDATE,
+            Raw.GUILD_MEMBER_ADD, Raw.GUILD_MEMBER_REMOVE, Raw.GUILD_MEMBER_UPDATE,
             // Member chunking
-            GUILD_MEMBERS_CHUNK,
+            Raw.GUILD_MEMBERS_CHUNK,
             // Users
-            USER_UPDATE, PRESENCE_UPDATE,
+            Raw.USER_UPDATE, Raw.PRESENCE_UPDATE,
             // Voice
-            VOICE_STATE_UPDATE,
+            Raw.VOICE_STATE_UPDATE,
     });
     
     private final Map<Integer, BufferState> buffers = new ConcurrentHashMap<>();
@@ -59,7 +59,7 @@ public class CachingBuffer extends AbstractBuffer {
         
         final JsonObject d = event.getJsonObject("d");
         switch(type) {
-            case READY: {
+            case Raw.READY: {
                 final Set<String> guilds = d.getJsonArray("guilds").stream()
                         .map(e -> ((JsonObject) e).getString("id"))
                         .collect(Collectors.toSet());
@@ -70,7 +70,7 @@ public class CachingBuffer extends AbstractBuffer {
                 maybeCache(type, d);
                 break;
             }
-            case GUILD_CREATE: {
+            case Raw.GUILD_CREATE: {
                 final String guild = d.getString("id");
                 catnip().logAdapter().debug("Got possibly-BufferState-ed guild {}", guild);
                 final BufferState bufferState = buffers.get(id);
