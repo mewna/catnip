@@ -2,7 +2,6 @@ package com.mewna.catnip.extension.hook;
 
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes.Route;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
@@ -51,7 +50,7 @@ public interface CatnipHook {
     default JsonObject rawGatewaySendHook(@Nonnull final JsonObject json) {
         return json;
     }
-
+    
     /**
      * Called when a payload is received in a REST request response. Note that,
      * due to how the Discord API works, it is possible that the data received
