@@ -13,7 +13,8 @@ import javax.annotation.Nullable;
 @SuppressWarnings("unused")
 public interface OverrideUpdateInfo extends OptionalEntryInfo {
     @CheckReturnValue
-    long overriddenEntityId();
+    @Nonnull
+    String overriddenEntityId();
     
     @CheckReturnValue
     @Nonnull

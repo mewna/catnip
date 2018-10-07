@@ -1,6 +1,7 @@
 package com.mewna.catnip.entity.guild.audit;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
 
 /**
  * @author SamOphis
@@ -9,7 +10,8 @@ import javax.annotation.CheckReturnValue;
 @SuppressWarnings("unused")
 public interface MessageDeleteInfo extends OptionalEntryInfo {
     @CheckReturnValue
-    long channelId();
+    @Nonnull
+    String channelId();
     
     @CheckReturnValue
     int deletedMessagesCount();
