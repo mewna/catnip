@@ -181,4 +181,12 @@ public class RestGuild extends RestHandler {
                 ImmutableMap.of("user.id", userId), null))
                 .thenApply(e -> null);
     }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<Void> removeGuildBan(@Nonnull final String guildId, @Nonnull final String userId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BAN.withMajorParam(guildId),
+                ImmutableMap.of("user.id", userId), null))
+                .thenApply(e -> null);
+    }
 }
