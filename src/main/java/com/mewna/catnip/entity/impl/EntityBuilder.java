@@ -614,10 +614,10 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public VoiceState createVoiceState(@Nonnull final JsonObject data) {
+    public VoiceState createVoiceState(@Nullable final String guildId, @Nonnull final JsonObject data) {
         return VoiceStateImpl.builder()
                 .catnip(catnip)
-                .guildId(data.getString("guild_id"))
+                .guildId(guildId)
                 .channelId(data.getString("channel_id"))
                 .userId(data.getString("user_id"))
                 .sessionId(data.getString("session_id"))
@@ -627,6 +627,12 @@ public final class EntityBuilder {
                 .selfMute(data.getBoolean("self_mute"))
                 .suppress(data.getBoolean("suppress"))
                 .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public VoiceState createVoiceState(@Nonnull final JsonObject data) {
+        return createVoiceState(data.getString("guild_id"), data);
     }
     
     @Nonnull
@@ -763,32 +769,34 @@ public final class EntityBuilder {
     public Guild createGuild(@Nonnull final JsonObject data) {
         // As we don't store these fields on the guild object itself, we have
         // to update them in the cache
+        final String id = data.getString("id"); //optimization
         if(data.getJsonArray("roles") != null) {
             catnip.cacheWorker().bulkCacheRoles(immutableListOf(data.getJsonArray("roles"),
-                    e -> createRole(data.getString("id"), e)));
+                    e -> createRole(id, e)));
         }
         if(data.getJsonArray("channels") != null) {
             catnip.cacheWorker().bulkCacheChannels(immutableListOf(data.getJsonArray("channels"),
-                    e -> createGuildChannel(data.getString("id"), e)));
+                    e -> createGuildChannel(id, e)));
         }
         if(data.getJsonArray("members") != null) {
             catnip.cacheWorker().bulkCacheMembers(immutableListOf(data.getJsonArray("members"),
-                    e -> createMember(data.getString("id"), e)));
+                    e -> createMember(id, e)));
         }
         if(data.getJsonArray("emojis") != null) {
             catnip.cacheWorker().bulkCacheEmoji(immutableListOf(data.getJsonArray("emojis"),
-                    e -> createCustomEmoji(data.getString("id"), e)));
+                    e -> createCustomEmoji(id, e)));
         }
         if(data.getJsonArray("presences") != null) {
             catnip.cacheWorker().bulkCachePresences(immutableMapOf(data.getJsonArray("presences"),
                     o -> o.getJsonObject("user").getString("id"), this::createPresence));
         }
         if(data.getJsonArray("voice_states") != null) {
-            catnip.cacheWorker().bulkCacheVoiceStates(immutableListOf(data.getJsonArray("voice_states"), this::createVoiceState));
+            catnip.cacheWorker().bulkCacheVoiceStates(immutableListOf(
+                    data.getJsonArray("voice_states"), e -> createVoiceState(id, e)));
         }
         return GuildImpl.builder()
                 .catnip(catnip)
-                .id(data.getString("id"))
+                .id(id)
                 .name(data.getString("name"))
                 .icon(data.getString("icon"))
                 .splash(data.getString("splash"))
