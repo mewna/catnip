@@ -162,22 +162,22 @@ public class MemoryEntityCache implements EntityCacheWorker {
     public EntityCache updateCache(@Nonnull final String eventType, @Nonnull final JsonObject payload) {
         switch(eventType) {
             // Lifecycle
-            case READY: {
+            case Raw.READY: {
                 selfUser.set(entityBuilder.createUser(payload.getJsonObject("user")));
                 break;
             }
             // Channels
-            case CHANNEL_CREATE: {
+            case Raw.CHANNEL_CREATE: {
                 final Channel channel = entityBuilder.createChannel(payload);
                 cacheChannel(channel);
                 break;
             }
-            case CHANNEL_UPDATE: {
+            case Raw.CHANNEL_UPDATE: {
                 final Channel channel = entityBuilder.createChannel(payload);
                 cacheChannel(channel);
                 break;
             }
-            case CHANNEL_DELETE: {
+            case Raw.CHANNEL_DELETE: {
                 final Channel channel = entityBuilder.createChannel(payload);
                 if(channel.isGuild()) {
                     final GuildChannel gc = (GuildChannel) channel;
@@ -194,37 +194,37 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 break;
             }
             // Guilds
-            case GUILD_CREATE: {
+            case Raw.GUILD_CREATE: {
                 final Guild guild = entityBuilder.createGuild(payload);
                 guildCache.put(guild.id(), guild);
                 break;
             }
-            case GUILD_UPDATE: {
+            case Raw.GUILD_UPDATE: {
                 final Guild guild = entityBuilder.createGuild(payload);
                 guildCache.put(guild.id(), guild);
                 break;
             }
-            case GUILD_DELETE: {
+            case Raw.GUILD_DELETE: {
                 final Guild guild = entityBuilder.createGuild(payload);
                 guildCache.remove(guild.id());
                 break;
             }
             // Roles
-            case GUILD_ROLE_CREATE: {
+            case Raw.GUILD_ROLE_CREATE: {
                 final String guild = payload.getString("guild_id");
                 final JsonObject json = payload.getJsonObject("role");
                 final Role role = entityBuilder.createRole(guild, json);
                 cacheRole(role);
                 break;
             }
-            case GUILD_ROLE_UPDATE: {
+            case Raw.GUILD_ROLE_UPDATE: {
                 final String guild = payload.getString("guild_id");
                 final JsonObject json = payload.getJsonObject("role");
                 final Role role = entityBuilder.createRole(guild, json);
                 cacheRole(role);
                 break;
             }
-            case GUILD_ROLE_DELETE: {
+            case Raw.GUILD_ROLE_DELETE: {
                 final String guild = payload.getString("guild_id");
                 final String role = payload.getString("role_id");
                 Optional.ofNullable(roleCache.get(guild)).ifPresent(e -> e.remove(role));
@@ -232,14 +232,14 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 break;
             }
             // Members
-            case GUILD_MEMBER_ADD: {
+            case Raw.GUILD_MEMBER_ADD: {
                 final Member member = entityBuilder.createMember(payload.getString("guild_id"), payload);
                 final User user = entityBuilder.createUser(payload.getJsonObject("user"));
                 cacheUser(user);
                 cacheMember(member);
                 break;
             }
-            case GUILD_MEMBER_UPDATE: {
+            case Raw.GUILD_MEMBER_UPDATE: {
                 // This doesn't send an object like all the other events, so we build a fake
                 // payload object and create an entity from that
                 final JsonObject user = payload.getJsonObject("user");
@@ -261,14 +261,14 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 }
                 break;
             }
-            case GUILD_MEMBER_REMOVE: {
+            case Raw.GUILD_MEMBER_REMOVE: {
                 final String guild = payload.getString("guild_id");
                 final String user = payload.getJsonObject("user").getString("id");
                 Optional.ofNullable(memberCache.get(guild)).ifPresent(e -> e.remove(user));
                 break;
             }
             // Member chunking
-            case GUILD_MEMBERS_CHUNK: {
+            case Raw.GUILD_MEMBERS_CHUNK: {
                 final String guild = payload.getString("guild_id");
                 final JsonArray members = payload.getJsonArray("members");
                 members.stream().map(e -> entityBuilder.createMember(guild, (JsonObject) e)).forEach(this::cacheMember);
@@ -276,7 +276,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 break;
             }
             // Emojis
-            case GUILD_EMOJIS_UPDATE: {
+            case Raw.GUILD_EMOJIS_UPDATE: {
                 if(!catnip.cacheFlags().contains(CacheFlag.DROP_EMOJI)) {
                     final String guild = payload.getString("guild_id");
                     final JsonArray emojis = payload.getJsonArray("emojis");
@@ -286,14 +286,14 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 break;
             }
             // Currently-logged-in user
-            case USER_UPDATE: {
+            case Raw.USER_UPDATE: {
                 // Inner payload is always a user object, according to the
                 // docs, so we can just outright replace it.
                 selfUser.set(entityBuilder.createUser(payload));
                 break;
             }
             // Users
-            case PRESENCE_UPDATE: {
+            case Raw.PRESENCE_UPDATE: {
                 final JsonObject user = payload.getJsonObject("user");
                 final String id = user.getString("id");
                 final User old = user(id);
@@ -321,7 +321,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 break;
             }
             // Voice
-            case VOICE_STATE_UPDATE: {
+            case Raw.VOICE_STATE_UPDATE: {
                 if(!catnip.cacheFlags().contains(CacheFlag.DROP_VOICE_STATES)) {
                     final VoiceState state = entityBuilder.createVoiceState(payload);
                     cacheVoiceState(state);

@@ -20,8 +20,7 @@ This is the simplest possible bot you can make right now:
 
 ```Java
 final Catnip catnip = Catnip.catnip("your token goes here");
-catnip.eventBus().<Message>consumer(DiscordEvent.MESSAGE_CREATE, event -> {
-    final Message msg = event.body();
+catnip.on(DiscordEvent.MESSAGE_CREATE, msg -> {
     if(msg.content().startsWith("!ping")) {
         catnip.rest().channel().sendMessage(msg.channelId(), "pong!");
     }
@@ -29,14 +28,13 @@ catnip.eventBus().<Message>consumer(DiscordEvent.MESSAGE_CREATE, event -> {
 catnip.startShards();
 ```
 
-catnip returns `CompletableFuture`s from all REST methods. For example,
+catnip returns `CompletionStage`s from all REST methods. For example,
 editing your ping message to include time it took to create the
 message:
 
 ```Java
 final Catnip catnip = Catnip.catnip("your token goes here");
-catnip.eventBus().<Message>consumer(DiscordEvent.MESSAGE_CREATE, event -> {
-    final Message msg = event.body();
+catnip.on(DiscordEvent.MESSAGE_CREATE, msg -> {
     if(msg.content().equalsIgnoreCase("!ping")) {
         final long start = System.currentTimeMillis();
         catnip.rest().channel().sendMessage(msg.channelId(), "pong!")
@@ -59,6 +57,4 @@ If you want to customize it more, look into the `CatnipOptions` class.
 
 ## TODO
 
-- Create entity classes for guilds, channels, ...
-- Finish handling all `DISPATCH` events (see `DispatchEmitter`)
 - Full REST API coverage (see `Rest`, #3)
