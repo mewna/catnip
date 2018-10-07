@@ -1,9 +1,9 @@
 package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
+import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Guild.GuildEditFields;
-import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.guild.GuildBan;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
@@ -128,14 +128,14 @@ public class RestGuild extends RestHandler {
     public CompletableFuture<List<Member>> listGuildMembers(@Nonnull final String guildId, @Nonnegative final int limit,
                                                             @Nullable final String after) {
         final Collection<String> params = new ArrayList<>();
-        if (limit > 0) {
+        if(limit > 0) {
             params.add("limit=" + limit);
         }
-        if (after != null && !after.isEmpty()) {
+        if(after != null && !after.isEmpty()) {
             params.add("after=" + after);
         }
         String query = String.join("&", params);
-        if (!query.isEmpty()) {
+        if(!query.isEmpty()) {
             query = '?' + query;
         }
         return getCatnip().requester().queue(new OutboundRequest(Routes.LIST_GUILD_MEMBERS.withMajorParam(guildId).withQueryString(query),
@@ -164,17 +164,17 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     public CompletableFuture<Void> createGuildBan(@Nonnull final String guildId, @Nonnull final String userId,
-                                                      @Nullable final String reason,
-                                                      @Nonnegative final int deleteMessageDays) {
+                                                  @Nullable final String reason,
+                                                  @Nonnegative final int deleteMessageDays) {
         final Collection<String> params = new ArrayList<>();
-        if (deleteMessageDays <= 7) {
+        if(deleteMessageDays <= 7) {
             params.add("delete-message-days=" + deleteMessageDays);
         }
-        if (reason != null && !reason.isEmpty()) {
+        if(reason != null && !reason.isEmpty()) {
             params.add("reason=" + encodeUTF8(reason));
         }
         String query = String.join("&", params);
-        if (!query.isEmpty()) {
+        if(!query.isEmpty()) {
             query = '?' + query;
         }
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BAN.withMajorParam(guildId).withQueryString(query),
@@ -201,5 +201,14 @@ public class RestGuild extends RestHandler {
         return getCatnip().requester().queue(new OutboundRequest(Routes.REMOVE_GUILD_MEMBER.withMajorParam(guildId),
                 ImmutableMap.of("user.id", userId), null))
                 .thenApply(e -> null);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<Member> getGuildMember(@Nonnull final String guildId, @Nonnull final String userId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_MEMBER.withMajorParam(guildId),
+                ImmutableMap.of("user.id", userId), null))
+                .thenApply(ResponsePayload::object)
+                .thenApply(e -> getEntityBuilder().createMember(guildId, e));
     }
 }
