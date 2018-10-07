@@ -18,6 +18,8 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -124,7 +126,18 @@ public class RestGuild extends RestHandler {
     @SuppressWarnings("WeakerAccess")
     public CompletableFuture<List<Member>> listGuildMembers(@Nonnull final String guildId, @Nonnegative final int limit,
                                                             @Nullable final String after) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.LIST_GUILD_MEMBERS.withMajorParam(guildId),
+        final Collection<String> params = new ArrayList<>();
+        if (limit > 0) {
+            params.add("limit=" + limit);
+        }
+        if (after != null && !after.isEmpty()) {
+            params.add("after=" + after);
+        }
+        String query = String.join("&", params);
+        if (!query.isEmpty()) {
+            query = '?' + query;
+        }
+        return getCatnip().requester().queue(new OutboundRequest(Routes.LIST_GUILD_MEMBERS.withMajorParam(guildId).withQueryString(query),
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
                 .thenApply(mapObjectContents(o -> getEntityBuilder().createMember(guildId, o)));
@@ -141,10 +154,31 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<GuildBan> getGuildBans(@Nonnull final String guildId, @Nonnull final String userId) {
+    public CompletableFuture<GuildBan> getGuildBan(@Nonnull final String guildId, @Nonnull final String userId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BAN.withMajorParam(guildId),
                 ImmutableMap.of("user.id", userId), null))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createGuildBan);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<Void> createGuildBan(@Nonnull final String guildId, @Nonnull final String userId,
+                                                      @Nullable final String reason,
+                                                      @Nonnegative final int deleteMessageDays) {
+        final Collection<String> params = new ArrayList<>();
+        if (deleteMessageDays <= 7) {
+            params.add("delete-message-days=" + deleteMessageDays);
+        }
+        if (reason != null && !reason.isEmpty()) {
+            params.add("reason=" + encodeUTF8(reason));
+        }
+        String query = String.join("&", params);
+        if (!query.isEmpty()) {
+            query = '?' + query;
+        }
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BAN.withMajorParam(guildId).withQueryString(query),
+                ImmutableMap.of("user.id", userId), null))
+                .thenApply(e -> null);
     }
 }
