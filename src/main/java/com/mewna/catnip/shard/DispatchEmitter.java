@@ -4,6 +4,8 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.impl.EntityBuilder;
 import io.vertx.core.json.JsonObject;
 
+import javax.annotation.Nonnull;
+
 import static com.mewna.catnip.shard.DiscordEvent.*;
 
 /**
@@ -16,12 +18,20 @@ public class DispatchEmitter {
     private final Catnip catnip;
     private final EntityBuilder entityBuilder;
     
-    public DispatchEmitter(final Catnip catnip) {
+    public DispatchEmitter(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
         entityBuilder = new EntityBuilder(catnip);
     }
     
-    public void emit(final JsonObject payload) {
+    public void emit(@Nonnull final JsonObject payload) {
+        try {
+            emit0(payload);
+        } catch(final Exception e) {
+            catnip.logAdapter().error("Error emitting event with payload {}", payload, e);
+        }
+    }
+    
+    private void emit0(@Nonnull final JsonObject payload) {
         final String type = payload.getString("t");
         final JsonObject data = payload.getJsonObject("d");
         
