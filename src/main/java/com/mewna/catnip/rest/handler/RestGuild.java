@@ -211,4 +211,12 @@ public class RestGuild extends RestHandler {
                 .thenApply(ResponsePayload::object)
                 .thenApply(e -> getEntityBuilder().createMember(guildId, e));
     }
+    
+    @Nonnull
+    public CompletableFuture<Void> removeGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
+                                                         @Nonnull final String roleId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.REMOVE_GUILD_MEMBER.withMajorParam(guildId),
+                ImmutableMap.of("user.id", userId, "role.id", roleId), null))
+                .thenApply(e -> null);
+    }
 }
