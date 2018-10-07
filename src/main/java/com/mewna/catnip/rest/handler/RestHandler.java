@@ -11,6 +11,8 @@ import lombok.Getter;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -52,5 +54,16 @@ abstract class RestHandler {
     @SuppressWarnings("unchecked")
     static <T> T uncheckedCast(@Nullable final Object object) {
         return (T)object;
+    }
+    
+    // Copied from JDA:
+    // https://github.com/DV8FromTheWorld/JDA/blob/9e593c5d5e1abf0967998ac5fcc0d915495e0758/src/main/java/net/dv8tion/jda/core/utils/MiscUtil.java#L179-L198
+    // Thank JDA devs! <3
+    static String encodeUTF8(final String chars) {
+        try {
+            return URLEncoder.encode(chars, "UTF-8");
+        } catch(final UnsupportedEncodingException e) {
+            throw new AssertionError(e); // thanks JDK 1.4
+        }
     }
 }
