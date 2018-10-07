@@ -9,9 +9,9 @@ import java.util.Set;
 /**
  * An {@link ExtensionManager} implementation is exactly what it sounds like:
  * it manages {@link Extension}s and takes care of lifecycle hooks, injecting
- * {@link com.mewna.catnip.Catnip} instances, and so on. Proper implementations
- * of this class will, among other things, pay attention to the caveats
- * mentioned in the {@link Extension} docs, to ensure compatibility with the
+ * {@link Catnip} instances, and so on. Proper implementations of this class
+ * will, among other things, pay attention to the caveats mentioned in the
+ * {@link Extension} docs, to ensure compatibility with the
  * {@link DefaultExtensionManager}.
  * <p/>
  * TODO: Come up with some way of indicating which extension an event is for
@@ -34,7 +34,7 @@ import java.util.Set;
  * @author amy
  * @since 9/6/18
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "UnusedReturnValue"})
 public interface ExtensionManager {
     /**
      * Load the given extension instance. Note than an extension may not be
@@ -76,6 +76,15 @@ public interface ExtensionManager {
      */
     @Nonnull
     Set<Extension> matchingExtensions(@Nonnull Class<? extends Extension> extensionClass);
+    
+    /**
+     * Get all loaded extensions. This method will only return extensions
+     * loaded by the current instance.
+     *
+     * @return A possibly-empty set of extensions.
+     */
+    @Nonnull
+    Set<Extension> extensions();
     
     Catnip catnip();
 }
