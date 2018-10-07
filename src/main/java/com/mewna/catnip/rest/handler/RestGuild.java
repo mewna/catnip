@@ -236,4 +236,13 @@ public class RestGuild extends RestHandler {
                 .thenApply(ResponsePayload::object)
                 .thenApply(e -> e.getInteger("pruned"));
     }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<Integer> beginGuildPrune(@Nonnull final String guildId, @Nonnegative final int days) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.BEGIN_GUILD_PRUNE.withMajorParam(guildId).withQueryString("?days=" + days),
+                ImmutableMap.of(), null))
+                .thenApply(ResponsePayload::object)
+                .thenApply(e -> e.getInteger("pruned"));
+    }
 }
