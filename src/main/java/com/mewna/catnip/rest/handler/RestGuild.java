@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Guild.GuildEditFields;
 import com.mewna.catnip.entity.channel.GuildChannel;
+import com.mewna.catnip.entity.guild.GuildBan;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.misc.CreatedInvite;
@@ -127,5 +128,14 @@ public class RestGuild extends RestHandler {
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
                 .thenApply(mapObjectContents(o -> getEntityBuilder().createMember(guildId, o)));
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<List<GuildBan>> getGuildBans(@Nonnull final String guildId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BANS.withMajorParam(guildId),
+                ImmutableMap.of(), null))
+                .thenApply(ResponsePayload::array)
+                .thenApply(mapObjectContents(getEntityBuilder()::createGuildBan));
     }
 }

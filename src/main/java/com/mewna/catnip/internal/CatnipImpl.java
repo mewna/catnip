@@ -5,7 +5,6 @@ import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.entity.impl.*;
-import com.mewna.catnip.entity.message.BulkRemovedReactions;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.DefaultExtensionManager;
@@ -129,7 +128,7 @@ public class CatnipImpl implements Catnip {
         
         // Guilds
         codec(GuildImpl.class);
-        codec(GuildBanImpl.class);
+        codec(GatewayGuildBanImpl.class);
         
         // Roles
         codec(RoleImpl.class);

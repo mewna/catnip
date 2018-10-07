@@ -4,16 +4,15 @@ import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * @author amy
  * @since 10/6/18.
  */
-public interface GuildBan extends Entity {
+public interface GatewayGuildBan extends Entity {
+    @Nonnull
+    String guildId();
+    
     @Nonnull
     User user();
-    
-    @Nullable
-    String reason();
 }

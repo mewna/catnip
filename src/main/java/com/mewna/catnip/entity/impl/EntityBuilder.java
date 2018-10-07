@@ -828,10 +828,20 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public GatewayGuildBan createGatewayGuildBan(@Nonnull final JsonObject data) {
+        return GatewayGuildBanImpl.builder()
+                .catnip(catnip)
+                .guildId(data.getString("guild_id"))
+                .user(createUser(data.getJsonObject("user")))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public GuildBan createGuildBan(@Nonnull final JsonObject data) {
         return GuildBanImpl.builder()
                 .catnip(catnip)
-                .guildId(data.getString("guild_id"))
+                .reason(data.getString("reason"))
                 .user(createUser(data.getJsonObject("user")))
                 .build();
     }

@@ -94,11 +94,11 @@ public class DispatchEmitter {
                 break;
             }
             case GUILD_BAN_ADD: {
-                catnip.eventBus().send(type, entityBuilder.createGuildBan(data));
+                catnip.eventBus().send(type, entityBuilder.createGatewayGuildBan(data));
                 break;
             }
             case GUILD_BAN_REMOVE: {
-                catnip.eventBus().send(type, entityBuilder.createGuildBan(data));
+                catnip.eventBus().send(type, entityBuilder.createGatewayGuildBan(data));
                 break;
             }
             
