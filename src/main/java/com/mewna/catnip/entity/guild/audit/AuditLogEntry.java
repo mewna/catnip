@@ -1,5 +1,6 @@
 package com.mewna.catnip.entity.guild.audit;
 
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.Snowflake;
 
 import javax.annotation.CheckReturnValue;
@@ -12,7 +13,7 @@ import java.util.List;
  * @since 10/07/18
  */
 @SuppressWarnings("unused")
-public interface AuditLogEntry extends Snowflake {
+public interface AuditLogEntry extends Snowflake, RequiresCatnip {
     @Nullable
     @CheckReturnValue
     String targetId();
