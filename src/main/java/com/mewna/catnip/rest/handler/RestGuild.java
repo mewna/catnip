@@ -190,9 +190,16 @@ public class RestGuild extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<String> modifyCurrentUsersNick(final String guildId, final String nick) {
+    public CompletableFuture<String> modifyCurrentUsersNick(@Nonnull final String guildId, @Nullable final String nick) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.MODIFY_CURRENT_USERS_NICK.withQueryString(guildId),
                 ImmutableMap.of(), new JsonObject().put("nick", nick)))
                 .thenApply(ResponsePayload::string);
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> removeGuildMember(@Nonnull final String guildId, @Nonnull final String userId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.REMOVE_GUILD_MEMBER.withMajorParam(guildId),
+                ImmutableMap.of("user.id", userId), null))
+                .thenApply(e -> null);
     }
 }
