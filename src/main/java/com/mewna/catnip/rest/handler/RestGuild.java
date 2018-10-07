@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Guild.GuildEditFields;
 import com.mewna.catnip.entity.channel.GuildChannel;
+import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.internal.CatnipImpl;
@@ -13,7 +14,9 @@ import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.guild.PartialGuild;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -95,5 +98,34 @@ public class RestGuild extends RestHandler {
                 ImmutableMap.of(), fields.payload()))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createGuild);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<List<Member>> listGuildMembers(@Nonnull final String guildId) {
+        return listGuildMembers(guildId, 1, "0");
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<List<Member>> listGuildMembers(@Nonnull final String guildId, @Nonnegative final int limit) {
+        return listGuildMembers(guildId, limit, "0");
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<List<Member>> listGuildMembers(@Nonnull final String guildId, @Nonnull final String after) {
+        return listGuildMembers(guildId, 1, after);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    @SuppressWarnings("WeakerAccess")
+    public CompletableFuture<List<Member>> listGuildMembers(@Nonnull final String guildId, @Nonnegative final int limit,
+                                                            @Nullable final String after) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.LIST_GUILD_MEMBERS.withMajorParam(guildId),
+                ImmutableMap.of(), null))
+                .thenApply(ResponsePayload::array)
+                .thenApply(mapObjectContents(o -> getEntityBuilder().createMember(guildId, o)));
     }
 }
