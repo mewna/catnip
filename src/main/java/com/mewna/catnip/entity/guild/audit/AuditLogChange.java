@@ -1,5 +1,7 @@
 package com.mewna.catnip.entity.guild.audit;
 
+import com.mewna.catnip.entity.RequiresCatnip;
+
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -9,7 +11,7 @@ import javax.annotation.Nullable;
  * @since 10/07/18
  */
 @SuppressWarnings("unused")
-public interface AuditLogChange {
+public interface AuditLogChange extends RequiresCatnip {
     @Nullable
     @CheckReturnValue
     <T> T newValue();
