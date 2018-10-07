@@ -280,7 +280,7 @@ public class RestGuild extends RestHandler {
         if (!query.isEmpty()) {
             query = '?' + query;
         }
-        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_AUDIT_LOG.withMajorParam(guildId).withQueryString(query)
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_AUDIT_LOG.withMajorParam(guildId).withQueryString(query),
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createAuditLog);
