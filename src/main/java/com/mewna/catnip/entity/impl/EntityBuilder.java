@@ -641,7 +641,7 @@ public final class EntityBuilder {
         return VoiceServerUpdateImpl.builder()
                 .catnip(catnip)
                 .token(data.getString("token"))
-                .guildId(data.getString("guildId"))
+                .guildId(data.getString("guild_id"))
                 .endpoint(data.getString("endpoint"))
                 .build();
     }
