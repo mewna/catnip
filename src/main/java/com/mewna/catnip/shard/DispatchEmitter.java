@@ -139,7 +139,7 @@ public class DispatchEmitter {
                 break;
             }
             case Raw.GUILD_MEMBER_REMOVE: {
-                catnip.eventBus().send(type, entityBuilder.createMember(data.getString("guild_id"), data.getJsonObject("user")));
+                catnip.eventBus().send(type, entityBuilder.createMember(data.getString("guild_id"), data));
                 break;
             }
             case Raw.GUILD_MEMBER_UPDATE: {
