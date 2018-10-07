@@ -28,8 +28,6 @@ import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
- * TODO: This thing has a giant number of dependencies - how to split it up?
- *
  * @author amy
  * @since 8/31/18.
  */

@@ -19,8 +19,6 @@ import static com.mewna.catnip.shard.DiscordEvent.*;
  * An implementation of {@link EventBuffer} used for the case of caching all
  * guilds sent in the {@code READY} payload, as well as for caching data as it
  * comes over the websocket connection.
- * <p>
- * TODO: Actually cache data lol
  *
  * @author amy
  * @since 9/9/18.
