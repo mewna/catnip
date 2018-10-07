@@ -8,6 +8,7 @@ import com.mewna.catnip.entity.guild.GuildBan;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.misc.CreatedInvite;
+import com.mewna.catnip.entity.misc.VoiceRegion;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
@@ -244,5 +245,14 @@ public class RestGuild extends RestHandler {
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::object)
                 .thenApply(e -> e.getInteger("pruned"));
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<List<VoiceRegion>> getGuildVoiceRegions(@Nonnull final String guildId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_VOICE_REGIONS.withQueryString(guildId),
+                ImmutableMap.of(), null))
+                .thenApply(ResponsePayload::array)
+                .thenApply(mapObjectContents(getEntityBuilder()::createVoiceRegion));
     }
 }
