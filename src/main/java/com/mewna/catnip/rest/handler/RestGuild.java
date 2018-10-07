@@ -79,8 +79,8 @@ public class RestGuild extends RestHandler {
                         ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
                 .thenApply(mapObjectContents(getEntityBuilder()::createChannel))
-                //all elements are guaranteed to be instances of GuildChannel,
-                //so it's safe to do a cast, plus this way we avoid copying the list.
+                // All elements are guaranteed to be instances of GuildChannel,
+                // so it's safe to do a cast, plus this way we avoid copying the list.
                 .thenApply(RestHandler::uncheckedCast);
     }
     
@@ -137,5 +137,14 @@ public class RestGuild extends RestHandler {
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
                 .thenApply(mapObjectContents(getEntityBuilder()::createGuildBan));
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<GuildBan> getGuildBans(@Nonnull final String guildId, @Nonnull final String userId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BAN.withMajorParam(guildId),
+                ImmutableMap.of("user.id", userId), null))
+                .thenApply(ResponsePayload::object)
+                .thenApply(getEntityBuilder()::createGuildBan);
     }
 }
