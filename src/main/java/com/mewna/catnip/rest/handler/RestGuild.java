@@ -227,4 +227,13 @@ public class RestGuild extends RestHandler {
                 ImmutableMap.of("user.id", userId, "role.id", roleId), null))
                 .thenApply(e -> null);
     }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<Integer> getGuildPruneCount(@Nonnull final String guildId, @Nonnegative final int days) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_PRUNE_COUNT.withMajorParam(guildId).withQueryString("?days=" + days),
+                ImmutableMap.of(), null))
+                .thenApply(ResponsePayload::object)
+                .thenApply(e -> e.getInteger("pruned"));
+    }
 }
