@@ -58,4 +58,10 @@ public class DefaultExtensionManager implements ExtensionManager {
                 .filter(e -> extensionClass.isAssignableFrom(e.getClass()))
                 .collect(Collectors.toSet()));
     }
+    
+    @Nonnull
+    @Override
+    public Set<Extension> extensions() {
+        return ImmutableSet.copyOf(loadedExtensions);
+    }
 }

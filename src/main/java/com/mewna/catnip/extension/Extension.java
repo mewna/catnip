@@ -1,12 +1,13 @@
 package com.mewna.catnip.extension;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.extension.hook.CatnipHook;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Verticle;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.Set;
 
 /**
  * <strong>If you are unsure if you need to implement this interface, you
@@ -77,6 +78,30 @@ public interface Extension extends Verticle {
      * @param catnip The catnip instance to inject. May not be {@code null}.
      */
     Extension catnip(@Nonnull Catnip catnip);
+    
+    /**
+     * Register a hook into catnip. Hooks are registered by extension, so
+     * unloading an extension will also unload all of its hooks.
+     *
+     * @param hook The hook to register.
+     *
+     * @return The extension instance.
+     */
+    Extension registerHook(@Nonnull CatnipHook hook);
+    
+    /**
+     * @return All hooks registered by this extension instance.
+     */
+    Set<CatnipHook> hooks();
+    
+    /**
+     * Unregister a hook from catnip.
+     *
+     * @param hook The hook to unregister.
+     *
+     * @return The extension instance.
+     */
+    Extension unregisterHook(@Nonnull CatnipHook hook);
     
     String deploymentID();
 }

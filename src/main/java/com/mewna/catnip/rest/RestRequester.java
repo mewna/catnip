@@ -1,6 +1,8 @@
 package com.mewna.catnip.rest;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.extension.Extension;
+import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.rest.Routes.Route;
 import com.mewna.catnip.util.CatnipMeta;
 import io.vertx.core.Future;
@@ -89,7 +91,7 @@ public class RestRequester {
                     );
                 }
             }
-            final ResponsePayload payload = new ResponsePayload(body);
+            ResponsePayload payload = new ResponsePayload(body);
             if(headers.contains("X-Ratelimit-Global")) {
                 // We hit a global ratelimit, update
                 final Bucket global = getBucket("GLOBAL");
@@ -114,6 +116,11 @@ public class RestRequester {
                 }
             } else {
                 bucket.updateFromHeaders(headers);
+                for(final Extension extension : catnip.extensionManager().extensions()) {
+                    for(final CatnipHook hook : extension.hooks()) {
+                        payload = hook.rawRestReceiveDataHook(r.route, payload);
+                    }
+                }
                 r.future.complete(payload);
                 bucket.finishRequest();
                 bucket.submit();
@@ -171,13 +178,18 @@ public class RestRequester {
                         final RequestBody requestBody = new MultipartRequestBody(r.binary());
                         
                         builder.addFormDataPart("file0", r.filename, requestBody);
-                        final String payload;
+                        JsonObject payload;
                         if(r.data != null) {
-                            payload = r.data.encode();
+                            payload = r.data;
                         } else {
-                            payload = new JsonObject().put("content", (String) null).put("embed", (String) null).encode();
+                            payload = new JsonObject().put("content", (String) null).put("embed", (String) null);
                         }
-                        builder.addFormDataPart("payload_json", payload);
+                        for(final Extension extension : catnip.extensionManager().extensions()) {
+                            for(final CatnipHook hook : extension.hooks()) {
+                                payload = hook.rawRestSendObjectHook(route, payload);
+                            }
+                        }
+                        builder.addFormDataPart("payload_json", payload.encode());
                         final MultipartBody body = builder.build();
                         
                         executeHttpRequest(r, route, bucket, body);
@@ -185,7 +197,17 @@ public class RestRequester {
                         e.printStackTrace();
                     }
                 } else {
-                    executeHttpRequest(r, route, bucket, r.data != null ? RequestBody.create(MediaType.parse("application/json"), r.data.encode()) : null);
+                    JsonObject payload = r.data;
+                    for(final Extension extension : catnip.extensionManager().extensions()) {
+                        for(final CatnipHook hook : extension.hooks()) {
+                            payload = hook.rawRestSendObjectHook(route, payload);
+                        }
+                    }
+                    RequestBody body = null;
+                    if(payload != null) {
+                        body = RequestBody.create(MediaType.parse("application/json"), payload.encode());
+                    }
+                    executeHttpRequest(r, route, bucket, body);
                 }
             } else {
                 // Add an extra 500ms buffer to be safe
@@ -200,6 +222,7 @@ public class RestRequester {
         } else {
             // Global rl, retry later
             // Add an extra 500ms buffer to be safe
+            // TODO: Properly calculate latency
             final long wait = global.getReset() - System.currentTimeMillis() + 500L;
             catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
                     bucketRoute.baseRoute(), route.baseRoute(), wait);
@@ -211,6 +234,9 @@ public class RestRequester {
     }
     
     private void executeHttpRequest(final OutboundRequest r, final Route route, final Bucket bucket, final RequestBody body) {
+        // We use OkHTTP in blocking mode here intentionally
+        // I wanted to keep everything inside of vert.x's threading model, ie.
+        // try to avoid letting everything do its own thread pools and stuff.
         catnip.vertx().executeBlocking(future -> {
             try {
                 final Response execute = _http.newCall(

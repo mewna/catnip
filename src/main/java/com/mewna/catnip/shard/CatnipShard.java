@@ -1,6 +1,8 @@
 package com.mewna.catnip.shard;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.extension.Extension;
+import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.util.BufferOutputStream;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.buffer.Buffer;
@@ -225,35 +227,41 @@ public class CatnipShard extends AbstractVerticle {
         }
     }
     
-    private void handleSocketData(final Message<JsonObject> msg, final JsonObject event) {
-        final GatewayOp op = GatewayOp.byId(event.getInteger("op"));
+    private void handleSocketData(final Message<JsonObject> msg, JsonObject payload) {
+        for(final Extension extension : catnip.extensionManager().extensions()) {
+            for(final CatnipHook hook : extension.hooks()) {
+                payload = hook.rawGatewayReceiveHook(payload);
+            }
+        }
+        
+        final GatewayOp op = GatewayOp.byId(payload.getInteger("op"));
         // We pass `msg` for consistency (and for the off-chance it's
         // needed), but REALLY you don't wanna do anything with it. It
         // gets passed *entirely* so that we can reply to the shard
         // manager directly.
         switch(op) {
             case HELLO: {
-                handleHello(msg, event);
+                handleHello(msg, payload);
                 break;
             }
             case DISPATCH: {
-                handleDispatch(msg, event);
+                handleDispatch(msg, payload);
                 break;
             }
             case HEARTBEAT: {
-                handleHeartbeat(msg, event);
+                handleHeartbeat(msg, payload);
                 break;
             }
             case HEARTBEAT_ACK: {
-                handleHeartbeatAck(msg, event);
+                handleHeartbeatAck(msg, payload);
                 break;
             }
             case INVALID_SESSION: {
-                handleInvalidSession(msg, event);
+                handleInvalidSession(msg, payload);
                 break;
             }
             case RECONNECT: {
-                handleReconnectRequest(msg, event);
+                handleReconnectRequest(msg, payload);
                 break;
             }
             default: {
@@ -261,8 +269,8 @@ public class CatnipShard extends AbstractVerticle {
             }
         }
         // Emit messages for subconsumers
-        catnip.eventBus().<JsonObject>send(websocketMessageRecvAddress(op), event);
-        catnip.eventBus().<JsonObject>send("RAW_WS", event);
+        catnip.eventBus().<JsonObject>send(websocketMessageRecvAddress(op), payload);
+        catnip.eventBus().<JsonObject>send("RAW_WS", payload);
     }
     
     private void handleSocketClose(final Void __) {
@@ -283,7 +291,13 @@ public class CatnipShard extends AbstractVerticle {
     private void handleSocketSend(final Message<JsonObject> msg) {
         final ShardState shardState = stateRef.get();
         if(shardState != null) {
-            shardState.socket().writeTextMessage(msg.body().encode());
+            JsonObject payload = msg.body();
+            for(final Extension extension : catnip.extensionManager().extensions()) {
+                for(final CatnipHook hook : extension.hooks()) {
+                    payload = hook.rawGatewaySendHook(payload);
+                }
+            }
+            shardState.socket().writeTextMessage(payload.encode());
         }
     }
     
