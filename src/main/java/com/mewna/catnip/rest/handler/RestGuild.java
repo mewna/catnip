@@ -215,7 +215,15 @@ public class RestGuild extends RestHandler {
     @Nonnull
     public CompletableFuture<Void> removeGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
                                                          @Nonnull final String roleId) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.REMOVE_GUILD_MEMBER.withMajorParam(guildId),
+        return getCatnip().requester().queue(new OutboundRequest(Routes.REMOVE_GUILD_MEMBER_ROLE.withMajorParam(guildId),
+                ImmutableMap.of("user.id", userId, "role.id", roleId), null))
+                .thenApply(e -> null);
+    }
+    
+    @Nonnull
+    public CompletableFuture<Void> AddGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
+                                                      @Nonnull final String roleId) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.ADD_GUILD_MEMBER_ROLE.withMajorParam(guildId),
                 ImmutableMap.of("user.id", userId, "role.id", roleId), null))
                 .thenApply(e -> null);
     }
