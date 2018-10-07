@@ -61,7 +61,8 @@ public interface Presence {
     enum ActivityType {
         PLAYING(0),
         STREAMING(1),
-        LISTENING(2),;
+        LISTENING(2),
+        WATCHING(3),;
         @Getter
         private final int id;
         
