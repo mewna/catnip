@@ -144,12 +144,7 @@ public class DispatchEmitter {
             }
             case Raw.GUILD_MEMBER_UPDATE: {
                 final String guild = data.getString("guild_id");
-                final JsonObject partialMember = new JsonObject()
-                        .put("user", payload.getJsonObject("user"))
-                        .put("roles", payload.getJsonArray("roles"))
-                        .put("nick", payload.getString("nick"));
-                
-                catnip.eventBus().send(type, entityBuilder.createPartialMember(guild, partialMember));
+                catnip.eventBus().send(type, entityBuilder.createPartialMember(guild, data));
                 break;
             }
             
