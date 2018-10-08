@@ -1,6 +1,7 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.guild.audit.AuditLogChange;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -17,7 +18,7 @@ import javax.annotation.Nonnull;
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(fluent = true)
-public class AuditLogChangeImpl implements AuditLogChange {
+public class AuditLogChangeImpl implements AuditLogChange, RequiresCatnip {
     private transient Catnip catnip;
     
     private Object oldValue;

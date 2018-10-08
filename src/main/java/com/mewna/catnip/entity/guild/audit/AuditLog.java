@@ -1,6 +1,6 @@
 package com.mewna.catnip.entity.guild.audit;
 
-import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.user.User;
 
@@ -12,7 +12,8 @@ import java.util.List;
  * @author SamOphis
  * @since 10/06/18
  */
-public interface AuditLog extends RequiresCatnip {
+@SuppressWarnings("unused")
+public interface AuditLog extends Entity {
     @CheckReturnValue
     @Nonnull
     List<Webhook> foundWebhooks();

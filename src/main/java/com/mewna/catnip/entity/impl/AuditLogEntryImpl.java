@@ -1,6 +1,7 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.guild.audit.ActionType;
 import com.mewna.catnip.entity.guild.audit.AuditLogChange;
 import com.mewna.catnip.entity.guild.audit.AuditLogEntry;
@@ -21,7 +22,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(fluent = true)
-public class AuditLogEntryImpl implements AuditLogEntry {
+public class AuditLogEntryImpl implements AuditLogEntry, RequiresCatnip {
     private transient Catnip catnip;
     
     private String id;
