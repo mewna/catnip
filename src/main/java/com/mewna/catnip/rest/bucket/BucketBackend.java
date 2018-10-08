@@ -5,23 +5,32 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
 /**
  * @author amy
  * @since 10/7/18.
  */
 @SuppressWarnings("UnusedReturnValue")
 public interface BucketBackend {
-    BucketBackend limit(String route, long value);
+    @Nonnull
+    BucketBackend limit(@Nonnull String route, @Nonnegative long value);
     
-    long limit(String route);
+    @Nonnegative
+    long limit(@Nonnull String route);
     
-    BucketBackend remaining(String route, long value);
+    @Nonnull
+    BucketBackend remaining(@Nonnull String route, @Nonnegative long value);
     
-    long remaining(String route);
+    @Nonnegative
+    long remaining(@Nonnull String route);
     
-    BucketBackend reset(String route, long value);
+    @Nonnull
+    BucketBackend reset(@Nonnull String route, @Nonnegative long value);
     
-    long reset(String route);
+    @Nonnegative
+    long reset(@Nonnull String route);
     
     @Getter
     @Setter
