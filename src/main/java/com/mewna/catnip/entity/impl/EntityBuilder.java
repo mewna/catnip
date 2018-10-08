@@ -704,7 +704,7 @@ public final class EntityBuilder {
         return ReactionImpl.builder()
                 .count(data.getInteger("count"))
                 .self(data.getBoolean("self", false))
-                .emoji(createEmoji(guildId, data.getJsonObject("emojis")))
+                .emoji(createEmoji(guildId, data.getJsonObject("emoji")))
                 .build();
     }
     
