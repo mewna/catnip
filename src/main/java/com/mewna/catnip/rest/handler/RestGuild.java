@@ -7,6 +7,8 @@ import com.mewna.catnip.entity.guild.Guild.GuildEditFields;
 import com.mewna.catnip.entity.guild.GuildBan;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
+import com.mewna.catnip.entity.guild.audit.ActionType;
+import com.mewna.catnip.entity.guild.audit.AuditLog;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.VoiceRegion;
 import com.mewna.catnip.internal.CatnipImpl;
@@ -254,5 +256,33 @@ public class RestGuild extends RestHandler {
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
                 .thenApply(mapObjectContents(getEntityBuilder()::createVoiceRegion));
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletableFuture<AuditLog> getGuildAuditLog(@Nonnull final String guildId, @Nullable final String userId,
+                                                        @Nullable final String beforeEntryId, @Nullable final ActionType type,
+                                                        @Nonnegative final int limit) {
+        final Collection<String> params = new ArrayList<>();
+        if (userId != null) {
+            params.add("user_id=" + userId);
+        }
+        if (beforeEntryId != null) {
+            params.add("before=" + beforeEntryId);
+        }
+        if (limit <= 100) {
+            params.add("limit=" + limit);
+        }
+        if (type != null) {
+            params.add("action_type=" + type);
+        }
+        String query = String.join("&", params);
+        if (!query.isEmpty()) {
+            query = '?' + query;
+        }
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_AUDIT_LOG.withMajorParam(guildId).withQueryString(query),
+                ImmutableMap.of(), null))
+                .thenApply(ResponsePayload::object)
+                .thenApply(getEntityBuilder()::createAuditLog);
     }
 }

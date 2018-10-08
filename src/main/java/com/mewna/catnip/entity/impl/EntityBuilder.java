@@ -15,6 +15,7 @@ import com.mewna.catnip.entity.guild.Invite.InviteChannel;
 import com.mewna.catnip.entity.guild.Invite.InviteGuild;
 import com.mewna.catnip.entity.guild.Invite.Inviter;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
+import com.mewna.catnip.entity.guild.audit.*;
 import com.mewna.catnip.entity.impl.EmbedImpl.*;
 import com.mewna.catnip.entity.impl.InviteImpl.InviteChannelImpl;
 import com.mewna.catnip.entity.impl.InviteImpl.InviteGuildImpl;
@@ -703,7 +704,7 @@ public final class EntityBuilder {
         return ReactionImpl.builder()
                 .count(data.getInteger("count"))
                 .self(data.getBoolean("self", false))
-                .emoji(createEmoji(guildId, data.getJsonObject("emojis")))
+                .emoji(createEmoji(guildId, data.getJsonObject("emoji")))
                 .build();
     }
     
@@ -988,5 +989,89 @@ public final class EntityBuilder {
                 .user(createUser(data.getJsonObject("user")))
                 .trace(ImmutableList.copyOf(data.getJsonArray("_trace").stream().map(e -> (String) e).collect(Collectors.toList())))
                 .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public AuditLogChange createAuditLogChange(@Nonnull final JsonObject data) {
+        return AuditLogChangeImpl.builder()
+                .catnip(catnip)
+                .key(data.getString("key"))
+                .newValue(data.getValue("new_value")) // no npe if null/optional key
+                .oldValue(data.getValue("old_value"))
+                .build();
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    public OptionalEntryInfo createOptionalEntryInfo(@Nonnull final JsonObject data, @Nonnull final ActionType type) {
+        switch (type) {
+            case MEMBER_PRUNE:
+                return MemberPruneInfoImpl.builder()
+                        .catnip(catnip)
+                        .deleteMemberDays(data.getInteger("delete_member_days"))
+                        .removedMembersCount(data.getInteger("members_removed"))
+                        .build();
+            case MESSAGE_DELETE:
+                return MessageDeleteInfoImpl.builder()
+                        .catnip(catnip)
+                        .channelId(data.getString("channel_id"))
+                        .deletedMessagesCount(Integer.parseUnsignedInt(data.getString("count")))
+                        .build();
+            case CHANNEL_OVERWRITE_CREATE:
+            case CHANNEL_OVERWRITE_UPDATE:
+            case CHANNEL_OVERWRITE_DELETE:
+                return OverrideUpdateInfoImpl.builder()
+                        .catnip(catnip)
+                        .overriddenEntityId(data.getString("id"))
+                        .overrideType(OverrideType.byKey(data.getString("type")))
+                        .roleName(data.getString("role_name"))
+                        .build();
+            default:
+                return null;
+        }
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public AuditLogEntry createAuditLogEntry(@Nonnull final JsonObject data) {
+        final ActionType type = ActionType.byKey(data.getInteger("action_type"));
+        return AuditLogEntryImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .userId(data.getString("user_id"))
+                .targetId(data.getString("target_id"))
+                .type(type)
+                .reason(data.getString("reason"))
+                .changes(addArrayToList(data, "changes", this::createAuditLogChange))
+                .options(data.containsKey("options") ? createOptionalEntryInfo(data.getJsonObject("options"), type) : null)
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public AuditLog createAuditLog(@Nonnull final JsonObject data) {
+        return AuditLogImpl.builder()
+                .catnip(catnip)
+                .foundWebhooks(addArrayToList(data, "webhooks", this::createWebhook))
+                .foundUsers(addArrayToList(data, "users", this::createUser))
+                .auditLogEntries(addArrayToList(data, "audit_log_entries", this::createAuditLogEntry))
+                .build();
+    }
+    
+    private <T> List<T> addArrayToList(final JsonObject data, final String key, final Function<JsonObject, T> mapper) {
+        final List<T> list = new ArrayList<>();
+        if (!data.containsKey(key)) {
+            return list;
+        }
+        final JsonArray array = data.getJsonArray(key);
+        final Iterator<Object> iter = array.iterator();
+        int counter = 0;
+        while (iter.hasNext()) {
+            list.add(mapper.apply(array.getJsonObject(counter)));
+            counter++;
+            iter.next();
+        }
+        return list;
     }
 }
