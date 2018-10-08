@@ -113,7 +113,7 @@ public final class Routes {
     public static final Route DELETE_GUILD                        = new Route(DELETE, "/guilds/{guild.id}", "guild.id");
     public static final Route GET_GUILD                           = new Route(GET,    "/guilds/{guild.id}", "guild.id");
     public static final Route MODIFY_GUILD                        = new Route(PATCH,  "/guilds/{guild.id}", "guild.id");
-    public static final Route GET_GUILD_AUDIT_LOG                 = new Route(GET,    "/guilds/{guild.id}/audit-log", "guild.id");
+    public static final Route GET_GUILD_AUDIT_LOG                 = new Route(GET,    "/guilds/{guild.id}/audit-logs", "guild.id");
     public static final Route GET_GUILD_BANS                      = new Route(GET,    "/guilds/{guild.id}/bans", "guild.id");
     public static final Route GET_GUILD_BAN                       = new Route(GET,    "/guilds/{guild.id}/bans/{user.id}", "guild.id");
     public static final Route REMOVE_GUILD_BAN                    = new Route(DELETE, "/guilds/{guild.id}/bans/{user.id}", "guild.id");
