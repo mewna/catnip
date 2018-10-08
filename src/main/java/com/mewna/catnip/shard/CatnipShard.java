@@ -62,7 +62,6 @@ public class CatnipShard extends AbstractVerticle {
         client = catnip.vertx().createHttpClient(new HttpClientOptions()
                 .setMaxWebsocketFrameSize(Integer.MAX_VALUE)
                 .setMaxWebsocketMessageSize(Integer.MAX_VALUE));
-        //emitter = new DispatchEmitter(catnip);
     }
     
     /**
@@ -157,8 +156,6 @@ public class CatnipShard extends AbstractVerticle {
         messageQueue.clear();
         heartbeatAcked.set(true);
     }
-    
-    // Payload handling
     
     private void connectSocket(final Message<JsonObject> msg) {
         client.websocketAbs(Catnip.getGatewayUrl(), null, null, null,
@@ -368,17 +365,13 @@ public class CatnipShard extends AbstractVerticle {
             }
         }
         
-        //emitter.emit(event);
         // This allows a buffer to know WHERE an event is coming from, so that
         // it can be accurate in the case of ex. buffering events until a shard
         // has finished booting.
         event.put("shard", new JsonObject().put("id", id).put("limit", limit));
         catnip.eventBuffer().buffer(event);
         catnip.eventBus().<JsonObject>send("RAW_DISPATCH", event);
-        //catnip.eventBus().send(type, data);
     }
-    
-    // Addresses
     
     private void handleHeartbeat(final Message<JsonObject> msg, final JsonObject event) {
         //heartbeatAcked.set(false);
@@ -405,8 +398,6 @@ public class CatnipShard extends AbstractVerticle {
             }
         }
     }
-    
-    // Payloads
     
     private void handleReconnectRequest(final Message<JsonObject> msg, final JsonObject event) {
         // Just immediately disconnect
@@ -465,8 +456,6 @@ public class CatnipShard extends AbstractVerticle {
                 )
         );
     }
-    
-    // Other
     
     public enum ShardConnectState {
         FAILED,
