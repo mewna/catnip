@@ -1,7 +1,5 @@
 package com.mewna.catnip.rest.bucket;
 
-import lombok.NoArgsConstructor;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,43 +13,36 @@ public class MemoryBucketBackend implements BucketBackend {
     @Override
     public BucketBackend limit(final String route, final long value) {
         final Container container = buckets.computeIfAbsent(route, __ -> new Container());
-        container.limit = value;
+        container.limit(value);
         return this;
     }
     
     @Override
     public long limit(final String route) {
-        return buckets.computeIfAbsent(route, __ -> new Container()).limit;
+        return buckets.computeIfAbsent(route, __ -> new Container()).limit();
     }
     
     @Override
     public BucketBackend remaining(final String route, final long value) {
         final Container container = buckets.computeIfAbsent(route, __ -> new Container());
-        container.remaining = value;
+        container.remaining(value);
         return this;
     }
     
     @Override
     public long remaining(final String route) {
-        return buckets.computeIfAbsent(route, __ -> new Container()).remaining;
+        return buckets.computeIfAbsent(route, __ -> new Container()).remaining();
     }
     
     @Override
     public BucketBackend reset(final String route, final long value) {
         final Container container = buckets.computeIfAbsent(route, __ -> new Container());
-        container.reset = value;
+        container.reset(value);
         return this;
     }
     
     @Override
     public long reset(final String route) {
-        return buckets.computeIfAbsent(route, __ -> new Container()).reset;
-    }
-    
-    @NoArgsConstructor
-    private static final class Container {
-        private long limit;
-        private long remaining;
-        private long reset;
+        return buckets.computeIfAbsent(route, __ -> new Container()).reset();
     }
 }
