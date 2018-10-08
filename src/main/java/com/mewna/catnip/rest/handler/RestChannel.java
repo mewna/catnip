@@ -21,6 +21,7 @@ import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.invite.InviteCreateOptions;
+import com.mewna.catnip.util.Paginator;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -33,6 +34,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * @author amy
@@ -187,7 +189,28 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<List<User>> getReactions(@Nonnull final String channelId, @Nonnull final String messageId,
+    public Paginator<User> getReactions(@Nonnull final String channelId, @Nonnull final String messageId,
+                                        @Nonnull final String emoji) {
+        return new Paginator<>(
+                getEntityBuilder()::createUser,
+                (id, amount) -> getReactionsRaw(channelId, messageId, emoji, null, id, amount),
+                User::id,
+                100
+        );
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Paginator<User> getReactions(@Nonnull final String channelId, @Nonnull final String messageId,
+                                        @Nonnull final Emoji emoji) {
+        return getReactions(channelId, messageId, emoji.forReaction());
+    }
+    
+    //TODO make public when we add raw methods for the other routes
+    //keeping this private for consistency with the rest of the methods
+    @Nonnull
+    @CheckReturnValue
+    private CompletableFuture<JsonArray> getReactionsRaw(@Nonnull final String channelId, @Nonnull final String messageId,
                                                       @Nonnull final String emoji, @Nullable final String before,
                                                       @Nullable final String after, @Nonnegative final int limit) {
         final Collection<String> params = new ArrayList<>();
@@ -207,7 +230,13 @@ public class RestChannel extends RestHandler {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.GET_REACTIONS.withMajorParam(channelId).withQueryString(query),
                         ImmutableMap.of("message.id", messageId, "emojis", encodeUTF8(emoji)), null))
-                .thenApply(ResponsePayload::array)
+                .thenApply(ResponsePayload::array);
+    }
+    
+    public CompletableFuture<List<User>> getReactions(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                        @Nonnull final String emoji, @Nullable final String before,
+                                                        @Nullable final String after, @Nonnegative final int limit) {
+        return getReactionsRaw(channelId, messageId, emoji, before, after, limit)
                 .thenApply(mapObjectContents(getEntityBuilder()::createUser))
                 .thenApply(Collections::unmodifiableList);
     }
@@ -222,7 +251,20 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<List<Message>> getChannelMessages(@Nonnull final String channelId, @Nullable final String before,
+    public Paginator<Message> getChannelMessages(@Nonnull final String channelId) {
+        return new Paginator<>(
+                getEntityBuilder()::createMessage,
+                (id, amount) -> getChannelMessagesRaw(channelId, id, null, null, amount),
+                Message::id,
+                100
+        );
+    }
+    
+    //TODO make public when we add raw methods for the other routes
+    //keeping this private for consistency with the rest of the methods
+    @Nonnull
+    @CheckReturnValue
+    private CompletableFuture<JsonArray> getChannelMessagesRaw(@Nonnull final String channelId, @Nullable final String before,
                                                                @Nullable final String after, @Nullable final String around,
                                                                @Nonnegative final int limit) {
         final Collection<String> params = new ArrayList<>();
@@ -245,7 +287,13 @@ public class RestChannel extends RestHandler {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.GET_CHANNEL_MESSAGES.withMajorParam(channelId).withQueryString(query),
                         ImmutableMap.of(), null))
-                .thenApply(ResponsePayload::array)
+                .thenApply(ResponsePayload::array);
+    }
+    
+    public CompletionStage<List<Message>> getChannelMessages(@Nonnull final String channelId, @Nullable final String before,
+                                                             @Nullable final String after, @Nullable final String around,
+                                                             @Nonnegative final int limit) {
+        return getChannelMessagesRaw(channelId, before, after, around, limit)
                 .thenApply(mapObjectContents(getEntityBuilder()::createMessage))
                 .thenApply(Collections::unmodifiableList);
     }
