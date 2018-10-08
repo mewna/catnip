@@ -1,6 +1,7 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
 import com.mewna.catnip.entity.guild.audit.OverrideUpdateInfo;
 import lombok.*;
@@ -18,7 +19,7 @@ import javax.annotation.Nonnull;
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(fluent = true)
-public class OverrideUpdateInfoImpl implements OverrideUpdateInfo {
+public class OverrideUpdateInfoImpl implements OverrideUpdateInfo, RequiresCatnip {
     private transient Catnip catnip;
     
     private String roleName;

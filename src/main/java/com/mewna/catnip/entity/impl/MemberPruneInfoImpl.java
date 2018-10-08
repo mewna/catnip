@@ -1,6 +1,7 @@
 package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.guild.audit.MemberPruneInfo;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -17,7 +18,7 @@ import javax.annotation.Nonnull;
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(fluent = true)
-public class MemberPruneInfoImpl implements MemberPruneInfo {
+public class MemberPruneInfoImpl implements MemberPruneInfo, RequiresCatnip {
     private transient Catnip catnip;
     
     private int deleteMemberDays;
