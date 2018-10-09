@@ -53,7 +53,7 @@ public class DefaultExtensionManager implements ExtensionManager {
     
     @Nonnull
     @Override
-    public Set<Extension> matchingExtensions(@Nonnull final Class<? extends Extension> extensionClass) {
+    public <T extends Extension> Set<Extension> matchingExtensions(@Nonnull final Class<T> extensionClass) {
         return ImmutableSet.copyOf(loadedExtensions.stream()
                 .filter(e -> extensionClass.isAssignableFrom(e.getClass()))
                 .collect(Collectors.toSet()));
