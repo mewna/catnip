@@ -8,8 +8,6 @@ import com.mewna.catnip.entity.builder.MessageBuilder;
 import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.guild.PermissionOverride;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
-import com.mewna.catnip.entity.impl.EntityBuilder;
-import com.mewna.catnip.entity.impl.WebhookImpl;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.misc.CreatedInvite;
@@ -21,7 +19,8 @@ import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.invite.InviteCreateOptions;
-import com.mewna.catnip.util.Paginator;
+import com.mewna.catnip.util.pagination.MessagePaginator;
+import com.mewna.catnip.util.pagination.ReactionPaginator;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -30,8 +29,6 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -189,20 +186,23 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Paginator<User> getReactions(@Nonnull final String channelId, @Nonnull final String messageId,
-                                        @Nonnull final String emoji) {
-        return new Paginator<>(
-                getEntityBuilder()::createUser,
-                (id, amount) -> getReactionsRaw(channelId, messageId, emoji, null, id, amount),
-                User::id,
-                100
-        );
+    public ReactionPaginator getReactions(@Nonnull final String channelId, @Nonnull final String messageId,
+                                            @Nonnull final String emoji) {
+        return new ReactionPaginator(getEntityBuilder()) {
+            @Nonnull
+            @CheckReturnValue
+            @Override
+            protected CompletionStage<JsonArray> fetchNext(@Nonnull final RequestState<User> state, @Nullable final String lastId,
+                                                           @Nonnegative final int requestSize) {
+                return getReactionsRaw(channelId, messageId, emoji, null, lastId, requestSize);
+            }
+        };
     }
     
     @Nonnull
     @CheckReturnValue
-    public Paginator<User> getReactions(@Nonnull final String channelId, @Nonnull final String messageId,
-                                        @Nonnull final Emoji emoji) {
+    public ReactionPaginator getReactions(@Nonnull final String channelId, @Nonnull final String messageId,
+                                            @Nonnull final Emoji emoji) {
         return getReactions(channelId, messageId, emoji.forReaction());
     }
     
@@ -251,13 +251,16 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Paginator<Message> getChannelMessages(@Nonnull final String channelId) {
-        return new Paginator<>(
-                getEntityBuilder()::createMessage,
-                (id, amount) -> getChannelMessagesRaw(channelId, id, null, null, amount),
-                Message::id,
-                100
-        );
+    public MessagePaginator getChannelMessages(@Nonnull final String channelId) {
+        return new MessagePaginator(getEntityBuilder()) {
+            @Nonnull
+            @CheckReturnValue
+            @Override
+            protected CompletionStage<JsonArray> fetchNext(@Nonnull final RequestState<Message> state, @Nullable final String lastId,
+                                                           @Nonnegative final int requestSize) {
+                return getChannelMessagesRaw(channelId, lastId, null, null, requestSize);
+            }
+        };
     }
     
     //TODO make public when we add raw methods for the other routes

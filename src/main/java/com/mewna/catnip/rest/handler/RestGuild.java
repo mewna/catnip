@@ -2,7 +2,6 @@ package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
 import com.mewna.catnip.entity.channel.GuildChannel;
-import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Guild.GuildEditFields;
 import com.mewna.catnip.entity.guild.GuildBan;
@@ -10,17 +9,14 @@ import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.guild.audit.ActionType;
 import com.mewna.catnip.entity.guild.audit.AuditLogEntry;
-import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.VoiceRegion;
-import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.guild.PartialGuild;
-import com.mewna.catnip.util.Paginator;
-import io.vertx.core.json.JsonArray;
+import com.mewna.catnip.util.pagination.AuditLogPaginator;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
@@ -30,8 +26,6 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 /**
  * @author amy
@@ -263,50 +257,14 @@ public class RestGuild extends RestHandler {
                 .thenApply(mapObjectContents(getEntityBuilder()::createVoiceRegion));
     }
     
-    public Paginator<AuditLogEntry> getAuditLog(@Nonnull final String guildId) {
-        //discord provides audit logs in a stupid format so we have to do this
-        return new Paginator<AuditLogEntry>(
-                __ -> {
-                    throw new UnsupportedOperationException("Should not get called since fetch() is overriden");
-                },
-                (__, ___) -> {
-                    throw new UnsupportedOperationException("Should not get called since fetch() is overriden");
-                },
-                __ -> {
-                    throw new UnsupportedOperationException("Should not get called since fetch() is overriden");
-                },
-                100
-        ) {
+    public AuditLogPaginator getAuditLog(@Nonnull final String guildId) {
+        return new AuditLogPaginator(getEntityBuilder()) {
             @Nonnull
+            @CheckReturnValue
             @Override
-            protected CompletionStage<Void> fetch(@Nullable final String id, @Nonnull final AtomicInteger fetched, @Nonnull final Consumer<AuditLogEntry> action, final int limit, final int requestSize) {
-                return getAuditLogRaw(guildId, null, null, null, Math.min(requestSize, limit - fetched.get())).thenCompose(logs -> {
-                    AuditLogEntry last = null;
-                    
-                    //inlined EntityBuilder.immutableListOf and EntityBuilder.createAuditLog
-                    //this is done so we can do less allocations and only parse the entries
-                    //we need to.
-                    final EntityBuilder builder = getEntityBuilder();
-                    final Map<String, Webhook> webhooks = EntityBuilder.immutableMapOf(logs.getJsonArray("webhooks"), x -> x.getString("id"), builder::createWebhook);
-                    final Map<String, User> users = EntityBuilder.immutableMapOf(logs.getJsonArray("users"), x -> x.getString("id"), builder::createUser);
-                    final JsonArray entries = logs.getJsonArray("audit_log_entries");
-                    
-                    for(final Object object : entries) {
-                        if(!(object instanceof JsonObject)) {
-                            throw new IllegalArgumentException("Expected all values to be JsonObjects, but found " +
-                                    (object == null ? "null" : object.getClass()));
-                        }
-                        last = builder.createAuditLogEntry((JsonObject)object, webhooks, users);
-                        action.accept(last);
-                        if(fetched.incrementAndGet() == limit) {
-                            return CompletableFuture.completedFuture(null);
-                        }
-                    }
-                    if(entries.size() < requestSize || last == null) {
-                        return CompletableFuture.completedFuture(null);
-                    }
-                    return fetch(last.id(), fetched, action, limit, requestSize);
-                });
+            protected CompletionStage<JsonObject> fetchNext(@Nonnull final RequestState<AuditLogEntry> state, @Nullable final String lastId,
+                                                            @Nonnegative final int requestSize) {
+                return getAuditLogRaw(guildId, state.extra("user"), lastId, state.extra("type"), requestSize);
             }
         };
     }
