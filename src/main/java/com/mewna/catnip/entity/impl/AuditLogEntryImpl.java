@@ -2,10 +2,12 @@ package com.mewna.catnip.entity.impl;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.guild.audit.ActionType;
 import com.mewna.catnip.entity.guild.audit.AuditLogChange;
 import com.mewna.catnip.entity.guild.audit.AuditLogEntry;
 import com.mewna.catnip.entity.guild.audit.OptionalEntryInfo;
+import com.mewna.catnip.entity.user.User;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -27,11 +29,12 @@ public class AuditLogEntryImpl implements AuditLogEntry, RequiresCatnip {
     
     private String id;
     private String targetId;
-    private String userId;
+    private User user;
     private String reason;
     private OptionalEntryInfo options;
     private ActionType type;
     private List<AuditLogChange> changes;
+    private Webhook webhook;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
