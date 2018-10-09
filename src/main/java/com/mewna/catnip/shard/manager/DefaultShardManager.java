@@ -98,12 +98,12 @@ public class DefaultShardManager implements ShardManager {
         }
         // Start verticles
         catnip.eventBus().consumer(POLL_QUEUE, msg -> connect());
-        catnip.eventBus().send(POLL_QUEUE, null);
+        catnip.eventBus().publish(POLL_QUEUE, null);
     }
     
     private void connect() {
         if(connectQueue.isEmpty()) {
-            catnip.vertx().setTimer(1000L, __ -> catnip.eventBus().send(POLL_QUEUE, null));
+            catnip.vertx().setTimer(1000L, __ -> catnip.eventBus().publish(POLL_QUEUE, null));
             return;
         }
         final int nextId = connectQueue.removeFirst();
@@ -132,7 +132,7 @@ public class DefaultShardManager implements ShardManager {
                         catnip.logAdapter().warn("Failed connecting shard {} entirely, re-queueing", nextId);
                         addToConnectQueue(nextId);
                     }
-                    catnip.eventBus().send(POLL_QUEUE, null);
+                    catnip.eventBus().publish(POLL_QUEUE, null);
                 });
     }
     

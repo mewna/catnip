@@ -3,5 +3,6 @@
 .idea/copyright/*.xml
 .idea/dictionaries/*.xml
 .idea/libraries
-catnip.iml
 target/
+*.iml
+*/*.iml

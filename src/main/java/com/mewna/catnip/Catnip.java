@@ -12,7 +12,6 @@ import com.mewna.catnip.internal.ratelimit.Ratelimiter;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
 import com.mewna.catnip.rest.Routes;
-import com.mewna.catnip.shard.DiscordEvent;
 import com.mewna.catnip.shard.DiscordEvent.EventType;
 import com.mewna.catnip.shard.event.EventBuffer;
 import com.mewna.catnip.shard.manager.ShardManager;
@@ -79,7 +78,7 @@ public interface Catnip {
     
     @Nonnull
     String token();
-
+    
     @Nonnull
     ShardManager shardManager();
     
