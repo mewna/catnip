@@ -133,8 +133,7 @@ public class DispatchEmitter {
             
             // Emoji
             case Raw.GUILD_EMOJIS_UPDATE: {
-                // TODO: ???
-                catnip.logAdapter().warn("Got GUILD_EMOJIS_UPDATE, but this isn't implemented!");
+                catnip.eventBus().publish(type, entityBuilder.createGuildEmojisUpdate(data));
                 break;
             }
             

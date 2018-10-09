@@ -117,6 +117,7 @@ public class CatnipImpl implements Catnip {
         // Guilds
         codec(GuildImpl.class);
         codec(GatewayGuildBanImpl.class);
+        codec(EmojiUpdateImpl.class);
         
         // Roles
         codec(RoleImpl.class);
