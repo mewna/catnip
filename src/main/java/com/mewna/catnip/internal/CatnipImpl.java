@@ -111,6 +111,7 @@ public class CatnipImpl implements Catnip {
         codec(UserDMChannelImpl.class);
         codec(VoiceChannelImpl.class);
         codec(WebhookImpl.class);
+        codec(ChannelPinsUpdateImpl.class);
         
         // Guilds
         codec(GuildImpl.class);
