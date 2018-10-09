@@ -15,7 +15,10 @@ import com.mewna.catnip.entity.guild.Invite.InviteChannel;
 import com.mewna.catnip.entity.guild.Invite.InviteGuild;
 import com.mewna.catnip.entity.guild.Invite.Inviter;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
-import com.mewna.catnip.entity.guild.audit.*;
+import com.mewna.catnip.entity.guild.audit.ActionType;
+import com.mewna.catnip.entity.guild.audit.AuditLogChange;
+import com.mewna.catnip.entity.guild.audit.AuditLogEntry;
+import com.mewna.catnip.entity.guild.audit.OptionalEntryInfo;
 import com.mewna.catnip.entity.impl.EmbedImpl.*;
 import com.mewna.catnip.entity.impl.InviteImpl.InviteChannelImpl;
 import com.mewna.catnip.entity.impl.InviteImpl.InviteGuildImpl;
@@ -89,8 +92,8 @@ public final class EntityBuilder {
     }
     
     public static <T> Map<String, T> immutableMapOf(@Nullable final JsonArray array,
-                                                     @Nonnull final Function<JsonObject, String> keyFunction,
-                                                     @Nonnull final Function<JsonObject, T> mapper) {
+                                                    @Nonnull final Function<JsonObject, String> keyFunction,
+                                                    @Nonnull final Function<JsonObject, T> mapper) {
         if(array == null) {
             return ImmutableMap.of();
         }
@@ -167,6 +170,16 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    private static FieldImpl createField(@Nonnull final JsonObject data) {
+        return FieldImpl.builder()
+                .name(data.getString("name"))
+                .value(data.getString("value"))
+                .inline(data.getBoolean("inline", false))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public JsonObject embedToJson(final Embed embed) {
         final JsonObject o = new JsonObject();
         
@@ -199,16 +212,6 @@ public final class EntityBuilder {
         }
         
         return o;
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    private static FieldImpl createField(@Nonnull final JsonObject data) {
-        return FieldImpl.builder()
-                .name(data.getString("name"))
-                .value(data.getString("value"))
-                .inline(data.getBoolean("inline", false))
-                .build();
     }
     
     @Nonnull
@@ -577,21 +580,32 @@ public final class EntityBuilder {
         if(userData != null) {
             catnip.cacheWorker().bulkCacheUsers(Collections.singletonList(createUser(userData)));
         }
+        final OffsetDateTime joinedAt;
+        if(data.getString("joined_at", null) != null) {
+            joinedAt = parseTimestamp(data.getString("joined_at"));
+        } else {
+            // This will only happen during GUILD_MEMBER_REMOVE afaik, but is this the right solution?
+            joinedAt = null;
+        }
         return MemberImpl.builder()
                 .catnip(catnip)
                 .id(id)
                 .guildId(guildId)
                 .nick(data.getString("nick"))
-                .roles(ImmutableSet.of()) // TODO: fetch roles from cache? or at least give the ids
-                .joinedAt(parseTimestamp(data.getString("joined_at")))
-                .deaf(data.getBoolean("deaf"))
-                .mute(data.getBoolean("mute"))
+                // TODO: fetch roles from cache? or at least give the ids
+                // TODO: Roles won't be present for eg. GUILD_MEMBER_REMOVE
+                .roles(ImmutableSet.of())
+                .joinedAt(joinedAt)
+                // If not present, it's probably(?) safe to assume not
+                .deaf(data.getBoolean("deaf", false))
+                .mute(data.getBoolean("mute", false))
                 .build();
     }
     
     @Nonnull
     @CheckReturnValue
-    public Member createMember(@Nonnull final String guildId, @Nonnull final User user, @Nonnull final JsonObject data) {
+    public Member createMember(@Nonnull final String guildId, @SuppressWarnings("TypeMayBeWeakened") @Nonnull final User user,
+                               @Nonnull final JsonObject data) {
         return createMember(guildId, user.id(), data);
     }
     
@@ -1005,7 +1019,7 @@ public final class EntityBuilder {
     @Nullable
     @CheckReturnValue
     public OptionalEntryInfo createOptionalEntryInfo(@Nonnull final JsonObject data, @Nonnull final ActionType type) {
-        switch (type) {
+        switch(type) {
             case MEMBER_PRUNE:
                 return MemberPruneInfoImpl.builder()
                         .catnip(catnip)
