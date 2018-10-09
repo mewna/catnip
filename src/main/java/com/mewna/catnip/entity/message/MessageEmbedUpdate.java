@@ -1,9 +1,9 @@
 package com.mewna.catnip.entity.message;
 
 import com.mewna.catnip.entity.Snowflake;
-import jdk.internal.jline.internal.Nullable;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
