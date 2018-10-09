@@ -9,6 +9,8 @@ import com.mewna.catnip.internal.logging.DefaultLogAdapter;
 import com.mewna.catnip.internal.logging.LogAdapter;
 import com.mewna.catnip.internal.ratelimit.MemoryRatelimiter;
 import com.mewna.catnip.internal.ratelimit.Ratelimiter;
+import com.mewna.catnip.rest.bucket.BucketBackend;
+import com.mewna.catnip.rest.bucket.MemoryBucketBackend;
 import com.mewna.catnip.shard.event.CachingBuffer;
 import com.mewna.catnip.shard.event.EventBuffer;
 import com.mewna.catnip.shard.manager.DefaultShardManager;
@@ -49,4 +51,6 @@ public final class CatnipOptions {
     private EntityCacheWorker cacheWorker = new MemoryEntityCache();
     @Nonnull
     private Set<CacheFlag> cacheFlags = EnumSet.noneOf(CacheFlag.class);
+    @Nonnull
+    private BucketBackend restBucketBackend = new MemoryBucketBackend();
 }
