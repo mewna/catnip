@@ -46,4 +46,10 @@ public interface TextChannel extends GuildChannel, MessageChannel {
     default CompletableFuture<List<Webhook>> fetchWebhooks() {
         return catnip().rest().webhook().getChannelWebhooks(id());
     }
+    
+    @Nonnull
+    @CheckReturnValue
+    default String asMention() {
+        return "<#" + id() + '>';
+    }
 }

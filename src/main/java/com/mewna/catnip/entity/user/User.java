@@ -136,4 +136,10 @@ public interface User extends Snowflake {
     default CompletableFuture<DMChannel> createDM() {
         return catnip().rest().user().createDM(id());
     }
+    
+    @Nonnull
+    @CheckReturnValue
+    default String asMention() {
+        return "<@" + id() + '>';
+    }
 }
