@@ -116,6 +116,26 @@ public interface Emoji extends Snowflake {
     @CheckReturnValue
     String forReaction();
     
+    /**
+     * Checks whether or not this emojis is the provided emoji string.
+     * <br>If this emoji is {@link UnicodeEmoji unicode}, it's
+     * {@link #name() name} is compared for equality with the provided string.
+     * <br>If this emoji is {@link CustomEmoji custom}, the following checks,
+     * in order, are applied:
+     * <ul>
+     *     <li>id equality</li>
+     *     <li>{@link Emoji#forMessage() forMessage()} equality</li>
+     *     <li>{@link Emoji#forReaction()} forReaction()} equality</li>
+     * </ul>
+     *
+     *
+     * @param emoji Emoji string to compare against.
+     *
+     * @return True, if this emoji is equal to the provided string.
+     */
+    @CheckReturnValue
+    boolean is(@Nonnull String emoji);
+    
     interface CustomEmoji extends Emoji {
         @Override
         @Nonnull
@@ -152,6 +172,12 @@ public interface Emoji extends Snowflake {
         @CheckReturnValue
         default String forReaction() {
             return String.format("%s:%s", name(), id());
+        }
+    
+        @Override
+        @CheckReturnValue
+        default boolean is(@Nonnull final String emoji) {
+            return id().equals(emoji) || forMessage().equals(emoji) || forReaction().equals(emoji);
         }
     }
     
@@ -205,6 +231,12 @@ public interface Emoji extends Snowflake {
         @CheckReturnValue
         default String forReaction() {
             return name();
+        }
+    
+        @Override
+        @CheckReturnValue
+        default boolean is(@Nonnull final String emoji) {
+            return name().equals(emoji);
         }
     }
 }
