@@ -4,6 +4,7 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.extension.Extension;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Set;
 
 /**
@@ -53,12 +54,34 @@ public interface ExtensionManager {
      * This method will only return extensions loaded by the current instance.
      *
      * @param extensionClass The extension class to find instances of.
+     * @param <T>            Type of the extension.
      *
      * @return A possibly-empty set of extensions that are instances of the
      * supplied class.
      */
     @Nonnull
-    Set<Extension> matchingExtensions(@Nonnull Class<? extends Extension> extensionClass);
+    <T extends Extension> Set<Extension> matchingExtensions(@Nonnull Class<T> extensionClass);
+    
+    /**
+     * Return a single extension by class. If multiple extensions are loaded
+     * from the same class, there is no guarantee which extension instance will
+     * be returned, in which case you should be using {@link #matchingExtensions(Class)} )}.
+     *
+     * @param extensionClass The extension class to find instances of
+     * @param <T>            Type of the extension.
+     *
+     * @return A possibly-{@code null} instance of the passed extension class.
+     */
+    @Nullable
+    default <T extends Extension> T extension(@Nonnull final Class<T> extensionClass) {
+        final Set<Extension> extensions = matchingExtensions(extensionClass);
+        if(extensions.isEmpty()) {
+            return null;
+        } else {
+            //noinspection unchecked
+            return (T) extensions.iterator().next();
+        }
+    }
     
     /**
      * Get all loaded extensions. This method will only return extensions
