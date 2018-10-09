@@ -767,6 +767,18 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public MessageEmbedUpdate createMessageEmbedUpdate(final JsonObject data) {
+        return MessageEmbedUpdateImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .guildId(data.getString("guild_id"))
+                .channelId(data.getString("channel_id"))
+                .embeds(immutableListOf(data.getJsonArray("embeds"), this::createEmbed))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public Guild createGuild(@Nonnull final JsonObject data) {
         // As we don't store these fields on the guild object itself, we have
         // to update them in the cache
