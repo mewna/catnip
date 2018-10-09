@@ -7,6 +7,7 @@ import com.mewna.catnip.entity.message.MessageEmbedUpdate;
 import lombok.*;
 import lombok.experimental.Accessors;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
@@ -26,4 +27,9 @@ public class MessageEmbedUpdateImpl implements MessageEmbedUpdate, RequiresCatni
     private String guildId;
     private String channelId;
     private List<Embed> embeds;
+    
+    @Override
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
+    }
 }
