@@ -13,17 +13,50 @@ import com.mewna.catnip.entity.voice.VoiceServerUpdate;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
-import static com.mewna.catnip.shard.DiscordEvent.Raw.*;
-import static com.mewna.catnip.shard.EventTypeImpl.*;
+import static com.mewna.catnip.shard.EventTypeImpl.event;
+import static com.mewna.catnip.shard.EventTypeImpl.notFired;
 
 /**
- *
  * Question: "WHY IS THIS NOT ENUM AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
  * Answer: "Vert.x uses strings for event consumption"
+ *
  * @author amy
  * @since 9/2/18.
  */
 public interface DiscordEvent {
+    // @formatter:off
+    EventType<Channel> CHANNEL_CREATE                            = event(Raw.CHANNEL_CREATE, Channel.class);
+    EventType<Channel> CHANNEL_UPDATE                            = event(Raw.CHANNEL_UPDATE, Channel.class);
+    EventType<Channel> CHANNEL_DELETE                            = event(Raw.CHANNEL_DELETE, Channel.class);
+    EventType<Guild> GUILD_CREATE                                = event(Raw.GUILD_CREATE, Guild.class);
+    EventType<Guild> GUILD_UPDATE                                = event(Raw.GUILD_UPDATE, Guild.class);
+    EventType<UnavailableGuild> GUILD_DELETE                     = event(Raw.GUILD_DELETE, UnavailableGuild.class);
+    //TODO: change type when the event is implemented
+    EventType<Void> GUILD_EMOJIS_UPDATE                          = notFired(Raw.GUILD_EMOJIS_UPDATE);
+    EventType<Member> GUILD_MEMBER_ADD                           = event(Raw.GUILD_MEMBER_ADD, Member.class);
+    EventType<Member> GUILD_MEMBER_REMOVE                        = event(Raw.GUILD_MEMBER_REMOVE, Member.class);
+    EventType<PartialMember> GUILD_MEMBER_UPDATE                 = event(Raw.GUILD_MEMBER_UPDATE, PartialMember.class);
+    EventType<Role> GUILD_ROLE_CREATE                            = event(Raw.GUILD_ROLE_CREATE, Role.class);
+    EventType<Role> GUILD_ROLE_UPDATE                            = event(Raw.GUILD_ROLE_UPDATE, Role.class);
+    EventType<PartialRole> GUILD_ROLE_DELETE                     = event(Raw.GUILD_ROLE_DELETE, PartialRole.class);
+    EventType<User> USER_UPDATE                                  = event(Raw.USER_UPDATE, User.class);
+    EventType<VoiceServerUpdate> VOICE_SERVER_UPDATE             = event(Raw.VOICE_SERVER_UPDATE, VoiceServerUpdate.class);
+    EventType<Message> MESSAGE_CREATE                            = event(Raw.MESSAGE_CREATE, Message.class);
+    EventType<Message> MESSAGE_UPDATE                            = event(Raw.MESSAGE_UPDATE, Message.class);
+    EventType<MessageEmbedUpdate> MESSAGE_EMBEDS_UPDATE          = event(Raw.MESSAGE_EMBEDS_UPDATE, MessageEmbedUpdate.class);
+    EventType<DeletedMessage> MESSAGE_DELETE                     = event(Raw.MESSAGE_DELETE, DeletedMessage.class);
+    EventType<BulkDeletedMessages> MESSAGE_DELETE_BULK           = event(Raw.MESSAGE_DELETE_BULK, BulkDeletedMessages.class);
+    //TODO add this event (or remove this field)
+    EventType<Void> GUILD_SYNC                                   = notFired(Raw.GUILD_SYNC);
+    EventType<GatewayGuildBan> GUILD_BAN_ADD                     = event(Raw.GUILD_BAN_ADD, GatewayGuildBan.class);
+    EventType<GatewayGuildBan> GUILD_BAN_REMOVE                  = event(Raw.GUILD_BAN_REMOVE, GatewayGuildBan.class);
+    EventType<ReactionUpdate> MESSAGE_REACTION_ADD               = event(Raw.MESSAGE_REACTION_ADD, ReactionUpdate.class);
+    EventType<ReactionUpdate> MESSAGE_REACTION_REMOVE            = event(Raw.MESSAGE_REACTION_REMOVE, ReactionUpdate.class);
+    EventType<BulkRemovedReactions> MESSAGE_REACTION_REMOVE_ALL  = event(Raw.MESSAGE_REACTION_REMOVE_ALL, BulkRemovedReactions.class);
+    EventType<Presence> PRESENCE_UPDATE                          = event(Raw.PRESENCE_UPDATE, Presence.class);
+    EventType<Ready> READY                                       = event(Raw.READY, Ready.class);
+    EventType<TypingUser> TYPING_START                           = event(Raw.TYPING_START, TypingUser.class);
+    EventType<VoiceState> VOICE_STATE_UPDATE                     = event(Raw.VOICE_STATE_UPDATE, VoiceState.class);
     /**
      * Raw string values for the gateway events
      *
@@ -52,6 +85,14 @@ public interface DiscordEvent {
         String MESSAGE_DELETE               = "MESSAGE_DELETE";
         String MESSAGE_DELETE_BULK          = "MESSAGE_DELETE_BULK";
         String MESSAGE_UPDATE               = "MESSAGE_UPDATE";
+        /**
+         * This is a special case of MESSAGE_UPDATE. The gateway will send a
+         * partial MESSAGE_UPDATE in the case of resolving message embeds,
+         * which cannot be filled by {@link Message} without a ton of extra
+         * work and doing ugly things like marking message author as nullable
+         * when it almost-always won't be null.
+         */
+        String MESSAGE_EMBEDS_UPDATE        = "MESSAGE_EMBEDS_UPDATE";
         String GUILD_SYNC                   = "GUILD_SYNC";
         String GUILD_BAN_ADD                = "GUILD_BAN_ADD";
         String GUILD_BAN_REMOVE             = "GUILD_BAN_REMOVE";
@@ -64,39 +105,6 @@ public interface DiscordEvent {
         String VOICE_STATE_UPDATE           = "VOICE_STATE_UPDATE";
         // @formatter:on
     }
-    
-    // @formatter:off
-    EventType<Channel> CHANNEL_CREATE                            = event(Raw.CHANNEL_CREATE, Channel.class);
-    EventType<Channel> CHANNEL_UPDATE                            = event(Raw.CHANNEL_UPDATE, Channel.class);
-    EventType<Channel> CHANNEL_DELETE                            = event(Raw.CHANNEL_DELETE, Channel.class);
-    EventType<Guild> GUILD_CREATE                                = event(Raw.GUILD_CREATE, Guild.class);
-    EventType<Guild> GUILD_UPDATE                                = event(Raw.GUILD_UPDATE, Guild.class);
-    EventType<UnavailableGuild> GUILD_DELETE                     = event(Raw.GUILD_DELETE, UnavailableGuild.class);
-    //TODO: change type when the event is implemented
-    EventType<Void> GUILD_EMOJIS_UPDATE                          = notFired(Raw.GUILD_EMOJIS_UPDATE);
-    EventType<Member> GUILD_MEMBER_ADD                           = event(Raw.GUILD_MEMBER_ADD, Member.class);
-    EventType<Member> GUILD_MEMBER_REMOVE                        = event(Raw.GUILD_MEMBER_REMOVE, Member.class);
-    EventType<PartialMember> GUILD_MEMBER_UPDATE                 = event(Raw.GUILD_MEMBER_UPDATE, PartialMember.class);
-    EventType<Role> GUILD_ROLE_CREATE                            = event(Raw.GUILD_ROLE_CREATE, Role.class);
-    EventType<Role> GUILD_ROLE_UPDATE                            = event(Raw.GUILD_ROLE_UPDATE, Role.class);
-    EventType<PartialRole> GUILD_ROLE_DELETE                     = event(Raw.GUILD_ROLE_DELETE, PartialRole.class);
-    EventType<User> USER_UPDATE                                  = event(Raw.USER_UPDATE, User.class);
-    EventType<VoiceServerUpdate> VOICE_SERVER_UPDATE             = event(Raw.VOICE_SERVER_UPDATE, VoiceServerUpdate.class);
-    EventType<Message> MESSAGE_CREATE                            = event(Raw.MESSAGE_CREATE, Message.class);
-    EventType<Message> MESSAGE_UPDATE                            = event(Raw.MESSAGE_UPDATE, Message.class);
-    EventType<DeletedMessage> MESSAGE_DELETE                     = event(Raw.MESSAGE_DELETE, DeletedMessage.class);
-    EventType<BulkDeletedMessages> MESSAGE_DELETE_BULK           = event(Raw.MESSAGE_DELETE_BULK, BulkDeletedMessages.class);
-    //TODO add this event (or remove this field)
-    EventType<Void> GUILD_SYNC                                   = notFired(Raw.GUILD_SYNC);
-    EventType<GatewayGuildBan> GUILD_BAN_ADD                     = event(Raw.GUILD_BAN_ADD, GatewayGuildBan.class);
-    EventType<GatewayGuildBan> GUILD_BAN_REMOVE                  = event(Raw.GUILD_BAN_REMOVE, GatewayGuildBan.class);
-    EventType<ReactionUpdate> MESSAGE_REACTION_ADD               = event(Raw.MESSAGE_REACTION_ADD, ReactionUpdate.class);
-    EventType<ReactionUpdate> MESSAGE_REACTION_REMOVE            = event(Raw.MESSAGE_REACTION_REMOVE, ReactionUpdate.class);
-    EventType<BulkRemovedReactions> MESSAGE_REACTION_REMOVE_ALL  = event(Raw.MESSAGE_REACTION_REMOVE_ALL, BulkRemovedReactions.class);
-    EventType<Presence> PRESENCE_UPDATE                          = event(Raw.PRESENCE_UPDATE, Presence.class);
-    EventType<Ready> READY                                       = event(Raw.READY, Ready.class);
-    EventType<TypingUser> TYPING_START                           = event(Raw.TYPING_START, TypingUser.class);
-    EventType<VoiceState> VOICE_STATE_UPDATE                     = event(Raw.VOICE_STATE_UPDATE, VoiceState.class);
     // @formatter:on
     
     /**
@@ -116,7 +124,7 @@ public interface DiscordEvent {
         @Nonnull
         @CheckReturnValue
         String key();
-    
+        
         /**
          * Class of the event payload.
          *
