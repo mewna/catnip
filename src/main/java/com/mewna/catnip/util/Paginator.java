@@ -17,6 +17,16 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * Utility class for iterating paginated endpoints, handling fetching the
+ * next objects automatically, until a given limit is reached or no more
+ * entities can be fetched.
+ *
+ * @param <T>
+ *
+ * @author natanbc
+ * @since 10/8/18.
+ */
 public class Paginator<T> {
     private final Function<JsonObject, T> mapper;
     private final BiFunction<String, Integer, CompletionStage<JsonArray>> fetchNext;
@@ -36,11 +46,35 @@ public class Paginator<T> {
         requestSize = maxRequestSize;
     }
     
+    /**
+     * Sets a limit to how many objects will be requested.
+     * <br>Only affects future calls to methods that start a
+     * pagination.
+     * <br>The actual amount of entities fetched may be smaller
+     * than the limit.
+     *
+     * @param limit Maximum amount of entities to fetch.
+     *
+     * @return {@code this}, for chaining calls.
+     */
     public Paginator<T> limit(@Nonnegative final int limit) {
         this.limit = limit;
+        //if limit < maxRequestSize we can optimize it a bit,
+        //otherwise just use max size to do as few requests
+        //as possible
+        requestSize = Math.min(maxRequestSize, limit);
         return this;
     }
     
+    /**
+     * Sets how many entities to fetch per request.
+     * <br>Usually you don't need to touch this method,
+     * as an appropriate value will be chosen by default.
+     *
+     * @param requestSize Amount of entities to fetch per request.
+     *
+     * @return {@code this}, for chaining calls.
+     */
     public Paginator<T> requestSize(@Nonnegative final int requestSize) {
         if(requestSize > maxRequestSize) {
             throw new IllegalArgumentException("Request size (" + requestSize +
@@ -65,15 +99,16 @@ public class Paginator<T> {
     
     @Nonnull
     @CheckReturnValue
-    private CompletionStage<Void> fetch(@Nonnull final Consumer<T> action) {
-        return fetch(null, new AtomicInteger(), action);
+    protected CompletionStage<Void> fetch(@Nonnull final Consumer<T> action) {
+        return fetch(null, new AtomicInteger(), action, limit, requestSize);
     }
     
     @Nonnull
     @CheckReturnValue
-    private CompletionStage<Void> fetch(@Nullable final String id, @Nonnull final AtomicInteger fetched,
-                                        @Nonnull final Consumer<T> action) {
-        return fetchNext.apply(id, requestSize).thenCompose(array -> {
+    protected CompletionStage<Void> fetch(@Nullable final String id, @Nonnull final AtomicInteger fetched,
+                                        @Nonnull final Consumer<T> action, @Nonnegative final int limit,
+                                        @Nonnegative final int requestSize) {
+        return fetchNext.apply(id, Math.min(requestSize, limit - fetched.get())).thenCompose(array -> {
             T last = null;
             for(final Object object : array) {
                 if(!(object instanceof JsonObject)) {
@@ -90,7 +125,7 @@ public class Paginator<T> {
             if(array.size() < requestSize || last == null) {
                 return CompletableFuture.completedFuture(null);
             }
-            return fetch(idOf.apply(last), fetched, action);
+            return fetch(idOf.apply(last), fetched, action, limit, requestSize);
         });
     }
 }
