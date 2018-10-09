@@ -585,7 +585,12 @@ public final class EntityBuilder {
             joinedAt = parseTimestamp(data.getString("joined_at"));
         } else {
             // This will only happen during GUILD_MEMBER_REMOVE afaik, but is this the right solution?
-            joinedAt = null;
+            final Member cachedMember = catnip.cache().member(guildId, id);
+            if(cachedMember != null) {
+                joinedAt = cachedMember.joinedAt();
+            } else {
+                joinedAt = null;
+            }
         }
         return MemberImpl.builder()
                 .catnip(catnip)
