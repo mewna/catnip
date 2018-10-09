@@ -84,6 +84,14 @@ public class Paginator<T> {
         return this;
     }
     
+    /**
+     * Fetches up to {@link #limit(int) limit} entities, returning a list
+     * containing all of them.
+     * <br><b>This method will keep all entities in memory</b>, so for unbounded
+     * pagination it should be avoided.
+     *
+     * @return A list containing all the fetched entities.
+     */
     @Nonnull
     @CheckReturnValue
     public CompletionStage<List<T>> fetch() {
@@ -91,8 +99,20 @@ public class Paginator<T> {
         return fetch(list::add).thenApply(__ -> Collections.unmodifiableList(list));
     }
     
+    /**
+     * Fetches up to {@link #limit(int) limit} entities, providing them to a
+     * given callback.
+     * <br>This method will not cache the provided entities, so it's
+     * recommended for unbounded pagination.
+     * <br>If the provided callback throws an exception, <b>pagination
+     * will stop</b> and the returned {@link CompletionStage completion stage}
+     * will be failed.
+     *
+     * @param action Callback for fetched entities.
+     *
+     * @return A completion stage representing the end of the iteration.
+     */
     @Nonnull
-    @CheckReturnValue
     public CompletionStage<Void> forEach(@Nonnull final Consumer<T> action) {
         return fetch(action);
     }
