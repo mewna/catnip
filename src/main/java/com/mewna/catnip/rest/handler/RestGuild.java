@@ -320,6 +320,8 @@ public class RestGuild extends RestHandler {
                 .thenApply(getEntityBuilder()::createAuditLog);
     }
     
+    //TODO make public when we add raw methods for the other routes
+    //keeping this private for consistency with the rest of the methods
     @Nonnull
     @CheckReturnValue
     private CompletableFuture<JsonObject> getAuditLogRaw(@Nonnull final String guildId, @Nullable final String userId,
