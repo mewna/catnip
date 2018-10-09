@@ -17,6 +17,8 @@ import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.guild.PartialGuild;
 import com.mewna.catnip.util.pagination.AuditLogPaginator;
+import com.mewna.catnip.util.pagination.MemberPaginator;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
@@ -108,27 +110,30 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<List<Member>> listGuildMembers(@Nonnull final String guildId) {
-        return listGuildMembers(guildId, 1, "0");
+    public MemberPaginator listGuildMembers(@Nonnull final String guildId) {
+        return new MemberPaginator(getEntityBuilder(), guildId) {
+            @Nonnull
+            @Override
+            protected CompletionStage<JsonArray> fetchNext(@Nonnull final RequestState<Member> state, @Nullable final String lastId, final int requestSize) {
+                return listGuildMembersRaw(guildId, state.entitiesToFetch(), lastId);
+            }
+        };
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<List<Member>> listGuildMembers(@Nonnull final String guildId, @Nonnegative final int limit) {
-        return listGuildMembers(guildId, limit, "0");
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    public CompletableFuture<List<Member>> listGuildMembers(@Nonnull final String guildId, @Nonnull final String after) {
-        return listGuildMembers(guildId, 1, after);
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    @SuppressWarnings("WeakerAccess")
     public CompletableFuture<List<Member>> listGuildMembers(@Nonnull final String guildId, @Nonnegative final int limit,
                                                             @Nullable final String after) {
+        return listGuildMembersRaw(guildId, limit, after)
+                .thenApply(mapObjectContents(o -> getEntityBuilder().createMember(guildId, o)));
+    }
+    
+    //TODO make public when we add raw methods for the other routes
+    //keeping this private for consistency with the rest of the methods
+    @Nonnull
+    @CheckReturnValue
+    private CompletableFuture<JsonArray> listGuildMembersRaw(@Nonnull final String guildId, @Nonnegative final int limit,
+                                                             @Nullable final String after) {
         final Collection<String> params = new ArrayList<>();
         if(limit > 0) {
             params.add("limit=" + limit);
@@ -142,8 +147,7 @@ public class RestGuild extends RestHandler {
         }
         return getCatnip().requester().queue(new OutboundRequest(Routes.LIST_GUILD_MEMBERS.withMajorParam(guildId).withQueryString(query),
                 ImmutableMap.of(), null))
-                .thenApply(ResponsePayload::array)
-                .thenApply(mapObjectContents(o -> getEntityBuilder().createMember(guildId, o)));
+                .thenApply(ResponsePayload::array);
     }
     
     @Nonnull
@@ -257,24 +261,24 @@ public class RestGuild extends RestHandler {
                 .thenApply(mapObjectContents(getEntityBuilder()::createVoiceRegion));
     }
     
-    public AuditLogPaginator getAuditLog(@Nonnull final String guildId) {
+    public AuditLogPaginator getGuildAuditLog(@Nonnull final String guildId) {
         return new AuditLogPaginator(getEntityBuilder()) {
             @Nonnull
             @CheckReturnValue
             @Override
             protected CompletionStage<JsonObject> fetchNext(@Nonnull final RequestState<AuditLogEntry> state, @Nullable final String lastId,
                                                             @Nonnegative final int requestSize) {
-                return getAuditLogRaw(guildId, state.extra("user"), lastId, state.extra("type"), requestSize);
+                return getGuildAuditLogRaw(guildId, state.extra("user"), lastId, state.extra("type"), requestSize);
             }
         };
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<List<AuditLogEntry>> getAuditLog(@Nonnull final String guildId, @Nullable final String userId,
-                                                         @Nullable final String beforeEntryId, @Nullable final ActionType type,
-                                                         @Nonnegative final int limit) {
-        return getAuditLogRaw(guildId, userId, beforeEntryId, type, limit)
+    public CompletableFuture<List<AuditLogEntry>> getGuildAuditLog(@Nonnull final String guildId, @Nullable final String userId,
+                                                              @Nullable final String beforeEntryId, @Nullable final ActionType type,
+                                                              @Nonnegative final int limit) {
+        return getGuildAuditLogRaw(guildId, userId, beforeEntryId, type, limit)
                 .thenApply(getEntityBuilder()::createAuditLog);
     }
     
@@ -282,7 +286,7 @@ public class RestGuild extends RestHandler {
     //keeping this private for consistency with the rest of the methods
     @Nonnull
     @CheckReturnValue
-    private CompletableFuture<JsonObject> getAuditLogRaw(@Nonnull final String guildId, @Nullable final String userId,
+    private CompletableFuture<JsonObject> getGuildAuditLogRaw(@Nonnull final String guildId, @Nullable final String userId,
                                                          @Nullable final String beforeEntryId, @Nullable final ActionType type,
                                                          @Nonnegative final int limit) {
         final Collection<String> params = new ArrayList<>();
