@@ -48,7 +48,12 @@ public class DispatchEmitter {
                 break;
             }
             case Raw.MESSAGE_UPDATE: {
-                catnip.eventBus().publish(type, entityBuilder.createMessage(data));
+                if(data.getJsonObject("author", null) == null) {
+                    // Embeds update, emit the special case
+                    catnip.eventBus().publish(Raw.MESSAGE_EMBEDS_UPDATE, entityBuilder.createMessageEmbedUpdate(data));
+                } else {
+                    catnip.eventBus().publish(type, entityBuilder.createMessage(data));
+                }
                 break;
             }
             case Raw.MESSAGE_DELETE: {
