@@ -6,7 +6,7 @@
 A Discord API wrapper in Java. Fully async / reactive, built on top of
 [vert.x](https://vertx.io).
 
-We have a Discord! https://discord.gg/kCsBCjK
+We have a Discord! https://discord.gg/QTZajS
 
 ## Installation
 
