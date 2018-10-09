@@ -38,91 +38,91 @@ public class DispatchEmitter {
         switch(type) {
             // Lifecycle
             case Raw.READY: {
-                catnip.eventBus().send(type, entityBuilder.createReady(data));
+                catnip.eventBus().publish(type, entityBuilder.createReady(data));
                 break;
             }
             
             // Messages
             case Raw.MESSAGE_CREATE: {
-                catnip.eventBus().send(type, entityBuilder.createMessage(data));
+                catnip.eventBus().publish(type, entityBuilder.createMessage(data));
                 break;
             }
             case Raw.MESSAGE_UPDATE: {
-                catnip.eventBus().send(type, entityBuilder.createMessage(data));
+                catnip.eventBus().publish(type, entityBuilder.createMessage(data));
                 break;
             }
             case Raw.MESSAGE_DELETE: {
-                catnip.eventBus().send(type, entityBuilder.createDeletedMessage(data));
+                catnip.eventBus().publish(type, entityBuilder.createDeletedMessage(data));
                 break;
             }
             case Raw.MESSAGE_DELETE_BULK: {
-                catnip.eventBus().send(type, entityBuilder.createBulkDeletedMessages(data));
+                catnip.eventBus().publish(type, entityBuilder.createBulkDeletedMessages(data));
                 break;
             }
             case Raw.TYPING_START: {
-                catnip.eventBus().send(type, entityBuilder.createTypingUser(data));
+                catnip.eventBus().publish(type, entityBuilder.createTypingUser(data));
                 break;
             }
             case Raw.MESSAGE_REACTION_REMOVE_ALL: {
-                catnip.eventBus().send(type, entityBuilder.createBulkRemovedReactions(data));
+                catnip.eventBus().publish(type, entityBuilder.createBulkRemovedReactions(data));
                 break;
             }
             case Raw.MESSAGE_REACTION_REMOVE: {
-                catnip.eventBus().send(type, entityBuilder.createReactionUpdate(data));
+                catnip.eventBus().publish(type, entityBuilder.createReactionUpdate(data));
                 break;
             }
             case Raw.MESSAGE_REACTION_ADD: {
-                catnip.eventBus().send(type, entityBuilder.createReactionUpdate(data));
+                catnip.eventBus().publish(type, entityBuilder.createReactionUpdate(data));
                 break;
             }
             
             // Channels
             case Raw.CHANNEL_CREATE: {
-                catnip.eventBus().send(type, entityBuilder.createChannel(data));
+                catnip.eventBus().publish(type, entityBuilder.createChannel(data));
                 break;
             }
             case Raw.CHANNEL_UPDATE: {
-                catnip.eventBus().send(type, entityBuilder.createChannel(data));
+                catnip.eventBus().publish(type, entityBuilder.createChannel(data));
                 break;
             }
             case Raw.CHANNEL_DELETE: {
-                catnip.eventBus().send(type, entityBuilder.createChannel(data));
+                catnip.eventBus().publish(type, entityBuilder.createChannel(data));
                 break;
             }
             
             // Guilds
             case Raw.GUILD_CREATE: {
-                catnip.eventBus().send(type, entityBuilder.createGuild(data));
+                catnip.eventBus().publish(type, entityBuilder.createGuild(data));
                 break;
             }
             case Raw.GUILD_UPDATE: {
-                catnip.eventBus().send(type, entityBuilder.createGuild(data));
+                catnip.eventBus().publish(type, entityBuilder.createGuild(data));
                 break;
             }
             case Raw.GUILD_DELETE: {
-                catnip.eventBus().send(type, entityBuilder.createUnavailableGuild(data));
+                catnip.eventBus().publish(type, entityBuilder.createUnavailableGuild(data));
                 break;
             }
             case Raw.GUILD_BAN_ADD: {
-                catnip.eventBus().send(type, entityBuilder.createGatewayGuildBan(data));
+                catnip.eventBus().publish(type, entityBuilder.createGatewayGuildBan(data));
                 break;
             }
             case Raw.GUILD_BAN_REMOVE: {
-                catnip.eventBus().send(type, entityBuilder.createGatewayGuildBan(data));
+                catnip.eventBus().publish(type, entityBuilder.createGatewayGuildBan(data));
                 break;
             }
             
             // Roles
             case Raw.GUILD_ROLE_CREATE: {
-                catnip.eventBus().send(type, entityBuilder.createRole(data.getString("guild_id"), data.getJsonObject("role")));
+                catnip.eventBus().publish(type, entityBuilder.createRole(data.getString("guild_id"), data.getJsonObject("role")));
                 break;
             }
             case Raw.GUILD_ROLE_UPDATE: {
-                catnip.eventBus().send(type, entityBuilder.createRole(data.getString("guild_id"), data.getJsonObject("role")));
+                catnip.eventBus().publish(type, entityBuilder.createRole(data.getString("guild_id"), data.getJsonObject("role")));
                 break;
             }
             case Raw.GUILD_ROLE_DELETE: {
-                catnip.eventBus().send(type, entityBuilder.createPartialRole(data.getString("guild_id"), data.getString("role_id")));
+                catnip.eventBus().publish(type, entityBuilder.createPartialRole(data.getString("guild_id"), data.getString("role_id")));
                 break;
             }
             
@@ -135,36 +135,36 @@ public class DispatchEmitter {
             
             // Members
             case Raw.GUILD_MEMBER_ADD: {
-                catnip.eventBus().send(type, entityBuilder.createMember(data.getString("guild_id"), data));
+                catnip.eventBus().publish(type, entityBuilder.createMember(data.getString("guild_id"), data));
                 break;
             }
             case Raw.GUILD_MEMBER_REMOVE: {
-                catnip.eventBus().send(type, entityBuilder.createMember(data.getString("guild_id"), data));
+                catnip.eventBus().publish(type, entityBuilder.createMember(data.getString("guild_id"), data));
                 break;
             }
             case Raw.GUILD_MEMBER_UPDATE: {
                 final String guild = data.getString("guild_id");
-                catnip.eventBus().send(type, entityBuilder.createPartialMember(guild, data));
+                catnip.eventBus().publish(type, entityBuilder.createPartialMember(guild, data));
                 break;
             }
             
             // Users
             case Raw.USER_UPDATE: {
-                catnip.eventBus().send(type, entityBuilder.createUser(data));
+                catnip.eventBus().publish(type, entityBuilder.createUser(data));
                 break;
             }
             case Raw.PRESENCE_UPDATE: {
-                catnip.eventBus().send(type, entityBuilder.createPresence(data));
+                catnip.eventBus().publish(type, entityBuilder.createPresence(data));
                 break;
             }
             
             // Voice
             case Raw.VOICE_STATE_UPDATE: {
-                catnip.eventBus().send(type, entityBuilder.createVoiceState(data));
+                catnip.eventBus().publish(type, entityBuilder.createVoiceState(data));
                 break;
             }
             case Raw.VOICE_SERVER_UPDATE: {
-                catnip.eventBus().send(type, entityBuilder.createVoiceServerUpdate(data));
+                catnip.eventBus().publish(type, entityBuilder.createVoiceServerUpdate(data));
                 break;
             }
             
