@@ -73,7 +73,7 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    private static <T> List<T> immutableListOf(@Nullable final JsonArray array, @Nonnull final Function<JsonObject, T> mapper) {
+    public static <T> List<T> immutableListOf(@Nullable final JsonArray array, @Nonnull final Function<JsonObject, T> mapper) {
         if(array == null) {
             return ImmutableList.of();
         }
@@ -88,7 +88,7 @@ public final class EntityBuilder {
         return ImmutableList.copyOf(ret);
     }
     
-    private static <T> Map<String, T> immutableMapOf(@Nullable final JsonArray array,
+    public static <T> Map<String, T> immutableMapOf(@Nullable final JsonArray array,
                                                      @Nonnull final Function<JsonObject, String> keyFunction,
                                                      @Nonnull final Function<JsonObject, T> mapper) {
         if(array == null) {
@@ -114,7 +114,7 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    private static List<String> stringListOf(@Nullable final JsonArray array) {
+    public static List<String> stringListOf(@Nullable final JsonArray array) {
         if(array == null) {
             return Collections.emptyList();
         }
@@ -131,37 +131,37 @@ public final class EntityBuilder {
     
     @Nullable
     @CheckReturnValue
-    private OffsetDateTime parseTimestamp(@Nullable final CharSequence raw) {
+    private static OffsetDateTime parseTimestamp(@Nullable final CharSequence raw) {
         return raw == null ? null : OffsetDateTime.parse(raw);
     }
     
     @Nonnull
     @CheckReturnValue
-    private JsonObject embedFooterToJson(final Footer footer) {
+    private static JsonObject embedFooterToJson(final Footer footer) {
         return new JsonObject().put("icon_url", footer.iconUrl()).put("text", footer.text());
     }
     
     @Nonnull
     @CheckReturnValue
-    private JsonObject embedImageToJson(final Image image) {
+    private static JsonObject embedImageToJson(final Image image) {
         return new JsonObject().put("url", image.url());
     }
     
     @Nonnull
     @CheckReturnValue
-    private JsonObject embedThumbnailToJson(final Thumbnail thumbnail) {
+    private static JsonObject embedThumbnailToJson(final Thumbnail thumbnail) {
         return new JsonObject().put("url", thumbnail.url());
     }
     
     @Nonnull
     @CheckReturnValue
-    private JsonObject embedAuthorToJson(final Author author) {
+    private static JsonObject embedAuthorToJson(final Author author) {
         return new JsonObject().put("name", author.name()).put("url", author.url()).put("icon_url", author.iconUrl());
     }
     
     @Nonnull
     @CheckReturnValue
-    private JsonObject embedFieldToJson(final Field field) {
+    private static JsonObject embedFieldToJson(final Field field) {
         return new JsonObject().put("name", field.name()).put("value", field.value()).put("inline", field.inline());
     }
     
@@ -195,7 +195,7 @@ public final class EntityBuilder {
             o.put("author", embedAuthorToJson(embed.author()));
         }
         if(!embed.fields().isEmpty()) {
-            o.put("fields", new JsonArray(embed.fields().stream().map(this::embedFieldToJson).collect(Collectors.toList())));
+            o.put("fields", new JsonArray(embed.fields().stream().map(EntityBuilder::embedFieldToJson).collect(Collectors.toList())));
         }
         
         return o;
@@ -203,7 +203,7 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    private FieldImpl createField(@Nonnull final JsonObject data) {
+    private static FieldImpl createField(@Nonnull final JsonObject data) {
         return FieldImpl.builder()
                 .name(data.getString("name"))
                 .value(data.getString("value"))
@@ -271,7 +271,7 @@ public final class EntityBuilder {
                 .video(video)
                 .provider(provider)
                 .author(author)
-                .fields(immutableListOf(data.getJsonArray("fields"), this::createField))
+                .fields(immutableListOf(data.getJsonArray("fields"), EntityBuilder::createField))
                 .build();
     }
     
@@ -1034,44 +1034,30 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public AuditLogEntry createAuditLogEntry(@Nonnull final JsonObject data) {
+    public AuditLogEntry createAuditLogEntry(@Nonnull final JsonObject data, @Nonnull final Map<String, Webhook> webhooks,
+                                             @Nonnull final Map<String, User> users) {
         final ActionType type = ActionType.byKey(data.getInteger("action_type"));
         return AuditLogEntryImpl.builder()
                 .catnip(catnip)
                 .id(data.getString("id"))
-                .userId(data.getString("user_id"))
+                .user(users.get(data.getString("user_id")))
                 .targetId(data.getString("target_id"))
+                .webhook(webhooks.get(data.getString("target_id")))
                 .type(type)
                 .reason(data.getString("reason"))
-                .changes(addArrayToList(data, "changes", this::createAuditLogChange))
+                .changes(immutableListOf(data.getJsonArray("changes"), this::createAuditLogChange))
                 .options(data.containsKey("options") ? createOptionalEntryInfo(data.getJsonObject("options"), type) : null)
                 .build();
     }
     
     @Nonnull
     @CheckReturnValue
-    public AuditLog createAuditLog(@Nonnull final JsonObject data) {
-        return AuditLogImpl.builder()
-                .catnip(catnip)
-                .foundWebhooks(addArrayToList(data, "webhooks", this::createWebhook))
-                .foundUsers(addArrayToList(data, "users", this::createUser))
-                .auditLogEntries(addArrayToList(data, "audit_log_entries", this::createAuditLogEntry))
-                .build();
-    }
-    
-    private <T> List<T> addArrayToList(final JsonObject data, final String key, final Function<JsonObject, T> mapper) {
-        final List<T> list = new ArrayList<>();
-        if (!data.containsKey(key)) {
-            return list;
-        }
-        final JsonArray array = data.getJsonArray(key);
-        final Iterator<Object> iter = array.iterator();
-        int counter = 0;
-        while (iter.hasNext()) {
-            list.add(mapper.apply(array.getJsonObject(counter)));
-            counter++;
-            iter.next();
-        }
-        return list;
+    public List<AuditLogEntry> createAuditLog(@Nonnull final JsonObject data) {
+        final Map<String, Webhook> webhooks = immutableMapOf(data.getJsonArray("webhooks"), x -> x.getString("id"), this::createWebhook);
+        final Map<String, User> users = immutableMapOf(data.getJsonArray("users"), x -> x.getString("id"), this::createUser);
+        
+        return immutableListOf(data.getJsonArray("audit_log_entries"), e ->
+                createAuditLogEntry(e, webhooks, users)
+        );
     }
 }

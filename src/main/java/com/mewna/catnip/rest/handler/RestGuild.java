@@ -2,31 +2,36 @@ package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
 import com.mewna.catnip.entity.channel.GuildChannel;
+import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Guild.GuildEditFields;
 import com.mewna.catnip.entity.guild.GuildBan;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.guild.audit.ActionType;
-import com.mewna.catnip.entity.guild.audit.AuditLog;
+import com.mewna.catnip.entity.guild.audit.AuditLogEntry;
+import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.VoiceRegion;
+import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.guild.PartialGuild;
+import com.mewna.catnip.util.Paginator;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 /**
  * @author amy
@@ -258,11 +263,70 @@ public class RestGuild extends RestHandler {
                 .thenApply(mapObjectContents(getEntityBuilder()::createVoiceRegion));
     }
     
+    public Paginator<AuditLogEntry> getAuditLog(@Nonnull final String guildId) {
+        //discord provides audit logs in a stupid format so we have to do this
+        return new Paginator<AuditLogEntry>(
+                __ -> {
+                    throw new UnsupportedOperationException("Should not get called since fetch() is overriden");
+                },
+                (__, ___) -> {
+                    throw new UnsupportedOperationException("Should not get called since fetch() is overriden");
+                },
+                __ -> {
+                    throw new UnsupportedOperationException("Should not get called since fetch() is overriden");
+                },
+                100
+        ) {
+            @Nonnull
+            @Override
+            protected CompletionStage<Void> fetch(@Nullable final String id, @Nonnull final AtomicInteger fetched, @Nonnull final Consumer<AuditLogEntry> action, final int limit, final int requestSize) {
+                return getAuditLogRaw(guildId, null, null, null, Math.min(requestSize, limit - fetched.get())).thenCompose(logs -> {
+                    AuditLogEntry last = null;
+                    
+                    //inlined EntityBuilder.immutableListOf and EntityBuilder.createAuditLog
+                    //this is done so we can do less allocations and only parse the entries
+                    //we need to.
+                    final EntityBuilder builder = getEntityBuilder();
+                    final Map<String, Webhook> webhooks = EntityBuilder.immutableMapOf(logs.getJsonArray("webhooks"), x -> x.getString("id"), builder::createWebhook);
+                    final Map<String, User> users = EntityBuilder.immutableMapOf(logs.getJsonArray("users"), x -> x.getString("id"), builder::createUser);
+                    final JsonArray entries = logs.getJsonArray("audit_log_entries");
+                    
+                    for(final Object object : entries) {
+                        if(!(object instanceof JsonObject)) {
+                            throw new IllegalArgumentException("Expected all values to be JsonObjects, but found " +
+                                    (object == null ? "null" : object.getClass()));
+                        }
+                        last = builder.createAuditLogEntry((JsonObject)object, webhooks, users);
+                        action.accept(last);
+                        if(fetched.incrementAndGet() == limit) {
+                            return CompletableFuture.completedFuture(null);
+                        }
+                    }
+                    if(entries.size() < requestSize || last == null) {
+                        return CompletableFuture.completedFuture(null);
+                    }
+                    return fetch(last.id(), fetched, action, limit, requestSize);
+                });
+            }
+        };
+    }
+    
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<AuditLog> getGuildAuditLog(@Nonnull final String guildId, @Nullable final String userId,
-                                                        @Nullable final String beforeEntryId, @Nullable final ActionType type,
-                                                        @Nonnegative final int limit) {
+    public CompletableFuture<List<AuditLogEntry>> getAuditLog(@Nonnull final String guildId, @Nullable final String userId,
+                                                         @Nullable final String beforeEntryId, @Nullable final ActionType type,
+                                                         @Nonnegative final int limit) {
+        return getAuditLogRaw(guildId, userId, beforeEntryId, type, limit)
+                .thenApply(getEntityBuilder()::createAuditLog);
+    }
+    
+    //TODO make public when we add raw methods for the other routes
+    //keeping this private for consistency with the rest of the methods
+    @Nonnull
+    @CheckReturnValue
+    private CompletableFuture<JsonObject> getAuditLogRaw(@Nonnull final String guildId, @Nullable final String userId,
+                                                         @Nullable final String beforeEntryId, @Nullable final ActionType type,
+                                                         @Nonnegative final int limit) {
         final Collection<String> params = new ArrayList<>();
         if (userId != null) {
             params.add("user_id=" + userId);
@@ -282,7 +346,6 @@ public class RestGuild extends RestHandler {
         }
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_AUDIT_LOG.withMajorParam(guildId).withQueryString(query),
                 ImmutableMap.of(), null))
-                .thenApply(ResponsePayload::object)
-                .thenApply(getEntityBuilder()::createAuditLog);
+                .thenApply(ResponsePayload::object);
     }
 }
