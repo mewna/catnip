@@ -417,6 +417,22 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public ChannelPinsUpdate createChannelPinsUpdate(@Nonnull final JsonObject data) {
+        final OffsetDateTime lastPinTimestamp;
+        if(data.getString("last_pin_timestamp", null) != null) {
+            lastPinTimestamp = parseTimestamp(data.getString("last_pin_timestamp"));
+        } else {
+            lastPinTimestamp = null;
+        }
+        return ChannelPinsUpdateImpl.builder()
+                .catnip(catnip)
+                .channelId(data.getString("channel_id"))
+                .lastPinTimestamp(lastPinTimestamp)
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public PermissionOverride createPermissionOverride(@Nonnull final JsonObject data) {
         return PermissionOverrideImpl.builder()
                 .catnip(catnip)
