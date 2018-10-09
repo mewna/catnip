@@ -31,38 +31,26 @@ import java.util.Set;
  * @author amy
  * @since 8/31/18.
  */
+@Getter
 @SuppressWarnings("OverlyCoupledClass")
 @Accessors(fluent = true, chain = true)
 public class CatnipImpl implements Catnip {
-    @Getter
     private final Vertx vertx;
-    // TODO: Allow changing the backend
-    @Getter
     private final RestRequester requester;
-    @Getter
     private final String token;
-    @Getter
     private final ShardManager shardManager;
-    @Getter
     private final SessionManager sessionManager;
-    @Getter
     private final Ratelimiter gatewayRatelimiter;
-    @Getter
     private final Rest rest = new Rest(this);
-    @Getter
     private final LogAdapter logAdapter;
-    @Getter
     private final ExtensionManager extensionManager = new DefaultExtensionManager(this);
-    @Getter
     private final EventBuffer eventBuffer;
-    @Getter
     private final EntityCacheWorker cache;
-    @Getter
     private final Set<CacheFlag> cacheFlags;
     
     public CatnipImpl(@Nonnull final Vertx vertx, @Nonnull final CatnipOptions options) {
         this.vertx = vertx;
-        requester = new RestRequester(this);
+        requester = new RestRequester(this, options.restBucketBackend());
         token = options.token();
         shardManager = options.shardManager();
         sessionManager = options.sessionManager();

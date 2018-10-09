@@ -4,6 +4,7 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.rest.Routes.Route;
+import com.mewna.catnip.rest.bucket.BucketBackend;
 import com.mewna.catnip.util.CatnipMeta;
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
@@ -48,9 +49,11 @@ public class RestRequester {
     private final Catnip catnip;
     private final OkHttpClient _http = new OkHttpClient();
     private final Collection<Bucket> submittedBuckets = new ConcurrentHashSet<>();
+    private final BucketBackend bucketBackend;
     
-    public RestRequester(final Catnip catnip) {
+    public RestRequester(final Catnip catnip, final BucketBackend bucketBackend) {
         this.catnip = catnip;
+        this.bucketBackend = bucketBackend;
     }
     
     public CompletableFuture<ResponsePayload> queue(final OutboundRequest r) {
@@ -60,7 +63,7 @@ public class RestRequester {
     }
     
     private Bucket getBucket(final String key) {
-        return buckets.computeIfAbsent(key, k -> new Bucket(k, 5, 1, -1));
+        return buckets.computeIfAbsent(key, Bucket::new);
     }
     
     private void handleResponse(final OutboundRequest r, final Bucket bucket, final int statusCode, final String statusMessage,
@@ -96,12 +99,12 @@ public class RestRequester {
                 // We hit a global ratelimit, update
                 final Bucket global = getBucket("GLOBAL");
                 final long retry = Long.parseLong(headers.get("Retry-After"));
-                global.setRemaining(0);
-                global.setLimit(1);
+                global.remaining(0);
+                global.limit(1);
                 // 500ms buffer for safety
                 final long globalReset = System.currentTimeMillis() + retry + 500L;
-                // CatnipImpl.vertx().setTimer(globalReset, __ -> global.reset());
-                global.setReset(TimeUnit.MILLISECONDS.toSeconds(globalReset));
+                // CatnipImpl.vertx().setTimer(globalReset, __ -> global.resetBucket());
+                global.reset(TimeUnit.MILLISECONDS.toSeconds(globalReset));
                 bucket.retry(r);
             } else if(ratelimited) {
                 // We got ratelimited, back the fuck off
@@ -149,14 +152,14 @@ public class RestRequester {
         final Bucket bucket = getBucket(bucketRoute.baseRoute());
         final Bucket global = getBucket("GLOBAL");
         
-        if(global.getRemaining() == 0 && global.getReset() < System.currentTimeMillis()) {
-            global.reset();
+        if(global.remaining() == 0 && global.reset() < System.currentTimeMillis()) {
+            global.resetBucket();
         }
         
-        if(global.getRemaining() > 0) {
+        if(global.remaining() > 0) {
             // Can request
-            if(bucket.getRemaining() == 0 && bucket.getReset() < System.currentTimeMillis()) {
-                bucket.reset();
+            if(bucket.remaining() == 0 && bucket.reset() < System.currentTimeMillis()) {
+                bucket.resetBucket();
             }
             // add/remove/remove_all routes for reactions have a meme 1/0.25s
             // ratelimit, which isn't accurately reflected in the responses
@@ -166,7 +169,7 @@ public class RestRequester {
             // run into ~(N-1) 429s. I *think* this is okay?
             final boolean hasMemeReactionRatelimits = route.method() != GET
                     && route.baseRoute().contains("/reactions/");
-            if(bucket.getRemaining() > 0 || hasMemeReactionRatelimits) {
+            if(bucket.remaining() > 0 || hasMemeReactionRatelimits) {
                 // Do request and update bucket
                 catnip.logAdapter().debug("Making request: {} (bucket {})", API_BASE + route.baseRoute(), bucket.route);
                 // v.x is dumb and doesn't support multipart, so we use okhttp instead /shrug
@@ -211,11 +214,11 @@ public class RestRequester {
                 }
             } else {
                 // Add an extra 500ms buffer to be safe
-                final long wait = bucket.getReset() - System.currentTimeMillis() + 500L;
+                final long wait = bucket.reset() - System.currentTimeMillis() + 500L;
                 catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
                         bucketRoute.baseRoute(), route.baseRoute(), wait);
                 catnip.vertx().setTimer(wait, __ -> {
-                    bucket.reset();
+                    bucket.resetBucket();
                     bucket.retry(r);
                 });
             }
@@ -223,11 +226,11 @@ public class RestRequester {
             // Global rl, retry later
             // Add an extra 500ms buffer to be safe
             // TODO: Properly calculate latency
-            final long wait = global.getReset() - System.currentTimeMillis() + 500L;
+            final long wait = global.reset() - System.currentTimeMillis() + 500L;
             catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
                     bucketRoute.baseRoute(), route.baseRoute(), wait);
             catnip.vertx().setTimer(wait, __ -> {
-                global.reset();
+                global.resetBucket();
                 bucket.retry(r);
             });
         }
@@ -333,22 +336,46 @@ public class RestRequester {
          */
         private final String route;
         private final Deque<OutboundRequest> queue = new ConcurrentLinkedDeque<>();
-        private long limit;
-        private long remaining;
-        private long reset;
         
-        void reset() {
-            remaining = limit;
-            reset = -1L;
+        long remaining() {
+            return bucketBackend.remaining(route);
+        }
+        
+        @SuppressWarnings("SameParameterValue")
+        void remaining(final long l) {
+            bucketBackend.remaining(route, l);
+        }
+        
+        long reset() {
+            return bucketBackend.reset(route);
+        }
+        
+        void reset(final long l) {
+            bucketBackend.reset(route, l);
+        }
+        
+        @SuppressWarnings("unused")
+        long limit() {
+            return bucketBackend.limit(route);
+        }
+        
+        @SuppressWarnings("SameParameterValue")
+        void limit(final long l) {
+            bucketBackend.limit(route, l);
+        }
+        
+        void resetBucket() {
+            bucketBackend.remaining(route, bucketBackend.limit(route));
+            bucketBackend.reset(route, -1L);
         }
         
         void updateFromHeaders(final MultiMap headers) {
             if(!(headers.contains("X-Ratelimit-Limit") && headers.contains("X-Ratelimit-Remaining") && headers.contains("X-Ratelimit-Reset"))) {
                 return;
             }
-            limit = Integer.parseInt(headers.get("X-Ratelimit-Limit"));
-            remaining = Integer.parseInt(headers.get("X-Ratelimit-Remaining"));
-            reset = TimeUnit.SECONDS.toMillis(Integer.parseInt(headers.get("X-Ratelimit-Reset")));
+            bucketBackend.limit(route, Integer.parseInt(headers.get("X-Ratelimit-Limit")));
+            bucketBackend.remaining(route, Integer.parseInt(headers.get("X-Ratelimit-Remaining")));
+            bucketBackend.reset(route, TimeUnit.SECONDS.toMillis(Integer.parseInt(headers.get("X-Ratelimit-Reset"))));
         }
         
         void queue(final Future<ResponsePayload> future, final OutboundRequest request) {
