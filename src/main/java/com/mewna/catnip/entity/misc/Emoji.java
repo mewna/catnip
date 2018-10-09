@@ -123,7 +123,7 @@ public interface Emoji extends Snowflake {
      * <br>If this emoji is {@link CustomEmoji custom}, the following checks,
      * in order, are applied:
      * <ul>
-     *     <li>id equality</li>
+     *     <li>{@link Emoji#id() id} equality</li>
      *     <li>{@link Emoji#forMessage() forMessage()} equality</li>
      *     <li>{@link Emoji#forReaction()} forReaction()} equality</li>
      * </ul>
