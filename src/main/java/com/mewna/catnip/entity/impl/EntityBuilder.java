@@ -720,6 +720,17 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public EmojiUpdate createGuildEmojisUpdate(@Nonnull final JsonObject data) {
+        return EmojiUpdateImpl.builder()
+                .catnip(catnip)
+                .guildId(data.getString("guild_id"))
+                .emoji(immutableListOf(data.getJsonArray("emojis"),
+                        e -> createCustomEmoji(data.getString("guild_id"), e)))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public Attachment createAttachment(@Nonnull final JsonObject data) {
         return AttachmentImpl.builder()
                 .catnip(catnip)
