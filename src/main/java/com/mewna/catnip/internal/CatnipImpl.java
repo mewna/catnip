@@ -103,6 +103,7 @@ public class CatnipImpl implements Catnip {
         codec(TypingUserImpl.class);
         codec(ReactionUpdateImpl.class);
         codec(BulkRemovedReactionsImpl.class);
+        codec(MessageEmbedUpdateImpl.class);
         
         // Channels
         codec(CategoryImpl.class);
