@@ -1,6 +1,7 @@
 package com.mewna.catnip.shard;
 
 import com.mewna.catnip.entity.channel.Channel;
+import com.mewna.catnip.entity.channel.ChannelPinsUpdate;
 import com.mewna.catnip.entity.guild.*;
 import com.mewna.catnip.entity.message.*;
 import com.mewna.catnip.entity.misc.Ready;
@@ -28,6 +29,7 @@ public interface DiscordEvent {
     EventType<Channel> CHANNEL_CREATE                            = event(Raw.CHANNEL_CREATE, Channel.class);
     EventType<Channel> CHANNEL_UPDATE                            = event(Raw.CHANNEL_UPDATE, Channel.class);
     EventType<Channel> CHANNEL_DELETE                            = event(Raw.CHANNEL_DELETE, Channel.class);
+    EventType<ChannelPinsUpdate> CHANNEL_PINS_UPDATE             = event(Raw.CHANNEL_PINS_UPDATE, ChannelPinsUpdate.class);
     EventType<Guild> GUILD_CREATE                                = event(Raw.GUILD_CREATE, Guild.class);
     EventType<Guild> GUILD_UPDATE                                = event(Raw.GUILD_UPDATE, Guild.class);
     EventType<UnavailableGuild> GUILD_DELETE                     = event(Raw.GUILD_DELETE, UnavailableGuild.class);
@@ -68,6 +70,7 @@ public interface DiscordEvent {
         String CHANNEL_CREATE               = "CHANNEL_CREATE";
         String CHANNEL_DELETE               = "CHANNEL_DELETE";
         String CHANNEL_UPDATE               = "CHANNEL_UPDATE";
+        String CHANNEL_PINS_UPDATE          = "CHANNEL_PINS_UPDATE";
         String GUILD_CREATE                 = "GUILD_CREATE";
         String GUILD_DELETE                 = "GUILD_DELETE";
         String GUILD_UPDATE                 = "GUILD_UPDATE";
