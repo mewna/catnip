@@ -67,10 +67,11 @@ public interface Member extends Snowflake {
     /**
      * When the user joined the server last.
      * <br>Members who have joined, left, then rejoined will only have the most recent join exposed.
+     * <br>This may be null under some conditions, ex. a member leaving a guild.
      *
      * @return The {@link OffsetDateTime date and time} the member joined the guild.
      */
-    @Nonnull
+    @Nullable
     OffsetDateTime joinedAt();
     
     /**
