@@ -164,6 +164,7 @@ public final class Routes {
     public static final Route MODIFY_CURRENT_USER                 = new Route(PATCH,  "/users/@me");
     public static final Route GET_USER_DMS                        = new Route(GET,    "/users/@me/channels");
     public static final Route CREATE_DM                           = new Route(POST,   "/users/@me/channels");
+    public static final Route GET_CURRENT_USER_GUILDS             = new Route(GET,    "/users/@me/guilds");
     public static final Route LEAVE_GUILD                         = new Route(DELETE, "/users/@me/guilds/{guild.id}");
     public static final Route GET_USER                            = new Route(GET,    "/users/{user.id}");
 

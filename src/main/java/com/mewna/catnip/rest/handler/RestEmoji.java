@@ -6,10 +6,12 @@ import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
+import com.mewna.catnip.util.Utils;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
+import java.net.URI;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
@@ -50,7 +52,8 @@ public class RestEmoji extends RestHandler {
     
     @Nonnull
     public CompletableFuture<CustomEmoji> createGuildEmoji(@Nonnull final String guildId, @Nonnull final String name,
-                                                           @Nonnull final String base64Image, @Nonnull final Collection<String> roles) {
+                                                           @Nonnull final URI imageData, @Nonnull final Collection<String> roles) {
+        Utils.validateImageUri(imageData);
         final JsonArray rolesArray;
         if(roles.isEmpty()) {
             rolesArray = null;
@@ -64,8 +67,7 @@ public class RestEmoji extends RestHandler {
                         ImmutableMap.of(),
                         new JsonObject()
                                 .put("name", name)
-                                //note: even though image/jpeg is hardcoded, png/gifs are still supported
-                                .put("image", "data:image/jpeg;base64," + base64Image)
+                                .put("image", imageData.toString())
                                 .put("roles", rolesArray)
                 ))
                 .thenApply(ResponsePayload::object)
@@ -76,7 +78,7 @@ public class RestEmoji extends RestHandler {
     @Nonnull
     public CompletableFuture<CustomEmoji> createGuildEmoji(@Nonnull final String guildId, @Nonnull final String name,
                                                            @Nonnull final byte[] image, @Nonnull final Collection<String> roles) {
-        return createGuildEmoji(guildId, name, Base64.getEncoder().encodeToString(image), roles);
+        return createGuildEmoji(guildId, name, Utils.asImageDataUri(image), roles);
     }
     
     @Nonnull
