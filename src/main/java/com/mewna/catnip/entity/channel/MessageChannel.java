@@ -1,8 +1,9 @@
 package com.mewna.catnip.entity.channel;
 
 import com.mewna.catnip.entity.message.Embed;
-import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.message.Message;
+import com.mewna.catnip.entity.message.MessageOptions;
+import com.mewna.catnip.entity.misc.Emoji;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -22,6 +23,11 @@ public interface MessageChannel extends Channel {
     @Nonnull
     default CompletableFuture<Message> sendMessage(@Nonnull final Message message) {
         return catnip().rest().channel().sendMessage(id(), message);
+    }
+    
+    @Nonnull
+    default CompletableFuture<Message> sendMessage(@Nonnull final MessageOptions options) {
+        return catnip().rest().channel().sendMessage(id(), options.content(), options.embed(), options.hasFiles() ? options.files() : null);
     }
     
     @Nonnull
