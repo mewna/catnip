@@ -8,6 +8,7 @@ import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.entity.util.ImageOptions;
+import com.mewna.catnip.util.Utils;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,6 +18,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -61,6 +63,7 @@ public interface Guild extends Snowflake {
         return splashUrl(new ImageOptions());
     }
     
+    @CheckReturnValue
     boolean owned();
     
     @Nonnull
@@ -203,9 +206,9 @@ public interface Guild extends Snowflake {
     }
     
     @Nonnull
-    default CompletableFuture<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final String base64Image,
+    default CompletableFuture<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final URI imageData,
                                                        @Nonnull final Collection<String> roles) {
-        return catnip().rest().emoji().createGuildEmoji(id(), name, base64Image, roles);
+        return catnip().rest().emoji().createGuildEmoji(id(), name, imageData, roles);
     }
     
     @Nonnull
@@ -339,9 +342,9 @@ public interface Guild extends Snowflake {
         private ContentFilterLevel explicitContentFilter;
         private String afkChannelId;
         private Integer afkTimeout;
-        private String icon;
+        private URI icon;
         private String ownerId;
-        private String splash;
+        private URI splash;
         private String systemChannelId;
         
         public GuildEditFields(@Nullable final Guild guild) {
@@ -350,6 +353,34 @@ public interface Guild extends Snowflake {
     
         public GuildEditFields() {
             this(null);
+        }
+    
+        @Nonnull
+        public GuildEditFields icon(@Nullable final URI iconData) {
+            if(iconData != null) {
+                Utils.validateImageUri(iconData);
+            }
+            icon = iconData;
+            return this;
+        }
+    
+        @Nonnull
+        public GuildEditFields icon(@Nullable final byte[] iconData) {
+            return icon(iconData == null ? null : Utils.asImageDataUri(iconData));
+        }
+    
+        @Nonnull
+        public GuildEditFields splash(@Nullable final URI splashData) {
+            if(splashData != null) {
+                Utils.validateImageUri(splashData);
+            }
+            splash = splashData;
+            return this;
+        }
+    
+        @Nonnull
+        public GuildEditFields splash(@Nullable final byte[] splashData) {
+            return splash(splashData == null ? null : Utils.asImageDataUri(splashData));
         }
         
         @Nonnull
@@ -385,14 +416,14 @@ public interface Guild extends Snowflake {
             if(afkTimeout != null && (guild == null || !Objects.equals(afkTimeout, guild.afkTimeout()))) {
                 payload.put("afk_timeout", afkTimeout);
             }
-            if(icon != null && (guild == null || !Objects.equals(icon, guild.icon()))) {
-                payload.put("icon", icon);
+            if(icon != null) {
+                payload.put("icon", icon.toString());
             }
             if(ownerId != null && (guild == null || !Objects.equals(ownerId, guild.ownerId()))) {
                 payload.put("owner_id", ownerId);
             }
-            if(splash != null && (guild == null || !Objects.equals(splash, guild.splash()))) {
-                payload.put("splash", splash);
+            if(splash != null) {
+                payload.put("splash", splash.toString());
             }
             if(systemChannelId != null && (guild == null || !Objects.equals(systemChannelId, guild.systemChannelId()))) {
                 payload.put("system_channel_id", systemChannelId);

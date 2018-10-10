@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 @Accessors(fluent = true)
-public class PartialGuild implements JsonConvertible {
+public class GuildData implements JsonConvertible {
     private final List<RoleData> roles = new ArrayList<>();
     private final List<ChannelData> channels = new ArrayList<>();
     @Getter
@@ -40,19 +40,19 @@ public class PartialGuild implements JsonConvertible {
     @Setter
     private ContentFilterLevel explicitContentFilter;
     
-    public PartialGuild(@Nonnull final String name) {
+    public GuildData(@Nonnull final String name) {
         name(name);
         createRole(); //public role
     }
     
     @Nonnull
     @CheckReturnValue
-    public static PartialGuild create(@Nonnull final String name) {
-        return new PartialGuild(name);
+    public static GuildData create(@Nonnull final String name) {
+        return new GuildData(name);
     }
     
     @Nonnull
-    public PartialGuild name(final String name) {
+    public GuildData name(final String name) {
         final String trimmed = name.trim();
         if(trimmed.length() < 2 || trimmed.length() > 100) {
             throw new IllegalArgumentException("Name must have 2-100 characters");
@@ -69,7 +69,7 @@ public class PartialGuild implements JsonConvertible {
     }
     
     @Nonnull
-    public PartialGuild createRole(@Nonnull final Consumer<RoleData> configurator) {
+    public GuildData createRole(@Nonnull final Consumer<RoleData> configurator) {
         configurator.accept(createRole());
         return this;
     }
@@ -80,7 +80,7 @@ public class PartialGuild implements JsonConvertible {
     }
     
     @Nonnull
-    public PartialGuild configureRole(@Nonnegative final int id, @Nonnull final Consumer<RoleData> configurator) {
+    public GuildData configureRole(@Nonnegative final int id, @Nonnull final Consumer<RoleData> configurator) {
         configurator.accept(getRole(id));
         return this;
     }
@@ -91,13 +91,13 @@ public class PartialGuild implements JsonConvertible {
     }
     
     @Nonnull
-    public PartialGuild configurePublicRole(@Nonnull final Consumer<RoleData> configurator) {
+    public GuildData configurePublicRole(@Nonnull final Consumer<RoleData> configurator) {
         configurator.accept(getRole(0));
         return this;
     }
     
     @Nonnull
-    public PartialGuild removeRole(@Nonnull final RoleData role) {
+    public GuildData removeRole(@Nonnull final RoleData role) {
         if(role.publicRole()) {
             throw new IllegalArgumentException("Cannot remove public role");
         }
@@ -106,7 +106,7 @@ public class PartialGuild implements JsonConvertible {
     }
     
     @Nonnull
-    public PartialGuild removeRole(@Nonnegative final int id) {
+    public GuildData removeRole(@Nonnegative final int id) {
         if(id == 0) {
             throw new IllegalArgumentException("Cannot remove public role");
         }
@@ -115,7 +115,7 @@ public class PartialGuild implements JsonConvertible {
     }
     
     @Nonnull
-    public PartialGuild addRole(@Nonnull final RoleData role) {
+    public GuildData addRole(@Nonnull final RoleData role) {
         roles.add(role);
         return this;
     }
@@ -128,7 +128,7 @@ public class PartialGuild implements JsonConvertible {
     }
     
     @Nonnull
-    public PartialGuild createTextChannel(@Nonnull final String name, @Nonnull final Consumer<ChannelData> configurator) {
+    public GuildData createTextChannel(@Nonnull final String name, @Nonnull final Consumer<ChannelData> configurator) {
         configurator.accept(createTextChannel(name));
         return this;
     }
@@ -141,7 +141,7 @@ public class PartialGuild implements JsonConvertible {
     }
     
     @Nonnull
-    public PartialGuild createVoiceChannel(@Nonnull final String name, @Nonnull final Consumer<ChannelData> configurator) {
+    public GuildData createVoiceChannel(@Nonnull final String name, @Nonnull final Consumer<ChannelData> configurator) {
         configurator.accept(createVoiceChannel(name));
         return this;
     }
@@ -152,19 +152,19 @@ public class PartialGuild implements JsonConvertible {
     }
     
     @Nonnull
-    public PartialGuild removeChannel(@Nonnull final ChannelData channel) {
+    public GuildData removeChannel(@Nonnull final ChannelData channel) {
         channels.remove(channel);
         return this;
     }
     
     @Nonnull
-    public PartialGuild removeChannel(@Nonnegative final int position) {
+    public GuildData removeChannel(@Nonnegative final int position) {
         channels.remove(position);
         return this;
     }
     
     @Nonnull
-    public PartialGuild addChannel(@Nonnull final ChannelData channel) {
+    public GuildData addChannel(@Nonnull final ChannelData channel) {
         channels.add(channel);
         return this;
     }
