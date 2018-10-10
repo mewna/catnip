@@ -1,15 +1,16 @@
 package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
+import com.mewna.catnip.entity.builder.MessageBuilder;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.channel.GuildChannel.ChannelEditFields;
-import com.mewna.catnip.entity.builder.MessageBuilder;
 import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.guild.PermissionOverride;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
+import com.mewna.catnip.entity.message.MessageOptions;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
@@ -21,16 +22,17 @@ import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.invite.InviteCreateOptions;
 import com.mewna.catnip.util.pagination.MessagePaginator;
 import com.mewna.catnip.util.pagination.ReactionPaginator;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -74,23 +76,24 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public final CompletableFuture<Message> sendMessage(@Nonnull final String channelId, @Nullable final String content,
-                                                        @Nullable final Embed embed,
-                                                        @Nullable final List<ImmutablePair<String, Buffer>> files) {
+    public final CompletableFuture<Message> sendMessage(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
         final JsonObject json = new JsonObject();
-        if(content != null && !content.isEmpty()) {
-            json.put("content", content);
+        
+        if(options.content() != null && !options.content().isEmpty()) {
+            json.put("content", options.content());
         }
-        if(embed != null) {
-            json.put("embed", getEntityBuilder().embedToJson(embed));
+        
+        if(options.embed() != null) {
+            json.put("embed", getEntityBuilder().embedToJson(options.embed()));
         }
-        if(json.getValue("embed", null) == null && json.getValue("content", null) == null) {
-            throw new IllegalArgumentException("Can't build a message with no content and no embeds!");
+        
+        if(json.getValue("embed", null) == null && json.getValue("content", null) == null && !options.hasFiles()) {
+            throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
         }
         
         final OutboundRequest request = new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json);
         return getCatnip().requester().
-                queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json).buffers(files))
+                queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json).buffers(options.files()))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createMessage);
     }

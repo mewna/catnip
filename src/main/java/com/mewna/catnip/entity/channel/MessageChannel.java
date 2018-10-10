@@ -27,7 +27,7 @@ public interface MessageChannel extends Channel {
     
     @Nonnull
     default CompletableFuture<Message> sendMessage(@Nonnull final MessageOptions options) {
-        return catnip().rest().channel().sendMessage(id(), options.content(), options.embed(), options.hasFiles() ? options.files() : null);
+        return catnip().rest().channel().sendMessage(id(), options);
     }
     
     @Nonnull
