@@ -91,7 +91,6 @@ public class RestChannel extends RestHandler {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
         }
         
-        final OutboundRequest request = new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json);
         return getCatnip().requester().
                 queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json).buffers(options.files()))
                 .thenApply(ResponsePayload::object)
