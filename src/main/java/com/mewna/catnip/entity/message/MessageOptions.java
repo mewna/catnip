@@ -74,6 +74,9 @@ public class MessageOptions {
         if (files == null) {
             files = new ArrayList<>();
         }
+        if (files.size() == 10) {
+            throw new UnsupportedOperationException("maximum limit of 10 attachments!");
+        }
         files.add(new ImmutablePair<>(name, Buffer.buffer(data)));
         return this;
     }
