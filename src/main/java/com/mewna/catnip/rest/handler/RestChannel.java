@@ -74,14 +74,15 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public final CompletableFuture<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Message message,
-                                                        @Nonnull final List<ImmutablePair<String, Buffer>> files) {
+    public final CompletableFuture<Message> sendMessage(@Nonnull final String channelId, @Nullable final String content,
+                                                        @Nullable final Embed embed,
+                                                        @Nullable final List<ImmutablePair<String, Buffer>> files) {
         final JsonObject json = new JsonObject();
-        if(message.content() != null && !message.content().isEmpty()) {
-            json.put("content", message.content());
+        if(content != null && !content.isEmpty()) {
+            json.put("content", content);
         }
-        if(message.embeds() != null && !message.embeds().isEmpty()) {
-            json.put("embed", getEntityBuilder().embedToJson(message.embeds().get(0)));
+        if(embed != null) {
+            json.put("embed", getEntityBuilder().embedToJson(embed));
         }
         if(json.getValue("embed", null) == null && json.getValue("content", null) == null) {
             throw new IllegalArgumentException("Can't build a message with no content and no embeds!");
