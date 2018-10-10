@@ -12,5 +12,5 @@ import java.util.List;
 public interface EmojiUpdate extends Entity {
     String guildId();
     
-    List<CustomEmoji> emoji();
+    List<CustomEmoji> emojis();
 }
