@@ -17,11 +17,13 @@ import lombok.experimental.Accessors;
 import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
 import okhttp3.*;
 import okio.BufferedSink;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
@@ -174,14 +176,16 @@ public class RestRequester {
                 // Do request and update bucket
                 catnip.logAdapter().debug("Making request: {} (bucket {})", API_BASE + route.baseRoute(), bucket.route);
                 // v.x is dumb and doesn't support multipart, so we use okhttp instead /shrug
-                if(r.binary != null) {
+                if(r.buffers != null) {
                     try {
                         @SuppressWarnings("UnnecessarilyQualifiedInnerClassAccess")
                         final MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
                         
-                        final RequestBody requestBody = new MultipartRequestBody(r.binary());
+                        for (int index = 0; index < r.buffers.size(); index++) {
+                            final ImmutablePair<String, Buffer> pair = r.buffers.get(index);
+                            builder.addFormDataPart("file" + index, pair.left, new MultipartRequestBody(pair.right));
+                        }
                         
-                        builder.addFormDataPart("file0", r.filename, requestBody);
                         JsonObject payload;
                         if(r.data != null) {
                             payload = r.data;
@@ -282,11 +286,10 @@ public class RestRequester {
         private Route route;
         private Map<String, String> params;
         private JsonObject data;
-        // Set this if you need multipart
+        
         @Setter
-        private Buffer binary;
-        @Setter
-        private String filename;
+        private List<ImmutablePair<String, Buffer>> buffers;
+        
         @Setter
         private Future<ResponsePayload> future;
         private int failedAttempts;
@@ -307,6 +310,7 @@ public class RestRequester {
         int failedAttempts() {
             return failedAttempts;
         }
+        
     }
     
     @RequiredArgsConstructor

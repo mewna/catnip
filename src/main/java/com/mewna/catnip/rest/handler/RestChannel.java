@@ -1,15 +1,16 @@
 package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
+import com.mewna.catnip.entity.builder.MessageBuilder;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.channel.GuildChannel.ChannelEditFields;
-import com.mewna.catnip.entity.builder.MessageBuilder;
 import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.guild.PermissionOverride;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
+import com.mewna.catnip.entity.message.MessageOptions;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
@@ -21,7 +22,6 @@ import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.invite.InviteCreateOptions;
 import com.mewna.catnip.util.pagination.MessagePaginator;
 import com.mewna.catnip.util.pagination.ReactionPaginator;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -29,7 +29,10 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -73,22 +76,24 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Message message,
-                                                  @Nonnull final String filename, @Nonnull final byte[] file) {
+    public final CompletableFuture<Message> sendMessage(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
         final JsonObject json = new JsonObject();
-        if(message.content() != null && !message.content().isEmpty()) {
-            json.put("content", message.content());
-        }
-        if(message.embeds() != null && !message.embeds().isEmpty()) {
-            json.put("embed", getEntityBuilder().embedToJson(message.embeds().get(0)));
-        }
-        if(json.getValue("embed", null) == null && json.getValue("content", null) == null) {
-            throw new IllegalArgumentException("Can't build a message with no content and no embeds!");
+        
+        if(options.content() != null && !options.content().isEmpty()) {
+            json.put("content", options.content());
         }
         
+        if(options.embed() != null) {
+            json.put("embed", getEntityBuilder().embedToJson(options.embed()));
+        }
+        
+        if(json.getValue("embed", null) == null && json.getValue("content", null) == null && !options.hasFiles()) {
+            throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
+        }
+        
+        final OutboundRequest request = new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json);
         return getCatnip().requester().
-                queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json)
-                        .binary(Buffer.buffer(file)).filename(filename))
+                queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json).buffers(options.files()))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createMessage);
     }
