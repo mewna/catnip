@@ -24,7 +24,7 @@ public class EmojiUpdateImpl implements EmojiUpdate, RequiresCatnip {
     private transient Catnip catnip;
     
     private String guildId;
-    private List<CustomEmoji> emoji;
+    private List<CustomEmoji> emojis;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {

@@ -724,7 +724,7 @@ public final class EntityBuilder {
         return EmojiUpdateImpl.builder()
                 .catnip(catnip)
                 .guildId(data.getString("guild_id"))
-                .emoji(immutableListOf(data.getJsonArray("emojis"),
+                .emojis(immutableListOf(data.getJsonArray("emojis"),
                         e -> createCustomEmoji(data.getString("guild_id"), e)))
                 .build();
     }
