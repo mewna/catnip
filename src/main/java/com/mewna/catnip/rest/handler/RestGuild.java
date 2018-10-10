@@ -15,7 +15,7 @@ import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
-import com.mewna.catnip.rest.guild.PartialGuild;
+import com.mewna.catnip.rest.guild.GuildData;
 import com.mewna.catnip.util.pagination.AuditLogPaginator;
 import com.mewna.catnip.util.pagination.MemberPaginator;
 import io.vertx.core.json.JsonArray;
@@ -62,7 +62,7 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<Guild> createGuild(@Nonnull final PartialGuild guild) {
+    public CompletableFuture<Guild> createGuild(@Nonnull final GuildData guild) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.CREATE_GUILD,
                         ImmutableMap.of(), guild.toJson()))
