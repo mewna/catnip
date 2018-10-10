@@ -895,6 +895,19 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public PartialGuild createPartialGuild(@Nonnull final JsonObject data) {
+        return PartialGuildImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .name(data.getString("name"))
+                .icon(data.getString("icon"))
+                .owned(data.getBoolean("owner", false))
+                .permissions(Permission.toSet(data.getLong("permissions", 0L)))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public GatewayGuildBan createGatewayGuildBan(@Nonnull final JsonObject data) {
         return GatewayGuildBanImpl.builder()
                 .catnip(catnip)
