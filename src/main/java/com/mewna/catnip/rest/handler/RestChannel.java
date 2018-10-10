@@ -24,6 +24,7 @@ import com.mewna.catnip.util.pagination.ReactionPaginator;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -73,8 +74,8 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Message message,
-                                                  @Nonnull final String filename, @Nonnull final byte[] file) {
+    public final CompletableFuture<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Message message,
+                                                        @Nonnull final List<ImmutablePair<String, Buffer>> files) {
         final JsonObject json = new JsonObject();
         if(message.content() != null && !message.content().isEmpty()) {
             json.put("content", message.content());
@@ -86,9 +87,9 @@ public class RestChannel extends RestHandler {
             throw new IllegalArgumentException("Can't build a message with no content and no embeds!");
         }
         
+        final OutboundRequest request = new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json);
         return getCatnip().requester().
-                queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json)
-                        .addFile(filename, Buffer.buffer(file)))
+                queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json).buffers(files))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createMessage);
     }

@@ -19,11 +19,12 @@ import okhttp3.*;
 import okio.BufferedSink;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -286,6 +287,8 @@ public class RestRequester {
         private Route route;
         private Map<String, String> params;
         private JsonObject data;
+        
+        @Setter
         private List<ImmutablePair<String, Buffer>> buffers;
         
         @Setter
@@ -309,15 +312,6 @@ public class RestRequester {
             return failedAttempts;
         }
         
-        @CheckReturnValue
-        @Nonnull
-        public OutboundRequest addFile(@Nonnull final String filename, @Nonnull final Buffer buffer) {
-            if (buffers == null) {
-                buffers = new ArrayList<>();
-            }
-            buffers.add(new ImmutablePair<>(filename, buffer));
-            return this;
-        }
     }
     
     @RequiredArgsConstructor
