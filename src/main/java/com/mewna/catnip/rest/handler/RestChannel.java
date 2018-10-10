@@ -88,7 +88,7 @@ public class RestChannel extends RestHandler {
         
         return getCatnip().requester().
                 queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json)
-                        .binary(Buffer.buffer(file)).filename(filename))
+                        .addFile(filename, Buffer.buffer(file)))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createMessage);
     }
