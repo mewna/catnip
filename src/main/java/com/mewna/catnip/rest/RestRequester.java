@@ -184,7 +184,6 @@ public class RestRequester {
                         for (int index = 0; index < r.buffers.size(); index++) {
                             final ImmutablePair<String, Buffer> pair = r.buffers.get(index);
                             builder.addFormDataPart("file" + index, pair.left, new MultipartRequestBody(pair.right));
-                            index++; // because post increment value is used ^
                         }
                         
                         JsonObject payload;
