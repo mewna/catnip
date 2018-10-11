@@ -48,10 +48,6 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
      */
     public P limit(@Nonnegative final int limit) {
         this.limit = limit;
-        //if limit < maxRequestSize we can optimize it a bit,
-        //otherwise just use max size to do as few requests
-        //as possible
-        requestSize = Math.min(maxRequestSize, limit);
         return uncheck(this);
     }
     
@@ -85,7 +81,7 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
     @CheckReturnValue
     public CompletionStage<List<T>> fetch() {
         final List<T> list = new ArrayList<>();
-        return fetch(list::add).thenApply(__ -> Collections.unmodifiableList(list));
+        return forEach(list::add).thenApply(__ -> Collections.unmodifiableList(list));
     }
     
     /**
@@ -103,12 +99,33 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
      */
     @Nonnull
     public CompletionStage<Void> forEach(@Nonnull final Consumer<T> action) {
-        return fetch(action);
+        return fetchWhile(e -> {
+            action.accept(e);
+            return true;
+        });
+    }
+    
+    /**
+     * Fetches entities until the provided callback returns false or the
+     * {@link #limit(int) limit} is reached.
+     * <br>This method will not cache the provided entities, so it's
+     * recommended for unbounded pagination.
+     * <br>If the provided callback throws an exception, <b>pagination
+     * will stop</b> and the returned {@link CompletionStage completion stage}
+     * will be failed.
+     *
+     * @param callback Callback for fetched entities.
+     *
+     * @return A completion stage representing the end of the iteration.
+     */
+    @Nonnull
+    public CompletionStage<Void> fetchWhile(@Nonnull final PaginationCallback<T> callback) {
+        return fetch(callback);
     }
     
     @Nonnull
     @CheckReturnValue
-    protected CompletionStage<Void> fetch(@Nonnull final Consumer<T> action) {
+    protected CompletionStage<Void> fetch(@Nonnull final PaginationCallback<T> action) {
         return fetch(null, new RequestState<>(limit, requestSize, action));
     }
     
@@ -145,28 +162,29 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
         private final Map<String, Object> extras = new HashMap<>();
         private final int limit;
         private final int requestSize;
-        private final Consumer<T> action;
+        private final PaginationCallback<T> callback;
         private int fetched;
         private T last;
+        private boolean callbackDone;
     
-        public RequestState(final int limit, final int requestSize, final Consumer<T> action) {
+        public RequestState(final int limit, final int requestSize, final PaginationCallback<T> callback) {
             this.limit = limit;
             this.requestSize = requestSize;
-            this.action = action;
+            this.callback = callback;
         }
         
         public void update(@Nonnull final T entity) {
             if(done()) {
                 return;
             }
-            action.accept(entity);
+            callbackDone = !callback.accept(entity);
             fetched++;
             last = entity;
         }
     
         @CheckReturnValue
         public boolean done() {
-            return fetched == limit;
+            return callbackDone || limit > 0 && fetched == limit;
         }
     
         @CheckReturnValue
