@@ -106,7 +106,13 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
     }
     
     /**
-     * Fetches entities until the provided callback returns false or the limit is reached.
+     * Fetches entities until the provided callback returns false or the
+     * {@link #limit(int) limit} is reached.
+     * <br>This method will not cache the provided entities, so it's
+     * recommended for unbounded pagination.
+     * <br>If the provided callback throws an exception, <b>pagination
+     * will stop</b> and the returned {@link CompletionStage completion stage}
+     * will be failed.
      *
      * @param callback Callback for fetched entities.
      *
