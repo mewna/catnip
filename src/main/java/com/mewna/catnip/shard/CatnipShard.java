@@ -1,6 +1,7 @@
 package com.mewna.catnip.shard;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.impl.PresenceImpl;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.Activity;
 import com.mewna.catnip.entity.user.Presence.OnlineStatus;
@@ -144,11 +145,11 @@ public class CatnipShard extends AbstractVerticle {
     public void stop() {
     }
     
-    private void handlePresenceUpdate(final Message<?> message) {
-        final Presence presence = (Presence) message.body();
+    private void handlePresenceUpdate(final Message<PresenceImpl> message) {
+        final Presence presence = message.body();
         final JsonObject innerData = new JsonObject()
                 .put("since", System.currentTimeMillis()) // how jda handles this
-                .put("idle", presence.status() == OnlineStatus.IDLE)
+                .put("afk", presence.status() == OnlineStatus.IDLE)
                 .put("status", presence.status().asString());
         
         final Activity activity = presence.activity();
