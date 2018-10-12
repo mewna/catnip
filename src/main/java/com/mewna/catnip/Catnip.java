@@ -3,6 +3,12 @@ package com.mewna.catnip;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCache;
 import com.mewna.catnip.cache.EntityCacheWorker;
+import com.mewna.catnip.entity.impl.PresenceImpl;
+import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
+import com.mewna.catnip.entity.user.Presence;
+import com.mewna.catnip.entity.user.Presence.Activity;
+import com.mewna.catnip.entity.user.Presence.ActivityType;
+import com.mewna.catnip.entity.user.Presence.OnlineStatus;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.ExtensionManager;
@@ -24,6 +30,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
 /**
@@ -115,6 +122,51 @@ public interface Catnip {
     
     @Nullable
     User selfUser();
+    
+    default void setPresence(@Nonnull final Presence presence) {
+        eventBus().publish(String.format("catnip:gateway:ws-outgoing:%s:presence-update",
+                ThreadLocalRandom.current().nextInt(shardManager().shardCount())), presence);
+        // pick random shard to send presence update because only one catnip instance per bot
+        // also better than having users specify shard numbers directly (little confusing for beginners)
+    }
+    
+    default void setPresence(@Nullable final OnlineStatus status, @Nullable final String game, @Nullable final ActivityType type,
+                             @Nullable final String url) {
+        final OnlineStatus stat;
+        if (status != null) {
+            stat = status;
+        }
+        else {
+            final User self = selfUser();
+            if (self != null) {
+                final Presence presence = cache().presence(self.id());
+                stat = presence == null ? OnlineStatus.ONLINE : presence.status();
+            }
+            else {
+                stat = OnlineStatus.ONLINE;
+            }
+        }
+        final Activity activity = game != null
+                ? ActivityImpl.builder()
+                    .name(game)
+                    .type(type == null ? ActivityType.PLAYING : type)
+                    .url(type == ActivityType.STREAMING ? url : null)
+                    .build()
+                : null;
+        setPresence(PresenceImpl.builder()
+                .catnip(this)
+                .status(stat)
+                .activity(activity)
+                .build());
+    }
+    
+    default void setStatus(@Nonnull final OnlineStatus status) {
+        setPresence(status, null, null, null);
+    }
+    
+    default void setGame(@Nonnull final String game, @Nonnull final ActivityType type, @Nullable final String url) {
+        setPresence(null, game, type, url);
+    }
     
     boolean chunkMembers();
     
