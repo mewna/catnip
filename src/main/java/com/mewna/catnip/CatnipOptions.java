@@ -53,4 +53,5 @@ public final class CatnipOptions {
     private Set<CacheFlag> cacheFlags = EnumSet.noneOf(CacheFlag.class);
     @Nonnull
     private BucketBackend restBucketBackend = new MemoryBucketBackend();
+    private boolean chunkMembers = true;
 }

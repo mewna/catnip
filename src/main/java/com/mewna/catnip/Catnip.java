@@ -116,6 +116,8 @@ public interface Catnip {
     @Nullable
     User selfUser();
     
+    boolean chunkMembers();
+    
     default <T> MessageConsumer<T> on(@Nonnull final EventType<T> type) {
         return eventBus().consumer(type.key());
     }
