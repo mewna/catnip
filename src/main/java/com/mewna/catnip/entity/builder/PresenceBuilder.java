@@ -35,7 +35,6 @@ public class PresenceBuilder {
             name = activity.name();
             url = activity.url();
         }
-        new PresenceBuilder().name(null);
     }
     
     public Presence build() {
