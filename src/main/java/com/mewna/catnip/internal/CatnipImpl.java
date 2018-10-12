@@ -49,7 +49,7 @@ public class CatnipImpl implements Catnip {
     private final EntityCacheWorker cache;
     private final Set<CacheFlag> cacheFlags;
     private final boolean chunkMembers;
-    private Presence presence;
+    private final Presence presence;
     
     public CatnipImpl(@Nonnull final Vertx vertx, @Nonnull final CatnipOptions options) {
         this.vertx = vertx;
