@@ -3,8 +3,6 @@ package com.mewna.catnip.shard;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.impl.PresenceImpl;
 import com.mewna.catnip.entity.user.Presence;
-import com.mewna.catnip.entity.user.Presence.Activity;
-import com.mewna.catnip.entity.user.Presence.OnlineStatus;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.util.BufferOutputStream;
@@ -17,6 +15,7 @@ import io.vertx.core.http.WebSocket;
 import io.vertx.core.http.WebSocketFrame;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import jdk.internal.jline.internal.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -48,6 +47,7 @@ public class CatnipShard extends AbstractVerticle {
     private final Catnip catnip;
     private final int id;
     private final int limit;
+    private final Presence presence;
     
     private final HttpClient client;
     
@@ -59,10 +59,11 @@ public class CatnipShard extends AbstractVerticle {
     
     private List<String> trace = new ArrayList<>();
     
-    public CatnipShard(final Catnip catnip, final int id, final int limit) {
+    public CatnipShard(final Catnip catnip, final int id, final int limit, @Nullable final Presence presence) {
         this.catnip = catnip;
         this.id = id;
         this.limit = limit;
+        this.presence = presence;
         
         client = catnip.vertx().createHttpClient(new HttpClientOptions()
                 .setMaxWebsocketFrameSize(Integer.MAX_VALUE)
@@ -146,26 +147,9 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void handlePresenceUpdate(final Message<PresenceImpl> message) {
-        final Presence presence = message.body();
-        final JsonObject innerData = new JsonObject()
-                .put("since", System.currentTimeMillis()) // how jda handles this
-                .put("afk", presence.status() == OnlineStatus.IDLE)
-                .put("status", presence.status().asString());
-        
-        final Activity activity = presence.activity();
-        if (activity != null) {
-            final JsonObject game = new JsonObject()
-                    .put("name", activity.name())
-                    .put("type", activity.type().id());
-            if (activity.url() != null) {
-                game.put("url", activity.url());
-            }
-            innerData.put("game", game);
-        }
-        
         final JsonObject object = new JsonObject()
                 .put("op", GatewayOp.STATUS_UPDATE.opcode())
-                .put("d", innerData);
+                .put("d", message.body().asJson());
         catnip.eventBus().publish(websocketMessageQueueAddress(), object);
     }
     
@@ -480,7 +464,7 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private JsonObject identify() {
-        return basePayload(GatewayOp.IDENTIFY, new JsonObject()
+        final JsonObject data = new JsonObject()
                 .put("token", catnip.token())
                 .put("compress", false)
                 .put("large_threshold", LARGE_THRESHOLD)
@@ -489,8 +473,11 @@ public class CatnipShard extends AbstractVerticle {
                         .put("$os", "JVM")
                         .put("$browser", "catnip")
                         .put("$device", "catnip")
-                )
-        );
+                );
+        if (presence != null) {
+            data.put("presence", ((PresenceImpl) presence).asJson());
+        }
+        return basePayload(GatewayOp.IDENTIFY, data);
     }
     
     private JsonObject resume() {
