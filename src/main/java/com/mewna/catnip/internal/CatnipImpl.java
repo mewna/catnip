@@ -47,6 +47,7 @@ public class CatnipImpl implements Catnip {
     private final EventBuffer eventBuffer;
     private final EntityCacheWorker cache;
     private final Set<CacheFlag> cacheFlags;
+    private final boolean chunkMembers;
     
     public CatnipImpl(@Nonnull final Vertx vertx, @Nonnull final CatnipOptions options) {
         this.vertx = vertx;
@@ -59,6 +60,7 @@ public class CatnipImpl implements Catnip {
         eventBuffer = options.eventBuffer();
         cache = options.cacheWorker();
         cacheFlags = options.cacheFlags();
+        chunkMembers = options.chunkMembers();
     }
     
     @Nonnull
