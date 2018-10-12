@@ -108,7 +108,7 @@ public class DefaultShardManager implements ShardManager {
         }
         final int nextId = connectQueue.removeFirst();
         catnip.logAdapter().info("Connecting shard {} (queue len {})", nextId, connectQueue.size());
-        catnip.eventBus().<JsonObject>send(CatnipShard.getControlAddress(nextId), new JsonObject().put("mode", "START"),
+        catnip.eventBus().<JsonObject>send(CatnipShard.controlAddress(nextId), new JsonObject().put("mode", "START"),
                 reply -> {
                     if(reply.succeeded()) {
                         final ShardConnectState state = ShardConnectState.valueOf(reply.result().body().getString("state"));
@@ -149,7 +149,7 @@ public class DefaultShardManager implements ShardManager {
     @Override
     public Future<List<String>> trace(final int shard) {
         final Future<List<String>> future = Future.future();
-        catnip.eventBus().<JsonArray>send(CatnipShard.getControlAddress(shard), new JsonObject().put("mode", "TRACE"),
+        catnip.eventBus().<JsonArray>send(CatnipShard.controlAddress(shard), new JsonObject().put("mode", "TRACE"),
                 reply -> {
                     if(reply.succeeded()) {
                         // ow

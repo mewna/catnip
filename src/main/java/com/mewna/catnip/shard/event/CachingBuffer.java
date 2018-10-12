@@ -1,6 +1,8 @@
 package com.mewna.catnip.shard.event;
 
 import com.google.common.collect.ImmutableList;
+import com.mewna.catnip.shard.CatnipShard;
+import com.mewna.catnip.shard.GatewayOp;
 import io.vertx.core.json.JsonObject;
 import lombok.Value;
 import lombok.experimental.Accessors;
@@ -13,7 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
-import static com.mewna.catnip.shard.DiscordEvent.*;
+import static com.mewna.catnip.shard.CatnipShard.LARGE_THRESHOLD;
+import static com.mewna.catnip.shard.DiscordEvent.Raw;
 
 /**
  * An implementation of {@link EventBuffer} used for the case of caching all
@@ -74,6 +77,17 @@ public class CachingBuffer extends AbstractBuffer {
                 final BufferState bufferState = buffers.get(id);
                 // Make sure to cache guild
                 maybeCache(type, d);
+                // Trigger member chunking
+                if(d.getInteger("member_count") > LARGE_THRESHOLD) {
+                    // Chunk members
+                    catnip().eventBus().publish(CatnipShard.websocketMessageQueueAddress(id),
+                            CatnipShard.basePayload(GatewayOp.REQUEST_GUILD_MEMBERS,
+                                    new JsonObject()
+                                            .put("guild_id", guild)
+                                            .put("query", "")
+                                            .put("limit", 0)
+                            ));
+                }
                 if(bufferState != null) {
                     if(bufferState.readyGuilds().isEmpty()) {
                         // No guilds left, can just dispatch normally

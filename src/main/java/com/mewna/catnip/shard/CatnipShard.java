@@ -39,6 +39,7 @@ import static com.mewna.catnip.shard.CatnipShard.ShardConnectState.*;
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class CatnipShard extends AbstractVerticle {
     public static final int ZLIB_SUFFIX = 0x0000FFFF;
+    public static final int LARGE_THRESHOLD = 250;
     
     private final Catnip catnip;
     private final int id;
@@ -71,31 +72,35 @@ public class CatnipShard extends AbstractVerticle {
      *
      * @return Control address for the given shard
      */
-    public static String getControlAddress(final int id) {
+    public static String controlAddress(final int id) {
         return String.format("catnip:shard:%s:control", id);
     }
     
-    public static JsonObject getBasePayload(final GatewayOp op) {
-        return getBasePayload(op, (JsonObject) null);
+    public static JsonObject basePayload(final GatewayOp op) {
+        return basePayload(op, (JsonObject) null);
     }
     
-    public static JsonObject getBasePayload(final GatewayOp op, final JsonObject payload) {
+    public static JsonObject basePayload(final GatewayOp op, final JsonObject payload) {
         return new JsonObject()
                 .put("op", op.opcode())
                 .put("d", payload)
                 ;
     }
     
-    public static JsonObject getBasePayload(final GatewayOp op, final Integer payload) {
+    public static JsonObject basePayload(final GatewayOp op, final Integer payload) {
         return new JsonObject()
                 .put("op", op.opcode())
                 .put("d", payload)
                 ;
+    }
+    
+    public static <T> String websocketMessageQueueAddress(final T id) {
+        return String.format("catnip:gateway:ws-outgoing:%s:queue", id);
     }
     
     @Override
     public void start() {
-        catnip.eventBus().consumer(getControlAddress(id), this::handleControlMessage);
+        catnip.eventBus().consumer(controlAddress(id), this::handleControlMessage);
         catnip.eventBus().consumer(websocketMessageSendAddress(), this::handleSocketSend);
         catnip.eventBus().consumer(websocketMessageQueueAddress(), this::handleSocketQueue);
         catnip.eventBus().consumer(websocketMessagePollAddress(), msg -> {
@@ -307,11 +312,11 @@ public class CatnipShard extends AbstractVerticle {
                 if(!heartbeatAcked.get()) {
                     // Zombie
                     catnip.logAdapter().warn("Shard {} zombied, queueing reconnect!", id);
-                    catnip.eventBus().publish(getControlAddress(id), new JsonObject().put("mode", "STOP"));
+                    catnip.eventBus().publish(controlAddress(id), new JsonObject().put("mode", "STOP"));
                     return;
                 }
                 catnip.eventBus().publish(websocketMessageSendAddress(),
-                        getBasePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().seqnum(id)));
+                        basePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().seqnum(id)));
                 heartbeatAcked.set(false);
             } else {
                 catnip.vertx().cancelTimer(timerId);
@@ -376,7 +381,7 @@ public class CatnipShard extends AbstractVerticle {
     private void handleHeartbeat(final Message<JsonObject> msg, final JsonObject event) {
         //heartbeatAcked.set(false);
         catnip.eventBus().publish(websocketMessageSendAddress(),
-                getBasePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().seqnum(id)));
+                basePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().seqnum(id)));
     }
     
     private void handleHeartbeatAck(final Message<JsonObject> msg, final JsonObject event) {
@@ -430,10 +435,10 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private JsonObject identify() {
-        return getBasePayload(GatewayOp.IDENTIFY, new JsonObject()
+        return basePayload(GatewayOp.IDENTIFY, new JsonObject()
                 .put("token", catnip.token())
                 .put("compress", false)
-                .put("large_threshold", 250)
+                .put("large_threshold", LARGE_THRESHOLD)
                 .put("shard", new JsonArray().add(id).add(limit))
                 .put("properties", new JsonObject()
                         .put("$os", "JVM")
@@ -444,7 +449,7 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private JsonObject resume() {
-        return getBasePayload(GatewayOp.RESUME, new JsonObject()
+        return basePayload(GatewayOp.RESUME, new JsonObject()
                 .put("token", catnip.token())
                 .put("compress", false)
                 .put("session_id", catnip.sessionManager().session(id))
