@@ -2,6 +2,7 @@ package com.mewna.catnip.shard.manager;
 
 import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
 import io.vertx.core.Future;
@@ -90,8 +91,9 @@ public class DefaultShardManager implements ShardManager {
         catnip.logAdapter().info("Booting {} shards", count);
         // Deploy verticles
         for(int id = 0; id < count; id++) {
+            // because each shard has its own presence, so no global presence on catnip class
             //noinspection TypeMayBeWeakened
-            final CatnipShard shard = new CatnipShard(catnip, id, count);
+            final CatnipShard shard = new CatnipShard(catnip, id, count, ((CatnipImpl) catnip).presence());
             catnip.vertx().deployVerticle(shard);
             connectQueue.addLast(id);
             catnip.logAdapter().info("Deployed shard {}", id);

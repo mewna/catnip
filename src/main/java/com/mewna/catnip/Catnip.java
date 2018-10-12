@@ -124,12 +124,24 @@ public interface Catnip {
     User selfUser();
     
     default void setPresence(@Nonnull final Presence presence) {
-        final int apparentShards = shardManager().shardCount() == 0
-                ? 0
-                : ThreadLocalRandom.current().nextInt(shardManager().shardCount());
-        eventBus().publish(String.format("catnip:gateway:ws-outgoing:%s:presence-update", apparentShards), presence);
-        // pick random shard to send presence update because only one catnip instance per bot
-        // also better than having users specify shard numbers directly (little confusing for beginners)
+        setPresence(presence, true);
+    }
+    
+    default void setPresence(@Nonnull final Presence presence, final boolean broadcastToAllShards) {
+        if (!broadcastToAllShards) {
+            final int apparentShards = shardManager().shardCount() == 0
+                    ? 0
+                    : ThreadLocalRandom.current().nextInt(shardManager().shardCount());
+            eventBus().publish(String.format("catnip:gateway:ws-outgoing:%s:presence-update", apparentShards), presence);
+            return;
+        }
+        int count = shardManager().shardCount();
+        if (count == 0) {
+            count = 1;
+        }
+        for (int i = 0; i < count; i++) {
+            eventBus().publish(String.format("catnip:gateway:ws-outgoing:%s:presence-update", i), presence);
+        }
     }
     
     default void setPresence(@Nullable final OnlineStatus status, @Nullable final String game, @Nullable final ActivityType type,
