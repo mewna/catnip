@@ -5,6 +5,7 @@ import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.entity.impl.*;
+import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.DefaultExtensionManager;
@@ -48,6 +49,7 @@ public class CatnipImpl implements Catnip {
     private final EntityCacheWorker cache;
     private final Set<CacheFlag> cacheFlags;
     private final boolean chunkMembers;
+    private Presence presence;
     
     public CatnipImpl(@Nonnull final Vertx vertx, @Nonnull final CatnipOptions options) {
         this.vertx = vertx;
@@ -61,6 +63,7 @@ public class CatnipImpl implements Catnip {
         cache = options.cacheWorker();
         cacheFlags = options.cacheFlags();
         chunkMembers = options.chunkMembers();
+        presence = options.presence();
     }
     
     @Nonnull

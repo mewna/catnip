@@ -3,8 +3,7 @@ package com.mewna.catnip;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.MemoryEntityCache;
-import com.mewna.catnip.extension.manager.DefaultExtensionManager;
-import com.mewna.catnip.extension.manager.ExtensionManager;
+import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.internal.logging.DefaultLogAdapter;
 import com.mewna.catnip.internal.logging.LogAdapter;
 import com.mewna.catnip.internal.ratelimit.MemoryRatelimiter;
@@ -23,6 +22,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -34,9 +34,12 @@ import java.util.Set;
 @Setter
 @Accessors(fluent = true, chain = true)
 @RequiredArgsConstructor
+@SuppressWarnings("OverlyCoupledClass")
 public final class CatnipOptions {
     @Nonnull
     private final String token;
+    @Nullable
+    private Presence presence;
     @Nonnull
     private ShardManager shardManager = new DefaultShardManager();
     @Nonnull

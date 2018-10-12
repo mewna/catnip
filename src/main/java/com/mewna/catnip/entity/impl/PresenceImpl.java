@@ -3,9 +3,11 @@ package com.mewna.catnip.entity.impl;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.user.Presence;
+import io.vertx.core.json.JsonObject;
 import lombok.*;
 import lombok.experimental.Accessors;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.util.Set;
 
@@ -97,5 +99,26 @@ public class PresenceImpl implements Presence, RequiresCatnip {
         private ActivitySecrets secrets;
         private boolean instance;
         private Set<ActivityFlag> flags;
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public JsonObject asJson() {
+        final JsonObject innerData = new JsonObject()
+                .put("since", System.currentTimeMillis()) // how jda handles this
+                .put("afk", status == OnlineStatus.IDLE)
+                .put("status", status.asString());
+        
+        if (activity != null) {
+            final JsonObject game = new JsonObject()
+                    .put("name", activity.name())
+                    .put("type", activity.type().id());
+            if (activity.url() != null) {
+                game.put("url", activity.url());
+            }
+            innerData.put("game", game);
+        }
+        
+        return innerData;
     }
 }
