@@ -297,9 +297,9 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 final JsonObject user = payload.getJsonObject("user");
                 final String id = user.getString("id");
                 final User old = user(id);
-                if(old == null) {
+                if(old == null && !catnip.chunkMembers()) {
                     catnip.logAdapter().warn("Received PRESENCE_UPDATE for uncached user {}!?", id);
-                } else {
+                } else if(old != null) {
                     // This could potentially update:
                     // - username
                     // - discriminator
@@ -317,6 +317,8 @@ public class MemoryEntityCache implements EntityCacheWorker {
                         final Presence presence = entityBuilder.createPresence(payload);
                         cachePresence(id, presence);
                     }
+                } else if(catnip.chunkMembers()) {
+                    catnip.logAdapter().warn("Received PRESENCE_UPDATE for unknown user {}!? (member chunking enabled)", id);
                 }
                 break;
             }
