@@ -103,12 +103,16 @@ public class CatnipShard extends AbstractVerticle {
         return String.format("catnip:gateway:ws-outgoing:%s:queue", id);
     }
     
+    public static <T> String websocketMessagePresenceUpdateAddress(final T id) {
+        return String.format("catnip:gateway:ws-outgoing:%s:presence-update", id);
+    }
+    
     @Override
     public void start() {
         catnip.eventBus().consumer(controlAddress(id), this::handleControlMessage);
         catnip.eventBus().consumer(websocketMessageSendAddress(), this::handleSocketSend);
         catnip.eventBus().consumer(websocketMessageQueueAddress(), this::handleSocketQueue);
-        catnip.eventBus().consumer(websocketMessagePresenceAddress(), this::handlePresenceUpdate);
+        catnip.eventBus().consumer(websocketMessagePresenceUpdateAddress(), this::handlePresenceUpdate);
         catnip.eventBus().consumer(websocketMessagePollAddress(), msg -> {
             if(stateRef.get() != null) {
                 while(!messageQueue.isEmpty()) {
@@ -125,7 +129,7 @@ public class CatnipShard extends AbstractVerticle {
                         break;
                     }
                     if (GatewayOp.byId(payload.getInteger("op")) == GatewayOp.STATUS_UPDATE) {
-                        if (catnip.gatewayRatelimiter().checkRatelimit(websocketMessagePresenceAddress(),
+                        if (catnip.gatewayRatelimiter().checkRatelimit(websocketMessagePresenceUpdateAddress(),
                                 60_000L, 5).left) {
                             break;
                         }
@@ -452,15 +456,15 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     public String websocketMessageQueueAddress() {
-        return String.format("catnip:gateway:ws-outgoing:%s:queue", id);
+        return websocketMessageQueueAddress(id);
     }
     
     private String websocketMessagePollAddress() {
         return String.format("catnip:gateway:ws-outgoing:%s:poll", id);
     }
     
-    private String websocketMessagePresenceAddress() {
-        return String.format("catnip:gateway:ws-outgoing:%s:presence-update", id);
+    private String websocketMessagePresenceUpdateAddress() {
+        return websocketMessagePresenceUpdateAddress(id);
     }
     
     private JsonObject identify() {

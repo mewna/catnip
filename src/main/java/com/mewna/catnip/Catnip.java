@@ -18,6 +18,7 @@ import com.mewna.catnip.internal.ratelimit.Ratelimiter;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
 import com.mewna.catnip.rest.Routes;
+import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.DiscordEvent.EventType;
 import com.mewna.catnip.shard.event.EventBuffer;
 import com.mewna.catnip.shard.manager.ShardManager;
@@ -27,10 +28,10 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
 /**
@@ -123,40 +124,35 @@ public interface Catnip {
     @Nullable
     User selfUser();
     
-    default void setPresence(@Nonnull final Presence presence) {
-        setPresence(presence, true);
-    }
+    @Nullable
+    @CheckReturnValue
+    Presence initialPresence();
     
-    default void setPresence(@Nonnull final Presence presence, final boolean broadcastToAllShards) {
-        if (!broadcastToAllShards) {
-            final int apparentShards = shardManager().shardCount() == 0
-                    ? 0
-                    : ThreadLocalRandom.current().nextInt(shardManager().shardCount());
-            eventBus().publish(String.format("catnip:gateway:ws-outgoing:%s:presence-update", apparentShards), presence);
-            return;
+    default void presence(@Nonnull final Presence presence) {
+        int shardCount = shardManager().shardCount();
+        if (shardCount == 0) {
+            shardCount = 1;
         }
-        int count = shardManager().shardCount();
-        if (count == 0) {
-            count = 1;
-        }
-        for (int i = 0; i < count; i++) {
-            eventBus().publish(String.format("catnip:gateway:ws-outgoing:%s:presence-update", i), presence);
+        for (int i = 0; i < shardCount; i++) {
+            presence(presence, i);
         }
     }
     
-    default void setPresence(@Nullable final OnlineStatus status, @Nullable final String game, @Nullable final ActivityType type,
+    default void presence(@Nonnull final Presence presence, @Nonnegative final int shardId) {
+        eventBus().publish(CatnipShard.websocketMessagePresenceUpdateAddress(shardId), presence);
+    }
+    
+    default void presence(@Nullable final OnlineStatus status, @Nullable final String game, @Nullable final ActivityType type,
                              @Nullable final String url) {
         final OnlineStatus stat;
         if (status != null) {
             stat = status;
-        }
-        else {
+        } else {
             final User self = selfUser();
             if (self != null) {
                 final Presence presence = cache().presence(self.id());
                 stat = presence == null ? OnlineStatus.ONLINE : presence.status();
-            }
-            else {
+            } else {
                 stat = OnlineStatus.ONLINE;
             }
         }
@@ -167,19 +163,19 @@ public interface Catnip {
                     .url(type == ActivityType.STREAMING ? url : null)
                     .build()
                 : null;
-        setPresence(PresenceImpl.builder()
+        presence(PresenceImpl.builder()
                 .catnip(this)
                 .status(stat)
                 .activity(activity)
                 .build());
     }
     
-    default void setStatus(@Nonnull final OnlineStatus status) {
-        setPresence(status, null, null, null);
+    default void status(@Nonnull final OnlineStatus status) {
+        presence(status, null, null, null);
     }
     
-    default void setGame(@Nonnull final String game, @Nonnull final ActivityType type, @Nullable final String url) {
-        setPresence(null, game, type, url);
+    default void game(@Nonnull final String game, @Nonnull final ActivityType type, @Nullable final String url) {
+        presence(null, game, type, url);
     }
     
     boolean chunkMembers();
