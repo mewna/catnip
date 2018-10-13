@@ -8,10 +8,14 @@ import com.mewna.catnip.entity.message.Embed.Image;
 import com.mewna.catnip.entity.message.Embed.Thumbnail;
 import com.mewna.catnip.entity.impl.EmbedImpl;
 import com.mewna.catnip.entity.impl.EmbedImpl.*;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +24,9 @@ import java.util.List;
  * @author amy
  * @since 9/4/18.
  */
+@Setter(onParam_ = @Nullable, onMethod_ = {@CheckReturnValue, @Nonnull})
+@NoArgsConstructor
+@Accessors(fluent = true, chain = true)
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class EmbedBuilder {
     // @formatter:off
@@ -33,9 +40,6 @@ public class EmbedBuilder {
     private Author author;
     private final List<Field> fields = new ArrayList<>();
     // @formatter:on
-    
-    public EmbedBuilder() {
-    }
     
     public EmbedBuilder(final Embed embed) {
         title = embed.title();
@@ -51,49 +55,17 @@ public class EmbedBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public EmbedBuilder title(@Nullable final String title) {
-        this.title = title;
+    public EmbedBuilder color(@Nullable final Color color) {
+        if (color != null) {
+            this.color = color.getRGB();
+        }
         return this;
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    public EmbedBuilder description(@Nullable final String description) {
-        this.description = description;
-        return this;
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    public EmbedBuilder url(@Nullable final String url) {
-        this.url = url;
-        return this;
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    public EmbedBuilder color(@Nullable final Integer color) {
-        this.color = color;
-        return this;
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    public EmbedBuilder footer(@Nullable final String text) {
-        return footer(text, null);
     }
     
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder footer(@Nullable final String text, @Nullable final String iconUrl) {
         return footer(new FooterImpl(text, iconUrl, null));
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    public EmbedBuilder footer(@Nullable final Footer footer) {
-        this.footer = footer;
-        return this;
     }
     
     @Nonnull
