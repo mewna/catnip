@@ -2,7 +2,6 @@ package com.mewna.catnip.shard.event;
 
 import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.shard.CatnipShard;
-import com.mewna.catnip.shard.DiscordEvent;
 import com.mewna.catnip.shard.GatewayOp;
 import io.vertx.core.json.JsonObject;
 import lombok.Value;
@@ -70,6 +69,7 @@ public class CachingBuffer extends AbstractBuffer {
                 // READY is also a cache event, as it does come with
                 // information about the current user
                 maybeCache(type, d);
+                emitter().emit(event);
                 break;
             }
             case Raw.GUILD_CREATE: {
@@ -94,11 +94,14 @@ public class CachingBuffer extends AbstractBuffer {
                         // No guilds left, can just dispatch normally
                         catnip().logAdapter().debug("BufferState for shard {} empty, removing and emitting.", id);
                         buffers.remove(id);
+                        maybeCache(type, event);
                         emitter().emit(event);
                     } else {
                         // Remove READY guild if necessary, otherwise buffer
                         if(bufferState.readyGuilds().contains(guild)) {
                             bufferState.recvGuild(guild);
+                            maybeCache(type, event);
+                            emitter().emit(event);
                             catnip().logAdapter().debug("Buffered guild {} for BufferState {}", guild, id);
                             // Replay all buffered events once we run out
                             if(bufferState.readyGuilds().isEmpty()) {
@@ -111,6 +114,10 @@ public class CachingBuffer extends AbstractBuffer {
                             bufferState.buffer(event);
                         }
                     }
+                } else {
+                    // If not doing buffering, just dispatch
+                    maybeCache(type, event);
+                    emitter().emit(event);
                 }
                 break;
             }
