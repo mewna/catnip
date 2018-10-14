@@ -128,6 +128,12 @@ public interface Catnip {
     @CheckReturnValue
     Presence initialPresence();
     
+    default void presence(@Nonnegative final int shardId, @Nonnull final Consumer<Presence> callback) {
+        eventBus().send(CatnipShard.websocketMessagePresenceUpdateAddress(shardId), null, result -> {
+            callback.accept((Presence) result.result().body());
+        });
+    }
+    
     default void presence(@Nonnull final Presence presence) {
         int shardCount = shardManager().shardCount();
         if (shardCount == 0) {
