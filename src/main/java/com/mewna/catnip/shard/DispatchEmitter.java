@@ -2,6 +2,9 @@ package com.mewna.catnip.shard;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.impl.EntityBuilder;
+import com.mewna.catnip.entity.misc.Ready;
+import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.internal.CatnipImpl;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
@@ -38,7 +41,9 @@ public class DispatchEmitter {
         switch(type) {
             // Lifecycle
             case Raw.READY: {
-                catnip.eventBus().publish(type, entityBuilder.createReady(data));
+                final Ready ready = entityBuilder.createReady(data);
+                ((CatnipImpl) catnip).selfUser(ready.user());
+                catnip.eventBus().publish(type, ready);
                 break;
             }
             
@@ -154,7 +159,9 @@ public class DispatchEmitter {
             
             // Users
             case Raw.USER_UPDATE: {
-                catnip.eventBus().publish(type, entityBuilder.createUser(data));
+                final User user = entityBuilder.createUser(data);
+                ((CatnipImpl) user).selfUser(user);
+                catnip.eventBus().publish(type, user);
                 break;
             }
             case Raw.PRESENCE_UPDATE: {
