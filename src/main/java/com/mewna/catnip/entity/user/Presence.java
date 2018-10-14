@@ -1,9 +1,12 @@
 package com.mewna.catnip.entity.user;
 
+import com.mewna.catnip.entity.impl.PresenceImpl;
+import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -21,6 +24,21 @@ public interface Presence {
     
     @Nullable
     Activity activity();
+    
+    @Nonnull
+    @CheckReturnValue
+    static Presence of(@Nonnull final OnlineStatus status, @Nullable final Activity activity) {
+        return PresenceImpl.builder()
+                .status(status)
+                .activity(activity)
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    static Presence of(@Nonnull final OnlineStatus status) {
+        return of(status, null);
+    }
     
     @Accessors(fluent = true, chain = true)
     enum OnlineStatus {
@@ -181,5 +199,27 @@ public interface Presence {
         
         @Nullable
         Set<ActivityFlag> flags();
+        
+        @Nonnull
+        @CheckReturnValue
+        static Activity of(@Nonnull final String name, @Nonnull final ActivityType type, @Nullable final String url) {
+            if (url == null && type == ActivityType.STREAMING) {
+                throw new IllegalArgumentException("A valid twitch.tv URL must be specified when the ActivityType == STREAMING!");
+            }
+            if (url != null && type != ActivityType.STREAMING) {
+                throw new IllegalArgumentException("You can only specify an URL when the ActivityType == STREAMING!");
+            }
+            return ActivityImpl.builder()
+                    .name(name)
+                    .type(type)
+                    .url(url)
+                    .build();
+        }
+        
+        @Nonnull
+        @CheckReturnValue
+        static Activity of(@Nonnull final String name, @Nonnull final ActivityType type) {
+            return of(name, type, null);
+        }
     }
 }
