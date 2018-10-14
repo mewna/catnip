@@ -105,10 +105,14 @@ public class PresenceImpl implements Presence, RequiresCatnip {
     @CheckReturnValue
     public JsonObject asJson() {
         final JsonObject innerData = new JsonObject()
-                .put("since", System.currentTimeMillis()) // how jda handles this
-                .put("afk", status == OnlineStatus.IDLE)
                 .put("status", status.asString());
-        
+        if (status == OnlineStatus.IDLE) {
+            innerData.put("since", System.currentTimeMillis());
+            innerData.put("afk", true);
+        } else {
+            innerData.putNull("since");
+            innerData.put("afk", false);
+        }
         if (activity != null) {
             final JsonObject game = new JsonObject()
                     .put("name", activity.name())
@@ -117,6 +121,8 @@ public class PresenceImpl implements Presence, RequiresCatnip {
                 game.put("url", activity.url());
             }
             innerData.put("game", game);
+        } else {
+            innerData.putNull("game");
         }
         
         return innerData;

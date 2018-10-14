@@ -123,9 +123,10 @@ public class CatnipShard extends AbstractVerticle {
                         break;
                     }
                     final PresenceImpl update = presenceQueue.pop();
-                    catnip.eventBus().publish(websocketMessageSendAddress(), new JsonObject()
+                    final JsonObject object = new JsonObject()
                             .put("op", GatewayOp.STATUS_UPDATE.opcode())
-                            .put("d", update.asJson()));
+                            .put("d", update.asJson());
+                    catnip.eventBus().publish(websocketMessageSendAddress(), object);
                     currentPresence.set(update);
                 }
             }
