@@ -151,7 +151,7 @@ public class CatnipShard extends AbstractVerticle {
         });
         // Start gateway poll
         catnip.eventBus().publish(websocketMessagePollAddress(), null);
-        catnip.eventBus().publish(websocketMessagePresenceUpdatePollAddress(), null)
+        catnip.eventBus().publish(websocketMessagePresenceUpdatePollAddress(), null);
     }
     
     @Override
