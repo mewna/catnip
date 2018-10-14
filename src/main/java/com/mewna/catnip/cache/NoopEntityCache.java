@@ -2,18 +2,19 @@ package com.mewna.catnip.cache;
 
 import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
+import com.mewna.catnip.entity.impl.EntityBuilder;
+import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
+import com.mewna.catnip.shard.DiscordEvent.Raw;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
@@ -21,6 +22,7 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author amy
@@ -29,13 +31,22 @@ import java.util.Map;
 @Accessors(fluent = true, chain = true)
 @SuppressWarnings("unused")
 public class NoopEntityCache implements EntityCacheWorker {
+    private final AtomicReference<User> selfUser = new AtomicReference<>(null);
+    
     @Getter
-    @Setter
     private Catnip catnip;
+    private EntityBuilder builder;
     
     @Nonnull
     @Override
     public EntityCache updateCache(@Nonnull final String eventType, @Nonnull final JsonObject payload) {
+        switch (eventType) {
+            case Raw.READY:
+                selfUser.set(builder.createUser(payload.getJsonObject("user")));
+                break;
+            case Raw.USER_UPDATE:
+                selfUser.set(builder.createUser(payload));
+        }
         return this;
     }
     
@@ -174,6 +185,14 @@ public class NoopEntityCache implements EntityCacheWorker {
     @Nullable
     @Override
     public User selfUser() {
-        return null;
+        return selfUser.get();
+    }
+    
+    @Nonnull
+    @Override
+    public EntityCache catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
+        builder = new EntityBuilder(catnip);
+        return this;
     }
 }
