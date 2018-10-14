@@ -52,10 +52,12 @@ public class CatnipShard extends AbstractVerticle {
     private final HttpClient client;
     
     private final AtomicReference<ShardState> stateRef = new AtomicReference<>(null);
+    private final AtomicReference<Presence> currentPresence = new AtomicReference<>(null);
     private final AtomicBoolean heartbeatAcked = new AtomicBoolean(true);
     private final byte[] decompressBuffer = new byte[1024];
     
     private final Deque<JsonObject> messageQueue = new ConcurrentLinkedDeque<>();
+    private final Deque<PresenceImpl> presenceQueue = new ConcurrentLinkedDeque<>();
     
     private List<String> trace = new ArrayList<>();
     
@@ -112,7 +114,23 @@ public class CatnipShard extends AbstractVerticle {
         catnip.eventBus().consumer(controlAddress(id), this::handleControlMessage);
         catnip.eventBus().consumer(websocketMessageSendAddress(), this::handleSocketSend);
         catnip.eventBus().consumer(websocketMessageQueueAddress(), this::handleSocketQueue);
+        catnip.eventBus().consumer(websocketMessagePresenceUpdateQueueAddress(), this::handlePresenceUpdateQueue);
         catnip.eventBus().consumer(websocketMessagePresenceUpdateAddress(), this::handlePresenceUpdate);
+        catnip.eventBus().consumer(websocketMessagePresenceUpdatePollAddress(), presence -> {
+            if (stateRef.get() != null) {
+                while (!presenceQueue.isEmpty()) {
+                    if (catnip.gatewayRatelimiter().checkRatelimit(websocketMessagePresenceUpdateAddress(), 60_000L, 5).left) {
+                        break;
+                    }
+                    final PresenceImpl update = presenceQueue.pop();
+                    catnip.eventBus().publish(websocketMessageSendAddress(), new JsonObject()
+                            .put("op", GatewayOp.STATUS_UPDATE.opcode())
+                            .put("d", update.asJson()));
+                    currentPresence.set(update);
+                }
+            }
+            catnip.vertx().setTimer(500, __ -> catnip.eventBus().publish(websocketMessagePresenceUpdatePollAddress(), null));
+        });
         catnip.eventBus().consumer(websocketMessagePollAddress(), msg -> {
             if(stateRef.get() != null) {
                 while(!messageQueue.isEmpty()) {
@@ -124,18 +142,7 @@ public class CatnipShard extends AbstractVerticle {
                         break;
                     }
                     
-                    final JsonObject payload = messageQueue.peek();
-                    if (payload == null) {
-                        break;
-                    }
-                    if (GatewayOp.byId(payload.getInteger("op")) == GatewayOp.STATUS_UPDATE) {
-                        if (catnip.gatewayRatelimiter().checkRatelimit(websocketMessagePresenceUpdateAddress(),
-                                60_000L, 5).left) {
-                            break;
-                        }
-                    }
-                    
-                    messageQueue.pop();
+                    final JsonObject payload = messageQueue.pop();
                     catnip.eventBus().publish(websocketMessageSendAddress(), payload);
                 }
             }
@@ -144,6 +151,7 @@ public class CatnipShard extends AbstractVerticle {
         });
         // Start gateway poll
         catnip.eventBus().publish(websocketMessagePollAddress(), null);
+        catnip.eventBus().publish(websocketMessagePresenceUpdatePollAddress(), null)
     }
     
     @Override
@@ -151,10 +159,12 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void handlePresenceUpdate(final Message<PresenceImpl> message) {
-        final JsonObject object = new JsonObject()
-                .put("op", GatewayOp.STATUS_UPDATE.opcode())
-                .put("d", message.body().asJson());
-        catnip.eventBus().publish(websocketMessageQueueAddress(), object);
+        final PresenceImpl impl = message.body();
+        if (impl == null) {
+            message.reply(currentPresence.get());
+            return;
+        }
+        catnip.eventBus().publish(websocketMessagePresenceUpdateQueueAddress(), impl);
     }
     
     private void handleControlMessage(final Message<JsonObject> msg) {
@@ -319,6 +329,10 @@ public class CatnipShard extends AbstractVerticle {
         messageQueue.addLast(msg.body());
     }
     
+    private void handlePresenceUpdateQueue(final Message<PresenceImpl> msg) {
+        presenceQueue.addLast(msg.body());
+    }
+    
     private void handleSocketSend(final Message<JsonObject> msg) {
         final ShardState shardState = stateRef.get();
         if(shardState != null) {
@@ -465,6 +479,14 @@ public class CatnipShard extends AbstractVerticle {
     
     private String websocketMessagePresenceUpdateAddress() {
         return websocketMessagePresenceUpdateAddress(id);
+    }
+    
+    private String websocketMessagePresenceUpdatePollAddress() {
+        return String.format("catnip:gateway:ws-outgoing:%s:presence-update:poll", id);
+    }
+    
+    private String websocketMessagePresenceUpdateQueueAddress() {
+        return String.format("catnip:gateway:ws-outgoing:%s:presence-update:queue", id);
     }
     
     private JsonObject identify() {
