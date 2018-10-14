@@ -27,6 +27,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author amy
@@ -50,6 +51,7 @@ public class CatnipImpl implements Catnip {
     private final Set<CacheFlag> cacheFlags;
     private final boolean chunkMembers;
     private final Presence initialPresence;
+    private final AtomicReference<User> selfUser = new AtomicReference<>(null);
     
     public CatnipImpl(@Nonnull final Vertx vertx, @Nonnull final CatnipOptions options) {
         this.vertx = vertx;
@@ -83,7 +85,14 @@ public class CatnipImpl implements Catnip {
     @Nullable
     @Override
     public User selfUser() {
-        return cache.selfUser();
+        return selfUser.get();
+    }
+    
+    @Nonnull
+    @SuppressWarnings("UnusedReturnValue")
+    public Catnip selfUser(@Nonnull final User self) {
+        selfUser.set(self);
+        return this;
     }
     
     @Nonnull
