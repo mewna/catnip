@@ -3,6 +3,12 @@ package com.mewna.catnip;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCache;
 import com.mewna.catnip.cache.EntityCacheWorker;
+import com.mewna.catnip.entity.impl.PresenceImpl;
+import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
+import com.mewna.catnip.entity.user.Presence;
+import com.mewna.catnip.entity.user.Presence.Activity;
+import com.mewna.catnip.entity.user.Presence.ActivityType;
+import com.mewna.catnip.entity.user.Presence.OnlineStatus;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.ExtensionManager;
@@ -12,6 +18,7 @@ import com.mewna.catnip.internal.ratelimit.Ratelimiter;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
 import com.mewna.catnip.rest.Routes;
+import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.DiscordEvent.EventType;
 import com.mewna.catnip.shard.event.EventBuffer;
 import com.mewna.catnip.shard.manager.ShardManager;
@@ -21,6 +28,7 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
@@ -115,6 +123,66 @@ public interface Catnip {
     
     @Nullable
     User selfUser();
+    
+    @Nullable
+    @CheckReturnValue
+    Presence initialPresence();
+    
+    default void presence(@Nonnegative final int shardId, @Nonnull final Consumer<Presence> callback) {
+        eventBus().send(CatnipShard.websocketMessagePresenceUpdateAddress(shardId), null, result -> {
+            callback.accept((Presence) result.result().body());
+        });
+    }
+    
+    default void presence(@Nonnull final Presence presence) {
+        int shardCount = shardManager().shardCount();
+        if (shardCount == 0) {
+            shardCount = 1;
+        }
+        for (int i = 0; i < shardCount; i++) {
+            presence(presence, i);
+        }
+    }
+    
+    default void presence(@Nonnull final Presence presence, @Nonnegative final int shardId) {
+        eventBus().publish(CatnipShard.websocketMessagePresenceUpdateAddress(shardId), presence);
+    }
+    
+    default void presence(@Nullable final OnlineStatus status, @Nullable final String game, @Nullable final ActivityType type,
+                             @Nullable final String url) {
+        final OnlineStatus stat;
+        if (status != null) {
+            stat = status;
+        } else {
+            final User self = selfUser();
+            if (self != null) {
+                final Presence presence = cache().presence(self.id());
+                stat = presence == null ? OnlineStatus.ONLINE : presence.status();
+            } else {
+                stat = OnlineStatus.ONLINE;
+            }
+        }
+        final Activity activity = game != null
+                ? ActivityImpl.builder()
+                    .name(game)
+                    .type(type == null ? ActivityType.PLAYING : type)
+                    .url(type == ActivityType.STREAMING ? url : null)
+                    .build()
+                : null;
+        presence(PresenceImpl.builder()
+                .catnip(this)
+                .status(stat)
+                .activity(activity)
+                .build());
+    }
+    
+    default void status(@Nonnull final OnlineStatus status) {
+        presence(status, null, null, null);
+    }
+    
+    default void game(@Nonnull final String game, @Nonnull final ActivityType type, @Nullable final String url) {
+        presence(null, game, type, url);
+    }
     
     boolean chunkMembers();
     

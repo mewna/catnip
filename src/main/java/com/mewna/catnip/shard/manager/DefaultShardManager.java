@@ -90,8 +90,9 @@ public class DefaultShardManager implements ShardManager {
         catnip.logAdapter().info("Booting {} shards", count);
         // Deploy verticles
         for(int id = 0; id < count; id++) {
+            // because each shard has its own presence, so no global presence on catnip class
             //noinspection TypeMayBeWeakened
-            final CatnipShard shard = new CatnipShard(catnip, id, count);
+            final CatnipShard shard = new CatnipShard(catnip, id, count, catnip.initialPresence());
             catnip.vertx().deployVerticle(shard);
             connectQueue.addLast(id);
             catnip.logAdapter().info("Deployed shard {}", id);
