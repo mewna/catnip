@@ -247,13 +247,16 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 final String guild = payload.getString("guild_id");
                 final Member old = member(guild, id);
                 if(old != null) {
+                    @SuppressWarnings("ConstantConditions")
                     final JsonObject data = new JsonObject()
                             .put("user", user)
                             .put("roles", payload.getJsonArray("roles"))
                             .put("nick", payload.getString("nick"))
                             .put("deaf", old.deaf())
                             .put("mute", old.mute())
-                            .put("joined_at", old.joinedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+                            .put("joined_at", old.joinedAt()
+                                    // If we have an old member cached, this shouldn't be an issue
+                                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
                     final Member member = entityBuilder.createMember(guild, data);
                     cacheMember(member);
                 } else {
@@ -512,13 +515,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
             return ImmutableList.of();
         }
     }
-    
-    @Nullable
-    @Override
-    public User selfUser() {
-        return selfUser.get();
-    }
-    
+
     @Nonnull
     @Override
     public EntityCache catnip(@Nonnull final Catnip catnip) {

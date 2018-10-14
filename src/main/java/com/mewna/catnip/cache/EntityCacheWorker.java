@@ -56,10 +56,7 @@ public interface EntityCacheWorker extends EntityCache {
     
     @Nonnull
     EntityCache bulkCacheVoiceStates(@Nonnull Collection<VoiceState> voiceStates);
-    
-    @Nonnull
-    Catnip catnip();
-    
+
     @Nonnull
     EntityCache catnip(@Nonnull Catnip catnip);
 }
