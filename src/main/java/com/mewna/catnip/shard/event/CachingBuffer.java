@@ -94,7 +94,7 @@ public class CachingBuffer extends AbstractBuffer {
                         // No guilds left, can just dispatch normally
                         catnip().logAdapter().debug("BufferState for shard {} empty, removing and emitting.", id);
                         buffers.remove(id);
-                        maybeCache(type, event);
+                        maybeCache(type, d);
                         emitter().emit(event);
                     } else {
                         // Remove READY guild if necessary, otherwise buffer
@@ -116,7 +116,7 @@ public class CachingBuffer extends AbstractBuffer {
                     }
                 } else {
                     // If not doing buffering, just dispatch
-                    maybeCache(type, event);
+                    maybeCache(type, d);
                     emitter().emit(event);
                 }
                 break;
