@@ -110,7 +110,11 @@ public class DispatchEmitter {
                 break;
             }
             case Raw.GUILD_DELETE: {
-                catnip.eventBus().publish(type, entityBuilder.createUnavailableGuild(data));
+                if(data.getBoolean("unavailable", false)) {
+                    catnip.eventBus().publish(Raw.GUILD_UNAVAILABLE, entityBuilder.createUnavailableGuild(data));
+                } else {
+                    catnip.eventBus().publish(type, entityBuilder.createGuild(data, false));
+                }
                 break;
             }
             case Raw.GUILD_BAN_ADD: {
