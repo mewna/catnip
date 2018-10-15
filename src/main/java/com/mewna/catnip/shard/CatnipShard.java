@@ -15,13 +15,13 @@ import io.vertx.core.http.WebSocket;
 import io.vertx.core.http.WebSocketFrame;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import jdk.internal.jline.internal.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Deque;
