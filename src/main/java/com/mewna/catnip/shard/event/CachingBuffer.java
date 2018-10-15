@@ -100,8 +100,8 @@ public class CachingBuffer extends AbstractBuffer {
                         // Remove READY guild if necessary, otherwise buffer
                         if(bufferState.readyGuilds().contains(guild)) {
                             bufferState.recvGuild(guild);
-                            maybeCache(type, event);
                             emitter().emit(event);
+                            bufferState.replayGuild(guild);
                             catnip().logAdapter().debug("Buffered guild {} for BufferState {}", guild, id);
                             // Replay all buffered events once we run out
                             if(bufferState.readyGuilds().isEmpty()) {
@@ -165,6 +165,7 @@ public class CachingBuffer extends AbstractBuffer {
                 catnip().cacheWorker().updateCache(eventType, payload);
             } catch(final Exception e) {
                 catnip().logAdapter().warn("Got error updating cache for payload {}", eventType, e);
+                catnip().logAdapter().warn("Payload: {}", payload.encodePrettily());
             }
         }
     }
@@ -196,9 +197,11 @@ public class CachingBuffer extends AbstractBuffer {
                 final int count = queue.size();
                 queue.forEach(emitter()::emit);
                 catnip().logAdapter().debug("Replayed {} buffered events for guild {}", count, id);
-            } else {
+            }/* else {
+                // It's possible that we never reach this case, eg. a guild
+                // not receiving any events before we finish caching it
                 catnip().logAdapter().warn("Was asked to replay guild {}, but it's not being buffered!", id);
-            }
+            }*/
         }
         
         void replay() {

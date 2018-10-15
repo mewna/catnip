@@ -101,4 +101,9 @@ public class GuildImpl implements Guild, RequiresCatnip {
     public List<CustomEmoji> emojis() {
         return catnip.cache().emojis(id);
     }
+    
+    @Override
+    public String toString() {
+        return String.format("Guild (%s, %s)", name, id);
+    }
 }
