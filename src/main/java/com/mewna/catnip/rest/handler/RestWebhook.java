@@ -11,7 +11,7 @@ import com.mewna.catnip.rest.Routes;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * @author natanbc
@@ -24,7 +24,7 @@ public class RestWebhook extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<Webhook> getWebhook(@Nonnull final String webhookId) {
+    public CompletionStage<Webhook> getWebhook(@Nonnull final String webhookId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_WEBHOOK.withMajorParam(webhookId),
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::object)
@@ -33,7 +33,7 @@ public class RestWebhook extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<List<Webhook>> getGuildWebhooks(@Nonnull final String guildId) {
+    public CompletionStage<List<Webhook>> getGuildWebhooks(@Nonnull final String guildId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_WEBHOOKS.withMajorParam(guildId),
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
@@ -42,7 +42,7 @@ public class RestWebhook extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<List<Webhook>> getChannelWebhooks(@Nonnull final String channelId) {
+    public CompletionStage<List<Webhook>> getChannelWebhooks(@Nonnull final String channelId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_CHANNEL_WEBHOOKS.withMajorParam(channelId),
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
@@ -51,7 +51,7 @@ public class RestWebhook extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<Webhook> modifyWebhook(@Nonnull final String webhookId, @Nonnull final WebhookEditFields fields) {
+    public CompletionStage<Webhook> modifyWebhook(@Nonnull final String webhookId, @Nonnull final WebhookEditFields fields) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.MODIFY_WEBHOOK.withMajorParam(webhookId),
                 ImmutableMap.of(), fields.payload()))
                 .thenApply(ResponsePayload::object)
@@ -60,7 +60,7 @@ public class RestWebhook extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<Void> deleteWebhook(@Nonnull final String webhookId) {
+    public CompletionStage<Void> deleteWebhook(@Nonnull final String webhookId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_WEBHOOK.withMajorParam(webhookId),
                 ImmutableMap.of(), null))
                 .thenApply(__ -> null);

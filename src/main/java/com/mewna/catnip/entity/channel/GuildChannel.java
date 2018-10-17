@@ -1,8 +1,8 @@
 package com.mewna.catnip.entity.channel;
 
-import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.guild.PermissionOverride;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
+import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.rest.guild.PermissionOverrideData;
 import com.mewna.catnip.rest.invite.InviteCreateOptions;
 import io.vertx.core.json.JsonObject;
@@ -17,13 +17,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 
 /**
  * @author natanbc
  * @since 9/12/18
  */
+@SuppressWarnings("unused")
 public interface GuildChannel extends Channel {
     @Nonnull
     @CheckReturnValue
@@ -64,36 +65,28 @@ public interface GuildChannel extends Channel {
     
     @Nonnull
     @CheckReturnValue
-    default CompletableFuture<CreatedInvite> createInvite(@Nullable final InviteCreateOptions options) {
+    default CompletionStage<CreatedInvite> createInvite(@Nullable final InviteCreateOptions options) {
         return catnip().rest().channel().createInvite(id(), options);
     }
     
     @Nonnull
     @CheckReturnValue
-    default CompletableFuture<CreatedInvite> createInvite() {
+    default CompletionStage<CreatedInvite> createInvite() {
         return createInvite(null);
     }
     
     @Nonnull
     @CheckReturnValue
-    default CompletableFuture<List<CreatedInvite>> fetchInvites() {
+    default CompletionStage<List<CreatedInvite>> fetchInvites() {
         return catnip().rest().channel().getChannelInvites(id());
     }
     
+    @SuppressWarnings("unused")
     @Getter
     @Setter
     @Accessors(fluent = true)
     class ChannelEditFields {
         private final GuildChannel channel;
-        
-        public ChannelEditFields(@Nullable final GuildChannel channel) {
-            this.channel = channel;
-        }
-        
-        public ChannelEditFields() {
-            this(null);
-        }
-        
         private String name;
         private Integer position;
         private String topic;
@@ -103,43 +96,51 @@ public interface GuildChannel extends Channel {
         private Map<String, PermissionOverrideData> overrides = new HashMap<>();
         private String parentId;
         private Integer rateLimitPerUser;
-    
+        
+        public ChannelEditFields(@Nullable final GuildChannel channel) {
+            this.channel = channel;
+        }
+        
+        public ChannelEditFields() {
+            this(null);
+        }
+        
         @Nonnull
         @CheckReturnValue
         public PermissionOverrideData override(@Nonnull final String id, @Nonnull final OverrideType type) {
             return overrides.computeIfAbsent(id, __ -> new PermissionOverrideData(type, id));
         }
-    
+        
         @Nonnull
         @CheckReturnValue
         public PermissionOverrideData memberOverride(@Nonnull final String id) {
             return override(id, OverrideType.MEMBER);
         }
-    
+        
         @Nonnull
         @CheckReturnValue
         public PermissionOverrideData roleOverride(@Nonnull final String id) {
             return override(id, OverrideType.ROLE);
         }
-    
+        
         @Nonnull
         public ChannelEditFields override(@Nonnull final String id, @Nonnull final OverrideType type, @Nonnull final Consumer<PermissionOverrideData> configurator) {
             configurator.accept(override(id, type));
             return this;
         }
-    
+        
         @Nonnull
         public ChannelEditFields memberOverride(@Nonnull final String id, @Nonnull final Consumer<PermissionOverrideData> configurator) {
             return override(id, OverrideType.MEMBER, configurator);
         }
-    
+        
         @Nonnull
         public ChannelEditFields roleOverride(@Nonnull final String id, @Nonnull final Consumer<PermissionOverrideData> configurator) {
             return override(id, OverrideType.ROLE, configurator);
         }
-    
+        
         @Nonnull
-        public CompletableFuture<GuildChannel> submit() {
+        public CompletionStage<GuildChannel> submit() {
             if(channel == null) {
                 throw new IllegalStateException("Cannot submit edit without a channel object! Please use RestChannel directly instead");
             }
@@ -162,15 +163,11 @@ public interface GuildChannel extends Channel {
             if(overrides != null && !overrides.isEmpty()) {
                 final Map<String, PermissionOverrideData> finalOverrides = new HashMap<>();
                 if(channel != null) {
-                    channel.overrides().forEach(override -> {
-                        finalOverrides.put(override.id(), PermissionOverrideData.create(override));
-                    });
+                    channel.overrides().forEach(override -> finalOverrides.put(override.id(), PermissionOverrideData.create(override)));
                 }
                 overrides.forEach(finalOverrides::put);
                 final JsonObject object = new JsonObject();
-                finalOverrides.forEach((k, v) -> {
-                    object.put(k, v.toJson());
-                });
+                finalOverrides.forEach((k, v) -> object.put(k, v.toJson()));
                 payload.put("permission_overwrites", object);
             }
             if(channel != null) {
