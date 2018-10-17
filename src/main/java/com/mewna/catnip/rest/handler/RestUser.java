@@ -21,7 +21,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -36,7 +35,7 @@ public class RestUser extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<User> getCurrentUser() {
+    public CompletionStage<User> getCurrentUser() {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_CURRENT_USER,
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::object)
@@ -45,7 +44,7 @@ public class RestUser extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<User> getUser(@Nonnull final String userId) {
+    public CompletionStage<User> getUser(@Nonnull final String userId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_USER,
                 ImmutableMap.of("user.id", userId), null))
                 .thenApply(ResponsePayload::object)
@@ -53,7 +52,7 @@ public class RestUser extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<User> modifyCurrentUser(@Nullable final String username, @Nullable final URI avatarData) {
+    public CompletionStage<User> modifyCurrentUser(@Nullable final String username, @Nullable final URI avatarData) {
         final JsonObject body = new JsonObject();
         if(avatarData != null) {
             Utils.validateImageUri(avatarData);
@@ -67,7 +66,7 @@ public class RestUser extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<User> modifyCurrentUser(@Nullable final String username, @Nullable final byte[] avatar) {
+    public CompletionStage<User> modifyCurrentUser(@Nullable final String username, @Nullable final byte[] avatar) {
         return modifyCurrentUser(username, avatar == null ? null : Utils.asImageDataUri(avatar));
     }
     
@@ -85,8 +84,8 @@ public class RestUser extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<List<PartialGuild>> getCurrentUserGuilds(@Nullable final String before, @Nullable final String after,
-                                                                      @Nonnegative final int limit) {
+    public CompletionStage<List<PartialGuild>> getCurrentUserGuilds(@Nullable final String before, @Nullable final String after,
+                                                                    @Nonnegative final int limit) {
         return getCurrentUserGuildsRaw(before, after, limit)
                 .thenApply(mapObjectContents(getEntityBuilder()::createPartialGuild));
     }
@@ -95,20 +94,20 @@ public class RestUser extends RestHandler {
     //keeping this private for consistency with the rest of the methods
     @Nonnull
     @CheckReturnValue
-    private CompletableFuture<JsonArray> getCurrentUserGuildsRaw(@Nullable final String before, @Nullable final String after,
-                                                                 @Nonnegative final int limit) {
+    private CompletionStage<JsonArray> getCurrentUserGuildsRaw(@Nullable final String before, @Nullable final String after,
+                                                               @Nonnegative final int limit) {
         final Collection<String> params = new ArrayList<>();
-        if (before != null) {
+        if(before != null) {
             params.add("before=" + before);
         }
-        if (after != null) {
+        if(after != null) {
             params.add("before=" + after);
         }
-        if (limit <= 100) {
+        if(limit <= 100) {
             params.add("limit=" + limit);
         }
         String query = String.join("&", params);
-        if (!query.isEmpty()) {
+        if(!query.isEmpty()) {
             query = '?' + query;
         }
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_CURRENT_USER_GUILDS.withQueryString(query),
@@ -118,7 +117,7 @@ public class RestUser extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<DMChannel> createDM(@Nonnull final String recipientId) {
+    public CompletionStage<DMChannel> createDM(@Nonnull final String recipientId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_DM,
                 ImmutableMap.of(), new JsonObject().put("recipient_id", recipientId)))
                 .thenApply(ResponsePayload::object)
@@ -126,7 +125,7 @@ public class RestUser extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<Void> leaveGuild(@Nonnull final String guildId) {
+    public CompletionStage<Void> leaveGuild(@Nonnull final String guildId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.LEAVE_GUILD.withMajorParam(guildId),
                 ImmutableMap.of(), null))
                 .thenApply(__ -> null);

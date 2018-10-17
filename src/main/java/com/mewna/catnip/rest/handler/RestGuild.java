@@ -25,8 +25,10 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -41,7 +43,7 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<List<Role>> getGuildRoles(@Nonnull final String guildId) {
+    public CompletionStage<List<Role>> getGuildRoles(@Nonnull final String guildId) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.GET_GUILD_ROLES.withMajorParam(guildId),
                         ImmutableMap.of(), null))
@@ -52,7 +54,7 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<Guild> getGuild(@Nonnull final String guildId) {
+    public CompletionStage<Guild> getGuild(@Nonnull final String guildId) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.GET_GUILD.withMajorParam(guildId),
                         ImmutableMap.of(), null))
@@ -62,7 +64,7 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<Guild> createGuild(@Nonnull final GuildData guild) {
+    public CompletionStage<Guild> createGuild(@Nonnull final GuildData guild) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.CREATE_GUILD,
                         ImmutableMap.of(), guild.toJson()))
@@ -71,7 +73,7 @@ public class RestGuild extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<Void> deleteGuild(@Nonnull final String guildId) {
+    public CompletionStage<Void> deleteGuild(@Nonnull final String guildId) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.DELETE_GUILD.withMajorParam(guildId),
                         ImmutableMap.of(), null))
@@ -80,7 +82,7 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<List<GuildChannel>> getGuildChannels(@Nonnull final String guildId) {
+    public CompletionStage<List<GuildChannel>> getGuildChannels(@Nonnull final String guildId) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.GET_GUILD_CHANNELS.withMajorParam(guildId),
                         ImmutableMap.of(), null))
@@ -93,7 +95,7 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<List<CreatedInvite>> getGuildInvites(@Nonnull final String guildId) {
+    public CompletionStage<List<CreatedInvite>> getGuildInvites(@Nonnull final String guildId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_INVITES.withMajorParam(guildId),
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
@@ -101,7 +103,7 @@ public class RestGuild extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<Guild> modifyGuild(@Nonnull final String guildId, @Nonnull final GuildEditFields fields) {
+    public CompletionStage<Guild> modifyGuild(@Nonnull final String guildId, @Nonnull final GuildEditFields fields) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.MODIFY_GUILD.withMajorParam(guildId),
                 ImmutableMap.of(), fields.payload()))
                 .thenApply(ResponsePayload::object)
@@ -122,8 +124,8 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<List<Member>> listGuildMembers(@Nonnull final String guildId, @Nonnegative final int limit,
-                                                            @Nullable final String after) {
+    public CompletionStage<List<Member>> listGuildMembers(@Nonnull final String guildId, @Nonnegative final int limit,
+                                                          @Nullable final String after) {
         return listGuildMembersRaw(guildId, limit, after)
                 .thenApply(mapObjectContents(o -> getEntityBuilder().createMember(guildId, o)));
     }
@@ -132,8 +134,8 @@ public class RestGuild extends RestHandler {
     //keeping this private for consistency with the rest of the methods
     @Nonnull
     @CheckReturnValue
-    private CompletableFuture<JsonArray> listGuildMembersRaw(@Nonnull final String guildId, @Nonnegative final int limit,
-                                                             @Nullable final String after) {
+    private CompletionStage<JsonArray> listGuildMembersRaw(@Nonnull final String guildId, @Nonnegative final int limit,
+                                                           @Nullable final String after) {
         final Collection<String> params = new ArrayList<>();
         if(limit > 0) {
             params.add("limit=" + limit);
@@ -152,7 +154,7 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<List<GuildBan>> getGuildBans(@Nonnull final String guildId) {
+    public CompletionStage<List<GuildBan>> getGuildBans(@Nonnull final String guildId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BANS.withMajorParam(guildId),
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
@@ -161,7 +163,7 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<GuildBan> getGuildBan(@Nonnull final String guildId, @Nonnull final String userId) {
+    public CompletionStage<GuildBan> getGuildBan(@Nonnull final String guildId, @Nonnull final String userId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BAN.withMajorParam(guildId),
                 ImmutableMap.of("user.id", userId), null))
                 .thenApply(ResponsePayload::object)
@@ -169,9 +171,9 @@ public class RestGuild extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<Void> createGuildBan(@Nonnull final String guildId, @Nonnull final String userId,
-                                                  @Nullable final String reason,
-                                                  @Nonnegative final int deleteMessageDays) {
+    public CompletionStage<Void> createGuildBan(@Nonnull final String guildId, @Nonnull final String userId,
+                                                @Nullable final String reason,
+                                                @Nonnegative final int deleteMessageDays) {
         final Collection<String> params = new ArrayList<>();
         if(deleteMessageDays <= 7) {
             params.add("delete-message-days=" + deleteMessageDays);
@@ -189,21 +191,21 @@ public class RestGuild extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<Void> removeGuildBan(@Nonnull final String guildId, @Nonnull final String userId) {
+    public CompletionStage<Void> removeGuildBan(@Nonnull final String guildId, @Nonnull final String userId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BAN.withMajorParam(guildId),
                 ImmutableMap.of("user.id", userId), null))
                 .thenApply(e -> null);
     }
     
     @Nonnull
-    public CompletableFuture<String> modifyCurrentUsersNick(@Nonnull final String guildId, @Nullable final String nick) {
+    public CompletionStage<String> modifyCurrentUsersNick(@Nonnull final String guildId, @Nullable final String nick) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.MODIFY_CURRENT_USERS_NICK.withQueryString(guildId),
                 ImmutableMap.of(), new JsonObject().put("nick", nick)))
                 .thenApply(ResponsePayload::string);
     }
     
     @Nonnull
-    public CompletableFuture<Void> removeGuildMember(@Nonnull final String guildId, @Nonnull final String userId) {
+    public CompletionStage<Void> removeGuildMember(@Nonnull final String guildId, @Nonnull final String userId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.REMOVE_GUILD_MEMBER.withMajorParam(guildId),
                 ImmutableMap.of("user.id", userId), null))
                 .thenApply(e -> null);
@@ -211,7 +213,7 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<Member> getGuildMember(@Nonnull final String guildId, @Nonnull final String userId) {
+    public CompletionStage<Member> getGuildMember(@Nonnull final String guildId, @Nonnull final String userId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_MEMBER.withMajorParam(guildId),
                 ImmutableMap.of("user.id", userId), null))
                 .thenApply(ResponsePayload::object)
@@ -219,16 +221,16 @@ public class RestGuild extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<Void> removeGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
-                                                         @Nonnull final String roleId) {
+    public CompletionStage<Void> removeGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
+                                                       @Nonnull final String roleId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.REMOVE_GUILD_MEMBER_ROLE.withMajorParam(guildId),
                 ImmutableMap.of("user.id", userId, "role.id", roleId), null))
                 .thenApply(e -> null);
     }
     
     @Nonnull
-    public CompletableFuture<Void> addGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
-                                                      @Nonnull final String roleId) {
+    public CompletionStage<Void> addGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
+                                                    @Nonnull final String roleId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.ADD_GUILD_MEMBER_ROLE.withMajorParam(guildId),
                 ImmutableMap.of("user.id", userId, "role.id", roleId), null))
                 .thenApply(e -> null);
@@ -236,7 +238,7 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<Integer> getGuildPruneCount(@Nonnull final String guildId, @Nonnegative final int days) {
+    public CompletionStage<Integer> getGuildPruneCount(@Nonnull final String guildId, @Nonnegative final int days) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_PRUNE_COUNT.withMajorParam(guildId).withQueryString("?days=" + days),
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::object)
@@ -245,7 +247,7 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<Integer> beginGuildPrune(@Nonnull final String guildId, @Nonnegative final int days) {
+    public CompletionStage<Integer> beginGuildPrune(@Nonnull final String guildId, @Nonnegative final int days) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.BEGIN_GUILD_PRUNE.withMajorParam(guildId).withQueryString("?days=" + days),
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::object)
@@ -254,7 +256,7 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<List<VoiceRegion>> getGuildVoiceRegions(@Nonnull final String guildId) {
+    public CompletionStage<List<VoiceRegion>> getGuildVoiceRegions(@Nonnull final String guildId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_VOICE_REGIONS.withQueryString(guildId),
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
@@ -275,9 +277,9 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<List<AuditLogEntry>> getGuildAuditLog(@Nonnull final String guildId, @Nullable final String userId,
-                                                              @Nullable final String beforeEntryId, @Nullable final ActionType type,
-                                                              @Nonnegative final int limit) {
+    public CompletionStage<List<AuditLogEntry>> getGuildAuditLog(@Nonnull final String guildId, @Nullable final String userId,
+                                                                 @Nullable final String beforeEntryId, @Nullable final ActionType type,
+                                                                 @Nonnegative final int limit) {
         return getGuildAuditLogRaw(guildId, userId, beforeEntryId, type, limit)
                 .thenApply(getEntityBuilder()::createAuditLog);
     }
@@ -286,24 +288,24 @@ public class RestGuild extends RestHandler {
     //keeping this private for consistency with the rest of the methods
     @Nonnull
     @CheckReturnValue
-    private CompletableFuture<JsonObject> getGuildAuditLogRaw(@Nonnull final String guildId, @Nullable final String userId,
-                                                         @Nullable final String beforeEntryId, @Nullable final ActionType type,
-                                                         @Nonnegative final int limit) {
+    private CompletionStage<JsonObject> getGuildAuditLogRaw(@Nonnull final String guildId, @Nullable final String userId,
+                                                            @Nullable final String beforeEntryId, @Nullable final ActionType type,
+                                                            @Nonnegative final int limit) {
         final Collection<String> params = new ArrayList<>();
-        if (userId != null) {
+        if(userId != null) {
             params.add("user_id=" + userId);
         }
-        if (beforeEntryId != null) {
+        if(beforeEntryId != null) {
             params.add("before=" + beforeEntryId);
         }
-        if (limit <= 100) {
+        if(limit <= 100) {
             params.add("limit=" + limit);
         }
-        if (type != null) {
+        if(type != null) {
             params.add("action_type=" + type);
         }
         String query = String.join("&", params);
-        if (!query.isEmpty()) {
+        if(!query.isEmpty()) {
             query = '?' + query;
         }
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_AUDIT_LOG.withMajorParam(guildId).withQueryString(query),

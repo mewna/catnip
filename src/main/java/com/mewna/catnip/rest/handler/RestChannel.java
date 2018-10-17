@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -47,17 +46,17 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<Message> sendMessage(@Nonnull final String channelId, @Nonnull final String content) {
+    public CompletionStage<Message> sendMessage(@Nonnull final String channelId, @Nonnull final String content) {
         return sendMessage(channelId, new MessageBuilder().content(content).build());
     }
     
     @Nonnull
-    public CompletableFuture<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Embed embed) {
+    public CompletionStage<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Embed embed) {
         return sendMessage(channelId, new MessageBuilder().embed(embed).build());
     }
     
     @Nonnull
-    public CompletableFuture<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Message message) {
+    public CompletionStage<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Message message) {
         final JsonObject json = new JsonObject();
         if(message.content() != null && !message.content().isEmpty()) {
             json.put("content", message.content());
@@ -76,7 +75,7 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public final CompletableFuture<Message> sendMessage(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
+    public final CompletionStage<Message> sendMessage(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
         final JsonObject json = new JsonObject();
         
         if(options.content() != null && !options.content().isEmpty()) {
@@ -99,7 +98,7 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<Message> getMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
+    public CompletionStage<Message> getMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
         return getCatnip().requester().queue(
                 new OutboundRequest(Routes.GET_CHANNEL_MESSAGE.withMajorParam(channelId),
                         ImmutableMap.of("message.id", messageId), null))
@@ -108,20 +107,20 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
-                                                  @Nonnull final String content) {
+    public CompletionStage<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                @Nonnull final String content) {
         return editMessage(channelId, messageId, new MessageBuilder().content(content).build());
     }
     
     @Nonnull
-    public CompletableFuture<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
-                                                  @Nonnull final Embed embed) {
+    public CompletionStage<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                @Nonnull final Embed embed) {
         return editMessage(channelId, messageId, new MessageBuilder().embed(embed).build());
     }
     
     @Nonnull
-    public CompletableFuture<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
-                                                  @Nonnull final Message message) {
+    public CompletionStage<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                @Nonnull final Message message) {
         final JsonObject json = new JsonObject();
         if(message.content() != null && !message.content().isEmpty()) {
             json.put("content", message.content());
@@ -140,13 +139,13 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<Void> deleteMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
+    public CompletionStage<Void> deleteMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_MESSAGE.withMajorParam(channelId),
                 ImmutableMap.of("message.id", messageId), null)).thenApply(__ -> null);
     }
     
     @Nonnull
-    public CompletableFuture<Void> deleteMessages(@Nonnull final String channelId, @Nonnull final List<String> messageIds) {
+    public CompletionStage<Void> deleteMessages(@Nonnull final String channelId, @Nonnull final List<String> messageIds) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.BULK_DELETE_MESSAGES.withMajorParam(channelId),
                         ImmutableMap.of(), new JsonObject().put("messages", new JsonArray(messageIds))))
@@ -154,35 +153,35 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<Void> addReaction(@Nonnull final String channelId, @Nonnull final String messageId,
-                                               @Nonnull final String emoji) {
+    public CompletionStage<Void> addReaction(@Nonnull final String channelId, @Nonnull final String messageId,
+                                             @Nonnull final String emoji) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_REACTION.withMajorParam(channelId),
                 ImmutableMap.of("message.id", messageId, "emojis", encodeUTF8(emoji)), new JsonObject()))
                 .thenApply(__ -> null);
     }
     
     @Nonnull
-    public CompletableFuture<Void> addReaction(@Nonnull final String channelId, @Nonnull final String messageId,
-                                               @Nonnull final Emoji emoji) {
+    public CompletionStage<Void> addReaction(@Nonnull final String channelId, @Nonnull final String messageId,
+                                             @Nonnull final Emoji emoji) {
         return addReaction(channelId, messageId, emoji.forReaction());
     }
     
     @Nonnull
-    public CompletableFuture<Void> deleteOwnReaction(@Nonnull final String channelId, @Nonnull final String messageId,
-                                                     @Nonnull final String emoji) {
+    public CompletionStage<Void> deleteOwnReaction(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                   @Nonnull final String emoji) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_OWN_REACTION.withMajorParam(channelId),
                 ImmutableMap.of("message.id", messageId, "emojis", encodeUTF8(emoji)), null))
                 .thenApply(__ -> null);
     }
     
     @Nonnull
-    public CompletableFuture<Void> deleteOwnReaction(@Nonnull final String channelId, @Nonnull final String messageId,
-                                                     @Nonnull final Emoji emoji) {
+    public CompletionStage<Void> deleteOwnReaction(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                   @Nonnull final Emoji emoji) {
         return deleteOwnReaction(channelId, messageId, emoji.forReaction());
     }
     
     @Nonnull
-    public CompletableFuture<Void> deleteAllReactions(@Nonnull final String channelId, @Nonnull final String messageId) {
+    public CompletionStage<Void> deleteAllReactions(@Nonnull final String channelId, @Nonnull final String messageId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_ALL_REACTIONS.withMajorParam(channelId),
                 ImmutableMap.of("message.id", messageId), null))
                 .thenApply(__ -> null);
@@ -191,7 +190,7 @@ public class RestChannel extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public ReactionPaginator getReactions(@Nonnull final String channelId, @Nonnull final String messageId,
-                                            @Nonnull final String emoji) {
+                                          @Nonnull final String emoji) {
         return new ReactionPaginator(getEntityBuilder()) {
             @Nonnull
             @CheckReturnValue
@@ -206,7 +205,7 @@ public class RestChannel extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public ReactionPaginator getReactions(@Nonnull final String channelId, @Nonnull final String messageId,
-                                            @Nonnull final Emoji emoji) {
+                                          @Nonnull final Emoji emoji) {
         return getReactions(channelId, messageId, emoji.forReaction());
     }
     
@@ -214,21 +213,21 @@ public class RestChannel extends RestHandler {
     //keeping this private for consistency with the rest of the methods
     @Nonnull
     @CheckReturnValue
-    private CompletableFuture<JsonArray> getReactionsRaw(@Nonnull final String channelId, @Nonnull final String messageId,
-                                                      @Nonnull final String emoji, @Nullable final String before,
-                                                      @Nullable final String after, @Nonnegative final int limit) {
+    private CompletionStage<JsonArray> getReactionsRaw(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                       @Nonnull final String emoji, @Nullable final String before,
+                                                       @Nullable final String after, @Nonnegative final int limit) {
         final Collection<String> params = new ArrayList<>();
-        if (limit > 0) {
+        if(limit > 0) {
             params.add("limit=" + limit);
         }
-        if (before != null) {
+        if(before != null) {
             params.add("before=" + before);
         }
-        if (after != null) {
+        if(after != null) {
             params.add("after=" + after);
         }
         String query = String.join("&", params);
-        if (!query.isEmpty()) {
+        if(!query.isEmpty()) {
             query = '?' + query;
         }
         return getCatnip().requester()
@@ -237,9 +236,9 @@ public class RestChannel extends RestHandler {
                 .thenApply(ResponsePayload::array);
     }
     
-    public CompletableFuture<List<User>> getReactions(@Nonnull final String channelId, @Nonnull final String messageId,
-                                                        @Nonnull final String emoji, @Nullable final String before,
-                                                        @Nullable final String after, @Nonnegative final int limit) {
+    public CompletionStage<List<User>> getReactions(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                    @Nonnull final String emoji, @Nullable final String before,
+                                                    @Nullable final String after, @Nonnegative final int limit) {
         return getReactionsRaw(channelId, messageId, emoji, before, after, limit)
                 .thenApply(mapObjectContents(getEntityBuilder()::createUser))
                 .thenApply(Collections::unmodifiableList);
@@ -247,9 +246,9 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<List<User>> getReactions(@Nonnull final String channelId, @Nonnull final String messageId,
-                                                      @Nonnull final Emoji emoji, @Nullable final String before,
-                                                      @Nullable final String after, @Nonnegative final int limit) {
+    public CompletionStage<List<User>> getReactions(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                    @Nonnull final Emoji emoji, @Nullable final String before,
+                                                    @Nullable final String after, @Nonnegative final int limit) {
         return getReactions(channelId, messageId, emoji.forReaction(), before, after, limit);
     }
     
@@ -271,9 +270,9 @@ public class RestChannel extends RestHandler {
     //keeping this private for consistency with the rest of the methods
     @Nonnull
     @CheckReturnValue
-    private CompletableFuture<JsonArray> getChannelMessagesRaw(@Nonnull final String channelId, @Nullable final String before,
-                                                               @Nullable final String after, @Nullable final String around,
-                                                               @Nonnegative final int limit) {
+    private CompletionStage<JsonArray> getChannelMessagesRaw(@Nonnull final String channelId, @Nullable final String before,
+                                                             @Nullable final String after, @Nullable final String around,
+                                                             @Nonnegative final int limit) {
         final Collection<String> params = new ArrayList<>();
         if(limit > 0) {
             params.add("limit=" + limit);
@@ -306,7 +305,7 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<Void> triggerTypingIndicator(@Nonnull final String channelId) {
+    public CompletionStage<Void> triggerTypingIndicator(@Nonnull final String channelId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.TRIGGER_TYPING_INDICATOR.withMajorParam(channelId),
                 ImmutableMap.of(), null))
                 .thenApply(__ -> null);
@@ -314,7 +313,7 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<Channel> getChannelById(@Nonnull final String channelId) {
+    public CompletionStage<Channel> getChannelById(@Nonnull final String channelId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_CHANNEL.withMajorParam(channelId),
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::object)
@@ -323,7 +322,7 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<Channel> deleteChannel(@Nonnull final String channelId) {
+    public CompletionStage<Channel> deleteChannel(@Nonnull final String channelId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_CHANNEL.withMajorParam(channelId),
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::object)
@@ -332,7 +331,8 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<CreatedInvite> createInvite(@Nonnull final String channelId, @Nullable final InviteCreateOptions options) {
+    public CompletionStage<CreatedInvite> createInvite(@Nonnull final String channelId,
+                                                       @Nullable final InviteCreateOptions options) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_CHANNEL_INVITE.withMajorParam(channelId),
                 ImmutableMap.of(), (options == null ? InviteCreateOptions.create() : options).toJson()))
                 .thenApply(ResponsePayload::object)
@@ -341,7 +341,7 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<List<CreatedInvite>> getChannelInvites(@Nonnull final String channelId) {
+    public CompletionStage<List<CreatedInvite>> getChannelInvites(@Nonnull final String channelId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_CHANNEL_INVITES.withMajorParam(channelId),
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
@@ -349,7 +349,8 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<GuildChannel> modifyChannel(@Nonnull final String channelId, @Nonnull final ChannelEditFields fields) {
+    public CompletionStage<GuildChannel> modifyChannel(@Nonnull final String channelId,
+                                                       @Nonnull final ChannelEditFields fields) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.MODIFY_CHANNEL.withMajorParam(channelId),
                 ImmutableMap.of(), fields.payload()))
                 .thenApply(ResponsePayload::object)
@@ -357,21 +358,22 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<Void> deletePermissionOverride(@Nonnull final String channelId, @Nonnull final String overwriteId) {
+    public CompletionStage<Void> deletePermissionOverride(@Nonnull final String channelId, @Nonnull final String overwriteId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_CHANNEL_PERMISSION.withMajorParam(channelId),
                 ImmutableMap.of("overwrite.id", overwriteId), null))
                 .thenApply(__ -> null);
     }
     
     @Nonnull
-    public CompletableFuture<Void> deletePermissionOverride(@Nonnull final String channelId, @Nonnull final PermissionOverride overwrite) {
+    public CompletionStage<Void> deletePermissionOverride(@Nonnull final String channelId,
+                                                          @Nonnull final PermissionOverride overwrite) {
         return deletePermissionOverride(channelId, overwrite.id());
     }
     
     @Nonnull
-    public CompletableFuture<Void> editPermissionOverride(@Nonnull final String channelId, @Nonnull final String overwriteId,
-                                                          @Nonnull final Collection<Permission> allowed,
-                                                          @Nonnull final Collection<Permission> denied, final boolean isMember) {
+    public CompletionStage<Void> editPermissionOverride(@Nonnull final String channelId, @Nonnull final String overwriteId,
+                                                        @Nonnull final Collection<Permission> allowed,
+                                                        @Nonnull final Collection<Permission> denied, final boolean isMember) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.EDIT_CHANNEL_PERMISSIONS.withMajorParam(channelId),
                 ImmutableMap.of("overwrite.id", overwriteId), new JsonObject()
                 .put("allow", Permission.from(allowed))
@@ -381,15 +383,15 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<Void> editPermissionOverride(@Nonnull final String channelId, @Nonnull final PermissionOverride overwrite,
-                                                          @Nonnull final Collection<Permission> allowed,
-                                                          @Nonnull final Collection<Permission> denied) {
+    public CompletionStage<Void> editPermissionOverride(@Nonnull final String channelId, @Nonnull final PermissionOverride overwrite,
+                                                        @Nonnull final Collection<Permission> allowed,
+                                                        @Nonnull final Collection<Permission> denied) {
         return editPermissionOverride(channelId, overwrite.id(), allowed, denied, overwrite.type() == OverrideType.MEMBER);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<List<Message>> getPinnedMessages(@Nonnull final String channelId) {
+    public CompletionStage<List<Message>> getPinnedMessages(@Nonnull final String channelId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_PINNED_MESSAGES.withMajorParam(channelId),
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)
@@ -397,31 +399,32 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public CompletableFuture<Void> deletePinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
+    public CompletionStage<Void> deletePinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_PINNED_CHANNEL_MESSAGE.withMajorParam(channelId),
                 ImmutableMap.of("message.id", messageId), null))
                 .thenApply(__ -> null);
     }
     
     @Nonnull
-    public CompletableFuture<Void> deletePinnedMessage(@Nonnull final Message message) {
+    public CompletionStage<Void> deletePinnedMessage(@Nonnull final Message message) {
         return deletePinnedMessage(message.channelId(), message.id());
     }
     
     @Nonnull
-    public CompletableFuture<Void> addPinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
+    public CompletionStage<Void> addPinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.ADD_PINNED_CHANNEL_MESSAGE.withMajorParam(channelId),
                 ImmutableMap.of("message.id", messageId), new JsonObject()))
                 .thenApply(__ -> null);
     }
     
     @Nonnull
-    public CompletableFuture<Void> addPinnedMessage(@Nonnull final Message message) {
+    public CompletionStage<Void> addPinnedMessage(@Nonnull final Message message) {
         return addPinnedMessage(message.channelId(), message.id());
     }
     
     @Nonnull
-    public CompletableFuture<Webhook> createWebhook(@Nonnull final String channelId, @Nonnull final String name, @Nullable final String avatar) {
+    public CompletionStage<Webhook> createWebhook(@Nonnull final String channelId, @Nonnull final String name,
+                                                  @Nullable final String avatar) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_WEBHOOK.withMajorParam(channelId),
                 ImmutableMap.of(), new JsonObject().put("name", name).put("avatar", avatar)))
                 .thenApply(ResponsePayload::object)

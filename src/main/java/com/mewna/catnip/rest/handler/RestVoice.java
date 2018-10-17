@@ -10,7 +10,7 @@ import com.mewna.catnip.rest.Routes;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 public class RestVoice extends RestHandler {
     public RestVoice(final CatnipImpl catnip) {
@@ -19,7 +19,7 @@ public class RestVoice extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<List<VoiceRegion>> listVoiceRegions() {
+    public CompletionStage<List<VoiceRegion>> listVoiceRegions() {
         return getCatnip().requester().queue(new OutboundRequest(Routes.LIST_VOICE_REGIONS,
                 ImmutableMap.of(), null))
                 .thenApply(ResponsePayload::array)

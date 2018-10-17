@@ -5,7 +5,7 @@ import lombok.Getter;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * @author natanbc
@@ -18,7 +18,7 @@ public interface Channel extends Snowflake {
     ChannelType type();
     
     @Nonnull
-    default CompletableFuture<Channel> delete() {
+    default CompletionStage<Channel> delete() {
         return catnip().rest().channel().deleteChannel(id());
     }
     
@@ -63,7 +63,7 @@ public interface Channel extends Snowflake {
         if(!isGuild()) {
             throw new UnsupportedOperationException("Not a guild channel");
         }
-        return (GuildChannel)this;
+        return (GuildChannel) this;
     }
     
     @Nonnull
@@ -72,7 +72,7 @@ public interface Channel extends Snowflake {
         if(!isText()) {
             throw new UnsupportedOperationException("Not a text channel");
         }
-        return (TextChannel)this;
+        return (TextChannel) this;
     }
     
     @Nonnull
@@ -81,7 +81,7 @@ public interface Channel extends Snowflake {
         if(!isVoice()) {
             throw new UnsupportedOperationException("Not a voice channel");
         }
-        return (VoiceChannel)this;
+        return (VoiceChannel) this;
     }
     
     @Nonnull
@@ -90,7 +90,7 @@ public interface Channel extends Snowflake {
         if(!isCategory()) {
             throw new UnsupportedOperationException("Not a category");
         }
-        return (Category)this;
+        return (Category) this;
     }
     
     @Nonnull
@@ -99,7 +99,7 @@ public interface Channel extends Snowflake {
         if(!isDM()) {
             throw new UnsupportedOperationException("Not a DM channel");
         }
-        return (DMChannel)this;
+        return (DMChannel) this;
     }
     
     @Nonnull
@@ -108,7 +108,7 @@ public interface Channel extends Snowflake {
         if(!isUserDM()) {
             throw new UnsupportedOperationException("Not an user DM channel");
         }
-        return (UserDMChannel)this;
+        return (UserDMChannel) this;
     }
     
     @Nonnull
@@ -117,7 +117,7 @@ public interface Channel extends Snowflake {
         if(!isGroupDM()) {
             throw new UnsupportedOperationException("Not a group DM channel");
         }
-        return (GroupDMChannel)this;
+        return (GroupDMChannel) this;
     }
     
     enum ChannelType {
@@ -132,7 +132,7 @@ public interface Channel extends Snowflake {
             this.key = key;
             this.guild = guild;
         }
-    
+        
         @Nonnull
         public static ChannelType byKey(final int key) {
             for(final ChannelType level : values()) {

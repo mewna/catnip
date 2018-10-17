@@ -11,12 +11,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * @author amy
  * @since 9/4/18.
  */
+@SuppressWarnings("unused")
 public interface Message extends Snowflake {
     /**
      * The type of message. Use this to tell normal messages from system messages.
@@ -189,7 +190,7 @@ public interface Message extends Snowflake {
      * @return Future for the reaction.
      */
     @Nonnull
-    default CompletableFuture<Void> react(@Nonnull final Emoji emoji) {
+    default CompletionStage<Void> react(@Nonnull final Emoji emoji) {
         return catnip().rest().channel().addReaction(channelId(), id(), emoji);
     }
     
@@ -202,27 +203,27 @@ public interface Message extends Snowflake {
      * @return Future for the reaction.
      */
     @Nonnull
-    default CompletableFuture<Void> react(@Nonnull final String emoji) {
+    default CompletionStage<Void> react(@Nonnull final String emoji) {
         return catnip().rest().channel().addReaction(channelId(), id(), emoji);
     }
     
     @Nonnull
-    default CompletableFuture<Void> delete() {
+    default CompletionStage<Void> delete() {
         return catnip().rest().channel().deleteMessage(channelId(), id());
     }
     
     @Nonnull
-    default CompletableFuture<Message> edit(@Nonnull final String content) {
+    default CompletionStage<Message> edit(@Nonnull final String content) {
         return catnip().rest().channel().editMessage(channelId(), id(), content);
     }
     
     @Nonnull
-    default CompletableFuture<Message> edit(@Nonnull final Embed embed) {
+    default CompletionStage<Message> edit(@Nonnull final Embed embed) {
         return catnip().rest().channel().editMessage(channelId(), id(), embed);
     }
     
     @Nonnull
-    default CompletableFuture<Message> edit(@Nonnull final Message message) {
+    default CompletionStage<Message> edit(@Nonnull final Message message) {
         return catnip().rest().channel().editMessage(channelId(), id(), message);
     }
     

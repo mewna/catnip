@@ -5,12 +5,13 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * @author natanbc
  * @since 9/12/18
  */
+@SuppressWarnings("unused")
 public interface TextChannel extends GuildChannel, MessageChannel {
     @Nullable
     @CheckReturnValue
@@ -43,7 +44,7 @@ public interface TextChannel extends GuildChannel, MessageChannel {
     
     @Nonnull
     @CheckReturnValue
-    default CompletableFuture<List<Webhook>> fetchWebhooks() {
+    default CompletionStage<List<Webhook>> fetchWebhooks() {
         return catnip().rest().webhook().getChannelWebhooks(id());
     }
     
