@@ -115,6 +115,15 @@ public interface Catnip {
     @Nonnull
     Set<CacheFlag> cacheFlags();
     
+    boolean chunkMembers();
+    
+    @Nonnull
+    Set<String> unavailableGuilds();
+    
+    default boolean isUnavailable(@Nonnull final String guildId) {
+        return unavailableGuilds().contains(guildId);
+    }
+    
     @Nonnull
     ExtensionManager extensionManager();
     
@@ -183,8 +192,6 @@ public interface Catnip {
     default void game(@Nonnull final String game, @Nonnull final ActivityType type, @Nullable final String url) {
         presence(null, game, type, url);
     }
-    
-    boolean chunkMembers();
     
     default <T> MessageConsumer<T> on(@Nonnull final EventType<T> type) {
         return eventBus().consumer(type.key());

@@ -69,6 +69,7 @@ public class CachingBuffer extends AbstractBuffer {
                 // READY is also a cache event, as it does come with
                 // information about the current user
                 maybeCache(type, d);
+                emitter().emit(event);
                 break;
             }
             case Raw.GUILD_CREATE: {
@@ -93,11 +94,14 @@ public class CachingBuffer extends AbstractBuffer {
                         // No guilds left, can just dispatch normally
                         catnip().logAdapter().debug("BufferState for shard {} empty, removing and emitting.", id);
                         buffers.remove(id);
+                        maybeCache(type, d);
                         emitter().emit(event);
                     } else {
                         // Remove READY guild if necessary, otherwise buffer
                         if(bufferState.readyGuilds().contains(guild)) {
                             bufferState.recvGuild(guild);
+                            emitter().emit(event);
+                            bufferState.replayGuild(guild);
                             catnip().logAdapter().debug("Buffered guild {} for BufferState {}", guild, id);
                             // Replay all buffered events once we run out
                             if(bufferState.readyGuilds().isEmpty()) {
@@ -110,6 +114,10 @@ public class CachingBuffer extends AbstractBuffer {
                             bufferState.buffer(event);
                         }
                     }
+                } else {
+                    // If not doing buffering, just dispatch
+                    maybeCache(type, d);
+                    emitter().emit(event);
                 }
                 break;
             }
@@ -120,11 +128,21 @@ public class CachingBuffer extends AbstractBuffer {
                     final String guildId = d.getString("guild_id", null);
                     if(guildId != null) {
                         if(bufferState.readyGuilds().contains(guildId)) {
-                            bufferState.buffer(event);
+                            if(catnip().chunkMembers() && type.equals(Raw.GUILD_MEMBERS_CHUNK)) {
+                                // When chunking members, we want to immediately cache+emit
+                                maybeCache(type, d);
+                                emitter().emit(event);
+                            } else {
+                                // If we have a guild id, and we have a guild being awaited,
+                                // buffer the event
+                                bufferState.recvGuildEvent(guildId, event);
+                            }
                         } else {
-                            // Emit if the payload is for a non-buffered guild
-                            maybeCache(type, d);
-                            emitter().emit(event);
+                            // If the payload is for a non-buffered guild, but we currently
+                            // have a BufferState, then it should be buffered, since it's
+                            // probably that we received a (buffered) GUILD_CREATE and then
+                            // started receiving events for it
+                            bufferState.buffer(event);
                         }
                     } else {
                         // Emit if the payload has no guild id
@@ -147,6 +165,7 @@ public class CachingBuffer extends AbstractBuffer {
                 catnip().cacheWorker().updateCache(eventType, payload);
             } catch(final Exception e) {
                 catnip().logAdapter().warn("Got error updating cache for payload {}", eventType, e);
+                catnip().logAdapter().warn("Payload: {}", payload.encodePrettily());
             }
         }
     }
@@ -156,14 +175,33 @@ public class CachingBuffer extends AbstractBuffer {
     private final class BufferState {
         private int id;
         private final Set<String> readyGuilds;
+        private final Map<String, Deque<JsonObject>> guildBuffers = new ConcurrentHashMap<>();
         private final Deque<JsonObject> buffer = new ConcurrentLinkedDeque<>();
         
         void recvGuild(final String id) {
             readyGuilds.remove(id);
         }
         
+        void recvGuildEvent(final String id, final JsonObject event) {
+            final Deque<JsonObject> queue = guildBuffers.computeIfAbsent(id, __ -> new ConcurrentLinkedDeque<>());
+            queue.addLast(event);
+        }
+        
         void buffer(final JsonObject event) {
             buffer.addLast(event);
+        }
+        
+        void replayGuild(final String id) {
+            if(guildBuffers.containsKey(id)) {
+                final Deque<JsonObject> queue = guildBuffers.get(id);
+                final int count = queue.size();
+                queue.forEach(emitter()::emit);
+                catnip().logAdapter().debug("Replayed {} buffered events for guild {}", count, id);
+            }/* else {
+                // It's possible that we never reach this case, eg. a guild
+                // not receiving any events before we finish caching it
+                catnip().logAdapter().warn("Was asked to replay guild {}, but it's not being buffered!", id);
+            }*/
         }
         
         void replay() {
