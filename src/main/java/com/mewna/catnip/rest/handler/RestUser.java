@@ -3,6 +3,7 @@ package com.mewna.catnip.rest.handler;
 import com.google.common.collect.ImmutableMap;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.guild.PartialGuild;
+import com.mewna.catnip.entity.misc.ApplicationInfo;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
@@ -129,5 +130,14 @@ public class RestUser extends RestHandler {
         return getCatnip().requester().queue(new OutboundRequest(Routes.LEAVE_GUILD.withMajorParam(guildId),
                 ImmutableMap.of(), null))
                 .thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<ApplicationInfo> getCurrentApplicationInformation() {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_CURRENT_APPLICATION_INFORMATION,
+                ImmutableMap.of(), null))
+                .thenApply(ResponsePayload::object)
+                .thenApply(getEntityBuilder()::createApplicationInfo);
     }
 }

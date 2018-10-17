@@ -30,12 +30,9 @@ import com.mewna.catnip.entity.message.*;
 import com.mewna.catnip.entity.message.Embed.*;
 import com.mewna.catnip.entity.message.Message.Attachment;
 import com.mewna.catnip.entity.message.Message.Reaction;
-import com.mewna.catnip.entity.misc.CreatedInvite;
-import com.mewna.catnip.entity.misc.Emoji;
+import com.mewna.catnip.entity.misc.*;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.misc.Emoji.UnicodeEmoji;
-import com.mewna.catnip.entity.misc.Ready;
-import com.mewna.catnip.entity.misc.VoiceRegion;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.*;
 import com.mewna.catnip.entity.user.TypingUser;
@@ -1138,5 +1135,24 @@ public final class EntityBuilder {
         return immutableListOf(data.getJsonArray("audit_log_entries"), e ->
                 createAuditLogEntry(e, webhooks, users)
         );
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public ApplicationInfo createApplicationInfo(@Nonnull final JsonObject data) {
+        return ApplicationInfoImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .name(data.getString("name"))
+                .icon(data.getString("icon"))
+                .description(data.getString("description"))
+                .rpcOrigins(ImmutableList.copyOf(data.getJsonArray("rpc_origins", new JsonArray())
+                        .stream()
+                        .map(Object::toString)
+                        .collect(Collectors.toList())))
+                .publicBot(data.getBoolean("bot_public"))
+                .requiresCodeGrant(data.getBoolean("bot_require_code_grant"))
+                .owner(createUser(data.getJsonObject("owner")))
+                .build();
     }
 }
