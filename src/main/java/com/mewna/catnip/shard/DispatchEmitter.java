@@ -1,15 +1,17 @@
 package com.mewna.catnip.shard;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.misc.Ready;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.internal.CatnipImpl;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
 
-import static com.mewna.catnip.shard.DiscordEvent.*;
+import static com.mewna.catnip.shard.DiscordEvent.Raw;
 
 /**
  * TODO: This should be cache-aware so that we don't pay the cost of deserializing twice
@@ -41,6 +43,14 @@ public class DispatchEmitter {
         switch(type) {
             // Lifecycle
             case Raw.READY: {
+                final JsonArray guilds = data.getJsonArray("guilds");
+                // All READY guilds are unavailable, marked available as the gateway
+                // streams them to us
+                guilds.stream()
+                        .map(e -> (JsonObject) e)
+                        .map(entityBuilder::createUnavailableGuild)
+                        .map(Snowflake::id)
+                        .forEach(((CatnipImpl) catnip)::markUnavailable);
                 final Ready ready = entityBuilder.createReady(data);
                 ((CatnipImpl) catnip).selfUser(ready.user());
                 catnip.eventBus().publish(type, ready);
@@ -102,7 +112,13 @@ public class DispatchEmitter {
             
             // Guilds
             case Raw.GUILD_CREATE: {
-                catnip.eventBus().publish(type, entityBuilder.createGuild(data));
+                final String id = data.getString("id");
+                if(catnip.isUnavailable(id)) {
+                    catnip.eventBus().publish(Raw.GUILD_AVAILABLE, entityBuilder.createGuild(data));
+                    ((CatnipImpl) catnip).markAvailable(id);
+                } else {
+                    catnip.eventBus().publish(type, entityBuilder.createGuild(data));
+                }
                 break;
             }
             case Raw.GUILD_UPDATE: {
@@ -110,7 +126,13 @@ public class DispatchEmitter {
                 break;
             }
             case Raw.GUILD_DELETE: {
-                catnip.eventBus().publish(type, entityBuilder.createUnavailableGuild(data));
+                final String id = data.getString("id");
+                if(data.getBoolean("unavailable", false)) {
+                    ((CatnipImpl) catnip).markUnavailable(id);
+                    catnip.eventBus().publish(Raw.GUILD_UNAVAILABLE, entityBuilder.createUnavailableGuild(data));
+                } else {
+                    catnip.eventBus().publish(type, entityBuilder.createGuild(data, false));
+                }
                 break;
             }
             case Raw.GUILD_BAN_ADD: {

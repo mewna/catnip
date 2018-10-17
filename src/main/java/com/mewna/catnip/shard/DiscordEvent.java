@@ -32,8 +32,10 @@ public interface DiscordEvent {
     EventType<Channel> CHANNEL_DELETE                           = event(Raw.CHANNEL_DELETE, Channel.class);
     EventType<ChannelPinsUpdate> CHANNEL_PINS_UPDATE            = event(Raw.CHANNEL_PINS_UPDATE, ChannelPinsUpdate.class);
     EventType<Guild> GUILD_CREATE                               = event(Raw.GUILD_CREATE, Guild.class);
+    EventType<Guild> GUILD_AVAILABLE                            = event(Raw.GUILD_AVAILABLE, Guild.class);
+    EventType<Guild> GUILD_DELETE                               = event(Raw.GUILD_DELETE, Guild.class);
+    EventType<UnavailableGuild> GUILD_UNAVAILABLE               = event(Raw.GUILD_UNAVAILABLE, UnavailableGuild.class);
     EventType<Guild> GUILD_UPDATE                               = event(Raw.GUILD_UPDATE, Guild.class);
-    EventType<UnavailableGuild> GUILD_DELETE                    = event(Raw.GUILD_DELETE, UnavailableGuild.class);
     EventType<EmojiUpdate> GUILD_EMOJIS_UPDATE                  = event(Raw.GUILD_EMOJIS_UPDATE, EmojiUpdate.class);
     EventType<Member> GUILD_MEMBER_ADD                          = event(Raw.GUILD_MEMBER_ADD, Member.class);
     EventType<Member> GUILD_MEMBER_REMOVE                       = event(Raw.GUILD_MEMBER_REMOVE, Member.class);
@@ -72,7 +74,9 @@ public interface DiscordEvent {
         String CHANNEL_UPDATE               = "CHANNEL_UPDATE";
         String CHANNEL_PINS_UPDATE          = "CHANNEL_PINS_UPDATE";
         String GUILD_CREATE                 = "GUILD_CREATE";
+        String GUILD_AVAILABLE              = "GUILD_AVAILABLE";
         String GUILD_DELETE                 = "GUILD_DELETE";
+        String GUILD_UNAVAILABLE            = "GUILD_UNAVAILABLE";
         String GUILD_UPDATE                 = "GUILD_UPDATE";
         String GUILD_EMOJIS_UPDATE          = "GUILD_EMOJIS_UPDATE";
         String GUILD_MEMBER_ADD             = "GUILD_MEMBER_ADD";
