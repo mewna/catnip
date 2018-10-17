@@ -5,6 +5,7 @@ import com.mewna.catnip.entity.impl.PresenceImpl;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
+import com.mewna.catnip.shard.LifecycleEvent.Raw;
 import com.mewna.catnip.util.BufferOutputStream;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.buffer.Buffer;
@@ -203,8 +204,10 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void connectSocket(final Message<JsonObject> msg) {
+        catnip.eventBus().publish(Raw.CONNECTING, shardInfo());
         client.websocketAbs(Catnip.getGatewayUrl(), null, null, null,
                 socket -> {
+                    catnip.eventBus().publish(Raw.CONNECTED, shardInfo());
                     socket.frameHandler(frame -> handleSocketFrame(msg, frame))
                             .closeHandler(this::handleSocketClose)
                             .exceptionHandler(Throwable::printStackTrace);
@@ -316,6 +319,7 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void handleSocketClose(final Void __) {
+        catnip.eventBus().publish(Raw.DISCONNECTED, shardInfo());
         catnip.logAdapter().warn("Socket closing!");
         try {
             catnip.eventBus().publish("RAW_STATUS", new JsonObject().put("status", "down:socket-close").put("shard", id));
@@ -402,11 +406,13 @@ public class CatnipShard extends AbstractVerticle {
                     // More shards to go, delay
                     catnip.vertx().setTimer(5500L, __ -> msg.reply(new JsonObject().put("state", READY.name())));
                 }
+                catnip.eventBus().publish(Raw.IDENTIFIED, shardInfo());
                 break;
             }
             case "RESUMED": {
                 // RESUME is fine, just reply immediately
                 msg.reply(new JsonObject().put("state", RESUMED.name()));
+                catnip.eventBus().publish(Raw.RESUMED, shardInfo());
                 break;
             }
             default: {
@@ -519,6 +525,10 @@ public class CatnipShard extends AbstractVerticle {
                         .put("$device", "catnip")
                 )
         );
+    }
+    
+    private ShardInfo shardInfo() {
+        return new ShardInfo(id, limit);
     }
     
     public enum ShardConnectState {

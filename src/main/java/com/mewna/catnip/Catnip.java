@@ -19,7 +19,7 @@ import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.shard.CatnipShard;
-import com.mewna.catnip.shard.DiscordEvent.EventType;
+import com.mewna.catnip.shard.EventType;
 import com.mewna.catnip.shard.event.EventBuffer;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.session.SessionManager;
