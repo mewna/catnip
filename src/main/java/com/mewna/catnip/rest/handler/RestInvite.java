@@ -9,7 +9,7 @@ import com.mewna.catnip.rest.Routes;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * @author natanbc
@@ -22,7 +22,7 @@ public class RestInvite extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<Invite> getInvite(@Nonnull final String code) {
+    public CompletionStage<Invite> getInvite(@Nonnull final String code) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_INVITE,
                 ImmutableMap.of("invite.code", code), null))
                 .thenApply(ResponsePayload::object)
@@ -31,7 +31,7 @@ public class RestInvite extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletableFuture<Invite> deleteInvite(@Nonnull final String code) {
+    public CompletionStage<Invite> deleteInvite(@Nonnull final String code) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_INVITE,
                 ImmutableMap.of("invite.code", code), null))
                 .thenApply(ResponsePayload::object)

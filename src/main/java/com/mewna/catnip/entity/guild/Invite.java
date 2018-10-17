@@ -10,12 +10,13 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * @author natanbc
  * @since 9/14/18
  */
+@SuppressWarnings("unused")
 public interface Invite extends Entity {
     @Nonnull
     @CheckReturnValue
@@ -34,10 +35,11 @@ public interface Invite extends Entity {
     InviteChannel channel();
     
     int approximatePresenceCount();
+    
     int approximateMemberCount();
     
     @Nonnull
-    default CompletableFuture<Invite> delete() {
+    default CompletionStage<Invite> delete() {
         return catnip().rest().invite().deleteInvite(code());
     }
     
@@ -49,7 +51,7 @@ public interface Invite extends Entity {
         @Nonnull
         @CheckReturnValue
         String username();
-    
+        
         @Nonnull
         @CheckReturnValue
         String discriminator();
@@ -60,7 +62,7 @@ public interface Invite extends Entity {
         
         @CheckReturnValue
         boolean animatedAvatar();
-    
+        
         @Nonnull
         @CheckReturnValue
         String defaultAvatarUrl();
@@ -68,13 +70,15 @@ public interface Invite extends Entity {
         @Nullable
         @CheckReturnValue
         String avatarUrl(@Nonnull ImageOptions options);
+        
         @Nullable
         @CheckReturnValue
         String avatarUrl();
-    
+        
         @Nonnull
         @CheckReturnValue
         String effectiveAvatarUrl(@Nonnull ImageOptions options);
+        
         @Nonnull
         @CheckReturnValue
         String effectiveAvatarUrl();
@@ -84,15 +88,15 @@ public interface Invite extends Entity {
         @Nonnull
         @CheckReturnValue
         String id();
-    
+        
         @Nonnull
         @CheckReturnValue
         String name();
-    
+        
         @Nullable
         @CheckReturnValue
         String icon();
-    
+        
         @Nullable
         @CheckReturnValue
         String splash();
@@ -104,19 +108,21 @@ public interface Invite extends Entity {
         @Nonnull
         @CheckReturnValue
         VerificationLevel verificationLevel();
-    
+        
         @Nullable
         @CheckReturnValue
         String iconUrl(@Nonnull ImageOptions options);
+        
         @Nullable
         @CheckReturnValue
         default String iconUrl() {
             return iconUrl(new ImageOptions());
         }
-    
+        
         @Nullable
         @CheckReturnValue
         String splashUrl(@Nonnull ImageOptions options);
+        
         @Nullable
         @CheckReturnValue
         default String splashUrl() {
@@ -128,7 +134,7 @@ public interface Invite extends Entity {
         @Nonnull
         @CheckReturnValue
         String id();
-    
+        
         @Nonnull
         @CheckReturnValue
         String name();

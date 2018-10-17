@@ -26,10 +26,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static io.vertx.core.http.HttpMethod.GET;
 
@@ -58,7 +55,7 @@ public class RestRequester {
         this.bucketBackend = bucketBackend;
     }
     
-    public CompletableFuture<ResponsePayload> queue(final OutboundRequest r) {
+    public CompletionStage<ResponsePayload> queue(final OutboundRequest r) {
         final Future<ResponsePayload> future = Future.future();
         getBucket(r.route.baseRoute()).queue(future, r);
         return VertxCompletableFuture.from(catnip.vertx(), future);

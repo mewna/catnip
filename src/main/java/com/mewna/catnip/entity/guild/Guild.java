@@ -24,12 +24,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * @author natanbc
  * @since 9/6/18
  */
+@SuppressWarnings("unused")
 public interface Guild extends Snowflake {
     @Nonnull
     @CheckReturnValue
@@ -165,70 +166,70 @@ public interface Guild extends Snowflake {
     
     @Nonnull
     @CheckReturnValue
-    default CompletableFuture<List<Role>> fetchRoles() {
+    default CompletionStage<List<Role>> fetchRoles() {
         return catnip().rest().guild().getGuildRoles(id());
     }
     
     @Nonnull
     @CheckReturnValue
-    default CompletableFuture<List<GuildChannel>> fetchChannels() {
+    default CompletionStage<List<GuildChannel>> fetchChannels() {
         return catnip().rest().guild().getGuildChannels(id());
     }
     
     @Nonnull
     @CheckReturnValue
-    default CompletableFuture<List<CreatedInvite>> fetchInvites() {
+    default CompletionStage<List<CreatedInvite>> fetchInvites() {
         return catnip().rest().guild().getGuildInvites(id());
     }
     
     @Nonnull
     @CheckReturnValue
-    default CompletableFuture<List<Webhook>> fetchWebhooks() {
+    default CompletionStage<List<Webhook>> fetchWebhooks() {
         return catnip().rest().webhook().getGuildWebhooks(id());
     }
     
     @Nonnull
     @CheckReturnValue
-    default CompletableFuture<List<CustomEmoji>> fetchEmojis() {
+    default CompletionStage<List<CustomEmoji>> fetchEmojis() {
         return catnip().rest().emoji().listGuildEmojis(id());
     }
     
     @Nonnull
     @CheckReturnValue
-    default CompletableFuture<CustomEmoji> fetchEmoji(@Nonnull final String emojiId) {
+    default CompletionStage<CustomEmoji> fetchEmoji(@Nonnull final String emojiId) {
         return catnip().rest().emoji().getGuildEmoji(id(), emojiId);
     }
     
     @Nonnull
-    default CompletableFuture<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final byte[] image,
+    default CompletionStage<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final byte[] image,
                                                        @Nonnull final Collection<String> roles) {
         return catnip().rest().emoji().createGuildEmoji(id(), name, image, roles);
     }
     
     @Nonnull
-    default CompletableFuture<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final URI imageData,
+    default CompletionStage<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final URI imageData,
                                                        @Nonnull final Collection<String> roles) {
         return catnip().rest().emoji().createGuildEmoji(id(), name, imageData, roles);
     }
     
     @Nonnull
-    default CompletableFuture<CustomEmoji> modifyEmoji(@Nonnull final String emojiId, @Nonnull final String name,
+    default CompletionStage<CustomEmoji> modifyEmoji(@Nonnull final String emojiId, @Nonnull final String name,
                                                        @Nonnull final Collection<String> roles) {
         return catnip().rest().emoji().modifyGuildEmoji(id(), emojiId, name, roles);
     }
     
     @Nonnull
-    default CompletableFuture<Void> deleteEmoji(@Nonnull final String emojiId) {
+    default CompletionStage<Void> deleteEmoji(@Nonnull final String emojiId) {
         return catnip().rest().emoji().deleteGuildEmoji(id(), emojiId);
     }
     
     @Nonnull
-    default CompletableFuture<Void> leave() {
+    default CompletionStage<Void> leave() {
         return catnip().rest().user().leaveGuild(id());
     }
     
     @Nonnull
-    default CompletableFuture<Void> delete() {
+    default CompletionStage<Void> delete() {
         return catnip().rest().guild().deleteGuild(id());
     }
     
@@ -332,6 +333,7 @@ public interface Guild extends Snowflake {
         }
     }
     
+    @SuppressWarnings("unused")
     @Getter
     @Setter
     @Accessors(fluent = true)
@@ -386,7 +388,7 @@ public interface Guild extends Snowflake {
         }
         
         @Nonnull
-        public CompletableFuture<Guild> submit() {
+        public CompletionStage<Guild> submit() {
             if(guild == null) {
                 throw new IllegalStateException("Cannot submit edit without a guild object! Please use RestGuild directly instead");
             }
@@ -403,13 +405,13 @@ public interface Guild extends Snowflake {
             if(region != null && (guild == null || !Objects.equals(region, guild.region()))) {
                 payload.put("region", region);
             }
-            if(verificationLevel != null && (guild == null || !Objects.equals(verificationLevel, guild.verificationLevel()))) {
+            if(verificationLevel != null && (guild == null || verificationLevel != guild.verificationLevel())) {
                 payload.put("verification_level", verificationLevel.getKey());
             }
-            if(defaultMessageNotifications != null && (guild == null || !Objects.equals(defaultMessageNotifications, guild.defaultMessageNotifications()))) {
+            if(defaultMessageNotifications != null && (guild == null || defaultMessageNotifications != guild.defaultMessageNotifications())) {
                 payload.put("default_message_notifications", defaultMessageNotifications.getKey());
             }
-            if(explicitContentFilter != null && (guild == null || !Objects.equals(explicitContentFilter, guild.explicitContentFilter()))) {
+            if(explicitContentFilter != null && (guild == null || explicitContentFilter != guild.explicitContentFilter())) {
                 payload.put("explicit_content_filter", explicitContentFilter.getKey());
             }
             if(afkChannelId != null && (guild == null || !Objects.equals(afkChannelId, guild.afkChannelId()))) {
