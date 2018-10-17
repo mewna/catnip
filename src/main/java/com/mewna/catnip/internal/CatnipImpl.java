@@ -1,5 +1,6 @@
 package com.mewna.catnip.internal;
 
+import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.cache.CacheFlag;
@@ -26,6 +27,7 @@ import lombok.experimental.Accessors;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -52,6 +54,7 @@ public class CatnipImpl implements Catnip {
     private final boolean chunkMembers;
     private final Presence initialPresence;
     private final AtomicReference<User> selfUser = new AtomicReference<>(null);
+    private final Set<String> unavailableGuilds = new HashSet<>();
     
     public CatnipImpl(@Nonnull final Vertx vertx, @Nonnull final CatnipOptions options) {
         this.vertx = vertx;
@@ -93,6 +96,20 @@ public class CatnipImpl implements Catnip {
     public Catnip selfUser(@Nonnull final User self) {
         selfUser.set(self);
         return this;
+    }
+    
+    @Nonnull
+    @Override
+    public Set<String> unavailableGuilds() {
+        return ImmutableSet.copyOf(unavailableGuilds);
+    }
+    
+    public void markAvailable(final String id) {
+        unavailableGuilds.remove(id);
+    }
+    
+    public void markUnavailable(final String id) {
+        unavailableGuilds.add(id);
     }
     
     @Nonnull
