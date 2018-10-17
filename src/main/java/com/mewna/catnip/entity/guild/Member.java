@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * @author amy
@@ -82,7 +82,7 @@ public interface Member extends Snowflake {
      *
      * @return Future with the result of the DM creation.
      */
-    default CompletableFuture<DMChannel> createDM() {
+    default CompletionStage<DMChannel> createDM() {
         return catnip().rest().user().createDM(id());
     }
 }

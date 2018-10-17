@@ -22,6 +22,7 @@ import java.util.function.Function;
  * @author natanbc
  * @since 10/8/18.
  */
+@SuppressWarnings("unused")
 public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
     protected final Function<T, String> idOf;
     protected final int maxRequestSize;
@@ -33,6 +34,13 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
         this.idOf = idOf;
         this.maxRequestSize = maxRequestSize;
         requestSize = maxRequestSize;
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    @SuppressWarnings("unchecked")
+    private static <T, J, P extends BasePaginator<T, J, P>> P uncheck(@Nonnull final BasePaginator<?, ?, ?> paginator) {
+        return (P) paginator;
     }
     
     /**
@@ -151,13 +159,6 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
     protected abstract CompletionStage<J> fetchNext(@Nonnull RequestState<T> state, @Nullable String lastId,
                                                     @Nonnegative int requestSize);
     
-    @Nonnull
-    @CheckReturnValue
-    @SuppressWarnings("unchecked")
-    private static <T, J, P extends BasePaginator<T, J, P>> P uncheck(@Nonnull final BasePaginator<?, ?, ?> paginator) {
-        return (P)paginator;
-    }
-    
     protected static class RequestState<T> {
         private final Map<String, Object> extras = new HashMap<>();
         private final int limit;
@@ -166,7 +167,7 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
         private int fetched;
         private T last;
         private boolean callbackDone;
-    
+        
         public RequestState(final int limit, final int requestSize, final PaginationCallback<T> callback) {
             this.limit = limit;
             this.requestSize = requestSize;
@@ -181,17 +182,17 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
             fetched++;
             last = entity;
         }
-    
+        
         @CheckReturnValue
         public boolean done() {
             return callbackDone || limit > 0 && fetched == limit;
         }
-    
+        
         @CheckReturnValue
         public int entitiesToFetch() {
             return Math.min(requestSize, remaining());
         }
-    
+        
         @CheckReturnValue
         public int remaining() {
             return limit - fetched;
@@ -213,7 +214,7 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
         @CheckReturnValue
         @SuppressWarnings("unchecked")
         public <U> U extra(@Nonnull final String key) {
-            return (U)extras.get(key);
+            return (U) extras.get(key);
         }
     }
 }

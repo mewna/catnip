@@ -7,12 +7,13 @@ import com.mewna.catnip.entity.util.ImageOptions;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * @author amy
  * @since 9/4/18
  */
+@SuppressWarnings("unused")
 public interface User extends Snowflake {
     /**
      * Whether the user's avatar is animated.
@@ -133,7 +134,7 @@ public interface User extends Snowflake {
      *
      * @return Future with the result of the DM creation.
      */
-    default CompletableFuture<DMChannel> createDM() {
+    default CompletionStage<DMChannel> createDM() {
         return catnip().rest().user().createDM(id());
     }
     

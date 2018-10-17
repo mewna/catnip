@@ -12,12 +12,13 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * @author natanbc
  * @since 9/15/18
  */
+@SuppressWarnings("unused")
 public interface Webhook extends Snowflake {
     @Nonnull
     @CheckReturnValue
@@ -51,10 +52,11 @@ public interface Webhook extends Snowflake {
     
     @Nonnull
     @CheckReturnValue
-    default CompletableFuture<Void> delete() {
+    default CompletionStage<Void> delete() {
         return catnip().rest().webhook().deleteWebhook(id());
     }
     
+    @SuppressWarnings("unused")
     @Getter
     @Setter
     @Accessors(fluent = true)
@@ -73,7 +75,7 @@ public interface Webhook extends Snowflake {
         }
     
         @Nonnull
-        public CompletableFuture<Webhook> submit() {
+        public CompletionStage<Webhook> submit() {
             if(webhook == null) {
                 throw new IllegalStateException("Cannot submit edit without a webhook object! Please use RestWebhook directly instead");
             }
