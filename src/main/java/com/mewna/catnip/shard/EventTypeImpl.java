@@ -1,6 +1,6 @@
 package com.mewna.catnip.shard;
 
-import com.mewna.catnip.shard.DiscordEvent.EventType;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -16,7 +16,7 @@ import javax.annotation.Nonnull;
  */
 @Getter
 @Accessors(fluent = true)
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 class EventTypeImpl<T> implements EventType<T> {
     private final String key;
     private final Class<T> payloadClass;

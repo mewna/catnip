@@ -11,9 +11,6 @@ import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.entity.voice.VoiceServerUpdate;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
-
 import static com.mewna.catnip.shard.EventTypeImpl.event;
 import static com.mewna.catnip.shard.EventTypeImpl.notFired;
 
@@ -61,6 +58,8 @@ public interface DiscordEvent {
     EventType<Ready> READY                                      = event(Raw.READY, Ready.class);
     EventType<TypingUser> TYPING_START                          = event(Raw.TYPING_START, TypingUser.class);
     EventType<VoiceState> VOICE_STATE_UPDATE                    = event(Raw.VOICE_STATE_UPDATE, VoiceState.class);
+    // @formatter:on
+    
     /**
      * Raw string values for the gateway events
      *
@@ -111,34 +110,5 @@ public interface DiscordEvent {
         String TYPING_START                 = "TYPING_START";
         String VOICE_STATE_UPDATE           = "VOICE_STATE_UPDATE";
         // @formatter:on
-    }
-    // @formatter:on
-    
-    /**
-     * Marker for statically validating event types on handlers.
-     *
-     * @param <T> Type of the event fired.
-     *
-     * @author natanbc
-     * @since 10/6/18.
-     */
-    interface EventType<T> {
-        /**
-         * Key used in the event bus.
-         *
-         * @return Key where this event is fired in the bus.
-         */
-        @Nonnull
-        @CheckReturnValue
-        String key();
-        
-        /**
-         * Class of the event payload.
-         *
-         * @return Class of the payload fired for this event.
-         */
-        @Nonnull
-        @CheckReturnValue
-        Class<T> payloadClass();
     }
 }
