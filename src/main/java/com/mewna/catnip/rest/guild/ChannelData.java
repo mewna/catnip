@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-@Accessors(fluent = true)
+@Accessors(fluent = true, chain = true)
 @Getter
 @Setter
 public abstract class ChannelData implements JsonConvertible {
