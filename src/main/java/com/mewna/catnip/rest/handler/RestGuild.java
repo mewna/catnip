@@ -15,6 +15,7 @@ import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
+import com.mewna.catnip.rest.guild.ChannelData;
 import com.mewna.catnip.rest.guild.GuildData;
 import com.mewna.catnip.rest.guild.PositionUpdater;
 import com.mewna.catnip.util.pagination.AuditLogPaginator;
@@ -72,7 +73,13 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public
+    public CompletionStage<GuildChannel> createGuildChannel(@Nonnull final String guildId, @Nonnull final ChannelData data) {
+        return getCatnip().requester()
+                .queue(new OutboundRequest(Routes.CREATE_GUILD_CHANNEL.withMajorParam(guildId),
+                        ImmutableMap.of(), data.toJson()))
+                .thenApply(ResponsePayload::object)
+                .thenApply(getEntityBuilder()::createGuildChannel);
+    }
     
     @Nonnull
     @CheckReturnValue
