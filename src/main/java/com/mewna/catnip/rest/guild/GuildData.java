@@ -6,6 +6,7 @@ import com.mewna.catnip.entity.guild.Guild.VerificationLevel;
 import com.mewna.catnip.util.JsonConvertible;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -17,27 +18,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-@Accessors(fluent = true)
+@Accessors(fluent = true, chain = true)
+@Getter
+@Setter
 public class GuildData implements JsonConvertible {
+    @Getter(AccessLevel.NONE) @Setter(AccessLevel.NONE)
     private final List<RoleData> roles = new ArrayList<>();
+    @Getter(AccessLevel.NONE) @Setter(AccessLevel.NONE)
     private final List<ChannelData> channels = new ArrayList<>();
-    @Getter
-    /*@Setter already manually generated for length checks*/
+    
     private String name;
-    @Getter
-    @Setter
     private String region;
-    @Getter
-    @Setter
     private String base64Icon;
-    @Getter
-    @Setter
     private VerificationLevel verificationLevel;
-    @Getter
-    @Setter
     private NotificationLevel defaultNotificationLevel;
-    @Getter
-    @Setter
     private ContentFilterLevel explicitContentFilter;
     
     public GuildData(@Nonnull final String name) {
