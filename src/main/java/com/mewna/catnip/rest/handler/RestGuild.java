@@ -58,6 +58,24 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
+    public CompletionStage<Void> modifyGuildRolePositions(@Nonnull final PositionUpdater updater) {
+        final JsonArray array = new JsonArray();
+        updater.entries()
+                .stream()
+                .map(x -> new JsonObject().put("id", x.getKey()).put("position", x.getValue()))
+                .forEach(array::add);
+        return getCatnip().requester()
+                .queue(new OutboundRequest(Routes.MODIFY_GUILD_ROLE_POSITIONS.withMajorParam(updater.guildId()),
+                        ImmutableMap.of(), array))
+                .thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public
+    
+    @Nonnull
+    @CheckReturnValue
     public CompletionStage<List<Role>> getGuildRoles(@Nonnull final String guildId) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.GET_GUILD_ROLES.withMajorParam(guildId),
