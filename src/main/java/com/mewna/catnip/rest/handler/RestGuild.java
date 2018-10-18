@@ -113,7 +113,15 @@ public class RestGuild extends RestHandler {
                 .thenApply(obj -> getEntityBuilder().createRole(guildId, obj));
     }
     
-    
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<Role> modifyGuildRole(@Nonnull final String guildId, @Nonnull final RoleData roleData) {
+        return getCatnip().requester()
+                .queue(new OutboundRequest(Routes.MODIFY_GUILD_ROLE.withMajorParam(guildId),
+                        ImmutableMap.of(), roleData.toJson()))
+                .thenApply(ResponsePayload::object)
+                .thenApply(obj -> getEntityBuilder().createRole(guildId, obj));
+    }
     
     @Nonnull
     @CheckReturnValue
