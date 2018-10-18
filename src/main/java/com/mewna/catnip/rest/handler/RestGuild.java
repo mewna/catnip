@@ -94,6 +94,16 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
+    public CompletionStage<GuildEmbed> modifyGuildEmbed(@Nonnull final String guildId, @Nullable final String channelId, final boolean enabled) {
+        return getCatnip().requester()
+                .queue(new OutboundRequest(Routes.MODIFY_GUILD_EMBED.withMajorParam(guildId),
+                        ImmutableMap.of(), new JsonObject().put("channel_id", channelId).put("enabled", enabled)))
+                .thenApply(ResponsePayload::object)
+                .thenApply(getEntityBuilder()::createGuildEmbed);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public CompletionStage<List<Role>> getGuildRoles(@Nonnull final String guildId) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.GET_GUILD_ROLES.withMajorParam(guildId),
