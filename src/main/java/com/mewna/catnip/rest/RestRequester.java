@@ -11,6 +11,7 @@ import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.impl.ConcurrentHashSet;
 import io.vertx.core.impl.NoStackTraceThrowable;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -182,35 +183,38 @@ public class RestRequester {
                             final ImmutablePair<String, Buffer> pair = r.buffers.get(index);
                             builder.addFormDataPart("file" + index, pair.left, new MultipartRequestBody(pair.right));
                         }
-                        
-                        JsonObject payload;
-                        if(r.data != null) {
-                            payload = r.data;
-                        } else {
-                            payload = new JsonObject().put("content", (String) null).put("embed", (String) null);
-                        }
-                        for(final Extension extension : catnip.extensionManager().extensions()) {
-                            for(final CatnipHook hook : extension.hooks()) {
-                                payload = hook.rawRestSendObjectHook(route, payload);
+                        if (r.object != null) {
+                            for(final Extension extension : catnip.extensionManager().extensions()) {
+                                for(final CatnipHook hook : extension.hooks()) {
+                                    r.object = hook.rawRestSendObjectHook(route, r.object);
+                                }
                             }
+                            builder.addFormDataPart("payload_json", r.object.encode());
+                        } else if (r.array != null) {
+                            builder.addFormDataPart("payload_json", r.array.encode());
+                        } else {
+                            builder.addFormDataPart("payload_json", new JsonObject().putNull("content").putNull("embed").encode());
                         }
-                        builder.addFormDataPart("payload_json", payload.encode());
-                        final MultipartBody body = builder.build();
-                        
-                        executeHttpRequest(r, route, bucket, body);
                     } catch(final Exception e) {
                         e.printStackTrace();
                     }
                 } else {
-                    JsonObject payload = r.data;
-                    for(final Extension extension : catnip.extensionManager().extensions()) {
-                        for(final CatnipHook hook : extension.hooks()) {
-                            payload = hook.rawRestSendObjectHook(route, payload);
+                    final String encoded;
+                    if (r.object != null) {
+                        for(final Extension extension : catnip.extensionManager().extensions()) {
+                            for(final CatnipHook hook : extension.hooks()) {
+                                r.object = hook.rawRestSendObjectHook(route, r.object);
+                            }
                         }
+                        encoded = r.object.encode();
+                    } else if (r.array != null) {
+                        encoded = r.array.encode();
+                    } else {
+                        encoded = null;
                     }
                     RequestBody body = null;
-                    if(payload != null) {
-                        body = RequestBody.create(MediaType.parse("application/json"), payload.encode());
+                    if(encoded != null) {
+                        body = RequestBody.create(MediaType.parse("application/json"), encoded);
                     }
                     executeHttpRequest(r, route, bucket, body);
                 }
@@ -282,7 +286,8 @@ public class RestRequester {
     public static final class OutboundRequest {
         private Route route;
         private Map<String, String> params;
-        private JsonObject data;
+        private JsonObject object;
+        private JsonArray array;
         
         @Setter
         private List<ImmutablePair<String, Buffer>> buffers;
@@ -294,12 +299,22 @@ public class RestRequester {
         public OutboundRequest() {
         }
         
-        public OutboundRequest(final Route route, final Map<String, String> params, final JsonObject data) {
+        public OutboundRequest(final Route route, final Map<String, String> params) {
             this.route = route;
             this.params = params;
-            this.data = data;
         }
         
+        public OutboundRequest(final Route route, final Map<String, String> params, final JsonObject object) {
+            this(route, params);
+            this.object = object;
+        }
+    
+        public OutboundRequest(final Route route, final Map<String, String> params, final JsonArray array) {
+            this(route, params);
+            this.array = array;
+        }
+    
+    
         void failed() {
             failedAttempts++;
         }

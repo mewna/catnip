@@ -16,6 +16,7 @@ import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.guild.GuildData;
+import com.mewna.catnip.rest.guild.PositionUpdater;
 import com.mewna.catnip.util.pagination.AuditLogPaginator;
 import com.mewna.catnip.util.pagination.MemberPaginator;
 import io.vertx.core.json.JsonArray;
@@ -43,10 +44,24 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
+    public CompletionStage<Void> modifyGuildChannelPositions(@Nonnull final PositionUpdater updater) {
+        final JsonArray array = new JsonArray();
+        updater.entries()
+                .stream()
+                .map(x -> new JsonObject().put("id", x.getKey()).put("position", x.getValue()))
+                .forEach(array::add);
+        return getCatnip().requester()
+                .queue(new OutboundRequest(Routes.MODIFY_GUILD_CHANNEL_POSITIONS.withMajorParam(updater.guildId()),
+                        ImmutableMap.of(), array))
+                .thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public CompletionStage<List<Role>> getGuildRoles(@Nonnull final String guildId) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.GET_GUILD_ROLES.withMajorParam(guildId),
-                        ImmutableMap.of(), null))
+                        ImmutableMap.of()))
                 .thenApply(ResponsePayload::array)
                 .thenApply(mapObjectContents(e -> getEntityBuilder().createRole(guildId, e)))
                 .thenApply(Collections::unmodifiableList);
@@ -57,7 +72,7 @@ public class RestGuild extends RestHandler {
     public CompletionStage<Guild> getGuild(@Nonnull final String guildId) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.GET_GUILD.withMajorParam(guildId),
-                        ImmutableMap.of(), null))
+                        ImmutableMap.of()))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createGuild);
     }
@@ -76,7 +91,7 @@ public class RestGuild extends RestHandler {
     public CompletionStage<Void> deleteGuild(@Nonnull final String guildId) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.DELETE_GUILD.withMajorParam(guildId),
-                        ImmutableMap.of(), null))
+                        ImmutableMap.of()))
                 .thenApply(__ -> null);
     }
     
@@ -85,7 +100,7 @@ public class RestGuild extends RestHandler {
     public CompletionStage<List<GuildChannel>> getGuildChannels(@Nonnull final String guildId) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.GET_GUILD_CHANNELS.withMajorParam(guildId),
-                        ImmutableMap.of(), null))
+                        ImmutableMap.of()))
                 .thenApply(ResponsePayload::array)
                 .thenApply(mapObjectContents(getEntityBuilder()::createChannel))
                 // All elements are guaranteed to be instances of GuildChannel,
@@ -97,7 +112,7 @@ public class RestGuild extends RestHandler {
     @CheckReturnValue
     public CompletionStage<List<CreatedInvite>> getGuildInvites(@Nonnull final String guildId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_INVITES.withMajorParam(guildId),
-                ImmutableMap.of(), null))
+                ImmutableMap.of()))
                 .thenApply(ResponsePayload::array)
                 .thenApply(mapObjectContents(getEntityBuilder()::createCreatedInvite));
     }
@@ -148,7 +163,7 @@ public class RestGuild extends RestHandler {
             query = '?' + query;
         }
         return getCatnip().requester().queue(new OutboundRequest(Routes.LIST_GUILD_MEMBERS.withMajorParam(guildId).withQueryString(query),
-                ImmutableMap.of(), null))
+                ImmutableMap.of()))
                 .thenApply(ResponsePayload::array);
     }
     
@@ -156,7 +171,7 @@ public class RestGuild extends RestHandler {
     @CheckReturnValue
     public CompletionStage<List<GuildBan>> getGuildBans(@Nonnull final String guildId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BANS.withMajorParam(guildId),
-                ImmutableMap.of(), null))
+                ImmutableMap.of()))
                 .thenApply(ResponsePayload::array)
                 .thenApply(mapObjectContents(getEntityBuilder()::createGuildBan));
     }
@@ -165,7 +180,7 @@ public class RestGuild extends RestHandler {
     @CheckReturnValue
     public CompletionStage<GuildBan> getGuildBan(@Nonnull final String guildId, @Nonnull final String userId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BAN.withMajorParam(guildId),
-                ImmutableMap.of("user.id", userId), null))
+                ImmutableMap.of("user.id", userId)))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createGuildBan);
     }
@@ -186,14 +201,14 @@ public class RestGuild extends RestHandler {
             query = '?' + query;
         }
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BAN.withMajorParam(guildId).withQueryString(query),
-                ImmutableMap.of("user.id", userId), null))
+                ImmutableMap.of("user.id", userId)))
                 .thenApply(e -> null);
     }
     
     @Nonnull
     public CompletionStage<Void> removeGuildBan(@Nonnull final String guildId, @Nonnull final String userId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BAN.withMajorParam(guildId),
-                ImmutableMap.of("user.id", userId), null))
+                ImmutableMap.of("user.id", userId)))
                 .thenApply(e -> null);
     }
     
@@ -207,7 +222,7 @@ public class RestGuild extends RestHandler {
     @Nonnull
     public CompletionStage<Void> removeGuildMember(@Nonnull final String guildId, @Nonnull final String userId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.REMOVE_GUILD_MEMBER.withMajorParam(guildId),
-                ImmutableMap.of("user.id", userId), null))
+                ImmutableMap.of("user.id", userId)))
                 .thenApply(e -> null);
     }
     
@@ -215,7 +230,7 @@ public class RestGuild extends RestHandler {
     @CheckReturnValue
     public CompletionStage<Member> getGuildMember(@Nonnull final String guildId, @Nonnull final String userId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_MEMBER.withMajorParam(guildId),
-                ImmutableMap.of("user.id", userId), null))
+                ImmutableMap.of("user.id", userId)))
                 .thenApply(ResponsePayload::object)
                 .thenApply(e -> getEntityBuilder().createMember(guildId, e));
     }
@@ -224,7 +239,7 @@ public class RestGuild extends RestHandler {
     public CompletionStage<Void> removeGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
                                                        @Nonnull final String roleId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.REMOVE_GUILD_MEMBER_ROLE.withMajorParam(guildId),
-                ImmutableMap.of("user.id", userId, "role.id", roleId), null))
+                ImmutableMap.of("user.id", userId, "role.id", roleId)))
                 .thenApply(e -> null);
     }
     
@@ -232,7 +247,7 @@ public class RestGuild extends RestHandler {
     public CompletionStage<Void> addGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
                                                     @Nonnull final String roleId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.ADD_GUILD_MEMBER_ROLE.withMajorParam(guildId),
-                ImmutableMap.of("user.id", userId, "role.id", roleId), null))
+                ImmutableMap.of("user.id", userId, "role.id", roleId)))
                 .thenApply(e -> null);
     }
     
@@ -240,7 +255,7 @@ public class RestGuild extends RestHandler {
     @CheckReturnValue
     public CompletionStage<Integer> getGuildPruneCount(@Nonnull final String guildId, @Nonnegative final int days) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_PRUNE_COUNT.withMajorParam(guildId).withQueryString("?days=" + days),
-                ImmutableMap.of(), null))
+                ImmutableMap.of()))
                 .thenApply(ResponsePayload::object)
                 .thenApply(e -> e.getInteger("pruned"));
     }
@@ -249,7 +264,7 @@ public class RestGuild extends RestHandler {
     @CheckReturnValue
     public CompletionStage<Integer> beginGuildPrune(@Nonnull final String guildId, @Nonnegative final int days) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.BEGIN_GUILD_PRUNE.withMajorParam(guildId).withQueryString("?days=" + days),
-                ImmutableMap.of(), null))
+                ImmutableMap.of()))
                 .thenApply(ResponsePayload::object)
                 .thenApply(e -> e.getInteger("pruned"));
     }
@@ -258,7 +273,7 @@ public class RestGuild extends RestHandler {
     @CheckReturnValue
     public CompletionStage<List<VoiceRegion>> getGuildVoiceRegions(@Nonnull final String guildId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_VOICE_REGIONS.withQueryString(guildId),
-                ImmutableMap.of(), null))
+                ImmutableMap.of()))
                 .thenApply(ResponsePayload::array)
                 .thenApply(mapObjectContents(getEntityBuilder()::createVoiceRegion));
     }
@@ -309,7 +324,7 @@ public class RestGuild extends RestHandler {
             query = '?' + query;
         }
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_AUDIT_LOG.withMajorParam(guildId).withQueryString(query),
-                ImmutableMap.of(), null))
+                ImmutableMap.of()))
                 .thenApply(ResponsePayload::object);
     }
 }
