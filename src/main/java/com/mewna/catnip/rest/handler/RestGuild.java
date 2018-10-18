@@ -44,7 +44,7 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<Void> modifyMember(@Nonnull final String guildId, @Nonnull final String memberId,
+    public CompletionStage<Void> modifyGuildMember(@Nonnull final String guildId, @Nonnull final String memberId,
                                               @Nonnull final MemberData data) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.MODIFY_GUILD_MEMBER.withMajorParam(guildId),
