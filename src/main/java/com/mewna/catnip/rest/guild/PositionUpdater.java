@@ -53,7 +53,7 @@ public class PositionUpdater {
         // not using computeIfAbsent because extra write needed otherwise
         final Integer old = positions.get(entityId);
         if (old == null) {
-            positions.put(entityId, positions.size());
+            positions.put(entityId, positions.size() - 1);
             return this;
         }
         positions.put(entityId, reverseOrder ? old - 1 : old + 1);
@@ -68,7 +68,7 @@ public class PositionUpdater {
         }
         final Integer old = positions.get(entityId);
         if (old == null) {
-            positions.put(entityId, positions.size());
+            positions.put(entityId, positions.size() - 1);
             return this;
         }
         positions.put(entityId, reverseOrder ? old + 1 : old - 1);
