@@ -393,6 +393,12 @@ public class MemoryEntityCache implements EntityCacheWorker {
         return guildCache.get(id);
     }
     
+    @Nonnull
+    @Override
+    public List<Guild> guilds() {
+        return ImmutableList.copyOf(guildCache.values());
+    }
+    
     @Nullable
     @Override
     public User user(@Nonnull final String id) {
@@ -403,6 +409,12 @@ public class MemoryEntityCache implements EntityCacheWorker {
     @Override
     public Presence presence(@Nonnull final String id) {
         return presenceCache.get(id);
+    }
+    
+    @Nonnull
+    @Override
+    public List<Presence> presences() {
+        return ImmutableList.copyOf(presenceCache.values());
     }
     
     @Nullable
@@ -423,6 +435,15 @@ public class MemoryEntityCache implements EntityCacheWorker {
         } else {
             return ImmutableList.of();
         }
+    }
+    
+    @Nonnull
+    @Override
+    public List<Member> members() {
+        return ImmutableList.copyOf(memberCache.values().stream()
+                .map(Map::values)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList()));
     }
     
     @Nonnull
@@ -449,6 +470,15 @@ public class MemoryEntityCache implements EntityCacheWorker {
         } else {
             return ImmutableList.of();
         }
+    }
+    
+    @Nonnull
+    @Override
+    public List<Role> roles() {
+        return ImmutableList.copyOf(roleCache.values().stream()
+                .map(Map::values)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList()));
     }
     
     @Nullable
@@ -497,6 +527,15 @@ public class MemoryEntityCache implements EntityCacheWorker {
         }
     }
     
+    @Nonnull
+    @Override
+    public List<CustomEmoji> emojis() {
+        return ImmutableList.copyOf(emojiCache.values().stream()
+                .map(Map::values)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList()));
+    }
+    
     @Nullable
     @Override
     public VoiceState voiceState(@Nullable final String guildId, @Nonnull final String id) {
@@ -516,7 +555,16 @@ public class MemoryEntityCache implements EntityCacheWorker {
             return ImmutableList.of();
         }
     }
-
+    
+    @Nonnull
+    @Override
+    public List<VoiceState> voiceState() {
+        return ImmutableList.copyOf(voiceStateCache.values().stream()
+                .map(Map::values)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList()));
+    }
+    
     @Nonnull
     @Override
     public EntityCache catnip(@Nonnull final Catnip catnip) {
