@@ -19,6 +19,7 @@ import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.guild.ChannelData;
 import com.mewna.catnip.rest.guild.GuildData;
 import com.mewna.catnip.rest.guild.PositionUpdater;
+import com.mewna.catnip.rest.guild.RoleData;
 import com.mewna.catnip.util.pagination.AuditLogPaginator;
 import com.mewna.catnip.util.pagination.MemberPaginator;
 import io.vertx.core.json.JsonArray;
@@ -101,6 +102,18 @@ public class RestGuild extends RestHandler {
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createGuildEmbed);
     }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<Role> createGuildRole(@Nonnull final String guildId, @Nonnull final RoleData roleData) {
+        return getCatnip().requester()
+                .queue(new OutboundRequest(Routes.CREATE_GUILD_ROLE.withMajorParam(guildId),
+                        ImmutableMap.of(), roleData.toJson()))
+                .thenApply(ResponsePayload::object)
+                .thenApply(obj -> getEntityBuilder().createRole(guildId, obj));
+    }
+    
+    
     
     @Nonnull
     @CheckReturnValue
