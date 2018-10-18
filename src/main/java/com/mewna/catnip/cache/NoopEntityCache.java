@@ -81,6 +81,12 @@ public class NoopEntityCache implements EntityCacheWorker {
         return null;
     }
     
+    @Nonnull
+    @Override
+    public List<Guild> guilds() {
+        return ImmutableList.of();
+    }
+    
     @Nullable
     @Override
     public User user(@Nonnull final String id) {
@@ -93,6 +99,12 @@ public class NoopEntityCache implements EntityCacheWorker {
         return null;
     }
     
+    @Nonnull
+    @Override
+    public List<Presence> presences() {
+        return ImmutableList.of();
+    }
+    
     @Nullable
     @Override
     public Member member(@Nonnull final String guildId, @Nonnull final String id) {
@@ -102,6 +114,12 @@ public class NoopEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
     public List<Member> members(@Nonnull final String guildId) {
+        return ImmutableList.of();
+    }
+    
+    @Nonnull
+    @Override
+    public List<Member> members() {
         return ImmutableList.of();
     }
     
@@ -120,6 +138,12 @@ public class NoopEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
     public List<Role> roles(@Nonnull final String guildId) {
+        return ImmutableList.of();
+    }
+    
+    @Nonnull
+    @Override
+    public List<Role> roles() {
         return ImmutableList.of();
     }
     
@@ -153,6 +177,12 @@ public class NoopEntityCache implements EntityCacheWorker {
         return ImmutableList.of();
     }
     
+    @Nonnull
+    @Override
+    public List<CustomEmoji> emojis() {
+        return ImmutableList.of();
+    }
+    
     @Nullable
     @Override
     public VoiceState voiceState(@Nullable final String guildId, @Nonnull final String id) {
@@ -162,6 +192,12 @@ public class NoopEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
     public List<VoiceState> voiceStates(@Nonnull final String guildId) {
+        return ImmutableList.of();
+    }
+    
+    @Nonnull
+    @Override
+    public List<VoiceState> voiceState() {
         return ImmutableList.of();
     }
     

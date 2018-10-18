@@ -1,10 +1,10 @@
 package com.mewna.catnip.cache;
 
-import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
+import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
@@ -33,6 +33,14 @@ public interface EntityCache {
     Guild guild(@Nonnull String id);
     
     /**
+     * Get all guilds cached in this entity cache.
+     *
+     * @return A non-{@code null}, possibly-empty list of guilds
+     */
+    @Nonnull
+    List<Guild> guilds();
+    
+    /**
      * Get the user with the specified ID. May be {@code null}.
      *
      * @param id The ID of the user to fetch.
@@ -41,6 +49,14 @@ public interface EntityCache {
      */
     @Nullable
     User user(@Nonnull String id);
+    
+    /**
+     * Get all users cached in this cache instance.
+     *
+     * @return A non-{@code null}, possibly-empty list of users.
+     */
+    @Nonnull
+    List<User> users();
     
     /**
      * Get the presence for the user with the specified ID. May be
@@ -52,6 +68,14 @@ public interface EntityCache {
      */
     @Nullable
     Presence presence(@Nonnull String id);
+    
+    /**
+     * Get all presences cached in this entity cache.
+     *
+     * @return A non-{@code null}, possibly-empty list of presences
+     */
+    @Nonnull
+    List<Presence> presences();
     
     /**
      * Get the member with the given ID from the guild with the given ID. May
@@ -77,12 +101,12 @@ public interface EntityCache {
     List<Member> members(@Nonnull String guildId);
     
     /**
-     * Get all users cached in this cache instance.
+     * Get all members cached in this entity cache.
      *
-     * @return A non-{@code null}, possibly-empty list of users.
+     * @return A non-{@code null}, possibly-empty list of members
      */
     @Nonnull
-    List<User> users();
+    List<Member> members();
     
     /**
      * Get the role with the given ID from the guild with the given ID. May be
@@ -106,6 +130,14 @@ public interface EntityCache {
      */
     @Nonnull
     List<Role> roles(@Nonnull String guildId);
+    
+    /**
+     * Get all roles cached in this entity cache.
+     *
+     * @return A non-{@code null}, possibly-empty list of roles
+     */
+    @Nonnull
+    List<Role> roles();
     
     /**
      * Get the channel with the given ID from the guild with the given ID. May
@@ -162,6 +194,14 @@ public interface EntityCache {
     List<CustomEmoji> emojis(@Nonnull String guildId);
     
     /**
+     * Get all emojis cached in this entity cache.
+     *
+     * @return A non-{@code null}, possibly-empty list of emojis
+     */
+    @Nonnull
+    List<CustomEmoji> emojis();
+    
+    /**
      * Get the voice state for the user with the given ID, possibly in the
      * guild with the given ID. May be {@code null}.
      *
@@ -185,4 +225,13 @@ public interface EntityCache {
      */
     @Nonnull
     List<VoiceState> voiceStates(@Nonnull String guildId);
+    
+    /**
+     * Get all voice states for the entire bot. The list returned by this
+     * method will never be {@code null}, but may be empty.
+     *
+     * @return A non-{@code null}, possibly-empty list of voice states.
+     */
+    @Nonnull
+    List<VoiceState> voiceState();
 }
