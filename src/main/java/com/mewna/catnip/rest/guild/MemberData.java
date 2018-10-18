@@ -23,7 +23,6 @@ import java.util.List;
 @Setter(onParam_ = @Nonnull, onMethod_ = {@CheckReturnValue, @Nullable})
 @Accessors(fluent = true, chain = true)
 @NoArgsConstructor
-@AllArgsConstructor
 @SuppressWarnings("unused")
 public class MemberData {
     @Setter(AccessLevel.NONE)
