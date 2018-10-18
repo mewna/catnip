@@ -4,7 +4,10 @@ import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.entity.guild.Role;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
@@ -20,7 +23,7 @@ import java.util.List;
  */
 
 @Getter(onMethod_ = {@CheckReturnValue, @Nullable})
-@Setter(onParam_ = @Nonnull, onMethod_ = {@CheckReturnValue, @Nullable})
+@Setter(onParam_ = @Nonnull, onMethod_ = {@CheckReturnValue, @Nonnull})
 @Accessors(fluent = true, chain = true)
 @NoArgsConstructor
 @SuppressWarnings("unused")
