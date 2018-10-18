@@ -117,6 +117,8 @@ public interface Catnip {
     
     boolean chunkMembers();
     
+    boolean emitEventObjects();
+    
     @Nonnull
     Set<String> unavailableGuilds();
     

@@ -52,7 +52,9 @@ public class CatnipImpl implements Catnip {
     private final EntityCacheWorker cache;
     private final Set<CacheFlag> cacheFlags;
     private final boolean chunkMembers;
+    private final boolean emitEventObjects;
     private final Presence initialPresence;
+    
     private final AtomicReference<User> selfUser = new AtomicReference<>(null);
     private final Set<String> unavailableGuilds = new HashSet<>();
     
@@ -68,6 +70,7 @@ public class CatnipImpl implements Catnip {
         cache = options.cacheWorker();
         cacheFlags = options.cacheFlags();
         chunkMembers = options.chunkMembers();
+        emitEventObjects = options.emitEventObjects();
         initialPresence = options.presence();
     }
     

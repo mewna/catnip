@@ -29,6 +29,9 @@ public class DispatchEmitter {
     }
     
     public void emit(@Nonnull final JsonObject payload) {
+        if(!catnip.emitEventObjects()) {
+            return;
+        }
         try {
             emit0(payload);
         } catch(final Exception e) {

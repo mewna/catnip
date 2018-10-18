@@ -38,8 +38,6 @@ import java.util.Set;
 public final class CatnipOptions {
     @Nonnull
     private final String token;
-    @Nullable
-    private Presence presence;
     @Nonnull
     private ShardManager shardManager = new DefaultShardManager();
     @Nonnull
@@ -57,4 +55,8 @@ public final class CatnipOptions {
     @Nonnull
     private BucketBackend restBucketBackend = new MemoryBucketBackend();
     private boolean chunkMembers = true;
+    private boolean emitEventObjects = true;
+    @Nullable
+    private Presence presence;
+    
 }
