@@ -1,6 +1,7 @@
 package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
+import com.mewna.catnip.entity.GuildEmbed;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Guild.GuildEditFields;
@@ -79,6 +80,16 @@ public class RestGuild extends RestHandler {
                         ImmutableMap.of(), data.toJson()))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createGuildChannel);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<GuildEmbed> getGuildEmbed(@Nonnull final String guildId) {
+        return getCatnip().requester()
+                .queue(new OutboundRequest(Routes.GET_GUILD_EMBED.withMajorParam(guildId),
+                        ImmutableMap.of()))
+                .thenApply(ResponsePayload::object)
+                .thenApply(getEntityBuilder()::createGuildEmbed);
     }
     
     @Nonnull
