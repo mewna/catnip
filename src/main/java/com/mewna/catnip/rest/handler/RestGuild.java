@@ -16,10 +16,7 @@ import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
-import com.mewna.catnip.rest.guild.ChannelData;
-import com.mewna.catnip.rest.guild.GuildData;
-import com.mewna.catnip.rest.guild.PositionUpdater;
-import com.mewna.catnip.rest.guild.RoleData;
+import com.mewna.catnip.rest.guild.*;
 import com.mewna.catnip.util.pagination.AuditLogPaginator;
 import com.mewna.catnip.util.pagination.MemberPaginator;
 import io.vertx.core.json.JsonArray;
@@ -43,6 +40,16 @@ import java.util.concurrent.CompletionStage;
 public class RestGuild extends RestHandler {
     public RestGuild(final CatnipImpl catnip) {
         super(catnip);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<Void> modifyMember(@Nonnull final String guildId, @Nonnull final String memberId,
+                                              @Nonnull final MemberData data) {
+        return getCatnip().requester()
+                .queue(new OutboundRequest(Routes.MODIFY_GUILD_MEMBER.withMajorParam(guildId),
+                        ImmutableMap.of("user.id", memberId), data.toJson()))
+                .thenApply(__ -> null);
     }
     
     @Nonnull
