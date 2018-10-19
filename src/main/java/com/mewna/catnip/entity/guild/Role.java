@@ -46,6 +46,14 @@ public interface Role extends Snowflake {
     int color();
     
     /**
+     * Position of the role within the guild it's from.
+     * <br><p>Note: Raw positions fetched from Discord are a bit weird and may confuse you sometimes.</p>
+     *
+     * @return The position of the role within its guild's role hierarchy.
+     */
+    int position();
+    
+    /**
      * Whether or not the role "hoists" users with it into a group in the user list.
      *
      * @return True if the role is grouped and hoisted, false otherwise.

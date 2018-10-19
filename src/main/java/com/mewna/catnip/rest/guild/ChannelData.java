@@ -1,5 +1,6 @@
 package com.mewna.catnip.rest.guild;
 
+import com.mewna.catnip.entity.channel.Category;
 import com.mewna.catnip.util.JsonConvertible;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -14,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-@Accessors(fluent = true)
+@Accessors(fluent = true, chain = true)
 @Getter
 @Setter
 public abstract class ChannelData implements JsonConvertible {
@@ -23,6 +24,7 @@ public abstract class ChannelData implements JsonConvertible {
     private final String name;
     private Integer position;
     private String topic;
+    private String parentId;
     private Boolean nsfw;
     private Integer bitrate;
     private Integer userLimit;
@@ -48,6 +50,19 @@ public abstract class ChannelData implements JsonConvertible {
     @CheckReturnValue
     public static ChannelData createVoice(@Nonnull final String name) {
         return new VoiceChannelData(name.trim());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public static ChannelData createCategory(@Nonnull final String name) {
+        return new CategoryData(name.trim());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public ChannelData category(@Nonnull final Category category) {
+        parentId = category.id();
+        return this;
     }
     
     @Nonnull
@@ -99,6 +114,9 @@ public abstract class ChannelData implements JsonConvertible {
         if(userLimit != null) {
             object.put("user_limit", userLimit);
         }
+        if (parentId != null) {
+            object.put("parent_id", parentId);
+        }
         if(!overrides.isEmpty()) {
             final JsonArray array = new JsonArray();
             for(final PermissionOverrideData override : overrides.values()) {
@@ -107,6 +125,23 @@ public abstract class ChannelData implements JsonConvertible {
             object.put("permission_overwrites", array);
         }
         return object;
+    }
+    
+    private static class CategoryData extends ChannelData {
+        CategoryData(final String name) {
+            super(4, name);
+        }
+    
+        @Override
+        public ChannelData parentId(final String parentId) {
+            throw new IllegalStateException("Cannot set Parent ID on categories!");
+        }
+    
+        @Nonnull
+        @Override
+        public ChannelData category(@Nonnull final Category category) {
+            throw new IllegalStateException("Cannot set Parent on categories!");
+        }
     }
     
     private static class TextChannelData extends ChannelData {

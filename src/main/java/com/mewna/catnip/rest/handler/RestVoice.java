@@ -21,7 +21,7 @@ public class RestVoice extends RestHandler {
     @CheckReturnValue
     public CompletionStage<List<VoiceRegion>> listVoiceRegions() {
         return getCatnip().requester().queue(new OutboundRequest(Routes.LIST_VOICE_REGIONS,
-                ImmutableMap.of(), null))
+                ImmutableMap.of()))
                 .thenApply(ResponsePayload::array)
                 .thenApply(mapObjectContents(getEntityBuilder()::createVoiceRegion));
     }

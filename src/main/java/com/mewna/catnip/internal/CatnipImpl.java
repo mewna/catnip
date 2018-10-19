@@ -15,6 +15,7 @@ import com.mewna.catnip.internal.logging.LogAdapter;
 import com.mewna.catnip.internal.ratelimit.Ratelimiter;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
+import com.mewna.catnip.shard.ShardInfo;
 import com.mewna.catnip.shard.event.EventBuffer;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.session.SessionManager;
@@ -169,6 +170,9 @@ public class CatnipImpl implements Catnip {
         // Voice
         codec(VoiceStateImpl.class);
         codec(VoiceServerUpdateImpl.class);
+        
+        // Shards
+        codec(ShardInfo.class);
         
         return this;
     }
