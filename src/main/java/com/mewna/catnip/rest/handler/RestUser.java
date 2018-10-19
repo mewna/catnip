@@ -38,7 +38,7 @@ public class RestUser extends RestHandler {
     @CheckReturnValue
     public CompletionStage<User> getCurrentUser() {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_CURRENT_USER,
-                ImmutableMap.of(), null))
+                ImmutableMap.of()))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createUser);
     }
@@ -47,7 +47,7 @@ public class RestUser extends RestHandler {
     @CheckReturnValue
     public CompletionStage<User> getUser(@Nonnull final String userId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_USER,
-                ImmutableMap.of("user.id", userId), null))
+                ImmutableMap.of("user.id", userId)))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createUser);
     }
@@ -112,7 +112,7 @@ public class RestUser extends RestHandler {
             query = '?' + query;
         }
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_CURRENT_USER_GUILDS.withQueryString(query),
-                ImmutableMap.of(), null))
+                ImmutableMap.of()))
                 .thenApply(ResponsePayload::array);
     }
     
@@ -128,7 +128,7 @@ public class RestUser extends RestHandler {
     @Nonnull
     public CompletionStage<Void> leaveGuild(@Nonnull final String guildId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.LEAVE_GUILD.withMajorParam(guildId),
-                ImmutableMap.of(), null))
+                ImmutableMap.of()))
                 .thenApply(__ -> null);
     }
     
@@ -136,7 +136,7 @@ public class RestUser extends RestHandler {
     @CheckReturnValue
     public CompletionStage<ApplicationInfo> getCurrentApplicationInformation() {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_CURRENT_APPLICATION_INFORMATION,
-                ImmutableMap.of(), null))
+                ImmutableMap.of()))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createApplicationInfo);
     }
