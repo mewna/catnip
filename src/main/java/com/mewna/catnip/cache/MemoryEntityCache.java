@@ -196,7 +196,6 @@ public class MemoryEntityCache implements EntityCacheWorker {
             // Guilds
             case Raw.GUILD_CREATE: {
                 final Guild guild = entityBuilder.createGuild(payload);
-                catnip.logAdapter().info("{}", guild);
                 guildCache.put(guild.id(), guild);
                 break;
             }
