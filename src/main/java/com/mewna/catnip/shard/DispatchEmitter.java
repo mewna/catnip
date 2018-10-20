@@ -204,6 +204,15 @@ public class DispatchEmitter {
                 break;
             }
             
+            // Other
+            
+            case Raw.GUILD_MEMBERS_CHUNK: {
+                // End-users don't really have a use for an event here;
+                // anyone who needs this will just be listening on raw
+                // ws events anyway
+                break;
+            }
+            
             default: {
                 catnip.logAdapter().warn("Got unimplemented gateway event: {}", type);
                 break;
