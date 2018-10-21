@@ -1,3 +1,5 @@
+<img align="right" src="https://i.imgur.com/JnOz6U8.png" height="180" width="250">
+
 # catnip
 
 [![CircleCI](https://circleci.com/gh/mewna/catnip.svg?style=svg)](https://circleci.com/gh/mewna/catnip)
