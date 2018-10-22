@@ -12,7 +12,6 @@ import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.entity.voice.VoiceServerUpdate;
 
 import static com.mewna.catnip.shard.EventTypeImpl.event;
-import static com.mewna.catnip.shard.EventTypeImpl.notFired;
 
 /**
  * Question: "WHY IS THIS NOT ENUM AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
@@ -47,8 +46,8 @@ public interface DiscordEvent {
     EventType<MessageEmbedUpdate> MESSAGE_EMBEDS_UPDATE         = event(Raw.MESSAGE_EMBEDS_UPDATE, MessageEmbedUpdate.class);
     EventType<DeletedMessage> MESSAGE_DELETE                    = event(Raw.MESSAGE_DELETE, DeletedMessage.class);
     EventType<BulkDeletedMessages> MESSAGE_DELETE_BULK          = event(Raw.MESSAGE_DELETE_BULK, BulkDeletedMessages.class);
-    //TODO add this event (or remove this field)
-    EventType<Void> GUILD_SYNC                                  = notFired(Raw.GUILD_SYNC);
+    
+    EventType<String> GUILD_INTEGRATIONS_UPDATE                 = event(Raw.GUILD_INTEGRATIONS_UPDATE, String.class);
     EventType<GatewayGuildBan> GUILD_BAN_ADD                    = event(Raw.GUILD_BAN_ADD, GatewayGuildBan.class);
     EventType<GatewayGuildBan> GUILD_BAN_REMOVE                 = event(Raw.GUILD_BAN_REMOVE, GatewayGuildBan.class);
     EventType<ReactionUpdate> MESSAGE_REACTION_ADD              = event(Raw.MESSAGE_REACTION_ADD, ReactionUpdate.class);
@@ -85,6 +84,7 @@ public interface DiscordEvent {
         String GUILD_ROLE_CREATE            = "GUILD_ROLE_CREATE";
         String GUILD_ROLE_DELETE            = "GUILD_ROLE_DELETE";
         String GUILD_ROLE_UPDATE            = "GUILD_ROLE_UPDATE";
+        String GUILD_INTEGRATIONS_UPDATE    = "GUILD_INTEGRATIONS_UPDATE";
         String USER_UPDATE                  = "USER_UPDATE";
         String VOICE_SERVER_UPDATE          = "VOICE_SERVER_UPDATE";
         String MESSAGE_CREATE               = "MESSAGE_CREATE";
@@ -99,7 +99,6 @@ public interface DiscordEvent {
          * when it almost-always won't be null.
          */
         String MESSAGE_EMBEDS_UPDATE        = "MESSAGE_EMBEDS_UPDATE";
-        String GUILD_SYNC                   = "GUILD_SYNC";
         String GUILD_BAN_ADD                = "GUILD_BAN_ADD";
         String GUILD_BAN_REMOVE             = "GUILD_BAN_REMOVE";
         String MESSAGE_REACTION_ADD         = "MESSAGE_REACTION_ADD";
