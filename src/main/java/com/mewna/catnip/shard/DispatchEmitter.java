@@ -146,6 +146,10 @@ public class DispatchEmitter {
                 catnip.eventBus().publish(type, entityBuilder.createGatewayGuildBan(data));
                 break;
             }
+            case Raw.GUILD_INTEGRATIONS_UPDATE: {
+                catnip.eventBus().publish(type, data.getString("guild_id"));
+                break;
+            }
             
             // Roles
             case Raw.GUILD_ROLE_CREATE: {
