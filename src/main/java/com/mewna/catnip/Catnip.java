@@ -202,4 +202,19 @@ public interface Catnip {
     default <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler) {
         return eventBus().consumer(type.key(), message -> handler.accept(message.body()));
     }
+    
+    /**
+     * Shutdown the catnip instance, undeploy all shards, and shutdown the
+     * vert.x instance.
+     */
+    default void shutdown() {
+        shutdown(true);
+    }
+    
+    /**
+     * Shutdown the catnip instance, undeploy all shards, and optionally
+     * shutdown the vert.x instance.
+     * @param vertx Whether or not to shut down the vert.x instance.
+     */
+    void shutdown(boolean vertx);
 }

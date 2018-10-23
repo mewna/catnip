@@ -181,8 +181,14 @@ public class CatnipShard extends AbstractVerticle {
                 doStop();
                 break;
             }
+            case "SHUTDOWN": {
+                doStop();
+                catnip.vertx().undeploy(deploymentID());
+                break;
+            }
             case "TRACE": {
                 msg.reply(new JsonArray(trace));
+                break;
             }
             default: {
                 catnip.logAdapter().warn("Shard {} Got unknown control message: {}", id, body.encodePrettily());

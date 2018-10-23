@@ -95,6 +95,14 @@ public class CatnipImpl implements Catnip {
         return selfUser.get();
     }
     
+    @Override
+    public void shutdown(final boolean vertx) {
+        shardManager.shutdown();
+        if(vertx) {
+            this.vertx.close();
+        }
+    }
+    
     @Nonnull
     @SuppressWarnings("UnusedReturnValue")
     public Catnip selfUser(@Nonnull final User self) {
