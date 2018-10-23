@@ -26,4 +26,6 @@ public interface ShardManager {
     
     @Nonnull
     ShardManager catnip(@Nonnull Catnip catnip);
+    
+    void shutdown();
 }

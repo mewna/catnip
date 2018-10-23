@@ -162,4 +162,11 @@ public class DefaultShardManager implements ShardManager {
                 });
         return future;
     }
+    
+    @Override
+    public void shutdown() {
+        for(int i = 0; i < shardCount(); i++) {
+            catnip.eventBus().<JsonArray>send(CatnipShard.controlAddress(i), new JsonObject().put("mode", "SHUTDOWN"));
+        }
+    }
 }
