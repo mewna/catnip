@@ -184,6 +184,11 @@ public class CatnipImpl implements Catnip {
         // Shards
         codec(ShardInfo.class);
         
+        // Inject catnip instance into dependent fields
+        shardManager.catnip(this);
+        eventBuffer.catnip(this);
+        cache.catnip(this);
+        
         return this;
     }
     
@@ -202,9 +207,6 @@ public class CatnipImpl implements Catnip {
         if(token == null || token.isEmpty()) {
             throw new IllegalStateException("Provided token is empty!");
         }
-        shardManager.catnip(this);
-        eventBuffer.catnip(this);
-        cache.catnip(this);
         shardManager.start();
         return this;
     }
