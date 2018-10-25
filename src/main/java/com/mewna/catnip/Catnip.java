@@ -139,6 +139,10 @@ public interface Catnip {
     @CheckReturnValue
     Presence initialPresence();
     
+    @Nonnull
+    @CheckReturnValue
+    Set<String> disabledEvents();
+    
     default void presence(@Nonnegative final int shardId, @Nonnull final Consumer<Presence> callback) {
         eventBus().send(CatnipShard.websocketMessagePresenceUpdateAddress(shardId), null, result -> {
             callback.accept((Presence) result.result().body());

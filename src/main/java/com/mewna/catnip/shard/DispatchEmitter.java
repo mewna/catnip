@@ -32,6 +32,10 @@ public class DispatchEmitter {
         if(!catnip.emitEventObjects()) {
             return;
         }
+        final String type = payload.getString("t");
+        if(catnip.disabledEvents().contains(type)) {
+            return;
+        }
         try {
             emit0(payload);
         } catch(final Exception e) {
