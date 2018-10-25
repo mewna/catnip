@@ -58,6 +58,7 @@ public class CatnipImpl implements Catnip {
     
     private final AtomicReference<User> selfUser = new AtomicReference<>(null);
     private final Set<String> unavailableGuilds = new HashSet<>();
+    private final Set<String> disabledEvents;
     
     public CatnipImpl(@Nonnull final Vertx vertx, @Nonnull final CatnipOptions options) {
         this.vertx = vertx;
@@ -73,6 +74,7 @@ public class CatnipImpl implements Catnip {
         chunkMembers = options.chunkMembers();
         emitEventObjects = options.emitEventObjects();
         initialPresence = options.presence();
+        disabledEvents = ImmutableSet.copyOf(options.disabledEvents());
     }
     
     @Nonnull

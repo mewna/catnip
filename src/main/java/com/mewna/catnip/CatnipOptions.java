@@ -1,5 +1,6 @@
 package com.mewna.catnip;
 
+import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.MemoryEntityCache;
@@ -58,5 +59,6 @@ public final class CatnipOptions {
     private boolean emitEventObjects = true;
     @Nullable
     private Presence presence;
-    
+    @Nonnull
+    private Set<String> disabledEvents = ImmutableSet.of();
 }
