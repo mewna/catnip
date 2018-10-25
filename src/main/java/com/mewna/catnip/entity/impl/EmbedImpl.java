@@ -1,5 +1,6 @@
 package com.mewna.catnip.entity.impl;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.entity.message.Embed;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -12,8 +13,8 @@ import java.util.List;
  * @author natanbc
  * @since 9/2/18.
  */
-@Getter
-@Setter
+@Getter(onMethod_ = @JsonProperty)
+@Setter(onMethod_ = @JsonProperty)
 @Builder
 @Accessors(fluent = true)
 @SuppressWarnings("WeakerAccess")

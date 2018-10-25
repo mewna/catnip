@@ -1,5 +1,7 @@
 package com.mewna.catnip.entity.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.channel.Webhook;
@@ -18,13 +20,14 @@ import java.util.List;
  * @author SamOphis
  * @since 10/07/2018
  */
-@Getter
-@Setter
+@Getter(onMethod_ = @JsonProperty)
+@Setter(onMethod_ = @JsonProperty)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(fluent = true)
 public class AuditLogEntryImpl implements AuditLogEntry, RequiresCatnip {
+    @JsonIgnore
     private transient Catnip catnip;
     
     private String id;

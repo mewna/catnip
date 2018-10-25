@@ -1,5 +1,7 @@
 package com.mewna.catnip.entity.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.misc.CreatedInvite;
@@ -13,13 +15,14 @@ import java.time.OffsetDateTime;
  * @author natanbc
  * @since 9/14/18.
  */
-@Getter
-@Setter
+@Getter(onMethod_ = @JsonProperty)
+@Setter(onMethod_ = @JsonProperty)
 @Builder
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreatedInviteImpl implements CreatedInvite, RequiresCatnip {
+    @JsonIgnore
     private transient Catnip catnip;
     
     private String code;

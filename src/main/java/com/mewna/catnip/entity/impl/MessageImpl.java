@@ -1,5 +1,7 @@
 package com.mewna.catnip.entity.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.guild.Member;
@@ -19,13 +21,14 @@ import java.util.List;
  * @author amy
  * @since 9/2/18.
  */
-@Getter
-@Setter
+@Getter(onMethod_ = @JsonProperty)
+@Setter(onMethod_ = @JsonProperty)
 @Builder
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class MessageImpl implements Message, RequiresCatnip {
+    @JsonIgnore
     private transient Catnip catnip;
     
     private String id;

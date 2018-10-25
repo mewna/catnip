@@ -1,5 +1,7 @@
 package com.mewna.catnip.entity.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.channel.Channel;
@@ -24,13 +26,14 @@ import java.util.Set;
  * @author natanbc
  * @since 9/6/18.
  */
-@Getter
-@Setter
+@Getter(onMethod_ = @JsonProperty)
+@Setter(onMethod_ = @JsonProperty)
 @Builder
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class GuildImpl implements Guild, RequiresCatnip {
+    @JsonIgnore
     private transient Catnip catnip;
     
     private String id;
