@@ -41,15 +41,24 @@ public class MemoryEntityCache implements EntityCacheWorker {
     
     private static final String DM_CHANNEL_KEY = "DMS";
     
-    private final Map<String, Guild> guildCache = new ConcurrentHashMap<>();
-    private final Map<String, User> userCache = new ConcurrentHashMap<>();
-    private final Map<String, Map<String, Member>> memberCache = new ConcurrentHashMap<>();
-    private final Map<String, Map<String, Role>> roleCache = new ConcurrentHashMap<>();
-    private final Map<String, Map<String, Channel>> channelCache = new ConcurrentHashMap<>();
-    private final Map<String, Map<String, CustomEmoji>> emojiCache = new ConcurrentHashMap<>();
-    private final Map<String, Map<String, VoiceState>> voiceStateCache = new ConcurrentHashMap<>();
-    private final Map<String, Presence> presenceCache = new ConcurrentHashMap<>();
-    private final AtomicReference<User> selfUser = new AtomicReference<>(null);
+    @SuppressWarnings("WeakerAccess")
+    protected final Map<String, Guild> guildCache = new ConcurrentHashMap<>();
+    @SuppressWarnings("WeakerAccess")
+    protected final Map<String, User> userCache = new ConcurrentHashMap<>();
+    @SuppressWarnings("WeakerAccess")
+    protected final Map<String, Map<String, Member>> memberCache = new ConcurrentHashMap<>();
+    @SuppressWarnings("WeakerAccess")
+    protected final Map<String, Map<String, Role>> roleCache = new ConcurrentHashMap<>();
+    @SuppressWarnings("WeakerAccess")
+    protected final Map<String, Map<String, Channel>> channelCache = new ConcurrentHashMap<>();
+    @SuppressWarnings("WeakerAccess")
+    protected final Map<String, Map<String, CustomEmoji>> emojiCache = new ConcurrentHashMap<>();
+    @SuppressWarnings("WeakerAccess")
+    protected final Map<String, Map<String, VoiceState>> voiceStateCache = new ConcurrentHashMap<>();
+    @SuppressWarnings("WeakerAccess")
+    protected final Map<String, Presence> presenceCache = new ConcurrentHashMap<>();
+    @SuppressWarnings("WeakerAccess")
+    protected final AtomicReference<User> selfUser = new AtomicReference<>(null);
     @Getter
     private Catnip catnip;
     private EntityBuilder entityBuilder;
