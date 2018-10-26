@@ -28,6 +28,7 @@ public class RestWebhook extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
+    @SuppressWarnings("unused")
     public CompletionStage<Webhook> getWebhook(@Nonnull final String webhookId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_WEBHOOK.withMajorParam(webhookId),
                 ImmutableMap.of()))
@@ -72,6 +73,7 @@ public class RestWebhook extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
+    @SuppressWarnings("unused")
     public CompletionStage<Message> executeWebhook(@Nonnull final String webhookId, @Nonnull final String webhookToken,
                                                    @Nonnull final MessageOptions options) {
         return executeWebhook(webhookId, webhookToken, null, null, options);
@@ -79,6 +81,7 @@ public class RestWebhook extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
+    @SuppressWarnings("WeakerAccess")
     public CompletionStage<Message> executeWebhook(@Nonnull final String webhookId, @Nonnull final String webhookToken,
                                                    @Nullable final String username, @Nullable final String avatarUrl,
                                                    @Nonnull final MessageOptions options) {
