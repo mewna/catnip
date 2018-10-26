@@ -13,6 +13,7 @@ import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 
@@ -73,6 +74,14 @@ public class RestWebhook extends RestHandler {
     @CheckReturnValue
     public CompletionStage<Message> executeWebhook(@Nonnull final String webhookId, @Nonnull final String webhookToken,
                                                    @Nonnull final MessageOptions options) {
+        return executeWebhook(webhookId, webhookToken, null, null, options);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<Message> executeWebhook(@Nonnull final String webhookId, @Nonnull final String webhookToken,
+                                                   @Nullable final String username, @Nullable final String avatarUrl,
+                                                   @Nonnull final MessageOptions options) {
         final JsonObject json = new JsonObject();
         
         if(options.content() != null && !options.content().isEmpty()) {
@@ -86,6 +95,13 @@ public class RestWebhook extends RestHandler {
         if(json.getValue("embed", null) == null && json.getValue("content", null) == null
                 && !options.hasFiles()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
+        }
+        
+        if(username != null && !username.isEmpty()) {
+            json.put("username", username);
+        }
+        if(avatarUrl != null && !avatarUrl.isEmpty()) {
+            json.put("avatar_url", avatarUrl);
         }
         
         return getCatnip().requester().
