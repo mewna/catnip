@@ -152,9 +152,11 @@ public final class Routes {
     public static final Route MODIFY_GUILD_ROLE                   = new Route(PATCH,  "/guilds/{guild.id}/roles/{role.id}", "guild.id");
     public static final Route GET_GUILD_WEBHOOKS                  = new Route(GET,    "/guilds/{guild.id}/webhooks", "guild.id");
     
-    public static final Route GET_WEBHOOK                         = new Route(GET,    "/webhooks/{webhook.id}");
-    public static final Route MODIFY_WEBHOOK                      = new Route(PATCH,  "/webhooks/{webhook.id}");
-    public static final Route DELETE_WEBHOOK                      = new Route(DELETE, "/webhooks/{webhook.id}");
+    public static final Route GET_WEBHOOK                         = new Route(GET,    "/webhooks/{webhook.id}", "webhook.id");
+    public static final Route MODIFY_WEBHOOK                      = new Route(PATCH,  "/webhooks/{webhook.id}", "webhook.id");
+    public static final Route DELETE_WEBHOOK                      = new Route(DELETE, "/webhooks/{webhook.id}", "webhook.id");
+    
+    public static final Route EXECUTE_WEBHOOK                     = new Route(POST,   "/webhooks/{webhook.id}/{webhook.token}", "webhook.id");
     
     public static final Route DELETE_INVITE                       = new Route(DELETE, "/invites/{invite.code}");
     public static final Route GET_INVITE                          = new Route(GET,    "/invites/{invite.code}");

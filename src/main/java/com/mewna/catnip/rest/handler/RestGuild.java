@@ -284,14 +284,14 @@ public class RestGuild extends RestHandler {
         if(!query.isEmpty()) {
             query = '?' + query;
         }
-        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BAN.withMajorParam(guildId).withQueryString(query),
+        return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_GUILD_BAN.withMajorParam(guildId).withQueryString(query),
                 ImmutableMap.of("user.id", userId)))
                 .thenApply(e -> null);
     }
     
     @Nonnull
     public CompletionStage<Void> removeGuildBan(@Nonnull final String guildId, @Nonnull final String userId) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BAN.withMajorParam(guildId),
+        return getCatnip().requester().queue(new OutboundRequest(Routes.REMOVE_GUILD_BAN.withMajorParam(guildId),
                 ImmutableMap.of("user.id", userId)))
                 .thenApply(e -> null);
     }

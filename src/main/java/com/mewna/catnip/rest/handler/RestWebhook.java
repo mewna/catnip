@@ -3,10 +3,13 @@ package com.mewna.catnip.rest.handler;
 import com.google.common.collect.ImmutableMap;
 import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.channel.Webhook.WebhookEditFields;
+import com.mewna.catnip.entity.message.Message;
+import com.mewna.catnip.entity.message.MessageOptions;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
+import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -64,5 +67,32 @@ public class RestWebhook extends RestHandler {
         return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_WEBHOOK.withMajorParam(webhookId),
                 ImmutableMap.of()))
                 .thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<Message> executeWebhook(@Nonnull final String webhookId, @Nonnull final String webhookToken,
+                                                   @Nonnull final MessageOptions options) {
+        final JsonObject json = new JsonObject();
+        
+        if(options.content() != null && !options.content().isEmpty()) {
+            json.put("content", options.content());
+        }
+        
+        if(options.embed() != null) {
+            json.put("embed", getEntityBuilder().embedToJson(options.embed()));
+        }
+        
+        if(json.getValue("embed", null) == null && json.getValue("content", null) == null
+                && !options.hasFiles()) {
+            throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
+        }
+        
+        return getCatnip().requester().
+                queue(new OutboundRequest(Routes.EXECUTE_WEBHOOK.withMajorParam(webhookId),
+                        ImmutableMap.of("webhook.token", webhookToken), json).needsToken(false)
+                        .buffers(options.files()))
+                .thenApply(ResponsePayload::object)
+                .thenApply(getEntityBuilder()::createMessage);
     }
 }

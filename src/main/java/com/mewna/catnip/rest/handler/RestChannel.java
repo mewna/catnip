@@ -181,6 +181,20 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
+    public CompletionStage<Void> deleteUserReaction(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                   @Nonnull final String userId, @Nonnull final String emoji) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_USER_REACTION.withMajorParam(channelId),
+                ImmutableMap.of("message.id", messageId, "emojis", encodeUTF8(emoji), "user.id", userId)))
+                .thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    public CompletionStage<Void> deleteUserReaction(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                   @Nonnull final String userId, @Nonnull final Emoji emoji) {
+        return deleteUserReaction(channelId, messageId, userId, emoji.forReaction());
+    }
+    
+    @Nonnull
     public CompletionStage<Void> deleteAllReactions(@Nonnull final String channelId, @Nonnull final String messageId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_ALL_REACTIONS.withMajorParam(channelId),
                 ImmutableMap.of("message.id", messageId)))

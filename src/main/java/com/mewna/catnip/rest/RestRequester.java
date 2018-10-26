@@ -248,13 +248,14 @@ public class RestRequester {
         // try to avoid letting everything do its own thread pools and stuff.
         catnip.vertx().executeBlocking(future -> {
             try {
-                final Response execute = _http.newCall(
-                        new Request.Builder().url(API_HOST + API_BASE + route.baseRoute())
-                                .method(route.method().name(), body)
-                                .header("Authorization", "Bot " + catnip.token())
-                                .header("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')')
-                                .build()
-                ).execute();
+                final Request.Builder requestBuilder = new Request.Builder().url(API_HOST + API_BASE + route.baseRoute())
+                        .method(route.method().name(), body)
+                        .header("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')');
+                if(r.needsToken()) {
+                    requestBuilder.header("Authorization", "Bot " + catnip.token());
+                }
+                
+                final Response execute = _http.newCall(requestBuilder.build()).execute();
                 final int code = execute.code();
                 final String message = execute.message();
                 if(execute.body() == null) {
@@ -288,6 +289,8 @@ public class RestRequester {
         private Map<String, String> params;
         private JsonObject object;
         private JsonArray array;
+        @Setter
+        private boolean needsToken = true;
         
         @Setter
         private List<ImmutablePair<String, Buffer>> buffers;
