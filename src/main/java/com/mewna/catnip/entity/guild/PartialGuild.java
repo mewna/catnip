@@ -1,5 +1,6 @@
 package com.mewna.catnip.entity.guild;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
@@ -23,10 +24,12 @@ public interface PartialGuild extends Snowflake {
     String icon();
     
     @Nullable
+    @JsonIgnore
     @CheckReturnValue
     String iconUrl(@Nonnull final ImageOptions options);
     
     @Nullable
+    @JsonIgnore
     @CheckReturnValue
     default String iconUrl() {
         return iconUrl(new ImageOptions());

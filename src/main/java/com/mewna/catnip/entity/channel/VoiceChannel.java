@@ -1,5 +1,7 @@
 package com.mewna.catnip.entity.channel;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.annotation.CheckReturnValue;
 
 /**
@@ -14,18 +16,21 @@ public interface VoiceChannel extends GuildChannel {
     int userLimit();
     
     @Override
+    @JsonIgnore
     @CheckReturnValue
     default boolean isText() {
         return false;
     }
     
     @Override
+    @JsonIgnore
     @CheckReturnValue
     default boolean isVoice() {
         return true;
     }
     
     @Override
+    @JsonIgnore
     @CheckReturnValue
     default boolean isCategory() {
         return false;

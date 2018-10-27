@@ -1,5 +1,6 @@
 package com.mewna.catnip.entity.channel;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.rest.RestRequester;
@@ -51,6 +52,7 @@ public interface Webhook extends Snowflake {
     }
     
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     default CompletionStage<Void> delete() {
         return catnip().rest().webhook().deleteWebhook(id());

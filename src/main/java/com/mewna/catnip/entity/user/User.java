@@ -1,5 +1,6 @@
 package com.mewna.catnip.entity.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.util.ImageOptions;
@@ -20,6 +21,7 @@ public interface User extends Snowflake {
      *
      * @return True if the avatar is animated, false otherwise.
      */
+    @JsonIgnore
     @CheckReturnValue
     boolean animatedAvatar();
     
@@ -29,32 +31,35 @@ public interface User extends Snowflake {
      * @return String containing the URL to the default avatar. Never null.
      */
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     String defaultAvatarUrl();
     
     /**
      * The URL for the user's set avatar. Can be null if the user has not set an avatar.
      *
-     * @see User#defaultAvatarUrl() Getting the user's default fallback avatar
-     * @see User#effectiveAvatarUrl() Getting the user's effective avatar
-     *
      * @param options {@link ImageOptions Image Options}.
      *
      * @return String containing the URL to their avatar, options considered. Can be null.
+     *
+     * @see User#defaultAvatarUrl() Getting the user's default fallback avatar
+     * @see User#effectiveAvatarUrl() Getting the user's effective avatar
      */
     @Nullable
+    @JsonIgnore
     @CheckReturnValue
     String avatarUrl(@Nonnull final ImageOptions options);
     
     /**
      * The URL for the user's set avatar. Can be null if the user has not set an avatar.
      *
+     * @return String containing the URL to their avatar. Can be null.
+     *
      * @see User#defaultAvatarUrl() Getting the user's default fallback avatar
      * @see User#effectiveAvatarUrl() Getting the user's effective avatar
-     *
-     * @return String containing the URL to their avatar. Can be null.
      */
     @Nullable
+    @JsonIgnore
     @CheckReturnValue
     String avatarUrl();
     
@@ -68,6 +73,7 @@ public interface User extends Snowflake {
      * @return String containing a URL to their effective avatar, options considered. Never null.
      */
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     String effectiveAvatarUrl(@Nonnull final ImageOptions options);
     
@@ -79,6 +85,7 @@ public interface User extends Snowflake {
      * @return String containing a URL to their effective avatar. Never null.
      */
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     String effectiveAvatarUrl();
     
@@ -113,9 +120,9 @@ public interface User extends Snowflake {
      * User's avatar hash.
      * <br><b>This does not return their avatar URL nor image directly.</b>
      *
-     * @see User#avatarUrl() Getting the user's avatar
-     *
      * @return User's hashed avatar string. Can be null.
+     *
+     * @see User#avatarUrl() Getting the user's avatar
      */
     @Nullable
     @CheckReturnValue
@@ -134,6 +141,8 @@ public interface User extends Snowflake {
      *
      * @return Future with the result of the DM creation.
      */
+    @JsonIgnore
+    @CheckReturnValue
     default CompletionStage<DMChannel> createDM() {
         return catnip().rest().user().createDM(id());
     }

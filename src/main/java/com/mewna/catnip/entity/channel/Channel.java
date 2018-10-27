@@ -1,5 +1,6 @@
 package com.mewna.catnip.entity.channel;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mewna.catnip.entity.Snowflake;
 import lombok.Getter;
 
@@ -22,42 +23,44 @@ public interface Channel extends Snowflake {
         return catnip().rest().channel().deleteChannel(id());
     }
     
+    @JsonIgnore
     @CheckReturnValue
     default boolean isText() {
         return type() == ChannelType.TEXT;
     }
-    
+    @JsonIgnore
     @CheckReturnValue
     default boolean isVoice() {
         return type() == ChannelType.VOICE;
     }
-    
+    @JsonIgnore
     @CheckReturnValue
     default boolean isCategory() {
         return type() == ChannelType.CATEGORY;
     }
-    
+    @JsonIgnore
     @CheckReturnValue
     default boolean isGuild() {
         return type().isGuild();
     }
-    
+    @JsonIgnore
     @CheckReturnValue
     default boolean isUserDM() {
         return type() == ChannelType.DM;
     }
-    
+    @JsonIgnore
     @CheckReturnValue
     default boolean isGroupDM() {
         return type() == ChannelType.GROUP_DM;
     }
-    
+    @JsonIgnore
     @CheckReturnValue
     default boolean isDM() {
         return !type().isGuild();
     }
     
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     default GuildChannel asGuildChannel() {
         if(!isGuild()) {
@@ -67,6 +70,7 @@ public interface Channel extends Snowflake {
     }
     
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     default TextChannel asTextChannel() {
         if(!isText()) {
@@ -76,6 +80,7 @@ public interface Channel extends Snowflake {
     }
     
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     default VoiceChannel asVoiceChannel() {
         if(!isVoice()) {
@@ -85,6 +90,7 @@ public interface Channel extends Snowflake {
     }
     
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     default Category asCategory() {
         if(!isCategory()) {
@@ -94,6 +100,7 @@ public interface Channel extends Snowflake {
     }
     
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     default DMChannel asDMChannel() {
         if(!isDM()) {
@@ -103,6 +110,7 @@ public interface Channel extends Snowflake {
     }
     
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     default UserDMChannel asUserDMChannel() {
         if(!isUserDM()) {
@@ -112,6 +120,7 @@ public interface Channel extends Snowflake {
     }
     
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     default GroupDMChannel asGroupDMChannel() {
         if(!isGroupDM()) {

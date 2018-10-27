@@ -1,5 +1,6 @@
 package com.mewna.catnip.entity.channel;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.CheckReturnValue;
@@ -26,12 +27,14 @@ public interface GroupDMChannel extends DMChannel {
     String applicationId();
     
     @Override
+    @JsonIgnore
     @CheckReturnValue
     default boolean isUserDM() {
         return false;
     }
     
     @Override
+    @JsonIgnore
     @CheckReturnValue
     default boolean isGroupDM() {
         return true;
