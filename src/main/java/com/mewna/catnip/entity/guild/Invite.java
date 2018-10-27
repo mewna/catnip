@@ -7,6 +7,7 @@ import com.mewna.catnip.entity.guild.Guild.VerificationLevel;
 import com.mewna.catnip.entity.util.ImageOptions;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
@@ -34,8 +35,10 @@ public interface Invite extends Entity {
     @CheckReturnValue
     InviteChannel channel();
     
+    @Nonnegative
     int approximatePresenceCount();
     
+    @Nonnegative
     int approximateMemberCount();
     
     @Nonnull

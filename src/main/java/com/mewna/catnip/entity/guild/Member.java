@@ -1,8 +1,10 @@
 package com.mewna.catnip.entity.guild;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.DMChannel;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
@@ -46,7 +48,7 @@ public interface Member extends Snowflake {
      * @return A {@link Set} of the user's roles.
      */
     @Nonnull
-    Set<String> roles();
+    Set<String> roleIds();
     
     /**
      * Whether the user is voice muted.
@@ -82,6 +84,8 @@ public interface Member extends Snowflake {
      *
      * @return Future with the result of the DM creation.
      */
+    @JsonIgnore
+    @CheckReturnValue
     default CompletionStage<DMChannel> createDM() {
         return catnip().rest().user().createDM(id());
     }

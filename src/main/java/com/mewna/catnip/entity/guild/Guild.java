@@ -1,13 +1,14 @@
 package com.mewna.catnip.entity.guild;
 
-import com.mewna.catnip.entity.misc.CreatedInvite;
-import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.GuildChannel;
-import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.entity.channel.Webhook;
+import com.mewna.catnip.entity.misc.CreatedInvite;
+import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.util.ImageOptions;
+import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.Utils;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
@@ -165,81 +166,92 @@ public interface Guild extends Snowflake {
      */
     
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     default CompletionStage<List<Role>> fetchRoles() {
         return catnip().rest().guild().getGuildRoles(id());
     }
     
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     default CompletionStage<List<GuildChannel>> fetchChannels() {
         return catnip().rest().guild().getGuildChannels(id());
     }
     
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     default CompletionStage<List<CreatedInvite>> fetchInvites() {
         return catnip().rest().guild().getGuildInvites(id());
     }
     
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     default CompletionStage<List<Webhook>> fetchWebhooks() {
         return catnip().rest().webhook().getGuildWebhooks(id());
     }
     
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     default CompletionStage<List<CustomEmoji>> fetchEmojis() {
         return catnip().rest().emoji().listGuildEmojis(id());
     }
     
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     default CompletionStage<CustomEmoji> fetchEmoji(@Nonnull final String emojiId) {
         return catnip().rest().emoji().getGuildEmoji(id(), emojiId);
     }
     
     @Nonnull
+    @JsonIgnore
     default CompletionStage<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final byte[] image,
-                                                       @Nonnull final Collection<String> roles) {
+                                                     @Nonnull final Collection<String> roles) {
         return catnip().rest().emoji().createGuildEmoji(id(), name, image, roles);
     }
     
     @Nonnull
+    @JsonIgnore
     default CompletionStage<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final URI imageData,
-                                                       @Nonnull final Collection<String> roles) {
+                                                     @Nonnull final Collection<String> roles) {
         return catnip().rest().emoji().createGuildEmoji(id(), name, imageData, roles);
     }
     
     @Nonnull
+    @JsonIgnore
     default CompletionStage<CustomEmoji> modifyEmoji(@Nonnull final String emojiId, @Nonnull final String name,
-                                                       @Nonnull final Collection<String> roles) {
+                                                     @Nonnull final Collection<String> roles) {
         return catnip().rest().emoji().modifyGuildEmoji(id(), emojiId, name, roles);
     }
     
     @Nonnull
+    @JsonIgnore
     default CompletionStage<Void> deleteEmoji(@Nonnull final String emojiId) {
         return catnip().rest().emoji().deleteGuildEmoji(id(), emojiId);
     }
     
     @Nonnull
+    @JsonIgnore
     default CompletionStage<Void> leave() {
         return catnip().rest().user().leaveGuild(id());
     }
     
     @Nonnull
+    @JsonIgnore
     default CompletionStage<Void> delete() {
         return catnip().rest().guild().deleteGuild(id());
     }
     
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     default GuildEditFields edit() {
         return new GuildEditFields(this);
     }
-    
-    
     
     enum NotificationLevel {
         ALL_MESSAGES(0),
@@ -292,7 +304,7 @@ public interface Guild extends Snowflake {
         
         @Getter
         private final int key;
-    
+        
         MFALevel(final int key) {
             this.key = key;
         }
@@ -317,7 +329,7 @@ public interface Guild extends Snowflake {
         
         @Getter
         private final int key;
-    
+        
         VerificationLevel(final int key) {
             this.key = key;
         }
@@ -354,11 +366,11 @@ public interface Guild extends Snowflake {
         public GuildEditFields(@Nullable final Guild guild) {
             this.guild = guild;
         }
-    
+        
         public GuildEditFields() {
             this(null);
         }
-    
+        
         @Nonnull
         public GuildEditFields icon(@Nullable final URI iconData) {
             if(iconData != null) {
@@ -367,12 +379,12 @@ public interface Guild extends Snowflake {
             icon = iconData;
             return this;
         }
-    
+        
         @Nonnull
         public GuildEditFields icon(@Nullable final byte[] iconData) {
             return icon(iconData == null ? null : Utils.asImageDataUri(iconData));
         }
-    
+        
         @Nonnull
         public GuildEditFields splash(@Nullable final URI splashData) {
             if(splashData != null) {
@@ -381,7 +393,7 @@ public interface Guild extends Snowflake {
             splash = splashData;
             return this;
         }
-    
+        
         @Nonnull
         public GuildEditFields splash(@Nullable final byte[] splashData) {
             return splash(splashData == null ? null : Utils.asImageDataUri(splashData));
@@ -394,7 +406,7 @@ public interface Guild extends Snowflake {
             }
             return guild.catnip().rest().guild().modifyGuild(guild.id(), this);
         }
-    
+        
         @Nonnull
         @CheckReturnValue
         public JsonObject payload() {

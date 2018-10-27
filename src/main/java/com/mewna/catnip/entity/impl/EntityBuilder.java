@@ -606,14 +606,18 @@ public final class EntityBuilder {
                 joinedAt = null;
             }
         }
+        
+        
         return MemberImpl.builder()
                 .catnip(catnip)
                 .id(id)
                 .guildId(guildId)
                 .nick(data.getString("nick"))
-                // TODO: fetch roles from cache? or at least give the ids
-                // TODO: Roles won't be present for eg. GUILD_MEMBER_REMOVE
-                .roles(ImmutableSet.of())
+                // This is safe
+                .roleIds(ImmutableSet.copyOf(data.getJsonArray("roles", new JsonArray())
+                        .stream()
+                        .map(e -> (String) e)
+                        .collect(Collectors.toSet())))
                 .joinedAt(joinedAt)
                 // If not present, it's probably(?) safe to assume not
                 .deaf(data.getBoolean("deaf", false))

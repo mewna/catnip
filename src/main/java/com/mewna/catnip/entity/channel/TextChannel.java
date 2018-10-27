@@ -1,5 +1,7 @@
 package com.mewna.catnip.entity.channel;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -25,30 +27,35 @@ public interface TextChannel extends GuildChannel, MessageChannel {
     int rateLimitPerUser();
     
     @Override
+    @JsonIgnore
     @CheckReturnValue
     default boolean isText() {
         return true;
     }
     
     @Override
+    @JsonIgnore
     @CheckReturnValue
     default boolean isVoice() {
         return false;
     }
     
     @Override
+    @JsonIgnore
     @CheckReturnValue
     default boolean isCategory() {
         return false;
     }
     
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     default CompletionStage<List<Webhook>> fetchWebhooks() {
         return catnip().rest().webhook().getChannelWebhooks(id());
     }
     
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     default String asMention() {
         return "<#" + id() + '>';

@@ -29,7 +29,7 @@ public class MemberImpl implements Member, RequiresCatnip {
     private String id;
     private String guildId;
     private String nick;
-    private Set<String> roles;
+    private Set<String> roleIds;
     private OffsetDateTime joinedAt;
     private boolean deaf;
     private boolean mute;

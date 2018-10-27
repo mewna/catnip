@@ -1,5 +1,6 @@
 package com.mewna.catnip.entity.message;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mewna.catnip.entity.*;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.misc.Emoji;
@@ -190,6 +191,7 @@ public interface Message extends Snowflake {
      * @return Future for the reaction.
      */
     @Nonnull
+    @JsonIgnore
     default CompletionStage<Void> react(@Nonnull final Emoji emoji) {
         return catnip().rest().channel().addReaction(channelId(), id(), emoji);
     }
@@ -203,26 +205,31 @@ public interface Message extends Snowflake {
      * @return Future for the reaction.
      */
     @Nonnull
+    @JsonIgnore
     default CompletionStage<Void> react(@Nonnull final String emoji) {
         return catnip().rest().channel().addReaction(channelId(), id(), emoji);
     }
     
     @Nonnull
+    @JsonIgnore
     default CompletionStage<Void> delete() {
         return catnip().rest().channel().deleteMessage(channelId(), id());
     }
     
     @Nonnull
+    @JsonIgnore
     default CompletionStage<Message> edit(@Nonnull final String content) {
         return catnip().rest().channel().editMessage(channelId(), id(), content);
     }
     
     @Nonnull
+    @JsonIgnore
     default CompletionStage<Message> edit(@Nonnull final Embed embed) {
         return catnip().rest().channel().editMessage(channelId(), id(), embed);
     }
     
     @Nonnull
+    @JsonIgnore
     default CompletionStage<Message> edit(@Nonnull final Message message) {
         return catnip().rest().channel().editMessage(channelId(), id(), message);
     }

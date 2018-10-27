@@ -1,5 +1,6 @@
 package com.mewna.catnip.entity.channel;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mewna.catnip.entity.guild.PermissionOverride;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
 import com.mewna.catnip.entity.misc.CreatedInvite;
@@ -64,18 +65,21 @@ public interface GuildChannel extends Channel {
     }
     
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     default CompletionStage<CreatedInvite> createInvite(@Nullable final InviteCreateOptions options) {
         return catnip().rest().channel().createInvite(id(), options);
     }
     
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     default CompletionStage<CreatedInvite> createInvite() {
         return createInvite(null);
     }
     
     @Nonnull
+    @JsonIgnore
     @CheckReturnValue
     default CompletionStage<List<CreatedInvite>> fetchInvites() {
         return catnip().rest().channel().getChannelInvites(id());
