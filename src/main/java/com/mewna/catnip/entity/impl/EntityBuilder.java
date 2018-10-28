@@ -804,7 +804,7 @@ public final class EntityBuilder {
                 .attachments(immutableListOf(data.getJsonArray("attachments"), this::createAttachment))
                 .embeds(immutableListOf(data.getJsonArray("embeds"), this::createEmbed))
                 .reactions(immutableListOf(data.getJsonArray("reactions"), e -> createReaction(data.getString("guild_id"), e)))
-                .nonce(data.getString("nonce"))
+                .nonce(String.valueOf(data.getValue("nonce")))
                 .pinned(data.getBoolean("pinned", false))
                 .webhookId(data.getString("webhook_id"))
                 .type(MessageType.byId(data.getInteger("type")))
