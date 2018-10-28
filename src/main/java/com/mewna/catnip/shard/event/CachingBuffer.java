@@ -1,6 +1,6 @@
 package com.mewna.catnip.shard.event;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.GatewayOp;
 import io.vertx.core.json.JsonObject;
@@ -8,7 +8,6 @@ import lombok.Value;
 import lombok.experimental.Accessors;
 
 import java.util.Deque;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,7 +27,7 @@ import static com.mewna.catnip.shard.DiscordEvent.Raw;
  */
 @SuppressWarnings("unused")
 public class CachingBuffer extends AbstractBuffer {
-    private static final List<String> CACHE_EVENTS = ImmutableList.copyOf(new String[] {
+    private static final Set<String> CACHE_EVENTS = ImmutableSet.copyOf(new String[] {
             // Lifecycle
             Raw.READY,
             // Channels
@@ -159,13 +158,13 @@ public class CachingBuffer extends AbstractBuffer {
         }
     }
     
-    private void maybeCache(final String eventType, final JsonObject payload) {
+    private void maybeCache(final String eventType, final JsonObject data) {
         if(CACHE_EVENTS.contains(eventType)) {
             try {
-                catnip().cacheWorker().updateCache(eventType, payload);
+                catnip().cacheWorker().updateCache(eventType, data);
             } catch(final Exception e) {
                 catnip().logAdapter().warn("Got error updating cache for payload {}", eventType, e);
-                catnip().logAdapter().warn("Payload: {}", payload.encodePrettily());
+                catnip().logAdapter().warn("Payload: {}", data.encodePrettily());
             }
         }
     }
