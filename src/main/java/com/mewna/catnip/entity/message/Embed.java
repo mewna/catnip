@@ -2,6 +2,13 @@ package com.mewna.catnip.entity.message;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.impl.EmbedImpl;
+import com.mewna.catnip.entity.impl.EmbedImpl.AuthorImpl;
+import com.mewna.catnip.entity.impl.EmbedImpl.FieldImpl;
+import com.mewna.catnip.entity.impl.EmbedImpl.FooterImpl;
+import com.mewna.catnip.entity.impl.EmbedImpl.ImageImpl;
+import com.mewna.catnip.entity.impl.EmbedImpl.ProviderImpl;
+import com.mewna.catnip.entity.impl.EmbedImpl.ThumbnailImpl;
+import com.mewna.catnip.entity.impl.EmbedImpl.VideoImpl;
 import lombok.*;
 
 import javax.annotation.CheckReturnValue;
@@ -16,6 +23,7 @@ import java.util.List;
  * @author natanbc
  * @since 9/2/18.
  */
+@SuppressWarnings("unused")
 @JsonDeserialize(as = EmbedImpl.class)
 public interface Embed {
     /**
@@ -161,6 +169,7 @@ public interface Embed {
         }
     }
     
+    @JsonDeserialize(as = AuthorImpl.class)
     interface Author {
         /**
          * Name of the author.
@@ -196,6 +205,7 @@ public interface Embed {
         String proxyIconUrl();
     }
     
+    @JsonDeserialize(as = FieldImpl.class)
     interface Field {
         /**
          * Name of the field.
@@ -224,6 +234,7 @@ public interface Embed {
         boolean inline();
     }
     
+    @JsonDeserialize(as = FooterImpl.class)
     interface Footer {
         /**
          * Text of the footer.
@@ -250,7 +261,8 @@ public interface Embed {
         @CheckReturnValue
         String proxyIconUrl();
     }
-
+    
+    @JsonDeserialize(as = ImageImpl.class)
     interface Image {
         /**
          * URL of the image.
@@ -285,7 +297,8 @@ public interface Embed {
         @CheckReturnValue
         int width();
     }
-
+    
+    @JsonDeserialize(as = ProviderImpl.class)
     interface Provider {
         /**
          * Name of the provider.
@@ -304,7 +317,8 @@ public interface Embed {
         @CheckReturnValue
         String url();
     }
-
+    
+    @JsonDeserialize(as = ThumbnailImpl.class)
     interface Thumbnail {
         /**
          * URL of the thumbnail.
@@ -339,7 +353,8 @@ public interface Embed {
         @CheckReturnValue
         int width();
     }
-
+    
+    @JsonDeserialize(as = VideoImpl.class)
     interface Video {
         /**
          * URL of the video.
