@@ -1,8 +1,10 @@
 package com.mewna.catnip.entity.guild;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.DMChannel;
+import com.mewna.catnip.entity.impl.MemberImpl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -16,6 +18,7 @@ import java.util.concurrent.CompletionStage;
  * @since 9/4/18.
  */
 @SuppressWarnings("unused")
+@JsonDeserialize(as = MemberImpl.class)
 public interface Member extends Snowflake {
     
     /**
