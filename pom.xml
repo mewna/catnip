@@ -23,7 +23,6 @@
         J9+-compat
         -->
         <netty.version>4.1.30.Final</netty.version>
-        <fastutil.version>8.2.2</fastutil.version>
 
         <junit.version>5.2.0</junit.version>
     </properties>
@@ -154,13 +153,6 @@
             <groupId>io.netty</groupId>
             <artifactId>netty-common</artifactId>
             <version>${netty.version}</version>
-        </dependency>
-
-        <!-- FastUtil -->
-        <dependency>
-            <groupId>it.unimi.dsi</groupId>
-            <artifactId>fastutil</artifactId>
-            <version>${fastutil.version}</version>
         </dependency>
 
         <!-- JUnit Jupiter -->
