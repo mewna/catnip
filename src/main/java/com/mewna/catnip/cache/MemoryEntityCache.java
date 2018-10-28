@@ -25,7 +25,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -88,7 +87,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
             final GuildChannel gc = (GuildChannel) channel;
             Map<String, Channel> channels = channelCache.get(gc.guildId());
             if(channels == null) {
-                channels = new ConcurrentHashMap<>();
+                channels = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
                 channelCache.put(gc.guildId(), channels);
             }
             channels.put(gc.id(), gc);
@@ -97,7 +96,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
             final UserDMChannel dm = (UserDMChannel) channel;
             Map<String, Channel> channels = channelCache.get(DM_CHANNEL_KEY);
             if(channels == null) {
-                channels = new ConcurrentHashMap<>();
+                channels = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
                 channelCache.put(DM_CHANNEL_KEY, channels);
             }
             // In this case in particular, this is safe because this method
@@ -119,7 +118,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
     private void cacheRole(final Role role) {
         Map<String, Role> roles = roleCache.get(role.guildId());
         if(roles == null) {
-            roles = new ConcurrentHashMap<>();
+            roles = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
             roleCache.put(role.guildId(), roles);
         }
         roles.put(role.id(), role);
@@ -134,7 +133,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
     private void cacheMember(final Member member) {
         Map<String, Member> members = memberCache.get(member.guildId());
         if(members == null) {
-            members = new ConcurrentHashMap<>();
+            members = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
             memberCache.put(member.guildId(), members);
         }
         members.put(member.id(), member);
@@ -144,7 +143,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
     private void cacheEmoji(final CustomEmoji emoji) {
         Map<String, CustomEmoji> emojiMap = emojiCache.get(emoji.guildId());
         if(emojiMap == null) {
-            emojiMap = new ConcurrentHashMap<>();
+            emojiMap = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
             emojiCache.put(emoji.guildId(), emojiMap);
         }
         emojiMap.put(emoji.id(), emoji);
@@ -162,7 +161,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
         }
         Map<String, VoiceState> states = voiceStateCache.get(state.guildId());
         if(states == null) {
-            states = new ConcurrentHashMap<>();
+            states = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
             voiceStateCache.put(state.guildId(), states);
         }
         states.put(state.userId(), state);
@@ -195,7 +194,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
                     final GuildChannel gc = (GuildChannel) channel;
                     Map<String, Channel> channels = channelCache.get(gc.guildId());
                     if(channels == null) {
-                        channels = new ConcurrentHashMap<>();
+                        channels = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
                         channelCache.put(gc.guildId(), channels);
                     }
                     channels.remove(gc.id());
