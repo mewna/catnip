@@ -66,7 +66,6 @@ public class MemoryEntityCache implements EntityCacheWorker {
     @Nonnull
     @CheckReturnValue
     private static <T> Function<JsonArray, List<T>> mapObjectContents(@Nonnull final Function<JsonObject, T> builder) {
-        
         return array -> {
             final Collection<T> result = new ArrayList<>(array.size());
             for(final Object object : array) {
@@ -84,19 +83,11 @@ public class MemoryEntityCache implements EntityCacheWorker {
     private void cacheChannel(final Channel channel) {
         if(channel.isGuild()) {
             final GuildChannel gc = (GuildChannel) channel;
-            Map<String, Channel> channels = channelCache.get(gc.guildId());
-            if(channels == null) {
-                channels = new ConcurrentHashMap<>();
-                channelCache.put(gc.guildId(), channels);
-            }
+            final Map<String, Channel> channels = channelCache.computeIfAbsent(gc.guildId(), __ -> new ConcurrentHashMap<>());
             channels.put(gc.id(), gc);
         } else if(channel.isUserDM()) {
             final UserDMChannel dm = (UserDMChannel) channel;
-            Map<String, Channel> channels = channelCache.get(DM_CHANNEL_KEY);
-            if(channels == null) {
-                channels = new ConcurrentHashMap<>();
-                channelCache.put(DM_CHANNEL_KEY, channels);
-            }
+            final Map<String, Channel> channels = channelCache.computeIfAbsent(DM_CHANNEL_KEY, __ -> new ConcurrentHashMap<>());
             // In this case in particular, this is safe because this method
             // will call into this cache and try to fetch the user that way.
             // The only possible way this could fail is if Discord sends us a
@@ -113,11 +104,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
     }
     
     private void cacheRole(final Role role) {
-        Map<String, Role> roles = roleCache.get(role.guildId());
-        if(roles == null) {
-            roles = new ConcurrentHashMap<>();
-            roleCache.put(role.guildId(), roles);
-        }
+        final Map<String, Role> roles = roleCache.computeIfAbsent(role.guildId(), __ -> new ConcurrentHashMap<>());
         roles.put(role.id(), role);
     }
     
@@ -126,20 +113,12 @@ public class MemoryEntityCache implements EntityCacheWorker {
     }
     
     private void cacheMember(final Member member) {
-        Map<String, Member> members = memberCache.get(member.guildId());
-        if(members == null) {
-            members = new ConcurrentHashMap<>();
-            memberCache.put(member.guildId(), members);
-        }
+        final Map<String, Member> members = memberCache.computeIfAbsent(member.guildId(), __ -> new ConcurrentHashMap<>());
         members.put(member.id(), member);
     }
     
     private void cacheEmoji(final CustomEmoji emoji) {
-        Map<String, CustomEmoji> emojiMap = emojiCache.get(emoji.guildId());
-        if(emojiMap == null) {
-            emojiMap = new ConcurrentHashMap<>();
-            emojiCache.put(emoji.guildId(), emojiMap);
-        }
+        final Map<String, CustomEmoji> emojiMap = emojiCache.computeIfAbsent(emoji.guildId(), __ -> new ConcurrentHashMap<>());
         emojiMap.put(emoji.id(), emoji);
     }
     
@@ -152,11 +131,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
             catnip.logAdapter().warn("Not caching voice state for {} due to null guild", state.userId());
             return;
         }
-        Map<String, VoiceState> states = voiceStateCache.get(state.guildId());
-        if(states == null) {
-            states = new ConcurrentHashMap<>();
-            voiceStateCache.put(state.guildId(), states);
-        }
+        final Map<String, VoiceState> states = voiceStateCache.computeIfAbsent(state.guildId(), __ -> new ConcurrentHashMap<>());
         states.put(state.userId(), state);
     }
     
