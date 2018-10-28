@@ -805,7 +805,7 @@ public final class EntityBuilder {
                 .nonce(String.valueOf(data.getValue("nonce")))
                 .pinned(data.getBoolean("pinned", false))
                 .webhookId(data.getString("webhook_id"))
-                .type(MessageType.byId(data.getInteger("type")))
+                .type(MessageType.byId(data.getInteger("type", MessageType.DEFAULT.getId())))
                 .member(member)
                 .guildId(data.getString("guild_id"))
                 .build();

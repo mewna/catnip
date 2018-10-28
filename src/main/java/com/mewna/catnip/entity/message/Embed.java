@@ -1,5 +1,7 @@
 package com.mewna.catnip.entity.message;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.entity.impl.EmbedImpl;
 import lombok.*;
 
 import javax.annotation.CheckReturnValue;
@@ -14,6 +16,7 @@ import java.util.List;
  * @author natanbc
  * @since 9/2/18.
  */
+@JsonDeserialize(as = EmbedImpl.class)
 public interface Embed {
     /**
      * Embed title.
