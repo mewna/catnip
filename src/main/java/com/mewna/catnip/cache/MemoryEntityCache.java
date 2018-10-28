@@ -2,7 +2,6 @@ package com.mewna.catnip.cache;
 
 import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.channel.UserDMChannel;
@@ -10,11 +9,14 @@ import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.impl.EntityBuilder;
+import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -28,7 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.mewna.catnip.shard.DiscordEvent.*;
+import static com.mewna.catnip.shard.DiscordEvent.Raw;
 
 /**
  * @author amy
@@ -42,21 +44,21 @@ public class MemoryEntityCache implements EntityCacheWorker {
     private static final String DM_CHANNEL_KEY = "DMS";
     
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, Guild> guildCache = new ConcurrentHashMap<>();
+    protected final Map<String, Guild> guildCache = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, User> userCache = new ConcurrentHashMap<>();
+    protected final Map<String, User> userCache = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, Map<String, Member>> memberCache = new ConcurrentHashMap<>();
+    protected final Map<String, Map<String, Member>> memberCache = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, Map<String, Role>> roleCache = new ConcurrentHashMap<>();
+    protected final Map<String, Map<String, Role>> roleCache = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, Map<String, Channel>> channelCache = new ConcurrentHashMap<>();
+    protected final Map<String, Map<String, Channel>> channelCache = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, Map<String, CustomEmoji>> emojiCache = new ConcurrentHashMap<>();
+    protected final Map<String, Map<String, CustomEmoji>> emojiCache = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, Map<String, VoiceState>> voiceStateCache = new ConcurrentHashMap<>();
+    protected final Map<String, Map<String, VoiceState>> voiceStateCache = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, Presence> presenceCache = new ConcurrentHashMap<>();
+    protected final Map<String, Presence> presenceCache = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
     @SuppressWarnings("WeakerAccess")
     protected final AtomicReference<User> selfUser = new AtomicReference<>(null);
     @Getter
@@ -66,6 +68,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
     @Nonnull
     @CheckReturnValue
     private static <T> Function<JsonArray, List<T>> mapObjectContents(@Nonnull final Function<JsonObject, T> builder) {
+        
         return array -> {
             final Collection<T> result = new ArrayList<>(array.size());
             for(final Object object : array) {
