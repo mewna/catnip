@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.Timestamped;
 import com.mewna.catnip.entity.guild.Member;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -22,7 +23,7 @@ import java.util.Set;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberImpl implements Member, RequiresCatnip {
+public class MemberImpl implements Member, RequiresCatnip, Timestamped {
     @JsonIgnore
     private transient Catnip catnip;
     
@@ -30,9 +31,15 @@ public class MemberImpl implements Member, RequiresCatnip {
     private String guildId;
     private String nick;
     private Set<String> roleIds;
-    private OffsetDateTime joinedAt;
+    private String joinedAt;
     private boolean deaf;
     private boolean mute;
+    
+    @Nonnull
+    @Override
+    public OffsetDateTime joinedAt() {
+        return parseTimestamp(joinedAt);
+    }
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {

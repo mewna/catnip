@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.Timestamped;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.guild.Guild;
@@ -32,7 +33,7 @@ import java.util.Set;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class GuildImpl implements Guild, RequiresCatnip {
+public class GuildImpl implements Guild, RequiresCatnip, Timestamped {
     @JsonIgnore
     private transient Catnip catnip;
     
@@ -57,7 +58,7 @@ public class GuildImpl implements Guild, RequiresCatnip {
     private boolean widgetEnabled;
     private String widgetChannelId;
     private String systemChannelId;
-    private OffsetDateTime joinedAt;
+    private String joinedAt;
     private boolean large;
     private boolean unavailable;
     private int memberCount;
@@ -103,6 +104,12 @@ public class GuildImpl implements Guild, RequiresCatnip {
     @Override
     public List<CustomEmoji> emojis() {
         return catnip.cache().emojis(id);
+    }
+    
+    @Nonnull
+    @Override
+    public OffsetDateTime joinedAt() {
+        return parseTimestamp(joinedAt);
     }
     
     @Override

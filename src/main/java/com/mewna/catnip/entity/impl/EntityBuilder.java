@@ -48,6 +48,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -178,6 +179,7 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    @SuppressWarnings("ConstantConditions")
     public JsonObject embedToJson(final Embed embed) {
         final JsonObject o = new JsonObject();
         
@@ -264,7 +266,7 @@ public final class EntityBuilder {
                 .type(EmbedType.byKey(data.getString("type")))
                 .description(data.getString("description"))
                 .url(data.getString("url"))
-                .timestamp(parseTimestamp(data.getString("timestamp")))
+                .timestamp(data.getString("timestamp"))
                 .color(data.getInteger("color", null))
                 .footer(footer)
                 .image(image)
@@ -419,16 +421,10 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public ChannelPinsUpdate createChannelPinsUpdate(@Nonnull final JsonObject data) {
-        final OffsetDateTime lastPinTimestamp;
-        if(data.getString("last_pin_timestamp", null) != null) {
-            lastPinTimestamp = parseTimestamp(data.getString("last_pin_timestamp"));
-        } else {
-            lastPinTimestamp = null;
-        }
         return ChannelPinsUpdateImpl.builder()
                 .catnip(catnip)
                 .channelId(data.getString("channel_id"))
-                .lastPinTimestamp(lastPinTimestamp)
+                .lastPinTimestamp(data.getString("last_pin_timestamp"))
                 .build();
     }
     
@@ -594,14 +590,16 @@ public final class EntityBuilder {
         if(userData != null) {
             catnip.cacheWorker().bulkCacheUsers(Collections.singletonList(createUser(userData)));
         }
-        final OffsetDateTime joinedAt;
+        final String joinedAt;
         if(data.getString("joined_at", null) != null) {
-            joinedAt = parseTimestamp(data.getString("joined_at"));
+            joinedAt = data.getString("joined_at");
         } else {
             // This will only happen during GUILD_MEMBER_REMOVE afaik, but is this the right solution?
             final Member cachedMember = catnip.cache().member(guildId, id);
-            if(cachedMember != null) {
-                joinedAt = cachedMember.joinedAt();
+            if(cachedMember != null && cachedMember.joinedAt() != null) {
+                // Guaranteed not null by preceding if
+                //noinspection ConstantConditions
+                joinedAt = cachedMember.joinedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
             } else {
                 joinedAt = null;
             }
@@ -795,8 +793,8 @@ public final class EntityBuilder {
                 .channelId(data.getString("channel_id"))
                 .author(author)
                 .content(data.getString("content"))
-                .timestamp(parseTimestamp(data.getString("timestamp")))
-                .editedTimestamp(parseTimestamp(data.getString("edited_timestamp")))
+                .timestamp(data.getString("timestamp"))
+                .editedTimestamp(data.getString("edited_timestamp"))
                 .tts(data.getBoolean("tts", false))
                 .mentionsEveryone(data.getBoolean("mention_everyone", false))
                 .mentionedUsers(immutableListOf(data.getJsonArray("mentions"), this::createUser))
@@ -896,7 +894,7 @@ public final class EntityBuilder {
                 .widgetEnabled(data.getBoolean("widget_enabled", false))
                 .widgetChannelId(data.getString("widget_channel_id"))
                 .systemChannelId(data.getString("system_channel_id"))
-                .joinedAt(parseTimestamp(data.getString("joined_at")))
+                .joinedAt(data.getString("joined_at"))
                 .large(data.getBoolean("large", false))
                 .unavailable(data.getBoolean("unavailable", false))
                 .memberCount(data.getInteger("member_count", -1))
@@ -978,7 +976,7 @@ public final class EntityBuilder {
                 .maxUses(data.getInteger("max_uses"))
                 .maxAge(data.getInteger("max_age"))
                 .temporary(data.getBoolean("temporary", false))
-                .createdAt(parseTimestamp(data.getString("created_at")))
+                .createdAt(data.getString("created_at"))
                 .revoked(data.getBoolean("revoked", false))
                 .build();
     }

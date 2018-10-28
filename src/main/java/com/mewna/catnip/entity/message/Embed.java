@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -19,6 +20,7 @@ public interface Embed {
      *
      * @return Title of the embed, or null if absent.
      */
+    @Nullable
     @CheckReturnValue
     String title();
     
@@ -36,6 +38,7 @@ public interface Embed {
      *
      * @return Description of the embed, or null if absent.
      */
+    @Nullable
     @CheckReturnValue
     String description();
     
@@ -44,6 +47,7 @@ public interface Embed {
      *
      * @return URL of the embed, or null if absent.
      */
+    @Nullable
     @CheckReturnValue
     String url();
     
@@ -52,6 +56,7 @@ public interface Embed {
      *
      * @return Timestamp of the embed, or null if absent.
      */
+    @Nullable
     @CheckReturnValue
     OffsetDateTime timestamp();
     
@@ -60,6 +65,7 @@ public interface Embed {
      *
      * @return Color of the embed, or null if absent.
      */
+    @Nullable
     @CheckReturnValue
     Integer color();
     
@@ -68,6 +74,7 @@ public interface Embed {
      *
      * @return Footer of the embed, or null if absent.
      */
+    @Nullable
     @CheckReturnValue
     Footer footer();
     
@@ -76,6 +83,7 @@ public interface Embed {
      *
      * @return Image of the embed, or null if absent.
      */
+    @Nullable
     @CheckReturnValue
     Image image();
     
@@ -84,6 +92,7 @@ public interface Embed {
      *
      * @return Thumbnail of the embed, or null if absent.
      */
+    @Nullable
     @CheckReturnValue
     Thumbnail thumbnail();
     
@@ -92,6 +101,7 @@ public interface Embed {
      *
      * @return Video of the embed, or null if absent.
      */
+    @Nullable
     @CheckReturnValue
     Video video();
     
@@ -100,6 +110,7 @@ public interface Embed {
      *
      * @return Provider of the embed, or null if absent.
      */
+    @Nullable
     @CheckReturnValue
     Provider provider();
     
@@ -108,6 +119,7 @@ public interface Embed {
      *
      * @return Author of the embed, or null if absent.
      */
+    @Nullable
     @CheckReturnValue
     Author author();
     
