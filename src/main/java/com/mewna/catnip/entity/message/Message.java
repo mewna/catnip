@@ -1,8 +1,12 @@
 package com.mewna.catnip.entity.message;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.*;
 import com.mewna.catnip.entity.guild.Member;
+import com.mewna.catnip.entity.impl.MessageImpl;
+import com.mewna.catnip.entity.impl.MessageImpl.AttachmentImpl;
+import com.mewna.catnip.entity.impl.MessageImpl.ReactionImpl;
 import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
 
@@ -19,6 +23,7 @@ import java.util.concurrent.CompletionStage;
  * @since 9/4/18.
  */
 @SuppressWarnings("unused")
+@JsonDeserialize(as = MessageImpl.class)
 public interface Message extends Snowflake {
     /**
      * The type of message. Use this to tell normal messages from system messages.
@@ -234,6 +239,7 @@ public interface Message extends Snowflake {
         return catnip().rest().channel().editMessage(channelId(), id(), message);
     }
     
+    @JsonDeserialize(as = AttachmentImpl.class)
     interface Attachment extends Snowflake {
         /**
          * The name of the file represented by this attachment.
@@ -298,6 +304,7 @@ public interface Message extends Snowflake {
         }
     }
     
+    @JsonDeserialize(as = ReactionImpl.class)
     interface Reaction {
         /**
          * The count of reactions.

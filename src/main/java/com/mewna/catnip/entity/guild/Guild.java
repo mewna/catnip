@@ -1,10 +1,12 @@
 package com.mewna.catnip.entity.guild;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.channel.Webhook;
+import com.mewna.catnip.entity.impl.GuildImpl;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.util.ImageOptions;
@@ -32,6 +34,7 @@ import java.util.concurrent.CompletionStage;
  * @since 9/6/18
  */
 @SuppressWarnings("unused")
+@JsonDeserialize(as = GuildImpl.class)
 public interface Guild extends Snowflake {
     @Nonnull
     @CheckReturnValue
