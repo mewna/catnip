@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.Timestamped;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -21,7 +22,7 @@ import java.time.OffsetDateTime;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreatedInviteImpl implements CreatedInvite, RequiresCatnip {
+public class CreatedInviteImpl implements CreatedInvite, RequiresCatnip, Timestamped {
     @JsonIgnore
     private transient Catnip catnip;
     
@@ -35,11 +36,16 @@ public class CreatedInviteImpl implements CreatedInvite, RequiresCatnip {
     private int maxUses;
     private int maxAge;
     private boolean temporary;
-    private OffsetDateTime createdAt;
+    private String createdAt;
     private boolean revoked;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
+    }
+    
+    @Nonnull
+    public OffsetDateTime createdAt() {
+        return parseTimestamp(createdAt);
     }
 }

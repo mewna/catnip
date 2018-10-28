@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.Timestamped;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
@@ -14,6 +15,7 @@ import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -27,7 +29,7 @@ import java.util.List;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class MessageImpl implements Message, RequiresCatnip {
+public class MessageImpl implements Message, RequiresCatnip, Timestamped {
     @JsonIgnore
     private transient Catnip catnip;
     
@@ -35,8 +37,8 @@ public class MessageImpl implements Message, RequiresCatnip {
     private String channelId;
     private User author;
     private String content;
-    private OffsetDateTime timestamp;
-    private OffsetDateTime editedTimestamp;
+    private String timestamp;
+    private String editedTimestamp;
     private boolean tts;
     private boolean mentionsEveryone;
     private List<User> mentionedUsers;
@@ -54,6 +56,18 @@ public class MessageImpl implements Message, RequiresCatnip {
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
+    }
+    
+    @Nonnull
+    @Override
+    public OffsetDateTime timestamp() {
+        return parseTimestamp(timestamp);
+    }
+    
+    @Nullable
+    @Override
+    public OffsetDateTime editedTimestamp() {
+        return parseTimestamp(editedTimestamp);
     }
     
     @Override

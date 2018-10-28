@@ -1,11 +1,13 @@
 package com.mewna.catnip.entity.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mewna.catnip.entity.Timestamped;
 import com.mewna.catnip.entity.message.Embed;
 import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -20,12 +22,12 @@ import java.util.List;
 @SuppressWarnings("WeakerAccess")
 @NoArgsConstructor
 @AllArgsConstructor
-public class EmbedImpl implements Embed {
+public class EmbedImpl implements Embed, Timestamped {
     private String title;
     private EmbedType type;
     private String description;
     private String url;
-    private OffsetDateTime timestamp;
+    private String timestamp;
     private Integer color;
     private Footer footer;
     private Image image;
@@ -40,6 +42,12 @@ public class EmbedImpl implements Embed {
     @SuppressWarnings("unchecked")
     public List<Field> fields() {
         return (List<Field>)fields;
+    }
+    
+    @Nullable
+    @Override
+    public OffsetDateTime timestamp() {
+        return parseTimestamp(timestamp);
     }
     
     @Getter
