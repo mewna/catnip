@@ -90,7 +90,6 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 channelCache.put(gc.guildId(), channels);
             }
             channels.put(gc.id(), gc);
-            catnip.logAdapter().debug("Cached channel {} for guild {}", gc.id(), gc.guildId());
         } else if(channel.isUserDM()) {
             final UserDMChannel dm = (UserDMChannel) channel;
             Map<String, Channel> channels = channelCache.get(DM_CHANNEL_KEY);
@@ -105,7 +104,6 @@ public class MemoryEntityCache implements EntityCacheWorker {
             // TODO: Re-evaluate safety at some point
             //noinspection ConstantConditions
             channels.put(dm.recipient().id(), channel);
-            catnip.logAdapter().debug("Cached probably-DM channel {}", channel.id());
         } else {
             catnip.logAdapter().warn("I don't know how to cache channel {}: isCategory={}, isDM={}, isGroupDM={}," +
                             "isGuild={}, isText={}, isUserDM={}, isVoice={}",
@@ -121,12 +119,10 @@ public class MemoryEntityCache implements EntityCacheWorker {
             roleCache.put(role.guildId(), roles);
         }
         roles.put(role.id(), role);
-        catnip.logAdapter().debug("Cached role {} for guild {}", role.id(), role.guildId());
     }
     
     private void cacheUser(final User user) {
         userCache.put(user.id(), user);
-        catnip.logAdapter().debug("Cached user {}", user.id());
     }
     
     private void cacheMember(final Member member) {
@@ -136,7 +132,6 @@ public class MemoryEntityCache implements EntityCacheWorker {
             memberCache.put(member.guildId(), members);
         }
         members.put(member.id(), member);
-        catnip.logAdapter().debug("Cached member {} for guild {}", member.id(), member.guildId());
     }
     
     private void cacheEmoji(final CustomEmoji emoji) {
@@ -146,7 +141,6 @@ public class MemoryEntityCache implements EntityCacheWorker {
             emojiCache.put(emoji.guildId(), emojiMap);
         }
         emojiMap.put(emoji.id(), emoji);
-        catnip.logAdapter().debug("Cached member {} for guild {}", emoji.id(), emoji.guildId());
     }
     
     private void cachePresence(final String id, final Presence presence) {
@@ -164,7 +158,6 @@ public class MemoryEntityCache implements EntityCacheWorker {
             voiceStateCache.put(state.guildId(), states);
         }
         states.put(state.userId(), state);
-        catnip.logAdapter().debug("Cached voice state for {} in guild {}", state.userId(), state.guildId());
     }
     
     @Nonnull
@@ -197,7 +190,6 @@ public class MemoryEntityCache implements EntityCacheWorker {
                         channelCache.put(gc.guildId(), channels);
                     }
                     channels.remove(gc.id());
-                    catnip.logAdapter().debug("Deleted channel {} for guild {}", gc.id(), gc.guildId());
                 } else {
                     catnip.logAdapter().warn("I don't know how to delete non-guild channel {}!", channel.id());
                 }
@@ -238,7 +230,6 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 final String guild = payload.getString("guild_id");
                 final String role = payload.getString("role_id");
                 Optional.ofNullable(roleCache.get(guild)).ifPresent(e -> e.remove(role));
-                catnip.logAdapter().debug("Deleted role {} for guild {}", role, guild);
                 break;
             }
             // Members
@@ -285,7 +276,6 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 final String guild = payload.getString("guild_id");
                 final JsonArray members = payload.getJsonArray("members");
                 members.stream().map(e -> entityBuilder.createMember(guild, (JsonObject) e)).forEach(this::cacheMember);
-                catnip.logAdapter().debug("Processed chunk of {} members for guild {}", members.size(), guild);
                 break;
             }
             // Emojis
@@ -294,7 +284,6 @@ public class MemoryEntityCache implements EntityCacheWorker {
                     final String guild = payload.getString("guild_id");
                     final JsonArray emojis = payload.getJsonArray("emojis");
                     emojis.stream().map(e -> entityBuilder.createCustomEmoji(guild, (JsonObject) e)).forEach(this::cacheEmoji);
-                    catnip.logAdapter().debug("Processed chunk of {} emojis for guild {}", emojis.size(), guild);
                 }
                 break;
             }

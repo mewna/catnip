@@ -84,7 +84,7 @@ public class CachingBuffer extends AbstractBuffer {
             }
             case Raw.GUILD_CREATE: {
                 final String guild = d.getString("id");
-                catnip().logAdapter().debug("Got possibly-BufferState-ed guild {}", guild);
+                //catnip().logAdapter().debug("Got possibly-BufferState-ed guild {}", guild);
                 final BufferState bufferState = buffers.get(id);
                 // Make sure to cache guild
                 maybeCache(type, d);
@@ -102,7 +102,7 @@ public class CachingBuffer extends AbstractBuffer {
                 if(bufferState != null) {
                     if(bufferState.readyGuilds().isEmpty()) {
                         // No guilds left, can just dispatch normally
-                        catnip().logAdapter().debug("BufferState for shard {} empty, removing and emitting.", id);
+                        //catnip().logAdapter().debug("BufferState for shard {} empty, removing and emitting.", id);
                         buffers.remove(id);
                         maybeCache(type, d);
                         emitter().emit(event);
@@ -112,15 +112,15 @@ public class CachingBuffer extends AbstractBuffer {
                             bufferState.recvGuild(guild);
                             emitter().emit(event);
                             bufferState.replayGuild(guild);
-                            catnip().logAdapter().debug("Buffered guild {} for BufferState {}", guild, id);
+                            //catnip().logAdapter().debug("Buffered guild {} for BufferState {}", guild, id);
                             // Replay all buffered events once we run out
                             if(bufferState.readyGuilds().isEmpty()) {
-                                catnip().logAdapter().debug("BufferState for {} empty, replaying {} events...", id, bufferState.buffer().size());
+                                //catnip().logAdapter().debug("BufferState for {} empty, replaying {} events...", id, bufferState.buffer().size());
                                 buffers.remove(id);
                                 bufferState.replay();
                             }
                         } else {
-                            catnip().logAdapter().debug("Buffering event for BufferState {} @ {}", id, guild);
+                            //catnip().logAdapter().debug("Buffering event for BufferState {} @ {}", id, guild);
                             bufferState.buffer(event);
                         }
                     }
@@ -222,7 +222,7 @@ public class CachingBuffer extends AbstractBuffer {
                 final Deque<JsonObject> queue = guildBuffers.get(id);
                 final int count = queue.size();
                 queue.forEach(emitter()::emit);
-                catnip().logAdapter().debug("Replayed {} buffered events for guild {}", count, id);
+                //catnip().logAdapter().debug("Replayed {} buffered events for guild {}", count, id);
             }/* else {
                 // It's possible that we never reach this case, eg. a guild
                 // not receiving any events before we finish caching it
@@ -233,7 +233,7 @@ public class CachingBuffer extends AbstractBuffer {
         void replay() {
             final int count = buffer.size();
             buffer.forEach(emitter()::emit);
-            catnip().logAdapter().debug("Replayed {} buffered events", count);
+            //catnip().logAdapter().debug("Replayed {} buffered events", count);
         }
     }
 }
