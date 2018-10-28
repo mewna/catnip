@@ -116,6 +116,10 @@ public class DispatchEmitter {
                 catnip.eventBus().publish(type, entityBuilder.createChannel(data));
                 break;
             }
+            case Raw.CHANNEL_PINS_UPDATE: {
+                catnip.eventBus().publish(type, entityBuilder.createChannelPinsUpdate(data));
+                break;
+            }
             
             // Guilds
             case Raw.GUILD_CREATE: {
