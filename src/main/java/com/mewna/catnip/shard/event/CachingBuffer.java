@@ -27,7 +27,7 @@ import static com.mewna.catnip.shard.DiscordEvent.Raw;
  */
 @SuppressWarnings("unused")
 public class CachingBuffer extends AbstractBuffer {
-    private static final Set<String> CACHE_EVENTS = ImmutableSet.copyOf(new String[] {
+    private static final Set<String> CACHE_EVENTS = ImmutableSet.of(
             // Lifecycle
             Raw.READY,
             // Channels
@@ -45,8 +45,19 @@ public class CachingBuffer extends AbstractBuffer {
             // Users
             Raw.USER_UPDATE, Raw.PRESENCE_UPDATE,
             // Voice
-            Raw.VOICE_STATE_UPDATE,
-    });
+            Raw.VOICE_STATE_UPDATE
+    );
+    
+    private static final Set<String> DELETE_EVENTS = ImmutableSet.of(
+            // Channels
+            Raw.CHANNEL_DELETE,
+            // Guilds
+            Raw.GUILD_DELETE,
+            // Roles
+            Raw.GUILD_ROLE_DELETE,
+            // Members
+            Raw.GUILD_MEMBER_REMOVE
+    );
     
     private final Map<Integer, BufferState> buffers = new ConcurrentHashMap<>();
     
@@ -155,6 +166,22 @@ public class CachingBuffer extends AbstractBuffer {
                 }
                 break;
             }
+        }
+    }
+    
+    // Yeah just lazy af here I know, but no need to fetch data a second time
+    private void cacheAndDispatch(final String type, final JsonObject d, final JsonObject event) {
+        if(DELETE_EVENTS.contains(type)) {
+            // We want to update cache AFTER we dispatch the event to
+            // subconsumers, to avoid a race around cache accesses.
+            // When explicitly only using the internal event bus, handlers are
+            // just invoked in a synchronous loop (see EventBusImpl in v.x),
+            // which means that this is safe:tm: to do here.
+            emitter().emit(event);
+            maybeCache(type, d);
+        } else {
+            maybeCache(type, d);
+            emitter().emit(event);
         }
     }
     
