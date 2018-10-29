@@ -233,16 +233,20 @@ public class CatnipShard extends AbstractVerticle {
         if(state == null) {
             return;
         }
-        if(state.readBuffer() != null) {
-            state.readBuffer().appendBuffer(binary);
+        final boolean isEnd = binary.getInt(binary.length() - 4) == ZLIB_SUFFIX;
+        if(!isEnd || state.readBufferPosition() > 0) {
+            final int position = state.readBufferPosition();
+            state.readBuffer().setBuffer(position, binary);
+            state.readBufferPosition(position + binary.length());
         }
-        if(binary.getInt(binary.length() - 4) == ZLIB_SUFFIX) {
-            final Buffer decompressed = Buffer.buffer();
-            final Buffer dataToDecompress = state.readBuffer() == null ? binary : state.readBuffer();
-            try(final InflaterOutputStream ios = new InflaterOutputStream(new BufferOutputStream(decompressed), state.inflater())) {
+        if(isEnd) {
+            final Buffer decompressed = state.decompressBuffer();
+            final Buffer dataToDecompress = state.readBufferPosition() > 0 ? state.readBuffer() : binary;
+            try(final InflaterOutputStream ios = new InflaterOutputStream(new BufferOutputStream(decompressed, 0), state.inflater())) {
                 synchronized(decompressBuffer) {
+                    final int length = Math.max(state.readBufferPosition(), binary.length());
                     int r = 0;
-                    while(r < dataToDecompress.length()) {
+                    while(r < length) {
                         //how many bytes we can read
                         final int read = Math.min(decompressBuffer.length, dataToDecompress.length() - r);
                         dataToDecompress.getBytes(r, r + read, decompressBuffer);
@@ -251,16 +255,11 @@ public class CatnipShard extends AbstractVerticle {
                         r += read;
                     }
                 }
+                handleSocketData(msg, decompressed.toJsonObject());
             } catch(final IOException e) {
                 catnip.logAdapter().error("Error decompressing payload", e);
-                return;
             } finally {
-                state.readBuffer(null);
-            }
-            handleSocketData(msg, decompressed.toJsonObject());
-        } else {
-            if(state.readBuffer() == null) {
-                state.readBuffer(binary);
+                state.readBufferPosition(0);
             }
         }
     }
@@ -551,11 +550,15 @@ public class CatnipShard extends AbstractVerticle {
         @Getter
         private final Inflater inflater;
         @Getter
+        private final Buffer readBuffer = Buffer.buffer();
+        @Getter
+        private final Buffer decompressBuffer = Buffer.buffer();
+        @Getter
         @Setter
-        private Buffer readBuffer;
-        
+        private int readBufferPosition;
+    
         ShardState(final WebSocket socket) {
-            this(socket, new Inflater(), null);
+            this(socket, new Inflater(), 0);
         }
     }
 }
