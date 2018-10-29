@@ -248,7 +248,7 @@ public class CatnipShard extends AbstractVerticle {
                     int r = 0;
                     while(r < length) {
                         //how many bytes we can read
-                        final int read = Math.min(decompressBuffer.length, dataToDecompress.length() - r);
+                        final int read = Math.min(decompressBuffer.length, length - r);
                         dataToDecompress.getBytes(r, r + read, decompressBuffer);
                         //decompress
                         ios.write(decompressBuffer, 0, read);
