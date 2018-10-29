@@ -273,6 +273,9 @@ public class CatnipShard extends AbstractVerticle {
             if(frame.isBinary()) {
                 handleBinaryData(msg, frame.binaryData());
             }
+            if(frame.isClose()) {
+                catnip.logAdapter().warn("Socket closing with code {}: {}", frame.closeStatusCode(), frame.closeReason());
+            }
         } catch(final Exception e) {
             e.printStackTrace();
         }
