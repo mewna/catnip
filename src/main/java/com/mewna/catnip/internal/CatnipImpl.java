@@ -118,6 +118,11 @@ public class CatnipImpl implements Catnip {
         return ImmutableSet.copyOf(unavailableGuilds);
     }
     
+    @Override
+    public boolean isUnavailable(@Nonnull final String guildId) {
+        return unavailableGuilds.contains(guildId);
+    }
+    
     public void markAvailable(final String id) {
         unavailableGuilds.remove(id);
     }
