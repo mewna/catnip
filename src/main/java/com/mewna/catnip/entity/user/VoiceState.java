@@ -1,5 +1,6 @@
 package com.mewna.catnip.entity.user;
 
+import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.guild.Member;
 
 import javax.annotation.Nonnull;
@@ -9,7 +10,7 @@ import javax.annotation.Nullable;
  * @author amy
  * @since 9/21/18.
  */
-public interface VoiceState {
+public interface VoiceState extends Entity {
     @Nullable
     String guildId();
     
