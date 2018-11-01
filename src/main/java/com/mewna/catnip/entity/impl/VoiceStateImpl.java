@@ -58,4 +58,9 @@ public class VoiceStateImpl implements VoiceState, RequiresCatnip {
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
     }
+    
+    @Override
+    public String toString() {
+        return String.format("VoiceState (%s, %s - %s)", userId, guildId, channelId);
+    }
 }
