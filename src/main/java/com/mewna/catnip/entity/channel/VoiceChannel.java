@@ -1,6 +1,8 @@
 package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.entity.impl.VoiceChannelImpl;
 
 import javax.annotation.CheckReturnValue;
 
@@ -8,6 +10,7 @@ import javax.annotation.CheckReturnValue;
  * @author natanbc
  * @since 9/12/18
  */
+@JsonDeserialize(as = VoiceChannelImpl.class)
 public interface VoiceChannel extends GuildChannel {
     @CheckReturnValue
     int bitrate();

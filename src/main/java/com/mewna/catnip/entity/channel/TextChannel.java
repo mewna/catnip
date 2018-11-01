@@ -1,6 +1,8 @@
 package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.entity.impl.TextChannelImpl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -14,6 +16,7 @@ import java.util.concurrent.CompletionStage;
  * @since 9/12/18
  */
 @SuppressWarnings("unused")
+@JsonDeserialize(as = TextChannelImpl.class)
 public interface TextChannel extends GuildChannel, MessageChannel {
     @Nullable
     @CheckReturnValue
