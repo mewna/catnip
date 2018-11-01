@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/openjdk:8-jdk
+      - image: maven:3.5.3-jdk-11
     working_directory: ~/catnip
 
     environment:
