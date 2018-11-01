@@ -17,7 +17,7 @@ public interface VoiceState extends Entity {
     @Nullable
     String guildId();
     
-    @Nonnull
+    @Nullable
     String channelId();
     
     @Nonnull
