@@ -1,6 +1,8 @@
 package com.mewna.catnip.entity.guild;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.impl.RoleImpl;
 import com.mewna.catnip.entity.util.Permission;
 
 import javax.annotation.Nonnull;
@@ -11,6 +13,7 @@ import java.util.Set;
  * @since 9/4/18.
  */
 @SuppressWarnings("unused")
+@JsonDeserialize(as = RoleImpl.class)
 public interface Role extends Snowflake {
     /**
      * The unique snowflake ID of this role.
