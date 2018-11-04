@@ -72,83 +72,79 @@ public class RestRequester {
     private void handleResponse(final OutboundRequest r, final Bucket bucket, final int statusCode, final String statusMessage,
                                 final Buffer body, final MultiMap headers, final boolean succeeded,
                                 final Throwable failureCause) {
-        try {
-            if(succeeded) {
-                catnip.logAdapter().debug("Completed request {}", r);
-                //final HttpResponse<Buffer> result = res.result();
-                if(statusCode < 200 || statusCode > 299) {
-                    if(statusCode != 429) {
-                        catnip.logAdapter().warn("Got unexpected HTTP status: {} {}, route: {} {}", statusCode,
-                                statusMessage, r.route.method().name(), r.route.baseRoute());
-                    }
-                }
-                boolean ratelimited = false;
-                final boolean hasMemeReactionRatelimits = r.route.method() != GET
-                        && r.route.baseRoute().contains("/reactions/");
-                if(statusCode == 429) {
-                    ratelimited = true;
-                    // Reactions are a HUGE meme
-                    // We hit *roughly* one 429 / reaction if we're adding many
-                    // reactions. I *think* this is ok?
-                    // TODO: Warn if we hit the meme ratelimit a lot
-                    if(!hasMemeReactionRatelimits) {
-                        catnip.logAdapter().error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
-                                r.route.baseRoute(),
-                                headers.get("X-Ratelimit-Global"),
-                                headers.get("X-Ratelimit-Limit"),
-                                headers.get("X-Ratelimit-Reset")
-                        );
-                    }
-                }
-                ResponsePayload payload = new ResponsePayload(body);
-                if(headers.contains("X-Ratelimit-Global")) {
-                    // We hit a global ratelimit, update
-                    final Bucket global = getBucket("GLOBAL");
-                    final long retry = Long.parseLong(headers.get("Retry-After"));
-                    global.remaining(0);
-                    global.limit(1);
-                    // 500ms buffer for safety
-                    final long globalReset = System.currentTimeMillis() + retry + 500L;
-                    // CatnipImpl.vertx().setTimer(globalReset, __ -> global.resetBucket());
-                    global.reset(TimeUnit.MILLISECONDS.toSeconds(globalReset));
-                    bucket.retry(r);
-                } else if(ratelimited) {
-                    // We got ratelimited, back the fuck off
-                    bucket.updateFromHeaders(headers);
-                    if(hasMemeReactionRatelimits) {
-                        // Ratelimits are a meme with reactions
-                        catnip.vertx().setTimer(250L, __ -> bucket.retry(r));
-                    } else {
-                        // Try and compute from headers
-                        bucket.updateFromHeaders(headers);
-                        bucket.retry(r);
-                    }
-                } else {
-                    bucket.updateFromHeaders(headers);
-                    for(final Extension extension : catnip.extensionManager().extensions()) {
-                        for(final CatnipHook hook : extension.hooks()) {
-                            payload = hook.rawRestReceiveDataHook(r.route, payload);
-                        }
-                    }
-                    r.future.complete(payload);
-                    bucket.finishRequest();
-                    bucket.submit();
-                }
-            } else {
-                // Fail request, resubmit to queue if failed less than 3 times, complete with error otherwise.
-                r.failed();
-                if(r.failedAttempts() >= 3) {
-                    catnip.logAdapter().debug("Request {} failed, giving up!", r);
-                    r.future.fail(failureCause);
-                    bucket.finishRequest();
-                    bucket.submit();
-                } else {
-                    catnip.logAdapter().debug("Request {} failed, retrying ({} / 3)!", r, r.failedAttempts() + 1);
-                    bucket.retry(r);
+        if(succeeded) {
+            catnip.logAdapter().debug("Completed request {}", r);
+            //final HttpResponse<Buffer> result = res.result();
+            if(statusCode < 200 || statusCode > 299) {
+                if(statusCode != 429) {
+                    catnip.logAdapter().warn("Got unexpected HTTP status: {} {}, route: {} {}", statusCode,
+                            statusMessage, r.route.method().name(), r.route.baseRoute());
                 }
             }
-        } catch(Exception e) {
-            e.printStackTrace();
+            boolean ratelimited = false;
+            final boolean hasMemeReactionRatelimits = r.route.method() != GET
+                    && r.route.baseRoute().contains("/reactions/");
+            if(statusCode == 429) {
+                ratelimited = true;
+                // Reactions are a HUGE meme
+                // We hit *roughly* one 429 / reaction if we're adding many
+                // reactions. I *think* this is ok?
+                // TODO: Warn if we hit the meme ratelimit a lot
+                if(!hasMemeReactionRatelimits) {
+                    catnip.logAdapter().error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
+                            r.route.baseRoute(),
+                            headers.get("X-Ratelimit-Global"),
+                            headers.get("X-Ratelimit-Limit"),
+                            headers.get("X-Ratelimit-Reset")
+                    );
+                }
+            }
+            ResponsePayload payload = new ResponsePayload(body);
+            if(headers.contains("X-Ratelimit-Global")) {
+                // We hit a global ratelimit, update
+                final Bucket global = getBucket("GLOBAL");
+                final long retry = Long.parseLong(headers.get("Retry-After"));
+                global.remaining(0);
+                global.limit(1);
+                // 500ms buffer for safety
+                final long globalReset = System.currentTimeMillis() + retry + 500L;
+                // CatnipImpl.vertx().setTimer(globalReset, __ -> global.resetBucket());
+                global.reset(TimeUnit.MILLISECONDS.toSeconds(globalReset));
+                bucket.retry(r);
+            } else if(ratelimited) {
+                // We got ratelimited, back the fuck off
+                bucket.updateFromHeaders(headers);
+                if(hasMemeReactionRatelimits) {
+                    // Ratelimits are a meme with reactions
+                    catnip.vertx().setTimer(250L, __ -> bucket.retry(r));
+                } else {
+                    // Try and compute from headers
+                    bucket.updateFromHeaders(headers);
+                    bucket.retry(r);
+                }
+            } else {
+                bucket.updateFromHeaders(headers);
+                for(final Extension extension : catnip.extensionManager().extensions()) {
+                    for(final CatnipHook hook : extension.hooks()) {
+                        payload = hook.rawRestReceiveDataHook(r.route, payload);
+                    }
+                }
+                r.future.complete(payload);
+                bucket.finishRequest();
+                bucket.submit();
+            }
+        } else {
+            // Fail request, resubmit to queue if failed less than 3 times, complete with error otherwise.
+            r.failed();
+            if(r.failedAttempts() >= 3) {
+                catnip.logAdapter().debug("Request {} failed, giving up!", r);
+                r.future.fail(failureCause);
+                bucket.finishRequest();
+                bucket.submit();
+            } else {
+                catnip.logAdapter().debug("Request {} failed, retrying ({} / 3)!", r, r.failedAttempts() + 1);
+                bucket.retry(r);
+            }
         }
     }
     
@@ -208,7 +204,7 @@ public class RestRequester {
                                     .putNull("content")
                                     .putNull("embed").encode());
                         }
-    
+                        
                         executeHttpRequest(r, route, bucket, builder.build());
                     } catch(final Exception e) {
                         e.printStackTrace();
