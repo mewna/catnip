@@ -77,8 +77,8 @@ public class RestRequester {
             //final HttpResponse<Buffer> result = res.result();
             if(statusCode < 200 || statusCode > 299) {
                 if(statusCode != 429) {
-                    catnip.logAdapter().warn("Got unexpected HTTP status: {} '{}', route: {} {}, request {}", statusCode,
-                            statusMessage, r.route.method().name(), r.route.baseRoute(), r);
+                    catnip.logAdapter().warn("Got unexpected HTTP status: {} '{}', route: {} {}, request {}, body {}", statusCode,
+                            statusMessage, r.route.method().name(), r.route.baseRoute(), r, body.toString());
                 }
             }
             boolean ratelimited = false;
