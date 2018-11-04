@@ -321,7 +321,7 @@ public class RestChannel extends RestHandler {
     @Nonnull
     public CompletionStage<Void> triggerTypingIndicator(@Nonnull final String channelId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.TRIGGER_TYPING_INDICATOR.withMajorParam(channelId),
-                ImmutableMap.of()))
+                ImmutableMap.of(), new JsonObject()))
                 .thenApply(__ -> null);
     }
     
