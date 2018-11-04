@@ -57,7 +57,8 @@ public class EmbedBuilder {
     @CheckReturnValue
     public EmbedBuilder color(@Nullable final Color color) {
         if (color != null) {
-            this.color = color.getRGB();
+            // Mask off the alpha bits
+            this.color = color.getRGB() & 0x00FFFFFF;
         }
         return this;
     }
