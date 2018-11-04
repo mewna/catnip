@@ -472,8 +472,7 @@ public final class EntityBuilder {
     public User createUser(@Nonnull final JsonObject data) {
         return UserImpl.builder()
                 .catnip(catnip)
-                // TODO: Figure out why this happens sometimes :C
-                .username(data.getString("username", "[catnip error: username not available!]"))
+                .username(data.getString("username"))
                 .id(data.getString("id"))
                 .discriminator(data.getString("discriminator"))
                 .avatar(data.getString("avatar", null))
