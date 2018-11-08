@@ -55,6 +55,3 @@ If you want to customize it more, look into the `CatnipOptions` class.
 - Automatic sharding
 - Proper support for REST / ratelimits, `RESUME`, ...
 
-## TODO
-
-- Full REST API coverage (see `Rest`, #3)
