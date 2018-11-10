@@ -16,41 +16,70 @@ import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 
 /**
+ * A webhook on a channel. Allows sending messages to a text channel in a guild
+ * without having to have a bot application.
+ *
  * @author natanbc
  * @since 9/15/18
  */
 @SuppressWarnings("unused")
 public interface Webhook extends Snowflake {
+    /**
+     * @return The id of the guild this webhook is for.
+     */
     @Nonnull
     @CheckReturnValue
     String guildId();
     
+    /**
+     * @return The id of the channel this webhook is for.
+     */
     @Nonnull
     @CheckReturnValue
     String channelId();
     
+    /**
+     * @return The user that created this webhook.
+     */
     @Nonnull
     @CheckReturnValue
     User user();
     
+    /**
+     * @return The name of this webhook.
+     */
     @Nullable
     @CheckReturnValue
     String name();
     
+    /**
+     * @return The default avatar of the webhook.
+     */
     @Nullable
     @CheckReturnValue
     String avatar();
     
+    /**
+     * @return The secure token of the webhook.
+     */
     @Nonnull
     @CheckReturnValue
     String token();
     
+    /**
+     * @return The full URL of the webhook that can be used for requests.
+     */
     @Nonnull
     @CheckReturnValue
     default String url() {
         return String.format("%s/webhooks/%s/%s", RestRequester.API_BASE, id(), token());
     }
     
+    /**
+     * Deletes the webhook.
+     *
+     * @return A CompletionStage that completes when the webhook is deleted.
+     */
     @Nonnull
     @JsonIgnore
     @CheckReturnValue
@@ -71,11 +100,11 @@ public interface Webhook extends Snowflake {
         public WebhookEditFields(@Nullable final Webhook webhook) {
             this.webhook = webhook;
         }
-    
+        
         public WebhookEditFields() {
             this(null);
         }
-    
+        
         @Nonnull
         public CompletionStage<Webhook> submit() {
             if(webhook == null) {
@@ -83,7 +112,7 @@ public interface Webhook extends Snowflake {
             }
             return webhook.catnip().rest().webhook().modifyWebhook(webhook.id(), this);
         }
-    
+        
         @Nonnull
         @CheckReturnValue
         public JsonObject payload() {

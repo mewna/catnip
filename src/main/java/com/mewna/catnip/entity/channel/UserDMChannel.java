@@ -9,6 +9,8 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 
 /**
+ * A DM with a single user.
+ *
  * @author natanbc
  * @since 9/12/18
  */

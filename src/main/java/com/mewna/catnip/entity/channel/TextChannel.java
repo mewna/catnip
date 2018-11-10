@@ -12,19 +12,36 @@ import java.util.List;
 import java.util.concurrent.CompletionStage;
 
 /**
+ * A channel in a guild that can have text messages sent in it.
+ *
  * @author natanbc
  * @since 9/12/18
  */
 @SuppressWarnings("unused")
 @JsonDeserialize(as = TextChannelImpl.class)
 public interface TextChannel extends GuildChannel, MessageChannel {
+    /**
+     * The channel's topic. Shown at the top of the channel. May be
+     * {@code null}.
+     *
+     * @return The channel's topic.
+     */
     @Nullable
     @CheckReturnValue
     String topic();
     
+    /**
+     * @return Whether or not this channel has been marked as nsfw.
+     */
     @CheckReturnValue
     boolean nsfw();
     
+    /**
+     * The slowmode set on this channel. A value of 0 means no slowmode. Bots
+     * are not affected by slowmode.
+     *
+     * @return The slowmode set on this channel, in seconds.
+     */
     @CheckReturnValue
     @Nonnegative
     int rateLimitPerUser();
@@ -50,6 +67,12 @@ public interface TextChannel extends GuildChannel, MessageChannel {
         return false;
     }
     
+    /**
+     * Fetch all webhooks on this channel.
+     *
+     * @return A not-{@code null}, possibly-empty list of webhooks for this
+     * channel.
+     */
     @Nonnull
     @JsonIgnore
     @CheckReturnValue
@@ -57,6 +80,9 @@ public interface TextChannel extends GuildChannel, MessageChannel {
         return catnip().rest().webhook().getChannelWebhooks(id());
     }
     
+    /**
+     * @return A mention for this channel that can be sent in a message.
+     */
     @Nonnull
     @JsonIgnore
     @CheckReturnValue

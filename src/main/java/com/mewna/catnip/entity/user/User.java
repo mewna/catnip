@@ -13,6 +13,8 @@ import javax.annotation.Nullable;
 import java.util.concurrent.CompletionStage;
 
 /**
+ * A single Discord user.
+ *
  * @author amy
  * @since 9/4/18
  */

@@ -16,8 +16,7 @@ import com.mewna.catnip.entity.voice.VoiceServerUpdate;
 import static com.mewna.catnip.shard.EventTypeImpl.event;
 
 /**
- * Question: "WHY IS THIS NOT ENUM AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
- * Answer: "Vert.x uses strings for event consumption"
+ * See the Discord docs for more information about each kind of event.
  *
  * @author amy
  * @since 9/2/18.
