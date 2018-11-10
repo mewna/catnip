@@ -9,6 +9,7 @@ import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.impl.GuildImpl;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
+import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.Utils;
@@ -111,11 +112,15 @@ public interface Guild extends Snowflake {
     
     @Nonnull
     @CheckReturnValue
-    List<Role> roles();
+    default List<Role> roles() {
+        return catnip().cache().roles(id());
+    }
     
     @Nonnull
     @CheckReturnValue
-    List<CustomEmoji> emojis();
+    default List<CustomEmoji> emojis() {
+        return catnip().cache().emojis(id());
+    }
     
     @Nonnull
     @CheckReturnValue
@@ -157,16 +162,23 @@ public interface Guild extends Snowflake {
     
     @Nonnull
     @CheckReturnValue
-    List<Member> members();
+    default List<Member> members() {
+        return catnip().cache().members(id());
+    }
     
     @Nonnull
     @CheckReturnValue
-    List<Channel> channels();
+    default List<Channel> channels() {
+        return catnip().cache().channels(id());
+    }
     
-    /* TODO:
-        - voice_states
-        - presences
-     */
+    @Nonnull
+    @CheckReturnValue
+    default List<VoiceState> voiceStates() {
+        return catnip().cache().voiceStates(id());
+    }
+    
+    // REST methods
     
     @Nonnull
     @JsonIgnore
