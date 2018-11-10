@@ -14,12 +14,10 @@ import javax.annotation.Nonnull;
 import static com.mewna.catnip.shard.DiscordEvent.Raw;
 
 /**
- * TODO: This should be cache-aware so that we don't pay the cost of deserializing twice
- *
  * @author amy
  * @since 9/2/18.
  */
-public class DispatchEmitter {
+public final class DispatchEmitter {
     private final Catnip catnip;
     private final EntityBuilder entityBuilder;
     

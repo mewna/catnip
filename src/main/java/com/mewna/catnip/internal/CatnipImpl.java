@@ -62,7 +62,7 @@ public class CatnipImpl implements Catnip {
     
     public CatnipImpl(@Nonnull final Vertx vertx, @Nonnull final CatnipOptions options) {
         this.vertx = vertx;
-        requester = new RestRequester(this, options.restBucketBackend());
+        requester = new RestRequester(this, options.restBucketBackend(), options.restHttpClient());
         token = options.token();
         shardManager = options.shardManager();
         sessionManager = options.sessionManager();

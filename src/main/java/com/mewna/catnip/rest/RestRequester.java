@@ -50,13 +50,14 @@ public class RestRequester {
     
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
     private final Catnip catnip;
-    private final OkHttpClient _http = new OkHttpClient();
+    private final OkHttpClient _http;
     private final Collection<Bucket> submittedBuckets = new ConcurrentHashSet<>();
     private final BucketBackend bucketBackend;
     
-    public RestRequester(final Catnip catnip, final BucketBackend bucketBackend) {
+    public RestRequester(final Catnip catnip, final BucketBackend bucketBackend, final OkHttpClient _http) {
         this.catnip = catnip;
         this.bucketBackend = bucketBackend;
+        this._http = _http;
     }
     
     public CompletionStage<ResponsePayload> queue(final OutboundRequest r) {
@@ -74,7 +75,6 @@ public class RestRequester {
                                 final Throwable failureCause) {
         if(succeeded) {
             catnip.logAdapter().debug("Completed request {}", r);
-            //final HttpResponse<Buffer> result = res.result();
             if(statusCode < 200 || statusCode > 299) {
                 if(statusCode != 429) {
                     catnip.logAdapter().warn("Got unexpected HTTP status: {} '{}', route: {} {}, request {}, body {}", statusCode,
