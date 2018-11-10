@@ -39,7 +39,7 @@ import static com.mewna.catnip.shard.DiscordEvent.Raw;
 public class MemoryEntityCache implements EntityCacheWorker {
     // TODO: What even is efficiency
     
-    private static final String DM_CHANNEL_KEY = "DMS";
+    public static final String DM_CHANNEL_KEY = "DMS";
     
     @SuppressWarnings("WeakerAccess")
     protected final Map<String, Guild> guildCache = new ConcurrentHashMap<>();
