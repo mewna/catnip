@@ -118,6 +118,10 @@ public final class DispatchEmitter {
                 catnip.eventBus().publish(type, entityBuilder.createChannelPinsUpdate(data));
                 break;
             }
+            case Raw.WEBHOOKS_UPDATE: {
+                catnip.eventBus().publish(type, entityBuilder.createWebhooksUpdate(data));
+                break;
+            }
             
             // Guilds
             case Raw.GUILD_CREATE: {
