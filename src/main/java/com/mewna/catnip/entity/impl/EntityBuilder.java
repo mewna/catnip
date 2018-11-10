@@ -1049,6 +1049,16 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public WebhooksUpdate createWebhooksUpdate(@Nonnull final JsonObject data) {
+        return WebhooksUpdateImpl.builder()
+                .catnip(catnip)
+                .guildId(data.getString("guild_id"))
+                .channelId(data.getString("channel_id"))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public DeletedMessage createDeletedMessage(@Nonnull final JsonObject data) {
         return DeletedMessageImpl.builder()
                 .catnip(catnip)
