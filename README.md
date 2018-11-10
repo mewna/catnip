@@ -22,7 +22,7 @@ This is the simplest possible bot you can make right now:
 final Catnip catnip = Catnip.catnip("your token goes here");
 catnip.on(DiscordEvent.MESSAGE_CREATE, msg -> {
     if(msg.content().startsWith("!ping")) {
-        catnip.rest().channel().sendMessage(msg.channelId(), "pong!");
+        msg.channel().sendMessage("pong!");
     }
 });
 catnip.startShards();
@@ -37,11 +37,10 @@ final Catnip catnip = Catnip.catnip("your token goes here");
 catnip.on(DiscordEvent.MESSAGE_CREATE, msg -> {
     if(msg.content().equalsIgnoreCase("!ping")) {
         final long start = System.currentTimeMillis();
-        catnip.rest().channel().sendMessage(msg.channelId(), "pong!")
+        msg.channel().sendMessage("pong!")
                 .thenAccept(ping -> {
                     final long end = System.currentTimeMillis();
-                    catnip.rest().channel().editMessage(msg.channelId(), ping.id(),
-                            "pong! (took " + (end - start) + "ms)");
+                    ping.edit("pong! (took " + (end - start) + "ms)");
                 });
     }
 });
