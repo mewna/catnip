@@ -113,7 +113,7 @@ public class CachingBuffer extends AbstractBuffer {
                             bufferState.recvGuild(guild);
                             emitter().emit(event);
                             
-                            if(catnip().chunkMembers()) {
+                            if(catnip().chunkMembers() && memberCount > LARGE_THRESHOLD) {
                                 // If we're chunking members, calculate how many chunks we have to await
                                 int chunks = memberCount / 1000;
                                 if(memberCount % 1000 != 0) {
