@@ -1092,6 +1092,15 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public Resumed createResumed(@Nonnull final JsonObject data) {
+        return ResumedImpl.builder()
+                .catnip(catnip)
+                .trace(ImmutableList.copyOf(data.getJsonArray("_trace").stream().map(e -> (String) e).collect(Collectors.toList())))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public AuditLogChange createAuditLogChange(@Nonnull final JsonObject data) {
         return AuditLogChangeImpl.builder()
                 .catnip(catnip)

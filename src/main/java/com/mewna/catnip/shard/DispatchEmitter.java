@@ -4,6 +4,7 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.misc.Ready;
+import com.mewna.catnip.entity.misc.Resumed;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.internal.CatnipImpl;
 import io.vertx.core.json.JsonArray;
@@ -59,6 +60,11 @@ public final class DispatchEmitter {
                 final Ready ready = entityBuilder.createReady(data);
                 ((CatnipImpl) catnip).selfUser(ready.user());
                 catnip.eventBus().publish(type, ready);
+                break;
+            }
+            case Raw.RESUMED: {
+                final Resumed resumed = entityBuilder.createResumed(data);
+                catnip.eventBus().publish(type, resumed);
                 break;
             }
             
