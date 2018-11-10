@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Options used for creating a new message.
+ *
  * @author SamOphis
  * @since 10/10/2018
  */

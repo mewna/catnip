@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.annotation.CheckReturnValue;
 
 /**
+ * A DM channel. May be a group DM or a single user DM.
+ *
  * @author natanbc
  * @since 9/12/18
  */

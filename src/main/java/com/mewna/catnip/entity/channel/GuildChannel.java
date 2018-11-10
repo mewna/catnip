@@ -22,26 +22,45 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 
 /**
+ * A channel in a guild.
+ *
  * @author natanbc
  * @since 9/12/18
  */
 @SuppressWarnings("unused")
 public interface GuildChannel extends Channel {
+    /**
+     * @return The name of the channel.
+     */
     @Nonnull
     @CheckReturnValue
     String name();
     
+    /**
+     * @return The id of the guild this channel is in. Never {@code null}.
+     */
     @Nonnull
     @CheckReturnValue
     String guildId();
     
+    /**
+     * @return The position of the channel.
+     */
     @CheckReturnValue
     int position();
     
+    /**
+     * @return The id of the {@link Category} that is the parent of this
+     * channel. May be {@code null}.
+     */
     @Nullable
     @CheckReturnValue
     String parentId();
     
+    /**
+     * @return The permission overrides set on this channel. Will never be
+     * {@code null}, but may be empty.
+     */
     @Nonnull
     @CheckReturnValue
     List<PermissionOverride> overrides();
@@ -64,6 +83,13 @@ public interface GuildChannel extends Channel {
         return true;
     }
     
+    /**
+     * Creates a new invite to this channel.
+     *
+     * @param options The options to set on the invite.
+     *
+     * @return A CompletionStage that completes when the invite is created.
+     */
     @Nonnull
     @JsonIgnore
     @CheckReturnValue
@@ -71,6 +97,11 @@ public interface GuildChannel extends Channel {
         return catnip().rest().channel().createInvite(id(), options);
     }
     
+    /**
+     * Creates a new invite to this channel.
+     *
+     * @return A CompletionStage that completes when the invite is created.
+     */
     @Nonnull
     @JsonIgnore
     @CheckReturnValue
@@ -78,6 +109,12 @@ public interface GuildChannel extends Channel {
         return createInvite(null);
     }
     
+    /**
+     * The list of all invites to this channel. Will never be {@code null}, but
+     * may be empty.
+     *
+     * @return A CompletionStage that completes when the invite is created.
+     */
     @Nonnull
     @JsonIgnore
     @CheckReturnValue
@@ -85,7 +122,7 @@ public interface GuildChannel extends Channel {
         return catnip().rest().channel().getChannelInvites(id());
     }
     
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "WeakerAccess"})
     @Getter
     @Setter
     @Accessors(fluent = true)

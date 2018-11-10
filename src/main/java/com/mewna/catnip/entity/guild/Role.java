@@ -9,6 +9,8 @@ import javax.annotation.Nonnull;
 import java.util.Set;
 
 /**
+ * A role in a guild.
+ *
  * @author amy
  * @since 9/4/18.
  */

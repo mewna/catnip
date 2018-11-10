@@ -16,6 +16,8 @@ import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 /**
+ * A member in a guild.
+ *
  * @author amy
  * @since 9/4/18.
  */

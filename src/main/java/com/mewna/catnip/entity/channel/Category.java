@@ -3,6 +3,8 @@ package com.mewna.catnip.entity.channel;
 import javax.annotation.CheckReturnValue;
 
 /**
+ * A category that contains channels in a guild.
+ *
  * @author natanbc
  * @since 9/12/18
  */
