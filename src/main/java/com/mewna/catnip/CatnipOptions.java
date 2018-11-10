@@ -21,6 +21,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import okhttp3.OkHttpClient;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -61,4 +62,6 @@ public final class CatnipOptions {
     private Presence presence;
     @Nonnull
     private Set<String> disabledEvents = ImmutableSet.of();
+    @Nonnull
+    private OkHttpClient restHttpClient = new OkHttpClient();
 }
