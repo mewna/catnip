@@ -6,6 +6,7 @@ import com.mewna.catnip.entity.channel.WebhooksUpdate;
 import com.mewna.catnip.entity.guild.*;
 import com.mewna.catnip.entity.message.*;
 import com.mewna.catnip.entity.misc.Ready;
+import com.mewna.catnip.entity.misc.Resumed;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.TypingUser;
 import com.mewna.catnip.entity.user.User;
@@ -56,6 +57,7 @@ public interface DiscordEvent {
     EventType<BulkRemovedReactions> MESSAGE_REACTION_REMOVE_ALL = event(Raw.MESSAGE_REACTION_REMOVE_ALL, BulkRemovedReactions.class);
     EventType<Presence>             PRESENCE_UPDATE             = event(Raw.PRESENCE_UPDATE, Presence.class);
     EventType<Ready>                READY                       = event(Raw.READY, Ready.class);
+    EventType<Resumed>              RESUMED                     = event(Raw.RESUMED, Resumed.class);
     EventType<TypingUser>           TYPING_START                = event(Raw.TYPING_START, TypingUser.class);
     EventType<VoiceState>           VOICE_STATE_UPDATE          = event(Raw.VOICE_STATE_UPDATE, VoiceState.class);
     // @formatter:on
@@ -108,6 +110,7 @@ public interface DiscordEvent {
         String MESSAGE_REACTION_REMOVE_ALL  = "MESSAGE_REACTION_REMOVE_ALL";
         String PRESENCE_UPDATE              = "PRESENCE_UPDATE";
         String READY                        = "READY";
+        String RESUMED                      = "RESUMED";
         String TYPING_START                 = "TYPING_START";
         String VOICE_STATE_UPDATE           = "VOICE_STATE_UPDATE";
         // @formatter:on
