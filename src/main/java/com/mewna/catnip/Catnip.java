@@ -283,10 +283,10 @@ public interface Catnip {
     Set<String> disabledEvents();
     
     /**
-     * Force the specified shard to update its presence.
+     * Get the presence for the specified shard.
      *
-     * @param shardId  The shard id to change presence for.
-     * @param callback The callback invoked when the presence is updated.
+     * @param shardId  The shard id to get presence for.
+     * @param callback The callback invoked when the presence is fetched.
      */
     default void presence(@Nonnegative final int shardId, @Nonnull final Consumer<Presence> callback) {
         eventBus().send(CatnipShard.websocketMessagePresenceUpdateAddress(shardId), null,
