@@ -4,6 +4,8 @@ import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 
 /**
+ * An entity that has a timestamp.
+ *
  * @author amy
  * @since 10/28/18.
  */

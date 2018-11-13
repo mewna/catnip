@@ -17,7 +17,7 @@ import javax.annotation.Nonnull;
  * @author SamOphis
  * @since 10/12/2018
  */
-@Setter(onParam_ = @Nonnull, onMethod_ = {@CheckReturnValue, @Nonnull}) // doesn't work in my ide, but *should* work elsewhere
+@Setter(onParam_ = @Nonnull, onMethod_ = {@CheckReturnValue, @Nonnull})
 @NoArgsConstructor
 @Accessors(fluent = true, chain = true)
 @SuppressWarnings("unused")

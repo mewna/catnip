@@ -23,6 +23,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 /**
+ * A single message in Discord.
+ *
  * @author amy
  * @since 9/4/18.
  */

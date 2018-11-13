@@ -3,7 +3,7 @@ package com.mewna.catnip.entity.impl;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.GuildEmbed;
+import com.mewna.catnip.entity.guild.GuildEmbed;
 import lombok.*;
 import lombok.experimental.Accessors;
 
