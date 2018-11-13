@@ -14,6 +14,8 @@ import java.util.EnumSet;
 import java.util.Set;
 
 /**
+ * A user's presence. Online status, current game, ...
+ *
  * @author amy
  * @since 9/21/18.
  */

@@ -7,14 +7,23 @@ import com.mewna.catnip.entity.impl.VoiceChannelImpl;
 import javax.annotation.CheckReturnValue;
 
 /**
+ * A voice channel in a guild.
+ *
  * @author natanbc
  * @since 9/12/18
  */
 @JsonDeserialize(as = VoiceChannelImpl.class)
 public interface VoiceChannel extends GuildChannel {
+    /**
+     * @return The bitrate of this channel. Will be from 8 to 96.
+     */
     @CheckReturnValue
     int bitrate();
     
+    /**
+     * @return The maxmium number of users allowed in this voice channel at
+     * once.
+     */
     @CheckReturnValue
     int userLimit();
     

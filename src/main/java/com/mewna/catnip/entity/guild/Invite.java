@@ -14,33 +14,58 @@ import java.util.List;
 import java.util.concurrent.CompletionStage;
 
 /**
+ * An invite to a guild.
+ *
  * @author natanbc
  * @since 9/14/18
  */
 @SuppressWarnings("unused")
 public interface Invite extends Entity {
+    /**
+     * @return The code for this invite.
+     */
     @Nonnull
     @CheckReturnValue
     String code();
     
+    /**
+     * @return The person who created the invite.
+     */
     @Nonnull
     @CheckReturnValue
     Inviter inviter();
     
+    /**
+     * @return The guild the invite is for.
+     */
     @Nonnull
     @CheckReturnValue
     InviteGuild guild();
     
+    /**
+     * @return The channel the member is for.
+     */
     @Nonnull
     @CheckReturnValue
     InviteChannel channel();
     
+    /**
+     * @return The approximate number of people online in the guild.
+     */
     @Nonnegative
     int approximatePresenceCount();
     
+    /**
+     * @return The approximate number of people in the guild.
+     */
     @Nonnegative
     int approximateMemberCount();
     
+    /**
+     * Deletes the invite.
+     *
+     * @return A CompletionStage that completes when the invite is deleted.
+     */
     @Nonnull
     default CompletionStage<Invite> delete() {
         return catnip().rest().invite().deleteInvite(code());

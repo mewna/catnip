@@ -1,13 +1,10 @@
 package com.mewna.catnip.entity.builder;
 
-import com.mewna.catnip.entity.message.Embed;
-import com.mewna.catnip.entity.message.Embed.Author;
-import com.mewna.catnip.entity.message.Embed.Field;
-import com.mewna.catnip.entity.message.Embed.Footer;
-import com.mewna.catnip.entity.message.Embed.Image;
-import com.mewna.catnip.entity.message.Embed.Thumbnail;
 import com.mewna.catnip.entity.impl.EmbedImpl;
 import com.mewna.catnip.entity.impl.EmbedImpl.*;
+import com.mewna.catnip.entity.message.Embed;
+import com.mewna.catnip.entity.message.Embed.*;
+import com.mewna.catnip.entity.message.Embed.Image;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -21,6 +18,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * Build a new embed to be used via the REST API.
+ *
  * @author amy
  * @since 9/4/18.
  */
@@ -29,6 +28,7 @@ import java.util.List;
 @Accessors(fluent = true, chain = true)
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class EmbedBuilder {
+    private final List<Field> fields = new ArrayList<>();
     // @formatter:off
     private String title;
     private String description;
@@ -38,7 +38,6 @@ public class EmbedBuilder {
     private Image image;
     private Thumbnail thumbnail;
     private Author author;
-    private final List<Field> fields = new ArrayList<>();
     // @formatter:on
     
     public EmbedBuilder(final Embed embed) {
@@ -53,22 +52,44 @@ public class EmbedBuilder {
         fields.addAll(embed.fields());
     }
     
+    /**
+     * Set the color of the embed. The alpha bits will be ignored.
+     *
+     * @param color The color to set.
+     *
+     * @return Itself.
+     */
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder color(@Nullable final Color color) {
-        if (color != null) {
+        if(color != null) {
             // Mask off the alpha bits
             this.color = color.getRGB() & 0x00FFFFFF;
         }
         return this;
     }
     
+    /**
+     * Add a footer to the embed.
+     *
+     * @param text    The text of the footer.
+     * @param iconUrl The URL of the icon in the embed's footer.
+     *
+     * @return Itself.
+     */
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder footer(@Nullable final String text, @Nullable final String iconUrl) {
         return footer(new FooterImpl(text, iconUrl, null));
     }
     
+    /**
+     * Set the embed's image.
+     *
+     * @param url The URL of the image.
+     *
+     * @return Itself.
+     */
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder image(@Nullable final String url) {
@@ -76,6 +97,13 @@ public class EmbedBuilder {
         return this;
     }
     
+    /**
+     * Set the embed's thumbnail.
+     *
+     * @param url The URL of the thumbnail image.
+     *
+     * @return Itself.
+     */
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder thumbnail(@Nullable final String url) {
@@ -83,24 +111,55 @@ public class EmbedBuilder {
         return this;
     }
     
+    /**
+     * Set the embed's author.
+     *
+     * @param name The author's name.
+     *
+     * @return Itself.
+     */
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder author(@Nullable final String name) {
         return author(name, null);
     }
     
+    /**
+     * Set the embed's author.
+     *
+     * @param name The author's name.
+     * @param url  The URL of the author's page.
+     *
+     * @return Itself.
+     */
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder author(@Nullable final String name, @Nullable final String url) {
         return author(name, url, null);
     }
     
+    /**
+     * Set the embed's author.
+     *
+     * @param name    The author's name.
+     * @param url     The URL of the author's page.
+     * @param iconUrl The URL for the author's icon.
+     *
+     * @return Itself.
+     */
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder author(@Nullable final String name, @Nullable final String url, @Nullable final String iconUrl) {
         return author(new AuthorImpl(name, url, iconUrl, null));
     }
     
+    /**
+     * Set the embed's author.
+     *
+     * @param author The new author.
+     *
+     * @return Itself.
+     */
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder author(@Nullable final Author author) {
@@ -108,12 +167,30 @@ public class EmbedBuilder {
         return this;
     }
     
+    /**
+     * Add a new field to the embed.
+     *
+     * @param name   The field's name.
+     * @param value  The field's value.
+     * @param inline Whether or not the field should be inline.
+     *
+     * @return Itself.
+     */
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder field(@Nonnull final String name, @Nonnull final String value, final boolean inline) {
         return field(new FieldImpl(name, value, inline));
     }
     
+    /**
+     * Add a new field to the embed.
+     *
+     * @param field The field to add.
+     *
+     * @return Itself.
+     *
+     * @throws IllegalStateException If more than 25 fields are added.
+     */
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder field(@Nonnull final Field field) {
@@ -124,6 +201,11 @@ public class EmbedBuilder {
         return this;
     }
     
+    /**
+     * Build the embed.
+     *
+     * @return The new embed.
+     */
     public Embed build() {
         int len = 0;
         final EmbedImplBuilder builder = EmbedImpl.builder();
@@ -133,7 +215,6 @@ public class EmbedBuilder {
             }
             len += title.length();
             builder.title(title);
-            
         }
         if(description != null && !description.isEmpty()) {
             if(description.length() > 2048) {
