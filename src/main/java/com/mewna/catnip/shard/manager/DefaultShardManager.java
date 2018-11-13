@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 public class DefaultShardManager implements ShardManager {
     private static final String POLL_QUEUE = "catnip:shard:manager:poll";
     
+    @Getter
+    private int shardCount = 0;
     private final int customShardCount;
     @Getter
     private final Deque<Integer> connectQueue = new ConcurrentLinkedDeque<>();
@@ -45,11 +47,6 @@ public class DefaultShardManager implements ShardManager {
     @SuppressWarnings("WeakerAccess")
     public DefaultShardManager(final int customShardCount) {
         this.customShardCount = customShardCount;
-    }
-    
-    @Override
-    public int shardCount() {
-        return 0;
     }
     
     @Override
@@ -88,6 +85,8 @@ public class DefaultShardManager implements ShardManager {
     
     private void loadShards(final int count) {
         catnip.logAdapter().info("Booting {} shards", count);
+        shardCount = count;
+        
         // Deploy verticles
         for(int id = 0; id < count; id++) {
             // because each shard has its own presence, so no global presence on catnip class
