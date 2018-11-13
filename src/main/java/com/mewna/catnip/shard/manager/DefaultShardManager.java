@@ -1,11 +1,8 @@
 package com.mewna.catnip.shard.manager;
 
-import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
-import io.vertx.core.Future;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,24 +11,20 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Deque;
-import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.stream.Collectors;
 
 /**
  * @author amy
  * @since 8/15/18.
  */
 @Accessors(fluent = true)
-public class DefaultShardManager implements ShardManager {
+public class DefaultShardManager extends AbstractShardManager {
     private static final String POLL_QUEUE = "catnip:shard:manager:poll";
     
     @Getter
-    private int shardCount = 0;
-    private final int customShardCount;
+    private final int shardCount;
     @Getter
     private final Deque<Integer> connectQueue = new ConcurrentLinkedDeque<>();
     @Getter
@@ -46,13 +39,13 @@ public class DefaultShardManager implements ShardManager {
     
     @SuppressWarnings("WeakerAccess")
     public DefaultShardManager(final int customShardCount) {
-        this.customShardCount = customShardCount;
+        shardCount = customShardCount;
     }
     
     @Override
     public void start() {
         client = new OkHttpClient();
-        if(customShardCount == -1) {
+        if(shardCount == -1) {
             // Load shard count from API
             catnip.vertx().<JsonObject>executeBlocking(future -> {
                 try {
@@ -79,13 +72,12 @@ public class DefaultShardManager implements ShardManager {
                 }
             });
         } else {
-            loadShards(customShardCount);
+            loadShards(shardCount);
         }
     }
     
     private void loadShards(final int count) {
         catnip.logAdapter().info("Booting {} shards", count);
-        shardCount = count;
         
         // Deploy verticles
         for(int id = 0; id < count; id++) {
@@ -142,30 +134,6 @@ public class DefaultShardManager implements ShardManager {
             connectQueue.add(shard);
         } else {
             catnip.logAdapter().warn("Ignoring duplicate queue for shard {}", shard);
-        }
-    }
-    
-    @Nonnull
-    @Override
-    public Future<List<String>> trace(final int shard) {
-        final Future<List<String>> future = Future.future();
-        catnip.eventBus().<JsonArray>send(CatnipShard.controlAddress(shard), new JsonObject().put("mode", "TRACE"),
-                reply -> {
-                    if(reply.succeeded()) {
-                        // ow
-                        future.complete(ImmutableList.copyOf(reply.result().body().stream()
-                                .map(e -> (String) e).collect(Collectors.toList())));
-                    } else {
-                        future.fail(reply.cause());
-                    }
-                });
-        return future;
-    }
-    
-    @Override
-    public void shutdown() {
-        for(int i = 0; i < shardCount(); i++) {
-            catnip.eventBus().<JsonArray>send(CatnipShard.controlAddress(i), new JsonObject().put("mode", "SHUTDOWN"));
         }
     }
 }
