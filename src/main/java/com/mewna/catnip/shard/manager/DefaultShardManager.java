@@ -13,7 +13,11 @@ import okhttp3.Request;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -24,29 +28,13 @@ import java.util.stream.IntStream;
  */
 @Accessors(fluent = true)
 public class DefaultShardManager extends AbstractShardManager {
-    private static final String POLL_QUEUE = "catnip:shard:manager:poll";
-    
-    @Getter
-    private int shardCount;
     @Getter
     private final Deque<Integer> connectQueue = new ConcurrentLinkedDeque<>();
     private final Collection<Integer> shardIds;
     @Getter
+    private int shardCount;
+    @Getter
     private OkHttpClient client;
-    
-    private static <T> int iterableLength(@Nonnull final Iterable<T> iterable) {
-        int count = 0;
-        for(final T ignored : iterable) {
-            ++count;
-        }
-        return count;
-    }
-    
-    private static <T> Collection<T> iterableToCollection(@Nonnull final Iterable<T> iterable) {
-        final List<T> list = new ArrayList<>();
-        iterable.forEach(list::add);
-        return list;
-    }
     
     public DefaultShardManager() {
         this(0, new ArrayList<>());
@@ -71,6 +59,20 @@ public class DefaultShardManager extends AbstractShardManager {
     public DefaultShardManager(@Nonnegative final int shardCount, final Collection<Integer> shardIds) {
         this.shardCount = shardCount;
         this.shardIds = new ArrayList<>(shardIds);
+    }
+    
+    private static <T> int iterableLength(@Nonnull final Iterable<T> iterable) {
+        int count = 0;
+        for(final T ignored : iterable) {
+            ++count;
+        }
+        return count;
+    }
+    
+    private static <T> Collection<T> iterableToCollection(@Nonnull final Iterable<T> iterable) {
+        final List<T> list = new ArrayList<>();
+        iterable.forEach(list::add);
+        return list;
     }
     
     @Override
@@ -123,13 +125,22 @@ public class DefaultShardManager extends AbstractShardManager {
             catnip().logAdapter().info("Deployed shard {}/{}", id, shardCount);
         }
         // Start verticles
-        catnip().eventBus().consumer(POLL_QUEUE, msg -> connect());
-        catnip().eventBus().publish(POLL_QUEUE, null);
+        poll();
+    }
+    
+    private void poll() {
+        CompletableFuture.allOf(conditions().stream().map(ShardCondition::get).toArray(CompletableFuture[]::new))
+                .thenAccept(__ -> connect())
+                .exceptionally(e -> {
+                    catnip().logAdapter().warn("Couldn't complete shard conditions, polling again in 1s", e);
+                    catnip().vertx().setTimer(1000L, __ -> poll());
+                    return null;
+                });
     }
     
     private void connect() {
         if(connectQueue.isEmpty()) {
-            catnip().vertx().setTimer(1000L, __ -> catnip().eventBus().publish(POLL_QUEUE, null));
+            catnip().vertx().setTimer(1000L, __ -> poll());
             return;
         }
         final int nextId = connectQueue.removeFirst();
@@ -158,7 +169,7 @@ public class DefaultShardManager extends AbstractShardManager {
                         catnip().logAdapter().warn("Failed connecting shard {} entirely, re-queueing", nextId);
                         addToConnectQueue(nextId);
                     }
-                    catnip().eventBus().publish(POLL_QUEUE, null);
+                    poll();
                 });
     }
     

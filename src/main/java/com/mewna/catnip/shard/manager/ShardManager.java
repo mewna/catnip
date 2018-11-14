@@ -33,14 +33,33 @@ public interface ShardManager {
     void start();
     
     /**
+     * @return The shard conditions for this shard manager instance.
+     *
+     * @see ShardCondition
+     */
+    List<ShardCondition> conditions();
+    
+    /**
+     * Add a condition to this shard manager.
+     *
+     * @param condition The new condition.
+     *
+     * @return Itself.
+     */
+    ShardManager addCondition(@Nonnull ShardCondition condition);
+    
+    /**
      * Adds the given shard id to the connect queue.
+     *
      * @param shard The shard id to add.
      */
     void addToConnectQueue(@Nonnegative int shard);
     
     /**
      * Fetches the trace from the given shard.
+     *
      * @param shard The shard to fetch the trace from.
+     *
      * @return The shard's trace.
      */
     @Nonnull

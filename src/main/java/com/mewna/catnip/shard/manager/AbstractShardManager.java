@@ -14,6 +14,7 @@ import lombok.experimental.Accessors;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -28,6 +29,9 @@ public abstract class AbstractShardManager implements ShardManager {
     @Setter
     private Catnip catnip;
     
+    @Getter
+    private final List<ShardCondition> conditions = new CopyOnWriteArrayList<>();
+    
     @SuppressWarnings("WeakerAccess")
     protected void deployShard(@Nonnegative final int id, @Nonnegative final int count) {
         // because each shard has its own presence, so no global presence on catnip class
@@ -35,6 +39,12 @@ public abstract class AbstractShardManager implements ShardManager {
         final CatnipShard shard = new CatnipShard(catnip, id, count, catnip.initialPresence());
         catnip.vertx().deployVerticle(shard);
         addToConnectQueue(id);
+    }
+    
+    @Override
+    public ShardManager addCondition(@Nonnull final ShardCondition condition) {
+        conditions.add(condition);
+        return this;
     }
     
     @Nonnull
