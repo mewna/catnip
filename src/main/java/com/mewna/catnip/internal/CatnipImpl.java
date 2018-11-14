@@ -140,6 +140,7 @@ public class CatnipImpl implements Catnip {
         
         // Lifecycle
         codec(ReadyImpl.class);
+        codec(ResumedImpl.class);
         
         // Messages
         codec(MessageImpl.class);
@@ -158,6 +159,7 @@ public class CatnipImpl implements Catnip {
         codec(VoiceChannelImpl.class);
         codec(WebhookImpl.class);
         codec(ChannelPinsUpdateImpl.class);
+        codec(WebhooksUpdateImpl.class);
         
         // Guilds
         codec(GuildImpl.class);

@@ -4,11 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
-import io.vertx.core.Future;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -16,50 +13,84 @@ import okhttp3.Request;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * @author amy
  * @since 8/15/18.
  */
 @Accessors(fluent = true)
-public class DefaultShardManager implements ShardManager {
-    private static final String POLL_QUEUE = "catnip:shard:manager:poll";
-    
-    @Getter
-    private int shardCount = 0;
-    private final int customShardCount;
+public class DefaultShardManager extends AbstractShardManager {
     @Getter
     private final Deque<Integer> connectQueue = new ConcurrentLinkedDeque<>();
+    private final Collection<Integer> shardIds;
+    @Getter
+    private int shardCount;
     @Getter
     private OkHttpClient client;
-    @Getter
-    @Setter
-    private Catnip catnip;
     
     public DefaultShardManager() {
-        this(-1);
+        this(0, new ArrayList<>());
+    }
+    
+    @SuppressWarnings({"WeakerAccess", "unused"})
+    public DefaultShardManager(@Nonnegative final int customShardCount) {
+        this(IntStream.range(0, customShardCount));
     }
     
     @SuppressWarnings("WeakerAccess")
-    public DefaultShardManager(final int customShardCount) {
-        this.customShardCount = customShardCount;
+    public DefaultShardManager(final IntStream shardIds) {
+        this(shardIds.boxed().collect(Collectors.toList()));
+    }
+    
+    @SuppressWarnings("WeakerAccess")
+    public DefaultShardManager(final Iterable<Integer> shardIds) {
+        this(iterableLength(shardIds), iterableToCollection(shardIds));
+    }
+    
+    @SuppressWarnings("WeakerAccess")
+    public DefaultShardManager(@Nonnegative final int shardCount, final Collection<Integer> shardIds) {
+        this.shardCount = shardCount;
+        this.shardIds = new ArrayList<>(shardIds);
+    }
+    
+    private static <T> int iterableLength(@Nonnull final Iterable<T> iterable) {
+        int count = 0;
+        for(final T ignored : iterable) {
+            ++count;
+        }
+        return count;
+    }
+    
+    private static <T> Collection<T> iterableToCollection(@Nonnull final Iterable<T> iterable) {
+        final List<T> list = new ArrayList<>();
+        iterable.forEach(list::add);
+        return list;
+    }
+    
+    @Override
+    public Collection<Integer> shardIds() {
+        return ImmutableList.copyOf(shardIds);
     }
     
     @Override
     public void start() {
         client = new OkHttpClient();
-        if(customShardCount == -1) {
+        if(shardCount == 0) {
             // Load shard count from API
-            catnip.vertx().<JsonObject>executeBlocking(future -> {
+            catnip().vertx().<JsonObject>executeBlocking(future -> {
                 try {
                     @SuppressWarnings({"UnnecessarilyQualifiedInnerClassAccess", "ConstantConditions"})
                     final String body = client.newCall(new Request.Builder()
                             .get().url(Catnip.getShardCountUrl())
-                            .header("Authorization", "Bot " + catnip.token())
+                            .header("Authorization", "Bot " + catnip().token())
                             .build()).execute().body().string();
                     future.complete(new JsonObject(body));
                 } catch(final IOException | NullPointerException e) {
@@ -70,7 +101,9 @@ public class DefaultShardManager implements ShardManager {
                     final JsonObject body = res.result();
                     final int shards = body.getInteger("shards", -1);
                     if(shards != -1) {
-                        loadShards(shards);
+                        // Update from API
+                        shardCount = shards;
+                        loadShards();
                     } else {
                         throw new IllegalStateException("Invalid token provided (Gateway JSON response doesn't have `shards` key)!");
                     }
@@ -79,60 +112,64 @@ public class DefaultShardManager implements ShardManager {
                 }
             });
         } else {
-            loadShards(customShardCount);
+            loadShards();
         }
     }
     
-    private void loadShards(final int count) {
-        catnip.logAdapter().info("Booting {} shards", count);
-        shardCount = count;
+    private void loadShards() {
+        catnip().logAdapter().info("Booting {}(/{}) shards", shardIds.size(), shardCount);
         
         // Deploy verticles
-        for(int id = 0; id < count; id++) {
-            // because each shard has its own presence, so no global presence on catnip class
-            //noinspection TypeMayBeWeakened
-            final CatnipShard shard = new CatnipShard(catnip, id, count, catnip.initialPresence());
-            catnip.vertx().deployVerticle(shard);
-            connectQueue.addLast(id);
-            catnip.logAdapter().info("Deployed shard {}", id);
+        for(final Integer id : shardIds) {
+            deployShard(id, shardCount);
+            catnip().logAdapter().info("Deployed shard {}/{}", id, shardCount);
         }
         // Start verticles
-        catnip.eventBus().consumer(POLL_QUEUE, msg -> connect());
-        catnip.eventBus().publish(POLL_QUEUE, null);
+        poll();
+    }
+    
+    private void poll() {
+        CompletableFuture.allOf(conditions().stream().map(ShardCondition::get).toArray(CompletableFuture[]::new))
+                .thenAccept(__ -> connect())
+                .exceptionally(e -> {
+                    catnip().logAdapter().warn("Couldn't complete shard conditions, polling again in 1s", e);
+                    catnip().vertx().setTimer(1000L, __ -> poll());
+                    return null;
+                });
     }
     
     private void connect() {
         if(connectQueue.isEmpty()) {
-            catnip.vertx().setTimer(1000L, __ -> catnip.eventBus().publish(POLL_QUEUE, null));
+            catnip().vertx().setTimer(1000L, __ -> poll());
             return;
         }
         final int nextId = connectQueue.removeFirst();
-        catnip.logAdapter().info("Connecting shard {} (queue len {})", nextId, connectQueue.size());
-        catnip.eventBus().<JsonObject>send(CatnipShard.controlAddress(nextId), new JsonObject().put("mode", "START"),
+        catnip().logAdapter().info("Connecting shard {} (queue len {})", nextId, connectQueue.size());
+        catnip().eventBus().<JsonObject>send(CatnipShard.controlAddress(nextId), new JsonObject().put("mode", "START"),
                 reply -> {
                     if(reply.succeeded()) {
                         final ShardConnectState state = ShardConnectState.valueOf(reply.result().body().getString("state"));
                         switch(state) {
                             case READY:
                             case RESUMED: {
-                                catnip.logAdapter().info("Connected shard {} with state {}", nextId, reply.result().body());
+                                catnip().logAdapter().info("Connected shard {} with state {}", nextId, reply.result().body());
                                 break;
                             }
                             case FAILED: {
-                                catnip.logAdapter().warn("Failed connecting shard {}, re-queueing", nextId);
+                                catnip().logAdapter().warn("Failed connecting shard {}, re-queueing", nextId);
                                 addToConnectQueue(nextId);
                                 break;
                             }
                             default: {
-                                catnip.logAdapter().error("Got unexpected / unknown shard connect state: {}", state);
+                                catnip().logAdapter().error("Got unexpected / unknown shard connect state: {}", state);
                                 break;
                             }
                         }
                     } else {
-                        catnip.logAdapter().warn("Failed connecting shard {} entirely, re-queueing", nextId);
+                        catnip().logAdapter().warn("Failed connecting shard {} entirely, re-queueing", nextId);
                         addToConnectQueue(nextId);
                     }
-                    catnip.eventBus().publish(POLL_QUEUE, null);
+                    poll();
                 });
     }
     
@@ -141,31 +178,7 @@ public class DefaultShardManager implements ShardManager {
         if(!connectQueue.contains(shard)) {
             connectQueue.add(shard);
         } else {
-            catnip.logAdapter().warn("Ignoring duplicate queue for shard {}", shard);
-        }
-    }
-    
-    @Nonnull
-    @Override
-    public Future<List<String>> trace(final int shard) {
-        final Future<List<String>> future = Future.future();
-        catnip.eventBus().<JsonArray>send(CatnipShard.controlAddress(shard), new JsonObject().put("mode", "TRACE"),
-                reply -> {
-                    if(reply.succeeded()) {
-                        // ow
-                        future.complete(ImmutableList.copyOf(reply.result().body().stream()
-                                .map(e -> (String) e).collect(Collectors.toList())));
-                    } else {
-                        future.fail(reply.cause());
-                    }
-                });
-        return future;
-    }
-    
-    @Override
-    public void shutdown() {
-        for(int i = 0; i < shardCount(); i++) {
-            catnip.eventBus().<JsonArray>send(CatnipShard.controlAddress(i), new JsonObject().put("mode", "SHUTDOWN"));
+            catnip().logAdapter().warn("Ignoring duplicate queue for shard {}", shard);
         }
     }
 }

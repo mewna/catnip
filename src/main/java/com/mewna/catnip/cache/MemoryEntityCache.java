@@ -172,11 +172,15 @@ public class MemoryEntityCache implements EntityCacheWorker {
             }
             // Guilds
             case Raw.GUILD_CREATE: {
+                // This is wrapped in a blocking executor because there could
+                // be cases of massive guilds that end blocking for a
+                // significant amount of time while the guild is being cached.
                 catnip().vertx().executeBlocking(f -> {
                     final Guild guild = entityBuilder.createGuild(payload);
                     guildCache.put(guild.id(), guild);
                     f.complete(null);
-                }, __ -> {});
+                }, __ -> {
+                });
                 break;
             }
             case Raw.GUILD_UPDATE: {
