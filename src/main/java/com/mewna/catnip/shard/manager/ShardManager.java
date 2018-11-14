@@ -5,6 +5,7 @@ import io.vertx.core.Future;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -19,6 +20,12 @@ public interface ShardManager {
      */
     @Nonnegative
     int shardCount();
+    
+    /**
+     * @return The collection of shard ids owned by this shard manager
+     * instance.
+     */
+    Collection<Integer> shardIds();
     
     /**
      * Starts booting shards.
