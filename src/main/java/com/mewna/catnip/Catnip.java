@@ -239,9 +239,7 @@ public interface Catnip {
      *
      * @return Whether or not the guild is unavailable.
      */
-    default boolean isUnavailable(@Nonnull final String guildId) {
-        return unavailableGuilds().contains(guildId);
-    }
+    boolean isUnavailable(@Nonnull final String guildId);
     
     /**
      * @return The extension manager being used by this catnip instance.

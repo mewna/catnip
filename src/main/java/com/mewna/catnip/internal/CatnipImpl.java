@@ -126,6 +126,11 @@ public class CatnipImpl implements Catnip {
         unavailableGuilds.add(id);
     }
     
+    @Override
+    public boolean isUnavailable(@Nonnull final String guildId) {
+        return unavailableGuilds.contains(guildId);
+    }
+    
     @Nonnull
     public Catnip setup() {
         // Register codecs
