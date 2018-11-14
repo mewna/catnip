@@ -103,6 +103,9 @@ public class DefaultShardManager extends AbstractShardManager {
                     if(shards != -1) {
                         // Update from API
                         shardCount = shards;
+                        catnip().logAdapter().info("Loaded expected shard count: {}", shardCount);
+                        shardIds.clear();
+                        shardIds.addAll(IntStream.range(0, shardCount).boxed().collect(Collectors.toList()));
                         loadShards();
                     } else {
                         throw new IllegalStateException("Invalid token provided (Gateway JSON response doesn't have `shards` key)!");
