@@ -132,7 +132,7 @@ public class DefaultShardManager extends AbstractShardManager {
     }
     
     private void poll() {
-        CompletableFuture.allOf(conditions().stream().map(ShardCondition::get).toArray(CompletableFuture[]::new))
+        CompletableFuture.allOf(conditions().stream().map(ShardCondition::preshard).toArray(CompletableFuture[]::new))
                 .thenAccept(__ -> connect())
                 .exceptionally(e -> {
                     catnip().logAdapter().warn("Couldn't complete shard conditions, polling again in 1s", e);
@@ -168,6 +168,7 @@ public class DefaultShardManager extends AbstractShardManager {
                                 break;
                             }
                         }
+                        conditions().forEach(e -> e.postshard(state));
                     } else {
                         catnip().logAdapter().warn("Failed connecting shard {} entirely, re-queueing", nextId);
                         addToConnectQueue(nextId);
