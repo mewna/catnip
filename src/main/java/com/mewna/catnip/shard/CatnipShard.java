@@ -214,12 +214,12 @@ public class CatnipShard extends AbstractVerticle {
         catnip.eventBus().publish(Raw.CONNECTING, shardInfo());
         client.websocketAbs(Catnip.getGatewayUrl(), null, null, null,
                 socket -> {
-                    stateRef.get().socketOpen().set(true);
                     catnip.eventBus().publish(Raw.CONNECTED, shardInfo());
                     socket.frameHandler(frame -> handleSocketFrame(msg, frame))
                             .closeHandler(this::handleSocketClose)
                             .exceptionHandler(Throwable::printStackTrace);
                     stateRef.set(new ShardState(socket));
+                    stateRef.get().socketOpen().set(true);
                 },
                 failure -> {
                     stateRef.set(null);
