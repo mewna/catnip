@@ -132,6 +132,10 @@ public class DefaultShardManager extends AbstractShardManager {
     }
     
     private void poll() {
+        if(connectQueue.isEmpty()) {
+            catnip().vertx().setTimer(1000L, __ -> poll());
+            return;
+        }
         CompletableFuture.allOf(conditions().stream().map(ShardCondition::preshard).toArray(CompletableFuture[]::new))
                 .thenAccept(__ -> connect())
                 .exceptionally(e -> {
@@ -142,10 +146,6 @@ public class DefaultShardManager extends AbstractShardManager {
     }
     
     private void connect() {
-        if(connectQueue.isEmpty()) {
-            catnip().vertx().setTimer(1000L, __ -> poll());
-            return;
-        }
         final int nextId = connectQueue.removeFirst();
         catnip().logAdapter().info("Connecting shard {} (queue len {})", nextId, connectQueue.size());
         catnip().eventBus().<JsonObject>send(CatnipShard.controlAddress(nextId), new JsonObject().put("mode", "START"),
