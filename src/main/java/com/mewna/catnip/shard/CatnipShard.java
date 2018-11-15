@@ -16,7 +16,6 @@ import io.vertx.core.http.WebSocket;
 import io.vertx.core.http.WebSocketFrame;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -204,8 +203,10 @@ public class CatnipShard extends AbstractVerticle {
     private void doStop() {
         if(stateRef.get() != null) {
             stateRef.get().socket().close((short) 4000);
+            stateRef.get().socketOpen().set(false);
         }
         messageQueue.clear();
+        presenceQueue.clear();
         heartbeatAcked.set(true);
     }
     
@@ -213,6 +214,7 @@ public class CatnipShard extends AbstractVerticle {
         catnip.eventBus().publish(Raw.CONNECTING, shardInfo());
         client.websocketAbs(Catnip.getGatewayUrl(), null, null, null,
                 socket -> {
+                    stateRef.get().socketOpen().set(true);
                     catnip.eventBus().publish(Raw.CONNECTED, shardInfo());
                     socket.frameHandler(frame -> handleSocketFrame(msg, frame))
                             .closeHandler(this::handleSocketClose)
@@ -275,6 +277,7 @@ public class CatnipShard extends AbstractVerticle {
             }
             if(frame.isClose()) {
                 catnip.logAdapter().warn("Socket closing with code {}: {}", frame.closeStatusCode(), frame.closeReason());
+                stateRef.get().socketOpen().set(false);
             }
         } catch(final Exception e) {
             e.printStackTrace();
@@ -349,7 +352,7 @@ public class CatnipShard extends AbstractVerticle {
     
     private void handleSocketSend(final Message<JsonObject> msg) {
         final ShardState shardState = stateRef.get();
-        if(shardState != null) {
+        if(shardState != null && shardState.socket() != null && shardState.socketOpen().get()) {
             JsonObject payload = msg.body();
             for(final Extension extension : catnip.extensionManager().extensions()) {
                 for(final CatnipHook hook : extension.hooks()) {
@@ -365,10 +368,12 @@ public class CatnipShard extends AbstractVerticle {
         trace = payload.getJsonArray("_trace").stream().map(e -> (String) e).collect(Collectors.toList());
         
         catnip.vertx().setPeriodic(payload.getInteger("heartbeat_interval"), timerId -> {
-            if(stateRef.get() != null) {
+            final ShardState shardState = stateRef.get();
+            if(shardState != null && shardState.socket() != null && shardState.socketOpen().get()) {
                 if(!heartbeatAcked.get()) {
                     // Zombie
                     catnip.logAdapter().warn("Shard {} zombied, queueing reconnect!", id);
+                    catnip.vertx().cancelTimer(timerId);
                     catnip.eventBus().publish(controlAddress(id), new JsonObject().put("mode", "STOP"));
                     return;
                 }
@@ -546,7 +551,6 @@ public class CatnipShard extends AbstractVerticle {
         RESUMED,
     }
     
-    @AllArgsConstructor
     @Accessors(fluent = true)
     private static final class ShardState {
         @Getter
@@ -554,11 +558,19 @@ public class CatnipShard extends AbstractVerticle {
         @Getter
         private final Inflater inflater;
         @Getter
+        private final AtomicBoolean socketOpen = new AtomicBoolean(false);
+        @Getter
         @Setter
         private Buffer readBuffer;
         
         ShardState(final WebSocket socket) {
             this(socket, new Inflater(), null);
+        }
+        
+        ShardState(final WebSocket socket, final Inflater inflater, final Buffer readBuffer) {
+            this.socket = socket;
+            this.inflater = inflater;
+            this.readBuffer = readBuffer;
         }
     }
 }
