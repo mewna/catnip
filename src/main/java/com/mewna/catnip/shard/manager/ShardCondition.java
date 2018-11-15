@@ -1,5 +1,8 @@
 package com.mewna.catnip.shard.manager;
 
+import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
+
+import javax.annotation.Nonnull;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -10,14 +13,22 @@ import java.util.concurrent.CompletableFuture;
  * @author amy
  * @since 11/14/18.
  */
-@FunctionalInterface
 public interface ShardCondition {
     /**
      * Get the future for this shard condition. This function is called
      * ASYNCHRONOUSLY and must be ASYNCHRONOUS to avoid blocking the vert.x
      * event loop threads.
+     * <p/>
+     * This is run prior to sharding.
      *
      * @return The future for this shard condition.
      */
-    CompletableFuture<Boolean> get();
+    CompletableFuture<Boolean> preshard();
+    
+    /**
+     * Run once sharding has finished. This function is called SYNCHRONOUSLY.
+     *
+     * @param state The state the shard connected with
+     */
+    void postshard(@Nonnull ShardConnectState state);
 }
