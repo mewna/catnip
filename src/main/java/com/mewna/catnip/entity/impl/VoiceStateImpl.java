@@ -26,14 +26,23 @@ public class VoiceStateImpl implements VoiceState, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
+    @JsonProperty
     private String guildId;
+    @JsonProperty
     private String channelId;
+    @JsonProperty
     private String userId;
+    @JsonProperty
     private String sessionId;
+    @JsonProperty
     private boolean deaf;
+    @JsonProperty
     private boolean mute;
+    @JsonProperty
     private boolean selfDeaf;
+    @JsonProperty
     private boolean selfMute;
+    @JsonProperty
     private boolean suppress;
     
     @Nullable
@@ -48,5 +57,10 @@ public class VoiceStateImpl implements VoiceState, RequiresCatnip {
     
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("VoiceState (%s, %s - %s)", userId, guildId, channelId);
     }
 }

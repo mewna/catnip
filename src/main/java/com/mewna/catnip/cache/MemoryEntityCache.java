@@ -39,7 +39,7 @@ import static com.mewna.catnip.shard.DiscordEvent.Raw;
 public class MemoryEntityCache implements EntityCacheWorker {
     // TODO: What even is efficiency
     
-    private static final String DM_CHANNEL_KEY = "DMS";
+    public static final String DM_CHANNEL_KEY = "DMS";
     
     @SuppressWarnings("WeakerAccess")
     protected final Map<String, Guild> guildCache = new ConcurrentHashMap<>();
@@ -172,8 +172,15 @@ public class MemoryEntityCache implements EntityCacheWorker {
             }
             // Guilds
             case Raw.GUILD_CREATE: {
-                final Guild guild = entityBuilder.createGuild(payload);
-                guildCache.put(guild.id(), guild);
+                // This is wrapped in a blocking executor because there could
+                // be cases of massive guilds that end blocking for a
+                // significant amount of time while the guild is being cached.
+                catnip().vertx().executeBlocking(f -> {
+                    final Guild guild = entityBuilder.createGuild(payload);
+                    guildCache.put(guild.id(), guild);
+                    f.complete(null);
+                }, __ -> {
+                });
                 break;
             }
             case Raw.GUILD_UPDATE: {

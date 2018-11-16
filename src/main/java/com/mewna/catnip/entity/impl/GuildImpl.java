@@ -84,30 +84,6 @@ public class GuildImpl implements Guild, RequiresCatnip, Timestamped {
     
     @Nonnull
     @Override
-    public List<Role> roles() {
-        return catnip.cache().roles(id);
-    }
-    
-    @Nonnull
-    @Override
-    public List<Member> members() {
-        return catnip.cache().members(id);
-    }
-    
-    @Nonnull
-    @Override
-    public List<Channel> channels() {
-        return catnip.cache().channels(id);
-    }
-    
-    @Nonnull
-    @Override
-    public List<CustomEmoji> emojis() {
-        return catnip.cache().emojis(id);
-    }
-    
-    @Nonnull
-    @Override
     public OffsetDateTime joinedAt() {
         return parseTimestamp(joinedAt);
     }

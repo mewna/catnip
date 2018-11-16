@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.GuildEmbed;
+import com.mewna.catnip.entity.guild.GuildEmbed;
 import com.mewna.catnip.entity.channel.*;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
 import com.mewna.catnip.entity.guild.*;
@@ -1049,6 +1049,16 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public WebhooksUpdate createWebhooksUpdate(@Nonnull final JsonObject data) {
+        return WebhooksUpdateImpl.builder()
+                .catnip(catnip)
+                .guildId(data.getString("guild_id"))
+                .channelId(data.getString("channel_id"))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public DeletedMessage createDeletedMessage(@Nonnull final JsonObject data) {
         return DeletedMessageImpl.builder()
                 .catnip(catnip)
@@ -1076,6 +1086,15 @@ public final class EntityBuilder {
                 .catnip(catnip)
                 .version(data.getInteger("v"))
                 .user(createUser(data.getJsonObject("user")))
+                .trace(ImmutableList.copyOf(data.getJsonArray("_trace").stream().map(e -> (String) e).collect(Collectors.toList())))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Resumed createResumed(@Nonnull final JsonObject data) {
+        return ResumedImpl.builder()
+                .catnip(catnip)
                 .trace(ImmutableList.copyOf(data.getJsonArray("_trace").stream().map(e -> (String) e).collect(Collectors.toList())))
                 .build();
     }

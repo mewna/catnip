@@ -2,7 +2,10 @@ package com.mewna.catnip.entity.message;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.*;
+import com.mewna.catnip.cache.MemoryEntityCache;
+import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.channel.TextChannel;
+import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.impl.MessageImpl;
 import com.mewna.catnip.entity.impl.MessageImpl.AttachmentImpl;
@@ -16,9 +19,12 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 /**
+ * A single message in Discord.
+ *
  * @author amy
  * @since 9/4/18.
  */
@@ -145,11 +151,25 @@ public interface Message extends Snowflake {
     String channelId();
     
     /**
+     * The channel this message was sent in.
+     *
+     * @return The {@link TextChannel} object representing the channel this
+     * message was sent in. Should not be null.
+     */
+    @CheckReturnValue
+    default TextChannel channel() {
+        return (TextChannel) catnip().cache()
+                // TODO: Find a better way to handle this
+                .channel(Optional.ofNullable(guildId())
+                        .orElse(MemoryEntityCache.DM_CHANNEL_KEY), channelId());
+    }
+    
+    /**
      * Guild-agnostic representation of the author of the message.
      *
-     * @see Message#member() Guild-specific representation of the author.
-     *
      * @return The author of the message. Never null.
+     *
+     * @see Message#member() Guild-specific representation of the author.
      */
     @Nonnull
     User author();
@@ -178,6 +198,23 @@ public interface Message extends Snowflake {
      */
     @Nullable
     String guildId();
+    
+    /**
+     * The guild this message was sent in. May be null.
+     *
+     * @return The {@link Guild} object for the guild this message was sent in.
+     * Will be null if the message is a DM.
+     */
+    @Nullable
+    @CheckReturnValue
+    default Guild guild() {
+        if(guildId() == null) {
+            return null;
+        } else {
+            //noinspection ConstantConditions
+            return catnip().cache().guild(guildId());
+        }
+    }
     
     /**
      * The snowflake ID of the webhook this message was sent by.
@@ -249,7 +286,7 @@ public interface Message extends Snowflake {
         @Nonnull
         @CheckReturnValue
         String fileName();
-    
+        
         /**
          * The size of the file represented by this attachment, in bytes.
          *
@@ -258,25 +295,25 @@ public interface Message extends Snowflake {
         @Nonnegative
         @CheckReturnValue
         int size();
-    
+        
         /**
-         *The source URL for the file.
+         * The source URL for the file.
          *
          * @return String representing the source URL. Never null.
          */
         @Nonnull
         @CheckReturnValue
         String url();
-    
+        
         /**
-         *The proxied URL for the file.
+         * The proxied URL for the file.
          *
          * @return String representing the proxied URL. Never null.
          */
         @Nonnull
         @CheckReturnValue
         String proxyUrl();
-    
+        
         /**
          * The height of this attachment, if it's an image.
          *
@@ -284,7 +321,7 @@ public interface Message extends Snowflake {
          */
         @CheckReturnValue
         int height();
-    
+        
         /**
          * The width of this attachment, if it's an image.
          *
@@ -292,7 +329,7 @@ public interface Message extends Snowflake {
          */
         @CheckReturnValue
         int width();
-    
+        
         /**
          * Whether this attachment is an image.
          *
@@ -314,7 +351,7 @@ public interface Message extends Snowflake {
         @Nonnegative
         @CheckReturnValue
         int count();
-    
+        
         /**
          * Whether the current logged in account added this reaction.
          *
@@ -322,7 +359,7 @@ public interface Message extends Snowflake {
          */
         @CheckReturnValue
         boolean self();
-    
+        
         /**
          * The emojis representing this reaction.
          *

@@ -4,17 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.misc.Ready;
-import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.entity.channel.WebhooksUpdate;
 import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 
 /**
  * @author amy
- * @since 10/4/18.
+ * @since 11/10/18.
  */
 @Getter(onMethod_ = @JsonProperty)
 @Setter(onMethod_ = @JsonProperty)
@@ -22,21 +20,15 @@ import java.util.List;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReadyImpl implements Ready, RequiresCatnip {
+public class WebhooksUpdateImpl implements WebhooksUpdate, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private int version;
-    private User user;
-    private List<String> trace;
+    private String channelId;
+    private String guildId;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
-    }
-    
-    @Override
-    public String toString() {
-        return String.format("Ready (v%s, %s#%s (%s))", version, user.username(), user.discriminator(), user.id());
     }
 }
