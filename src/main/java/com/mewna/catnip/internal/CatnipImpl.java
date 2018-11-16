@@ -62,7 +62,7 @@ public class CatnipImpl implements Catnip {
     
     public CatnipImpl(@Nonnull final Vertx vertx, @Nonnull final CatnipOptions options) {
         this.vertx = vertx;
-        requester = new RestRequester(this, options.restBucketBackend());
+        requester = new RestRequester(this, options.restBucketBackend(), options.restHttpClient());
         token = options.token();
         shardManager = options.shardManager();
         sessionManager = options.sessionManager();
@@ -131,6 +131,11 @@ public class CatnipImpl implements Catnip {
         unavailableGuilds.add(id);
     }
     
+    @Override
+    public boolean isUnavailable(@Nonnull final String guildId) {
+        return unavailableGuilds.contains(guildId);
+    }
+    
     @Nonnull
     public Catnip setup() {
         // Register codecs
@@ -145,6 +150,7 @@ public class CatnipImpl implements Catnip {
         
         // Lifecycle
         codec(ReadyImpl.class);
+        codec(ResumedImpl.class);
         
         // Messages
         codec(MessageImpl.class);
@@ -163,6 +169,7 @@ public class CatnipImpl implements Catnip {
         codec(VoiceChannelImpl.class);
         codec(WebhookImpl.class);
         codec(ChannelPinsUpdateImpl.class);
+        codec(WebhooksUpdateImpl.class);
         
         // Guilds
         codec(GuildImpl.class);

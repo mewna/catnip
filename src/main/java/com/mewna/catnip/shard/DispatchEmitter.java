@@ -4,6 +4,7 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.misc.Ready;
+import com.mewna.catnip.entity.misc.Resumed;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.internal.CatnipImpl;
 import io.vertx.core.json.JsonArray;
@@ -14,12 +15,10 @@ import javax.annotation.Nonnull;
 import static com.mewna.catnip.shard.DiscordEvent.Raw;
 
 /**
- * TODO: This should be cache-aware so that we don't pay the cost of deserializing twice
- *
  * @author amy
  * @since 9/2/18.
  */
-public class DispatchEmitter {
+public final class DispatchEmitter {
     private final Catnip catnip;
     private final EntityBuilder entityBuilder;
     
@@ -61,6 +60,11 @@ public class DispatchEmitter {
                 final Ready ready = entityBuilder.createReady(data);
                 ((CatnipImpl) catnip).selfUser(ready.user());
                 catnip.eventBus().publish(type, ready);
+                break;
+            }
+            case Raw.RESUMED: {
+                final Resumed resumed = entityBuilder.createResumed(data);
+                catnip.eventBus().publish(type, resumed);
                 break;
             }
             
@@ -118,6 +122,10 @@ public class DispatchEmitter {
             }
             case Raw.CHANNEL_PINS_UPDATE: {
                 catnip.eventBus().publish(type, entityBuilder.createChannelPinsUpdate(data));
+                break;
+            }
+            case Raw.WEBHOOKS_UPDATE: {
+                catnip.eventBus().publish(type, entityBuilder.createWebhooksUpdate(data));
                 break;
             }
             

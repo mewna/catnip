@@ -3,34 +3,27 @@ package com.mewna.catnip.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mewna.catnip.Catnip;
 import io.vertx.core.json.JsonObject;
-import lombok.RequiredArgsConstructor;
 
 import javax.annotation.Nonnull;
 
 /**
+ * A single entity in catnip.
+ *
  * @author natanbc
  * @since 5/9/18.
  */
 @SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
 public interface Entity {
     /**
-     * Returns the catnip instance associated with this entity.
+     * Converts JSON to the specified entity type.
      *
-     * @return The catnip instance of this entity.
+     * @param catnip The catnip instance to attach to the entity.
+     * @param type   The type of the entity.
+     * @param json   The JSON to convert.
+     * @param <T>    The type of the entity.
+     *
+     * @return The newly-created entity.
      */
-    @JsonIgnore
-    Catnip catnip();
-    
-    /**
-     * Map this entity instance to a JSON object.
-     * @return A JSON object representing this entity.
-     */
-    @Nonnull
-    @JsonIgnore
-    default JsonObject toJson() {
-        return JsonObject.mapFrom(this);
-    }
-    
     @Nonnull
     @JsonIgnore
     @SuppressWarnings("ClassReferencesSubclass")
@@ -42,5 +35,24 @@ public interface Entity {
             ((RequiresCatnip) t).catnip(catnip);
         }
         return t;
+    }
+    
+    /**
+     * Returns the catnip instance associated with this entity.
+     *
+     * @return The catnip instance of this entity.
+     */
+    @JsonIgnore
+    Catnip catnip();
+    
+    /**
+     * Map this entity instance to a JSON object.
+     *
+     * @return A JSON object representing this entity.
+     */
+    @Nonnull
+    @JsonIgnore
+    default JsonObject toJson() {
+        return JsonObject.mapFrom(this);
     }
 }

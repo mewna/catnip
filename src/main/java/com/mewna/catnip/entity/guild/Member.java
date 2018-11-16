@@ -2,6 +2,7 @@ package com.mewna.catnip.entity.guild;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.impl.MemberImpl;
@@ -12,8 +13,11 @@ import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
+import java.util.stream.Collectors;
 
 /**
+ * A member in a guild.
+ *
  * @author amy
  * @since 9/4/18.
  */
@@ -46,12 +50,26 @@ public interface Member extends Snowflake {
     String nick();
     
     /**
+     * The ids of the user's roles in this guild.
+     *
+     * @return A {@link Set} of the ids of the user's roles.
+     */
+    @Nonnull
+    @CheckReturnValue
+    Set<String> roleIds();
+    
+    /**
      * The user's roles in this guild.
      *
      * @return A {@link Set} of the user's roles.
      */
     @Nonnull
-    Set<String> roleIds();
+    @CheckReturnValue
+    default Set<Role> roles() {
+        return ImmutableSet.copyOf(roleIds().stream()
+                .map(e -> catnip().cache().role(guildId(), e))
+                .collect(Collectors.toSet()));
+    }
     
     /**
      * Whether the user is voice muted.

@@ -1,7 +1,7 @@
 package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
-import com.mewna.catnip.entity.GuildEmbed;
+import com.mewna.catnip.entity.guild.GuildEmbed;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Guild.GuildEditFields;

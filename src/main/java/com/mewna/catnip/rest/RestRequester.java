@@ -27,7 +27,10 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.TimeUnit;
 
 import static io.vertx.core.http.HttpMethod.GET;
 
@@ -47,13 +50,14 @@ public class RestRequester {
     
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
     private final Catnip catnip;
-    private final OkHttpClient _http = new OkHttpClient();
+    private final OkHttpClient _http;
     private final Collection<Bucket> submittedBuckets = new ConcurrentHashSet<>();
     private final BucketBackend bucketBackend;
     
-    public RestRequester(final Catnip catnip, final BucketBackend bucketBackend) {
+    public RestRequester(final Catnip catnip, final BucketBackend bucketBackend, final OkHttpClient _http) {
         this.catnip = catnip;
         this.bucketBackend = bucketBackend;
+        this._http = _http;
     }
     
     public CompletionStage<ResponsePayload> queue(final OutboundRequest r) {
@@ -70,11 +74,11 @@ public class RestRequester {
                                 final Buffer body, final MultiMap headers, final boolean succeeded,
                                 final Throwable failureCause) {
         if(succeeded) {
-            //final HttpResponse<Buffer> result = res.result();
+            catnip.logAdapter().debug("Completed request {}", r);
             if(statusCode < 200 || statusCode > 299) {
                 if(statusCode != 429) {
-                    catnip.logAdapter().warn("Got unexpected HTTP status: {} {}, route: {} {}", statusCode,
-                            statusMessage, r.route.method().name(), r.route.baseRoute());
+                    catnip.logAdapter().warn("Got unexpected HTTP status: {} '{}', route: {} {}, request {}, body {}", statusCode,
+                            statusMessage, r.route.method().name(), r.route.baseRoute(), r, body.toString());
                 }
             }
             boolean ratelimited = false;
@@ -133,10 +137,12 @@ public class RestRequester {
             // Fail request, resubmit to queue if failed less than 3 times, complete with error otherwise.
             r.failed();
             if(r.failedAttempts() >= 3) {
+                catnip.logAdapter().debug("Request {} failed, giving up!", r);
                 r.future.fail(failureCause);
                 bucket.finishRequest();
                 bucket.submit();
             } else {
+                catnip.logAdapter().debug("Request {} failed, retrying ({} / 3)!", r, r.failedAttempts() + 1);
                 bucket.retry(r);
             }
         }
@@ -172,42 +178,47 @@ public class RestRequester {
                     && route.baseRoute().contains("/reactions/");
             if(bucket.remaining() > 0 || hasMemeReactionRatelimits) {
                 // Do request and update bucket
-                catnip.logAdapter().debug("Making request: {} (bucket {})", API_BASE + route.baseRoute(), bucket.route);
+                catnip.logAdapter().debug("Making request: {} {} (bucket {})", route.method().name(),
+                        API_BASE + route.baseRoute(), bucket.route);
                 // v.x is dumb and doesn't support multipart, so we use okhttp instead /shrug
                 if(r.buffers != null) {
                     try {
                         @SuppressWarnings("UnnecessarilyQualifiedInnerClassAccess")
                         final MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
                         
-                        for (int index = 0; index < r.buffers.size(); index++) {
+                        for(int index = 0; index < r.buffers.size(); index++) {
                             final ImmutablePair<String, Buffer> pair = r.buffers.get(index);
                             builder.addFormDataPart("file" + index, pair.left, new MultipartRequestBody(pair.right));
                         }
-                        if (r.object != null) {
+                        if(r.object != null) {
                             for(final Extension extension : catnip.extensionManager().extensions()) {
                                 for(final CatnipHook hook : extension.hooks()) {
                                     r.object = hook.rawRestSendObjectHook(route, r.object);
                                 }
                             }
                             builder.addFormDataPart("payload_json", r.object.encode());
-                        } else if (r.array != null) {
+                        } else if(r.array != null) {
                             builder.addFormDataPart("payload_json", r.array.encode());
                         } else {
-                            builder.addFormDataPart("payload_json", new JsonObject().putNull("content").putNull("embed").encode());
+                            builder.addFormDataPart("payload_json", new JsonObject()
+                                    .putNull("content")
+                                    .putNull("embed").encode());
                         }
+                        
+                        executeHttpRequest(r, route, bucket, builder.build());
                     } catch(final Exception e) {
                         e.printStackTrace();
                     }
                 } else {
                     final String encoded;
-                    if (r.object != null) {
+                    if(r.object != null) {
                         for(final Extension extension : catnip.extensionManager().extensions()) {
                             for(final CatnipHook hook : extension.hooks()) {
                                 r.object = hook.rawRestSendObjectHook(route, r.object);
                             }
                         }
                         encoded = r.object.encode();
-                    } else if (r.array != null) {
+                    } else if(r.array != null) {
                         encoded = r.array.encode();
                     } else {
                         encoded = null;
@@ -311,13 +322,12 @@ public class RestRequester {
             this(route, params);
             this.object = object;
         }
-    
+        
         public OutboundRequest(final Route route, final Map<String, String> params, final JsonArray array) {
             this(route, params);
             this.array = array;
         }
-    
-    
+        
         void failed() {
             failedAttempts++;
         }
@@ -326,6 +336,11 @@ public class RestRequester {
             return failedAttempts;
         }
         
+        @Override
+        public String toString() {
+            return String.format("OutboundRequest (%s, %s, object=%s, array=%s, buffers=%s, failures=%s)",
+                    route, params, object == null, array == null, buffers != null && !buffers.isEmpty(), failedAttempts);
+        }
     }
     
     @RequiredArgsConstructor

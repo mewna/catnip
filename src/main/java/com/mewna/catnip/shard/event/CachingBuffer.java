@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.GatewayOp;
 import io.vertx.core.json.JsonObject;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.Value;
 import lombok.experimental.Accessors;
 
@@ -84,12 +86,12 @@ public class CachingBuffer extends AbstractBuffer {
             }
             case Raw.GUILD_CREATE: {
                 final String guild = d.getString("id");
-                //catnip().logAdapter().debug("Got possibly-BufferState-ed guild {}", guild);
                 final BufferState bufferState = buffers.get(id);
                 // Make sure to cache guild
                 maybeCache(type, d);
                 // Trigger member chunking
-                if(d.getInteger("member_count") > LARGE_THRESHOLD) {
+                final Integer memberCount = d.getInteger("member_count");
+                if(memberCount > LARGE_THRESHOLD) {
                     // Chunk members
                     catnip().eventBus().publish(CatnipShard.websocketMessageQueueAddress(id),
                             CatnipShard.basePayload(GatewayOp.REQUEST_GUILD_MEMBERS,
@@ -102,7 +104,6 @@ public class CachingBuffer extends AbstractBuffer {
                 if(bufferState != null) {
                     if(bufferState.readyGuilds().isEmpty()) {
                         // No guilds left, can just dispatch normally
-                        //catnip().logAdapter().debug("BufferState for shard {} empty, removing and emitting.", id);
                         buffers.remove(id);
                         maybeCache(type, d);
                         emitter().emit(event);
@@ -111,16 +112,24 @@ public class CachingBuffer extends AbstractBuffer {
                         if(bufferState.readyGuilds().contains(guild)) {
                             bufferState.recvGuild(guild);
                             emitter().emit(event);
-                            bufferState.replayGuild(guild);
-                            //catnip().logAdapter().debug("Buffered guild {} for BufferState {}", guild, id);
-                            // Replay all buffered events once we run out
-                            if(bufferState.readyGuilds().isEmpty()) {
-                                //catnip().logAdapter().debug("BufferState for {} empty, replaying {} events...", id, bufferState.buffer().size());
-                                buffers.remove(id);
-                                bufferState.replay();
+                            
+                            if(catnip().chunkMembers() && memberCount > LARGE_THRESHOLD) {
+                                // If we're chunking members, calculate how many chunks we have to await
+                                int chunks = memberCount / 1000;
+                                if(memberCount % 1000 != 0) {
+                                    // Not a perfect 1k, add a chunk to make up for how math works
+                                    chunks += 1;
+                                }
+                                bufferState.initialGuildChunkCount(guild, chunks);
+                            } else {
+                                bufferState.replayGuild(guild);
+                                // Replay all buffered events once we run out
+                                if(bufferState.readyGuilds().isEmpty()) {
+                                    buffers.remove(id);
+                                    bufferState.replay();
+                                }
                             }
                         } else {
-                            //catnip().logAdapter().debug("Buffering event for BufferState {} @ {}", id, guild);
                             bufferState.buffer(event);
                         }
                     }
@@ -131,6 +140,28 @@ public class CachingBuffer extends AbstractBuffer {
                 }
                 break;
             }
+            case Raw.GUILD_MEMBERS_CHUNK: {
+                if(catnip().chunkMembers()) {
+                    final BufferState bufferState = buffers.get(id);
+                    if(bufferState != null) {
+                        final String guild = d.getString("guild_id");
+                        maybeCache(type, d);
+                        emitter().emit(event);
+                        bufferState.acceptChunk(guild);
+                        if(bufferState.doneChunking(guild)) {
+                            // If we're finished chunking that guild, defer doing everything needed
+                            // by a little bit to allow chunk caching to finish
+                            bufferState.replayGuild(guild);
+                            // Replay all buffered events once we run out
+                            if(bufferState.readyGuilds().isEmpty()) {
+                                buffers.remove(id);
+                                bufferState.replay();
+                            }
+                        }
+                    }
+                }
+                // We very explicitly DON'T break here because this is SUPPOSED to fall through to the next case
+            }
             default: {
                 // Buffer and replay later
                 final BufferState bufferState = buffers.get(id);
@@ -138,15 +169,9 @@ public class CachingBuffer extends AbstractBuffer {
                     final String guildId = d.getString("guild_id", null);
                     if(guildId != null) {
                         if(bufferState.readyGuilds().contains(guildId)) {
-                            if(catnip().chunkMembers() && type.equals(Raw.GUILD_MEMBERS_CHUNK)) {
-                                // When chunking members, we want to immediately cache+emit
-                                maybeCache(type, d);
-                                emitter().emit(event);
-                            } else {
-                                // If we have a guild id, and we have a guild being awaited,
-                                // buffer the event
-                                bufferState.recvGuildEvent(guildId, event);
-                            }
+                            // If we have a guild id, and we have a guild being awaited,
+                            // buffer the event
+                            bufferState.recvGuildEvent(guildId, event);
                         } else {
                             // If the payload is for a non-buffered guild, but we currently
                             // have a BufferState, then it should be buffered, since it's
@@ -199,9 +224,11 @@ public class CachingBuffer extends AbstractBuffer {
     @Value
     @Accessors(fluent = true)
     private final class BufferState {
+        
         private int id;
         private final Set<String> readyGuilds;
         private final Map<String, Deque<JsonObject>> guildBuffers = new ConcurrentHashMap<>();
+        private final Map<String, Counter> guildChunkCount = new ConcurrentHashMap<>();
         private final Deque<JsonObject> buffer = new ConcurrentLinkedDeque<>();
         
         void recvGuild(final String id) {
@@ -222,18 +249,36 @@ public class CachingBuffer extends AbstractBuffer {
                 final Deque<JsonObject> queue = guildBuffers.get(id);
                 final int count = queue.size();
                 queue.forEach(emitter()::emit);
-                //catnip().logAdapter().debug("Replayed {} buffered events for guild {}", count, id);
-            }/* else {
-                // It's possible that we never reach this case, eg. a guild
-                // not receiving any events before we finish caching it
-                catnip().logAdapter().warn("Was asked to replay guild {}, but it's not being buffered!", id);
-            }*/
+            }
         }
         
         void replay() {
             final int count = buffer.size();
             buffer.forEach(emitter()::emit);
-            //catnip().logAdapter().debug("Replayed {} buffered events", count);
+        }
+        
+        void initialGuildChunkCount(final String guild, final int count) {
+            guildChunkCount.put(guild, new Counter(count));
+        }
+        
+        void acceptChunk(final String guild) {
+            final Counter counter = guildChunkCount.get(guild);
+            counter.decrement();
+        }
+        
+        boolean doneChunking(final String guild) {
+            return guildChunkCount.get(guild).count() == 0;
+        }
+    }
+    
+    @Accessors(fluent = true)
+    @AllArgsConstructor
+    private final class Counter {
+        @Getter
+        private int count;
+        
+        void decrement() {
+            --count;
         }
     }
 }
