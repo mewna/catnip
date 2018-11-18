@@ -6,7 +6,11 @@ import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.entity.impl.*;
+import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
 import com.mewna.catnip.entity.user.Presence;
+import com.mewna.catnip.entity.user.Presence.Activity;
+import com.mewna.catnip.entity.user.Presence.ActivityType;
+import com.mewna.catnip.entity.user.Presence.OnlineStatus;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.DefaultExtensionManager;
@@ -15,6 +19,7 @@ import com.mewna.catnip.internal.logging.LogAdapter;
 import com.mewna.catnip.internal.ratelimit.Ratelimiter;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
+import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.ShardInfo;
 import com.mewna.catnip.shard.event.EventBuffer;
 import com.mewna.catnip.shard.manager.ShardManager;
@@ -22,15 +27,18 @@ import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.util.JsonPojoCodec;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /**
  * @author amy
@@ -131,6 +139,85 @@ public class CatnipImpl implements Catnip {
         return unavailableGuilds.contains(guildId);
     }
     
+    @Override
+    public void openVoiceConnection(@Nonnull final String guildId, @Nonnull final String channelId) {
+        eventBus().send(CatnipShard.websocketMessageQueueAddress(shardIdFor(guildId)),
+                new JsonObject()
+                        .put("op", 4)
+                        .put("d", new JsonObject()
+                                .put("guild_id", guildId)
+                                .put("channel_id", channelId)
+                                .put("self_mute", false)
+                                .put("self_deaf", false)
+                        )
+        );
+    }
+    
+    @Override
+    public void closeVoiceConnection(@Nonnull final String guildId) {
+        eventBus().send(CatnipShard.websocketMessageQueueAddress(shardIdFor(guildId)),
+                new JsonObject()
+                        .put("op", 4)
+                        .put("d", new JsonObject()
+                                .put("guild_id", guildId)
+                                .putNull("channel_id")
+                                .put("self_mute", false)
+                                .put("self_deaf", false)
+                        )
+        );
+    }
+    
+    @Override
+    public void presence(@Nonnegative final int shardId, @Nonnull final Consumer<Presence> callback) {
+        eventBus().send(CatnipShard.websocketMessagePresenceUpdateAddress(shardId), null,
+                result -> callback.accept((Presence) result.result().body()));
+    }
+    
+    @Override
+    public void presence(@Nonnull final Presence presence) {
+        int shardCount = shardManager().shardCount();
+        if(shardCount == 0) {
+            shardCount = 1;
+        }
+        for(int i = 0; i < shardCount; i++) {
+            presence(presence, i);
+        }
+    }
+    
+    @Override
+    public void presence(@Nonnull final Presence presence, @Nonnegative final int shardId) {
+        eventBus().publish(CatnipShard.websocketMessagePresenceUpdateAddress(shardId), presence);
+    }
+    
+    @Override
+    public void presence(@Nullable final OnlineStatus status, @Nullable final String game, @Nullable final ActivityType type,
+                         @Nullable final String url) {
+        final OnlineStatus stat;
+        if(status != null) {
+            stat = status;
+        } else {
+            final User self = selfUser();
+            if(self != null) {
+                final Presence presence = cache().presence(self.id());
+                stat = presence == null ? OnlineStatus.ONLINE : presence.status();
+            } else {
+                stat = OnlineStatus.ONLINE;
+            }
+        }
+        final Activity activity = game != null
+                ? ActivityImpl.builder()
+                .name(game)
+                .type(type == null ? ActivityType.PLAYING : type)
+                .url(type == ActivityType.STREAMING ? url : null)
+                .build()
+                : null;
+        presence(PresenceImpl.builder()
+                .catnip(this)
+                .status(stat)
+                .activity(activity)
+                .build());
+    }
+    
     @Nonnull
     public Catnip setup() {
         // Register codecs
@@ -216,5 +303,10 @@ public class CatnipImpl implements Catnip {
         }
         shardManager.start();
         return this;
+    }
+    
+    private int shardIdFor(@Nonnull final String guildId) {
+        final long idLong = Long.parseUnsignedLong(guildId);
+        return (int)((idLong >>> 22) % shardManager.shardCount());
     }
 }
