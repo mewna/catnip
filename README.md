@@ -8,6 +8,8 @@ A Discord API wrapper in Java. Fully async / reactive, built on top of
 
 We have a Discord! https://discord.gg/yeF2HpP
 
+Licensed under the [BSD 3-Clause License](https://tldrlegal.com/license/bsd-3-clause-license-(revised)).
+
 ## Installation
 
 Run `mvn clean test install`
