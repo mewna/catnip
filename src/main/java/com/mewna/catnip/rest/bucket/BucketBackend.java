@@ -59,17 +59,31 @@ public interface BucketBackend {
     @Nonnegative
     long reset(@Nonnull String route);
     
+    @Nonnull
+    BucketBackend latency(@Nonnull String route, @Nonnegative long value);
+    
+    @Nonnegative
+    long latency(@Nonnull String route);
+    
+    @Nonnull
+    BucketBackend lastRequest(@Nonnull String route, @Nonnegative long time);
+    
+    @Nonnegative
+    long lastRequest(@Nonnull String route);
+    
     @Getter
     @Setter
     @Accessors(fluent = true)
     @SuppressWarnings("FieldMayBeFinal")
     @NoArgsConstructor
-    final class Container {
+    final class BucketContainer {
         // By default, we pretend we have 1 request left in a 5-limit bucket.
         // This is done so that it'll immediately update from the headers on
         // the next request
         private long limit = 5;
         private long remaining = 1;
         private long reset = System.currentTimeMillis() - 1L;
+        private long latency;
+        private long lastRequest;
     }
 }

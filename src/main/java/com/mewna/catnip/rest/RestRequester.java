@@ -100,6 +100,8 @@ public class RestRequester {
     private void handleResponse(final OutboundRequest r, final Bucket bucket, final int statusCode, final String statusMessage,
                                 final Buffer body, final MultiMap headers, final boolean succeeded,
                                 final Throwable failureCause) {
+        final long now = System.currentTimeMillis();
+        bucket.latency(now - bucket.lastRequest());
         if(succeeded) {
             catnip.logAdapter().debug("Completed request {}", r);
             if(statusCode < 200 || statusCode > 299) {
@@ -257,8 +259,7 @@ public class RestRequester {
                     executeHttpRequest(r, route, bucket, body);
                 }
             } else {
-                // Add an extra 500ms buffer to be safe
-                final long wait = bucket.reset() - System.currentTimeMillis() + 500L;
+                final long wait = bucket.reset() - System.currentTimeMillis() + bucket.latency();
                 catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
                         bucketRoute.baseRoute(), route.baseRoute(), wait);
                 catnip.vertx().setTimer(wait, __ -> {
@@ -268,9 +269,7 @@ public class RestRequester {
             }
         } else {
             // Global rl, retry later
-            // Add an extra 500ms buffer to be safe
-            // TODO: Properly calculate latency
-            final long wait = global.reset() - System.currentTimeMillis() + 500L;
+            final long wait = global.reset() - System.currentTimeMillis() + bucket.latency();
             catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
                     bucketRoute.baseRoute(), route.baseRoute(), wait);
             catnip.vertx().setTimer(wait, __ -> {
@@ -284,6 +283,7 @@ public class RestRequester {
         // We use OkHTTP in blocking mode here intentionally
         // I wanted to keep everything inside of vert.x's threading model, ie.
         // try to avoid letting everything do its own thread pools and stuff.
+        bucket.lastRequest(System.currentTimeMillis());
         catnip.vertx().executeBlocking(future -> {
             try {
                 final Request.Builder requestBuilder = new Request.Builder().url(API_HOST + API_BASE + route.baseRoute())
@@ -424,6 +424,22 @@ public class RestRequester {
         @SuppressWarnings("SameParameterValue")
         void limit(final long l) {
             bucketBackend.limit(route, l);
+        }
+        
+        long latency() {
+            return bucketBackend.latency(route);
+        }
+        
+        void latency(final long l) {
+            bucketBackend.latency(route, l);
+        }
+        
+        long lastRequest() {
+            return bucketBackend.lastRequest(route);
+        }
+        
+        void lastRequest(final long l) {
+            bucketBackend.lastRequest(route, l);
         }
         
         void resetBucket() {
