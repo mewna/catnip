@@ -1,3 +1,30 @@
+/*
+ * Copyright (c) 2018 amy, All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software without
+ *    specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -5,6 +32,7 @@ import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageOptions;
 import com.mewna.catnip.entity.misc.Emoji;
+import com.mewna.catnip.util.pagination.MessagePaginator;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -185,6 +213,38 @@ public interface MessageChannel extends Channel {
     }
     
     /**
+     * Delete a user's reaction on the given message.
+     *
+     * @param messageId The id of the message to remove a reaction from.
+     * @param userId    The id of the user whose reaction is to be removed.
+     * @param emoji     The reaction to remove.
+     *
+     * @return A CompletionStage that completes when the reaction is removed.
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId,
+                                                     @Nonnull final String emoji) {
+        return catnip().rest().channel().deleteUserReaction(id(), messageId, userId, emoji);
+    }
+    
+    /**
+     * Delete a user's reaction on the given message.
+     *
+     * @param messageId The id of the message to remove a reaction from.
+     * @param userId    The id of the user whose reaction is to be removed.
+     * @param emoji     The reaction to remove.
+     *
+     * @return A CompletionStage that completes when the reaction is removed.
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId,
+                                                     @Nonnull final Emoji emoji) {
+        return catnip().rest().channel().deleteUserReaction(id(), messageId, userId, emoji);
+    }
+    
+    /**
      * Trigger the "[user] is typing..." indicator for yourself in this
      * channel.
      *
@@ -209,5 +269,17 @@ public interface MessageChannel extends Channel {
     @CheckReturnValue
     default CompletionStage<Message> fetchMessage(@Nonnull final String messageId) {
         return catnip().rest().channel().getMessage(id(), messageId);
+    }
+    
+    /**
+     * Fetch the history for the channel in a paginated way.
+     *
+     * @return The paginator for channel history.
+     */
+    @Nonnull
+    @JsonIgnore
+    @CheckReturnValue
+    default MessagePaginator fetchMessages() {
+        return catnip().rest().channel().getChannelMessages(id());
     }
 }

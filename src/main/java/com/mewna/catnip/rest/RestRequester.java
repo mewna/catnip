@@ -1,3 +1,30 @@
+/*
+ * Copyright (c) 2018 amy, All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software without
+ *    specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package com.mewna.catnip.rest;
 
 import com.mewna.catnip.Catnip;
@@ -73,6 +100,8 @@ public class RestRequester {
     private void handleResponse(final OutboundRequest r, final Bucket bucket, final int statusCode, final String statusMessage,
                                 final Buffer body, final MultiMap headers, final boolean succeeded,
                                 final Throwable failureCause) {
+        final long now = System.currentTimeMillis();
+        bucket.latency(now - bucket.lastRequest());
         if(succeeded) {
             catnip.logAdapter().debug("Completed request {}", r);
             if(statusCode < 200 || statusCode > 299) {
@@ -230,8 +259,7 @@ public class RestRequester {
                     executeHttpRequest(r, route, bucket, body);
                 }
             } else {
-                // Add an extra 500ms buffer to be safe
-                final long wait = bucket.reset() - System.currentTimeMillis() + 500L;
+                final long wait = bucket.reset() - System.currentTimeMillis() + bucket.latency();
                 catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
                         bucketRoute.baseRoute(), route.baseRoute(), wait);
                 catnip.vertx().setTimer(wait, __ -> {
@@ -241,9 +269,7 @@ public class RestRequester {
             }
         } else {
             // Global rl, retry later
-            // Add an extra 500ms buffer to be safe
-            // TODO: Properly calculate latency
-            final long wait = global.reset() - System.currentTimeMillis() + 500L;
+            final long wait = global.reset() - System.currentTimeMillis() + bucket.latency();
             catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
                     bucketRoute.baseRoute(), route.baseRoute(), wait);
             catnip.vertx().setTimer(wait, __ -> {
@@ -257,6 +283,7 @@ public class RestRequester {
         // We use OkHTTP in blocking mode here intentionally
         // I wanted to keep everything inside of vert.x's threading model, ie.
         // try to avoid letting everything do its own thread pools and stuff.
+        bucket.lastRequest(System.currentTimeMillis());
         catnip.vertx().executeBlocking(future -> {
             try {
                 final Request.Builder requestBuilder = new Request.Builder().url(API_HOST + API_BASE + route.baseRoute())
@@ -397,6 +424,22 @@ public class RestRequester {
         @SuppressWarnings("SameParameterValue")
         void limit(final long l) {
             bucketBackend.limit(route, l);
+        }
+        
+        long latency() {
+            return bucketBackend.latency(route);
+        }
+        
+        void latency(final long l) {
+            bucketBackend.latency(route, l);
+        }
+        
+        long lastRequest() {
+            return bucketBackend.lastRequest(route);
+        }
+        
+        void lastRequest(final long l) {
+            bucketBackend.lastRequest(route, l);
         }
         
         void resetBucket() {
