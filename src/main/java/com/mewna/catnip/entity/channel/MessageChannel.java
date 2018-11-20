@@ -271,6 +271,11 @@ public interface MessageChannel extends Channel {
         return catnip().rest().channel().getMessage(id(), messageId);
     }
     
+    /**
+     * Fetch the history for the channel in a paginated way.
+     *
+     * @return The paginator for channel history.
+     */
     @Nonnull
     @JsonIgnore
     @CheckReturnValue
