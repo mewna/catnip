@@ -32,6 +32,7 @@ import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageOptions;
 import com.mewna.catnip.entity.misc.Emoji;
+import com.mewna.catnip.util.pagination.MessagePaginator;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -268,5 +269,12 @@ public interface MessageChannel extends Channel {
     @CheckReturnValue
     default CompletionStage<Message> fetchMessage(@Nonnull final String messageId) {
         return catnip().rest().channel().getMessage(id(), messageId);
+    }
+    
+    @Nonnull
+    @JsonIgnore
+    @CheckReturnValue
+    default MessagePaginator fetchMessages() {
+        return catnip().rest().channel().getChannelMessages(id());
     }
 }
