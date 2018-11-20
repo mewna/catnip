@@ -37,12 +37,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since 10/7/18.
  */
 public class MemoryBucketBackend implements BucketBackend {
-    private final Map<String, Container> buckets = new ConcurrentHashMap<>();
+    private final Map<String, BucketContainer> buckets = new ConcurrentHashMap<>();
     
     @Nonnull
     @Override
     public BucketBackend limit(@Nonnull final String route, @Nonnegative final long value) {
-        final Container container = buckets.computeIfAbsent(route, __ -> new Container());
+        final BucketContainer container = buckets.computeIfAbsent(route, __ -> new BucketContainer());
         container.limit(value);
         return this;
     }
@@ -50,13 +50,13 @@ public class MemoryBucketBackend implements BucketBackend {
     @Nonnegative
     @Override
     public long limit(@Nonnull final String route) {
-        return buckets.computeIfAbsent(route, __ -> new Container()).limit();
+        return buckets.computeIfAbsent(route, __ -> new BucketContainer()).limit();
     }
     
     @Nonnull
     @Override
     public BucketBackend remaining(@Nonnull final String route, @Nonnegative final long value) {
-        final Container container = buckets.computeIfAbsent(route, __ -> new Container());
+        final BucketContainer container = buckets.computeIfAbsent(route, __ -> new BucketContainer());
         container.remaining(value);
         return this;
     }
@@ -64,13 +64,13 @@ public class MemoryBucketBackend implements BucketBackend {
     @Nonnegative
     @Override
     public long remaining(@Nonnull final String route) {
-        return buckets.computeIfAbsent(route, __ -> new Container()).remaining();
+        return buckets.computeIfAbsent(route, __ -> new BucketContainer()).remaining();
     }
     
     @Nonnull
     @Override
     public BucketBackend reset(@Nonnull final String route, @Nonnegative final long value) {
-        final Container container = buckets.computeIfAbsent(route, __ -> new Container());
+        final BucketContainer container = buckets.computeIfAbsent(route, __ -> new BucketContainer());
         container.reset(value);
         return this;
     }
@@ -78,6 +78,32 @@ public class MemoryBucketBackend implements BucketBackend {
     @Nonnegative
     @Override
     public long reset(@Nonnull final String route) {
-        return buckets.computeIfAbsent(route, __ -> new Container()).reset();
+        return buckets.computeIfAbsent(route, __ -> new BucketContainer()).reset();
+    }
+    
+    @Nonnull
+    @Override
+    public BucketBackend latency(@Nonnull final String route, final long value) {
+        final BucketContainer container = buckets.computeIfAbsent(route, __ -> new BucketContainer());
+        container.latency(value);
+        return this;
+    }
+    
+    @Override
+    public long latency(@Nonnull final String route) {
+        return buckets.computeIfAbsent(route, __ -> new BucketContainer()).latency();
+    }
+    
+    @Nonnull
+    @Override
+    public BucketBackend lastRequest(@Nonnull final String route, final long time) {
+        final BucketContainer container = buckets.computeIfAbsent(route, __ -> new BucketContainer());
+        container.lastRequest(time);
+        return this;
+    }
+    
+    @Override
+    public long lastRequest(@Nonnull final String route) {
+        return buckets.computeIfAbsent(route, __ -> new BucketContainer()).lastRequest();
     }
 }
