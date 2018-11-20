@@ -168,29 +168,23 @@ public class CatnipImpl implements Catnip {
     
     @Override
     public void openVoiceConnection(@Nonnull final String guildId, @Nonnull final String channelId) {
-        eventBus().send(CatnipShard.websocketMessageQueueAddress(shardIdFor(guildId)),
+        eventBus().send(CatnipShard.websocketMessageVoiceStateUpdateQueueAddress(shardIdFor(guildId)),
                 new JsonObject()
-                        .put("op", 4)
-                        .put("d", new JsonObject()
-                                .put("guild_id", guildId)
-                                .put("channel_id", channelId)
-                                .put("self_mute", false)
-                                .put("self_deaf", false)
-                        )
+                        .put("guild_id", guildId)
+                        .put("channel_id", channelId)
+                        .put("self_mute", false)
+                        .put("self_deaf", false)
         );
     }
     
     @Override
     public void closeVoiceConnection(@Nonnull final String guildId) {
-        eventBus().send(CatnipShard.websocketMessageQueueAddress(shardIdFor(guildId)),
+        eventBus().send(CatnipShard.websocketMessageVoiceStateUpdateQueueAddress(shardIdFor(guildId)),
                 new JsonObject()
-                        .put("op", 4)
-                        .put("d", new JsonObject()
-                                .put("guild_id", guildId)
-                                .putNull("channel_id")
-                                .put("self_mute", false)
-                                .put("self_deaf", false)
-                        )
+                        .put("guild_id", guildId)
+                        .putNull("channel_id")
+                        .put("self_mute", false)
+                        .put("self_deaf", false)
         );
     }
     
