@@ -1,3 +1,30 @@
+/*
+ * Copyright (c) 2018 amy, All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software without
+ *    specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package com.mewna.catnip.shard;
 
 import com.mewna.catnip.Catnip;
@@ -21,6 +48,8 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -61,7 +90,8 @@ public class CatnipShard extends AbstractVerticle {
     
     private List<String> trace = new ArrayList<>();
     
-    public CatnipShard(final Catnip catnip, final int id, final int limit, @Nullable final Presence presence) {
+    public CatnipShard(@Nonnull final Catnip catnip, @Nonnegative final int id, @Nonnegative final int limit,
+                       @Nullable final Presence presence) {
         this.catnip = catnip;
         this.id = id;
         this.limit = limit;
@@ -83,29 +113,29 @@ public class CatnipShard extends AbstractVerticle {
         return "catnip:shard:" + id + ":control";
     }
     
-    public static JsonObject basePayload(final GatewayOp op) {
+    public static JsonObject basePayload(@Nonnull final GatewayOp op) {
         return basePayload(op, (JsonObject) null);
     }
     
-    public static JsonObject basePayload(final GatewayOp op, final JsonObject payload) {
+    public static JsonObject basePayload(@Nonnull final GatewayOp op, @Nullable final JsonObject payload) {
         return new JsonObject()
                 .put("op", op.opcode())
                 .put("d", payload)
                 ;
     }
     
-    public static JsonObject basePayload(final GatewayOp op, final Integer payload) {
+    public static JsonObject basePayload(@Nonnull final GatewayOp op, @Nonnull @Nonnegative final Integer payload) {
         return new JsonObject()
                 .put("op", op.opcode())
                 .put("d", payload)
                 ;
     }
     
-    public static <T> String websocketMessageQueueAddress(final T id) {
+    public static <T> String websocketMessageQueueAddress(@Nonnull final T id) {
         return "catnip:gateway:ws-outgoing:" + id + ":queue";
     }
     
-    public static <T> String websocketMessagePresenceUpdateAddress(final T id) {
+    public static <T> String websocketMessagePresenceUpdateAddress(@Nonnull final T id) {
         return "catnip:gateway:ws-outgoing:" + id + ":presence-update";
     }
     
@@ -235,34 +265,33 @@ public class CatnipShard extends AbstractVerticle {
         if(state == null) {
             return;
         }
-        if(state.readBuffer() != null) {
-            state.readBuffer().appendBuffer(binary);
+        final boolean isEnd = binary.getInt(binary.length() - 4) == ZLIB_SUFFIX;
+        if(!isEnd || state.readBufferPosition() > 0) {
+            final int position = state.readBufferPosition();
+            state.readBuffer().setBuffer(position, binary);
+            state.readBufferPosition(position + binary.length());
         }
-        if(binary.getInt(binary.length() - 4) == ZLIB_SUFFIX) {
-            final Buffer decompressed = Buffer.buffer();
-            final Buffer dataToDecompress = state.readBuffer() == null ? binary : state.readBuffer();
-            try(final InflaterOutputStream ios = new InflaterOutputStream(new BufferOutputStream(decompressed), state.inflater())) {
+        if(isEnd) {
+            final Buffer decompressed = state.decompressBuffer();
+            final Buffer dataToDecompress = state.readBufferPosition() > 0 ? state.readBuffer() : binary;
+            try(final InflaterOutputStream ios = new InflaterOutputStream(new BufferOutputStream(decompressed, 0), state.inflater())) {
                 synchronized(decompressBuffer) {
+                    final int length = Math.max(state.readBufferPosition(), binary.length());
                     int r = 0;
-                    while(r < dataToDecompress.length()) {
+                    while(r < length) {
                         //how many bytes we can read
-                        final int read = Math.min(decompressBuffer.length, dataToDecompress.length() - r);
+                        final int read = Math.min(decompressBuffer.length, length - r);
                         dataToDecompress.getBytes(r, r + read, decompressBuffer);
                         //decompress
                         ios.write(decompressBuffer, 0, read);
                         r += read;
                     }
                 }
+                handleSocketData(msg, decompressed.toJsonObject());
             } catch(final IOException e) {
                 catnip.logAdapter().error("Error decompressing payload", e);
-                return;
             } finally {
-                state.readBuffer(null);
-            }
-            handleSocketData(msg, decompressed.toJsonObject());
-        } else {
-            if(state.readBuffer() == null) {
-                state.readBuffer(binary);
+                state.readBufferPosition(0);
             }
         }
     }
@@ -276,7 +305,25 @@ public class CatnipShard extends AbstractVerticle {
                 handleBinaryData(msg, frame.binaryData());
             }
             if(frame.isClose()) {
-                catnip.logAdapter().warn("Socket closing with code {}: {}", frame.closeStatusCode(), frame.closeReason());
+                final short closeCode = frame.closeStatusCode();
+                if(closeCode == GatewayCloseCode.INVALID_SEQ.code() || closeCode == GatewayCloseCode.SESSION_TIMEOUT.code()) {
+                    // These two close codes invalidate your session (and afaik do not send an OP9).
+                    catnip.sessionManager().clearSeqnum(id);
+                    catnip.sessionManager().clearSession(id);
+                }
+                if(closeCode >= 4000) {
+                    final GatewayCloseCode code = GatewayCloseCode.byId(closeCode);
+                    if(code != null) {
+                        catnip.logAdapter().warn("Shard {}: gateway websocket closed with code {}: {}: {}",
+                                id, closeCode, code.name(), code.message());
+                    } else {
+                        catnip.logAdapter().warn("Shard {}: gateway websocket closing with code {}: {}",
+                                id, closeCode, frame.closeReason());
+                    }
+                } else {
+                    catnip.logAdapter().warn("Shard {}: gateway websocket closing with code {}: {}",
+                            id, closeCode, frame.closeReason());
+                }
                 stateRef.get().socketOpen().set(false);
             }
         } catch(final Exception e) {
@@ -334,7 +381,8 @@ public class CatnipShard extends AbstractVerticle {
         catnip.eventBus().publish(Raw.DISCONNECTED, shardInfo());
         catnip.logAdapter().warn("Socket closing!");
         try {
-            catnip.eventBus().publish("RAW_STATUS", new JsonObject().put("status", "down:socket-close").put("shard", id));
+            catnip.eventBus().publish("RAW_STATUS", new JsonObject().put("status", "down:socket-close")
+                    .put("shard", id));
             stateRef.set(null);
             catnip.shardManager().addToConnectQueue(id);
         } catch(final Exception e) {
@@ -558,19 +606,22 @@ public class CatnipShard extends AbstractVerticle {
         @Getter
         private final Inflater inflater;
         @Getter
+        private final Buffer readBuffer = Buffer.buffer();
+        @Getter
+        private final Buffer decompressBuffer = Buffer.buffer();
+        @Getter
         private final AtomicBoolean socketOpen = new AtomicBoolean(false);
         @Getter
         @Setter
-        private Buffer readBuffer;
-        
+        private int readBufferPosition;
+    
         ShardState(final WebSocket socket) {
-            this(socket, new Inflater(), null);
+            this(socket, new Inflater());
         }
         
-        ShardState(final WebSocket socket, final Inflater inflater, final Buffer readBuffer) {
+        ShardState(final WebSocket socket, final Inflater inflater) {
             this.socket = socket;
             this.inflater = inflater;
-            this.readBuffer = readBuffer;
         }
     }
 }
