@@ -212,6 +212,38 @@ public interface MessageChannel extends Channel {
     }
     
     /**
+     * Delete a user's reaction on the given message.
+     *
+     * @param messageId The id of the message to remove a reaction from.
+     * @param userId    The id of the user whose reaction is to be removed.
+     * @param emoji     The reaction to remove.
+     *
+     * @return A CompletionStage that completes when the reaction is removed.
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId,
+                                                     @Nonnull final String emoji) {
+        return catnip().rest().channel().deleteUserReaction(id(), messageId, userId, emoji);
+    }
+    
+    /**
+     * Delete a user's reaction on the given message.
+     *
+     * @param messageId The id of the message to remove a reaction from.
+     * @param userId    The id of the user whose reaction is to be removed.
+     * @param emoji     The reaction to remove.
+     *
+     * @return A CompletionStage that completes when the reaction is removed.
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId,
+                                                     @Nonnull final Emoji emoji) {
+        return catnip().rest().channel().deleteUserReaction(id(), messageId, userId, emoji);
+    }
+    
+    /**
      * Trigger the "[user] is typing..." indicator for yourself in this
      * channel.
      *
