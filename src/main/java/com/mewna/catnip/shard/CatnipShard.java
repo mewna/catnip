@@ -48,6 +48,8 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -88,7 +90,8 @@ public class CatnipShard extends AbstractVerticle {
     
     private List<String> trace = new ArrayList<>();
     
-    public CatnipShard(final Catnip catnip, final int id, final int limit, @Nullable final Presence presence) {
+    public CatnipShard(@Nonnull final Catnip catnip, @Nonnegative final int id, @Nonnegative final int limit,
+                       @Nullable final Presence presence) {
         this.catnip = catnip;
         this.id = id;
         this.limit = limit;
@@ -110,29 +113,29 @@ public class CatnipShard extends AbstractVerticle {
         return "catnip:shard:" + id + ":control";
     }
     
-    public static JsonObject basePayload(final GatewayOp op) {
+    public static JsonObject basePayload(@Nonnull final GatewayOp op) {
         return basePayload(op, (JsonObject) null);
     }
     
-    public static JsonObject basePayload(final GatewayOp op, final JsonObject payload) {
+    public static JsonObject basePayload(@Nonnull final GatewayOp op, @Nullable final JsonObject payload) {
         return new JsonObject()
                 .put("op", op.opcode())
                 .put("d", payload)
                 ;
     }
     
-    public static JsonObject basePayload(final GatewayOp op, final Integer payload) {
+    public static JsonObject basePayload(@Nonnull final GatewayOp op, @Nonnull @Nonnegative final Integer payload) {
         return new JsonObject()
                 .put("op", op.opcode())
                 .put("d", payload)
                 ;
     }
     
-    public static <T> String websocketMessageQueueAddress(final T id) {
+    public static <T> String websocketMessageQueueAddress(@Nonnull final T id) {
         return "catnip:gateway:ws-outgoing:" + id + ":queue";
     }
     
-    public static <T> String websocketMessagePresenceUpdateAddress(final T id) {
+    public static <T> String websocketMessagePresenceUpdateAddress(@Nonnull final T id) {
         return "catnip:gateway:ws-outgoing:" + id + ":presence-update";
     }
     
@@ -302,7 +305,25 @@ public class CatnipShard extends AbstractVerticle {
                 handleBinaryData(msg, frame.binaryData());
             }
             if(frame.isClose()) {
-                catnip.logAdapter().warn("Socket closing with code {}: {}", frame.closeStatusCode(), frame.closeReason());
+                final short closeCode = frame.closeStatusCode();
+                if(closeCode == GatewayCloseCode.INVALID_SEQ.code() || closeCode == GatewayCloseCode.SESSION_TIMEOUT.code()) {
+                    // These two close codes invalidate your session (and afaik do not send an OP9).
+                    catnip.sessionManager().clearSeqnum(id);
+                    catnip.sessionManager().clearSession(id);
+                }
+                if(closeCode >= 4000) {
+                    final GatewayCloseCode code = GatewayCloseCode.byId(closeCode);
+                    if(code != null) {
+                        catnip.logAdapter().warn("Shard {}: gateway websocket closed with code {}: {}: {}",
+                                id, closeCode, code.name(), code.message());
+                    } else {
+                        catnip.logAdapter().warn("Shard {}: gateway websocket closing with code {}: {}",
+                                id, closeCode, frame.closeReason());
+                    }
+                } else {
+                    catnip.logAdapter().warn("Shard {}: gateway websocket closing with code {}: {}",
+                            id, closeCode, frame.closeReason());
+                }
                 stateRef.get().socketOpen().set(false);
             }
         } catch(final Exception e) {
@@ -360,7 +381,8 @@ public class CatnipShard extends AbstractVerticle {
         catnip.eventBus().publish(Raw.DISCONNECTED, shardInfo());
         catnip.logAdapter().warn("Socket closing!");
         try {
-            catnip.eventBus().publish("RAW_STATUS", new JsonObject().put("status", "down:socket-close").put("shard", id));
+            catnip.eventBus().publish("RAW_STATUS", new JsonObject().put("status", "down:socket-close")
+                    .put("shard", id));
             stateRef.set(null);
             catnip.shardManager().addToConnectQueue(id);
         } catch(final Exception e) {

@@ -52,6 +52,7 @@ public enum GatewayOp {
     INVALID_SESSION(9),
     HELLO(10),
     HEARTBEAT_ACK(11),
+    GUILD_SYNC(12),
     ;
     @Getter
     private final int opcode;
