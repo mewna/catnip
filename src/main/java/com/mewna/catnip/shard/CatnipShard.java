@@ -139,6 +139,10 @@ public class CatnipShard extends AbstractVerticle {
         return "catnip:gateway:ws-outgoing:" + id + ":presence-update";
     }
     
+    public static <T> String websocketMessageVoiceStateUpdateQueueAddress(@Nonnull final T id) {
+        return "catnip:gateway:ws-outgoing:" + id + ":voice-state-update:queue";
+    }
+    
     @Override
     public void start() {
         catnip.eventBus().consumer(controlAddress(id), this::handleControlMessage);
@@ -161,6 +165,12 @@ public class CatnipShard extends AbstractVerticle {
                 }
             }
             catnip.vertx().setTimer(500, __ -> catnip.eventBus().publish(websocketMessagePresenceUpdatePollAddress(), null));
+        });
+        catnip.eventBus().<JsonObject>consumer(websocketMessageVoiceStateUpdateQueueAddress(), state -> {
+            catnip.eventBus().send(websocketMessageQueueAddress(), basePayload(
+                    GatewayOp.VOICE_STATE_UPDATE,
+                    state.body()
+            ));
         });
         catnip.eventBus().consumer(websocketMessagePollAddress(), msg -> {
             if(stateRef.get() != null) {
@@ -556,6 +566,10 @@ public class CatnipShard extends AbstractVerticle {
     
     private String websocketMessagePresenceUpdateQueueAddress() {
         return "catnip:gateway:ws-outgoing:" + id + ":presence-update:queue";
+    }
+    
+    private String websocketMessageVoiceStateUpdateQueueAddress() {
+        return websocketMessageVoiceStateUpdateQueueAddress(id);
     }
     
     private JsonObject identify() {

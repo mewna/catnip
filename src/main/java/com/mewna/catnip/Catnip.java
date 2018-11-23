@@ -30,10 +30,7 @@ package com.mewna.catnip;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCache;
 import com.mewna.catnip.cache.EntityCacheWorker;
-import com.mewna.catnip.entity.impl.PresenceImpl;
-import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
 import com.mewna.catnip.entity.user.Presence;
-import com.mewna.catnip.entity.user.Presence.Activity;
 import com.mewna.catnip.entity.user.Presence.ActivityType;
 import com.mewna.catnip.entity.user.Presence.OnlineStatus;
 import com.mewna.catnip.entity.user.User;
@@ -45,7 +42,6 @@ import com.mewna.catnip.internal.ratelimit.Ratelimiter;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
 import com.mewna.catnip.rest.Routes;
-import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.EventType;
 import com.mewna.catnip.shard.event.EventBuffer;
 import com.mewna.catnip.shard.manager.ShardManager;
@@ -308,30 +304,39 @@ public interface Catnip {
     Set<String> disabledEvents();
     
     /**
+     * Opens a voice connection to the provided guild and channel. The connection is
+     * opened asynchronously, with
+     * {@link com.mewna.catnip.shard.DiscordEvent#VOICE_STATE_UPDATE VOICE_STATE_UPDATE} and
+     * {@link com.mewna.catnip.shard.DiscordEvent#VOICE_SERVER_UPDATE VOICE_SERVER_UPDATE}
+     * events being fired when the connection is opened.
+     *
+     * @param guildId Guild to connect.
+     * @param channelId Channel to connect.
+     */
+    //TODO self mute/self deaf?
+    void openVoiceConnection(@Nonnull String guildId, @Nonnull String channelId);
+    
+    /**
+     * Closes the voice connection on the specified guild.
+     *
+     * @param guildId Guild to disconnect.
+     */
+    void closeVoiceConnection(@Nonnull String guildId);
+    
+    /**
      * Get the presence for the specified shard.
      *
      * @param shardId  The shard id to get presence for.
      * @param callback The callback invoked when the presence is fetched.
      */
-    default void presence(@Nonnegative final int shardId, @Nonnull final Consumer<Presence> callback) {
-        eventBus().send(CatnipShard.websocketMessagePresenceUpdateAddress(shardId), null,
-                result -> callback.accept((Presence) result.result().body()));
-    }
+    void presence(@Nonnegative final int shardId, @Nonnull final Consumer<Presence> callback);
     
     /**
      * Update the presence for all shards.
      *
      * @param presence The new presence to set.
      */
-    default void presence(@Nonnull final Presence presence) {
-        int shardCount = shardManager().shardCount();
-        if(shardCount == 0) {
-            shardCount = 1;
-        }
-        for(int i = 0; i < shardCount; i++) {
-            presence(presence, i);
-        }
-    }
+    void presence(@Nonnull final Presence presence);
     
     /**
      * Update the presence for a specific shard.
@@ -339,9 +344,7 @@ public interface Catnip {
      * @param presence The new presence to set.
      * @param shardId  The shard to set presence for.
      */
-    default void presence(@Nonnull final Presence presence, @Nonnegative final int shardId) {
-        eventBus().publish(CatnipShard.websocketMessagePresenceUpdateAddress(shardId), presence);
-    }
+    void presence(@Nonnull final Presence presence, @Nonnegative final int shardId);
     
     /**
      * Update the presence for all shards by specifying each part of the
@@ -354,33 +357,8 @@ public interface Catnip {
      * @param url    The new URL for the presence. Will be ignored if {@code type}
      *               is not {@link ActivityType#STREAMING}.
      */
-    default void presence(@Nullable final OnlineStatus status, @Nullable final String game, @Nullable final ActivityType type,
-                          @Nullable final String url) {
-        final OnlineStatus stat;
-        if(status != null) {
-            stat = status;
-        } else {
-            final User self = selfUser();
-            if(self != null) {
-                final Presence presence = cache().presence(self.id());
-                stat = presence == null ? OnlineStatus.ONLINE : presence.status();
-            } else {
-                stat = OnlineStatus.ONLINE;
-            }
-        }
-        final Activity activity = game != null
-                ? ActivityImpl.builder()
-                .name(game)
-                .type(type == null ? ActivityType.PLAYING : type)
-                .url(type == ActivityType.STREAMING ? url : null)
-                .build()
-                : null;
-        presence(PresenceImpl.builder()
-                .catnip(this)
-                .status(stat)
-                .activity(activity)
-                .build());
-    }
+    void presence(@Nullable final OnlineStatus status, @Nullable final String game, @Nullable final ActivityType type,
+                          @Nullable final String url);
     
     /**
      * Update the online status for all shards. Will clear the activity status.

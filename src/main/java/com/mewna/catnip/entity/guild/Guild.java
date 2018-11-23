@@ -485,6 +485,17 @@ public interface Guild extends Snowflake {
     }
     
     /**
+     * Closes the voice connection for this guild. This method is equivalent to
+     * {@code guild.catnip().{@link com.mewna.catnip.Catnip#closeVoiceConnection(String) closeVoiceConnection}(guild.id())}
+     *
+     * @see com.mewna.catnip.Catnip#closeVoiceConnection(String)
+     */
+    @JsonIgnore
+    default void closeVoiceConnection() {
+        catnip().closeVoiceConnection(id());
+    }
+    
+    /**
      * Edit this guild.
      *
      * @return A guild editor that can complete the editing.
