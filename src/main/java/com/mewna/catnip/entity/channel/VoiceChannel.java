@@ -54,6 +54,16 @@ public interface VoiceChannel extends GuildChannel {
     @CheckReturnValue
     int userLimit();
     
+    /**
+     * Opens a voice connection to this channel. This method is equivalent to
+     * {@code channel.catnip().{@link com.mewna.catnip.Catnip#openVoiceConnection(String, String) openVoiceConnection}(channel.guildId(), channel.id())}
+     *
+     * @see com.mewna.catnip.Catnip#openVoiceConnection(String, String)
+     */
+    default void openVoiceConnection() {
+        catnip().openVoiceConnection(guildId(), id());
+    }
+    
     @Override
     @JsonIgnore
     @CheckReturnValue
