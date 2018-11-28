@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.guild.GuildEmbed;
 import com.mewna.catnip.entity.channel.*;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
@@ -1113,7 +1114,15 @@ public final class EntityBuilder {
                 .catnip(catnip)
                 .version(data.getInteger("v"))
                 .user(createUser(data.getJsonObject("user")))
-                .trace(ImmutableList.copyOf(data.getJsonArray("_trace").stream().map(e -> (String) e).collect(Collectors.toList())))
+                .trace(ImmutableList.copyOf(data.getJsonArray("_trace")
+                        .stream()
+                        .map(e -> (String) e)
+                        .toArray(String[]::new)))
+                .guilds(ImmutableSet.copyOf(data.getJsonArray("guilds")
+                        .stream()
+                        .map(e -> (JsonObject) e)
+                        .map(this::createUnavailableGuild)
+                        .toArray(UnavailableGuild[]::new)))
                 .build();
     }
     
