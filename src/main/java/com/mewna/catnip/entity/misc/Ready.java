@@ -28,11 +28,13 @@
 package com.mewna.catnip.entity.misc;
 
 import com.mewna.catnip.entity.Entity;
+import com.mewna.catnip.entity.guild.UnavailableGuild;
 import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Fired when a shard logs in successfully.
@@ -58,4 +60,11 @@ public interface Ready extends Entity {
      */
     @Nonnull
     List<String> trace();
+    
+    /**
+     * @return The list of guild snowflakes for the guidls that this shard is
+     * in.
+     */
+    @Nonnull
+    Set<UnavailableGuild> guilds();
 }
