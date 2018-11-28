@@ -29,6 +29,7 @@ package com.mewna.catnip.shard;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.misc.Ready;
 import com.mewna.catnip.entity.misc.Resumed;
@@ -159,11 +160,12 @@ public final class DispatchEmitter {
             // Guilds
             case Raw.GUILD_CREATE: {
                 final String id = data.getString("id");
+                final Guild guild = entityBuilder.createGuild(data);
                 if(catnip.isUnavailable(id)) {
-                    catnip.eventBus().publish(Raw.GUILD_AVAILABLE, entityBuilder.createGuild(data));
+                    catnip.eventBus().publish(Raw.GUILD_AVAILABLE, guild);
                     ((CatnipImpl) catnip).markAvailable(id);
                 } else {
-                    catnip.eventBus().publish(type, entityBuilder.createGuild(data));
+                    catnip.eventBus().publish(type, guild);
                 }
                 break;
             }

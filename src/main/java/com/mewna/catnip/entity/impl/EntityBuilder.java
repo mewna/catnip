@@ -31,8 +31,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.entity.guild.GuildEmbed;
 import com.mewna.catnip.entity.channel.*;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
 import com.mewna.catnip.entity.guild.*;
@@ -632,7 +630,6 @@ public final class EntityBuilder {
                 joinedAt = null;
             }
         }
-        
         
         return MemberImpl.builder()
                 .catnip(catnip)

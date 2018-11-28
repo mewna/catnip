@@ -132,7 +132,6 @@ public class CachingBuffer extends AbstractBuffer {
                     if(bufferState.readyGuilds().isEmpty()) {
                         // No guilds left, can just dispatch normally
                         buffers.remove(id);
-                        maybeCache(type, d);
                         emitter().emit(event);
                     } else {
                         // Remove READY guild if necessary, otherwise buffer
@@ -162,7 +161,6 @@ public class CachingBuffer extends AbstractBuffer {
                     }
                 } else {
                     // If not doing buffering, just dispatch
-                    maybeCache(type, d);
                     emitter().emit(event);
                 }
                 break;
@@ -172,8 +170,7 @@ public class CachingBuffer extends AbstractBuffer {
                     final BufferState bufferState = buffers.get(id);
                     if(bufferState != null) {
                         final String guild = d.getString("guild_id");
-                        maybeCache(type, d);
-                        emitter().emit(event);
+                        cacheAndDispatch(type, d, event);
                         bufferState.acceptChunk(guild);
                         if(bufferState.doneChunking(guild)) {
                             // If we're finished chunking that guild, defer doing everything needed
@@ -208,13 +205,11 @@ public class CachingBuffer extends AbstractBuffer {
                         }
                     } else {
                         // Emit if the payload has no guild id
-                        maybeCache(type, d);
-                        emitter().emit(event);
+                        cacheAndDispatch(type, d, event);
                     }
                 } else {
                     // Emit if not buffering right now
-                    maybeCache(type, d);
-                    emitter().emit(event);
+                    cacheAndDispatch(type, d, event);
                 }
                 break;
             }
