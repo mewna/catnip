@@ -31,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.cache.MemoryEntityCache;
 import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.entity.channel.TextChannel;
+import com.mewna.catnip.entity.channel.MessageChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.impl.MessageImpl;
@@ -180,12 +180,12 @@ public interface Message extends Snowflake {
     /**
      * The channel this message was sent in.
      *
-     * @return The {@link TextChannel} object representing the channel this
+     * @return The {@link MessageChannel} object representing the channel this
      * message was sent in. Should not be null.
      */
     @CheckReturnValue
-    default TextChannel channel() {
-        return (TextChannel) catnip().cache()
+    default MessageChannel channel() {
+        return (MessageChannel)catnip().cache()
                 // TODO: Find a better way to handle this
                 .channel(Optional.ofNullable(guildId())
                         .orElse(MemoryEntityCache.DM_CHANNEL_KEY), channelId());
