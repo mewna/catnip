@@ -30,6 +30,7 @@ package com.mewna.catnip.shard.event;
 import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.GatewayOp;
+import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -107,62 +108,63 @@ public class CachingBuffer extends AbstractBuffer {
                 catnip().logAdapter().debug("Prepared new BufferState for shard {} with {} guilds.", id, guilds.size());
                 // READY is also a cache event, as it does come with
                 // information about the current user
-                maybeCache(type, d);
-                emitter().emit(event);
+                maybeCache(type, d).setHandler(_res -> emitter().emit(event));
                 break;
             }
             case Raw.GUILD_CREATE: {
                 final String guild = d.getString("id");
                 final BufferState bufferState = buffers.get(id);
                 // Make sure to cache guild
-                maybeCache(type, d);
-                // Trigger member chunking
-                final Integer memberCount = d.getInteger("member_count");
-                if(memberCount > LARGE_THRESHOLD) {
-                    // Chunk members
-                    catnip().eventBus().publish(CatnipShard.websocketMessageQueueAddress(id),
-                            CatnipShard.basePayload(GatewayOp.REQUEST_GUILD_MEMBERS,
-                                    new JsonObject()
-                                            .put("guild_id", guild)
-                                            .put("query", "")
-                                            .put("limit", 0)
-                            ));
-                }
-                if(bufferState != null) {
-                    if(bufferState.readyGuilds().isEmpty()) {
-                        // No guilds left, can just dispatch normally
-                        buffers.remove(id);
-                        emitter().emit(event);
-                    } else {
-                        // Remove READY guild if necessary, otherwise buffer
-                        if(bufferState.readyGuilds().contains(guild)) {
-                            bufferState.recvGuild(guild);
-                            emitter().emit(event);
-                            
-                            if(catnip().chunkMembers() && memberCount > LARGE_THRESHOLD) {
-                                // If we're chunking members, calculate how many chunks we have to await
-                                int chunks = memberCount / 1000;
-                                if(memberCount % 1000 != 0) {
-                                    // Not a perfect 1k, add a chunk to make up for how math works
-                                    chunks += 1;
-                                }
-                                bufferState.initialGuildChunkCount(guild, chunks);
-                            } else {
-                                bufferState.replayGuild(guild);
-                                // Replay all buffered events once we run out
-                                if(bufferState.readyGuilds().isEmpty()) {
-                                    buffers.remove(id);
-                                    bufferState.replay();
-                                }
-                            }
-                        } else {
-                            bufferState.buffer(event);
-                        }
+                // This will always succeed unless something goes horribly wrong
+                maybeCache(type, d).setHandler(_res -> {
+                    // Trigger member chunking
+                    final Integer memberCount = d.getInteger("member_count");
+                    if(memberCount > LARGE_THRESHOLD) {
+                        // Chunk members
+                        catnip().eventBus().publish(CatnipShard.websocketMessageQueueAddress(id),
+                                CatnipShard.basePayload(GatewayOp.REQUEST_GUILD_MEMBERS,
+                                        new JsonObject()
+                                                .put("guild_id", guild)
+                                                .put("query", "")
+                                                .put("limit", 0)
+                                ));
                     }
-                } else {
-                    // If not doing buffering, just dispatch
-                    emitter().emit(event);
-                }
+                    if(bufferState != null) {
+                        if(bufferState.readyGuilds().isEmpty()) {
+                            // No guilds left, can just dispatch normally
+                            buffers.remove(id);
+                            emitter().emit(event);
+                        } else {
+                            // Remove READY guild if necessary, otherwise buffer
+                            if(bufferState.readyGuilds().contains(guild)) {
+                                bufferState.recvGuild(guild);
+                                emitter().emit(event);
+                
+                                if(catnip().chunkMembers() && memberCount > LARGE_THRESHOLD) {
+                                    // If we're chunking members, calculate how many chunks we have to await
+                                    int chunks = memberCount / 1000;
+                                    if(memberCount % 1000 != 0) {
+                                        // Not a perfect 1k, add a chunk to make up for how math works
+                                        chunks += 1;
+                                    }
+                                    bufferState.initialGuildChunkCount(guild, chunks);
+                                } else {
+                                    bufferState.replayGuild(guild);
+                                    // Replay all buffered events once we run out
+                                    if(bufferState.readyGuilds().isEmpty()) {
+                                        buffers.remove(id);
+                                        bufferState.replay();
+                                    }
+                                }
+                            } else {
+                                bufferState.buffer(event);
+                            }
+                        }
+                    } else {
+                        // If not doing buffering, just dispatch
+                        emitter().emit(event);
+                    }
+                });
                 break;
             }
             case Raw.GUILD_MEMBERS_CHUNK: {
@@ -227,19 +229,21 @@ public class CachingBuffer extends AbstractBuffer {
             emitter().emit(event);
             maybeCache(type, d);
         } else {
-            maybeCache(type, d);
-            emitter().emit(event);
+            maybeCache(type, d).setHandler(_res -> emitter().emit(event));
         }
     }
     
-    private void maybeCache(final String eventType, final JsonObject data) {
+    private Future<Void> maybeCache(final String eventType, final JsonObject data) {
         if(CACHE_EVENTS.contains(eventType)) {
             try {
-                catnip().cacheWorker().updateCache(eventType, data);
+                return catnip().cacheWorker().updateCache(eventType, data);
             } catch(final Exception e) {
                 catnip().logAdapter().warn("Got error updating cache for payload {}", eventType, e);
                 catnip().logAdapter().warn("Payload: {}", data.encodePrettily());
+                return Future.failedFuture(e);
             }
+        } else {
+            return Future.succeededFuture(null);
         }
     }
     
