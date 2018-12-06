@@ -35,6 +35,7 @@ import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
+import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
@@ -61,28 +62,21 @@ public interface EntityCacheWorker extends EntityCache {
      */
     @Nonnull
     @SuppressWarnings("UnusedReturnValue")
-    EntityCache updateCache(@Nonnull String eventType, @Nonnull JsonObject payload);
+    Future<Void> updateCache(@Nonnull String eventType, @Nonnull JsonObject payload);
     
-    @Nonnull
-    EntityCache bulkCacheUsers(@Nonnull Collection<User> users);
+    void bulkCacheUsers(@Nonnull Collection<User> users);
     
-    @Nonnull
-    EntityCache bulkCacheChannels(@Nonnull Collection<GuildChannel> channels);
+    void bulkCacheChannels(@Nonnull Collection<GuildChannel> channels);
     
-    @Nonnull
-    EntityCache bulkCacheRoles(@Nonnull Collection<Role> roles);
+    void bulkCacheRoles(@Nonnull Collection<Role> roles);
     
-    @Nonnull
-    EntityCache bulkCacheMembers(@Nonnull Collection<Member> members);
+    void bulkCacheMembers(@Nonnull Collection<Member> members);
     
-    @Nonnull
-    EntityCache bulkCacheEmoji(@Nonnull Collection<CustomEmoji> emoji);
+    void bulkCacheEmoji(@Nonnull Collection<CustomEmoji> emoji);
     
-    @Nonnull
-    EntityCache bulkCachePresences(@Nonnull Map<String, Presence> presences);
+    void bulkCachePresences(@Nonnull Map<String, Presence> presences);
     
-    @Nonnull
-    EntityCache bulkCacheVoiceStates(@Nonnull Collection<VoiceState> voiceStates);
+    void bulkCacheVoiceStates(@Nonnull Collection<VoiceState> voiceStates);
 
     @Nonnull
     EntityCache catnip(@Nonnull Catnip catnip);
