@@ -40,6 +40,7 @@ import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
+import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
@@ -153,18 +154,9 @@ public class MemoryEntityCache implements EntityCacheWorker {
         presenceCache.put(id, presence);
     }
     
-    private void cacheVoiceState(final VoiceState state) {
-        if(state.guildId() == null) {
-            catnip.logAdapter().warn("Not caching voice state for {} due to null guild", state.userId());
-            return;
-        }
-        final Map<String, VoiceState> states = voiceStateCache.computeIfAbsent(state.guildId(), __ -> new ConcurrentHashMap<>());
-        states.put(state.userId(), state);
-    }
-    
     @Nonnull
     @Override
-    public EntityCache updateCache(@Nonnull final String eventType, @Nonnull final JsonObject payload) {
+    public Future<Void> updateCache(@Nonnull final String eventType, @Nonnull final JsonObject payload) {
         switch(eventType) {
             // Lifecycle
             case Raw.READY: {
@@ -202,13 +194,13 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 // This is wrapped in a blocking executor because there could
                 // be cases of massive guilds that end blocking for a
                 // significant amount of time while the guild is being cached.
+                final Future<Void> future = Future.future();
                 catnip().vertx().executeBlocking(f -> {
                     final Guild guild = entityBuilder.createGuild(payload);
                     guildCache.put(guild.id(), guild);
                     f.complete(null);
-                }, __ -> {
-                });
-                break;
+                }, __ -> future.complete(null));
+                return future;
             }
             case Raw.GUILD_UPDATE: {
                 final Guild guild = entityBuilder.createGuild(payload);
@@ -342,56 +334,52 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 break;
             }
         }
-        return this;
+        // Default case; most events don't need to have special future cases
+        return Future.succeededFuture(null);
     }
     
-    @Nonnull
+    private void cacheVoiceState(final VoiceState state) {
+        if(state.guildId() == null) {
+            catnip.logAdapter().warn("Not caching voice state for {} due to null guild", state.userId());
+            return;
+        }
+        final Map<String, VoiceState> states = voiceStateCache.computeIfAbsent(state.guildId(), __ -> new ConcurrentHashMap<>());
+        states.put(state.userId(), state);
+    }
+    
     @Override
-    public EntityCache bulkCacheUsers(@Nonnull final Collection<User> users) {
+    public void bulkCacheUsers(@Nonnull final Collection<User> users) {
         users.forEach(this::cacheUser);
-        return this;
     }
     
-    @Nonnull
     @Override
-    public EntityCache bulkCacheChannels(@Nonnull final Collection<GuildChannel> channels) {
+    public void bulkCacheChannels(@Nonnull final Collection<GuildChannel> channels) {
         channels.forEach(this::cacheChannel);
-        return this;
     }
     
-    @Nonnull
     @Override
-    public EntityCache bulkCacheRoles(@Nonnull final Collection<Role> roles) {
+    public void bulkCacheRoles(@Nonnull final Collection<Role> roles) {
         roles.forEach(this::cacheRole);
-        return this;
     }
     
-    @Nonnull
     @Override
-    public EntityCache bulkCacheMembers(@Nonnull final Collection<Member> members) {
+    public void bulkCacheMembers(@Nonnull final Collection<Member> members) {
         members.forEach(this::cacheMember);
-        return this;
     }
     
-    @Nonnull
     @Override
-    public EntityCache bulkCacheEmoji(@Nonnull final Collection<CustomEmoji> emoji) {
+    public void bulkCacheEmoji(@Nonnull final Collection<CustomEmoji> emoji) {
         emoji.forEach(this::cacheEmoji);
-        return this;
     }
     
-    @Nonnull
     @Override
-    public EntityCache bulkCachePresences(@Nonnull final Map<String, Presence> presences) {
+    public void bulkCachePresences(@Nonnull final Map<String, Presence> presences) {
         presences.forEach(this::cachePresence);
-        return this;
     }
     
-    @Nonnull
     @Override
-    public EntityCache bulkCacheVoiceStates(@Nonnull final Collection<VoiceState> voiceStates) {
+    public void bulkCacheVoiceStates(@Nonnull final Collection<VoiceState> voiceStates) {
         voiceStates.forEach(this::cacheVoiceState);
-        return this;
     }
     
     @Nullable
