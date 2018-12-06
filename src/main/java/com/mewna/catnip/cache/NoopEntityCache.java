@@ -38,6 +38,7 @@ import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
+import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import lombok.experimental.Accessors;
 
@@ -56,50 +57,36 @@ import java.util.Map;
 public class NoopEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
-    public EntityCache updateCache(@Nonnull final String eventType, @Nonnull final JsonObject payload) {
-        return this;
+    public Future<Void> updateCache(@Nonnull final String eventType, @Nonnull final JsonObject payload) {
+        return Future.succeededFuture(null);
     }
     
-    @Nonnull
     @Override
-    public EntityCache bulkCacheUsers(@Nonnull final Collection<User> users) {
-        return this;
+    public void bulkCacheUsers(@Nonnull final Collection<User> users) {
     }
     
-    @Nonnull
     @Override
-    public EntityCache bulkCacheChannels(@Nonnull final Collection<GuildChannel> channels) {
-        return this;
+    public void bulkCacheChannels(@Nonnull final Collection<GuildChannel> channels) {
     }
     
-    @Nonnull
     @Override
-    public EntityCache bulkCacheRoles(@Nonnull final Collection<Role> roles) {
-        return this;
+    public void bulkCacheRoles(@Nonnull final Collection<Role> roles) {
     }
     
-    @Nonnull
     @Override
-    public EntityCache bulkCacheMembers(@Nonnull final Collection<Member> members) {
-        return this;
+    public void bulkCacheMembers(@Nonnull final Collection<Member> members) {
     }
     
-    @Nonnull
     @Override
-    public EntityCache bulkCacheEmoji(@Nonnull final Collection<CustomEmoji> emoji) {
-        return this;
+    public void bulkCacheEmoji(@Nonnull final Collection<CustomEmoji> emoji) {
     }
     
-    @Nonnull
     @Override
-    public EntityCache bulkCachePresences(@Nonnull final Map<String, Presence> presences) {
-        return this;
+    public void bulkCachePresences(@Nonnull final Map<String, Presence> presences) {
     }
     
-    @Nonnull
     @Override
-    public EntityCache bulkCacheVoiceStates(@Nonnull final Collection<VoiceState> voiceStates) {
-        return this;
+    public void bulkCacheVoiceStates(@Nonnull final Collection<VoiceState> voiceStates) {
     }
     
     @Nullable
