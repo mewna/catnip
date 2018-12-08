@@ -12,9 +12,10 @@ Licensed under the [BSD 3-Clause License](https://tldrlegal.com/license/bsd-3-cl
 
 ## Installation
 
-Run `mvn clean test install`
 
-If this is too hard for you and / or you use gradle, get it on Jitpack here: https://jitpack.io/#mewna/catnip
+
+If you want to keep up with the latest changes, get it on Jitpack here: 
+https://jitpack.io/#mewna/catnip
 
 ## Basic usage
 
