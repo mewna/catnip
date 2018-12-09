@@ -25,7 +25,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package basic;import com.mewna.catnip.Catnip;
+package basic;
+
+import com.mewna.catnip.Catnip;
 import com.mewna.catnip.shard.DiscordEvent;
 
 /**
