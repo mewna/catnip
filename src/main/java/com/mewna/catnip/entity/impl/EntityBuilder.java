@@ -1220,4 +1220,18 @@ public final class EntityBuilder {
                 .owner(createUser(data.getJsonObject("owner")))
                 .build();
     }
+    
+    @Nonnull
+    @CheckReturnValue
+    public GatewayInfo createGatewayInfo(@Nonnull final JsonObject data) {
+        final JsonObject sessionStartLimit = data.getJsonObject("session_start_limit");
+        return GatewayInfoImpl.builder()
+                .catnip(catnip)
+                .url(data.getString("url"))
+                .shards(data.getInteger("shards"))
+                .totalSessions(sessionStartLimit.getInteger("total"))
+                .remainingSessions(sessionStartLimit.getInteger("remaining"))
+                .resetAfter(sessionStartLimit.getLong("reset_after"))
+                .build();
+    }
 }

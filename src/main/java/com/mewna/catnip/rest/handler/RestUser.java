@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.guild.PartialGuild;
 import com.mewna.catnip.entity.misc.ApplicationInfo;
+import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
@@ -166,5 +167,13 @@ public class RestUser extends RestHandler {
                 ImmutableMap.of()))
                 .thenApply(ResponsePayload::object)
                 .thenApply(getEntityBuilder()::createApplicationInfo);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<GatewayInfo> getGatewayBot() {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GATEWAY_BOT, ImmutableMap.of()))
+                .thenApply(ResponsePayload::object)
+                .thenApply(e -> getEntityBuilder().createGatewayInfo(e));
     }
 }
