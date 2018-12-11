@@ -228,6 +228,10 @@ public class CatnipShard extends AbstractVerticle {
                 msg.reply(new JsonArray(trace));
                 break;
             }
+            case "CONNECTED": {
+                msg.reply(stateRef.get().socketOpen().get());
+                break;
+            }
             default: {
                 catnip.logAdapter().warn("Shard {} Got unknown control message: {}", id, body.encodePrettily());
                 break;

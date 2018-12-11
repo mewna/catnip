@@ -37,10 +37,13 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -89,6 +92,22 @@ public abstract class AbstractShardManager implements ShardManager {
                     }
                 });
         return future;
+    }
+    
+    @Nonnull
+    @Override
+    @CheckReturnValue
+    public CompletableFuture<Boolean> isConnected(@Nonnegative final int id) {
+        final Future<Boolean> future = Future.future();
+        catnip.eventBus().<Boolean>send(CatnipShard.controlAddress(id), new JsonObject().put("mode", "CONNECTED"),
+                reply -> {
+                    if(reply.succeeded()) {
+                        future.complete(reply.result().body());
+                    } else {
+                        future.fail(reply.cause());
+                    }
+                });
+        return VertxCompletableFuture.from(catnip.vertx(), future);
     }
     
     @Override
