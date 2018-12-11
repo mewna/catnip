@@ -306,6 +306,16 @@ public class CatnipImpl implements Catnip {
         eventBuffer.catnip(this);
         cache.catnip(this);
         
+        // Since this is running outside of the vert.x event loop when it's
+        // called, we can safely block it to do this http request.
+        rest.user().getGatewayBot()
+                .thenAccept(gateway -> {
+                    gatewayInfo.set(gateway);
+                    logAdapter.info("Token validated!");
+                })
+                .toCompletableFuture()
+                .join();
+        
         return this;
     }
     
@@ -321,19 +331,13 @@ public class CatnipImpl implements Catnip {
     
     @Nonnull
     public Catnip startShards() {
-        if(token == null || token.isEmpty()) {
-            throw new IllegalStateException("Provided token is empty!");
-        }
-        rest.user().getGatewayBot().thenAccept(gateway -> {
-            gatewayInfo.set(gateway);
-            shardManager.start();
-        });
+        shardManager.start();
         return this;
     }
     
     private int shardIdFor(@Nonnull final String guildId) {
         final long idLong = Long.parseUnsignedLong(guildId);
-        return (int)((idLong >>> 22) % shardManager.shardCount());
+        return (int) ((idLong >>> 22) % shardManager.shardCount());
     }
     
     @Nullable
