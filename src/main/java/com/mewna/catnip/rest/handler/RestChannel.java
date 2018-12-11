@@ -149,9 +149,10 @@ public class RestChannel extends RestHandler {
     public CompletionStage<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
                                                 @Nonnull final Message message) {
         final JsonObject json = new JsonObject();
-        if(message.content() != null && !message.content().isEmpty()) {
-            json.put("content", message.content());
+        if(message.embeds().isEmpty() && (message.content() == null || message.content().isEmpty())) {
+            throw new IllegalArgumentException("Can't build a message with no content and no embed!");
         }
+        json.put("content", message.content());
         if(message.embeds() != null && !message.embeds().isEmpty()) {
             json.put("embed", getEntityBuilder().embedToJson(message.embeds().get(0)));
         }
