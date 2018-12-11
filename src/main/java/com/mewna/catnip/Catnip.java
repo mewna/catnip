@@ -30,6 +30,7 @@ package com.mewna.catnip;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCache;
 import com.mewna.catnip.cache.EntityCacheWorker;
+import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.ActivityType;
 import com.mewna.catnip.entity.user.Presence.OnlineStatus;
@@ -119,6 +120,14 @@ public interface Catnip {
         //return "https://discordapp.com/api/v6/gateway/bot";
         return RestRequester.API_HOST + RestRequester.API_BASE + Routes.GET_GATEWAY_BOT.baseRoute();
     }
+    
+    /**
+     * @return The cached gateway info. May be null if it hasn't been fetched
+     * yet.
+     */
+    @Nullable
+    @CheckReturnValue
+    GatewayInfo getGatewayInfo();
     
     /**
      * @return The vert.x instance being used by this catnip instance.
@@ -296,7 +305,7 @@ public interface Catnip {
      * {@link com.mewna.catnip.shard.DiscordEvent#VOICE_SERVER_UPDATE VOICE_SERVER_UPDATE}
      * events being fired when the connection is opened.
      *
-     * @param guildId Guild to connect.
+     * @param guildId   Guild to connect.
      * @param channelId Channel to connect.
      */
     //TODO self mute/self deaf?
@@ -344,7 +353,7 @@ public interface Catnip {
      *               is not {@link ActivityType#STREAMING}.
      */
     void presence(@Nullable final OnlineStatus status, @Nullable final String game, @Nullable final ActivityType type,
-                          @Nullable final String url);
+                  @Nullable final String url);
     
     /**
      * Update the online status for all shards. Will clear the activity status.
