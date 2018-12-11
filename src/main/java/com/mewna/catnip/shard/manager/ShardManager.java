@@ -30,10 +30,12 @@ package com.mewna.catnip.shard.manager;
 import com.mewna.catnip.Catnip;
 import io.vertx.core.Future;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Manages the lifecycle of shards - starting, stopping, resuming, etc.
@@ -91,6 +93,27 @@ public interface ShardManager {
      */
     @Nonnull
     Future<List<String>> trace(@Nonnegative int shard);
+    
+    /**
+     * Checks whether or not the shard with the given ID is currently connected
+     * to the websocket gateway. This is done as a boolean because - at least
+     * for now - there's only 2 meaningful states: connected, and queued to be
+     * connected.
+     * <p />
+     * If the shard id does <strong>not</strong> exist (ex. not controlled by
+     * this shard manager instance), then the future will FAIL, and this case
+     * must also be handled.
+     * <p />
+     * This is fetched <em>asynchronously</em>.
+     *
+     * @param id The id of the shard to get connection status for.
+     *
+     * @return Whether or not the shard with the given id is currently
+     * connected to the websocket gateway.
+     */
+    @Nonnull
+    @CheckReturnValue
+    CompletableFuture<Boolean> isConnected(@Nonnegative int id);
     
     /**
      * @return The catnip instance this shard manager is for.

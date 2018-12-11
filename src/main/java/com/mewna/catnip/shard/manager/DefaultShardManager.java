@@ -28,18 +28,15 @@
 package com.mewna.catnip.shard.manager;
 
 import com.google.common.collect.ImmutableList;
-import com.mewna.catnip.Catnip;
 import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
@@ -112,34 +109,14 @@ public class DefaultShardManager extends AbstractShardManager {
         client = new OkHttpClient();
         if(shardCount == 0) {
             // Load shard count from API
-            catnip().vertx().<JsonObject>executeBlocking(future -> {
-                try {
-                    @SuppressWarnings({"UnnecessarilyQualifiedInnerClassAccess", "ConstantConditions"})
-                    final String body = client.newCall(new Request.Builder()
-                            .get().url(Catnip.getShardCountUrl())
-                            .header("Authorization", "Bot " + catnip().token())
-                            .build()).execute().body().string();
-                    future.complete(new JsonObject(body));
-                } catch(final IOException | NullPointerException e) {
-                    future.fail(e);
-                }
-            }, res -> {
-                if(res.succeeded()) {
-                    final JsonObject body = res.result();
-                    final int shards = body.getInteger("shards", -1);
-                    if(shards != -1) {
-                        // Update from API
-                        shardCount = shards;
-                        catnip().logAdapter().info("Loaded expected shard count: {}", shardCount);
-                        shardIds.clear();
-                        shardIds.addAll(IntStream.range(0, shardCount).boxed().collect(Collectors.toList()));
-                        loadShards();
-                    } else {
-                        throw new IllegalStateException("Invalid token provided (Gateway JSON response doesn't have `shards` key)!");
-                    }
-                } else {
-                    throw new IllegalStateException("Couldn't load shard count from API!", res.cause());
-                }
+            catnip().rest().user().getGatewayBot().thenAccept(gatewayInfo -> {
+                shardCount = gatewayInfo.shards();
+                catnip().logAdapter().info("Loaded expected shard count: {}", shardCount);
+                shardIds.clear();
+                shardIds.addAll(IntStream.range(0, shardCount).boxed().collect(Collectors.toList()));
+                loadShards();
+            }).exceptionally(e -> {
+                throw new IllegalStateException("Couldn't load shard count from API!", e);
             });
         } else {
             loadShards();
