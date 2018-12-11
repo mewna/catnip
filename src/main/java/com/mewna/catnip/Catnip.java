@@ -66,6 +66,8 @@ import java.util.function.Consumer;
 public interface Catnip {
     /**
      * Create a new catnip instance with the given token.
+     * <p />
+     * <strong>This method may block while validating the provided token.</strong>
      *
      * @param token The token to be used for all API operations.
      *
@@ -77,6 +79,8 @@ public interface Catnip {
     
     /**
      * Create a new catnip instance with the given options.
+     * <p />
+     * <strong>This method may block while validating the provided token.</strong>
      *
      * @param options The options to be applied to the catnip instance.
      *
@@ -88,6 +92,8 @@ public interface Catnip {
     
     /**
      * Create a new catnip instance with the given token and vert.x instance.
+     * <p />
+     * <strong>This method may block while validating the provided token.</strong>
      *
      * @param token The token to be used for all API operations.
      * @param vertx The vert.x instance used to run the bot.
@@ -100,6 +106,8 @@ public interface Catnip {
     
     /**
      * Create a new catnip instance with the given options and vert.x instance.
+     * <p />
+     * <strong>This method may block while validating the provided token.</strong>
      *
      * @param options The options to be applied to the catnip instance.
      * @param vertx   The vert.x instance used to run the bot.

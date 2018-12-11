@@ -105,7 +105,12 @@ public class RestRequester {
         if(succeeded) {
             catnip.logAdapter().debug("Completed request {}", r);
             if(statusCode < 200 || statusCode > 299) {
-                if(statusCode != 429) {
+                if(statusCode == 401) {
+                    catnip.logAdapter().warn("Token probably invalid: got {} '{}', route: {} {}, request {}, body {}",
+                            statusCode, statusMessage, r.route.method().name(), r.route.baseRoute(), r, body.toString());
+                    r.future.fail("Invalid token");
+                    return;
+                } else if(statusCode != 429) {
                     catnip.logAdapter().warn("Got unexpected HTTP status: {} '{}', route: {} {}, request {}, body {}", statusCode,
                             statusMessage, r.route.method().name(), r.route.baseRoute(), r, body.toString());
                 }
@@ -135,7 +140,8 @@ public class RestRequester {
                 final long retry = Long.parseLong(headers.get("Retry-After"));
                 global.remaining(0);
                 global.limit(1);
-                // 500ms buffer for safety
+                // 500ms buffer for safety; we don't use a specific bucket's
+                // latency because the ratelimit is global, not per-bucket.
                 final long globalReset = System.currentTimeMillis() + retry + 500L;
                 // CatnipImpl.vertx().setTimer(globalReset, __ -> global.resetBucket());
                 global.reset(TimeUnit.MILLISECONDS.toSeconds(globalReset));
@@ -152,6 +158,7 @@ public class RestRequester {
                     bucket.retry(r);
                 }
             } else {
+                // We're good, run it through hooks and complete the future.
                 bucket.updateFromHeaders(headers);
                 for(final Extension extension : catnip.extensionManager().extensions()) {
                     for(final CatnipHook hook : extension.hooks()) {
