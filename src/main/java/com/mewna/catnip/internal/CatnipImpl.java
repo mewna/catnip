@@ -34,6 +34,7 @@ import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.entity.impl.*;
 import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
+import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.Activity;
 import com.mewna.catnip.entity.user.Presence.ActivityType;
@@ -94,6 +95,7 @@ public class CatnipImpl implements Catnip {
     private final AtomicReference<User> selfUser = new AtomicReference<>(null);
     private final Set<String> unavailableGuilds = new HashSet<>();
     private final Set<String> disabledEvents;
+    private final AtomicReference<GatewayInfo> gatewayInfo = new AtomicReference<>(null);
     
     public CatnipImpl(@Nonnull final Vertx vertx, @Nonnull final CatnipOptions options) {
         this.vertx = vertx;
@@ -322,12 +324,21 @@ public class CatnipImpl implements Catnip {
         if(token == null || token.isEmpty()) {
             throw new IllegalStateException("Provided token is empty!");
         }
-        shardManager.start();
+        rest.user().getGatewayBot().thenAccept(gateway -> {
+            gatewayInfo.set(gateway);
+            shardManager.start();
+        });
         return this;
     }
     
     private int shardIdFor(@Nonnull final String guildId) {
         final long idLong = Long.parseUnsignedLong(guildId);
         return (int)((idLong >>> 22) % shardManager.shardCount());
+    }
+    
+    @Nullable
+    @Override
+    public GatewayInfo getGatewayInfo() {
+        return gatewayInfo.get();
     }
 }
