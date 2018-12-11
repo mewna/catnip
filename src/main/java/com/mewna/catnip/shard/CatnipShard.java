@@ -166,12 +166,11 @@ public class CatnipShard extends AbstractVerticle {
             }
             catnip.vertx().setTimer(500, __ -> catnip.eventBus().publish(websocketMessagePresenceUpdatePollAddress(), null));
         });
-        catnip.eventBus().<JsonObject>consumer(websocketMessageVoiceStateUpdateQueueAddress(), state -> {
-            catnip.eventBus().send(websocketMessageQueueAddress(), basePayload(
-                    GatewayOp.VOICE_STATE_UPDATE,
-                    state.body()
-            ));
-        });
+        catnip.eventBus().<JsonObject>consumer(websocketMessageVoiceStateUpdateQueueAddress(),
+                state -> catnip.eventBus().send(websocketMessageQueueAddress(), basePayload(
+                        GatewayOp.VOICE_STATE_UPDATE,
+                        state.body()
+                )));
         catnip.eventBus().consumer(websocketMessagePollAddress(), msg -> {
             if(stateRef.get() != null) {
                 while(!messageQueue.isEmpty()) {
@@ -252,22 +251,27 @@ public class CatnipShard extends AbstractVerticle {
     
     private void connectSocket(final Message<JsonObject> msg) {
         catnip.eventBus().publish(Raw.CONNECTING, shardInfo());
-        client.websocketAbs(Catnip.getGatewayUrl(), null, null, null,
-                socket -> {
-                    catnip.eventBus().publish(Raw.CONNECTED, shardInfo());
-                    socket.frameHandler(frame -> handleSocketFrame(msg, frame))
-                            .closeHandler(this::handleSocketClose)
-                            .exceptionHandler(Throwable::printStackTrace);
-                    stateRef.set(new ShardState(socket));
-                    stateRef.get().socketOpen().set(true);
-                },
-                failure -> {
-                    stateRef.set(null);
-                    catnip.logAdapter().error("Couldn't connect socket:", failure);
-                    catnip.eventBus().publish("RAW_STATUS", new JsonObject().put("status", "down:fail-connect").put("shard", id));
-                    // If we totally fail to connect socket, don't need to worry as much
-                    catnip.vertx().setTimer(500L, __ -> msg.reply(new JsonObject().put("state", FAILED.name())));
-                });
+        catnip.rest().user().getGatewayBot().thenAccept(gateway ->
+                client.websocketAbs(gateway.url(), null, null, null,
+                        socket -> {
+                            catnip.eventBus().publish(Raw.CONNECTED, shardInfo());
+                            socket.frameHandler(frame -> handleSocketFrame(msg, frame))
+                                    .closeHandler(this::handleSocketClose)
+                                    .exceptionHandler(Throwable::printStackTrace);
+                            stateRef.set(new ShardState(socket));
+                            stateRef.get().socketOpen().set(true);
+                        },
+                        failure -> {
+                            stateRef.set(null);
+                            catnip.logAdapter().error("Couldn't connect socket:", failure);
+                            catnip.eventBus().publish("RAW_STATUS", new JsonObject().put("status", "down:fail-connect")
+                                    .put("shard", id));
+                            // If we totally fail to connect socket, don't need to worry as much
+                            catnip.vertx().setTimer(500L, __ -> msg.reply(new JsonObject().put("state", FAILED.name())));
+                        })).exceptionally(e -> {
+                            e.printStackTrace();
+                            return null;
+        });
     }
     
     private void handleBinaryData(final Message<JsonObject> msg, final Buffer binary) {
@@ -628,7 +632,7 @@ public class CatnipShard extends AbstractVerticle {
         @Getter
         @Setter
         private int readBufferPosition;
-    
+        
         ShardState(final WebSocket socket) {
             this(socket, new Inflater());
         }

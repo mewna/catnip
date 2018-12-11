@@ -110,20 +110,6 @@ public interface Catnip {
     }
     
     /**
-     * The gateway URL used to connect shards.
-     * <p/>
-     * TODO: Properly fetch this from the API.
-     *
-     * @return The websocket gateway URL.
-     */
-    @Nonnull
-    @CheckReturnValue
-    static String getGatewayUrl() {
-        // TODO: Allow injecting other gateway URLs for eg. mocks?
-        return "wss://gateway.discord.gg/?v=6&encoding=json&compress=zlib-stream";
-    }
-    
-    /**
      * @return The URL used to fetch recommended shard count.
      */
     @Nonnull
