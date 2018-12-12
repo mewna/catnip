@@ -73,6 +73,8 @@ public class MessageBuilder {
         m.content(content);
         if(embed != null) {
             m.embeds(Collections.singletonList(embed));
+        } else {
+            m.embeds(Collections.emptyList());
         }
         return m;
     }
