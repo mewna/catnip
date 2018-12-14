@@ -60,11 +60,8 @@ import com.mewna.catnip.entity.message.Message.Reaction;
 import com.mewna.catnip.entity.misc.*;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.misc.Emoji.UnicodeEmoji;
-import com.mewna.catnip.entity.user.Presence;
+import com.mewna.catnip.entity.user.*;
 import com.mewna.catnip.entity.user.Presence.*;
-import com.mewna.catnip.entity.user.TypingUser;
-import com.mewna.catnip.entity.user.User;
-import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.entity.voice.VoiceServerUpdate;
 import io.vertx.core.json.JsonArray;
@@ -513,6 +510,22 @@ public final class EntityBuilder {
                 .catnip(catnip)
                 .status(OnlineStatus.fromString(data.getString("status")))
                 .activity(createActivity(data.getJsonObject("game", null)))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public PresenceUpdate createPresenceUpdate(@Nonnull final JsonObject data) {
+        final JsonObject clientStatus = data.getJsonObject("client_status");
+        return PresenceUpdateImpl.builder()
+                .catnip(catnip)
+                .status(OnlineStatus.fromString(data.getString("status")))
+                .activity(createActivity(data.getJsonObject("game", null)))
+                .id(data.getJsonObject("user").getString("id"))
+                .guildId(data.getString("guild_id"))
+                .roles(ImmutableSet.copyOf(stringListOf(data.getJsonArray("roles"))))
+                .nick(data.getString("nick"))
+                .mobileStatus(clientStatus != null ? OnlineStatus.fromString(clientStatus.getString("mobile")) : null)
                 .build();
     }
     

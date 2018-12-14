@@ -239,7 +239,7 @@ public final class DispatchEmitter {
                 break;
             }
             case Raw.PRESENCE_UPDATE: {
-                catnip.eventBus().publish(type, entityBuilder.createPresence(data));
+                catnip.eventBus().publish(type, entityBuilder.createPresenceUpdate(data));
                 break;
             }
             
