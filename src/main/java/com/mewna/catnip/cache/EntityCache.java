@@ -260,5 +260,5 @@ public interface EntityCache {
      * @return A non-{@code null}, possibly-empty list of voice states.
      */
     @Nonnull
-    List<VoiceState> voiceState();
+    List<VoiceState> voiceStates();
 }
