@@ -293,6 +293,7 @@ public class CatnipImpl implements Catnip {
         // Users
         codec(UserImpl.class);
         codec(PresenceImpl.class);
+        codec(PresenceUpdateImpl.class);
         
         // Voice
         codec(VoiceStateImpl.class);
