@@ -34,8 +34,8 @@ public interface PresenceUpdate extends Presence {
     String nick();
     
     /**
-     * @return Status reported for the user's mobile device.
+     * @return Online status reported for the user's mobile device.
      */
     @Nullable
-    String mobileStatus();
+    OnlineStatus mobileStatus();
 }
