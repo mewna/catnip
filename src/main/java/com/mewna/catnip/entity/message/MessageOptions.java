@@ -116,6 +116,6 @@ public class MessageOptions {
     }
     
     public List<ImmutablePair<String, Buffer>> files() {
-        return ImmutableList.copyOf(files);
+        return hasFiles() ? ImmutableList.copyOf(files) : ImmutableList.of() ;
     }
 }
