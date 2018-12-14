@@ -34,10 +34,7 @@ import com.mewna.catnip.entity.guild.*;
 import com.mewna.catnip.entity.message.*;
 import com.mewna.catnip.entity.misc.Ready;
 import com.mewna.catnip.entity.misc.Resumed;
-import com.mewna.catnip.entity.user.Presence;
-import com.mewna.catnip.entity.user.TypingUser;
-import com.mewna.catnip.entity.user.User;
-import com.mewna.catnip.entity.user.VoiceState;
+import com.mewna.catnip.entity.user.*;
 import com.mewna.catnip.entity.voice.VoiceServerUpdate;
 
 import static com.mewna.catnip.shard.EventTypeImpl.event;
@@ -81,7 +78,7 @@ public interface DiscordEvent {
     EventType<ReactionUpdate>       MESSAGE_REACTION_ADD        = event(Raw.MESSAGE_REACTION_ADD, ReactionUpdate.class);
     EventType<ReactionUpdate>       MESSAGE_REACTION_REMOVE     = event(Raw.MESSAGE_REACTION_REMOVE, ReactionUpdate.class);
     EventType<BulkRemovedReactions> MESSAGE_REACTION_REMOVE_ALL = event(Raw.MESSAGE_REACTION_REMOVE_ALL, BulkRemovedReactions.class);
-    EventType<Presence>             PRESENCE_UPDATE             = event(Raw.PRESENCE_UPDATE, Presence.class);
+    EventType<PresenceUpdate>       PRESENCE_UPDATE             = event(Raw.PRESENCE_UPDATE, PresenceUpdate.class);
     EventType<Ready>                READY                       = event(Raw.READY, Ready.class);
     EventType<Resumed>              RESUMED                     = event(Raw.RESUMED, Resumed.class);
     EventType<TypingUser>           TYPING_START                = event(Raw.TYPING_START, TypingUser.class);
