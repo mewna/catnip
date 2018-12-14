@@ -211,7 +211,7 @@ public class NoopEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public List<VoiceState> voiceState() {
+    public List<VoiceState> voiceStates() {
         return ImmutableList.of();
     }
     

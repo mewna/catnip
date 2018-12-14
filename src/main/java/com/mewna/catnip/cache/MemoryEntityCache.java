@@ -553,7 +553,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public List<VoiceState> voiceState() {
+    public List<VoiceState> voiceStates() {
         return ImmutableList.copyOf(voiceStateCache.values().stream()
                 .map(Map::values)
                 .flatMap(Collection::stream)
