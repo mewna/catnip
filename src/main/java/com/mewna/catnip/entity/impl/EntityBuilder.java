@@ -525,7 +525,7 @@ public final class EntityBuilder {
                 .guildId(data.getString("guild_id"))
                 .roles(ImmutableSet.copyOf(stringListOf(data.getJsonArray("roles"))))
                 .nick(data.getString("nick"))
-                .mobileStatus(clientStatus != null ? clientStatus.getString("mobile") : null)
+                .mobileStatus(clientStatus != null ? OnlineStatus.fromString(clientStatus.getString("mobile")) : null)
                 .build();
     }
     
