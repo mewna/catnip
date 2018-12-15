@@ -4,6 +4,14 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Collections;
 
+/**
+ * Always empty {@link NamedCacheView named cache view}.
+ *
+ * @author natanbc
+ * @since 12/15/18
+ *
+ * @see NamedCacheView#empty()
+ */
 public class EmptyNamedCacheView<T> extends EmptyCacheView<T> implements NamedCacheView<T> {
     public static final NamedCacheView<?> INSTANCE = new EmptyNamedCacheView<>();
     

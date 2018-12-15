@@ -8,6 +8,14 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+/**
+ * Always empty {@link CacheView cache view}.
+ *
+ * @author natanbc
+ * @since 12/15/18
+ *
+ * @see CacheView#empty()
+ */
 public class EmptyCacheView<T> implements CacheView<T> {
     public static final CacheView<?> INSTANCE = new EmptyCacheView<>();
     

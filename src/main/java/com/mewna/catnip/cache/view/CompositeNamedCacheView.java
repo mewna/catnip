@@ -6,6 +6,15 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.function.Function;
 
+/**
+ * A {@link NamedCacheView NamedCacheView} that's equivalent to a collection of provided ones.
+ * Any update to any of the provided views will update this view.
+ *
+ * @param <T> Type of the entity held by this cache.
+ *
+ * @author natanbc
+ * @since 12/15/18
+ */
 public class CompositeNamedCacheView<T> extends CompositeCacheView<T> implements NamedCacheView<T> {
     protected final Function<T, String> nameFunction;
     
