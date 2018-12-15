@@ -54,6 +54,10 @@ public interface UserDMChannel extends DMChannel {
     @CheckReturnValue
     User recipient();
     
+    @Nonnull
+    @CheckReturnValue
+    String userId();
+    
     @Override
     @JsonIgnore
     @CheckReturnValue

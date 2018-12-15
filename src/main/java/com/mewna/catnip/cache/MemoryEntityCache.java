@@ -74,11 +74,13 @@ public class MemoryEntityCache implements EntityCacheWorker {
     @SuppressWarnings("WeakerAccess")
     protected final DefaultNamedCacheView<User> userCache = new DefaultNamedCacheView<>(User::username);
     @SuppressWarnings("WeakerAccess")
+    protected final DefaultCacheView<UserDMChannel> dmChannelCache = new DefaultCacheView<>();
+    @SuppressWarnings("WeakerAccess")
     protected final Map<String, DefaultNamedCacheView<Member>> memberCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
     protected final Map<String, DefaultNamedCacheView<Role>> roleCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, DefaultCacheView<Channel>> channelCache = new ConcurrentHashMap<>();
+    protected final Map<String, DefaultNamedCacheView<GuildChannel>> guildChannelCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
     protected final Map<String, DefaultNamedCacheView<CustomEmoji>> emojiCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
@@ -118,7 +120,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
     private void cacheChannel(final Channel channel) {
         if(channel.isGuild()) {
             final GuildChannel gc = (GuildChannel) channel;
-            channelCache.computeIfAbsent(gc.guildId(), __ -> new DefaultCacheView<>())
+            guildChannelCache.computeIfAbsent(gc.guildId(), __ -> new DefaultNamedCacheView<>(GuildChannel::name))
                     .put(gc.id(), gc);
         } else if(channel.isUserDM()) {
             final UserDMChannel dm = (UserDMChannel) channel;
@@ -128,8 +130,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
             // DM for a user we don't have cached, which is unlikely
             // TODO: Re-evaluate safety at some point
             //noinspection ConstantConditions
-            channelCache.computeIfAbsent(DM_CHANNEL_KEY, __ -> new DefaultCacheView<>())
-                    .put(dm.recipient().id(), channel);
+            dmChannelCache.put(dm.recipient().id(), dm);
         } else {
             catnip.logAdapter().warn("I don't know how to cache channel {}: isCategory={}, isDM={}, isGroupDM={}," +
                             "isGuild={}, isText={}, isUserDM={}, isVoice={}",
@@ -185,10 +186,13 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 final Channel channel = entityBuilder.createChannel(payload);
                 if(channel.isGuild()) {
                     final GuildChannel gc = (GuildChannel) channel;
-                    final DefaultCacheView<Channel> channels = channelCache.get(gc.guildId());
+                    final DefaultNamedCacheView<GuildChannel> channels = guildChannelCache.get(gc.guildId());
                     if(channels != null) {
                         channels.remove(gc.id());
                     }
+                } else if(channel.isUserDM()) {
+                    final UserDMChannel dm = (UserDMChannel) channel;
+                    dmChannelCache.remove(dm.userId());
                 } else {
                     catnip.logAdapter().warn("I don't know how to delete non-guild channel {}!", channel.id());
                 }
@@ -465,22 +469,34 @@ public class MemoryEntityCache implements EntityCacheWorker {
     
     @Nullable
     @Override
-    public Channel channel(@Nonnull final String guildId, @Nonnull final String id) {
-        final DefaultCacheView<Channel> cache = channelCache.get(guildId);
+    public GuildChannel channel(@Nonnull final String guildId, @Nonnull final String id) {
+        final DefaultNamedCacheView<GuildChannel> cache = guildChannelCache.get(guildId);
         return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
-    public CacheView<Channel> channels(@Nonnull final String guildId) {
-        final DefaultCacheView<Channel> cache = channelCache.get(guildId);
-        return cache == null ? CacheView.empty() : cache;
+    public NamedCacheView<GuildChannel> channels(@Nonnull final String guildId) {
+        final DefaultNamedCacheView<GuildChannel> cache = guildChannelCache.get(guildId);
+        return cache == null ? NamedCacheView.empty() : cache;
     }
     
     @Nonnull
     @Override
-    public CacheView<Channel> channels() {
-        return new CompositeCacheView<>(channelCache.values());
+    public NamedCacheView<GuildChannel> channels() {
+        return new CompositeNamedCacheView<>(guildChannelCache.values(), GuildChannel::name);
+    }
+    
+    @Nullable
+    @Override
+    public UserDMChannel dmChannel(@Nonnull final String id) {
+        return dmChannelCache.getById(id);
+    }
+    
+    @Nonnull
+    @Override
+    public CacheView<UserDMChannel> dmChannels() {
+        return dmChannelCache;
     }
     
     @Nullable

@@ -29,7 +29,8 @@ package com.mewna.catnip.cache;
 
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.cache.view.NamedCacheView;
-import com.mewna.catnip.entity.channel.Channel;
+import com.mewna.catnip.entity.channel.GuildChannel;
+import com.mewna.catnip.entity.channel.UserDMChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
@@ -40,7 +41,6 @@ import com.mewna.catnip.entity.user.VoiceState;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 
 /**
  * If you're looking to implement your own caching system, you want
@@ -178,7 +178,7 @@ public interface EntityCache {
      * @return The channel, or {@code null} if it isn't cached.
      */
     @Nullable
-    Channel channel(@Nonnull String guildId, @Nonnull String id);
+    GuildChannel channel(@Nonnull String guildId, @Nonnull String id);
     
     /**
      * Get all channels for the guild with the given ID. The list returned by
@@ -189,7 +189,7 @@ public interface EntityCache {
      * @return A non-{@code null}, possibly-empty list of guild channels.
      */
     @Nonnull
-    CacheView<Channel> channels(@Nonnull String guildId);
+    NamedCacheView<GuildChannel> channels(@Nonnull String guildId);
     
     /**
      * Get all channels cached in this entity cache.
@@ -197,7 +197,13 @@ public interface EntityCache {
      * @return A non-{@code null}, possibly-empty list of channels
      */
     @Nonnull
-    CacheView<Channel> channels();
+    NamedCacheView<GuildChannel> channels();
+    
+    @Nullable
+    UserDMChannel dmChannel(@Nonnull String id);
+    
+    @Nonnull
+    CacheView<UserDMChannel> dmChannels();
     
     /**
      * Get the custom emojis with the given ID from the guild with the given ID.

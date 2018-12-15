@@ -30,8 +30,8 @@ package com.mewna.catnip.cache;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.cache.view.NamedCacheView;
-import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.GuildChannel;
+import com.mewna.catnip.entity.channel.UserDMChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
@@ -163,19 +163,31 @@ public class NoopEntityCache implements EntityCacheWorker {
     
     @Nullable
     @Override
-    public Channel channel(@Nonnull final String guildId, @Nonnull final String id) {
+    public GuildChannel channel(@Nonnull final String guildId, @Nonnull final String id) {
         return null;
     }
     
     @Nonnull
     @Override
-    public CacheView<Channel> channels(@Nonnull final String guildId) {
-        return CacheView.empty();
+    public NamedCacheView<GuildChannel> channels(@Nonnull final String guildId) {
+        return NamedCacheView.empty();
     }
     
     @Nonnull
     @Override
-    public CacheView<Channel> channels() {
+    public NamedCacheView<GuildChannel> channels() {
+        return NamedCacheView.empty();
+    }
+    
+    @Nullable
+    @Override
+    public UserDMChannel dmChannel(@Nonnull final String id) {
+        return null;
+    }
+    
+    @Nonnull
+    @Override
+    public CacheView<UserDMChannel> dmChannels() {
         return CacheView.empty();
     }
     

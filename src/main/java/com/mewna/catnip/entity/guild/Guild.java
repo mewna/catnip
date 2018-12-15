@@ -32,7 +32,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.cache.view.NamedCacheView;
 import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.impl.GuildImpl;
@@ -311,7 +310,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @CheckReturnValue
-    default CacheView<Channel> channels() {
+    default NamedCacheView<GuildChannel> channels() {
         return catnip().cache().channels(id());
     }
     
