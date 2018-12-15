@@ -29,6 +29,7 @@ package com.mewna.catnip.cache;
 
 import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.cache.view.*;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.channel.UserDMChannel;
@@ -54,7 +55,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static com.mewna.catnip.shard.DiscordEvent.Raw;
 
@@ -70,23 +70,32 @@ public class MemoryEntityCache implements EntityCacheWorker {
     public static final String DM_CHANNEL_KEY = "DMS";
     
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, Guild> guildCache = new ConcurrentHashMap<>();
+    protected final DefaultNamedCacheView<Guild> guildCache = new DefaultNamedCacheView<>(Guild::name);
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, User> userCache = new ConcurrentHashMap<>();
+    protected final DefaultNamedCacheView<User> userCache = new DefaultNamedCacheView<>(User::username);
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, Map<String, Member>> memberCache = new ConcurrentHashMap<>();
+    protected final DefaultCacheView<UserDMChannel> dmChannelCache = new DefaultCacheView<>();
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, Map<String, Role>> roleCache = new ConcurrentHashMap<>();
+    protected final Map<String, DefaultNamedCacheView<Member>> memberCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, Map<String, Channel>> channelCache = new ConcurrentHashMap<>();
+    protected final Map<String, DefaultNamedCacheView<Role>> roleCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, Map<String, CustomEmoji>> emojiCache = new ConcurrentHashMap<>();
+    protected final Map<String, DefaultNamedCacheView<GuildChannel>> guildChannelCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, Map<String, VoiceState>> voiceStateCache = new ConcurrentHashMap<>();
+    protected final Map<String, DefaultNamedCacheView<CustomEmoji>> emojiCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, Presence> presenceCache = new ConcurrentHashMap<>();
+    protected final Map<String, DefaultCacheView<VoiceState>> voiceStateCache = new ConcurrentHashMap<>();
+    @SuppressWarnings("WeakerAccess")
+    protected final DefaultCacheView<Presence> presenceCache = new DefaultCacheView<>();
     @SuppressWarnings("WeakerAccess")
     protected final AtomicReference<User> selfUser = new AtomicReference<>(null);
+    protected final Function<Member, String> memberNameFunction = m -> {
+        if(m.nick() != null) {
+            return m.nick();
+        }
+        final User u = user(m.id());
+        return u == null ? null : u.username();
+    };
     @Getter
     private Catnip catnip;
     private EntityBuilder entityBuilder;
@@ -111,18 +120,17 @@ public class MemoryEntityCache implements EntityCacheWorker {
     private void cacheChannel(final Channel channel) {
         if(channel.isGuild()) {
             final GuildChannel gc = (GuildChannel) channel;
-            final Map<String, Channel> channels = channelCache.computeIfAbsent(gc.guildId(), __ -> new ConcurrentHashMap<>());
-            channels.put(gc.id(), gc);
+            guildChannelCache.computeIfAbsent(gc.guildId(), __ -> new DefaultNamedCacheView<>(GuildChannel::name))
+                    .put(gc.id(), gc);
         } else if(channel.isUserDM()) {
             final UserDMChannel dm = (UserDMChannel) channel;
-            final Map<String, Channel> channels = channelCache.computeIfAbsent(DM_CHANNEL_KEY, __ -> new ConcurrentHashMap<>());
             // In this case in particular, this is safe because this method
             // will call into this cache and try to fetch the user that way.
             // The only possible way this could fail is if Discord sends us a
             // DM for a user we don't have cached, which is unlikely
             // TODO: Re-evaluate safety at some point
             //noinspection ConstantConditions
-            channels.put(dm.recipient().id(), channel);
+            dmChannelCache.put(dm.recipient().id(), dm);
         } else {
             catnip.logAdapter().warn("I don't know how to cache channel {}: isCategory={}, isDM={}, isGroupDM={}," +
                             "isGuild={}, isText={}, isUserDM={}, isVoice={}",
@@ -132,8 +140,8 @@ public class MemoryEntityCache implements EntityCacheWorker {
     }
     
     private void cacheRole(final Role role) {
-        final Map<String, Role> roles = roleCache.computeIfAbsent(role.guildId(), __ -> new ConcurrentHashMap<>());
-        roles.put(role.id(), role);
+        roleCache.computeIfAbsent(role.guildId(), __ -> new DefaultNamedCacheView<>(Role::name))
+                .put(role.id(), role);
     }
     
     private void cacheUser(final User user) {
@@ -141,13 +149,13 @@ public class MemoryEntityCache implements EntityCacheWorker {
     }
     
     private void cacheMember(final Member member) {
-        final Map<String, Member> members = memberCache.computeIfAbsent(member.guildId(), __ -> new ConcurrentHashMap<>());
-        members.put(member.id(), member);
+        memberCache.computeIfAbsent(member.guildId(), __ -> new DefaultNamedCacheView<>(memberNameFunction))
+                .put(member.id(), member);
     }
     
     private void cacheEmoji(final CustomEmoji emoji) {
-        final Map<String, CustomEmoji> emojiMap = emojiCache.computeIfAbsent(emoji.guildId(), __ -> new ConcurrentHashMap<>());
-        emojiMap.put(emoji.id(), emoji);
+        emojiCache.computeIfAbsent(emoji.guildId(), __ -> new DefaultNamedCacheView<>(CustomEmoji::name))
+                .put(emoji.id(), emoji);
     }
     
     private void cachePresence(final String id, final Presence presence) {
@@ -178,12 +186,13 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 final Channel channel = entityBuilder.createChannel(payload);
                 if(channel.isGuild()) {
                     final GuildChannel gc = (GuildChannel) channel;
-                    Map<String, Channel> channels = channelCache.get(gc.guildId());
-                    if(channels == null) {
-                        channels = new ConcurrentHashMap<>();
-                        channelCache.put(gc.guildId(), channels);
+                    final DefaultNamedCacheView<GuildChannel> channels = guildChannelCache.get(gc.guildId());
+                    if(channels != null) {
+                        channels.remove(gc.id());
                     }
-                    channels.remove(gc.id());
+                } else if(channel.isUserDM()) {
+                    final UserDMChannel dm = (UserDMChannel) channel;
+                    dmChannelCache.remove(dm.userId());
                 } else {
                     catnip.logAdapter().warn("I don't know how to delete non-guild channel {}!", channel.id());
                 }
@@ -343,8 +352,8 @@ public class MemoryEntityCache implements EntityCacheWorker {
             catnip.logAdapter().warn("Not caching voice state for {} due to null guild", state.userId());
             return;
         }
-        final Map<String, VoiceState> states = voiceStateCache.computeIfAbsent(state.guildId(), __ -> new ConcurrentHashMap<>());
-        states.put(state.userId(), state);
+        voiceStateCache.computeIfAbsent(state.guildId(), __ -> new DefaultCacheView<>())
+                .put(state.userId(), state);
     }
     
     @Override
@@ -385,179 +394,149 @@ public class MemoryEntityCache implements EntityCacheWorker {
     @Nullable
     @Override
     public Guild guild(@Nonnull final String id) {
-        return guildCache.get(id);
+        return guildCache.getById(id);
     }
     
     @Nonnull
     @Override
-    public List<Guild> guilds() {
-        return ImmutableList.copyOf(guildCache.values());
+    public NamedCacheView<Guild> guilds() {
+        return guildCache;
     }
     
     @Nullable
     @Override
     public User user(@Nonnull final String id) {
-        return userCache.get(id);
+        return userCache.getById(id);
     }
     
     @Nullable
     @Override
     public Presence presence(@Nonnull final String id) {
-        return presenceCache.get(id);
+        return presenceCache.getById(id);
     }
     
     @Nonnull
     @Override
-    public List<Presence> presences() {
-        return ImmutableList.copyOf(presenceCache.values());
+    public CacheView<Presence> presences() {
+        return presenceCache;
     }
     
     @Nullable
     @Override
     public Member member(@Nonnull final String guildId, @Nonnull final String id) {
-        if(memberCache.containsKey(guildId)) {
-            return memberCache.get(guildId).get(id);
-        } else {
-            return null;
-        }
+        final DefaultCacheView<Member> cache = memberCache.get(guildId);
+        return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
-    public List<Member> members(@Nonnull final String guildId) {
-        if(memberCache.containsKey(guildId)) {
-            return ImmutableList.copyOf(memberCache.get(guildId).values());
-        } else {
-            return ImmutableList.of();
-        }
+    public NamedCacheView<Member> members(@Nonnull final String guildId) {
+        final DefaultNamedCacheView<Member> cache = memberCache.get(guildId);
+        return cache == null ? NamedCacheView.empty() : cache;
     }
     
     @Nonnull
     @Override
-    public List<Member> members() {
-        return ImmutableList.copyOf(memberCache.values().stream()
-                .map(Map::values)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList()));
+    public NamedCacheView<Member> members() {
+        return new CompositeNamedCacheView<>(memberCache.values(), memberNameFunction);
     }
     
     @Nonnull
     @Override
-    public List<User> users() {
-        return ImmutableList.copyOf(userCache.values());
+    public NamedCacheView<User> users() {
+        return userCache;
     }
     
     @Nullable
     @Override
     public Role role(@Nonnull final String guildId, @Nonnull final String id) {
-        if(roleCache.containsKey(guildId)) {
-            return roleCache.get(guildId).get(id);
-        } else {
-            return null;
-        }
+        final DefaultCacheView<Role> cache = roleCache.get(guildId);
+        return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
-    public List<Role> roles(@Nonnull final String guildId) {
-        if(roleCache.containsKey(guildId)) {
-            return ImmutableList.copyOf(roleCache.get(guildId).values());
-        } else {
-            return ImmutableList.of();
-        }
+    public NamedCacheView<Role> roles(@Nonnull final String guildId) {
+        final DefaultNamedCacheView<Role> cache = roleCache.get(guildId);
+        return cache == null ? NamedCacheView.empty() : cache;
     }
     
     @Nonnull
     @Override
-    public List<Role> roles() {
-        return ImmutableList.copyOf(roleCache.values().stream()
-                .map(Map::values)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList()));
+    public NamedCacheView<Role> roles() {
+        return new CompositeNamedCacheView<>(roleCache.values(), Role::name);
     }
     
     @Nullable
     @Override
-    public Channel channel(@Nonnull final String guildId, @Nonnull final String id) {
-        if(channelCache.containsKey(guildId)) {
-            return channelCache.get(guildId).get(id);
-        } else {
-            return null;
-        }
+    public GuildChannel channel(@Nonnull final String guildId, @Nonnull final String id) {
+        final DefaultNamedCacheView<GuildChannel> cache = guildChannelCache.get(guildId);
+        return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
-    public List<Channel> channels(@Nonnull final String guildId) {
-        if(channelCache.containsKey(guildId)) {
-            return ImmutableList.copyOf(channelCache.get(guildId).values());
-        } else {
-            return ImmutableList.of();
-        }
+    public NamedCacheView<GuildChannel> channels(@Nonnull final String guildId) {
+        final DefaultNamedCacheView<GuildChannel> cache = guildChannelCache.get(guildId);
+        return cache == null ? NamedCacheView.empty() : cache;
     }
     
     @Nonnull
     @Override
-    public List<Channel> channels() {
-        return ImmutableList.copyOf(channelCache.values().stream().map(Map::values).flatMap(Collection::stream).collect(Collectors.toList()));
+    public NamedCacheView<GuildChannel> channels() {
+        return new CompositeNamedCacheView<>(guildChannelCache.values(), GuildChannel::name);
+    }
+    
+    @Nullable
+    @Override
+    public UserDMChannel dmChannel(@Nonnull final String id) {
+        return dmChannelCache.getById(id);
+    }
+    
+    @Nonnull
+    @Override
+    public CacheView<UserDMChannel> dmChannels() {
+        return dmChannelCache;
     }
     
     @Nullable
     @Override
     public CustomEmoji emoji(@Nonnull final String guildId, @Nonnull final String id) {
-        if(emojiCache.containsKey(guildId)) {
-            return emojiCache.get(guildId).get(id);
-        } else {
-            return null;
-        }
+        final DefaultCacheView<CustomEmoji> cache = emojiCache.get(guildId);
+        return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
-    public List<CustomEmoji> emojis(@Nonnull final String guildId) {
-        if(emojiCache.containsKey(guildId)) {
-            return ImmutableList.copyOf(emojiCache.get(guildId).values());
-        } else {
-            return ImmutableList.of();
-        }
+    public NamedCacheView<CustomEmoji> emojis(@Nonnull final String guildId) {
+        final DefaultNamedCacheView<CustomEmoji> cache = emojiCache.get(guildId);
+        return cache == null ? NamedCacheView.empty() : cache;
     }
     
     @Nonnull
     @Override
-    public List<CustomEmoji> emojis() {
-        return ImmutableList.copyOf(emojiCache.values().stream()
-                .map(Map::values)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList()));
+    public NamedCacheView<CustomEmoji> emojis() {
+        return new CompositeNamedCacheView<>(emojiCache.values(), CustomEmoji::name);
     }
     
     @Nullable
     @Override
     public VoiceState voiceState(@Nullable final String guildId, @Nonnull final String id) {
-        if(voiceStateCache.containsKey(guildId)) {
-            return voiceStateCache.get(guildId).get(id);
-        } else {
-            return null;
-        }
+        final DefaultCacheView<VoiceState> cache = voiceStateCache.get(guildId);
+        return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
-    public List<VoiceState> voiceStates(@Nonnull final String guildId) {
-        if(voiceStateCache.containsKey(guildId)) {
-            return ImmutableList.copyOf(voiceStateCache.get(guildId).values());
-        } else {
-            return ImmutableList.of();
-        }
+    public CacheView<VoiceState> voiceStates(@Nonnull final String guildId) {
+        final DefaultCacheView<VoiceState> cache = voiceStateCache.get(guildId);
+        return cache == null ? CacheView.empty() : cache;
     }
     
     @Nonnull
     @Override
-    public List<VoiceState> voiceStates() {
-        return ImmutableList.copyOf(voiceStateCache.values().stream()
-                .map(Map::values)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList()));
+    public CacheView<VoiceState> voiceStates() {
+        return new CompositeCacheView<>(voiceStateCache.values());
     }
     
     @Nonnull

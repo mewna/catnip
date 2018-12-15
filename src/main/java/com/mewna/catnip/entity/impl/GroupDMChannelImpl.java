@@ -54,7 +54,6 @@ public class GroupDMChannelImpl implements GroupDMChannel, RequiresCatnip {
     private transient Catnip catnip;
     
     private String id;
-    private ChannelType type;
     private List<User> recipients;
     private String icon;
     private String ownerId;

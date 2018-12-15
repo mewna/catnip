@@ -105,6 +105,11 @@ public interface GuildChannel extends Channel {
     }
     
     @Override
+    default boolean isUserDM() {
+        return false;
+    }
+    
+    @Override
     @CheckReturnValue
     default boolean isGuild() {
         return true;

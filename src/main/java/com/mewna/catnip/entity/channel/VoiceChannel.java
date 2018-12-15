@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.impl.VoiceChannelImpl;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
 
 /**
  * A voice channel in a guild.
@@ -41,6 +42,12 @@ import javax.annotation.CheckReturnValue;
  */
 @JsonDeserialize(as = VoiceChannelImpl.class)
 public interface VoiceChannel extends GuildChannel {
+    @Nonnull
+    @Override
+    default ChannelType type() {
+        return ChannelType.VOICE;
+    }
+    
     /**
      * @return The bitrate of this channel. Will be from 8 to 96.
      */
