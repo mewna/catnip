@@ -27,6 +27,8 @@
 
 package com.mewna.catnip.cache;
 
+import com.mewna.catnip.cache.view.CacheView;
+import com.mewna.catnip.cache.view.NamedCacheView;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
@@ -65,7 +67,7 @@ public interface EntityCache {
      * @return A non-{@code null}, possibly-empty list of guilds
      */
     @Nonnull
-    List<Guild> guilds();
+    NamedCacheView<Guild> guilds();
     
     /**
      * Get the user with the specified ID. May be {@code null}.
@@ -83,7 +85,7 @@ public interface EntityCache {
      * @return A non-{@code null}, possibly-empty list of users.
      */
     @Nonnull
-    List<User> users();
+    NamedCacheView<User> users();
     
     /**
      * Get the presence for the user with the specified ID. May be
@@ -102,7 +104,7 @@ public interface EntityCache {
      * @return A non-{@code null}, possibly-empty list of presences
      */
     @Nonnull
-    List<Presence> presences();
+    CacheView<Presence> presences();
     
     /**
      * Get the member with the given ID from the guild with the given ID. May
@@ -125,7 +127,7 @@ public interface EntityCache {
      * @return A non-{@code null}, possibly-empty list of guild members.
      */
     @Nonnull
-    List<Member> members(@Nonnull String guildId);
+    NamedCacheView<Member> members(@Nonnull String guildId);
     
     /**
      * Get all members cached in this entity cache.
@@ -133,7 +135,7 @@ public interface EntityCache {
      * @return A non-{@code null}, possibly-empty list of members
      */
     @Nonnull
-    List<Member> members();
+    NamedCacheView<Member> members();
     
     /**
      * Get the role with the given ID from the guild with the given ID. May be
@@ -156,7 +158,7 @@ public interface EntityCache {
      * @return A non-{@code null}, possibly-empty list of guild roles.
      */
     @Nonnull
-    List<Role> roles(@Nonnull String guildId);
+    NamedCacheView<Role> roles(@Nonnull String guildId);
     
     /**
      * Get all roles cached in this entity cache.
@@ -164,7 +166,7 @@ public interface EntityCache {
      * @return A non-{@code null}, possibly-empty list of roles
      */
     @Nonnull
-    List<Role> roles();
+    NamedCacheView<Role> roles();
     
     /**
      * Get the channel with the given ID from the guild with the given ID. May
@@ -187,7 +189,7 @@ public interface EntityCache {
      * @return A non-{@code null}, possibly-empty list of guild channels.
      */
     @Nonnull
-    List<Channel> channels(@Nonnull String guildId);
+    CacheView<Channel> channels(@Nonnull String guildId);
     
     /**
      * Get all channels cached in this entity cache.
@@ -195,7 +197,7 @@ public interface EntityCache {
      * @return A non-{@code null}, possibly-empty list of channels
      */
     @Nonnull
-    List<Channel> channels();
+    CacheView<Channel> channels();
     
     /**
      * Get the custom emojis with the given ID from the guild with the given ID.
@@ -218,7 +220,7 @@ public interface EntityCache {
      * @return A non-{@code null}, possibly-empty list of custom emojis.
      */
     @Nonnull
-    List<CustomEmoji> emojis(@Nonnull String guildId);
+    NamedCacheView<CustomEmoji> emojis(@Nonnull String guildId);
     
     /**
      * Get all emojis cached in this entity cache.
@@ -226,7 +228,7 @@ public interface EntityCache {
      * @return A non-{@code null}, possibly-empty list of emojis
      */
     @Nonnull
-    List<CustomEmoji> emojis();
+    NamedCacheView<CustomEmoji> emojis();
     
     /**
      * Get the voice state for the user with the given ID, possibly in the
@@ -251,7 +253,7 @@ public interface EntityCache {
      * @return A non-{@code null}, possibly-empty list of voice states.
      */
     @Nonnull
-    List<VoiceState> voiceStates(@Nonnull String guildId);
+    CacheView<VoiceState> voiceStates(@Nonnull String guildId);
     
     /**
      * Get all voice states for the entire bot. The list returned by this
@@ -260,5 +262,5 @@ public interface EntityCache {
      * @return A non-{@code null}, possibly-empty list of voice states.
      */
     @Nonnull
-    List<VoiceState> voiceStates();
+    CacheView<VoiceState> voiceStates();
 }

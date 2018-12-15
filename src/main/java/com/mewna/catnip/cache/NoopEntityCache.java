@@ -27,8 +27,9 @@
 
 package com.mewna.catnip.cache;
 
-import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.cache.view.CacheView;
+import com.mewna.catnip.cache.view.NamedCacheView;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.guild.Guild;
@@ -45,7 +46,6 @@ import lombok.experimental.Accessors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -97,8 +97,8 @@ public class NoopEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public List<Guild> guilds() {
-        return ImmutableList.of();
+    public NamedCacheView<Guild> guilds() {
+        return NamedCacheView.empty();
     }
     
     @Nullable
@@ -115,8 +115,8 @@ public class NoopEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public List<Presence> presences() {
-        return ImmutableList.of();
+    public CacheView<Presence> presences() {
+        return CacheView.empty();
     }
     
     @Nullable
@@ -127,20 +127,20 @@ public class NoopEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public List<Member> members(@Nonnull final String guildId) {
-        return ImmutableList.of();
+    public NamedCacheView<Member> members(@Nonnull final String guildId) {
+        return NamedCacheView.empty();
     }
     
     @Nonnull
     @Override
-    public List<Member> members() {
-        return ImmutableList.of();
+    public NamedCacheView<Member> members() {
+        return NamedCacheView.empty();
     }
     
     @Nonnull
     @Override
-    public List<User> users() {
-        return ImmutableList.of();
+    public NamedCacheView<User> users() {
+        return NamedCacheView.empty();
     }
     
     @Nullable
@@ -151,14 +151,14 @@ public class NoopEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public List<Role> roles(@Nonnull final String guildId) {
-        return ImmutableList.of();
+    public NamedCacheView<Role> roles(@Nonnull final String guildId) {
+        return NamedCacheView.empty();
     }
     
     @Nonnull
     @Override
-    public List<Role> roles() {
-        return ImmutableList.of();
+    public NamedCacheView<Role> roles() {
+        return NamedCacheView.empty();
     }
     
     @Nullable
@@ -169,14 +169,14 @@ public class NoopEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public List<Channel> channels(@Nonnull final String guildId) {
-        return ImmutableList.of();
+    public CacheView<Channel> channels(@Nonnull final String guildId) {
+        return CacheView.empty();
     }
     
     @Nonnull
     @Override
-    public List<Channel> channels() {
-        return ImmutableList.of();
+    public CacheView<Channel> channels() {
+        return CacheView.empty();
     }
     
     @Nullable
@@ -187,14 +187,14 @@ public class NoopEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public List<CustomEmoji> emojis(@Nonnull final String guildId) {
-        return ImmutableList.of();
+    public NamedCacheView<CustomEmoji> emojis(@Nonnull final String guildId) {
+        return NamedCacheView.empty();
     }
     
     @Nonnull
     @Override
-    public List<CustomEmoji> emojis() {
-        return ImmutableList.of();
+    public NamedCacheView<CustomEmoji> emojis() {
+        return NamedCacheView.empty();
     }
     
     @Nullable
@@ -205,14 +205,14 @@ public class NoopEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public List<VoiceState> voiceStates(@Nonnull final String guildId) {
-        return ImmutableList.of();
+    public CacheView<VoiceState> voiceStates(@Nonnull final String guildId) {
+        return CacheView.empty();
     }
     
     @Nonnull
     @Override
-    public List<VoiceState> voiceStates() {
-        return ImmutableList.of();
+    public CacheView<VoiceState> voiceStates() {
+        return CacheView.empty();
     }
     
     @Nonnull

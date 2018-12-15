@@ -29,6 +29,8 @@ package com.mewna.catnip.entity.guild;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.cache.view.CacheView;
+import com.mewna.catnip.cache.view.NamedCacheView;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.GuildChannel;
@@ -205,26 +207,6 @@ public interface Guild extends Snowflake {
     ContentFilterLevel explicitContentFilter();
     
     /**
-     * @return A not-{@code null}, possibly-empty list of all roles in the
-     * guild.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default List<Role> roles() {
-        return catnip().cache().roles(id());
-    }
-    
-    /**
-     * @return A not-{@code null}, possibly-empty list of all custom emoji in
-     * the guild.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default List<CustomEmoji> emojis() {
-        return catnip().cache().emojis(id());
-    }
-    
-    /**
      * @return The list of features enabled for the guild.
      */
     @Nonnull
@@ -293,8 +275,26 @@ public interface Guild extends Snowflake {
      */
     @Nonnegative
     @CheckReturnValue
-    default int memberCount() {
+    default long memberCount() {
         return members().size();
+    }
+    
+    /**
+     * @return All roles in this guild.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default NamedCacheView<Role> roles() {
+        return catnip().cache().roles(id());
+    }
+    
+    /**
+     * @return All custom emoji in this guild.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default NamedCacheView<CustomEmoji> emojis() {
+        return catnip().cache().emojis(id());
     }
     
     /**
@@ -302,7 +302,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @CheckReturnValue
-    default List<Member> members() {
+    default NamedCacheView<Member> members() {
         return catnip().cache().members(id());
     }
     
@@ -311,7 +311,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @CheckReturnValue
-    default List<Channel> channels() {
+    default CacheView<Channel> channels() {
         return catnip().cache().channels(id());
     }
     
@@ -320,7 +320,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @CheckReturnValue
-    default List<VoiceState> voiceStates() {
+    default CacheView<VoiceState> voiceStates() {
         return catnip().cache().voiceStates(id());
     }
     
