@@ -33,6 +33,7 @@ import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.rest.Routes.Route;
 import com.mewna.catnip.rest.bucket.BucketBackend;
 import com.mewna.catnip.util.CatnipMeta;
+import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
@@ -47,6 +48,7 @@ import okhttp3.*;
 import okio.BufferedSink;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Collection;
@@ -287,41 +289,43 @@ public class RestRequester {
     }
     
     private void executeHttpRequest(final OutboundRequest r, final Route route, final Bucket bucket, final RequestBody body) {
-        // We use OkHTTP in blocking mode here intentionally
-        // I wanted to keep everything inside of vert.x's threading model, ie.
-        // try to avoid letting everything do its own thread pools and stuff.
         bucket.lastRequest(System.currentTimeMillis());
-        catnip.vertx().executeBlocking(future -> {
-            try {
-                final Request.Builder requestBuilder = new Request.Builder().url(API_HOST + API_BASE + route.baseRoute())
-                        .method(route.method().name(), body)
-                        .header("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')');
-                if(r.needsToken()) {
-                    requestBuilder.header("Authorization", "Bot " + catnip.token());
-                }
-                
-                final Response execute = _http.newCall(requestBuilder.build()).execute();
-                final int code = execute.code();
-                final String message = execute.message();
-                if(execute.body() == null) {
-                    handleResponse(r, bucket, code, message, null, null,
-                            false, new NoStackTraceThrowable("body == null"));
-                } else {
-                    final String bodyString = execute.body().string();
-                    
-                    final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
-                    execute.headers().toMultimap().forEach(headers::add);
-                    handleResponse(r, bucket, code, message, Buffer.buffer(bodyString),
-                            headers, true, null);
-                    future.complete();
-                }
-            } catch(final IOException e) {
-                future.fail(e);
-            }
-        }, bRes -> {
-            if(!bRes.succeeded()) {
+        final Context context = catnip.vertx().getOrCreateContext();
+        final Request.Builder requestBuilder = new Request.Builder().url(API_HOST + API_BASE + route.baseRoute())
+                .method(route.method().name(), body)
+                .header("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')');
+        if(r.needsToken()) {
+            requestBuilder.header("Authorization", "Bot " + catnip.token());
+        }
+        _http.newCall(requestBuilder.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(@Nonnull final Call call, @Nonnull final IOException e) {
                 handleResponse(r, bucket, -1, "", null, null,
-                        false, bRes.cause());
+                        false, e);
+            }
+    
+            @Override
+            public void onResponse(@Nonnull final Call call, @Nonnull final Response resp) throws IOException {
+                //ensure we close it no matter what
+                try(final Response response = resp) {
+                    final int code = response.code();
+                    final String message = response.message();
+                    if(response.body() == null) {
+                        context.runOnContext(__ -> {
+                            handleResponse(r, bucket, code, message, null, null,
+                                    false, new NoStackTraceThrowable("body == null"));
+                        });
+                    } else {
+                        final byte[] bodyBytes = response.body().bytes();
+        
+                        final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
+                        response.headers().toMultimap().forEach(headers::add);
+                        context.runOnContext(__ -> {
+                            handleResponse(r, bucket, code, message, Buffer.buffer(bodyBytes),
+                                    headers, true, null);
+                        });
+                    }
+                }
             }
         });
     }
