@@ -120,4 +120,37 @@ public final class Utils {
             return null;
         }
     }
+    
+    @CheckReturnValue
+    public static boolean containsIgnoreCase(@Nonnull final String str, @Nonnull final String search) {
+        final int length = search.length();
+        if(length == 0) {
+            return true;
+        }
+        
+        for(int i = str.length() - length; i >= 0; i--) {
+            if(str.regionMatches(true, i, search, 0, length)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    @CheckReturnValue
+    public static boolean startsWithIgnoreCase(@Nonnull final String str, @Nonnull final String search) {
+        final int length = search.length();
+        if(length == 0 || length > str.length()) {
+            return true;
+        }
+        return str.regionMatches(true, 0, search, 0, length);
+    }
+    
+    @CheckReturnValue
+    public static boolean endsWithIgnoreCase(@Nonnull final String str, @Nonnull final String search) {
+        final int length = search.length();
+        if(length == 0 || length > str.length()) {
+            return true;
+        }
+        return str.regionMatches(true, str.length() - length, search, 0, length);
+    }
 }
