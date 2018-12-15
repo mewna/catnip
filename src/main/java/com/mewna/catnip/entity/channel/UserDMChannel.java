@@ -33,6 +33,7 @@ import com.mewna.catnip.entity.impl.UserDMChannelImpl;
 import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -43,6 +44,12 @@ import javax.annotation.Nullable;
  */
 @JsonDeserialize(as = UserDMChannelImpl.class)
 public interface UserDMChannel extends DMChannel {
+    @Nonnull
+    @Override
+    default ChannelType type() {
+        return ChannelType.DM;
+    }
+    
     @Nullable
     @CheckReturnValue
     User recipient();

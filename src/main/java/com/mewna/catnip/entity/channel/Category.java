@@ -28,6 +28,7 @@
 package com.mewna.catnip.entity.channel;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
 
 /**
  * A category that contains channels in a guild.
@@ -36,6 +37,12 @@ import javax.annotation.CheckReturnValue;
  * @since 9/12/18
  */
 public interface Category extends GuildChannel {
+    @Nonnull
+    @Override
+    default ChannelType type() {
+        return ChannelType.CATEGORY;
+    }
+    
     @Override
     @CheckReturnValue
     default boolean isText() {

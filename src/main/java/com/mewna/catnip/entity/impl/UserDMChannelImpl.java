@@ -55,7 +55,6 @@ public class UserDMChannelImpl implements UserDMChannel, RequiresCatnip {
     
     private String id;
     private String userId;
-    private ChannelType type;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
