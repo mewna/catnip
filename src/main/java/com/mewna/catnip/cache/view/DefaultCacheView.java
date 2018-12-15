@@ -8,6 +8,14 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+/**
+ * Default {@link CacheView CacheView} implementation.
+ *
+ * @param <T> Type of the entity held by this cache.
+ *
+ * @author natanbc
+ * @since 12/15/18
+ */
 public class DefaultCacheView<T> implements CacheView<T> {
     protected final Map<String, T> map = new ConcurrentHashMap<>();
     

@@ -6,6 +6,14 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.function.Function;
 
+/**
+ * Default {@link NamedCacheView NamedCacheView} implementation.
+ *
+ * @param <T> Type of the entity held by this cache.
+ *
+ * @author natanbc
+ * @since 12/15/18
+ */
 public class DefaultNamedCacheView<T> extends DefaultCacheView<T> implements NamedCacheView<T> {
     private final Function<T, String> nameFunction;
     

@@ -6,6 +6,15 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+/**
+ * A {@link CacheView CacheView} that's equivalent to a collection of provided ones.
+ * Any update to any of the provided views will update this view.
+ *
+ * @param <T> Type of the entity held by this cache.
+ *
+ * @author natanbc
+ * @since 12/15/18
+ */
 public class CompositeCacheView<T> implements CacheView<T> {
     protected final Collection<? extends CacheView<T>> sources;
     
