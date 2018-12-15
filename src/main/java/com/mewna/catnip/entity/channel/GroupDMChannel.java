@@ -45,6 +45,12 @@ import java.util.List;
 @SuppressWarnings("unused")
 @JsonDeserialize(as = GroupDMChannelImpl.class)
 public interface GroupDMChannel extends DMChannel {
+    @Nonnull
+    @Override
+    default ChannelType type() {
+        return ChannelType.GROUP_DM;
+    }
+    
     /**
      * @return The list of users in the group DM.
      */
