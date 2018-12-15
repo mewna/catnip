@@ -54,7 +54,6 @@ public class CategoryImpl implements Category, RequiresCatnip {
     private transient Catnip catnip;
     
     private String id;
-    private ChannelType type;
     private String name;
     private String guildId;
     private int position;
