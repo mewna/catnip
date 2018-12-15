@@ -62,9 +62,7 @@ public interface EntityCache {
     Guild guild(@Nonnull String id);
     
     /**
-     * Get all guilds cached in this entity cache.
-     *
-     * @return A non-{@code null}, possibly-empty list of guilds
+     * @return A view of the current guild cache. Updates to the cache will update this view.
      */
     @Nonnull
     NamedCacheView<Guild> guilds();
@@ -80,9 +78,7 @@ public interface EntityCache {
     User user(@Nonnull String id);
     
     /**
-     * Get all users cached in this cache instance.
-     *
-     * @return A non-{@code null}, possibly-empty list of users.
+     * @return A view of the current user cache. Updates to the cache will update this view.
      */
     @Nonnull
     NamedCacheView<User> users();
@@ -99,9 +95,7 @@ public interface EntityCache {
     Presence presence(@Nonnull String id);
     
     /**
-     * Get all presences cached in this entity cache.
-     *
-     * @return A non-{@code null}, possibly-empty list of presences
+     * @return A view of the current presence cache. Updates to the cache will update this view.
      */
     @Nonnull
     CacheView<Presence> presences();
@@ -119,12 +113,11 @@ public interface EntityCache {
     Member member(@Nonnull String guildId, @Nonnull String id);
     
     /**
-     * Get all members for the guild with the given ID. The list returned by
-     * this method will never be {@code null}, but may be empty.
+     * Get all members for the guild with the given ID.
      *
      * @param guildId The ID of the guild to fetch members for.
      *
-     * @return A non-{@code null}, possibly-empty list of guild members.
+     * @return A view of the current member cache of the guild. Updates to the cache will update this view.
      */
     @Nonnull
     NamedCacheView<Member> members(@Nonnull String guildId);
@@ -132,7 +125,8 @@ public interface EntityCache {
     /**
      * Get all members cached in this entity cache.
      *
-     * @return A non-{@code null}, possibly-empty list of members
+     * @return A view of all the current member caches. Updates to the caches or
+     * additions/removals (of guilds) will update this view.
      */
     @Nonnull
     NamedCacheView<Member> members();
@@ -150,12 +144,11 @@ public interface EntityCache {
     Role role(@Nonnull String guildId, @Nonnull String id);
     
     /**
-     * Get all roles for the guild with the given ID. The list returned by this
-     * method will never be {@code null}, but may be empty.
+     * Get all roles for the guild with the given ID.
      *
      * @param guildId The ID of the guild to fetch roles for.
      *
-     * @return A non-{@code null}, possibly-empty list of guild roles.
+     * @return A view of the current role cache of the guild. Updates to the cache will update this view.
      */
     @Nonnull
     NamedCacheView<Role> roles(@Nonnull String guildId);
@@ -163,7 +156,8 @@ public interface EntityCache {
     /**
      * Get all roles cached in this entity cache.
      *
-     * @return A non-{@code null}, possibly-empty list of roles
+     * @return A view of all the current role caches. Updates to the caches or
+     * additions/removals (of guilds) will update this view.
      */
     @Nonnull
     NamedCacheView<Role> roles();
@@ -181,27 +175,40 @@ public interface EntityCache {
     GuildChannel channel(@Nonnull String guildId, @Nonnull String id);
     
     /**
-     * Get all channels for the guild with the given ID. The list returned by
-     * this method will never be {@code null}, but may be empty.
+     * Get all channels for the guild with the given ID.
      *
      * @param guildId The ID of the guild to fetch channels for.
      *
-     * @return A non-{@code null}, possibly-empty list of guild channels.
+     * @return A view of the current channel cache of the guild. Updates to the cache will update this view.
      */
     @Nonnull
     NamedCacheView<GuildChannel> channels(@Nonnull String guildId);
     
     /**
-     * Get all channels cached in this entity cache.
+     * Get all guild channels cached in this entity cache.
      *
-     * @return A non-{@code null}, possibly-empty list of channels
+     * @return A view of all the current guild channel caches. Updates to the caches or
+     * additions/removals (of guilds) will update this view.
      */
     @Nonnull
     NamedCacheView<GuildChannel> channels();
     
+    /**
+     * Get the DM channel with the given ID. May be {@code null}.
+     *
+     * @param id Recipient (user) ID of the channel.
+     *
+     * @return The channel, or {@code null} if it isn't cached.
+     */
     @Nullable
     UserDMChannel dmChannel(@Nonnull String id);
     
+    /**
+     * Get all DM channels cached in this entity cache.
+     *
+     * @return A view of all the current DM channel caches. Updates to the caches or
+     * additions/removals (of guilds) will update this view.
+     */
     @Nonnull
     CacheView<UserDMChannel> dmChannels();
     
@@ -218,12 +225,11 @@ public interface EntityCache {
     CustomEmoji emoji(@Nonnull String guildId, @Nonnull String id);
     
     /**
-     * Get all custom emojis for the guild with the given ID. The list returned
-     * by this method will never be {@code null}, but may be empty.
+     * Get all custom emojis for the guild with the given ID.
      *
      * @param guildId The ID of the guild to fetch custom emojis for.
      *
-     * @return A non-{@code null}, possibly-empty list of custom emojis.
+     * @return A view of the current emoji cache of the guild. Updates to the cache will update this view.
      */
     @Nonnull
     NamedCacheView<CustomEmoji> emojis(@Nonnull String guildId);
@@ -231,7 +237,8 @@ public interface EntityCache {
     /**
      * Get all emojis cached in this entity cache.
      *
-     * @return A non-{@code null}, possibly-empty list of emojis
+     * @return A view of all the current emoji caches. Updates to the caches or
+     * additions/removals (of guilds) will update this view.
      */
     @Nonnull
     NamedCacheView<CustomEmoji> emojis();
@@ -251,21 +258,20 @@ public interface EntityCache {
     VoiceState voiceState(@Nullable String guildId, @Nonnull String id);
     
     /**
-     * Get all voice states for the guild with the given ID. The list returned
-     * by this method will never be {@code null}, but may be empty.
+     * Get all voice states for the guild with the given ID.
      *
      * @param guildId The ID of the guild to fetch voice states for.
      *
-     * @return A non-{@code null}, possibly-empty list of voice states.
+     * @return A view of the current voice state cache of the guild. Updates to the cache will update this view.
      */
     @Nonnull
     CacheView<VoiceState> voiceStates(@Nonnull String guildId);
     
     /**
-     * Get all voice states for the entire bot. The list returned by this
-     * method will never be {@code null}, but may be empty.
+     * Get all voice states for the entire bot.
      *
-     * @return A non-{@code null}, possibly-empty list of voice states.
+     * @return A view of all the current voice state caches. Updates to the caches or
+     * additions/removals (of guilds) will update this view.
      */
     @Nonnull
     CacheView<VoiceState> voiceStates();
