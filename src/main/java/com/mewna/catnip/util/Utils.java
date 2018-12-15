@@ -148,8 +148,11 @@ public final class Utils {
     @CheckReturnValue
     public static boolean endsWithIgnoreCase(@Nonnull final String str, @Nonnull final String search) {
         final int length = search.length();
-        if(length == 0 || length > str.length()) {
+        if(length == 0) {
             return true;
+        }
+        if(length > str.length()) {
+            return false;
         }
         return str.regionMatches(true, str.length() - length, search, 0, length);
     }
