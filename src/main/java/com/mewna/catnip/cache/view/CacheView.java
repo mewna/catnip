@@ -32,15 +32,15 @@ public interface CacheView<T> extends Iterable<T> {
      *
      * @return The element with the provided ID, or {@code null} if it isn't cached.
      */
-    T getById(String id);
+    T getById(long id);
     
     /**
      * @param id ID of the entity to fetch.
      *
      * @return The element with the provided ID, or {@code null} if it isn't cached.
      */
-    default T getById(final long id) {
-        return getById(Long.toUnsignedString(id));
+    default T getById(@Nonnull final String id) {
+        return getById(Long.parseUnsignedLong(id));
     }
     
     /**
@@ -84,7 +84,7 @@ public interface CacheView<T> extends Iterable<T> {
      * @see Map#keySet()
      */
     @Nonnull
-    Set<String> keys();
+    Set<Long> keys();
     
     /**
      * @return A view of all the values in this cache. Updated if this cache is modified.
