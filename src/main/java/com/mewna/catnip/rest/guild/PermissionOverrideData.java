@@ -37,7 +37,10 @@ import com.mewna.catnip.util.JsonConvertible;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.Set;
 
 public class PermissionOverrideData implements JsonConvertible {
     private final Set<Permission> allow = EnumSet.noneOf(Permission.class);
@@ -45,18 +48,13 @@ public class PermissionOverrideData implements JsonConvertible {
     private final OverrideType type;
     private final String targetId;
     
-    public PermissionOverrideData(@Nonnull final RoleData role) {
-        type = OverrideType.ROLE;
-        targetId = String.valueOf(role.id());
-    }
-    
     public PermissionOverrideData(@Nonnull final OverrideType type, @Nonnull final String targetId) {
         this.type = type;
         this.targetId = targetId;
     }
     
     public static PermissionOverrideData create(@Nonnull final RoleData role) {
-        return new PermissionOverrideData(role);
+        return new PermissionOverrideData(OverrideType.ROLE, String.valueOf(role.id()));
     }
     
     public static PermissionOverrideData create(@Nonnull final Role role) {
