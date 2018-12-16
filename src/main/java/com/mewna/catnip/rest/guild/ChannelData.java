@@ -59,8 +59,8 @@ public abstract class ChannelData implements JsonConvertible {
     ChannelData(@Nonnegative final int type, @Nonnull final String name) {
         this.type = type;
         this.name = name;
-        if(type != 0 && type != 2) {
-            throw new IllegalArgumentException("Type must be either 0 (text) or 2 (voice)");
+        if(type != 0 && type != 2 && type != 4) {
+            throw new IllegalArgumentException("Type must be either 0 (text), 2 (voice) or 4 (category)");
         }
         if(name.length() < 2 || name.length() > 100) {
             throw new IllegalArgumentException("Name must have 2-100 characters");
@@ -161,13 +161,13 @@ public abstract class ChannelData implements JsonConvertible {
     
         @Override
         public ChannelData parentId(final String parentId) {
-            throw new IllegalStateException("Cannot set Parent ID on categories!");
+            throw new UnsupportedOperationException("Cannot set Parent ID on categories!");
         }
     
         @Nonnull
         @Override
         public ChannelData category(@Nonnull final Category category) {
-            throw new IllegalStateException("Cannot set Parent on categories!");
+            throw new UnsupportedOperationException("Cannot set Parent on categories!");
         }
     }
     
@@ -178,12 +178,12 @@ public abstract class ChannelData implements JsonConvertible {
     
         @Override
         public ChannelData bitrate(final Integer bitrate) {
-            throw new IllegalStateException("Cannot set bitrate on text channels");
+            throw new UnsupportedOperationException("Cannot set bitrate on text channels");
         }
     
         @Override
         public ChannelData userLimit(final Integer userLimit) {
-            throw new IllegalStateException("Cannot set user limit on text channels");
+            throw new UnsupportedOperationException("Cannot set user limit on text channels");
         }
     }
     
@@ -194,12 +194,12 @@ public abstract class ChannelData implements JsonConvertible {
     
         @Override
         public ChannelData topic(final String topic) {
-            throw new IllegalStateException("Cannot set topic on voice channels");
+            throw new UnsupportedOperationException("Cannot set topic on voice channels");
         }
     
         @Override
-        public Boolean nsfw() {
-            throw new IllegalStateException("Cannot set nsfw on voice channels");
+        public ChannelData nsfw(final Boolean nsfw) {
+            throw new UnsupportedOperationException("Cannot set nsfw on voice channels");
         }
     }
 }
