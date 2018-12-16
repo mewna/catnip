@@ -58,7 +58,7 @@ public class NoopEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
     public Future<Void> updateCache(@Nonnull final String eventType, @Nonnull final JsonObject payload) {
-        return Future.succeededFuture(null);
+        return Future.succeededFuture();
     }
     
     @Override
