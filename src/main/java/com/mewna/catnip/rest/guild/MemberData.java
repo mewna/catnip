@@ -28,6 +28,7 @@
 package com.mewna.catnip.rest.guild;
 
 import com.google.common.collect.ImmutableList;
+import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -40,9 +41,9 @@ import lombok.experimental.Accessors;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author SamOphis
@@ -55,9 +56,8 @@ import java.util.List;
 @NoArgsConstructor
 @SuppressWarnings("unused")
 public class MemberData {
-    @Setter(AccessLevel.NONE)
     @Getter(AccessLevel.NONE)
-    private List<String> roles;
+    private Set<String> roles;
     
     private String nickname;
     private String channelId;
@@ -74,7 +74,7 @@ public class MemberData {
     @Nonnull
     public MemberData addRole(@Nonnull final Role role) {
         if (roles == null) {
-            roles = new ArrayList<>();
+            roles = new HashSet<>();
         }
         roles.add(role.id());
         return this;
@@ -84,7 +84,7 @@ public class MemberData {
     @Nonnull
     public MemberData addRole(@Nonnull final String roleId) {
         if (roles == null) {
-            roles = new ArrayList<>();
+            roles = new HashSet<>();
         }
         roles.add(roleId);
         return this;
@@ -92,10 +92,40 @@ public class MemberData {
     
     @CheckReturnValue
     @Nonnull
+    public MemberData removeRole(@Nonnull final Role role) {
+        if (roles != null) {
+            roles.remove(role.id());
+        }
+        return this;
+    }
+    
+    @CheckReturnValue
+    @Nonnull
+    public MemberData removeRole(@Nonnull final String roleId) {
+        if (roles != null) {
+            roles.remove(roleId);
+        }
+        return this;
+    }
+    
+    @CheckReturnValue
+    @Nonnull
+    public static MemberData of(@Nonnull final Member member) {
+        return new MemberData()
+                .roles(member.roleIds())
+                .deaf(member.deaf())
+                .mute(member.mute())
+                .nickname(member.nick());
+    }
+    
+    @CheckReturnValue
+    @Nonnull
     public JsonObject toJson() {
         final JsonObject object = new JsonObject();
         if (roles != null) {
-            object.put("roles", new JsonArray(roles));
+            final JsonArray array = new JsonArray();
+            roles.forEach(array::add);
+            object.put("roles", array);
         }
         if (nickname != null) {
             object.put("nick", nickname);

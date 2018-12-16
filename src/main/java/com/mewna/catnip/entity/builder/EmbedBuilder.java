@@ -92,6 +92,27 @@ public class EmbedBuilder {
         if(color != null) {
             // Mask off the alpha bits
             this.color = color.getRGB() & 0x00FFFFFF;
+        } else {
+            this.color = null;
+        }
+        return this;
+    }
+    
+    /**
+     * Set the color of the embed. The alpha bits will be ignored.
+     *
+     * @param color The color to set.
+     *
+     * @return Itself.
+     */
+    @Nonnull
+    @CheckReturnValue
+    public EmbedBuilder color(@Nullable final Integer color) {
+        if(color != null) {
+            // Mask off the alpha bits
+            this.color = color & 0x00FFFFFF;
+        } else {
+            this.color = null;
         }
         return this;
     }
