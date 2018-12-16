@@ -344,7 +344,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
             }
         }
         // Default case; most events don't need to have special future cases
-        return Future.succeededFuture(null);
+        return Future.succeededFuture();
     }
     
     private void cacheVoiceState(final VoiceState state) {
