@@ -17,21 +17,31 @@ import java.util.stream.Collectors;
  * @since 12/15/18
  */
 public class DefaultCacheView<T> implements CacheView<T> {
-    protected final Map<String, T> map = new ConcurrentHashMap<>();
+    protected final Map<Long, T> map = new ConcurrentHashMap<>();
     
     @Nonnull
-    public Map<String, T> map() {
+    public Map<Long, T> map() {
         return map;
     }
     
     @Nullable
-    public T put(@Nonnull final String key, @Nonnull final T value) {
+    public T put(final long key, @Nonnull final T value) {
         return map.put(key, value);
     }
     
     @Nullable
-    public T remove(@Nonnull final String key) {
+    public T put(@Nonnull final String key, @Nonnull final T value) {
+        return put(Long.parseUnsignedLong(key), value);
+    }
+    
+    @Nullable
+    public T remove(final long key) {
         return map.remove(key);
+    }
+    
+    @Nullable
+    public T remove(@Nonnull final String key) {
+        return remove(Long.parseUnsignedLong(key));
     }
     
     @Override
@@ -40,7 +50,7 @@ public class DefaultCacheView<T> implements CacheView<T> {
     }
     
     @Override
-    public T getById(final String id) {
+    public T getById(final long id) {
         return map.get(id);
     }
     
@@ -74,7 +84,7 @@ public class DefaultCacheView<T> implements CacheView<T> {
     
     @Nonnull
     @Override
-    public Set<String> keys() {
+    public Set<Long> keys() {
         return Collections.unmodifiableSet(map.keySet());
     }
     

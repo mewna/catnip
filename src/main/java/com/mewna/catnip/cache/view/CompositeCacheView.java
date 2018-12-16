@@ -32,7 +32,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
     }
     
     @Override
-    public T getById(final String id) {
+    public T getById(final long id) {
         for(final CacheView<T> c : sources) {
             final T element = c.getById(id);
             if(element != null) {
@@ -75,11 +75,11 @@ public class CompositeCacheView<T> implements CacheView<T> {
     
     @Nonnull
     @Override
-    public Set<String> keys() {
-        return Collections.unmodifiableSet(new AbstractSet<String>() {
+    public Set<Long> keys() {
+        return Collections.unmodifiableSet(new AbstractSet<Long>() {
             @Nonnull
             @Override
-            public Iterator<String> iterator() {
+            public Iterator<Long> iterator() {
                 return CompositeCacheView.this.iterator(c -> c.keys().iterator());
             }
     

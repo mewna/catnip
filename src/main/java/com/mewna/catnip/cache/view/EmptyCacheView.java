@@ -25,7 +25,7 @@ public class EmptyCacheView<T> implements CacheView<T> {
     }
     
     @Override
-    public T getById(final String id) {
+    public T getById(final long id) {
         return null;
     }
     
@@ -48,7 +48,7 @@ public class EmptyCacheView<T> implements CacheView<T> {
     
     @Nonnull
     @Override
-    public Set<String> keys() {
+    public Set<Long> keys() {
         return Collections.emptySet();
     }
     
