@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.rest.guild;
 
+import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.JsonConvertible;
 import io.vertx.core.json.JsonObject;
@@ -39,7 +40,6 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.function.LongUnaryOperator;
 
 @Accessors(fluent = true)
@@ -115,11 +115,26 @@ public class RoleData implements JsonConvertible {
         return permissions(updater.applyAsLong(permissions == null ? 0 : permissions));
     }
     
+    @Nonnull
+    @CheckReturnValue
+    public static RoleData of(@Nonnull final Role role) {
+        return create(-1)
+                .permissions(role.permissions())
+                .name(role.name())
+                .color(role.color())
+                .position(role.position())
+                .mentionable(role.mentionable())
+                .hoisted(role.hoist());
+    }
+    
     @Override
     @Nonnull
     @CheckReturnValue
     public JsonObject toJson() {
-        final JsonObject object = new JsonObject().put("id", Integer.toString(id));
+        final JsonObject object = new JsonObject();
+        if(id >= 0) {
+            object.put("id", Integer.toString(id));
+        }
         if(permissions != null) {
             object.put("permissions", permissions);
         }
