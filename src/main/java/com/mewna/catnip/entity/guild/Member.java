@@ -29,7 +29,7 @@ package com.mewna.catnip.entity.guild;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.google.common.collect.ImmutableSet;
+import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.channel.GuildChannel;
@@ -43,6 +43,7 @@ import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
@@ -100,8 +101,9 @@ public interface Member extends Snowflake {
     @Nonnull
     @CheckReturnValue
     default Set<Role> roles() {
-        return ImmutableSet.copyOf(roleIds().stream()
-                .map(e -> catnip().cache().role(guildId(), e))
+        final CacheView<Role> roles = catnip().cache().roles(guildId());
+        return Collections.unmodifiableSet(roleIds().stream()
+                .map(roles::getById)
                 .collect(Collectors.toSet()));
     }
     

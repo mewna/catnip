@@ -32,6 +32,8 @@ import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
 import com.mewna.catnip.entity.guild.Guild.VerificationLevel;
 import com.mewna.catnip.entity.util.ImageOptions;
+import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.PermissionUtil;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -95,6 +97,8 @@ public interface Invite extends Entity {
      */
     @Nonnull
     default CompletionStage<Invite> delete() {
+        PermissionUtil.checkPermissions(catnip(), guild().id(), channel().id(),
+                Permission.MANAGE_CHANNELS);
         return catnip().rest().invite().deleteInvite(code());
     }
     

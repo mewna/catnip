@@ -29,6 +29,8 @@ package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.PermissionUtil;
 import lombok.Getter;
 
 import javax.annotation.CheckReturnValue;
@@ -59,6 +61,10 @@ public interface Channel extends Snowflake {
      */
     @Nonnull
     default CompletionStage<Channel> delete() {
+        if(isGuild()) {
+            PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
+                    Permission.MANAGE_CHANNELS);
+        }
         return catnip().rest().channel().deleteChannel(id());
     }
     

@@ -159,6 +159,19 @@ public interface GuildChannel extends Channel {
         return catnip().rest().channel().getChannelInvites(id());
     }
     
+    /**
+     * Edit this channel.
+     *
+     * @return A channel editor that can complete the editing.
+     */
+    @Nonnull
+    @JsonIgnore
+    @CheckReturnValue
+    default ChannelEditFields edit() {
+        PermissionUtil.checkPermissions(catnip(), guildId(), id(), Permission.MANAGE_CHANNELS);
+        return new ChannelEditFields(this);
+    }
+    
     @SuppressWarnings({"unused", "WeakerAccess"})
     @Getter
     @Setter

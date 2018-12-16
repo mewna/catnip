@@ -510,6 +510,7 @@ public interface Guild extends Snowflake {
     @JsonIgnore
     @CheckReturnValue
     default GuildEditFields edit() {
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_GUILD);
         return new GuildEditFields(this);
     }
     
