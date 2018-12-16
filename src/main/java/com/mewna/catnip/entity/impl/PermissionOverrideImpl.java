@@ -32,12 +32,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.guild.PermissionOverride;
-import com.mewna.catnip.entity.util.Permission;
 import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
-import java.util.Set;
 
 /**
  * @author natanbc
@@ -55,8 +53,8 @@ public class PermissionOverrideImpl implements PermissionOverride, RequiresCatni
     
     private String id;
     private OverrideType type;
-    private Set<Permission> allow;
-    private Set<Permission> deny;
+    private long allowRaw;
+    private long denyRaw;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {

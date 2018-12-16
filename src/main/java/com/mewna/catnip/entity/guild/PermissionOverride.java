@@ -47,13 +47,23 @@ public interface PermissionOverride extends Snowflake {
     @CheckReturnValue
     OverrideType type();
     
-    @Nonnull
     @CheckReturnValue
-    Set<Permission> allow();
+    long allowRaw();
     
     @Nonnull
     @CheckReturnValue
-    Set<Permission> deny();
+    default Set<Permission> allow() {
+        return Permission.toSet(allowRaw());
+    }
+    
+    @CheckReturnValue
+    long denyRaw();
+    
+    @Nonnull
+    @CheckReturnValue
+    default Set<Permission> deny() {
+        return Permission.toSet(denyRaw());
+    }
     
     enum OverrideType {
         ROLE("role"), MEMBER("member");

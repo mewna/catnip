@@ -40,6 +40,7 @@ import com.mewna.catnip.entity.user.Presence.Activity;
 import com.mewna.catnip.entity.user.Presence.ActivityType;
 import com.mewna.catnip.entity.user.Presence.OnlineStatus;
 import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.DefaultExtensionManager;
 import com.mewna.catnip.extension.manager.ExtensionManager;
@@ -53,6 +54,7 @@ import com.mewna.catnip.shard.event.EventBuffer;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.util.JsonPojoCodec;
+import com.mewna.catnip.util.PermissionUtil;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
@@ -90,6 +92,7 @@ public class CatnipImpl implements Catnip {
     private final Set<CacheFlag> cacheFlags;
     private final boolean chunkMembers;
     private final boolean emitEventObjects;
+    private final boolean enforcePermissions;
     private final Presence initialPresence;
     
     private final AtomicReference<User> selfUser = new AtomicReference<>(null);
@@ -110,6 +113,7 @@ public class CatnipImpl implements Catnip {
         cacheFlags = options.cacheFlags();
         chunkMembers = options.chunkMembers();
         emitEventObjects = options.emitEventObjects();
+        enforcePermissions = options.enforcePermissions();
         initialPresence = options.presence();
         disabledEvents = ImmutableSet.copyOf(options.disabledEvents());
     }
@@ -170,6 +174,7 @@ public class CatnipImpl implements Catnip {
     
     @Override
     public void openVoiceConnection(@Nonnull final String guildId, @Nonnull final String channelId) {
+        PermissionUtil.checkPermissions(this, guildId, channelId, Permission.CONNECT);
         eventBus().send(CatnipShard.websocketMessageVoiceStateUpdateQueueAddress(shardIdFor(guildId)),
                 new JsonObject()
                         .put("guild_id", guildId)

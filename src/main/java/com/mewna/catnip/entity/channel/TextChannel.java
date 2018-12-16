@@ -30,6 +30,8 @@ package com.mewna.catnip.entity.channel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.impl.TextChannelImpl;
+import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.PermissionUtil;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -110,6 +112,7 @@ public interface TextChannel extends GuildChannel, MessageChannel {
     @JsonIgnore
     @CheckReturnValue
     default CompletionStage<List<Webhook>> fetchWebhooks() {
+        PermissionUtil.checkPermissions(catnip(), guildId(), id(), Permission.MANAGE_WEBHOOKS);
         return catnip().rest().webhook().getChannelWebhooks(id());
     }
     
