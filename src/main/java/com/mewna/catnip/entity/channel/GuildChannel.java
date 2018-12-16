@@ -31,8 +31,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mewna.catnip.entity.guild.PermissionOverride;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
 import com.mewna.catnip.entity.misc.CreatedInvite;
+import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.rest.guild.PermissionOverrideData;
 import com.mewna.catnip.rest.invite.InviteCreateOptions;
+import com.mewna.catnip.util.PermissionUtil;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
@@ -126,6 +128,7 @@ public interface GuildChannel extends Channel {
     @JsonIgnore
     @CheckReturnValue
     default CompletionStage<CreatedInvite> createInvite(@Nullable final InviteCreateOptions options) {
+        PermissionUtil.checkPermissions(catnip(), guildId(), id(), Permission.CREATE_INSTANT_INVITE);
         return catnip().rest().channel().createInvite(id(), options);
     }
     
@@ -138,6 +141,7 @@ public interface GuildChannel extends Channel {
     @JsonIgnore
     @CheckReturnValue
     default CompletionStage<CreatedInvite> createInvite() {
+        PermissionUtil.checkPermissions(catnip(), guildId(), id(), Permission.CREATE_INSTANT_INVITE);
         return createInvite(null);
     }
     
@@ -151,6 +155,7 @@ public interface GuildChannel extends Channel {
     @JsonIgnore
     @CheckReturnValue
     default CompletionStage<List<CreatedInvite>> fetchInvites() {
+        PermissionUtil.checkPermissions(catnip(), guildId(), id(), Permission.MANAGE_CHANNELS);
         return catnip().rest().channel().getChannelInvites(id());
     }
     

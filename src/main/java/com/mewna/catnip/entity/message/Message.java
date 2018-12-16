@@ -39,6 +39,8 @@ import com.mewna.catnip.entity.impl.MessageImpl.AttachmentImpl;
 import com.mewna.catnip.entity.impl.MessageImpl.ReactionImpl;
 import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.PermissionUtil;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -263,6 +265,8 @@ public interface Message extends Snowflake {
     @Nonnull
     @JsonIgnore
     default CompletionStage<Void> react(@Nonnull final Emoji emoji) {
+        PermissionUtil.checkPermissions(catnip(), guildId(), channelId(),
+                Permission.ADD_REACTIONS, Permission.READ_MESSAGE_HISTORY);
         return catnip().rest().channel().addReaction(channelId(), id(), emoji);
     }
     
@@ -277,12 +281,19 @@ public interface Message extends Snowflake {
     @Nonnull
     @JsonIgnore
     default CompletionStage<Void> react(@Nonnull final String emoji) {
+        PermissionUtil.checkPermissions(catnip(), guildId(), channelId(),
+                Permission.ADD_REACTIONS, Permission.READ_MESSAGE_HISTORY);
         return catnip().rest().channel().addReaction(channelId(), id(), emoji);
     }
     
     @Nonnull
     @JsonIgnore
     default CompletionStage<Void> delete() {
+        final User self = catnip().selfUser();
+        if(self != null && !author().id().equals(self.id())) {
+            PermissionUtil.checkPermissions(catnip(), guildId(), channelId(),
+                    Permission.MANAGE_MESSAGES);
+        }
         return catnip().rest().channel().deleteMessage(channelId(), id());
     }
     

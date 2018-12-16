@@ -85,6 +85,7 @@ public final class CatnipOptions {
     private BucketBackend restBucketBackend = new MemoryBucketBackend();
     private boolean chunkMembers = true;
     private boolean emitEventObjects = true;
+    private boolean enforcePermissions = true;
     @Nullable
     private Presence presence;
     @Nonnull

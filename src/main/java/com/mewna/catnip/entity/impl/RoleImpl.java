@@ -31,12 +31,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.guild.Role;
-import com.mewna.catnip.entity.util.Permission;
 import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
-import java.util.Set;
 
 /**
  * @author Julia Rogers
@@ -57,7 +55,7 @@ public class RoleImpl implements Role, RequiresCatnip {
     private int color;
     private boolean hoist;
     private int position;
-    private Set<Permission> permissions;
+    private long permissionsRaw;
     private boolean managed;
     private boolean mentionable;
     

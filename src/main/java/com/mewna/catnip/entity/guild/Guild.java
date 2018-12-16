@@ -40,6 +40,7 @@ import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.Utils;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
@@ -358,6 +359,7 @@ public interface Guild extends Snowflake {
     @JsonIgnore
     @CheckReturnValue
     default CompletionStage<List<CreatedInvite>> fetchInvites() {
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_GUILD);
         return catnip().rest().guild().getGuildInvites(id());
     }
     
@@ -370,6 +372,7 @@ public interface Guild extends Snowflake {
     @JsonIgnore
     @CheckReturnValue
     default CompletionStage<List<Webhook>> fetchWebhooks() {
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_WEBHOOKS);
         return catnip().rest().webhook().getGuildWebhooks(id());
     }
     
@@ -412,6 +415,7 @@ public interface Guild extends Snowflake {
     @JsonIgnore
     default CompletionStage<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final byte[] image,
                                                      @Nonnull final Collection<String> roles) {
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJI);
         return catnip().rest().emoji().createGuildEmoji(id(), name, image, roles);
     }
     
@@ -428,6 +432,7 @@ public interface Guild extends Snowflake {
     @JsonIgnore
     default CompletionStage<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final URI imageData,
                                                      @Nonnull final Collection<String> roles) {
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJI);
         return catnip().rest().emoji().createGuildEmoji(id(), name, imageData, roles);
     }
     
@@ -445,6 +450,7 @@ public interface Guild extends Snowflake {
     @JsonIgnore
     default CompletionStage<CustomEmoji> modifyEmoji(@Nonnull final String emojiId, @Nonnull final String name,
                                                      @Nonnull final Collection<String> roles) {
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJI);
         return catnip().rest().emoji().modifyGuildEmoji(id(), emojiId, name, roles);
     }
     
@@ -458,6 +464,7 @@ public interface Guild extends Snowflake {
     @Nonnull
     @JsonIgnore
     default CompletionStage<Void> deleteEmoji(@Nonnull final String emojiId) {
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJI);
         return catnip().rest().emoji().deleteGuildEmoji(id(), emojiId);
     }
     
