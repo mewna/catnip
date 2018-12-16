@@ -95,6 +95,12 @@ public class NoopEntityCache implements EntityCacheWorker {
         return null;
     }
     
+    @Nullable
+    @Override
+    public Guild guild(final long id) {
+        return null;
+    }
+    
     @Nonnull
     @Override
     public NamedCacheView<Guild> guilds() {
@@ -109,7 +115,19 @@ public class NoopEntityCache implements EntityCacheWorker {
     
     @Nullable
     @Override
+    public User user(final long id) {
+        return null;
+    }
+    
+    @Nullable
+    @Override
     public Presence presence(@Nonnull final String id) {
+        return null;
+    }
+    
+    @Nullable
+    @Override
+    public Presence presence(final long id) {
         return null;
     }
     
@@ -125,9 +143,21 @@ public class NoopEntityCache implements EntityCacheWorker {
         return null;
     }
     
+    @Nullable
+    @Override
+    public Member member(final long guildId, final long id) {
+        return null;
+    }
+    
     @Nonnull
     @Override
     public NamedCacheView<Member> members(@Nonnull final String guildId) {
+        return NamedCacheView.empty();
+    }
+    
+    @Nonnull
+    @Override
+    public NamedCacheView<Member> members(final long guildId) {
         return NamedCacheView.empty();
     }
     
@@ -149,9 +179,21 @@ public class NoopEntityCache implements EntityCacheWorker {
         return null;
     }
     
+    @Nullable
+    @Override
+    public Role role(final long guildId, final long id) {
+        return null;
+    }
+    
     @Nonnull
     @Override
     public NamedCacheView<Role> roles(@Nonnull final String guildId) {
+        return NamedCacheView.empty();
+    }
+    
+    @Nonnull
+    @Override
+    public NamedCacheView<Role> roles(final long guildId) {
         return NamedCacheView.empty();
     }
     
@@ -167,9 +209,21 @@ public class NoopEntityCache implements EntityCacheWorker {
         return null;
     }
     
+    @Nullable
+    @Override
+    public GuildChannel channel(final long guildId, final long id) {
+        return null;
+    }
+    
     @Nonnull
     @Override
     public NamedCacheView<GuildChannel> channels(@Nonnull final String guildId) {
+        return NamedCacheView.empty();
+    }
+    
+    @Nonnull
+    @Override
+    public NamedCacheView<GuildChannel> channels(final long guildId) {
         return NamedCacheView.empty();
     }
     
@@ -185,6 +239,12 @@ public class NoopEntityCache implements EntityCacheWorker {
         return null;
     }
     
+    @Nullable
+    @Override
+    public UserDMChannel dmChannel(final long id) {
+        return null;
+    }
+    
     @Nonnull
     @Override
     public CacheView<UserDMChannel> dmChannels() {
@@ -197,9 +257,21 @@ public class NoopEntityCache implements EntityCacheWorker {
         return null;
     }
     
+    @Nullable
+    @Override
+    public CustomEmoji emoji(final long guildId, final long id) {
+        return null;
+    }
+    
     @Nonnull
     @Override
     public NamedCacheView<CustomEmoji> emojis(@Nonnull final String guildId) {
+        return NamedCacheView.empty();
+    }
+    
+    @Nonnull
+    @Override
+    public NamedCacheView<CustomEmoji> emojis(final long guildId) {
         return NamedCacheView.empty();
     }
     
@@ -215,9 +287,21 @@ public class NoopEntityCache implements EntityCacheWorker {
         return null;
     }
     
+    @Nullable
+    @Override
+    public VoiceState voiceState(final long guildId, final long id) {
+        return null;
+    }
+    
     @Nonnull
     @Override
     public CacheView<VoiceState> voiceStates(@Nonnull final String guildId) {
+        return CacheView.empty();
+    }
+    
+    @Nonnull
+    @Override
+    public CacheView<VoiceState> voiceStates(final long guildId) {
         return CacheView.empty();
     }
     
