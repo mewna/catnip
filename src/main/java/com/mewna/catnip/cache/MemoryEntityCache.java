@@ -65,10 +65,6 @@ import static com.mewna.catnip.shard.DiscordEvent.Raw;
 @Accessors(fluent = true, chain = true)
 @SuppressWarnings({"unused", "MismatchedQueryAndUpdateOfCollection"})
 public class MemoryEntityCache implements EntityCacheWorker {
-    // TODO: What even is efficiency
-    
-    public static final String DM_CHANNEL_KEY = "DMS";
-    
     @SuppressWarnings("WeakerAccess")
     protected final DefaultNamedCacheView<Guild> guildCache = new DefaultNamedCacheView<>(Guild::name);
     @SuppressWarnings("WeakerAccess")
@@ -76,15 +72,15 @@ public class MemoryEntityCache implements EntityCacheWorker {
     @SuppressWarnings("WeakerAccess")
     protected final DefaultCacheView<UserDMChannel> dmChannelCache = new DefaultCacheView<>();
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, DefaultNamedCacheView<Member>> memberCache = new ConcurrentHashMap<>();
+    protected final Map<Long, DefaultNamedCacheView<Member>> memberCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, DefaultNamedCacheView<Role>> roleCache = new ConcurrentHashMap<>();
+    protected final Map<Long, DefaultNamedCacheView<Role>> roleCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, DefaultNamedCacheView<GuildChannel>> guildChannelCache = new ConcurrentHashMap<>();
+    protected final Map<Long, DefaultNamedCacheView<GuildChannel>> guildChannelCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, DefaultNamedCacheView<CustomEmoji>> emojiCache = new ConcurrentHashMap<>();
+    protected final Map<Long, DefaultNamedCacheView<CustomEmoji>> emojiCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
-    protected final Map<String, DefaultCacheView<VoiceState>> voiceStateCache = new ConcurrentHashMap<>();
+    protected final Map<Long, DefaultCacheView<VoiceState>> voiceStateCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
     protected final DefaultCacheView<Presence> presenceCache = new DefaultCacheView<>();
     @SuppressWarnings("WeakerAccess")
@@ -120,17 +116,12 @@ public class MemoryEntityCache implements EntityCacheWorker {
     private void cacheChannel(final Channel channel) {
         if(channel.isGuild()) {
             final GuildChannel gc = (GuildChannel) channel;
-            guildChannelCache.computeIfAbsent(gc.guildId(), __ -> new DefaultNamedCacheView<>(GuildChannel::name))
+            guildChannelCache.computeIfAbsent(Long.parseUnsignedLong(gc.guildId()),
+                    __ -> new DefaultNamedCacheView<>(GuildChannel::name))
                     .put(gc.id(), gc);
         } else if(channel.isUserDM()) {
             final UserDMChannel dm = (UserDMChannel) channel;
-            // In this case in particular, this is safe because this method
-            // will call into this cache and try to fetch the user that way.
-            // The only possible way this could fail is if Discord sends us a
-            // DM for a user we don't have cached, which is unlikely
-            // TODO: Re-evaluate safety at some point
-            //noinspection ConstantConditions
-            dmChannelCache.put(dm.recipient().id(), dm);
+            dmChannelCache.put(dm.userId(), dm);
         } else {
             catnip.logAdapter().warn("I don't know how to cache channel {}: isCategory={}, isDM={}, isGroupDM={}," +
                             "isGuild={}, isText={}, isUserDM={}, isVoice={}",
@@ -140,7 +131,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
     }
     
     private void cacheRole(final Role role) {
-        roleCache.computeIfAbsent(role.guildId(), __ -> new DefaultNamedCacheView<>(Role::name))
+        roleCache.computeIfAbsent(Long.parseUnsignedLong(role.guildId()), __ -> new DefaultNamedCacheView<>(Role::name))
                 .put(role.id(), role);
     }
     
@@ -149,12 +140,13 @@ public class MemoryEntityCache implements EntityCacheWorker {
     }
     
     private void cacheMember(final Member member) {
-        memberCache.computeIfAbsent(member.guildId(), __ -> new DefaultNamedCacheView<>(memberNameFunction))
+        memberCache.computeIfAbsent(Long.parseUnsignedLong(member.guildId()), __ -> new DefaultNamedCacheView<>(memberNameFunction))
                 .put(member.id(), member);
     }
     
     private void cacheEmoji(final CustomEmoji emoji) {
-        emojiCache.computeIfAbsent(emoji.guildId(), __ -> new DefaultNamedCacheView<>(CustomEmoji::name))
+        emojiCache.computeIfAbsent(Long.parseUnsignedLong(Objects.requireNonNull(emoji.guildId(), "Cannot cache emoji with null guild id!")),
+                __ -> new DefaultNamedCacheView<>(CustomEmoji::name))
                 .put(emoji.id(), emoji);
     }
     
@@ -348,11 +340,12 @@ public class MemoryEntityCache implements EntityCacheWorker {
     }
     
     private void cacheVoiceState(final VoiceState state) {
-        if(state.guildId() == null) {
+        final String guild = state.guildId();
+        if(guild == null) {
             catnip.logAdapter().warn("Not caching voice state for {} due to null guild", state.userId());
             return;
         }
-        voiceStateCache.computeIfAbsent(state.guildId(), __ -> new DefaultCacheView<>())
+        voiceStateCache.computeIfAbsent(Long.parseUnsignedLong(guild), __ -> new DefaultCacheView<>())
                 .put(state.userId(), state);
     }
     
@@ -393,7 +386,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
     
     @Nullable
     @Override
-    public Guild guild(@Nonnull final String id) {
+    public Guild guild(final long id) {
         return guildCache.getById(id);
     }
     
@@ -405,13 +398,13 @@ public class MemoryEntityCache implements EntityCacheWorker {
     
     @Nullable
     @Override
-    public User user(@Nonnull final String id) {
+    public User user(final long id) {
         return userCache.getById(id);
     }
     
     @Nullable
     @Override
-    public Presence presence(@Nonnull final String id) {
+    public Presence presence(final long id) {
         return presenceCache.getById(id);
     }
     
@@ -423,14 +416,14 @@ public class MemoryEntityCache implements EntityCacheWorker {
     
     @Nullable
     @Override
-    public Member member(@Nonnull final String guildId, @Nonnull final String id) {
+    public Member member(final long guildId, final long id) {
         final DefaultCacheView<Member> cache = memberCache.get(guildId);
         return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
-    public NamedCacheView<Member> members(@Nonnull final String guildId) {
+    public NamedCacheView<Member> members(final long guildId) {
         final DefaultNamedCacheView<Member> cache = memberCache.get(guildId);
         return cache == null ? NamedCacheView.empty() : cache;
     }
@@ -449,14 +442,14 @@ public class MemoryEntityCache implements EntityCacheWorker {
     
     @Nullable
     @Override
-    public Role role(@Nonnull final String guildId, @Nonnull final String id) {
+    public Role role(final long guildId, final long id) {
         final DefaultCacheView<Role> cache = roleCache.get(guildId);
         return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
-    public NamedCacheView<Role> roles(@Nonnull final String guildId) {
+    public NamedCacheView<Role> roles(final long guildId) {
         final DefaultNamedCacheView<Role> cache = roleCache.get(guildId);
         return cache == null ? NamedCacheView.empty() : cache;
     }
@@ -469,14 +462,14 @@ public class MemoryEntityCache implements EntityCacheWorker {
     
     @Nullable
     @Override
-    public GuildChannel channel(@Nonnull final String guildId, @Nonnull final String id) {
+    public GuildChannel channel(final long guildId, final long id) {
         final DefaultNamedCacheView<GuildChannel> cache = guildChannelCache.get(guildId);
         return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
-    public NamedCacheView<GuildChannel> channels(@Nonnull final String guildId) {
+    public NamedCacheView<GuildChannel> channels(final long guildId) {
         final DefaultNamedCacheView<GuildChannel> cache = guildChannelCache.get(guildId);
         return cache == null ? NamedCacheView.empty() : cache;
     }
@@ -489,7 +482,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
     
     @Nullable
     @Override
-    public UserDMChannel dmChannel(@Nonnull final String id) {
+    public UserDMChannel dmChannel(final long id) {
         return dmChannelCache.getById(id);
     }
     
@@ -501,14 +494,14 @@ public class MemoryEntityCache implements EntityCacheWorker {
     
     @Nullable
     @Override
-    public CustomEmoji emoji(@Nonnull final String guildId, @Nonnull final String id) {
+    public CustomEmoji emoji(final long guildId, final long id) {
         final DefaultCacheView<CustomEmoji> cache = emojiCache.get(guildId);
         return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
-    public NamedCacheView<CustomEmoji> emojis(@Nonnull final String guildId) {
+    public NamedCacheView<CustomEmoji> emojis(final long guildId) {
         final DefaultNamedCacheView<CustomEmoji> cache = emojiCache.get(guildId);
         return cache == null ? NamedCacheView.empty() : cache;
     }
@@ -521,14 +514,14 @@ public class MemoryEntityCache implements EntityCacheWorker {
     
     @Nullable
     @Override
-    public VoiceState voiceState(@Nullable final String guildId, @Nonnull final String id) {
+    public VoiceState voiceState(final long guildId, final long id) {
         final DefaultCacheView<VoiceState> cache = voiceStateCache.get(guildId);
         return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
-    public CacheView<VoiceState> voiceStates(@Nonnull final String guildId) {
+    public CacheView<VoiceState> voiceStates(final long guildId) {
         final DefaultCacheView<VoiceState> cache = voiceStateCache.get(guildId);
         return cache == null ? CacheView.empty() : cache;
     }

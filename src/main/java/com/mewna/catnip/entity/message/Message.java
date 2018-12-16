@@ -29,9 +29,9 @@ package com.mewna.catnip.entity.message;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.cache.MemoryEntityCache;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.MessageChannel;
+import com.mewna.catnip.entity.channel.TextChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.impl.MessageImpl;
@@ -46,7 +46,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -185,10 +184,12 @@ public interface Message extends Snowflake {
      */
     @CheckReturnValue
     default MessageChannel channel() {
-        return (MessageChannel)catnip().cache()
-                // TODO: Find a better way to handle this
-                .channel(Optional.ofNullable(guildId())
-                        .orElse(MemoryEntityCache.DM_CHANNEL_KEY), channelId());
+        final String guild = guildId();
+        if(guild != null) {
+            return (TextChannel)catnip().cache().channel(guild, channelId());
+        } else {
+            return catnip().cache().dmChannel(channelId());
+        }
     }
     
     /**
