@@ -62,6 +62,18 @@ public interface EntityCache {
     Guild guild(@Nonnull String id);
     
     /**
+     * Get the guild with the specified ID. May be {@code null}.
+     *
+     * @param id The ID of the guild to fetch.
+     *
+     * @return The guild, or {@code null} if it isn't cached.
+     */
+    @Nullable
+    default Guild guild(final long id) {
+        return guild(Long.toUnsignedString(id));
+    }
+    
+    /**
      * @return A view of the current guild cache. Updates to the cache will update this view.
      */
     @Nonnull
@@ -76,6 +88,18 @@ public interface EntityCache {
      */
     @Nullable
     User user(@Nonnull String id);
+    
+    /**
+     * Get the user with the specified ID. May be {@code null}.
+     *
+     * @param id The ID of the user to fetch.
+     *
+     * @return The user, or {@code null} if it isn't cached.
+     */
+    @Nullable
+    default User user(final long id) {
+        return user(Long.toUnsignedString(id));
+    }
     
     /**
      * @return A view of the current user cache. Updates to the cache will update this view.
@@ -93,6 +117,19 @@ public interface EntityCache {
      */
     @Nullable
     Presence presence(@Nonnull String id);
+    
+    /**
+     * Get the presence for the user with the specified ID. May be
+     * {@code null}.
+     *
+     * @param id The ID of the user whose presence is to be fetched.
+     *
+     * @return The user's presence, or {@code null} if it isn't cached.
+     */
+    @Nullable
+    default Presence presence(final long id) {
+        return presence(Long.toUnsignedString(id));
+    }
     
     /**
      * @return A view of the current presence cache. Updates to the cache will update this view.
@@ -113,6 +150,20 @@ public interface EntityCache {
     Member member(@Nonnull String guildId, @Nonnull String id);
     
     /**
+     * Get the member with the given ID from the guild with the given ID. May
+     * be {@code null}.
+     *
+     * @param guildId The ID of the guild the desired member is in.
+     * @param id      The ID of the desired member.
+     *
+     * @return The member, or {@code null} if it isn't cached.
+     */
+    @Nullable
+    default Member member(final long guildId, final long id) {
+        return member(Long.toUnsignedString(guildId), Long.toUnsignedString(id));
+    }
+    
+    /**
      * Get all members for the guild with the given ID.
      *
      * @param guildId The ID of the guild to fetch members for.
@@ -121,6 +172,18 @@ public interface EntityCache {
      */
     @Nonnull
     NamedCacheView<Member> members(@Nonnull String guildId);
+    
+    /**
+     * Get all members for the guild with the given ID.
+     *
+     * @param guildId The ID of the guild to fetch members for.
+     *
+     * @return A view of the current member cache of the guild. Updates to the cache will update this view.
+     */
+    @Nonnull
+    default NamedCacheView<Member> members(final long guildId) {
+        return members(Long.toUnsignedString(guildId));
+    }
     
     /**
      * Get all members cached in this entity cache.
@@ -144,6 +207,20 @@ public interface EntityCache {
     Role role(@Nonnull String guildId, @Nonnull String id);
     
     /**
+     * Get the role with the given ID from the guild with the given ID. May be
+     * {@code null}.
+     *
+     * @param guildId The ID of the guild the desired role is from.
+     * @param id      The ID of the desired role.
+     *
+     * @return The role, or {@code null} if it isn't cached.
+     */
+    @Nullable
+    default Role role(final long guildId, final long id) {
+        return role(Long.toUnsignedString(guildId), Long.toUnsignedString(id));
+    }
+    
+    /**
      * Get all roles for the guild with the given ID.
      *
      * @param guildId The ID of the guild to fetch roles for.
@@ -152,6 +229,18 @@ public interface EntityCache {
      */
     @Nonnull
     NamedCacheView<Role> roles(@Nonnull String guildId);
+    
+    /**
+     * Get all roles for the guild with the given ID.
+     *
+     * @param guildId The ID of the guild to fetch roles for.
+     *
+     * @return A view of the current role cache of the guild. Updates to the cache will update this view.
+     */
+    @Nonnull
+    default NamedCacheView<Role> roles(final long guildId) {
+        return roles(Long.toUnsignedString(guildId));
+    }
     
     /**
      * Get all roles cached in this entity cache.
@@ -175,6 +264,20 @@ public interface EntityCache {
     GuildChannel channel(@Nonnull String guildId, @Nonnull String id);
     
     /**
+     * Get the channel with the given ID from the guild with the given ID. May
+     * be {@code null}.
+     *
+     * @param guildId The ID of the guild the desired channel is from.
+     * @param id      The ID of the desired channel.
+     *
+     * @return The channel, or {@code null} if it isn't cached.
+     */
+    @Nullable
+    default GuildChannel channel(final long guildId, final long id) {
+        return channel(Long.toUnsignedString(guildId), Long.toUnsignedString(id));
+    }
+    
+    /**
      * Get all channels for the guild with the given ID.
      *
      * @param guildId The ID of the guild to fetch channels for.
@@ -183,6 +286,18 @@ public interface EntityCache {
      */
     @Nonnull
     NamedCacheView<GuildChannel> channels(@Nonnull String guildId);
+    
+    /**
+     * Get all channels for the guild with the given ID.
+     *
+     * @param guildId The ID of the guild to fetch channels for.
+     *
+     * @return A view of the current channel cache of the guild. Updates to the cache will update this view.
+     */
+    @Nonnull
+    default NamedCacheView<GuildChannel> channels(final long guildId) {
+        return channels(Long.toUnsignedString(guildId));
+    }
     
     /**
      * Get all guild channels cached in this entity cache.
@@ -202,6 +317,18 @@ public interface EntityCache {
      */
     @Nullable
     UserDMChannel dmChannel(@Nonnull String id);
+    
+    /**
+     * Get the DM channel with the given ID. May be {@code null}.
+     *
+     * @param id Recipient (user) ID of the channel.
+     *
+     * @return The channel, or {@code null} if it isn't cached.
+     */
+    @Nullable
+    default UserDMChannel dmChannel(final long id) {
+        return dmChannel(Long.toUnsignedString(id));
+    }
     
     /**
      * Get all DM channels cached in this entity cache.
@@ -225,6 +352,20 @@ public interface EntityCache {
     CustomEmoji emoji(@Nonnull String guildId, @Nonnull String id);
     
     /**
+     * Get the custom emojis with the given ID from the guild with the given ID.
+     * May be {@code null},
+     *
+     * @param guildId The ID of the guild the desired custom emojis is from.
+     * @param id      The ID of the desired custom emojis.
+     *
+     * @return The custom emojis, or {@code null} if it isn't cached.
+     */
+    @Nullable
+    default CustomEmoji emoji(final long guildId, final long id) {
+        return emoji(Long.toUnsignedString(guildId), Long.toUnsignedString(id));
+    }
+    
+    /**
      * Get all custom emojis for the guild with the given ID.
      *
      * @param guildId The ID of the guild to fetch custom emojis for.
@@ -233,6 +374,18 @@ public interface EntityCache {
      */
     @Nonnull
     NamedCacheView<CustomEmoji> emojis(@Nonnull String guildId);
+    
+    /**
+     * Get all custom emojis for the guild with the given ID.
+     *
+     * @param guildId The ID of the guild to fetch custom emojis for.
+     *
+     * @return A view of the current emoji cache of the guild. Updates to the cache will update this view.
+     */
+    @Nonnull
+    default NamedCacheView<CustomEmoji> emojis(final long guildId) {
+        return emojis(Long.toUnsignedString(guildId));
+    }
     
     /**
      * Get all emojis cached in this entity cache.
@@ -258,6 +411,22 @@ public interface EntityCache {
     VoiceState voiceState(@Nullable String guildId, @Nonnull String id);
     
     /**
+     * Get the voice state for the user with the given ID, possibly in the
+     * guild with the given ID. May be {@code null}.
+     *
+     * @param guildId The ID of the guild the voice state is from. May be
+     *                {@code null}
+     * @param id      The ID of the user whose voice state is desired. May not
+     *                be {@code null}.
+     *
+     * @return The requested voice state, or {@code null} if it isn't cached.
+     */
+    @Nullable
+    default VoiceState voiceState(final long guildId, final long id) {
+        return voiceState(Long.toUnsignedString(guildId), Long.toUnsignedString(id));
+    }
+    
+    /**
      * Get all voice states for the guild with the given ID.
      *
      * @param guildId The ID of the guild to fetch voice states for.
@@ -266,6 +435,18 @@ public interface EntityCache {
      */
     @Nonnull
     CacheView<VoiceState> voiceStates(@Nonnull String guildId);
+    
+    /**
+     * Get all voice states for the guild with the given ID.
+     *
+     * @param guildId The ID of the guild to fetch voice states for.
+     *
+     * @return A view of the current voice state cache of the guild. Updates to the cache will update this view.
+     */
+    @Nonnull
+    default CacheView<VoiceState> voiceStates(final long guildId) {
+        return voiceStates(Long.toUnsignedString(guildId));
+    }
     
     /**
      * Get all voice states for the entire bot.
