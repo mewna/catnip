@@ -336,7 +336,7 @@ public class CatnipImpl implements Catnip {
     }
     
     @Nonnull
-    public Catnip startShards() {
+    public Catnip connect() {
         shardManager.start();
         return this;
     }

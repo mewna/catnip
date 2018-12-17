@@ -163,7 +163,7 @@ public interface Catnip {
      * @return Itself.
      */
     @Nonnull
-    Catnip startShards();
+    Catnip connect();
     
     /**
      * @return The token being used by this catnip instance.
