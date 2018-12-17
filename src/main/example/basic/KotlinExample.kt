@@ -44,6 +44,6 @@ object KotlinExample {
                 msg.channel().sendMessage("pong!")
             }
         }
-        catnip.startShards()
+        catnip.connect()
     }
 }
