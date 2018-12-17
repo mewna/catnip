@@ -32,6 +32,8 @@ import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageOptions;
 import com.mewna.catnip.entity.misc.Emoji;
+import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.pagination.MessagePaginator;
 
 import javax.annotation.CheckReturnValue;
@@ -56,6 +58,10 @@ public interface MessageChannel extends Channel {
     @Nonnull
     @JsonIgnore
     default CompletionStage<Message> sendMessage(@Nonnull final String content) {
+        if(isGuild()) {
+            PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
+                    Permission.SEND_MESSAGES);
+        }
         return catnip().rest().channel().sendMessage(id(), content);
     }
     
@@ -69,6 +75,10 @@ public interface MessageChannel extends Channel {
     @Nonnull
     @JsonIgnore
     default CompletionStage<Message> sendMessage(@Nonnull final Embed embed) {
+        if(isGuild()) {
+            PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
+                    Permission.SEND_MESSAGES, Permission.EMBED_LINKS);
+        }
         return catnip().rest().channel().sendMessage(id(), embed);
     }
     
@@ -82,6 +92,15 @@ public interface MessageChannel extends Channel {
     @Nonnull
     @JsonIgnore
     default CompletionStage<Message> sendMessage(@Nonnull final Message message) {
+        if(isGuild()) {
+            if(!message.embeds().isEmpty()) {
+                PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
+                        Permission.SEND_MESSAGES, Permission.EMBED_LINKS);
+            } else {
+                PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
+                        Permission.SEND_MESSAGES);
+            }
+        }
         return catnip().rest().channel().sendMessage(id(), message);
     }
     
@@ -95,6 +114,25 @@ public interface MessageChannel extends Channel {
     @Nonnull
     @JsonIgnore
     default CompletionStage<Message> sendMessage(@Nonnull final MessageOptions options) {
+        if(isGuild()) {
+            if(options.hasFiles()) {
+                if(options.embed() != null) {
+                    PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
+                            Permission.SEND_MESSAGES, Permission.ATTACH_FILES, Permission.EMBED_LINKS);
+                } else {
+                    PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
+                            Permission.SEND_MESSAGES, Permission.ATTACH_FILES);
+                }
+            } else {
+                if(options.embed() != null) {
+                    PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
+                            Permission.SEND_MESSAGES, Permission.EMBED_LINKS);
+                } else {
+                    PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
+                            Permission.SEND_MESSAGES);
+                }
+            }
+        }
         return catnip().rest().channel().sendMessage(id(), options);
     }
     
@@ -167,6 +205,10 @@ public interface MessageChannel extends Channel {
     @Nonnull
     @JsonIgnore
     default CompletionStage<Void> addReaction(@Nonnull final String messageId, @Nonnull final String emoji) {
+        if(isGuild()) {
+            PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
+                    Permission.ADD_REACTIONS, Permission.READ_MESSAGE_HISTORY);
+        }
         return catnip().rest().channel().addReaction(id(), messageId, emoji);
     }
     
@@ -181,6 +223,10 @@ public interface MessageChannel extends Channel {
     @Nonnull
     @JsonIgnore
     default CompletionStage<Void> addReaction(@Nonnull final String messageId, @Nonnull final Emoji emoji) {
+        if(isGuild()) {
+            PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
+                    Permission.ADD_REACTIONS, Permission.READ_MESSAGE_HISTORY);
+        }
         return catnip().rest().channel().addReaction(id(), messageId, emoji);
     }
     
@@ -225,6 +271,10 @@ public interface MessageChannel extends Channel {
     @JsonIgnore
     default CompletionStage<Void> deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId,
                                                      @Nonnull final String emoji) {
+        if(isGuild()) {
+            PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
+                    Permission.MANAGE_MESSAGES);
+        }
         return catnip().rest().channel().deleteUserReaction(id(), messageId, userId, emoji);
     }
     
@@ -241,6 +291,10 @@ public interface MessageChannel extends Channel {
     @JsonIgnore
     default CompletionStage<Void> deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId,
                                                      @Nonnull final Emoji emoji) {
+        if(isGuild()) {
+            PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
+                    Permission.MANAGE_MESSAGES);
+        }
         return catnip().rest().channel().deleteUserReaction(id(), messageId, userId, emoji);
     }
     
@@ -268,6 +322,10 @@ public interface MessageChannel extends Channel {
     @JsonIgnore
     @CheckReturnValue
     default CompletionStage<Message> fetchMessage(@Nonnull final String messageId) {
+        if(isGuild()) {
+            PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
+                    Permission.READ_MESSAGE_HISTORY);
+        }
         return catnip().rest().channel().getMessage(id(), messageId);
     }
     
@@ -280,6 +338,10 @@ public interface MessageChannel extends Channel {
     @JsonIgnore
     @CheckReturnValue
     default MessagePaginator fetchMessages() {
+        if(isGuild()) {
+            PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
+                    Permission.READ_MESSAGE_HISTORY);
+        }
         return catnip().rest().channel().getChannelMessages(id());
     }
 }
