@@ -30,7 +30,9 @@ package com.mewna.catnip.entity.channel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.rest.RestRequester;
+import com.mewna.catnip.util.PermissionUtil;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
@@ -111,7 +113,21 @@ public interface Webhook extends Snowflake {
     @JsonIgnore
     @CheckReturnValue
     default CompletionStage<Void> delete() {
+        PermissionUtil.checkPermissions(catnip(), guildId(), channelId(), Permission.MANAGE_WEBHOOKS);
         return catnip().rest().webhook().deleteWebhook(id());
+    }
+    
+    /**
+     * Edit this webhook.
+     *
+     * @return A webhook editor that can complete the editing.
+     */
+    @Nonnull
+    @JsonIgnore
+    @CheckReturnValue
+    default WebhookEditFields edit() {
+        PermissionUtil.checkPermissions(catnip(), guildId(), channelId(), Permission.MANAGE_WEBHOOKS);
+        return new WebhookEditFields(this);
     }
     
     @SuppressWarnings("unused")

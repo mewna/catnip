@@ -29,15 +29,21 @@ package com.mewna.catnip.entity.guild;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.google.common.collect.ImmutableSet;
+import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.DMChannel;
+import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.impl.MemberImpl;
+import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.PermissionUtil;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
@@ -51,13 +57,13 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 @JsonDeserialize(as = MemberImpl.class)
 public interface Member extends Snowflake {
-    
     /**
      * The unique snowflake ID of the user.
      *
      * @return User's ID. Never null.
      */
     @Nonnull
+    @CheckReturnValue
     String id();
     
     /**
@@ -66,6 +72,7 @@ public interface Member extends Snowflake {
      * @return String representing the guild ID.
      */
     @Nonnull
+    @CheckReturnValue
     String guildId();
     
     /**
@@ -74,6 +81,7 @@ public interface Member extends Snowflake {
      * @return User's nickname. Null if not set.
      */
     @Nullable
+    @CheckReturnValue
     String nick();
     
     /**
@@ -93,8 +101,9 @@ public interface Member extends Snowflake {
     @Nonnull
     @CheckReturnValue
     default Set<Role> roles() {
-        return ImmutableSet.copyOf(roleIds().stream()
-                .map(e -> catnip().cache().role(guildId(), e))
+        final CacheView<Role> roles = catnip().cache().roles(guildId());
+        return Collections.unmodifiableSet(roleIds().stream()
+                .map(roles::getById)
                 .collect(Collectors.toSet()));
     }
     
@@ -104,6 +113,7 @@ public interface Member extends Snowflake {
      *
      * @return True if muted, false otherwise.
      */
+    @CheckReturnValue
     boolean mute();
     
     /**
@@ -112,6 +122,7 @@ public interface Member extends Snowflake {
      *
      * @return True if deafened, false otherwise.
      */
+    @CheckReturnValue
     boolean deaf();
     
     /**
@@ -125,6 +136,7 @@ public interface Member extends Snowflake {
      * @return The {@link OffsetDateTime date and time} the member joined the guild.
      */
     @Nullable
+    @CheckReturnValue
     OffsetDateTime joinedAt();
     
     /**
@@ -136,5 +148,33 @@ public interface Member extends Snowflake {
     @CheckReturnValue
     default CompletionStage<DMChannel> createDM() {
         return catnip().rest().user().createDM(id());
+    }
+    
+    default Set<Permission> permissions() {
+        return Permission.toSet(PermissionUtil.effectivePermissions(catnip(), this));
+    }
+    
+    default Set<Permission> permissions(@Nonnull final GuildChannel channel) {
+        return Permission.toSet(PermissionUtil.effectivePermissions(catnip(), this, channel));
+    }
+    
+    default boolean hasPermissions(@Nonnull final Permission... permissions) {
+        return hasPermissions(Arrays.asList(permissions));
+    }
+    
+    default boolean hasPermissions(@Nonnull final Collection<Permission> permissions) {
+        final long needed = Permission.from(permissions);
+        final long actual = PermissionUtil.effectivePermissions(catnip(), this);
+        return (actual & needed) == needed;
+    }
+    
+    default boolean hasPermissions(@Nonnull final GuildChannel channel, @Nonnull final Permission... permissions) {
+        return hasPermissions(channel, Arrays.asList(permissions));
+    }
+    
+    default boolean hasPermissions(@Nonnull final GuildChannel channel, @Nonnull final Collection<Permission> permissions) {
+        final long needed = Permission.from(permissions);
+        final long actual = PermissionUtil.effectivePermissions(catnip(), this, channel);
+        return (actual & needed) == needed;
     }
 }

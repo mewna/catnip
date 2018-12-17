@@ -31,7 +31,8 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * @author Julia Rogers
@@ -68,6 +69,9 @@ public enum Permission {
     MANAGE_ROLES(0x10000000, true),
     MANAGE_WEBHOOKS(0x20000000, true),
     MANAGE_EMOJI(0x40000000, false);
+    
+    public static final long ALL = Permission.from(Permission.values());
+    public static final long NONE = 0;
 
     Permission(final int value, final boolean channel) {
         this.value = value;
@@ -78,6 +82,10 @@ public enum Permission {
     private final int value;
     @Getter
     private final boolean channel;
+    
+    public boolean isPresent(final long permissions) {
+        return (permissions & value) == value;
+    }
 
     /* Static convenience methods */
 

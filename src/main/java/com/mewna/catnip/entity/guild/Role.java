@@ -32,6 +32,7 @@ import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.impl.RoleImpl;
 import com.mewna.catnip.entity.util.Permission;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.util.Set;
 
@@ -75,6 +76,7 @@ public interface Role extends Snowflake {
      *
      * @return The integer representation of the role color. Never null.
      */
+    @CheckReturnValue
     int color();
     
     /**
@@ -83,6 +85,7 @@ public interface Role extends Snowflake {
      *
      * @return The position of the role within its guild's role hierarchy.
      */
+    @CheckReturnValue
     int position();
     
     /**
@@ -90,7 +93,17 @@ public interface Role extends Snowflake {
      *
      * @return True if the role is grouped and hoisted, false otherwise.
      */
+    @CheckReturnValue
     boolean hoist();
+    
+    /**
+     * Permissions this role grants users in the guild.
+     * <br>Channels may override and add to or remove from this.
+     *
+     * @return Bit set of permissions granted by this role.
+     */
+    @CheckReturnValue
+    long permissionsRaw();
     
     /**
      * Permissions this role grants users in the guild.
@@ -99,7 +112,10 @@ public interface Role extends Snowflake {
      * @return Set of permissions granted by this role. Never null.
      */
     @Nonnull
-    Set<Permission> permissions();
+    @CheckReturnValue
+    default Set<Permission> permissions() {
+        return Permission.toSet(permissionsRaw());
+    }
     
     /**
      * Whether or not this role is managed by a 3rd party connection.
@@ -108,6 +124,7 @@ public interface Role extends Snowflake {
      *
      * @return True if the role is managed, false otherwise.
      */
+    @CheckReturnValue
     boolean managed();
     
     /**
@@ -116,5 +133,6 @@ public interface Role extends Snowflake {
      *
      * @return True if the role is mentionable, false otherwise.
      */
+    @CheckReturnValue
     boolean mentionable();
 }

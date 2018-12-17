@@ -255,6 +255,17 @@ public interface Catnip {
     boolean emitEventObjects();
     
     /**
+     * @return Whether or not this catnip instance will execute permission
+     * checks before doing a request. Does not affect direct calls to {@link #rest() Rest}
+     * methods. If, for whatever reason, the needed entities for the permission
+     * calculation cannot be retrieved from the cache, such as using a
+     * {@link com.mewna.catnip.cache.NoopEntityCache noop cache} or attempting to
+     * do the requests before the cache has been populated, the check will assume
+     * all permissions are available.
+     */
+    boolean enforcePermissions();
+    
+    /**
      * @return A set of all ids of unavailable guilds.
      */
     @Nonnull
