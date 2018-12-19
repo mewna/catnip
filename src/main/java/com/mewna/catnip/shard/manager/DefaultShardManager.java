@@ -189,4 +189,11 @@ public class DefaultShardManager extends AbstractShardManager {
             catnip().logAdapter().warn("Ignoring duplicate queue for shard {}", shard);
         }
     }
+    
+    @Override
+    public void shutdown() {
+        shardIds.forEach(i -> {
+            catnip().eventBus().send(CatnipShard.controlAddress(i), new JsonObject().put("mode", "SHUTDOWN"));
+        });
+    }
 }

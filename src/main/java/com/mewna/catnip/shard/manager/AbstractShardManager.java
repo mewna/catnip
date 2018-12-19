@@ -108,11 +108,4 @@ public abstract class AbstractShardManager implements ShardManager {
                 });
         return VertxCompletableFuture.from(catnip.vertx(), future);
     }
-    
-    @Override
-    public void shutdown() {
-        for(int i = 0; i < shardCount(); i++) {
-            catnip.eventBus().send(CatnipShard.controlAddress(i), new JsonObject().put("mode", "SHUTDOWN"));
-        }
-    }
 }
