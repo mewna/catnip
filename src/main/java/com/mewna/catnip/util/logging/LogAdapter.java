@@ -25,7 +25,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.internal.logging;
+package com.mewna.catnip.util.logging;
 
 import org.slf4j.event.Level;
 
