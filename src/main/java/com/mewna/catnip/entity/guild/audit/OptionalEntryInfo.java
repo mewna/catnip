@@ -34,4 +34,5 @@ import com.mewna.catnip.entity.Entity;
  * @since 10/07/18
  */
 @SuppressWarnings("WeakerAccess")
-public interface OptionalEntryInfo extends Entity {}
+public interface OptionalEntryInfo extends Entity {
+}

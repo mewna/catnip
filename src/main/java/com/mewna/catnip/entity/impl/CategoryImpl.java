@@ -72,7 +72,7 @@ public class CategoryImpl implements Category, RequiresCatnip {
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Category && ((Category)obj).id().equals(id);
+        return obj instanceof Category && ((Category) obj).id().equals(id);
     }
     
     @Override

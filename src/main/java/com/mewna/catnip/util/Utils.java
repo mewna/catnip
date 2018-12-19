@@ -50,7 +50,8 @@ public final class Utils {
     );
     public static final long DISCORD_EPOCH = 1420070400000L;
     
-    private Utils() {}
+    private Utils() {
+    }
     
     @Nonnull
     @CheckReturnValue

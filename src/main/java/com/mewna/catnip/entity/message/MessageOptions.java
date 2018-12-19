@@ -73,15 +73,15 @@ public class MessageOptions {
     @Nonnull
     @SuppressWarnings("WeakerAccess")
     public MessageOptions addFile(@Nonnull final String name, @Nonnull final File file) {
-        if (!file.exists()) {
+        if(!file.exists()) {
             throw new IllegalArgumentException("file doesn't exist!");
         }
-        if (!file.canRead()) {
+        if(!file.canRead()) {
             throw new IllegalArgumentException("file cannot be read!");
         }
         try {
             return addFile(name, Files.toByteArray(file));
-        } catch (final IOException exc) {
+        } catch(final IOException exc) {
             throw new IllegalArgumentException("cannot read data from file!", exc);
         }
     }
@@ -91,7 +91,7 @@ public class MessageOptions {
     public MessageOptions addFile(@Nonnull final String name, @Nonnull final InputStream stream) {
         try {
             return addFile(name, ByteStreams.toByteArray(stream));
-        } catch (final IOException exc) {
+        } catch(final IOException exc) {
             throw new IllegalArgumentException("cannot read data from inputstream!", exc);
         }
     }
@@ -100,10 +100,10 @@ public class MessageOptions {
     @Nonnull
     @SuppressWarnings("WeakerAccess")
     public MessageOptions addFile(@Nonnull final String name, @Nonnull final byte[] data) {
-        if (files == null) {
+        if(files == null) {
             files = new ArrayList<>();
         }
-        if (files.size() == 10) {
+        if(files.size() == 10) {
             throw new UnsupportedOperationException("maximum limit of 10 attachments!");
         }
         files.add(new ImmutablePair<>(name, Buffer.buffer(data)));
@@ -116,6 +116,6 @@ public class MessageOptions {
     }
     
     public List<ImmutablePair<String, Buffer>> files() {
-        return hasFiles() ? ImmutableList.copyOf(files) : ImmutableList.of() ;
+        return hasFiles() ? ImmutableList.copyOf(files) : ImmutableList.of();
     }
 }

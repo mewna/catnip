@@ -95,13 +95,13 @@ public abstract class AuditLogPaginator extends BasePaginator<AuditLogEntry, Jso
         final Map<String, Webhook> webhooks = EntityBuilder.immutableMapOf(data.getJsonArray("webhooks"), x -> x.getString("id"), builder::createWebhook);
         final Map<String, User> users = EntityBuilder.immutableMapOf(data.getJsonArray("users"), x -> x.getString("id"), builder::createUser);
         final JsonArray entries = data.getJsonArray("audit_log_entries");
-    
+        
         for(final Object object : entries) {
             if(!(object instanceof JsonObject)) {
                 throw new IllegalArgumentException("Expected all values to be JsonObjects, but found " +
                         (object == null ? "null" : object.getClass()));
             }
-            final AuditLogEntry entry = builder.createAuditLogEntry((JsonObject)object, webhooks, users);
+            final AuditLogEntry entry = builder.createAuditLogEntry((JsonObject) object, webhooks, users);
             state.update(entry);
             if(state.done()) {
                 return;

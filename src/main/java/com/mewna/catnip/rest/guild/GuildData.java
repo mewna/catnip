@@ -49,9 +49,11 @@ import java.util.function.Consumer;
 @Getter
 @Setter
 public class GuildData implements JsonConvertible {
-    @Getter(AccessLevel.NONE) @Setter(AccessLevel.NONE)
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private final List<RoleData> roles = new ArrayList<>();
-    @Getter(AccessLevel.NONE) @Setter(AccessLevel.NONE)
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private final List<ChannelData> channels = new ArrayList<>();
     
     private String name;

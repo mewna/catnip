@@ -80,7 +80,7 @@ public class MemberImpl implements Member, RequiresCatnip, Timestamped {
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Member && ((Member)obj).id().equals(id);
+        return obj instanceof Member && ((Member) obj).id().equals(id);
     }
     
     @Override

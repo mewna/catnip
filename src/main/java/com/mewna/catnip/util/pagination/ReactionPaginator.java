@@ -29,6 +29,7 @@ package com.mewna.catnip.util.pagination;
 
 import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.user.User;
+
 import javax.annotation.Nonnull;
 
 /**

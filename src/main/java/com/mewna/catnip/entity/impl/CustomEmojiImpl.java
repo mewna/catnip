@@ -74,7 +74,7 @@ public class CustomEmojiImpl implements CustomEmoji, RequiresCatnip {
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof CustomEmoji && ((CustomEmoji)obj).id().equals(id);
+        return obj instanceof CustomEmoji && ((CustomEmoji) obj).id().equals(id);
     }
     
     @Override

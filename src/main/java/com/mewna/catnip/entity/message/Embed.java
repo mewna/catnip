@@ -29,14 +29,8 @@ package com.mewna.catnip.entity.message;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.impl.EmbedImpl;
-import com.mewna.catnip.entity.impl.EmbedImpl.AuthorImpl;
-import com.mewna.catnip.entity.impl.EmbedImpl.FieldImpl;
-import com.mewna.catnip.entity.impl.EmbedImpl.FooterImpl;
-import com.mewna.catnip.entity.impl.EmbedImpl.ImageImpl;
-import com.mewna.catnip.entity.impl.EmbedImpl.ProviderImpl;
-import com.mewna.catnip.entity.impl.EmbedImpl.ThumbnailImpl;
-import com.mewna.catnip.entity.impl.EmbedImpl.VideoImpl;
-import lombok.*;
+import com.mewna.catnip.entity.impl.EmbedImpl.*;
+import lombok.Getter;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -169,21 +163,21 @@ public interface Embed {
     @Nonnull
     @CheckReturnValue
     List<Field> fields();
-
+    
     enum EmbedType {
         IMAGE("image"),
         VIDEO("video"),
         LINK("link"),
         RICH("rich"),
         UNKNOWN("");
-
+        
         @Getter
         private final String key;
-
+        
         EmbedType(final String key) {
             this.key = key;
         }
-
+        
         @Nonnull
         @CheckReturnValue
         public static EmbedType byKey(@Nonnull final String key) {
@@ -200,13 +194,13 @@ public interface Embed {
     interface Author {
         /**
          * Name of the author.
-         * 
+         *
          * @return Embed author's name. Never null.
          */
         @Nonnull
         @CheckReturnValue
         String name();
-    
+        
         /**
          * URL of the author.
          *
@@ -214,7 +208,7 @@ public interface Embed {
          */
         @CheckReturnValue
         String url();
-    
+        
         /**
          * Icon URL of the author.
          *
@@ -222,7 +216,7 @@ public interface Embed {
          */
         @CheckReturnValue
         String iconUrl();
-    
+        
         /**
          * Icon proxy URL of the author.
          *
@@ -242,7 +236,7 @@ public interface Embed {
         @Nonnull
         @CheckReturnValue
         String name();
-    
+        
         /**
          * Value of the field.
          *
@@ -251,7 +245,7 @@ public interface Embed {
         @Nonnull
         @CheckReturnValue
         String value();
-    
+        
         /**
          * Whether the field is inline.
          *
@@ -271,7 +265,7 @@ public interface Embed {
         @Nonnull
         @CheckReturnValue
         String text();
-    
+        
         /**
          * Icon URL of the footer.
          *
@@ -279,7 +273,7 @@ public interface Embed {
          */
         @CheckReturnValue
         String iconUrl();
-    
+        
         /**
          * Icon proxy URL of the footer.
          *
@@ -293,13 +287,13 @@ public interface Embed {
     interface Image {
         /**
          * URL of the image.
-         * 
+         *
          * @return Image's URL. Never null.
          */
         @Nonnull
         @CheckReturnValue
         String url();
-    
+        
         /**
          * Proxy URL of the image.
          *
@@ -307,7 +301,7 @@ public interface Embed {
          */
         @CheckReturnValue
         String proxyUrl();
-    
+        
         /**
          * Height of the image.
          *
@@ -315,7 +309,7 @@ public interface Embed {
          */
         @CheckReturnValue
         int height();
-    
+        
         /**
          * Width of the image.
          *
@@ -329,12 +323,12 @@ public interface Embed {
     interface Provider {
         /**
          * Name of the provider.
-         * 
+         *
          * @return Provider's name, or null if absent.
          */
         @CheckReturnValue
         String name();
-    
+        
         /**
          * URL of the provider.
          *
@@ -355,7 +349,7 @@ public interface Embed {
         @Nonnull
         @CheckReturnValue
         String url();
-    
+        
         /**
          * Proxy URL of the thumbnail.
          *
@@ -363,7 +357,7 @@ public interface Embed {
          */
         @CheckReturnValue
         String proxyUrl();
-    
+        
         /**
          * Height of the thumbnail.
          *
@@ -371,7 +365,7 @@ public interface Embed {
          */
         @CheckReturnValue
         int height();
-    
+        
         /**
          * Width of the thumbnail.
          *
@@ -391,7 +385,7 @@ public interface Embed {
         @Nonnull
         @CheckReturnValue
         String url();
-    
+        
         /**
          * Height of the video.
          *
@@ -399,7 +393,7 @@ public interface Embed {
          */
         @CheckReturnValue
         int height();
-    
+        
         /**
          * Width of the video.
          *

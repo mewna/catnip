@@ -61,14 +61,14 @@ public enum GatewayOp {
         this.opcode = opcode;
     }
     
-    @Override
-    public String toString() {
-        return name();
-    }
-    
     @Nonnull
     @CheckReturnValue
     public static GatewayOp byId(@Nonnegative final int id) {
         return values()[id];
+    }
+    
+    @Override
+    public String toString() {
+        return name();
     }
 }

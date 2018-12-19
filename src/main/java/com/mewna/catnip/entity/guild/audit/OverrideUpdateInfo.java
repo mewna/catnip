@@ -46,7 +46,7 @@ public interface OverrideUpdateInfo extends OptionalEntryInfo {
     @CheckReturnValue
     @Nonnull
     OverrideType overrideType();
-
+    
     @CheckReturnValue
     @Nullable
     String roleName();

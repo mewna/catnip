@@ -39,7 +39,8 @@ import javax.annotation.Nullable;
  * @since 9/14/18
  */
 public final class CDNFormat {
-    private CDNFormat() {}
+    private CDNFormat() {
+    }
     
     @Nonnull
     @CheckReturnValue

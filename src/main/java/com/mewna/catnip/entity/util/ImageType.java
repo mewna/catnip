@@ -49,12 +49,6 @@ public enum ImageType {
     
     @Nonnull
     @CheckReturnValue
-    public String getFileExtension() {
-        return name().toLowerCase();
-    }
-    
-    @Nonnull
-    @CheckReturnValue
     public static ImageType fromExtension(@Nonnull final String extension) {
         for(final ImageType type : values()) {
             if(type.getFileExtension().equals(extension)) {
@@ -65,5 +59,11 @@ public enum ImageType {
             }
         }
         throw new IllegalArgumentException("No matching file type for extension " + extension);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public String getFileExtension() {
+        return name().toLowerCase();
     }
 }

@@ -124,7 +124,7 @@ public class DefaultCacheView<T> implements CacheView<T> {
     @Nonnull
     @Override
     public Collection<T> snapshot() {
-        return snapshot(() -> new ArrayList<>((int)size()));
+        return snapshot(() -> new ArrayList<>((int) size()));
     }
     
     @Nonnull

@@ -43,6 +43,11 @@ public class ImageOptions {
     private ImageType type = ImageType.PNG;
     private int size = -1;
     
+    private static boolean isPowerOfTwo(final int i) {
+        final int minusOne = i - 1;
+        return (i & minusOne) == 0;
+    }
+    
     @Nonnull
     @CheckReturnValue
     public ImageOptions type(@Nullable ImageType type) {
@@ -97,10 +102,5 @@ public class ImageOptions {
     @CheckReturnValue
     public String buildUrl(@Nonnull final String base) {
         return base + '.' + type.getFileExtension() + (size == -1 ? "" : "?size=" + size);
-    }
-    
-    private static boolean isPowerOfTwo(final int i) {
-        final int minusOne = i - 1;
-        return (i & minusOne) == 0;
     }
 }

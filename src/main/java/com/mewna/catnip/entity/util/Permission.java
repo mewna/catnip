@@ -72,34 +72,28 @@ public enum Permission {
     
     public static final long ALL = Permission.from(Permission.values());
     public static final long NONE = 0;
-
-    Permission(final int value, final boolean channel) {
-        this.value = value;
-        this.channel = channel;
-    }
-
     @Getter
     private final int value;
     @Getter
     private final boolean channel;
-    
-    public boolean isPresent(final long permissions) {
-        return (permissions & value) == value;
+    Permission(final int value, final boolean channel) {
+        this.value = value;
+        this.channel = channel;
     }
-
-    /* Static convenience methods */
-
+    
     public static Set<Permission> toSet(final long asLong) {
         final Set<Permission> perms = EnumSet.noneOf(Permission.class);
-
-        for (final Permission p : values()) {
-            if ((asLong & p.value) == p.value) {
+        
+        for(final Permission p : values()) {
+            if((asLong & p.value) == p.value) {
                 perms.add(p);
             }
         }
-
+        
         return perms;
     }
+    
+    /* Static convenience methods */
     
     public static long from(@Nonnull final Iterable<Permission> permissions) {
         long result = 0;
@@ -115,5 +109,9 @@ public enum Permission {
             result |= permission.value;
         }
         return result;
+    }
+    
+    public boolean isPresent(final long permissions) {
+        return (permissions & value) == value;
     }
 }

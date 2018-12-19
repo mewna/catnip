@@ -96,6 +96,51 @@ public abstract class ChannelData implements JsonConvertible {
     
     @Nonnull
     @CheckReturnValue
+    public static ChannelData of(@Nonnull final TextChannel textChannel) {
+        return new TextChannelData()
+                .name(textChannel.name())
+                .position(textChannel.position())
+                .topic(textChannel.topic())
+                .parentId(textChannel.parentId())
+                .nsfw(textChannel.nsfw())
+                .overrides(textChannel.overrides());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public static ChannelData of(@Nonnull final VoiceChannel voiceChannel) {
+        return new VoiceChannelData()
+                .name(voiceChannel.name())
+                .position(voiceChannel.position())
+                .parentId(voiceChannel.parentId())
+                .userLimit(voiceChannel.userLimit())
+                .bitrate(voiceChannel.bitrate())
+                .overrides(voiceChannel.overrides());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public static ChannelData of(@Nonnull final Category category) {
+        return new CategoryData()
+                .name(category.name())
+                .position(category.position())
+                .overrides(category.overrides());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public static ChannelData of(@Nonnull final GuildChannel channel) {
+        if(channel.isText()) {
+            return of(channel.asTextChannel());
+        } else if(channel.isVoice()) {
+            return of(channel.asVoiceChannel());
+        } else {
+            return of(channel.asCategory());
+        }
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public ChannelData category(@Nonnull final Category category) {
         parentId = category.id();
         return this;
@@ -194,51 +239,6 @@ public abstract class ChannelData implements JsonConvertible {
         return "ChannelData (name = " + name + ')';
     }
     
-    @Nonnull
-    @CheckReturnValue
-    public static ChannelData of(@Nonnull final TextChannel textChannel) {
-        return new TextChannelData()
-                .name(textChannel.name())
-                .position(textChannel.position())
-                .topic(textChannel.topic())
-                .parentId(textChannel.parentId())
-                .nsfw(textChannel.nsfw())
-                .overrides(textChannel.overrides());
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    public static ChannelData of(@Nonnull final VoiceChannel voiceChannel) {
-        return new VoiceChannelData()
-                .name(voiceChannel.name())
-                .position(voiceChannel.position())
-                .parentId(voiceChannel.parentId())
-                .userLimit(voiceChannel.userLimit())
-                .bitrate(voiceChannel.bitrate())
-                .overrides(voiceChannel.overrides());
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    public static ChannelData of(@Nonnull final Category category) {
-        return new CategoryData()
-                .name(category.name())
-                .position(category.position())
-                .overrides(category.overrides());
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    public static ChannelData of(@Nonnull final GuildChannel channel) {
-        if(channel.isText()) {
-            return of(channel.asTextChannel());
-        } else if(channel.isVoice()) {
-            return of(channel.asVoiceChannel());
-        } else {
-            return of(channel.asCategory());
-        }
-    }
-    
     private ChannelData overrides(@Nonnull final Collection<PermissionOverride> overrideList) {
         for(final PermissionOverride o : overrideList) {
             overrides.put(o.id(), PermissionOverrideData.create(o));
@@ -269,7 +269,7 @@ public abstract class ChannelData implements JsonConvertible {
         if(userLimit != null) {
             object.put("user_limit", userLimit);
         }
-        if (parentId != null) {
+        if(parentId != null) {
             object.put("parent_id", parentId);
         }
         if(!overrides.isEmpty()) {
@@ -290,33 +290,33 @@ public abstract class ChannelData implements JsonConvertible {
         CategoryData() {
             super(4, null);
         }
-    
+        
         @Override
         public ChannelData parentId(final String parentId) {
             throw new UnsupportedOperationException("Cannot set parent ID on categories!");
         }
-    
+        
         @Nonnull
         @Override
         public ChannelData category(@Nonnull final Category category) {
             throw new UnsupportedOperationException("Cannot set parent on categories!");
         }
-    
+        
         @Override
         public ChannelData topic(final String topic) {
             throw new UnsupportedOperationException("Cannot set topic on categories");
         }
-    
+        
         @Override
         public ChannelData nsfw(final Boolean nsfw) {
             throw new UnsupportedOperationException("Cannot set nsfw on categories");
         }
-    
+        
         @Override
         public ChannelData bitrate(final Integer bitrate) {
             throw new UnsupportedOperationException("Cannot set bitrate on categories");
         }
-    
+        
         @Override
         public ChannelData userLimit(final Integer userLimit) {
             throw new UnsupportedOperationException("Cannot set user limit on categories");
@@ -327,16 +327,16 @@ public abstract class ChannelData implements JsonConvertible {
         TextChannelData(final String name) {
             super(0, name);
         }
-    
+        
         TextChannelData() {
             super(0, null);
         }
-    
+        
         @Override
         public ChannelData bitrate(final Integer bitrate) {
             throw new UnsupportedOperationException("Cannot set bitrate on text channels");
         }
-    
+        
         @Override
         public ChannelData userLimit(final Integer userLimit) {
             throw new UnsupportedOperationException("Cannot set user limit on text channels");
@@ -347,16 +347,16 @@ public abstract class ChannelData implements JsonConvertible {
         VoiceChannelData(final String name) {
             super(2, name);
         }
-    
+        
         VoiceChannelData() {
             super(2, null);
         }
-    
+        
         @Override
         public ChannelData topic(final String topic) {
             throw new UnsupportedOperationException("Cannot set topic on voice channels");
         }
-    
+        
         @Override
         public ChannelData nsfw(final Boolean nsfw) {
             throw new UnsupportedOperationException("Cannot set nsfw on voice channels");

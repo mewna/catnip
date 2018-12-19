@@ -71,7 +71,7 @@ public class RoleImpl implements Role, RequiresCatnip {
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Role && ((Role)obj).id().equals(id);
+        return obj instanceof Role && ((Role) obj).id().equals(id);
     }
     
     @Override

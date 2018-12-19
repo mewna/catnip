@@ -99,11 +99,11 @@ public interface ShardManager {
      * to the websocket gateway. This is done as a boolean because - at least
      * for now - there's only 2 meaningful states: connected, and queued to be
      * connected.
-     * <p />
+     * <p/>
      * If the shard id does <strong>not</strong> exist (ex. not controlled by
      * this shard manager instance), then the future will FAIL, and this case
      * must also be handled.
-     * <p />
+     * <p/>
      * This is fetched <em>asynchronously</em>.
      *
      * @param id The id of the shard to get connection status for.

@@ -64,50 +64,6 @@ public class MemberData {
     private Boolean mute;
     private Boolean deaf;
     
-    @Nonnull
-    @CheckReturnValue
-    public Collection<String> roles() {
-        return ImmutableList.copyOf(roles);
-    }
-    
-    @CheckReturnValue
-    @Nonnull
-    public MemberData addRole(@Nonnull final Role role) {
-        if (roles == null) {
-            roles = new HashSet<>();
-        }
-        roles.add(role.id());
-        return this;
-    }
-    
-    @CheckReturnValue
-    @Nonnull
-    public MemberData addRole(@Nonnull final String roleId) {
-        if (roles == null) {
-            roles = new HashSet<>();
-        }
-        roles.add(roleId);
-        return this;
-    }
-    
-    @CheckReturnValue
-    @Nonnull
-    public MemberData removeRole(@Nonnull final Role role) {
-        if (roles != null) {
-            roles.remove(role.id());
-        }
-        return this;
-    }
-    
-    @CheckReturnValue
-    @Nonnull
-    public MemberData removeRole(@Nonnull final String roleId) {
-        if (roles != null) {
-            roles.remove(roleId);
-        }
-        return this;
-    }
-    
     @CheckReturnValue
     @Nonnull
     public static MemberData of(@Nonnull final Member member) {
@@ -118,25 +74,69 @@ public class MemberData {
                 .nickname(member.nick());
     }
     
+    @Nonnull
+    @CheckReturnValue
+    public Collection<String> roles() {
+        return ImmutableList.copyOf(roles);
+    }
+    
+    @CheckReturnValue
+    @Nonnull
+    public MemberData addRole(@Nonnull final Role role) {
+        if(roles == null) {
+            roles = new HashSet<>();
+        }
+        roles.add(role.id());
+        return this;
+    }
+    
+    @CheckReturnValue
+    @Nonnull
+    public MemberData addRole(@Nonnull final String roleId) {
+        if(roles == null) {
+            roles = new HashSet<>();
+        }
+        roles.add(roleId);
+        return this;
+    }
+    
+    @CheckReturnValue
+    @Nonnull
+    public MemberData removeRole(@Nonnull final Role role) {
+        if(roles != null) {
+            roles.remove(role.id());
+        }
+        return this;
+    }
+    
+    @CheckReturnValue
+    @Nonnull
+    public MemberData removeRole(@Nonnull final String roleId) {
+        if(roles != null) {
+            roles.remove(roleId);
+        }
+        return this;
+    }
+    
     @CheckReturnValue
     @Nonnull
     public JsonObject toJson() {
         final JsonObject object = new JsonObject();
-        if (roles != null) {
+        if(roles != null) {
             final JsonArray array = new JsonArray();
             roles.forEach(array::add);
             object.put("roles", array);
         }
-        if (nickname != null) {
+        if(nickname != null) {
             object.put("nick", nickname);
         }
-        if (mute != null) {
+        if(mute != null) {
             object.put("mute", mute);
         }
-        if (deaf != null) {
+        if(deaf != null) {
             object.put("deaf", deaf);
         }
-        if (channelId != null) {
+        if(channelId != null) {
             object.put("channel_id", channelId);
         }
         return object;

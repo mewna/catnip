@@ -49,12 +49,6 @@ import java.util.Set;
 @SuppressWarnings("unused")
 public interface Presence {
     @Nonnull
-    OnlineStatus status();
-    
-    @Nullable
-    Activity activity();
-    
-    @Nonnull
     @CheckReturnValue
     static Presence of(@Nonnull final OnlineStatus status, @Nullable final Activity activity) {
         return PresenceImpl.builder()
@@ -69,12 +63,19 @@ public interface Presence {
         return of(status, null);
     }
     
+    @Nonnull
+    OnlineStatus status();
+    
+    @Nullable
+    Activity activity();
+    
     @Accessors(fluent = true, chain = true)
     enum OnlineStatus {
         ONLINE,
         IDLE,
         DND,
-        OFFLINE,;
+        OFFLINE,
+        ;
         
         @Nonnull
         public static OnlineStatus fromString(@Nonnull final String status) {
@@ -109,7 +110,8 @@ public interface Presence {
         PLAYING(0),
         STREAMING(1),
         LISTENING(2),
-        WATCHING(3),;
+        WATCHING(3),
+        ;
         @Getter
         private final int id;
         
@@ -137,7 +139,8 @@ public interface Presence {
         SPECTATE(1 << 2),
         JOIN_REQUEST(1 << 3),
         SYNC(1 << 4),
-        PLAY(1 << 5),;
+        PLAY(1 << 5),
+        ;
         
         private final int bits;
         
@@ -195,6 +198,28 @@ public interface Presence {
     
     interface Activity {
         @Nonnull
+        @CheckReturnValue
+        static Activity of(@Nonnull final String name, @Nonnull final ActivityType type, @Nullable final String url) {
+            if(url == null && type == ActivityType.STREAMING) {
+                throw new IllegalArgumentException("A valid twitch.tv URL must be specified when the ActivityType == STREAMING!");
+            }
+            if(url != null && type != ActivityType.STREAMING) {
+                throw new IllegalArgumentException("You can only specify an URL when the ActivityType == STREAMING!");
+            }
+            return ActivityImpl.builder()
+                    .name(name)
+                    .type(type)
+                    .url(url)
+                    .build();
+        }
+        
+        @Nonnull
+        @CheckReturnValue
+        static Activity of(@Nonnull final String name, @Nonnull final ActivityType type) {
+            return of(name, type, null);
+        }
+        
+        @Nonnull
         String name();
         
         @Nonnull
@@ -228,27 +253,5 @@ public interface Presence {
         
         @Nullable
         Set<ActivityFlag> flags();
-        
-        @Nonnull
-        @CheckReturnValue
-        static Activity of(@Nonnull final String name, @Nonnull final ActivityType type, @Nullable final String url) {
-            if (url == null && type == ActivityType.STREAMING) {
-                throw new IllegalArgumentException("A valid twitch.tv URL must be specified when the ActivityType == STREAMING!");
-            }
-            if (url != null && type != ActivityType.STREAMING) {
-                throw new IllegalArgumentException("You can only specify an URL when the ActivityType == STREAMING!");
-            }
-            return ActivityImpl.builder()
-                    .name(name)
-                    .type(type)
-                    .url(url)
-                    .build();
-        }
-        
-        @Nonnull
-        @CheckReturnValue
-        static Activity of(@Nonnull final String name, @Nonnull final ActivityType type) {
-            return of(name, type, null);
-        }
     }
 }

@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.entity.guild.audit;
 
-import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.user.User;
 

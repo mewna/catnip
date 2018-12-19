@@ -70,7 +70,7 @@ public interface PermissionOverride extends Snowflake {
         
         @Getter
         private final String key;
-    
+        
         OverrideType(final String key) {
             this.key = key;
         }

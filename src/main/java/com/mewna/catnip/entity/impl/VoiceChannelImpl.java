@@ -31,8 +31,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.guild.PermissionOverride;
 import com.mewna.catnip.entity.channel.VoiceChannel;
+import com.mewna.catnip.entity.guild.PermissionOverride;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -74,7 +74,7 @@ public class VoiceChannelImpl implements VoiceChannel, RequiresCatnip {
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof VoiceChannel && ((VoiceChannel)obj).id().equals(id);
+        return obj instanceof VoiceChannel && ((VoiceChannel) obj).id().equals(id);
     }
     
     @Override

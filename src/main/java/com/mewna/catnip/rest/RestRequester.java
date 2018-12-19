@@ -303,7 +303,7 @@ public class RestRequester {
                 handleResponse(r, bucket, -1, "", null, null,
                         false, e);
             }
-    
+            
             @Override
             public void onResponse(@Nonnull final Call call, @Nonnull final Response resp) throws IOException {
                 //ensure we close it no matter what
@@ -317,7 +317,7 @@ public class RestRequester {
                         });
                     } else {
                         final byte[] bodyBytes = response.body().bytes();
-        
+                        
                         final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
                         response.headers().toMultimap().forEach(headers::add);
                         context.runOnContext(__ -> {

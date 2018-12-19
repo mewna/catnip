@@ -54,7 +54,7 @@ public abstract class ArrayOfObjectPaginator<T, P extends ArrayOfObjectPaginator
                 throw new IllegalArgumentException("Expected all values to be JsonObjects, but found " +
                         (object == null ? "null" : object.getClass()));
             }
-            state.update(mapper.apply((JsonObject)object));
+            state.update(mapper.apply((JsonObject) object));
             if(state.done()) {
                 return;
             }

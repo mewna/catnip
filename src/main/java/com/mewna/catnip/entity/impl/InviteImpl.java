@@ -78,7 +78,7 @@ public class InviteImpl implements Invite, RequiresCatnip {
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Invite && ((Invite)obj).code().equals(code);
+        return obj instanceof Invite && ((Invite) obj).code().equals(code);
     }
     
     @Override
@@ -99,35 +99,35 @@ public class InviteImpl implements Invite, RequiresCatnip {
         private String username;
         private String discriminator;
         private String avatar;
-    
+        
         @Override
         public void catnip(@Nonnull final Catnip catnip) {
             this.catnip = catnip;
         }
-    
+        
         @Override
         public boolean animatedAvatar() {
             return avatar != null && avatar.startsWith("a_");
         }
-    
+        
         @Nonnull
         @Override
         public String defaultAvatarUrl() {
             return CDNFormat.defaultAvatarUrl(discriminator);
         }
-    
+        
         @Nullable
         @Override
         public String avatarUrl(@Nonnull final ImageOptions options) {
             return CDNFormat.avatarUrl(id, avatar, options);
         }
-    
+        
         @Nullable
         @Override
         public String avatarUrl() {
             return avatarUrl(defaultOptions());
         }
-    
+        
         @Nonnull
         @Override
         public String effectiveAvatarUrl(@Nonnull final ImageOptions options) {
@@ -136,27 +136,27 @@ public class InviteImpl implements Invite, RequiresCatnip {
                     "Avatar url is null but avatar hash is present (??)"
             );
         }
-    
+        
         @Nonnull
         @Override
         public String effectiveAvatarUrl() {
             return effectiveAvatarUrl(defaultOptions());
         }
-    
+        
         private ImageOptions defaultOptions() {
             return new ImageOptions().type(animatedAvatar() ? ImageType.GIF : null);
         }
-    
+        
         @Override
         public int hashCode() {
             return id.hashCode();
         }
-    
+        
         @Override
         public boolean equals(final Object obj) {
-            return obj instanceof Inviter && ((Inviter)obj).id().equals(id);
+            return obj instanceof Inviter && ((Inviter) obj).id().equals(id);
         }
-    
+        
         @Override
         public String toString() {
             return String.format("Inviter (%s)", username);
@@ -178,7 +178,7 @@ public class InviteImpl implements Invite, RequiresCatnip {
         private String splash;
         private List<String> features;
         private VerificationLevel verificationLevel;
-    
+        
         @Override
         public void catnip(@Nonnull final Catnip catnip) {
             this.catnip = catnip;
@@ -189,23 +189,23 @@ public class InviteImpl implements Invite, RequiresCatnip {
         public String iconUrl(@Nonnull final ImageOptions options) {
             return CDNFormat.iconUrl(id, icon, options);
         }
-    
+        
         @Nullable
         @Override
         public String splashUrl(@Nonnull final ImageOptions options) {
             return CDNFormat.splashUrl(id, splash, options);
         }
-    
+        
         @Override
         public int hashCode() {
             return id.hashCode();
         }
-    
+        
         @Override
         public boolean equals(final Object obj) {
-            return obj instanceof InviteGuild && ((InviteGuild)obj).id().equals(id);
+            return obj instanceof InviteGuild && ((InviteGuild) obj).id().equals(id);
         }
-    
+        
         @Override
         public String toString() {
             return String.format("InviteGuild (%s)", name);
@@ -237,7 +237,7 @@ public class InviteImpl implements Invite, RequiresCatnip {
         
         @Override
         public boolean equals(final Object obj) {
-            return obj instanceof InviteChannel && ((InviteChannel)obj).id().equals(id);
+            return obj instanceof InviteChannel && ((InviteChannel) obj).id().equals(id);
         }
         
         @Override
