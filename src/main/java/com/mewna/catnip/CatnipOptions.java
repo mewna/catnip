@@ -31,7 +31,10 @@ import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.MemoryEntityCache;
+import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.user.Presence;
+import com.mewna.catnip.extension.Extension;
+import com.mewna.catnip.shard.DiscordEvent.Raw;
 import com.mewna.catnip.util.logging.DefaultLogAdapter;
 import com.mewna.catnip.util.logging.LogAdapter;
 import com.mewna.catnip.shard.ratelimit.MemoryRatelimiter;
@@ -65,31 +68,90 @@ import java.util.Set;
 @RequiredArgsConstructor
 @SuppressWarnings("OverlyCoupledClass")
 public final class CatnipOptions {
+    /**
+     * The token for catnip to use.
+     */
     @Nonnull
     private final String token;
+    /**
+     * The shard manager for catnip to use. Defaults to {@link DefaultShardManager}.
+     */
     @Nonnull
     private ShardManager shardManager = new DefaultShardManager();
+    /**
+     * The session manager for catnip to use. Defaults to {@link DefaultSessionManager}
+     */
     @Nonnull
     private SessionManager sessionManager = new DefaultSessionManager();
+    /**
+     * The gateway ratelimiter for catnip to use. Defaults to {@link MemoryRatelimiter}
+     */
     @Nonnull
     private Ratelimiter gatewayRatelimiter = new MemoryRatelimiter();
+    /**
+     * The log adapter for catnip to use. Defaults to {@link DefaultLogAdapter},
+     * which uses SLF4j.
+     */
     @Nonnull
     private LogAdapter logAdapter = new DefaultLogAdapter();
+    /**
+     * The event buffer for catnip to use. Defaults to {@link CachingBuffer}.
+     * Do NOT change this if you don't know what you're doing!
+     */
     @Nonnull
     private EventBuffer eventBuffer = new CachingBuffer();
+    /**
+     * The cache worker for catnip to use. Defaults to {@link MemoryEntityCache}.
+     * Change this if you want to use your own {@link EntityCacheWorker}.
+     */
     @Nonnull
     private EntityCacheWorker cacheWorker = new MemoryEntityCache();
+    /**
+     * The set of cache flags for catnip to obey. Used to prevent caching certain
+     * things.
+     */
     @Nonnull
     private Set<CacheFlag> cacheFlags = EnumSet.noneOf(CacheFlag.class);
+    /**
+     * The REST bucket backend for catnip to use. Defaults to {@link MemoryBucketBackend}.
+     */
     @Nonnull
     private BucketBackend restBucketBackend = new MemoryBucketBackend();
+    /**
+     * Whether or not catnip should chunk members. Do not disable this if you
+     * don't know what it does.
+     */
     private boolean chunkMembers = true;
+    /**
+     * Whether or not catnip should emit full event objects. Do not disable
+     * this if you don't know what it does. Mainly only useful for ex. an
+     * {@link Extension} that does things with the raw gateway payloads, like
+     * sending them to a message queue.
+     */
     private boolean emitEventObjects = true;
+    /**
+     * Whether or not catnip should enforce permissions for REST actions. Note
+     * that this will NOT enforce permissions if you directly call methods via
+     * {@link Catnip#rest()}, but will enforce them if you call them from
+     * entity objects (ex. doing {@link Guild#delete()}).
+     */
     private boolean enforcePermissions = true;
+    /**
+     * The presence that catnip should set for shards as they log in. This is
+     * for setting whether your bot appears online/DND/away/offline, as well as
+     * the "playing XXX" status.
+     */
     @Nullable
     private Presence presence;
+    /**
+     * The events that catnip should not emit. You can use {@link Raw} to get
+     * the event names.
+     */
     @Nonnull
     private Set<String> disabledEvents = ImmutableSet.of();
+    /**
+     * The OkHTTP client to be used for REST requests.
+     */
     @Nonnull
     private OkHttpClient restHttpClient = new OkHttpClient();
 }
