@@ -263,6 +263,7 @@ public interface Catnip {
      * do the requests before the cache has been populated, the check will assume
      * all permissions are available.
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean enforcePermissions();
     
     /**
