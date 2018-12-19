@@ -25,9 +25,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.internal.ratelimit;
+package com.mewna.catnip.shard.ratelimit;
 
-import com.mewna.catnip.internal.ratelimit.MemoryRatelimiter.Bucket;
+import com.mewna.catnip.shard.ratelimit.MemoryRatelimiter.Bucket;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.Test;
 
