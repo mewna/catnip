@@ -34,19 +34,19 @@ import com.mewna.catnip.cache.MemoryEntityCache;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.extension.Extension;
-import com.mewna.catnip.shard.DiscordEvent.Raw;
-import com.mewna.catnip.util.logging.DefaultLogAdapter;
-import com.mewna.catnip.util.logging.LogAdapter;
-import com.mewna.catnip.shard.ratelimit.MemoryRatelimiter;
-import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.rest.bucket.BucketBackend;
 import com.mewna.catnip.rest.bucket.MemoryBucketBackend;
+import com.mewna.catnip.shard.DiscordEvent.Raw;
 import com.mewna.catnip.shard.event.CachingBuffer;
 import com.mewna.catnip.shard.event.EventBuffer;
 import com.mewna.catnip.shard.manager.DefaultShardManager;
 import com.mewna.catnip.shard.manager.ShardManager;
+import com.mewna.catnip.shard.ratelimit.MemoryRatelimiter;
+import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.DefaultSessionManager;
 import com.mewna.catnip.shard.session.SessionManager;
+import com.mewna.catnip.util.logging.DefaultLogAdapter;
+import com.mewna.catnip.util.logging.LogAdapter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -67,7 +67,7 @@ import java.util.Set;
 @Accessors(fluent = true, chain = true)
 @RequiredArgsConstructor
 @SuppressWarnings("OverlyCoupledClass")
-public final class CatnipOptions {
+public final class CatnipOptions implements Cloneable {
     /**
      * The token for catnip to use.
      */
@@ -154,4 +154,18 @@ public final class CatnipOptions {
      */
     @Nonnull
     private OkHttpClient restHttpClient = new OkHttpClient();
+    /**
+     * Whether or not extensions overriding options should be logged. Defaults
+     * to {@code true}.
+     */
+    private boolean logExtensionOverrides = true;
+    
+    @Override
+    public Object clone() {
+        try {
+            return super.clone();
+        } catch(final CloneNotSupportedException e) {
+            throw new IllegalStateException("Couldn't clone!", e);
+        }
+    }
 }

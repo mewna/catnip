@@ -28,6 +28,7 @@
 package com.mewna.catnip.extension;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.extension.hook.CatnipHook;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
@@ -35,6 +36,8 @@ import io.vertx.core.Verticle;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * <strong>If you are unsure if you need to implement this interface, you
@@ -129,6 +132,20 @@ public interface Extension extends Verticle {
      * @return The extension instance.
      */
     Extension unregisterHook(@Nonnull CatnipHook hook);
+    
+    /**
+     * Inject options into the catnip instance. You cannot override {@code token}
+     * or {@code logExtensionOverrides} from this.
+     *
+     * @param optionsPatcher A function that makes changes to the provided
+     *                        default options object.
+     *
+     * @return The extension instance.
+     */
+    default Extension injectOptions(@Nonnull final Function<CatnipOptions, CatnipOptions> optionsPatcher) {
+        catnip().injectOptions(this, optionsPatcher);
+        return this;
+    }
     
     String deploymentID();
 }

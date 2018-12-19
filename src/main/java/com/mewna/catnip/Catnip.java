@@ -38,15 +38,15 @@ import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.internal.CatnipImpl;
-import com.mewna.catnip.util.logging.LogAdapter;
-import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.shard.EventType;
 import com.mewna.catnip.shard.event.EventBuffer;
 import com.mewna.catnip.shard.manager.ShardManager;
+import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.SessionManager;
+import com.mewna.catnip.util.logging.LogAdapter;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
@@ -57,6 +57,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * @author amy
@@ -295,6 +296,23 @@ public interface Catnip {
      */
     @Nonnull
     Catnip loadExtension(@Nonnull Extension extension);
+    
+    /**
+     * Inject options into this catnip instance from the given extension. This
+     * allows extensions to do things like automatically register a new cache
+     * worker without having to tell the end-user to specify options. By
+     * default, options that get injected will be logged.
+     *
+     * @param options   The options to inject.
+     *
+     * @param extension The extension injecting the options.
+     * @param optionsPatcher
+     * @return Itself.
+     *
+     * @throws IllegalArgumentException When the given extension isn't loaded.
+     */
+    @Nonnull
+    Catnip injectOptions(@Nonnull Extension extension, @Nonnull Function<CatnipOptions, CatnipOptions> optionsPatcher);
     
     /**
      * @return The currently-logged-in user. May be {@code null} if no shards
