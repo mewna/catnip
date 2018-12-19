@@ -43,74 +43,8 @@ import static io.vertx.core.http.HttpMethod.*;
  */
 @SuppressWarnings({"StaticVariableOfConcreteClass", "WeakerAccess"})
 public final class Routes {
-    private Routes() {
-    }
-    
-    @Accessors(fluent = true)
-    @SuppressWarnings({"WeakerAccess", "unused"})
-    public static final class Route {
-        @Getter
-        private HttpMethod method;
-        @Getter
-        private String baseRoute;
-        @Getter
-        private String majorParam;
-        
-        public Route() {
-        }
-        
-        public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute) {
-            this(method, baseRoute, null);
-        }
-        
-        public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute, @Nullable final String majorParam) {
-            this.method = method;
-            this.baseRoute = baseRoute;
-            this.majorParam = majorParam;
-        }
-        
-        @Nonnull
-        @CheckReturnValue
-        @SuppressWarnings("TypeMayBeWeakened")
-        public Route withMajorParam(@Nonnull final String value) {
-            if(majorParam == null) {
-                throw new IllegalStateException("This route takes no major params!");
-            }
-            return new Route(method, baseRoute.replace('{' + majorParam + '}', value));
-        }
-    
-        @Nonnull
-        @CheckReturnValue
-        @SuppressWarnings("TypeMayBeWeakened")
-        Route compile(@Nonnull final String param, @Nonnull final String value) {
-            if(param.equalsIgnoreCase(majorParam)) {
-                return this;
-            }
-            return new Route(method, baseRoute.replace('{' + param + '}', value));
-        }
-    
-        @Nonnull
-        @CheckReturnValue
-        Route copy() {
-            return new Route(method, baseRoute, majorParam);
-        }
-        
-        public Route withQueryString(final String qs) {
-            return new Route(method, baseRoute + qs, majorParam);
-        }
-    
-        @Override
-        public boolean equals(final Object o) {
-            if(!(o instanceof Route)) {
-                return false;
-            }
-            return baseRoute.equalsIgnoreCase(((Route) o).baseRoute);
-        }
-    }
-
     // @formatter:off
     public static final Route GET_GATEWAY_BOT                     = new Route(GET,    "/gateway/bot");
-
     public static final Route DELETE_CHANNEL                      = new Route(DELETE, "/channels/{channel.id}", "channel.id");
     public static final Route GET_CHANNEL                         = new Route(GET,    "/channels/{channel.id}", "channel.id");
     public static final Route MODIFY_CHANNEL                      = new Route(PATCH,  "/channels/{channel.id}", "channel.id");
@@ -135,7 +69,6 @@ public final class Routes {
     public static final Route TRIGGER_TYPING_INDICATOR            = new Route(POST,   "/channels/{channel.id}/typing", "channel.id");
     public static final Route GET_CHANNEL_WEBHOOKS                = new Route(GET,    "/channels/{channel.id}/webhooks", "channel.id");
     public static final Route CREATE_WEBHOOK                      = new Route(POST,   "/channels/{channel.id}/webhooks", "channel.id");
-
     public static final Route CREATE_GUILD                        = new Route(POST,   "/guilds");
     public static final Route DELETE_GUILD                        = new Route(DELETE, "/guilds/{guild.id}", "guild.id");
     public static final Route GET_GUILD                           = new Route(GET,    "/guilds/{guild.id}", "guild.id");
@@ -178,17 +111,13 @@ public final class Routes {
     public static final Route DELETE_GUILD_ROLE                   = new Route(DELETE, "/guilds/{guild.id}/roles/{role.id}", "guild.id");
     public static final Route MODIFY_GUILD_ROLE                   = new Route(PATCH,  "/guilds/{guild.id}/roles/{role.id}", "guild.id");
     public static final Route GET_GUILD_WEBHOOKS                  = new Route(GET,    "/guilds/{guild.id}/webhooks", "guild.id");
-    
     public static final Route GET_WEBHOOK                         = new Route(GET,    "/webhooks/{webhook.id}", "webhook.id");
     public static final Route MODIFY_WEBHOOK                      = new Route(PATCH,  "/webhooks/{webhook.id}", "webhook.id");
     public static final Route DELETE_WEBHOOK                      = new Route(DELETE, "/webhooks/{webhook.id}", "webhook.id");
-    
     public static final Route EXECUTE_WEBHOOK                     = new Route(POST,   "/webhooks/{webhook.id}/{webhook.token}", "webhook.id");
-    
     public static final Route DELETE_INVITE                       = new Route(DELETE, "/invites/{invite.code}");
     public static final Route GET_INVITE                          = new Route(GET,    "/invites/{invite.code}");
     public static final Route ACCEPT_INVITE                       = new Route(POST,   "/invites/{invite.code}");
-
     public static final Route GET_CURRENT_USER                    = new Route(GET,    "/users/@me");
     public static final Route MODIFY_CURRENT_USER                 = new Route(PATCH,  "/users/@me");
     public static final Route GET_USER_DMS                        = new Route(GET,    "/users/@me/channels");
@@ -196,8 +125,72 @@ public final class Routes {
     public static final Route GET_CURRENT_USER_GUILDS             = new Route(GET,    "/users/@me/guilds");
     public static final Route LEAVE_GUILD                         = new Route(DELETE, "/users/@me/guilds/{guild.id}");
     public static final Route GET_USER                            = new Route(GET,    "/users/{user.id}");
-
     public static final Route GET_CURRENT_APPLICATION_INFORMATION = new Route(GET,    "/oauth2/applications/@me");
     public static final Route LIST_VOICE_REGIONS                  = new Route(GET,    "/voice/regions");
+
+    private Routes() {
+    }
+
+    @Accessors(fluent = true)
+    @SuppressWarnings({"WeakerAccess", "unused"})
+    public static final class Route {
+        @Getter
+        private HttpMethod method;
+        @Getter
+        private String baseRoute;
+        @Getter
+        private String majorParam;
+        
+        public Route() {
+        }
+        
+        public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute) {
+            this(method, baseRoute, null);
+        }
+        
+        public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute, @Nullable final String majorParam) {
+            this.method = method;
+            this.baseRoute = baseRoute;
+            this.majorParam = majorParam;
+        }
+        
+        @Nonnull
+        @CheckReturnValue
+        @SuppressWarnings("TypeMayBeWeakened")
+        public Route withMajorParam(@Nonnull final String value) {
+            if(majorParam == null) {
+                throw new IllegalStateException("This route takes no major params!");
+            }
+            return new Route(method, baseRoute.replace('{' + majorParam + '}', value));
+        }
+        
+        @Nonnull
+        @CheckReturnValue
+        @SuppressWarnings("TypeMayBeWeakened")
+        Route compile(@Nonnull final String param, @Nonnull final String value) {
+            if(param.equalsIgnoreCase(majorParam)) {
+                return this;
+            }
+            return new Route(method, baseRoute.replace('{' + param + '}', value));
+        }
+        
+        @Nonnull
+        @CheckReturnValue
+        Route copy() {
+            return new Route(method, baseRoute, majorParam);
+        }
+        
+        public Route withQueryString(final String qs) {
+            return new Route(method, baseRoute + qs, majorParam);
+        }
+        
+        @Override
+        public boolean equals(final Object o) {
+            if(!(o instanceof Route)) {
+                return false;
+            }
+            return baseRoute.equalsIgnoreCase(((Route) o).baseRoute);
+        }
+    }
     // @formatter:on
 }

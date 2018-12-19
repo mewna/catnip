@@ -40,10 +40,16 @@ import java.util.Collection;
  * @since 12/15/18
  */
 public interface NamedCacheView<T> extends CacheView<T> {
+    @Nonnull
+    @SuppressWarnings("unchecked")
+    static <T> NamedCacheView<T> empty() {
+        return (NamedCacheView<T>) EmptyNamedCacheView.INSTANCE;
+    }
+    
     /**
      * Finds all entities with a name equal to the provided value.
      *
-     * @param name Name to search for.
+     * @param name       Name to search for.
      * @param ignoreCase Ignore casing differences between the entity
      *                   names and the provided name.
      *
@@ -72,7 +78,7 @@ public interface NamedCacheView<T> extends CacheView<T> {
     /**
      * Finds all entities whose name contains the provided value.
      *
-     * @param name Name to search for.
+     * @param name       Name to search for.
      * @param ignoreCase Ignore casing differences between the entity
      *                   names and the provided name.
      *
@@ -101,7 +107,7 @@ public interface NamedCacheView<T> extends CacheView<T> {
     /**
      * Finds all entities whose name starts with the provided value.
      *
-     * @param name Name to search for.
+     * @param name       Name to search for.
      * @param ignoreCase Ignore casing differences between the entity
      *                   names and the provided name.
      *
@@ -130,7 +136,7 @@ public interface NamedCacheView<T> extends CacheView<T> {
     /**
      * Finds all entities whose name ends with the provided value.
      *
-     * @param name Name to search for.
+     * @param name       Name to search for.
      * @param ignoreCase Ignore casing differences between the entity
      *                   names and the provided name.
      *
@@ -154,11 +160,5 @@ public interface NamedCacheView<T> extends CacheView<T> {
     @Nonnull
     default Collection<T> findByNameEndsWith(@Nonnull final String name) {
         return findByNameEndsWith(name, false);
-    }
-    
-    @Nonnull
-    @SuppressWarnings("unchecked")
-    static <T> NamedCacheView<T> empty() {
-        return (NamedCacheView<T>)EmptyNamedCacheView.INSTANCE;
     }
 }

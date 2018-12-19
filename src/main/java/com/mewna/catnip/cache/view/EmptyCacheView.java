@@ -39,9 +39,8 @@ import java.util.function.Supplier;
  * Always empty {@link CacheView cache view}.
  *
  * @author natanbc
- * @since 12/15/18
- *
  * @see CacheView#empty()
+ * @since 12/15/18
  */
 public class EmptyCacheView<T> implements CacheView<T> {
     public static final CacheView<?> INSTANCE = new EmptyCacheView<>();

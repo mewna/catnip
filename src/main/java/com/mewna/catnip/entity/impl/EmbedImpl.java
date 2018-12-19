@@ -68,7 +68,7 @@ public class EmbedImpl implements Embed, Timestamped {
     @Nonnull
     @SuppressWarnings("unchecked")
     public List<Field> fields() {
-        return (List<Field>)fields;
+        return (List<Field>) fields;
     }
     
     @Nullable

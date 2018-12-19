@@ -49,6 +49,15 @@ import java.util.stream.StreamSupport;
  */
 public interface CacheView<T> extends Iterable<T> {
     /**
+     * @return An always empty cache view. Cannot be modified.
+     */
+    @Nonnull
+    @SuppressWarnings("unchecked")
+    static <T> CacheView<T> empty() {
+        return (CacheView<T>) EmptyCacheView.INSTANCE;
+    }
+    
+    /**
      * @return The size of this cache.
      */
     @Nonnegative
@@ -95,12 +104,12 @@ public interface CacheView<T> extends Iterable<T> {
      * Returns all elements in this cache that matches the given filter. There are no order
      * guarantees if multiple elements match.
      *
-     * @param filter Filter to find matching elements.
+     * @param filter   Filter to find matching elements.
      * @param supplier Supplier for the collection to add the elements to. The returned
      *                 collection <b>must</b> be mutable.
      *
      * @return The collection returned by {@code supplier}, after adding the matching
-     *         elements. May be empty.
+     * elements. May be empty.
      */
     @Nonnull
     <C extends Collection<T>> C find(@Nonnull Predicate<T> filter, @Nonnull Supplier<C> supplier);
@@ -135,7 +144,7 @@ public interface CacheView<T> extends Iterable<T> {
      *                 collection <b>must</b> be mutable.
      *
      * @return The collection returned by {@code supplier}, after adding the cached
-     *         elements. May be empty.
+     * elements. May be empty.
      *
      * @see #values()
      * @see #snapshot()
@@ -151,14 +160,5 @@ public interface CacheView<T> extends Iterable<T> {
     @Nonnull
     default Stream<T> stream() {
         return StreamSupport.stream(spliterator(), false);
-    }
-    
-    /**
-     * @return An always empty cache view. Cannot be modified.
-     */
-    @Nonnull
-    @SuppressWarnings("unchecked")
-    static <T> CacheView<T> empty() {
-        return (CacheView<T>)EmptyCacheView.INSTANCE;
     }
 }

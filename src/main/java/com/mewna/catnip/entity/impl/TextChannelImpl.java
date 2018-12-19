@@ -30,8 +30,8 @@ package com.mewna.catnip.entity.impl;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.guild.PermissionOverride;
 import com.mewna.catnip.entity.channel.TextChannel;
+import com.mewna.catnip.entity.guild.PermissionOverride;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -73,7 +73,7 @@ public class TextChannelImpl implements TextChannel, RequiresCatnip {
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof TextChannel && ((TextChannel)obj).id().equals(id);
+        return obj instanceof TextChannel && ((TextChannel) obj).id().equals(id);
     }
     
     @Override

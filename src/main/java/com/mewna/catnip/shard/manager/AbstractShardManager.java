@@ -56,11 +56,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public abstract class AbstractShardManager implements ShardManager {
     @Getter
+    private final List<ShardCondition> conditions = new CopyOnWriteArrayList<>();
+    @Getter
     @Setter
     private Catnip catnip;
-    
-    @Getter
-    private final List<ShardCondition> conditions = new CopyOnWriteArrayList<>();
     
     @SuppressWarnings("WeakerAccess")
     protected void deployShard(@Nonnegative final int id, @Nonnegative final int count) {

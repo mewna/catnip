@@ -68,7 +68,7 @@ public class PermissionOverrideImpl implements PermissionOverride, RequiresCatni
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof PermissionOverride && ((PermissionOverride)obj).id().equals(id);
+        return obj instanceof PermissionOverride && ((PermissionOverride) obj).id().equals(id);
     }
     
     @Override

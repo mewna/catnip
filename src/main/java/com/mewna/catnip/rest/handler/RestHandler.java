@@ -80,7 +80,7 @@ abstract class RestHandler {
     
     @SuppressWarnings("unchecked")
     static <T> T uncheckedCast(@Nullable final Object object) {
-        return (T)object;
+        return (T) object;
     }
     
     // Copied from JDA:

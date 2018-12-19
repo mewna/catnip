@@ -34,7 +34,10 @@ import com.mewna.catnip.entity.guild.*;
 import com.mewna.catnip.entity.message.*;
 import com.mewna.catnip.entity.misc.Ready;
 import com.mewna.catnip.entity.misc.Resumed;
-import com.mewna.catnip.entity.user.*;
+import com.mewna.catnip.entity.user.PresenceUpdate;
+import com.mewna.catnip.entity.user.TypingUser;
+import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.entity.voice.VoiceServerUpdate;
 
 import static com.mewna.catnip.shard.EventTypeImpl.event;

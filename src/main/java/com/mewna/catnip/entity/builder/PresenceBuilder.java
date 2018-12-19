@@ -57,7 +57,7 @@ public class PresenceBuilder {
     public PresenceBuilder(final Presence presence) {
         status = presence.status();
         final Activity activity = presence.activity();
-        if (activity != null) {
+        if(activity != null) {
             type = activity.type();
             name = activity.name();
             url = activity.url();
@@ -67,10 +67,10 @@ public class PresenceBuilder {
     public Presence build() {
         final Activity activity = name != null && type != null
                 ? ActivityImpl.builder()
-                    .name(name)
-                    .type(type)
-                    .url(url)
-                    .build()
+                .name(name)
+                .type(type)
+                .url(url)
+                .build()
                 : null;
         return PresenceImpl.builder()
                 .status(status)

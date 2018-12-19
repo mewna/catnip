@@ -119,7 +119,7 @@ public class UserImpl implements User, RequiresCatnip {
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof User && ((User)obj).id().equals(id);
+        return obj instanceof User && ((User) obj).id().equals(id);
     }
     
     @Override

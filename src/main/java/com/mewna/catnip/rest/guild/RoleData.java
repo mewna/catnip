@@ -70,6 +70,18 @@ public class RoleData implements JsonConvertible {
     }
     
     @Nonnull
+    @CheckReturnValue
+    public static RoleData of(@Nonnull final Role role) {
+        return create(-1)
+                .permissions(role.permissions())
+                .name(role.name())
+                .color(role.color())
+                .position(role.position())
+                .mentionable(role.mentionable())
+                .hoisted(role.hoist());
+    }
+    
+    @Nonnull
     public RoleData permissions(@Nullable final Long permissions) {
         this.permissions = permissions;
         return this;
@@ -94,7 +106,7 @@ public class RoleData implements JsonConvertible {
     public RoleData addPermissions(@Nonnull final Iterable<Permission> permissions) {
         //1101 | 0010
         //1111
-        return updatePermissions(v->v | Permission.from(permissions));
+        return updatePermissions(v -> v | Permission.from(permissions));
     }
     
     @Nonnull
@@ -107,24 +119,12 @@ public class RoleData implements JsonConvertible {
         //1111 & ~0010
         //1111 & 1101
         //1101
-        return updatePermissions(v->v & ~Permission.from(permissions));
+        return updatePermissions(v -> v & ~Permission.from(permissions));
     }
     
     @Nonnull
     public RoleData updatePermissions(@Nonnull final LongUnaryOperator updater) {
         return permissions(updater.applyAsLong(permissions == null ? 0 : permissions));
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    public static RoleData of(@Nonnull final Role role) {
-        return create(-1)
-                .permissions(role.permissions())
-                .name(role.name())
-                .color(role.color())
-                .position(role.position())
-                .mentionable(role.mentionable())
-                .hoisted(role.hoist());
     }
     
     @Override
@@ -175,27 +175,27 @@ public class RoleData implements JsonConvertible {
         PublicRoleData() {
             super(0);
         }
-    
+        
         @Override
         public RoleData name(final String name) {
             throw new IllegalStateException("Cannot change name of public role");
         }
-    
+        
         @Override
         public RoleData color(final Integer color) {
             throw new IllegalStateException("Cannot change color of public role");
         }
-    
+        
         @Override
         public RoleData position(final Integer position) {
             throw new IllegalStateException("Cannot change position of public role");
         }
-    
+        
         @Override
         public RoleData mentionable(final Boolean mentionable) {
             throw new IllegalStateException("Cannot change mentionable of public role");
         }
-    
+        
         @Override
         public RoleData hoisted(final Boolean mentionable) {
             throw new IllegalStateException("Cannot change hoisted of public role");

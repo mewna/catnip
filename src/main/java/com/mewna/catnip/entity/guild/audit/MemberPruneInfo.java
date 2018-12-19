@@ -37,7 +37,7 @@ import javax.annotation.CheckReturnValue;
 public interface MemberPruneInfo extends OptionalEntryInfo {
     @CheckReturnValue
     int deleteMemberDays();
-
+    
     @CheckReturnValue
     int removedMembersCount();
 }

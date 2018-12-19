@@ -150,11 +150,10 @@ public interface Emoji extends Snowflake {
      * <br>If this emoji is {@link CustomEmoji custom}, the following checks,
      * in order, are applied:
      * <ul>
-     *     <li>{@link Emoji#id() id} equality</li>
-     *     <li>{@link Emoji#forMessage() forMessage()} equality</li>
-     *     <li>{@link Emoji#forReaction()} forReaction()} equality</li>
+     * <li>{@link Emoji#id() id} equality</li>
+     * <li>{@link Emoji#forMessage() forMessage()} equality</li>
+     * <li>{@link Emoji#forReaction()} forReaction()} equality</li>
      * </ul>
-     *
      *
      * @param emoji Emoji string to compare against.
      *
@@ -171,7 +170,7 @@ public interface Emoji extends Snowflake {
         
         /**
          * ID of guild that owns this emojis, or null if it has no guild.
-         * <p />
+         * <p/>
          * NOTE: This may be null in the case of a reaction, because the data
          * may not be available to get the id for the emoji!
          *
@@ -200,7 +199,7 @@ public interface Emoji extends Snowflake {
         default String forReaction() {
             return String.format("%s:%s", name(), id());
         }
-    
+        
         @Override
         @CheckReturnValue
         default boolean is(@Nonnull final String emoji) {
@@ -259,7 +258,7 @@ public interface Emoji extends Snowflake {
         default String forReaction() {
             return name();
         }
-    
+        
         @Override
         @CheckReturnValue
         default boolean is(@Nonnull final String emoji) {

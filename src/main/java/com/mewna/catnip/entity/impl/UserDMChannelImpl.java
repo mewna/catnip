@@ -31,8 +31,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.channel.UserDMChannel;
+import com.mewna.catnip.entity.user.User;
 import lombok.*;
 import lombok.experimental.Accessors;
 

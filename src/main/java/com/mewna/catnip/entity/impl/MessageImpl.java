@@ -111,6 +111,21 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
         return reactions;
     }
     
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+    
+    @Override
+    public boolean equals(final Object obj) {
+        return obj instanceof Message && ((Message) obj).id().equals(id);
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("Message (%s)", content);
+    }
+    
     @Getter
     @Setter
     @Builder
@@ -126,7 +141,7 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
         private String proxyUrl;
         private int height;
         private int width;
-    
+        
         @Override
         public void catnip(@Nonnull final Catnip catnip) {
             this.catnip = catnip;
@@ -136,12 +151,12 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
         public int hashCode() {
             return id.hashCode();
         }
-    
+        
         @Override
         public boolean equals(final Object obj) {
-            return obj instanceof Attachment && ((Attachment)obj).id().equals(id);
+            return obj instanceof Attachment && ((Attachment) obj).id().equals(id);
         }
-    
+        
         @Override
         public String toString() {
             return String.format("Attachment (%s)", fileName);
@@ -157,35 +172,20 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
         private int count;
         private boolean self;
         private Emoji emoji;
-    
+        
         @Override
         public int hashCode() {
             return emoji.hashCode();
         }
-    
+        
         @Override
         public boolean equals(final Object obj) {
-            return obj instanceof Reaction && ((Reaction)obj).emoji().equals(emoji);
+            return obj instanceof Reaction && ((Reaction) obj).emoji().equals(emoji);
         }
-    
+        
         @Override
         public String toString() {
             return String.format("Reaction (%d x %s, self = %b)", count, emoji, self);
         }
-    }
-    
-    @Override
-    public int hashCode() {
-        return id.hashCode();
-    }
-    
-    @Override
-    public boolean equals(final Object obj) {
-        return obj instanceof Message && ((Message)obj).id().equals(id);
-    }
-    
-    @Override
-    public String toString() {
-        return String.format("Message (%s)", content);
     }
 }

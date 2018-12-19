@@ -28,13 +28,9 @@
 package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
-import com.mewna.catnip.entity.guild.GuildEmbed;
 import com.mewna.catnip.entity.channel.GuildChannel;
-import com.mewna.catnip.entity.guild.Guild;
+import com.mewna.catnip.entity.guild.*;
 import com.mewna.catnip.entity.guild.Guild.GuildEditFields;
-import com.mewna.catnip.entity.guild.GuildBan;
-import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.guild.audit.ActionType;
 import com.mewna.catnip.entity.guild.audit.AuditLogEntry;
 import com.mewna.catnip.entity.misc.CreatedInvite;
@@ -72,7 +68,7 @@ public class RestGuild extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletionStage<Void> modifyGuildMember(@Nonnull final String guildId, @Nonnull final String memberId,
-                                              @Nonnull final MemberData data) {
+                                                   @Nonnull final MemberData data) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.MODIFY_GUILD_MEMBER.withMajorParam(guildId),
                         ImmutableMap.of("user.id", memberId), data.toJson()))

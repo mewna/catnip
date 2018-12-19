@@ -109,10 +109,10 @@ public class CompositeCacheView<T> implements CacheView<T> {
             public Iterator<Long> iterator() {
                 return CompositeCacheView.this.iterator(c -> c.keys().iterator());
             }
-    
+            
             @Override
             public int size() {
-                return (int)CompositeCacheView.this.size();
+                return (int) CompositeCacheView.this.size();
             }
         });
     }
@@ -126,10 +126,10 @@ public class CompositeCacheView<T> implements CacheView<T> {
             public Iterator<T> iterator() {
                 return CompositeCacheView.this.iterator();
             }
-    
+            
             @Override
             public int size() {
-                return (int)CompositeCacheView.this.size();
+                return (int) CompositeCacheView.this.size();
             }
         });
     }
@@ -137,7 +137,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
     @Nonnull
     @Override
     public Collection<T> snapshot() {
-        return snapshot(() -> new ArrayList<>((int)size()));
+        return snapshot(() -> new ArrayList<>((int) size()));
     }
     
     @Nonnull
@@ -171,7 +171,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
         private JoiningIterator(final Queue<Iterator<T>> queue) {
             this.queue = queue;
         }
-    
+        
         @Override
         public boolean hasNext() {
             while(current == null || !current.hasNext()) {
@@ -182,12 +182,12 @@ public class CompositeCacheView<T> implements CacheView<T> {
             }
             return true;
         }
-    
+        
         @Override
         public T next() {
             return current.next();
         }
-    
+        
         @Override
         public void remove() {
             current.remove();

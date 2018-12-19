@@ -71,7 +71,7 @@ public class GroupDMChannelImpl implements GroupDMChannel, RequiresCatnip {
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof GroupDMChannel && ((GroupDMChannel)obj).id().equals(id);
+        return obj instanceof GroupDMChannel && ((GroupDMChannel) obj).id().equals(id);
     }
     
     @Override

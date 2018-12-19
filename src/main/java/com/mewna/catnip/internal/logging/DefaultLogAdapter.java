@@ -93,7 +93,7 @@ public class DefaultLogAdapter implements LogAdapter {
             }
         }
     }
-
+    
     /**
      * A custom security manager that exposes the getClassContext() information.
      * This is an ugly hack and needs to be replaced with the StackWalker API

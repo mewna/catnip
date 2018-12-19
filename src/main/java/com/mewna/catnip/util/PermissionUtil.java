@@ -43,7 +43,8 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 
 public final class PermissionUtil {
-    private PermissionUtil() {}
+    private PermissionUtil() {
+    }
     
     private static long basePermissions(final Catnip catnip, final Member member) {
         final Guild guild = catnip.cache().guild(member.guildId());

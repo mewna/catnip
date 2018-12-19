@@ -188,7 +188,7 @@ public interface Message extends Snowflake {
     default MessageChannel channel() {
         final String guild = guildId();
         if(guild != null) {
-            return (TextChannel)catnip().cache().channel(guild, channelId());
+            return (TextChannel) catnip().cache().channel(guild, channelId());
         } else {
             return catnip().cache().dmChannel(channelId());
         }
