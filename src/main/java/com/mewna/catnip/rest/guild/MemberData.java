@@ -64,8 +64,8 @@ public class MemberData {
     private Boolean mute;
     private Boolean deaf;
     
-    @CheckReturnValue
     @Nonnull
+    @CheckReturnValue
     public static MemberData of(@Nonnull final Member member) {
         return new MemberData()
                 .roles(member.roleIds())
@@ -80,8 +80,9 @@ public class MemberData {
         return ImmutableList.copyOf(roles);
     }
     
-    @CheckReturnValue
     @Nonnull
+    @CheckReturnValue
+    @SuppressWarnings("TypeMayBeWeakened")
     public MemberData addRole(@Nonnull final Role role) {
         if(roles == null) {
             roles = new HashSet<>();
@@ -90,8 +91,8 @@ public class MemberData {
         return this;
     }
     
-    @CheckReturnValue
     @Nonnull
+    @CheckReturnValue
     public MemberData addRole(@Nonnull final String roleId) {
         if(roles == null) {
             roles = new HashSet<>();
@@ -100,8 +101,9 @@ public class MemberData {
         return this;
     }
     
-    @CheckReturnValue
     @Nonnull
+    @CheckReturnValue
+    @SuppressWarnings("TypeMayBeWeakened")
     public MemberData removeRole(@Nonnull final Role role) {
         if(roles != null) {
             roles.remove(role.id());
@@ -109,8 +111,8 @@ public class MemberData {
         return this;
     }
     
-    @CheckReturnValue
     @Nonnull
+    @CheckReturnValue
     public MemberData removeRole(@Nonnull final String roleId) {
         if(roles != null) {
             roles.remove(roleId);
@@ -118,8 +120,8 @@ public class MemberData {
         return this;
     }
     
-    @CheckReturnValue
     @Nonnull
+    @CheckReturnValue
     public JsonObject toJson() {
         final JsonObject object = new JsonObject();
         if(roles != null) {

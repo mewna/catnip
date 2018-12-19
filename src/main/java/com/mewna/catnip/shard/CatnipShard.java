@@ -255,7 +255,8 @@ public class CatnipShard extends AbstractVerticle {
     
     private void connectSocket(final Message<JsonObject> msg) {
         catnip.eventBus().publish(Raw.CONNECTING, shardInfo());
-        
+    
+        //noinspection ConstantConditions
         client.websocketAbs(catnip.getGatewayInfo().url(), null, null, null,
                 socket -> {
                     catnip.eventBus().publish(Raw.CONNECTED, shardInfo());

@@ -311,19 +311,17 @@ public class RestRequester {
                     final int code = response.code();
                     final String message = response.message();
                     if(response.body() == null) {
-                        context.runOnContext(__ -> {
-                            handleResponse(r, bucket, code, message, null, null,
-                                    false, new NoStackTraceThrowable("body == null"));
-                        });
+                        context.runOnContext(__ ->
+                                handleResponse(r, bucket, code, message, null, null,
+                                        false, new NoStackTraceThrowable("body == null")));
                     } else {
                         final byte[] bodyBytes = response.body().bytes();
                         
                         final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
                         response.headers().toMultimap().forEach(headers::add);
-                        context.runOnContext(__ -> {
-                            handleResponse(r, bucket, code, message, Buffer.buffer(bodyBytes),
-                                    headers, true, null);
-                        });
+                        context.runOnContext(__ ->
+                                handleResponse(r, bucket, code, message, Buffer.buffer(bodyBytes),
+                                        headers, true, null));
                     }
                 }
             }

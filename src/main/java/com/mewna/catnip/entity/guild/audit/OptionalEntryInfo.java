@@ -33,6 +33,6 @@ import com.mewna.catnip.entity.Entity;
  * @author SamOphis
  * @since 10/07/18
  */
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "InterfaceMayBeAnnotatedFunctional"})
 public interface OptionalEntryInfo extends Entity {
 }
