@@ -27,6 +27,9 @@
 
 package com.mewna.catnip.entity.user;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.entity.impl.PresenceUpdateImpl;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
@@ -35,6 +38,7 @@ import java.util.Set;
  * @author natanbc
  * @since 12/14/18
  */
+@JsonDeserialize(as = PresenceUpdateImpl.class)
 public interface PresenceUpdate extends Presence {
     /**
      * @return ID of the user.
@@ -65,4 +69,10 @@ public interface PresenceUpdate extends Presence {
      */
     @Nullable
     OnlineStatus mobileStatus();
+    
+    /**
+     * @return Online status reported for the user's web browser.
+     */
+    @Nullable
+    OnlineStatus webStatus();
 }

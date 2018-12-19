@@ -59,6 +59,7 @@ public class PresenceUpdateImpl implements PresenceUpdate, RequiresCatnip {
     private Set<String> roles;
     private String nick;
     private OnlineStatus mobileStatus;
+    private OnlineStatus webStatus;
     
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
