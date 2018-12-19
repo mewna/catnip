@@ -42,6 +42,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Set;
 
+@SuppressWarnings("unused")
 public class PermissionOverrideData implements JsonConvertible {
     private final Set<Permission> allow = EnumSet.noneOf(Permission.class);
     private final Set<Permission> deny = EnumSet.noneOf(Permission.class);
@@ -57,14 +58,17 @@ public class PermissionOverrideData implements JsonConvertible {
         return new PermissionOverrideData(OverrideType.ROLE, String.valueOf(role.id()));
     }
     
+    @SuppressWarnings("TypeMayBeWeakened")
     public static PermissionOverrideData create(@Nonnull final Role role) {
         return new PermissionOverrideData(OverrideType.ROLE, role.id());
     }
     
+    @SuppressWarnings("TypeMayBeWeakened")
     public static PermissionOverrideData create(@Nonnull final Member member) {
         return new PermissionOverrideData(OverrideType.MEMBER, member.id());
     }
     
+    @SuppressWarnings("TypeMayBeWeakened")
     public static PermissionOverrideData create(@Nonnull final User user) {
         return new PermissionOverrideData(OverrideType.MEMBER, user.id());
     }
@@ -93,6 +97,7 @@ public class PermissionOverrideData implements JsonConvertible {
         return deny(Arrays.asList(permissions));
     }
     
+    @SuppressWarnings("WeakerAccess")
     public PermissionOverrideData deny(@Nonnull final Collection<Permission> permissions) {
         allow.removeAll(permissions);
         deny.addAll(permissions);

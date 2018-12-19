@@ -105,6 +105,7 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
+    @SuppressWarnings("TypeMayBeWeakened")
     public CompletionStage<GuildChannel> createGuildChannel(@Nonnull final String guildId, @Nonnull final ChannelData data) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.CREATE_GUILD_CHANNEL.withMajorParam(guildId),
@@ -135,6 +136,7 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
+    @SuppressWarnings("TypeMayBeWeakened")
     public CompletionStage<Role> createGuildRole(@Nonnull final String guildId, @Nonnull final RoleData roleData) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.CREATE_GUILD_ROLE.withMajorParam(guildId),
@@ -145,6 +147,7 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
+    @SuppressWarnings("TypeMayBeWeakened")
     public CompletionStage<Role> modifyGuildRole(@Nonnull final String guildId, @Nonnull final String roleId,
                                                  @Nonnull final RoleData roleData) {
         return getCatnip().requester()

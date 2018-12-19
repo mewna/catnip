@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
+@SuppressWarnings("unused")
 @Accessors(fluent = true, chain = true)
 @Getter
 @Setter
@@ -78,12 +79,14 @@ public abstract class ChannelData implements JsonConvertible {
     
     @Nonnull
     @CheckReturnValue
+    @SuppressWarnings("WeakerAccess")
     public static ChannelData createText(@Nonnull final String name) {
         return new TextChannelData(name.trim());
     }
     
     @Nonnull
     @CheckReturnValue
+    @SuppressWarnings("WeakerAccess")
     public static ChannelData createVoice(@Nonnull final String name) {
         return new VoiceChannelData(name.trim());
     }
@@ -120,6 +123,7 @@ public abstract class ChannelData implements JsonConvertible {
     
     @Nonnull
     @CheckReturnValue
+    @SuppressWarnings("TypeMayBeWeakened")
     public static ChannelData of(@Nonnull final Category category) {
         return new CategoryData()
                 .name(category.name())
@@ -129,6 +133,7 @@ public abstract class ChannelData implements JsonConvertible {
     
     @Nonnull
     @CheckReturnValue
+    @SuppressWarnings("TypeMayBeWeakened")
     public static ChannelData of(@Nonnull final GuildChannel channel) {
         if(channel.isText()) {
             return of(channel.asTextChannel());
@@ -154,12 +159,14 @@ public abstract class ChannelData implements JsonConvertible {
     
     @Nonnull
     @CheckReturnValue
+    @SuppressWarnings("TypeMayBeWeakened")
     public PermissionOverrideData createOverride(@Nonnull final Role role) {
         return createRoleOverride(role.id());
     }
     
     @Nonnull
     @CheckReturnValue
+    @SuppressWarnings("WeakerAccess")
     public PermissionOverrideData createRoleOverride(@Nonnull final String roleId) {
         return overrides.computeIfAbsent(roleId, __ -> new PermissionOverrideData(OverrideType.ROLE, roleId));
     }
@@ -170,11 +177,13 @@ public abstract class ChannelData implements JsonConvertible {
     }
     
     @Nonnull
+    @SuppressWarnings("TypeMayBeWeakened")
     public ChannelData configureOverride(@Nonnull final Role role, @Nonnull final Consumer<PermissionOverrideData> configurator) {
         return configureRoleOverride(role.id(), configurator);
     }
     
     @Nonnull
+    @SuppressWarnings("WeakerAccess")
     public ChannelData configureRoleOverride(@Nonnull final String roleId, @Nonnull final Consumer<PermissionOverrideData> configurator) {
         configurator.accept(createRoleOverride(roleId));
         return this;
@@ -182,22 +191,26 @@ public abstract class ChannelData implements JsonConvertible {
     
     @Nonnull
     @CheckReturnValue
+    @SuppressWarnings("TypeMayBeWeakened")
     public PermissionOverrideData createOverride(@Nonnull final Member member) {
         return createMemberOverride(member.id());
     }
     
     @Nonnull
     @CheckReturnValue
+    @SuppressWarnings("WeakerAccess")
     public PermissionOverrideData createMemberOverride(@Nonnull final String memberId) {
         return overrides.computeIfAbsent(memberId, __ -> new PermissionOverrideData(OverrideType.MEMBER, memberId));
     }
     
     @Nonnull
+    @SuppressWarnings("TypeMayBeWeakened")
     public ChannelData configureOverride(@Nonnull final Member member, @Nonnull final Consumer<PermissionOverrideData> configurator) {
         return configureMemberOverride(member.id(), configurator);
     }
     
     @Nonnull
+    @SuppressWarnings("WeakerAccess")
     public ChannelData configureMemberOverride(@Nonnull final String roleId, @Nonnull final Consumer<PermissionOverrideData> configurator) {
         configurator.accept(createMemberOverride(roleId));
         return this;
@@ -209,16 +222,19 @@ public abstract class ChannelData implements JsonConvertible {
     }
     
     @Nonnull
+    @SuppressWarnings("TypeMayBeWeakened")
     public ChannelData deleteOverride(@Nonnull final Role role) {
         return deleteOverride(role.id());
     }
     
     @Nonnull
+    @SuppressWarnings("TypeMayBeWeakened")
     public ChannelData deleteOverride(@Nonnull final Member member) {
         return deleteOverride(member.id());
     }
     
     @Nonnull
+    @SuppressWarnings("WeakerAccess")
     public ChannelData deleteOverride(@Nonnull final String targetId) {
         overrides.remove(targetId);
         return this;

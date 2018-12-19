@@ -65,6 +65,7 @@ public final class MemoryRatelimiter implements Ratelimiter {
     }
     
     @AllArgsConstructor
+    @SuppressWarnings("FieldMayBeFinal")
     static final class Bucket {
         private long limit;
         private long remaining;
