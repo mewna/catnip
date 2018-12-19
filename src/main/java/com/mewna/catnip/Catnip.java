@@ -38,7 +38,7 @@ import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.internal.CatnipImpl;
-import com.mewna.catnip.internal.logging.LogAdapter;
+import com.mewna.catnip.util.logging.LogAdapter;
 import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
