@@ -501,10 +501,15 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public Presence createPresence(@Nonnull final JsonObject data) {
+        final JsonObject clientStatus = data.getJsonObject("client_status");
+        final String mobileStatusString = clientStatus == null ? null : clientStatus.getString("mobile");
+        final String webStatusString = clientStatus == null ? null : clientStatus.getString("web");
         return PresenceImpl.builder()
                 .catnip(catnip)
                 .status(OnlineStatus.fromString(data.getString("status")))
                 .activity(createActivity(data.getJsonObject("game", null)))
+                .mobileStatus(mobileStatusString != null ? OnlineStatus.fromString(mobileStatusString) : null)
+                .webStatus(webStatusString != null ? OnlineStatus.fromString(webStatusString) : null)
                 .build();
     }
     

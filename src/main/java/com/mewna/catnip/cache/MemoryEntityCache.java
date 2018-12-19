@@ -85,6 +85,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
     protected final DefaultCacheView<Presence> presenceCache = new DefaultCacheView<>();
     @SuppressWarnings("WeakerAccess")
     protected final AtomicReference<User> selfUser = new AtomicReference<>(null);
+    @SuppressWarnings("WeakerAccess")
     protected final Function<Member, String> memberNameFunction = m -> {
         if(m.nick() != null) {
             return m.nick();
@@ -178,7 +179,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 final Channel channel = entityBuilder.createChannel(payload);
                 if(channel.isGuild()) {
                     final GuildChannel gc = (GuildChannel) channel;
-                    final DefaultNamedCacheView<GuildChannel> channels = guildChannelCache.get(gc.guildId());
+                    final DefaultNamedCacheView<GuildChannel> channels = guildChannelCache.get(Long.parseLong(gc.guildId()));
                     if(channels != null) {
                         channels.remove(gc.id());
                     }
@@ -231,7 +232,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
             case Raw.GUILD_ROLE_DELETE: {
                 final String guild = payload.getString("guild_id");
                 final String role = payload.getString("role_id");
-                Optional.ofNullable(roleCache.get(guild)).ifPresent(e -> e.remove(role));
+                Optional.ofNullable(roleCache.get(Long.parseLong(guild))).ifPresent(e -> e.remove(role));
                 break;
             }
             // Members
@@ -270,7 +271,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
             case Raw.GUILD_MEMBER_REMOVE: {
                 final String guild = payload.getString("guild_id");
                 final String user = payload.getJsonObject("user").getString("id");
-                Optional.ofNullable(memberCache.get(guild)).ifPresent(e -> e.remove(user));
+                Optional.ofNullable(memberCache.get(Long.parseLong(guild))).ifPresent(e -> e.remove(user));
                 break;
             }
             // Member chunking
