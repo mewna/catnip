@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.entity.user;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.impl.PresenceImpl;
 import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
 import lombok.Getter;
@@ -47,6 +48,7 @@ import java.util.Set;
  * @since 9/21/18.
  */
 @SuppressWarnings("unused")
+@JsonDeserialize(as = PresenceImpl.class)
 public interface Presence {
     @Nonnull
     @CheckReturnValue
@@ -65,6 +67,12 @@ public interface Presence {
     
     @Nonnull
     OnlineStatus status();
+    
+    @Nullable
+    OnlineStatus mobileStatus();
+    
+    @Nullable
+    OnlineStatus webStatus();
     
     @Nullable
     Activity activity();
