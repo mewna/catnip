@@ -44,31 +44,34 @@ import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.DefaultExtensionManager;
 import com.mewna.catnip.extension.manager.ExtensionManager;
-import com.mewna.catnip.util.logging.LogAdapter;
-import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
 import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.ShardInfo;
 import com.mewna.catnip.shard.event.EventBuffer;
 import com.mewna.catnip.shard.manager.ShardManager;
+import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.util.JsonPojoCodec;
 import com.mewna.catnip.util.PermissionUtil;
+import com.mewna.catnip.util.logging.LogAdapter;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashSet;
-import java.util.Set;
+import java.lang.reflect.Field;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * @author amy
@@ -79,31 +82,39 @@ import java.util.function.Consumer;
 @Accessors(fluent = true, chain = true)
 public class CatnipImpl implements Catnip {
     private final Vertx vertx;
-    private final RestRequester requester;
     private final String token;
-    private final ShardManager shardManager;
-    private final SessionManager sessionManager;
-    private final Ratelimiter gatewayRatelimiter;
+    private final boolean logExtensionOverrides;
     private final Rest rest = new Rest(this);
-    private final LogAdapter logAdapter;
     private final ExtensionManager extensionManager = new DefaultExtensionManager(this);
-    private final EventBuffer eventBuffer;
-    private final EntityCacheWorker cache;
-    private final Set<CacheFlag> cacheFlags;
-    private final boolean chunkMembers;
-    private final boolean emitEventObjects;
-    private final boolean enforcePermissions;
-    private final Presence initialPresence;
-    
     private final AtomicReference<User> selfUser = new AtomicReference<>(null);
     private final Set<String> unavailableGuilds = new HashSet<>();
-    private final Set<String> disabledEvents;
     private final AtomicReference<GatewayInfo> gatewayInfo = new AtomicReference<>(null);
+    
+    private RestRequester requester;
+    private ShardManager shardManager;
+    private SessionManager sessionManager;
+    private Ratelimiter gatewayRatelimiter;
+    private LogAdapter logAdapter;
+    private EventBuffer eventBuffer;
+    private EntityCacheWorker cache;
+    private Set<CacheFlag> cacheFlags;
+    private boolean chunkMembers;
+    private boolean emitEventObjects;
+    private boolean enforcePermissions;
+    private Presence initialPresence;
+    private Set<String> disabledEvents;
+    private CatnipOptions options;
     
     public CatnipImpl(@Nonnull final Vertx vertx, @Nonnull final CatnipOptions options) {
         this.vertx = vertx;
-        requester = new RestRequester(this, options.restBucketBackend(), options.restHttpClient());
+        applyOptions(options);
         token = options.token();
+        logExtensionOverrides = options.logExtensionOverrides();
+    }
+    
+    private void applyOptions(@Nonnull final CatnipOptions options) {
+        this.options = options;
+        requester = new RestRequester(this, options.restBucketBackend(), options.restHttpClient());
         shardManager = options.shardManager();
         sessionManager = options.sessionManager();
         gatewayRatelimiter = options.gatewayRatelimiter();
@@ -116,6 +127,50 @@ public class CatnipImpl implements Catnip {
         enforcePermissions = options.enforcePermissions();
         initialPresence = options.presence();
         disabledEvents = ImmutableSet.copyOf(options.disabledEvents());
+    
+        injectSelf();
+    }
+    
+    @Nonnull
+    @Override
+    public Catnip injectOptions(@Nonnull final Extension extension, @Nonnull final Function<CatnipOptions, CatnipOptions> optionsPatcher) {
+        if(!extensionManager.matchingExtensions(extension.getClass()).isEmpty()) {
+            final Map<String, Pair<Object, Object>> diff = diff(optionsPatcher.apply((CatnipOptions) options.clone()));
+            if(!diff.isEmpty()) {
+                if(logExtensionOverrides) {
+                    diff.forEach((name, patch) -> logAdapter.info("Extension {} updated {} from \"{}\" to \"{}\".",
+                            extension.name(), name, patch.getLeft(), patch.getRight()));
+                }
+                applyOptions(options);
+            }
+        } else {
+            throw new IllegalArgumentException("Extension with class " + extension.getClass().getName()
+                    + " isn't loaded, but tried to inject options!");
+        }
+        
+        return this;
+    }
+    
+    private Map<String, Pair<Object, Object>> diff(@Nonnull final CatnipOptions patch) {
+        final Map<String, Pair<Object, Object>> diff = new LinkedHashMap<>();
+        // Yeah this is ugly reflection bs, I know. But this allows it to
+        // automatically diff it without having to
+        for(final Field field : patch.getClass().getDeclaredFields()) {
+            // Don't compare tokens because there's no point
+            if(!field.getName().equals("token")) {
+                try {
+                    field.setAccessible(true);
+                    final Object input = field.get(patch);
+                    final Object original = field.get(options);
+                    if(!Objects.equals(original, input)) {
+                        diff.put(field.getName(), ImmutablePair.of(original, input));
+                    }
+                } catch(final IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return diff;
     }
     
     @Nonnull
@@ -307,11 +362,6 @@ public class CatnipImpl implements Catnip {
         // Shards
         codec(ShardInfo.class);
         
-        // Inject catnip instance into dependent fields
-        shardManager.catnip(this);
-        eventBuffer.catnip(this);
-        cache.catnip(this);
-        
         // Since this is running outside of the vert.x event loop when it's
         // called, we can safely block it to do this http request.
         rest.user().getGatewayBot()
@@ -323,6 +373,13 @@ public class CatnipImpl implements Catnip {
                 .join();
         
         return this;
+    }
+    
+    private void injectSelf() {
+        // Inject catnip instance into dependent fields
+        shardManager.catnip(this);
+        eventBuffer.catnip(this);
+        cache.catnip(this);
     }
     
     private <T> void codec(@Nonnull final Class<T> cls) {
