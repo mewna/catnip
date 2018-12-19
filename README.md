@@ -51,7 +51,7 @@ catnip.on(DiscordEvent.MESSAGE_CREATE, msg -> {
         msg.channel().sendMessage("pong!");
     }
 });
-catnip.startShards();
+catnip.connect();
 ```
 
 catnip returns `CompletionStage`s from all REST methods. For example,
@@ -70,7 +70,7 @@ catnip.on(DiscordEvent.MESSAGE_CREATE, msg -> {
                 });
     }
 });
-catnip.startShards();
+catnip.connect();
 ```
 
 Also check out the [examples](https://github.com/mewna/catnip/tree/master/src/main/example/basic) for Kotlin and Scala usage.
