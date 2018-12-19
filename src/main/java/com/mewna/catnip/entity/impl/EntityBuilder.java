@@ -53,6 +53,9 @@ import com.mewna.catnip.entity.impl.InviteImpl.InviterImpl;
 import com.mewna.catnip.entity.impl.MessageImpl.AttachmentImpl;
 import com.mewna.catnip.entity.impl.MessageImpl.ReactionImpl;
 import com.mewna.catnip.entity.impl.PresenceImpl.*;
+import com.mewna.catnip.entity.impl.SkuImpl.PriceImpl;
+import com.mewna.catnip.entity.impl.StoreListingImpl.PreviewVideoImpl;
+import com.mewna.catnip.entity.impl.SystemRequirementsImpl.RequirementImpl;
 import com.mewna.catnip.entity.message.*;
 import com.mewna.catnip.entity.message.Embed.*;
 import com.mewna.catnip.entity.message.Message.Attachment;
@@ -60,6 +63,10 @@ import com.mewna.catnip.entity.message.Message.Reaction;
 import com.mewna.catnip.entity.misc.*;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.misc.Emoji.UnicodeEmoji;
+import com.mewna.catnip.entity.store.*;
+import com.mewna.catnip.entity.store.Sku.Price;
+import com.mewna.catnip.entity.store.StoreListing.PreviewVideo;
+import com.mewna.catnip.entity.store.SystemRequirements.Requirement;
 import com.mewna.catnip.entity.user.*;
 import com.mewna.catnip.entity.user.Presence.*;
 import com.mewna.catnip.entity.util.Permission;
@@ -70,6 +77,7 @@ import io.vertx.core.json.JsonObject;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -1248,6 +1256,157 @@ public final class EntityBuilder {
                 .totalSessions(sessionStartLimit.getInteger("total"))
                 .remainingSessions(sessionStartLimit.getInteger("remaining"))
                 .resetAfter(sessionStartLimit.getLong("reset_after"))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Gift createGift(@Nonnull final JsonObject data) {
+        final Boolean redeemed = data.getBoolean("redeemed", false);
+        final JsonObject user = data.getJsonObject("user");
+        return GiftImpl.builder()
+                .catnip(catnip)
+                .subscriptionPlanId(data.getString("subscription_plan_id"))
+                .skuId(data.getString("sku_id"))
+                .redeemed(redeemed == null ? false : redeemed)
+                .expiresAt(parseTimestamp(data.getString("expires_at")))
+                .code(data.getString("code"))
+                .uses(data.getInteger("uses", 0))
+                .maxUses(data.getInteger("max_uses", 0))
+                .user(user == null ? null : createUser(user))
+                .storeListing(createStoreListing(data.getJsonObject("store_listing")))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public StoreListing createStoreListing(@Nonnull final JsonObject data) {
+        final JsonObject thumbnail = data.getJsonObject("thumbnail");
+        final JsonObject preview = data.getJsonObject("preview_video");
+        return StoreListingImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .summary(data.getString("summary"))
+                .flavorText(data.getString("flavor_text"))
+                .tagLine(data.getString("tagline"))
+                .thumbnail(thumbnail == null ? null : createStoreThumbnail(thumbnail))
+                .previewVideo(preview == null ? null : createStorePreview(preview))
+                .sku(createSku(data.getJsonObject("sku")))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public StoreListing.Thumbnail createStoreThumbnail(@Nonnull final JsonObject data) {
+        return StoreListingImpl.ThumbnailImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .mimeType(data.getString("mime_type"))
+                .fileName(data.getString("filename"))
+                .size(data.getInteger("size"))
+                .width(data.getInteger("width"))
+                .height(data.getInteger("height"))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public PreviewVideo createStorePreview(@Nonnull final JsonObject data) {
+        return PreviewVideoImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .mimeType(data.getString("mime_type"))
+                .fileName(data.getString("filename"))
+                .size(data.getInteger("size"))
+                .width(data.getInteger("width"))
+                .height(data.getInteger("height"))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Sku createSku(@Nonnull final JsonObject data) {
+        final Set<SkuFeature> features = EnumSet.noneOf(SkuFeature.class);
+        final JsonArray featuresRaw = data.getJsonArray("features");
+        if(featuresRaw != null) {
+            for(final Object object : featuresRaw) {
+                if(!(object instanceof Number)) {
+                    throw new IllegalArgumentException("Expected all values to be Numbers, but found " +
+                            (object == null ? "null" : object.getClass()));
+                }
+                features.add(SkuFeature.byId(((Number)object).intValue()));
+            }
+        }
+        final Set<SkuGenre> genres = EnumSet.noneOf(SkuGenre.class);
+        final JsonArray genresRaw = data.getJsonArray("genres");
+        if(genresRaw != null) {
+            for(final Object object : genresRaw) {
+                if(!(object instanceof Number)) {
+                    throw new IllegalArgumentException("Expected all values to be Numbers, but found " +
+                            (object == null ? "null" : object.getClass()));
+                }
+                genres.add(SkuGenre.byId(((Number)object).intValue()));
+            }
+        }
+        final JsonObject price = data.getJsonObject("price");
+        final String releaseDate = data.getString("release_date");
+        final JsonObject systemRequirementsOuter = data.getJsonObject("system_requirements");
+        final JsonObject systemRequirements = systemRequirementsOuter == null ? null : systemRequirementsOuter.getJsonObject("1");
+        final Boolean showAgeGate = data.getBoolean("show_age_gate", false);
+        final Boolean premium = data.getBoolean("premium", false);
+        return SkuImpl.builder()
+                .catnip(catnip)
+                .id(data.getString("id"))
+                .applicationId(data.getString("application_id"))
+                .dependentSkuId(data.getString("dependent_sku_id"))
+                .legalNotice(data.getString("legal_notice"))
+                .slug(data.getString("slug"))
+                .name(data.getString("name"))
+                .showAgeGate(showAgeGate == null ? false : showAgeGate)
+                .premium(premium == null ? false : premium)
+                .type(SkuType.byId(data.getInteger("type", -1)))
+                .accessType(SkuAccessType.byId(data.getInteger("access_type", -1)))
+                .features(Collections.unmodifiableSet(features))
+                .genres(Collections.unmodifiableSet(genres))
+                .locales(stringListOf(data.getJsonArray("locales")))
+                .manifestLabels(stringListOf(data.getJsonArray("manifest_labels")))
+                .price(price == null ? null : createPrice(price))
+                .releaseDate(releaseDate == null ? null : LocalDate.parse(releaseDate))
+                .systemRequirements(systemRequirements == null ? null : createSystemRequirements(systemRequirements))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Price createPrice(@Nonnull final JsonObject data) {
+        return PriceImpl.builder()
+                .amount(data.getInteger("amount"))
+                .currency(data.getString("currency"))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public SystemRequirements createSystemRequirements(@Nonnull final JsonObject data) {
+        return SystemRequirementsImpl.builder()
+                .minimum(createRequirement(data.getJsonObject("minimum")))
+                .recommended(createRequirement(data.getJsonObject("recommended")))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Requirement createRequirement(@Nonnull final JsonObject data) {
+        return RequirementImpl.builder()
+                .cpu(data.getString("cpu"))
+                .directx(data.getString("directx"))
+                .disk(data.getInteger("disk", 0))
+                .gpu(data.getString("gpu"))
+                .network(data.getString("network"))
+                .notes(data.getString("notes"))
+                .operatingSystemVersion(data.getString("operating_system_version"))
+                .ram(data.getInteger("ram", 0))
+                .soundCard(data.getString("sound_card"))
                 .build();
     }
 }

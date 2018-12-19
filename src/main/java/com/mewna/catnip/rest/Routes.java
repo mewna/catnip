@@ -127,6 +127,7 @@ public final class Routes {
     public static final Route GET_USER                            = new Route(GET,    "/users/{user.id}");
     public static final Route GET_CURRENT_APPLICATION_INFORMATION = new Route(GET,    "/oauth2/applications/@me");
     public static final Route LIST_VOICE_REGIONS                  = new Route(GET,    "/voice/regions");
+    public static final Route GET_GIFT                            = new Route(GET,    "/entitlements/gift-codes/{gift.code}");
 
     private Routes() {
     }
