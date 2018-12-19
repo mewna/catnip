@@ -512,7 +512,8 @@ public final class EntityBuilder {
     @CheckReturnValue
     public PresenceUpdate createPresenceUpdate(@Nonnull final JsonObject data) {
         final JsonObject clientStatus = data.getJsonObject("client_status");
-        final String clientStatusString = clientStatus == null ? null : clientStatus.getString("mobile");
+        final String mobileStatusString = clientStatus == null ? null : clientStatus.getString("mobile");
+        final String webStatusString = clientStatus == null ? null : clientStatus.getString("web");
         return PresenceUpdateImpl.builder()
                 .catnip(catnip)
                 .status(OnlineStatus.fromString(data.getString("status")))
@@ -521,7 +522,8 @@ public final class EntityBuilder {
                 .guildId(data.getString("guild_id"))
                 .roles(ImmutableSet.copyOf(stringListOf(data.getJsonArray("roles"))))
                 .nick(data.getString("nick"))
-                .mobileStatus(clientStatusString != null ? OnlineStatus.fromString(clientStatusString) : null)
+                .mobileStatus(mobileStatusString != null ? OnlineStatus.fromString(mobileStatusString) : null)
+                .webStatus(webStatusString != null ? OnlineStatus.fromString(webStatusString) : null)
                 .build();
     }
     
