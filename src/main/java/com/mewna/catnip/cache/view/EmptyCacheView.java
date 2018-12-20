@@ -28,12 +28,9 @@
 package com.mewna.catnip.cache.view;
 
 import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.*;
+import java.util.function.*;
+import java.util.stream.Collector;
 
 /**
  * Always empty {@link CacheView cache view}.
@@ -46,8 +43,18 @@ public class EmptyCacheView<T> implements CacheView<T> {
     public static final CacheView<?> INSTANCE = new EmptyCacheView<>();
     
     @Override
+    public void forEach(final Consumer<? super T> action) {
+    
+    }
+    
+    @Override
     public long size() {
         return 0;
+    }
+    
+    @Override
+    public boolean isEmpty() {
+        return true;
     }
     
     @Override
@@ -56,20 +63,70 @@ public class EmptyCacheView<T> implements CacheView<T> {
     }
     
     @Override
-    public T findAny(@Nonnull final Predicate<T> filter) {
+    public T findAny(@Nonnull final Predicate<? super T> filter) {
         return null;
     }
     
     @Nonnull
     @Override
-    public Collection<T> find(@Nonnull final Predicate<T> filter) {
+    public Collection<T> find(@Nonnull final Predicate<? super T> filter) {
         return Collections.emptyList();
     }
     
     @Nonnull
     @Override
-    public <C extends Collection<T>> C find(@Nonnull final Predicate<T> filter, @Nonnull final Supplier<C> supplier) {
+    public <C extends Collection<T>> C find(@Nonnull final Predicate<? super T> filter, @Nonnull final Supplier<C> supplier) {
         return supplier.get();
+    }
+    
+    @Override
+    public <A, R> R collect(final Collector<? super T, A, R> collector) {
+        return collector.finisher().apply(collector.supplier().get());
+    }
+    
+    @Override
+    public <R> R collect(final Supplier<R> supplier, final BiConsumer<R, ? super T> accumulator, final BiConsumer<R, R> combiner) {
+        return supplier.get();
+    }
+    
+    @Override
+    public <U> U reduce(final U identity, final BiFunction<U, ? super T, U> accumulator, final BinaryOperator<U> combiner) {
+        return identity;
+    }
+    
+    @Override
+    public Optional<T> reduce(final BinaryOperator<T> accumulator) {
+        return Optional.empty();
+    }
+    
+    @Override
+    public T reduce(final T identity, final BinaryOperator<T> accumulator) {
+        return identity;
+    }
+    
+    @Override
+    public boolean anyMatch(final Predicate<? super T> predicate) {
+        return false;
+    }
+    
+    @Override
+    public boolean allMatch(final Predicate<? super T> predicate) {
+        return true;
+    }
+    
+    @Override
+    public boolean noneMatch(final Predicate<? super T> predicate) {
+        return true;
+    }
+    
+    @Override
+    public Optional<T> min(final Comparator<? super T> comparator) {
+        return Optional.empty();
+    }
+    
+    @Override
+    public Optional<T> max(final Comparator<? super T> comparator) {
+        return Optional.empty();
     }
     
     @Nonnull

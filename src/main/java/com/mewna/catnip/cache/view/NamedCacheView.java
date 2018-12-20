@@ -57,6 +57,9 @@ public interface NamedCacheView<T> extends CacheView<T> {
      *
      * @see String#equals(Object)
      * @see String#equalsIgnoreCase(String)
+     *
+     * @implNote Implementations should attempt to perform this operation without
+     *           copying the elements of this view whenever possible.
      */
     @Nonnull
     Collection<T> findByName(@Nonnull String name, boolean ignoreCase);
@@ -69,6 +72,9 @@ public interface NamedCacheView<T> extends CacheView<T> {
      * @return All elements that have a name equal to the provided.
      *
      * @see String#equals(Object)
+     *
+     * @implNote Implementations should attempt to perform this operation without
+     *           copying the elements of this view whenever possible.
      */
     @Nonnull
     default Collection<T> findByName(@Nonnull final String name) {
@@ -86,6 +92,9 @@ public interface NamedCacheView<T> extends CacheView<T> {
      *
      * @see String#contains(CharSequence)
      * @see com.mewna.catnip.util.Utils#containsIgnoreCase(String, String)
+     *
+     * @implNote Implementations should attempt to perform this operation without
+     *           copying the elements of this view whenever possible.
      */
     @Nonnull
     Collection<T> findByNameContains(@Nonnull final String name, boolean ignoreCase);
@@ -98,6 +107,9 @@ public interface NamedCacheView<T> extends CacheView<T> {
      * @return All elements that have a name containing the provided.
      *
      * @see String#contains(CharSequence)
+     *
+     * @implNote Implementations should attempt to perform this operation without
+     *           copying the elements of this view whenever possible.
      */
     @Nonnull
     default Collection<T> findByNameContains(@Nonnull final String name) {
@@ -115,6 +127,9 @@ public interface NamedCacheView<T> extends CacheView<T> {
      *
      * @see String#startsWith(String)
      * @see com.mewna.catnip.util.Utils#startsWithIgnoreCase(String, String)
+     *
+     * @implNote Implementations should attempt to perform this operation without
+     *           copying the elements of this view whenever possible.
      */
     @Nonnull
     Collection<T> findByNameStartsWith(@Nonnull final String name, boolean ignoreCase);
@@ -127,6 +142,9 @@ public interface NamedCacheView<T> extends CacheView<T> {
      * @return All elements that have a name starting with the provided.
      *
      * @see String#startsWith(String)
+     *
+     * @implNote Implementations should attempt to perform this operation without
+     *           copying the elements of this view whenever possible.
      */
     @Nonnull
     default Collection<T> findByNameStartsWith(@Nonnull final String name) {
@@ -144,6 +162,9 @@ public interface NamedCacheView<T> extends CacheView<T> {
      *
      * @see String#endsWith(String)
      * @see com.mewna.catnip.util.Utils#endsWithIgnoreCase(String, String)
+     *
+     * @implNote Implementations should attempt to perform this operation without
+     *           copying the elements of this view whenever possible.
      */
     @Nonnull
     Collection<T> findByNameEndsWith(@Nonnull final String name, boolean ignoreCase);
@@ -156,6 +177,9 @@ public interface NamedCacheView<T> extends CacheView<T> {
      * @return All elements that have a name ending with the provided.
      *
      * @see String#endsWith(String)
+     *
+     * @implNote Implementations should attempt to perform this operation without
+     *           copying the elements of this view whenever possible.
      */
     @Nonnull
     default Collection<T> findByNameEndsWith(@Nonnull final String name) {
