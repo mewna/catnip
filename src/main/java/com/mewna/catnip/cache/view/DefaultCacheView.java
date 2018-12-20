@@ -31,8 +31,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -72,8 +72,18 @@ public class DefaultCacheView<T> implements CacheView<T> {
     }
     
     @Override
+    public void forEach(final Consumer<? super T> action) {
+        map.values().forEach(action);
+    }
+    
+    @Override
     public long size() {
         return map.size();
+    }
+    
+    @Override
+    public boolean isEmpty() {
+        return map.isEmpty();
     }
     
     @Override
@@ -82,7 +92,7 @@ public class DefaultCacheView<T> implements CacheView<T> {
     }
     
     @Override
-    public T findAny(@Nonnull final Predicate<T> filter) {
+    public T findAny(@Nonnull final Predicate<? super T> filter) {
         return map.values()
                 .stream()
                 .filter(filter)
@@ -92,7 +102,7 @@ public class DefaultCacheView<T> implements CacheView<T> {
     
     @Nonnull
     @Override
-    public Collection<T> find(@Nonnull final Predicate<T> filter) {
+    public Collection<T> find(@Nonnull final Predicate<? super T> filter) {
         return map.values()
                 .stream()
                 .filter(filter)
@@ -101,12 +111,123 @@ public class DefaultCacheView<T> implements CacheView<T> {
     
     @Nonnull
     @Override
-    public <C extends Collection<T>> C find(@Nonnull final Predicate<T> filter, @Nonnull final Supplier<C> supplier) {
+    public <C extends Collection<T>> C find(@Nonnull final Predicate<? super T> filter, @Nonnull final Supplier<C> supplier) {
         final C collection = Objects.requireNonNull(supplier.get(), "Provided collection may not be null");
         return map.values()
                 .stream()
                 .filter(filter)
                 .collect(Collectors.toCollection(() -> collection));
+    }
+    
+    @Override
+    public <A, R> R collect(final Collector<? super T, A, R> collector) {
+        final A a = collector.supplier().get();
+        final BiConsumer<A, ? super T> accumulator = collector.accumulator();
+        for(final T element : map.values()) {
+            accumulator.accept(a, element);
+        }
+        return collector.finisher().apply(a);
+    }
+    
+    @Override
+    public <R> R collect(final Supplier<R> supplier, final BiConsumer<R, ? super T> accumulator, final BiConsumer<R, R> combiner) {
+        final R result = supplier.get();
+        for(final T element : map.values()) {
+            accumulator.accept(result, element);
+        }
+        return result;
+    }
+    
+    @Override
+    public <U> U reduce(final U identity, final BiFunction<U, ? super T, U> accumulator, final BinaryOperator<U> combiner) {
+        U result = identity;
+        for(final T element : map.values()) {
+            result = accumulator.apply(result, element);
+        }
+        return result;
+    }
+    
+    @Override
+    public Optional<T> reduce(final BinaryOperator<T> accumulator) {
+        boolean foundAny = false;
+        T result = null;
+        for(final T element : map.values()) {
+            if(!foundAny) {
+                foundAny = true;
+                result = element;
+            } else {
+                result = accumulator.apply(result, element);
+            }
+        }
+        return foundAny ? Optional.of(result) : Optional.empty();
+    }
+    
+    @Override
+    public T reduce(final T identity, final BinaryOperator<T> accumulator) {
+        T result = identity;
+        for (final T element : map.values()) {
+            result = accumulator.apply(result, element);
+        }
+        return result;
+    }
+    
+    @Override
+    public boolean anyMatch(final Predicate<? super T> predicate) {
+        for(final T element : map.values()) {
+            if(predicate.test(element)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    @Override
+    public boolean allMatch(final Predicate<? super T> predicate) {
+        for(final T element : map.values()) {
+            if(!predicate.test(element)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    @Override
+    public boolean noneMatch(final Predicate<? super T> predicate) {
+        return !anyMatch(predicate);
+    }
+    
+    @Override
+    public Optional<T> min(final Comparator<? super T> comparator) {
+        boolean foundAny = false;
+        T min = null;
+        for(final T element : map.values()) {
+            if(!foundAny) {
+                min = element;
+                foundAny = true;
+            } else {
+                if(comparator.compare(min, element) > 0) {
+                    min = element;
+                }
+            }
+        }
+        return foundAny ? Optional.of(min) : Optional.empty();
+    }
+    
+    @Override
+    public Optional<T> max(final Comparator<? super T> comparator) {
+        boolean foundAny = false;
+        T max = null;
+        for(final T element : map.values()) {
+            if(!foundAny) {
+                max = element;
+                foundAny = true;
+            } else {
+                if(comparator.compare(max, element) < 0) {
+                    max = element;
+                }
+            }
+        }
+        return foundAny ? Optional.of(max) : Optional.empty();
     }
     
     @Nonnull
@@ -139,6 +260,6 @@ public class DefaultCacheView<T> implements CacheView<T> {
     @Nonnull
     @Override
     public Iterator<T> iterator() {
-        return map.values().iterator();
+        return Collections.unmodifiableCollection(map.values()).iterator();
     }
 }
