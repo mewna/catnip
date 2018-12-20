@@ -138,7 +138,6 @@ public class CachingBuffer extends AbstractBuffer {
                             // Remove READY guild if necessary, otherwise buffer
                             if(bufferState.readyGuilds().contains(guild)) {
                                 bufferState.recvGuild(guild);
-                                emitter().emit(event);
                                 
                                 if(catnip().chunkMembers() && memberCount > LARGE_THRESHOLD) {
                                     // If we're chunking members, calculate how many chunks we have to await
@@ -147,8 +146,9 @@ public class CachingBuffer extends AbstractBuffer {
                                         // Not a perfect 1k, add a chunk to make up for how math works
                                         chunks += 1;
                                     }
-                                    bufferState.initialGuildChunkCount(guild, chunks);
+                                    bufferState.initialGuildChunkCount(guild, chunks, event);
                                 } else {
+                                    emitter().emit(event);
                                     bufferState.replayGuild(guild);
                                     // Replay all buffered events once we run out
                                     if(bufferState.readyGuilds().isEmpty()) {
@@ -175,6 +175,7 @@ public class CachingBuffer extends AbstractBuffer {
                         cacheAndDispatch(type, d, event);
                         bufferState.acceptChunk(guild);
                         if(bufferState.doneChunking(guild)) {
+                            emitter().emit(bufferState.guildCreate(guild));
                             // If we're finished chunking that guild, defer doing everything needed
                             // by a little bit to allow chunk caching to finish
                             bufferState.replayGuild(guild);
@@ -243,7 +244,7 @@ public class CachingBuffer extends AbstractBuffer {
                 return Future.failedFuture(e);
             }
         } else {
-            return Future.succeededFuture(null);
+            return Future.succeededFuture();
         }
     }
     
@@ -279,12 +280,11 @@ public class CachingBuffer extends AbstractBuffer {
         }
         
         void replay() {
-            final int count = buffer.size();
             buffer.forEach(emitter()::emit);
         }
         
-        void initialGuildChunkCount(final String guild, final int count) {
-            guildChunkCount.put(guild, new Counter(count));
+        void initialGuildChunkCount(final String guild, final int count, final JsonObject guildCreate) {
+            guildChunkCount.put(guild, new Counter(count, guildCreate));
         }
         
         void acceptChunk(final String guild) {
@@ -295,6 +295,10 @@ public class CachingBuffer extends AbstractBuffer {
         boolean doneChunking(final String guild) {
             return guildChunkCount.get(guild).count() == 0;
         }
+        
+        JsonObject guildCreate(final String guild) {
+            return guildChunkCount.get(guild).guildCreate();
+        }
     }
     
     @Accessors(fluent = true)
@@ -302,6 +306,8 @@ public class CachingBuffer extends AbstractBuffer {
     private final class Counter {
         @Getter
         private int count;
+        @Getter
+        private final JsonObject guildCreate;
         
         void decrement() {
             --count;
