@@ -154,6 +154,7 @@ public class CatnipShard extends AbstractVerticle {
             if(stateRef.get() != null) {
                 while(!presenceQueue.isEmpty()) {
                     if(catnip.gatewayRatelimiter().checkRatelimit(websocketMessagePresenceUpdateAddress(), 60_000L, 5).left) {
+                        catnip.vertx().setTimer(1000, __ -> catnip.eventBus().publish(websocketMessagePresenceUpdatePollAddress(), null));
                         break;
                     }
                     final PresenceImpl update = presenceQueue.pop();
@@ -164,7 +165,6 @@ public class CatnipShard extends AbstractVerticle {
                     currentPresence.set(update);
                 }
             }
-            catnip.vertx().setTimer(500, __ -> catnip.eventBus().publish(websocketMessagePresenceUpdatePollAddress(), null));
         });
         catnip.eventBus().<JsonObject>consumer(websocketMessageVoiceStateUpdateQueueAddress(),
                 state -> catnip.eventBus().send(websocketMessageQueueAddress(), basePayload(
@@ -178,7 +178,8 @@ public class CatnipShard extends AbstractVerticle {
                     final ImmutablePair<Boolean, Long> check = catnip.gatewayRatelimiter()
                             .checkRatelimit("catnip:gateway:" + id + ":outgoing-send", 60_000L, 110);
                     if(check.left) {
-                        // We got ratelimited, stop sending
+                        // We got ratelimited, stop sending and try again in 1s
+                        catnip.vertx().setTimer(1000, __ -> catnip.eventBus().publish(websocketMessagePollAddress(), null));
                         break;
                     }
                     
@@ -186,12 +187,10 @@ public class CatnipShard extends AbstractVerticle {
                     catnip.eventBus().publish(websocketMessageSendAddress(), payload);
                 }
             }
-            // Poll again in half a second
-            catnip.vertx().setTimer(500, __ -> catnip.eventBus().publish(websocketMessagePollAddress(), null));
         });
         // Start gateway poll
-        catnip.eventBus().publish(websocketMessagePollAddress(), null);
-        catnip.eventBus().publish(websocketMessagePresenceUpdatePollAddress(), null);
+        //catnip.eventBus().publish(websocketMessagePollAddress(), null);
+        //catnip.eventBus().publish(websocketMessagePresenceUpdatePollAddress(), null);
     }
     
     @Override
@@ -408,10 +407,12 @@ public class CatnipShard extends AbstractVerticle {
     
     private void handleSocketQueue(final Message<JsonObject> msg) {
         messageQueue.addLast(msg.body());
+        catnip.eventBus().publish(websocketMessagePollAddress(), null);
     }
     
     private void handlePresenceUpdateQueue(final Message<PresenceImpl> msg) {
         presenceQueue.addLast(msg.body());
+        catnip.eventBus().publish(websocketMessagePresenceUpdatePollAddress(), null);
     }
     
     private void handleSocketSend(final Message<JsonObject> msg) {
