@@ -87,7 +87,7 @@ public interface ExtensionManager {
      * supplied class.
      */
     @Nonnull
-    <T extends Extension> Set<Extension> matchingExtensions(@Nonnull Class<T> extensionClass);
+    <T extends Extension> Set<? extends T> matchingExtensions(@Nonnull Class<T> extensionClass);
     
     /**
      * Return a single extension by class. If multiple extensions are loaded
@@ -101,12 +101,12 @@ public interface ExtensionManager {
      */
     @Nullable
     default <T extends Extension> T extension(@Nonnull final Class<T> extensionClass) {
-        final Set<Extension> extensions = matchingExtensions(extensionClass);
+        final Set<? extends T> extensions = matchingExtensions(extensionClass);
         if(extensions.isEmpty()) {
             return null;
         } else {
             //noinspection unchecked
-            return (T) extensions.iterator().next();
+            return extensions.iterator().next();
         }
     }
     

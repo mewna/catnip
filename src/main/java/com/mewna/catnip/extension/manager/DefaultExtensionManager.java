@@ -80,9 +80,10 @@ public class DefaultExtensionManager implements ExtensionManager {
     
     @Nonnull
     @Override
-    public <T extends Extension> Set<Extension> matchingExtensions(@Nonnull final Class<T> extensionClass) {
+    public <T extends Extension> Set<? extends T> matchingExtensions(@Nonnull final Class<T> extensionClass) {
         return ImmutableSet.copyOf(loadedExtensions.stream()
-                .filter(e -> extensionClass.isAssignableFrom(e.getClass()))
+                .filter(extensionClass::isInstance)
+                .map(extensionClass::cast)
                 .collect(Collectors.toSet()));
     }
     

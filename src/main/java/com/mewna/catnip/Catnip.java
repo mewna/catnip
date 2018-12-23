@@ -303,10 +303,10 @@ public interface Catnip {
      * worker without having to tell the end-user to specify options. By
      * default, options that get injected will be logged.
      *
-     * @param options   The options to inject.
      *
      * @param extension The extension injecting the options.
-     * @param optionsPatcher
+     * @param optionsPatcher Function responsible for updating the settings.
+     *
      * @return Itself.
      *
      * @throws IllegalArgumentException When the given extension isn't loaded.
