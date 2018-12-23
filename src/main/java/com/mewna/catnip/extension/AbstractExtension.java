@@ -30,7 +30,9 @@ package com.mewna.catnip.extension;
 import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.extension.hook.CatnipHook;
+import com.mewna.catnip.shard.EventType;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.impl.ConcurrentHashSet;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +42,7 @@ import lombok.experimental.Accessors;
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * @author amy
@@ -71,5 +74,17 @@ public abstract class AbstractExtension extends AbstractVerticle implements Exte
     @Override
     public Set<CatnipHook> hooks() {
         return ImmutableSet.copyOf(hooks);
+    }
+    
+    @Override
+    public <T> MessageConsumer<T> on(@Nonnull final EventType<T> type) {
+        final MessageConsumer<T> consumer = catnip().eventBus().consumer(type.key());
+        context.addCloseHook(consumer::unregister);
+        return consumer;
+    }
+    
+    @Override
+    public <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler) {
+        return on(type).handler(m -> handler.accept(m.body()));
     }
 }

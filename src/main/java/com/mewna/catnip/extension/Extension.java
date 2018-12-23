@@ -30,9 +30,11 @@ package com.mewna.catnip.extension;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.extension.hook.CatnipHook;
+import com.mewna.catnip.shard.EventType;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Verticle;
+import io.vertx.core.eventbus.MessageConsumer;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
@@ -146,6 +148,34 @@ public interface Extension extends Verticle {
         catnip().injectOptions(this, optionsPatcher);
         return this;
     }
+    
+    /**
+     * Add a consumer for the specified event type.
+     *
+     * This method behaves similarly to {@link Catnip#on(EventType)},
+     * but the event listeners are unregistered when the extension unloads
+     *
+     * @param type The type of event to listen on.
+     * @param <T>  The object type of event being listened on.
+     *
+     * @return The vert.x message consumer.
+     */
+    <T> MessageConsumer<T> on(@Nonnull EventType<T> type);
+    
+    /**
+     * Add a consumer for the specified event type with the given handler
+     * callback.
+     *
+     * This method behaves similarly to {@link Catnip#on(EventType, Consumer)},
+     * but the event listeners are unregistered when the extension unloads
+     *
+     * @param type    The type of event to listen on.
+     * @param handler The handler for the event object.
+     * @param <T>     The object type of event being listened on.
+     *
+     * @return The vert.x message consumer.
+     */
+    <T> MessageConsumer<T> on(@Nonnull EventType<T> type, @Nonnull Consumer<T> handler);
     
     String deploymentID();
 }
