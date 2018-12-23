@@ -55,6 +55,7 @@ import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.util.JsonPojoCodec;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.logging.LogAdapter;
+import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
@@ -361,6 +362,31 @@ public class CatnipImpl implements Catnip {
         
         // Shards
         codec(ShardInfo.class);
+    
+        //if we are in a vertx context, check whether or not it's a worker
+        //context. If it isn't (aka it's an event loop context), we can't safely
+        //block the thread, so it's better to just throw an exception instead,
+        //as the join() call below would deadlock.
+        //exception: if the context owner is a different vertx instance than
+        //the one we use, allow blocking but log a warn, as that case won't
+        //actually lead to a deadlock, but will still block an event loop thread.
+        final Context currentContext = Vertx.currentContext();
+        if(currentContext != null && currentContext.isEventLoopContext()) {
+            if(currentContext.owner() == vertx) {
+                throw new IllegalStateException(
+                        "Catnip instances cannot be created inside event loop threads " +
+                        "as that could cause a deadlock. Instantiate the Catnip object " +
+                        "in an executeBlocking() context."
+                );
+            } else {
+                logAdapter.warn(
+                        "Catnip instance created inside event loop thread. " +
+                        "Creating a catnip instance blocks the current thread, " +
+                        "which should not be done on event loop threads. Create the " +
+                        "Catnip instance in an executeBlocking() context instead.",
+                        new Throwable("Blocking method call location"));
+            }
+        }
         
         // Since this is running outside of the vert.x event loop when it's
         // called, we can safely block it to do this http request.
