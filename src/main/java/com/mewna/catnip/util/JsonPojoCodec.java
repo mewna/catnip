@@ -40,44 +40,42 @@ import io.vertx.core.json.JsonObject;
 public class JsonPojoCodec<T> implements MessageCodec<T, T> {
     private final Catnip catnip;
     private final Class<T> type;
-
+    
     @SuppressWarnings("unchecked")
     public JsonPojoCodec(final Catnip catnip, final Class<T> type) {
         this.catnip = catnip;
         this.type = type;
     }
-
+    
     @Override
     public void encodeToWire(final Buffer buffer, final T t) {
         byte[] data = JsonObject.mapFrom(t).encode().getBytes();
         buffer.appendInt(data.length);
         buffer.appendBytes(data);
     }
-
+    
     @Override
     public T decodeFromWire(final int pos, final Buffer buffer) {
         final int length = buffer.getInt(pos);
         final JsonObject data = new JsonObject(buffer.getString(pos + 4, pos + 4 + length));
         final T object = data.mapTo(type);
-        if (object instanceof RequiresCatnip) {
+        if(object instanceof RequiresCatnip)
             ((RequiresCatnip) object).catnip(catnip);
-        }
         return object;
     }
-
+    
     @Override
     public T transform(final T t) {
-        if (t instanceof RequiresCatnip) {
+        if(t instanceof RequiresCatnip)
             ((RequiresCatnip) t).catnip(catnip);
-        }
         return t;
     }
-
+    
     @Override
     public String name() {
         return "JsonPojoCodec-" + type.getName();
     }
-
+    
     @Override
     public byte systemCodecID() {
         return -1;
