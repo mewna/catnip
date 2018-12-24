@@ -101,6 +101,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
      */
     @SuppressWarnings("WeakerAccess")
     @Nonnull
+    @CheckReturnValue
     protected Function<Member, String> memberNameFunction() {
         return m -> {
             if(m.nick() != null) {
@@ -121,6 +122,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
      */
     @SuppressWarnings("WeakerAccess")
     @Nonnull
+    @CheckReturnValue
     protected MutableNamedCacheView<Guild> createGuildCacheView() {
         return createNamedCacheView(Guild::name);
     }
@@ -135,6 +137,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
      */
     @SuppressWarnings("WeakerAccess")
     @Nonnull
+    @CheckReturnValue
     protected MutableNamedCacheView<User> createUserCacheView() {
         return createNamedCacheView(User::username);
     }
@@ -149,6 +152,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
      */
     @SuppressWarnings("WeakerAccess")
     @Nonnull
+    @CheckReturnValue
     protected MutableCacheView<UserDMChannel> createDMChannelCacheView() {
         return createCacheView();
     }
@@ -163,6 +167,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
      */
     @SuppressWarnings("WeakerAccess")
     @Nonnull
+    @CheckReturnValue
     protected MutableCacheView<Presence> createPresenceCacheView() {
         return createCacheView();
     }
@@ -177,6 +182,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
      */
     @SuppressWarnings("WeakerAccess")
     @Nonnull
+    @CheckReturnValue
     protected MutableNamedCacheView<GuildChannel> createGuildChannelCacheView() {
         return createNamedCacheView(GuildChannel::name);
     }
@@ -191,6 +197,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
      */
     @SuppressWarnings("WeakerAccess")
     @Nonnull
+    @CheckReturnValue
     protected MutableNamedCacheView<Role> createRoleCacheView() {
         return createNamedCacheView(Role::name);
     }
@@ -205,6 +212,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
      */
     @SuppressWarnings("WeakerAccess")
     @Nonnull
+    @CheckReturnValue
     protected MutableNamedCacheView<Member> createMemberCacheView() {
         return createNamedCacheView(memberNameFunction());
     }
@@ -219,6 +227,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
      */
     @SuppressWarnings("WeakerAccess")
     @Nonnull
+    @CheckReturnValue
     protected MutableNamedCacheView<CustomEmoji> createEmojiCacheView() {
         return createNamedCacheView(CustomEmoji::name);
     }
@@ -231,6 +240,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
      *
      * @return A new cache view.
      */
+    @SuppressWarnings("WeakerAccess")
     @Nonnull
     @CheckReturnValue
     protected <T> MutableCacheView<T> createCacheView() {
@@ -245,6 +255,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
      *
      * @return A new named cache view.
      */
+    @SuppressWarnings("WeakerAccess")
     @Nonnull
     @CheckReturnValue
     protected <T> MutableNamedCacheView<T> createNamedCacheView(@Nonnull final Function<T, String> nameFunction) {
