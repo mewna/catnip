@@ -224,6 +224,19 @@ public class DefaultCacheViewTests {
     }
     
     @Test
+    public void count() {
+        final DefaultCacheView<String> cache = new DefaultCacheView<>();
+        Assertions.assertEquals(cache.count(__ -> true), 0);
+        cache.put("123", "some string");
+        Assertions.assertEquals(cache.count(__ -> true), 1);
+        cache.put("456", "some other string");
+        Assertions.assertEquals(cache.count(__ -> true), 2);
+        Assertions.assertEquals(cache.count("some string"::equals), 1);
+        Assertions.assertEquals(cache.count("some other string"::equals), 1);
+        Assertions.assertEquals(cache.count("yet another string"::equals), 0);
+    }
+    
+    @Test
     public void keys() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
         Assertions.assertTrue(cache.keys().isEmpty());

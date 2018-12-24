@@ -154,7 +154,8 @@ public interface CacheView<T> extends Iterable<T> {
      * @implNote Implementations should attempt to perform this operation without
      *           copying the elements of this view whenever possible.
      */
-    <A, R> R collect(Collector<? super T, A, R> collector);
+    @Nonnull
+    <A, R> R collect(@Nonnull Collector<? super T, A, R> collector);
     
     /**
      * Performs a mutable reduction operation on the elements of this cache.
@@ -178,7 +179,7 @@ public interface CacheView<T> extends Iterable<T> {
      * @implNote Implementations should attempt to perform this operation without
      *           copying the elements of this view whenever possible.
      */
-    <R> R collect(Supplier<R> supplier, BiConsumer<R, ? super T> accumulator, BiConsumer<R, R> combiner);
+    <R> R collect(@Nonnull Supplier<R> supplier, @Nonnull BiConsumer<R, ? super T> accumulator, @Nonnull BiConsumer<R, R> combiner);
     
     /**
      * Performs a reduction on the elements of this cache, using the
@@ -201,7 +202,7 @@ public interface CacheView<T> extends Iterable<T> {
      * @implNote Implementations should attempt to perform this operation without
      *           copying the elements of this view whenever possible.
      */
-    <U> U reduce(U identity, BiFunction<U, ? super T, U> accumulator, BinaryOperator<U> combiner);
+    <U> U reduce(U identity, @Nonnull BiFunction<U, ? super T, U> accumulator, @Nonnull BinaryOperator<U> combiner);
     
     /**
      * Performs a reduction on the elements of this cache, using an
@@ -221,7 +222,8 @@ public interface CacheView<T> extends Iterable<T> {
      * @implNote Implementations should attempt to perform this operation without
      *           copying the elements of this view whenever possible.
      */
-    Optional<T> reduce(BinaryOperator<T> accumulator);
+    @Nonnull
+    Optional<T> reduce(@Nonnull BinaryOperator<T> accumulator);
     
     /**
      * Performs a reduction on the elements of this cache, using the
@@ -239,7 +241,7 @@ public interface CacheView<T> extends Iterable<T> {
      * @implNote Implementations should attempt to perform this operation without
      *           copying the elements of this view whenever possible.
      */
-    T reduce(T identity, BinaryOperator<T> accumulator);
+    T reduce(T identity, @Nonnull BinaryOperator<T> accumulator);
     
     /**
      * Returns whether any elements of this cache match the provided
@@ -258,7 +260,7 @@ public interface CacheView<T> extends Iterable<T> {
      * @implNote Implementations should attempt to perform this operation without
      *           copying the elements of this view whenever possible.
      */
-    boolean anyMatch(Predicate<? super T> predicate);
+    boolean anyMatch(@Nonnull Predicate<? super T> predicate);
     
     /**
      * Returns whether all elements of this cache match the provided predicate.
@@ -277,7 +279,7 @@ public interface CacheView<T> extends Iterable<T> {
      * @implNote Implementations should attempt to perform this operation without
      *           copying the elements of this view whenever possible.
      */
-    boolean allMatch(Predicate<? super T> predicate);
+    boolean allMatch(@Nonnull Predicate<? super T> predicate);
     
     /**
      * Returns whether no elements of this cache match the provided predicate.
@@ -296,7 +298,7 @@ public interface CacheView<T> extends Iterable<T> {
      * @implNote Implementations should attempt to perform this operation without
      *           copying the elements of this view whenever possible.
      */
-    boolean noneMatch(Predicate<? super T> predicate);
+    boolean noneMatch(@Nonnull Predicate<? super T> predicate);
     
     /**
      * Returns the minimum element of this cache according to the provided
@@ -312,7 +314,8 @@ public interface CacheView<T> extends Iterable<T> {
      *
      * @see Stream#min(Comparator)
      */
-    Optional<T> min(Comparator<? super T> comparator);
+    @Nonnull
+    Optional<T> min(@Nonnull Comparator<? super T> comparator);
     
     /**
      * Returns the maximum element of this cache according to the provided
@@ -328,7 +331,18 @@ public interface CacheView<T> extends Iterable<T> {
      *
      * @see Stream#max(Comparator)
      */
-    Optional<T> max(Comparator<? super T> comparator);
+    @Nonnull
+    Optional<T> max(@Nonnull Comparator<? super T> comparator);
+    
+    /**
+     * Returns the amount of elements that match the provided predicate.
+     *
+     * @param filter Filter to find matching elements.
+     *
+     * @return Amount of matching elements.
+     */
+    @Nonnegative
+    long count(@Nonnull Predicate<? super T> filter);
     
     /**
      * @return A view of all the keys in this cache. Updated if this cache is modified.
@@ -382,6 +396,7 @@ public interface CacheView<T> extends Iterable<T> {
      * {@inheritDoc}
      */
     @Override
+    @Nonnull
     default Spliterator<T> spliterator() {
         return Spliterators.spliteratorUnknownSize(iterator(),
                 Spliterator.DISTINCT | Spliterator.NONNULL | Spliterator.IMMUTABLE);

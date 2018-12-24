@@ -274,7 +274,6 @@ public class CachingBuffer extends AbstractBuffer {
         void replayGuild(final String id) {
             if(guildBuffers.containsKey(id)) {
                 final Deque<JsonObject> queue = guildBuffers.get(id);
-                final int count = queue.size();
                 queue.forEach(emitter()::emit);
             }
         }

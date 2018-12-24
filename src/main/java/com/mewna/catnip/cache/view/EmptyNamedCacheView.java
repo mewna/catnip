@@ -30,6 +30,8 @@ package com.mewna.catnip.cache.view;
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * Always empty {@link NamedCacheView named cache view}.
@@ -49,8 +51,20 @@ public class EmptyNamedCacheView<T> extends EmptyCacheView<T> implements NamedCa
     
     @Nonnull
     @Override
+    public <C extends Collection<T>> C findByName(@Nonnull final String name, final boolean ignoreCase, @Nonnull final Supplier<C> supplier) {
+        return Objects.requireNonNull(supplier.get(), "Provided collection may not be null");
+    }
+    
+    @Nonnull
+    @Override
     public Collection<T> findByNameContains(@Nonnull final String name, final boolean ignoreCase) {
         return Collections.emptyList();
+    }
+    
+    @Nonnull
+    @Override
+    public <C extends Collection<T>> C findByNameContains(@Nonnull final String name, final boolean ignoreCase, @Nonnull final Supplier<C> supplier) {
+        return Objects.requireNonNull(supplier.get(), "Provided collection may not be null");
     }
     
     @Nonnull
@@ -61,7 +75,19 @@ public class EmptyNamedCacheView<T> extends EmptyCacheView<T> implements NamedCa
     
     @Nonnull
     @Override
+    public <C extends Collection<T>> C findByNameStartsWith(@Nonnull final String name, final boolean ignoreCase, @Nonnull final Supplier<C> supplier) {
+        return Objects.requireNonNull(supplier.get(), "Provided collection may not be null");
+    }
+    
+    @Nonnull
+    @Override
     public Collection<T> findByNameEndsWith(@Nonnull final String name, final boolean ignoreCase) {
         return Collections.emptyList();
+    }
+    
+    @Nonnull
+    @Override
+    public <C extends Collection<T>> C findByNameEndsWith(@Nonnull final String name, final boolean ignoreCase, @Nonnull final Supplier<C> supplier) {
+        return Objects.requireNonNull(supplier.get(), "Provided collection may not be null");
     }
 }

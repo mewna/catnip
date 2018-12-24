@@ -88,6 +88,9 @@ public class CatnipShard extends AbstractVerticle {
     private final Deque<JsonObject> messageQueue = new ConcurrentLinkedDeque<>();
     private final Deque<PresenceImpl> presenceQueue = new ConcurrentLinkedDeque<>();
     
+    private final AtomicBoolean presenceRateLimitRecheckQueued = new AtomicBoolean();
+    private final AtomicBoolean sendRateLimitRecheckQueued = new AtomicBoolean();
+    
     private List<String> trace = new ArrayList<>();
     
     public CatnipShard(@Nonnull final Catnip catnip, @Nonnegative final int id, @Nonnegative final int limit,
@@ -154,8 +157,13 @@ public class CatnipShard extends AbstractVerticle {
             if(stateRef.get() != null) {
                 while(!presenceQueue.isEmpty()) {
                     if(catnip.gatewayRatelimiter().checkRatelimit(websocketMessagePresenceUpdateAddress(), 60_000L, 5).left) {
+                        if(!presenceRateLimitRecheckQueued.get()) {
+                            presenceRateLimitRecheckQueued.set(true);
+                            catnip.vertx().setTimer(1000, __ -> catnip.eventBus().publish(websocketMessagePresenceUpdatePollAddress(), null));
+                        }
                         break;
                     }
+                    presenceRateLimitRecheckQueued.set(false);
                     final PresenceImpl update = presenceQueue.pop();
                     final JsonObject object = new JsonObject()
                             .put("op", GatewayOp.STATUS_UPDATE.opcode())
@@ -164,7 +172,6 @@ public class CatnipShard extends AbstractVerticle {
                     currentPresence.set(update);
                 }
             }
-            catnip.vertx().setTimer(500, __ -> catnip.eventBus().publish(websocketMessagePresenceUpdatePollAddress(), null));
         });
         catnip.eventBus().<JsonObject>consumer(websocketMessageVoiceStateUpdateQueueAddress(),
                 state -> catnip.eventBus().send(websocketMessageQueueAddress(), basePayload(
@@ -178,20 +185,22 @@ public class CatnipShard extends AbstractVerticle {
                     final ImmutablePair<Boolean, Long> check = catnip.gatewayRatelimiter()
                             .checkRatelimit("catnip:gateway:" + id + ":outgoing-send", 60_000L, 110);
                     if(check.left) {
-                        // We got ratelimited, stop sending
+                        // We got ratelimited, stop sending and try again in 1s
+                        if(!sendRateLimitRecheckQueued.get()) {
+                            sendRateLimitRecheckQueued.set(true);
+                            catnip.vertx().setTimer(1000, __ -> catnip.eventBus().publish(websocketMessagePollAddress(), null));
+                        }
                         break;
                     }
-                    
+                    sendRateLimitRecheckQueued.set(false);
                     final JsonObject payload = messageQueue.pop();
                     catnip.eventBus().publish(websocketMessageSendAddress(), payload);
                 }
             }
-            // Poll again in half a second
-            catnip.vertx().setTimer(500, __ -> catnip.eventBus().publish(websocketMessagePollAddress(), null));
         });
         // Start gateway poll
-        catnip.eventBus().publish(websocketMessagePollAddress(), null);
-        catnip.eventBus().publish(websocketMessagePresenceUpdatePollAddress(), null);
+        //catnip.eventBus().publish(websocketMessagePollAddress(), null);
+        //catnip.eventBus().publish(websocketMessagePresenceUpdatePollAddress(), null);
     }
     
     @Override
@@ -408,10 +417,12 @@ public class CatnipShard extends AbstractVerticle {
     
     private void handleSocketQueue(final Message<JsonObject> msg) {
         messageQueue.addLast(msg.body());
+        catnip.eventBus().publish(websocketMessagePollAddress(), null);
     }
     
     private void handlePresenceUpdateQueue(final Message<PresenceImpl> msg) {
         presenceQueue.addLast(msg.body());
+        catnip.eventBus().publish(websocketMessagePresenceUpdatePollAddress(), null);
     }
     
     private void handleSocketSend(final Message<JsonObject> msg) {
