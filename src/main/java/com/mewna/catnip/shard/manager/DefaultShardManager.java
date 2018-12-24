@@ -33,7 +33,6 @@ import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import okhttp3.OkHttpClient;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -57,8 +56,6 @@ public class DefaultShardManager extends AbstractShardManager {
     private final Collection<Integer> shardIds;
     @Getter
     private int shardCount;
-    @Getter
-    private OkHttpClient client;
     
     public DefaultShardManager() {
         this(0, new ArrayList<>());
@@ -106,7 +103,6 @@ public class DefaultShardManager extends AbstractShardManager {
     
     @Override
     public void start() {
-        client = new OkHttpClient();
         if(shardCount == 0) {
             // Load shard count from API
             catnip().rest().user().getGatewayBot().thenAccept(gatewayInfo -> {
