@@ -66,36 +66,201 @@ import static com.mewna.catnip.shard.DiscordEvent.Raw;
 @SuppressWarnings({"unused", "MismatchedQueryAndUpdateOfCollection"})
 public class MemoryEntityCache implements EntityCacheWorker {
     @SuppressWarnings("WeakerAccess")
-    protected final DefaultNamedCacheView<Guild> guildCache = new DefaultNamedCacheView<>(Guild::name);
+    protected final MutableNamedCacheView<Guild> guildCache = createGuildCacheView();
     @SuppressWarnings("WeakerAccess")
-    protected final DefaultNamedCacheView<User> userCache = new DefaultNamedCacheView<>(User::username);
+    protected final MutableNamedCacheView<User> userCache = createUserCacheView();
     @SuppressWarnings("WeakerAccess")
-    protected final DefaultCacheView<UserDMChannel> dmChannelCache = new DefaultCacheView<>();
+    protected final MutableCacheView<UserDMChannel> dmChannelCache = createDMChannelCacheView();
     @SuppressWarnings("WeakerAccess")
-    protected final Map<Long, DefaultNamedCacheView<Member>> memberCache = new ConcurrentHashMap<>();
+    protected final Map<Long, MutableNamedCacheView<Member>> memberCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
-    protected final Map<Long, DefaultNamedCacheView<Role>> roleCache = new ConcurrentHashMap<>();
+    protected final Map<Long, MutableNamedCacheView<Role>> roleCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
-    protected final Map<Long, DefaultNamedCacheView<GuildChannel>> guildChannelCache = new ConcurrentHashMap<>();
+    protected final Map<Long, MutableNamedCacheView<GuildChannel>> guildChannelCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
-    protected final Map<Long, DefaultNamedCacheView<CustomEmoji>> emojiCache = new ConcurrentHashMap<>();
+    protected final Map<Long, MutableNamedCacheView<CustomEmoji>> emojiCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
-    protected final Map<Long, DefaultCacheView<VoiceState>> voiceStateCache = new ConcurrentHashMap<>();
+    protected final Map<Long, MutableCacheView<VoiceState>> voiceStateCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
-    protected final DefaultCacheView<Presence> presenceCache = new DefaultCacheView<>();
+    protected final MutableCacheView<Presence> presenceCache = createPresenceCacheView();
     @SuppressWarnings("WeakerAccess")
     protected final AtomicReference<User> selfUser = new AtomicReference<>(null);
-    @SuppressWarnings("WeakerAccess")
-    protected final Function<Member, String> memberNameFunction = m -> {
-        if(m.nick() != null) {
-            return m.nick();
-        }
-        final User u = user(m.id());
-        return u == null ? null : u.username();
-    };
     @Getter
     private Catnip catnip;
     private EntityBuilder entityBuilder;
+    
+    /**
+     * Function used to map members to their name, for named cache views.
+     * Used by the default {@link #createMemberCacheView()} and
+     * {@link #members()} implementations.
+     *
+     * Defaults to returning a member's effective name, which is their
+     * nickname, if present, or their username.
+     *
+     * @return Function used to map members to their name.
+     */
+    @SuppressWarnings("WeakerAccess")
+    @Nonnull
+    @CheckReturnValue
+    protected Function<Member, String> memberNameFunction() {
+        return m -> {
+            if(m.nick() != null) {
+                return m.nick();
+            }
+            final User u = user(m.id());
+            return u == null ? null : u.username();
+        };
+    }
+    
+    /**
+     * Creates a new guild cache view. Subclasses can override this method to
+     * use a different cache view implementation.
+     *
+     * @return A new guild cache view.
+     *
+     * @implNote Default to calling {@link #createNamedCacheView(Function)}
+     */
+    @SuppressWarnings("WeakerAccess")
+    @Nonnull
+    @CheckReturnValue
+    protected MutableNamedCacheView<Guild> createGuildCacheView() {
+        return createNamedCacheView(Guild::name);
+    }
+    
+    /**
+     * Creates a new user cache view. Subclasses can override this method to
+     * use a different cache view implementation.
+     *
+     * @return A new user cache view.
+     *
+     * @implNote Default to calling {@link #createNamedCacheView(Function)}
+     */
+    @SuppressWarnings("WeakerAccess")
+    @Nonnull
+    @CheckReturnValue
+    protected MutableNamedCacheView<User> createUserCacheView() {
+        return createNamedCacheView(User::username);
+    }
+    
+    /**
+     * Creates a new DM channel cache view. Subclasses can override this method to
+     * use a different cache view implementation.
+     *
+     * @return A new DM channel cache view.
+     *
+     * @implNote Default to calling {@link #createCacheView()}
+     */
+    @SuppressWarnings("WeakerAccess")
+    @Nonnull
+    @CheckReturnValue
+    protected MutableCacheView<UserDMChannel> createDMChannelCacheView() {
+        return createCacheView();
+    }
+    
+    /**
+     * Creates a new presence cache view. Subclasses can override this method to
+     * use a different cache view implementation.
+     *
+     * @return A new presence cache view.
+     *
+     * @implNote Default to calling {@link #createCacheView()}
+     */
+    @SuppressWarnings("WeakerAccess")
+    @Nonnull
+    @CheckReturnValue
+    protected MutableCacheView<Presence> createPresenceCacheView() {
+        return createCacheView();
+    }
+    
+    /**
+     * Creates a new guild channel cache view. Subclasses can override this method to
+     * use a different cache view implementation.
+     *
+     * @return A new guild channel cache view.
+     *
+     * @implNote Default to calling {@link #createNamedCacheView(Function)}
+     */
+    @SuppressWarnings("WeakerAccess")
+    @Nonnull
+    @CheckReturnValue
+    protected MutableNamedCacheView<GuildChannel> createGuildChannelCacheView() {
+        return createNamedCacheView(GuildChannel::name);
+    }
+    
+    /**
+     * Creates a new role cache view. Subclasses can override this method to
+     * use a different cache view implementation.
+     *
+     * @return A new role cache view.
+     *
+     * @implNote Default to calling {@link #createNamedCacheView(Function)}
+     */
+    @SuppressWarnings("WeakerAccess")
+    @Nonnull
+    @CheckReturnValue
+    protected MutableNamedCacheView<Role> createRoleCacheView() {
+        return createNamedCacheView(Role::name);
+    }
+    
+    /**
+     * Creates a new member cache view. Subclasses can override this method to
+     * use a different cache view implementation.
+     *
+     * @return A new member cache view.
+     *
+     * @implNote Default to calling {@link #createNamedCacheView(Function)}
+     */
+    @SuppressWarnings("WeakerAccess")
+    @Nonnull
+    @CheckReturnValue
+    protected MutableNamedCacheView<Member> createMemberCacheView() {
+        return createNamedCacheView(memberNameFunction());
+    }
+    
+    /**
+     * Creates a new emoji cache view. Subclasses can override this method to
+     * use a different cache view implementation.
+     *
+     * @return A new emoji cache view.
+     *
+     * @implNote Default to calling {@link #createNamedCacheView(Function)}
+     */
+    @SuppressWarnings("WeakerAccess")
+    @Nonnull
+    @CheckReturnValue
+    protected MutableNamedCacheView<CustomEmoji> createEmojiCacheView() {
+        return createNamedCacheView(CustomEmoji::name);
+    }
+    
+    /**
+     * Creates a new cache view. Subclasses can override this method to
+     * use a different cache view implementation.
+     *
+     * @param <T> Type of the elements to be held by this view.
+     *
+     * @return A new cache view.
+     */
+    @SuppressWarnings("WeakerAccess")
+    @Nonnull
+    @CheckReturnValue
+    protected <T> MutableCacheView<T> createCacheView() {
+        return new DefaultCacheView<>();
+    }
+    
+    /**
+     * Creates a new named cache view. Subclasses can override this method to
+     * use a different cache view implementation.
+     *
+     * @param <T> Type of the elements to be held by this view.
+     *
+     * @return A new named cache view.
+     */
+    @SuppressWarnings("WeakerAccess")
+    @Nonnull
+    @CheckReturnValue
+    protected <T> MutableNamedCacheView<T> createNamedCacheView(@Nonnull final Function<T, String> nameFunction) {
+        return new DefaultNamedCacheView<>(nameFunction);
+    }
     
     @Nonnull
     @CheckReturnValue
@@ -118,7 +283,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
         if(channel.isGuild()) {
             final GuildChannel gc = (GuildChannel) channel;
             guildChannelCache.computeIfAbsent(Long.parseUnsignedLong(gc.guildId()),
-                    __ -> new DefaultNamedCacheView<>(GuildChannel::name))
+                    __ -> createGuildChannelCacheView())
                     .put(gc.id(), gc);
         } else if(channel.isUserDM()) {
             final UserDMChannel dm = (UserDMChannel) channel;
@@ -132,7 +297,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
     }
     
     private void cacheRole(final Role role) {
-        roleCache.computeIfAbsent(Long.parseUnsignedLong(role.guildId()), __ -> new DefaultNamedCacheView<>(Role::name))
+        roleCache.computeIfAbsent(Long.parseUnsignedLong(role.guildId()), __ -> createRoleCacheView())
                 .put(role.id(), role);
     }
     
@@ -141,13 +306,13 @@ public class MemoryEntityCache implements EntityCacheWorker {
     }
     
     private void cacheMember(final Member member) {
-        memberCache.computeIfAbsent(Long.parseUnsignedLong(member.guildId()), __ -> new DefaultNamedCacheView<>(memberNameFunction))
+        memberCache.computeIfAbsent(Long.parseUnsignedLong(member.guildId()), __ -> createMemberCacheView())
                 .put(member.id(), member);
     }
     
     private void cacheEmoji(final CustomEmoji emoji) {
         emojiCache.computeIfAbsent(Long.parseUnsignedLong(Objects.requireNonNull(emoji.guildId(), "Cannot cache emoji with null guild id!")),
-                __ -> new DefaultNamedCacheView<>(CustomEmoji::name))
+                __ -> createEmojiCacheView())
                 .put(emoji.id(), emoji);
     }
     
@@ -179,7 +344,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 final Channel channel = entityBuilder.createChannel(payload);
                 if(channel.isGuild()) {
                     final GuildChannel gc = (GuildChannel) channel;
-                    final DefaultNamedCacheView<GuildChannel> channels = guildChannelCache.get(Long.parseLong(gc.guildId()));
+                    final MutableNamedCacheView<GuildChannel> channels = guildChannelCache.get(Long.parseLong(gc.guildId()));
                     if(channels != null) {
                         channels.remove(gc.id());
                     }
@@ -346,7 +511,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
             catnip.logAdapter().warn("Not caching voice state for {} due to null guild", state.userId());
             return;
         }
-        voiceStateCache.computeIfAbsent(Long.parseUnsignedLong(guild), __ -> new DefaultCacheView<>())
+        voiceStateCache.computeIfAbsent(Long.parseUnsignedLong(guild), __ -> createCacheView())
                 .put(state.userId(), state);
     }
     
@@ -418,21 +583,21 @@ public class MemoryEntityCache implements EntityCacheWorker {
     @Nullable
     @Override
     public Member member(final long guildId, final long id) {
-        final DefaultCacheView<Member> cache = memberCache.get(guildId);
+        final MutableNamedCacheView<Member> cache = memberCache.get(guildId);
         return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
     public NamedCacheView<Member> members(final long guildId) {
-        final DefaultNamedCacheView<Member> cache = memberCache.get(guildId);
+        final MutableNamedCacheView<Member> cache = memberCache.get(guildId);
         return cache == null ? NamedCacheView.empty() : cache;
     }
     
     @Nonnull
     @Override
     public NamedCacheView<Member> members() {
-        return new CompositeNamedCacheView<>(memberCache.values(), memberNameFunction);
+        return new CompositeNamedCacheView<>(memberCache.values(), memberNameFunction());
     }
     
     @Nonnull
@@ -444,14 +609,14 @@ public class MemoryEntityCache implements EntityCacheWorker {
     @Nullable
     @Override
     public Role role(final long guildId, final long id) {
-        final DefaultCacheView<Role> cache = roleCache.get(guildId);
+        final MutableNamedCacheView<Role> cache = roleCache.get(guildId);
         return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
     public NamedCacheView<Role> roles(final long guildId) {
-        final DefaultNamedCacheView<Role> cache = roleCache.get(guildId);
+        final MutableNamedCacheView<Role> cache = roleCache.get(guildId);
         return cache == null ? NamedCacheView.empty() : cache;
     }
     
@@ -464,14 +629,14 @@ public class MemoryEntityCache implements EntityCacheWorker {
     @Nullable
     @Override
     public GuildChannel channel(final long guildId, final long id) {
-        final DefaultNamedCacheView<GuildChannel> cache = guildChannelCache.get(guildId);
+        final MutableNamedCacheView<GuildChannel> cache = guildChannelCache.get(guildId);
         return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
     public NamedCacheView<GuildChannel> channels(final long guildId) {
-        final DefaultNamedCacheView<GuildChannel> cache = guildChannelCache.get(guildId);
+        final MutableNamedCacheView<GuildChannel> cache = guildChannelCache.get(guildId);
         return cache == null ? NamedCacheView.empty() : cache;
     }
     
@@ -496,14 +661,14 @@ public class MemoryEntityCache implements EntityCacheWorker {
     @Nullable
     @Override
     public CustomEmoji emoji(final long guildId, final long id) {
-        final DefaultCacheView<CustomEmoji> cache = emojiCache.get(guildId);
+        final MutableNamedCacheView<CustomEmoji> cache = emojiCache.get(guildId);
         return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
     public NamedCacheView<CustomEmoji> emojis(final long guildId) {
-        final DefaultNamedCacheView<CustomEmoji> cache = emojiCache.get(guildId);
+        final MutableNamedCacheView<CustomEmoji> cache = emojiCache.get(guildId);
         return cache == null ? NamedCacheView.empty() : cache;
     }
     
@@ -516,14 +681,14 @@ public class MemoryEntityCache implements EntityCacheWorker {
     @Nullable
     @Override
     public VoiceState voiceState(final long guildId, final long id) {
-        final DefaultCacheView<VoiceState> cache = voiceStateCache.get(guildId);
+        final MutableCacheView<VoiceState> cache = voiceStateCache.get(guildId);
         return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
     public CacheView<VoiceState> voiceStates(final long guildId) {
-        final DefaultCacheView<VoiceState> cache = voiceStateCache.get(guildId);
+        final MutableCacheView<VoiceState> cache = voiceStateCache.get(guildId);
         return cache == null ? CacheView.empty() : cache;
     }
     
