@@ -88,6 +88,9 @@ public class CatnipShard extends AbstractVerticle {
     private final Deque<JsonObject> messageQueue = new ConcurrentLinkedDeque<>();
     private final Deque<PresenceImpl> presenceQueue = new ConcurrentLinkedDeque<>();
     
+    private final AtomicBoolean presenceRateLimitRecheckQueued = new AtomicBoolean();
+    private final AtomicBoolean sendRateLimitRecheckQueued = new AtomicBoolean();
+    
     private List<String> trace = new ArrayList<>();
     
     public CatnipShard(@Nonnull final Catnip catnip, @Nonnegative final int id, @Nonnegative final int limit,
@@ -154,9 +157,13 @@ public class CatnipShard extends AbstractVerticle {
             if(stateRef.get() != null) {
                 while(!presenceQueue.isEmpty()) {
                     if(catnip.gatewayRatelimiter().checkRatelimit(websocketMessagePresenceUpdateAddress(), 60_000L, 5).left) {
-                        catnip.vertx().setTimer(1000, __ -> catnip.eventBus().publish(websocketMessagePresenceUpdatePollAddress(), null));
+                        if(!presenceRateLimitRecheckQueued.get()) {
+                            presenceRateLimitRecheckQueued.set(true);
+                            catnip.vertx().setTimer(1000, __ -> catnip.eventBus().publish(websocketMessagePresenceUpdatePollAddress(), null));
+                        }
                         break;
                     }
+                    presenceRateLimitRecheckQueued.set(false);
                     final PresenceImpl update = presenceQueue.pop();
                     final JsonObject object = new JsonObject()
                             .put("op", GatewayOp.STATUS_UPDATE.opcode())
@@ -179,10 +186,13 @@ public class CatnipShard extends AbstractVerticle {
                             .checkRatelimit("catnip:gateway:" + id + ":outgoing-send", 60_000L, 110);
                     if(check.left) {
                         // We got ratelimited, stop sending and try again in 1s
-                        catnip.vertx().setTimer(1000, __ -> catnip.eventBus().publish(websocketMessagePollAddress(), null));
+                        if(!sendRateLimitRecheckQueued.get()) {
+                            sendRateLimitRecheckQueued.set(true);
+                            catnip.vertx().setTimer(1000, __ -> catnip.eventBus().publish(websocketMessagePollAddress(), null));
+                        }
                         break;
                     }
-                    
+                    sendRateLimitRecheckQueued.set(false);
                     final JsonObject payload = messageQueue.pop();
                     catnip.eventBus().publish(websocketMessageSendAddress(), payload);
                 }
