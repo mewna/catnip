@@ -49,14 +49,15 @@ public class JsonPojoCodec<T> implements MessageCodec<T, T> {
     
     @Override
     public void encodeToWire(final Buffer buffer, final T t) {
-        buffer.appendString(JsonObject.mapFrom(t).encode());
+        byte[] data = JsonObject.mapFrom(t).encode().getBytes();
+        buffer.appendInt(data.length);
+        buffer.appendBytes(data);
     }
     
     @Override
     public T decodeFromWire(final int pos, final Buffer buffer) {
-        final Buffer out = Buffer.buffer();
-        buffer.readFromBuffer(pos, out);
-        final JsonObject data = new JsonObject(out.getString(0, out.length()));
+        final int length = buffer.getInt(pos);
+        final JsonObject data = new JsonObject(buffer.getString(pos + 4, pos + 4 + length));
         final T object = data.mapTo(type);
         if(object instanceof RequiresCatnip) {
             ((RequiresCatnip) object).catnip(catnip);
