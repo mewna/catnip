@@ -30,8 +30,10 @@ package com.mewna.catnip.cache.view;
 import com.mewna.catnip.util.Utils;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Default {@link NamedCacheView NamedCacheView} implementation.
@@ -41,7 +43,7 @@ import java.util.function.Function;
  * @author natanbc
  * @since 12/15/18
  */
-public class DefaultNamedCacheView<T> extends DefaultCacheView<T> implements NamedCacheView<T> {
+public class DefaultNamedCacheView<T> extends DefaultCacheView<T> implements MutableNamedCacheView<T> {
     private final Function<T, String> nameFunction;
     
     public DefaultNamedCacheView(final Function<T, String> nameFunction) {
@@ -51,25 +53,49 @@ public class DefaultNamedCacheView<T> extends DefaultCacheView<T> implements Nam
     @Nonnull
     @Override
     public Collection<T> findByName(@Nonnull final String name, final boolean ignoreCase) {
-        return find(e -> ignoreCase ? name(e).equalsIgnoreCase(name) : name(e).equals(name));
+        return findByName(name, ignoreCase, ArrayList::new);
+    }
+    
+    @Nonnull
+    @Override
+    public <C extends Collection<T>> C findByName(@Nonnull final String name, final boolean ignoreCase, @Nonnull final Supplier<C> supplier) {
+        return find(e -> ignoreCase ? name(e).equalsIgnoreCase(name) : name(e).equals(name), supplier);
     }
     
     @Nonnull
     @Override
     public Collection<T> findByNameContains(@Nonnull final String name, final boolean ignoreCase) {
-        return find(e -> ignoreCase ? Utils.containsIgnoreCase(name(e), name) : name(e).contains(name));
+        return findByNameContains(name, ignoreCase, ArrayList::new);
+    }
+    
+    @Nonnull
+    @Override
+    public <C extends Collection<T>> C findByNameContains(@Nonnull final String name, final boolean ignoreCase, @Nonnull final Supplier<C> supplier) {
+        return find(e -> ignoreCase ? Utils.containsIgnoreCase(name(e), name) : name(e).contains(name), supplier);
     }
     
     @Nonnull
     @Override
     public Collection<T> findByNameStartsWith(@Nonnull final String name, final boolean ignoreCase) {
-        return find(e -> ignoreCase ? Utils.startsWithIgnoreCase(name(e), name) : name(e).startsWith(name));
+        return findByNameStartsWith(name, ignoreCase, ArrayList::new);
+    }
+    
+    @Nonnull
+    @Override
+    public <C extends Collection<T>> C findByNameStartsWith(@Nonnull final String name, final boolean ignoreCase, @Nonnull final Supplier<C> supplier) {
+        return find(e -> ignoreCase ? Utils.startsWithIgnoreCase(name(e), name) : name(e).startsWith(name), supplier);
     }
     
     @Nonnull
     @Override
     public Collection<T> findByNameEndsWith(@Nonnull final String name, final boolean ignoreCase) {
-        return find(e -> ignoreCase ? Utils.endsWithIgnoreCase(name(e), name) : name(e).endsWith(name));
+        return findByNameEndsWith(name, ignoreCase, ArrayList::new);
+    }
+    
+    @Nonnull
+    @Override
+    public <C extends Collection<T>> C findByNameEndsWith(@Nonnull final String name, final boolean ignoreCase, @Nonnull final Supplier<C> supplier) {
+        return find(e -> ignoreCase ? Utils.endsWithIgnoreCase(name(e), name) : name(e).endsWith(name), supplier);
     }
     
     private String name(@Nonnull final T element) {
