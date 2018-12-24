@@ -89,6 +89,16 @@ public class MemoryEntityCache implements EntityCacheWorker {
     private Catnip catnip;
     private EntityBuilder entityBuilder;
     
+    /**
+     * Function used to map members to their name, for named cache views.
+     * Used by the default {@link #createMemberCacheView()} and
+     * {@link #members()} implementations.
+     *
+     * Defaults to returning a member's effective name, which is their
+     * nickname, if present, or their username.
+     *
+     * @return Function used to map members to their name.
+     */
     @SuppressWarnings("WeakerAccess")
     @Nonnull
     protected Function<Member, String> memberNameFunction() {
