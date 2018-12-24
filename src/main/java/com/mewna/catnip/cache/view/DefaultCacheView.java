@@ -27,13 +27,13 @@
 
 package com.mewna.catnip.cache.view;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.*;
 import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 /**
  * Default {@link CacheView CacheView} implementation.
@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  * @author natanbc
  * @since 12/15/18
  */
-public class DefaultCacheView<T> implements CacheView<T> {
+public class DefaultCacheView<T> implements MutableCacheView<T> {
     protected final Map<Long, T> map = new ConcurrentHashMap<>();
     
     @Nonnull
@@ -52,21 +52,25 @@ public class DefaultCacheView<T> implements CacheView<T> {
     }
     
     @Nullable
+    @Override
     public T put(final long key, @Nonnull final T value) {
         return map.put(key, value);
     }
     
     @Nullable
+    @Override
     public T put(@Nonnull final String key, @Nonnull final T value) {
         return put(Long.parseUnsignedLong(key), value);
     }
     
     @Nullable
+    @Override
     public T remove(final long key) {
         return map.remove(key);
     }
     
     @Nullable
+    @Override
     public T remove(@Nonnull final String key) {
         return remove(Long.parseUnsignedLong(key));
     }
@@ -76,6 +80,7 @@ public class DefaultCacheView<T> implements CacheView<T> {
         map.values().forEach(action);
     }
     
+    @Nonnegative
     @Override
     public long size() {
         return map.size();
@@ -103,24 +108,24 @@ public class DefaultCacheView<T> implements CacheView<T> {
     @Nonnull
     @Override
     public Collection<T> find(@Nonnull final Predicate<? super T> filter) {
-        return map.values()
-                .stream()
-                .filter(filter)
-                .collect(Collectors.toList());
+        return find(filter, ArrayList::new);
     }
     
     @Nonnull
     @Override
     public <C extends Collection<T>> C find(@Nonnull final Predicate<? super T> filter, @Nonnull final Supplier<C> supplier) {
         final C collection = Objects.requireNonNull(supplier.get(), "Provided collection may not be null");
-        return map.values()
-                .stream()
-                .filter(filter)
-                .collect(Collectors.toCollection(() -> collection));
+        for(final T element : map.values()) {
+            if(filter.test(element)) {
+                collection.add(element);
+            }
+        }
+        return collection;
     }
     
+    @Nonnull
     @Override
-    public <A, R> R collect(final Collector<? super T, A, R> collector) {
+    public <A, R> R collect(@Nonnull final Collector<? super T, A, R> collector) {
         final A a = collector.supplier().get();
         final BiConsumer<A, ? super T> accumulator = collector.accumulator();
         for(final T element : map.values()) {
@@ -130,7 +135,7 @@ public class DefaultCacheView<T> implements CacheView<T> {
     }
     
     @Override
-    public <R> R collect(final Supplier<R> supplier, final BiConsumer<R, ? super T> accumulator, final BiConsumer<R, R> combiner) {
+    public <R> R collect(@Nonnull final Supplier<R> supplier, @Nonnull final BiConsumer<R, ? super T> accumulator, @Nonnull final BiConsumer<R, R> combiner) {
         final R result = supplier.get();
         for(final T element : map.values()) {
             accumulator.accept(result, element);
@@ -139,7 +144,7 @@ public class DefaultCacheView<T> implements CacheView<T> {
     }
     
     @Override
-    public <U> U reduce(final U identity, final BiFunction<U, ? super T, U> accumulator, final BinaryOperator<U> combiner) {
+    public <U> U reduce(final U identity, @Nonnull final BiFunction<U, ? super T, U> accumulator, @Nonnull final BinaryOperator<U> combiner) {
         U result = identity;
         for(final T element : map.values()) {
             result = accumulator.apply(result, element);
@@ -147,8 +152,9 @@ public class DefaultCacheView<T> implements CacheView<T> {
         return result;
     }
     
+    @Nonnull
     @Override
-    public Optional<T> reduce(final BinaryOperator<T> accumulator) {
+    public Optional<T> reduce(@Nonnull final BinaryOperator<T> accumulator) {
         boolean foundAny = false;
         T result = null;
         for(final T element : map.values()) {
@@ -163,7 +169,7 @@ public class DefaultCacheView<T> implements CacheView<T> {
     }
     
     @Override
-    public T reduce(final T identity, final BinaryOperator<T> accumulator) {
+    public T reduce(final T identity, @Nonnull final BinaryOperator<T> accumulator) {
         T result = identity;
         for (final T element : map.values()) {
             result = accumulator.apply(result, element);
@@ -172,7 +178,7 @@ public class DefaultCacheView<T> implements CacheView<T> {
     }
     
     @Override
-    public boolean anyMatch(final Predicate<? super T> predicate) {
+    public boolean anyMatch(@Nonnull final Predicate<? super T> predicate) {
         for(final T element : map.values()) {
             if(predicate.test(element)) {
                 return true;
@@ -182,7 +188,7 @@ public class DefaultCacheView<T> implements CacheView<T> {
     }
     
     @Override
-    public boolean allMatch(final Predicate<? super T> predicate) {
+    public boolean allMatch(@Nonnull final Predicate<? super T> predicate) {
         for(final T element : map.values()) {
             if(!predicate.test(element)) {
                 return false;
@@ -192,12 +198,13 @@ public class DefaultCacheView<T> implements CacheView<T> {
     }
     
     @Override
-    public boolean noneMatch(final Predicate<? super T> predicate) {
+    public boolean noneMatch(@Nonnull final Predicate<? super T> predicate) {
         return !anyMatch(predicate);
     }
     
+    @Nonnull
     @Override
-    public Optional<T> min(final Comparator<? super T> comparator) {
+    public Optional<T> min(@Nonnull final Comparator<? super T> comparator) {
         boolean foundAny = false;
         T min = null;
         for(final T element : map.values()) {
@@ -213,8 +220,9 @@ public class DefaultCacheView<T> implements CacheView<T> {
         return foundAny ? Optional.of(min) : Optional.empty();
     }
     
+    @Nonnull
     @Override
-    public Optional<T> max(final Comparator<? super T> comparator) {
+    public Optional<T> max(@Nonnull final Comparator<? super T> comparator) {
         boolean foundAny = false;
         T max = null;
         for(final T element : map.values()) {
@@ -228,6 +236,17 @@ public class DefaultCacheView<T> implements CacheView<T> {
             }
         }
         return foundAny ? Optional.of(max) : Optional.empty();
+    }
+    
+    @Override
+    public long count(@Nonnull final Predicate<? super T> filter) {
+        long count = 0;
+        for(final T element : map.values()) {
+            if(filter.test(element)) {
+                count++;
+            }
+        }
+        return count;
     }
     
     @Nonnull
