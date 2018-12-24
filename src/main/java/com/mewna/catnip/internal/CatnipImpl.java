@@ -128,7 +128,7 @@ public class CatnipImpl implements Catnip {
         enforcePermissions = options.enforcePermissions();
         initialPresence = options.presence();
         disabledEvents = ImmutableSet.copyOf(options.disabledEvents());
-    
+        
         injectSelf();
     }
     
@@ -362,7 +362,7 @@ public class CatnipImpl implements Catnip {
         
         // Shards
         codec(ShardInfo.class);
-    
+        
         //if we are in a vertx context, check whether or not it's a worker
         //context. If it isn't (aka it's an event loop context), we can't safely
         //block the thread, so it's better to just throw an exception instead,
@@ -375,15 +375,15 @@ public class CatnipImpl implements Catnip {
             if(currentContext.owner() == vertx) {
                 throw new IllegalStateException(
                         "Catnip instances cannot be created inside event loop threads " +
-                        "as that could cause a deadlock. Instantiate the Catnip object " +
-                        "in an executeBlocking() context."
+                                "as that could cause a deadlock. Instantiate the Catnip object " +
+                                "in an executeBlocking() context."
                 );
             } else {
                 logAdapter.warn(
                         "Catnip instance created inside event loop thread. " +
-                        "Creating a catnip instance blocks the current thread, " +
-                        "which should not be done on event loop threads. Create the " +
-                        "Catnip instance in an executeBlocking() context instead.",
+                                "Creating a catnip instance blocks the current thread, " +
+                                "which should not be done on event loop threads. Create the " +
+                                "Catnip instance in an executeBlocking() context instead.",
                         new Throwable("Blocking method call location"));
             }
         }
@@ -409,7 +409,13 @@ public class CatnipImpl implements Catnip {
     }
     
     private <T> void codec(@Nonnull final Class<T> cls) {
-        eventBus().registerDefaultCodec(cls, new JsonPojoCodec<>(this, cls));
+        try {
+            eventBus().registerDefaultCodec(cls, new JsonPojoCodec<>(this, cls));
+        } catch(final IllegalStateException e) {
+            logAdapter.debug("Couldn't register the codec for {} because it's already registered." +
+                    "This is probably because you're running multiple catnip instances on the same vert.x" +
+                    "instance. If you're sure this is correct, you can ignore this warning.", cls.getName(), e);
+        }
     }
     
     @Nonnull
