@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.cache.view;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.*;
@@ -55,6 +56,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
         }
     }
     
+    @Nonnegative
     @Override
     public long size() {
         long s = 0;
@@ -116,8 +118,9 @@ public class CompositeCacheView<T> implements CacheView<T> {
         return collection;
     }
     
+    @Nonnull
     @Override
-    public <A, R> R collect(final Collector<? super T, A, R> collector) {
+    public <A, R> R collect(@Nonnull final Collector<? super T, A, R> collector) {
         final A a = collector.supplier().get();
         final BiConsumer<A, ? super T> accumulator = collector.accumulator();
         forEach(element -> accumulator.accept(a, element));
@@ -125,14 +128,14 @@ public class CompositeCacheView<T> implements CacheView<T> {
     }
     
     @Override
-    public <R> R collect(final Supplier<R> supplier, final BiConsumer<R, ? super T> accumulator, final BiConsumer<R, R> combiner) {
+    public <R> R collect(@Nonnull final Supplier<R> supplier, @Nonnull final BiConsumer<R, ? super T> accumulator, @Nonnull final BiConsumer<R, R> combiner) {
         final R result = supplier.get();
         forEach(element -> accumulator.accept(result, element));
         return result;
     }
     
     @Override
-    public <U> U reduce(final U identity, final BiFunction<U, ? super T, U> accumulator, final BinaryOperator<U> combiner) {
+    public <U> U reduce(final U identity, @Nonnull final BiFunction<U, ? super T, U> accumulator, @Nonnull final BinaryOperator<U> combiner) {
         U result = identity;
         for(final CacheView<T> view : sources) {
             result = view.reduce(result, accumulator, combiner);
@@ -140,8 +143,9 @@ public class CompositeCacheView<T> implements CacheView<T> {
         return result;
     }
     
+    @Nonnull
     @Override
-    public Optional<T> reduce(final BinaryOperator<T> accumulator) {
+    public Optional<T> reduce(@Nonnull final BinaryOperator<T> accumulator) {
         boolean foundAny = false;
         T result = null;
         for(final CacheView<T> view : sources) {
@@ -160,7 +164,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
     }
     
     @Override
-    public T reduce(final T identity, final BinaryOperator<T> accumulator) {
+    public T reduce(final T identity, @Nonnull final BinaryOperator<T> accumulator) {
         T result = identity;
         for(final CacheView<T> view : sources) {
             result = view.reduce(result, accumulator);
@@ -169,7 +173,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
     }
     
     @Override
-    public boolean anyMatch(final Predicate<? super T> predicate) {
+    public boolean anyMatch(@Nonnull final Predicate<? super T> predicate) {
         for(final CacheView<T> view : sources) {
             if(view.anyMatch(predicate)) {
                 return true;
@@ -179,7 +183,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
     }
     
     @Override
-    public boolean allMatch(final Predicate<? super T> predicate) {
+    public boolean allMatch(@Nonnull final Predicate<? super T> predicate) {
         for(final CacheView<T> view : sources) {
             if(!view.allMatch(predicate)) {
                 return false;
@@ -188,8 +192,9 @@ public class CompositeCacheView<T> implements CacheView<T> {
         return true;
     }
     
+    @Nonnull
     @Override
-    public Optional<T> min(final Comparator<? super T> comparator) {
+    public Optional<T> min(@Nonnull final Comparator<? super T> comparator) {
         boolean foundAny = false;
         T min = null;
         for(final CacheView<T> view : sources) {
@@ -210,8 +215,9 @@ public class CompositeCacheView<T> implements CacheView<T> {
         return foundAny ? Optional.of(min) : Optional.empty();
     }
     
+    @Nonnull
     @Override
-    public Optional<T> max(final Comparator<? super T> comparator) {
+    public Optional<T> max(@Nonnull final Comparator<? super T> comparator) {
         boolean foundAny = false;
         T max = null;
         for(final CacheView<T> view : sources) {
@@ -232,8 +238,18 @@ public class CompositeCacheView<T> implements CacheView<T> {
         return foundAny ? Optional.of(max) : Optional.empty();
     }
     
+    @Nonnegative
     @Override
-    public boolean noneMatch(final Predicate<? super T> predicate) {
+    public long count(@Nonnull final Predicate<? super T> filter) {
+        long count = 0;
+        for(final CacheView<T> view : sources) {
+            count += view.count(filter);
+        }
+        return count;
+    }
+    
+    @Override
+    public boolean noneMatch(@Nonnull final Predicate<? super T> predicate) {
         return !anyMatch(predicate);
     }
     
