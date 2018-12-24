@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.cache.view;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.*;
@@ -44,9 +45,10 @@ public class EmptyCacheView<T> implements CacheView<T> {
     
     @Override
     public void forEach(final Consumer<? super T> action) {
-    
+        //noop
     }
     
+    @Nonnegative
     @Override
     public long size() {
         return 0;
@@ -76,57 +78,69 @@ public class EmptyCacheView<T> implements CacheView<T> {
     @Nonnull
     @Override
     public <C extends Collection<T>> C find(@Nonnull final Predicate<? super T> filter, @Nonnull final Supplier<C> supplier) {
-        return supplier.get();
+        return Objects.requireNonNull(supplier.get(), "Provided collection may not be null");
     }
     
+    @Nonnull
     @Override
-    public <A, R> R collect(final Collector<? super T, A, R> collector) {
+    public <A, R> R collect(@Nonnull final Collector<? super T, A, R> collector) {
         return collector.finisher().apply(collector.supplier().get());
     }
     
+    @Nonnull
     @Override
-    public <R> R collect(final Supplier<R> supplier, final BiConsumer<R, ? super T> accumulator, final BiConsumer<R, R> combiner) {
+    public <R> R collect(@Nonnull final Supplier<R> supplier, @Nonnull final BiConsumer<R, ? super T> accumulator, @Nonnull final BiConsumer<R, R> combiner) {
         return supplier.get();
     }
     
+    @Nonnull
     @Override
-    public <U> U reduce(final U identity, final BiFunction<U, ? super T, U> accumulator, final BinaryOperator<U> combiner) {
+    public <U> U reduce(final U identity, @Nonnull final BiFunction<U, ? super T, U> accumulator, @Nonnull  final BinaryOperator<U> combiner) {
         return identity;
     }
     
+    @Nonnull
     @Override
-    public Optional<T> reduce(final BinaryOperator<T> accumulator) {
+    public Optional<T> reduce(@Nonnull final BinaryOperator<T> accumulator) {
         return Optional.empty();
     }
     
     @Override
-    public T reduce(final T identity, final BinaryOperator<T> accumulator) {
+    public T reduce(@Nonnull final T identity, @Nonnull final BinaryOperator<T> accumulator) {
         return identity;
     }
     
     @Override
-    public boolean anyMatch(final Predicate<? super T> predicate) {
+    public boolean anyMatch(@Nonnull final Predicate<? super T> predicate) {
         return false;
     }
     
     @Override
-    public boolean allMatch(final Predicate<? super T> predicate) {
+    public boolean allMatch(@Nonnull final Predicate<? super T> predicate) {
         return true;
     }
     
     @Override
-    public boolean noneMatch(final Predicate<? super T> predicate) {
+    public boolean noneMatch(@Nonnull final Predicate<? super T> predicate) {
         return true;
     }
     
+    @Nonnull
     @Override
-    public Optional<T> min(final Comparator<? super T> comparator) {
+    public Optional<T> min(@Nonnull final Comparator<? super T> comparator) {
         return Optional.empty();
     }
     
+    @Nonnull
     @Override
-    public Optional<T> max(final Comparator<? super T> comparator) {
+    public Optional<T> max(@Nonnull final Comparator<? super T> comparator) {
         return Optional.empty();
+    }
+    
+    @Nonnegative
+    @Override
+    public long count(@Nonnull final Predicate<? super T> filter) {
+        return 0;
     }
     
     @Nonnull
@@ -150,7 +164,7 @@ public class EmptyCacheView<T> implements CacheView<T> {
     @Nonnull
     @Override
     public <C extends Collection<T>> C snapshot(@Nonnull final Supplier<C> supplier) {
-        return supplier.get();
+        return Objects.requireNonNull(supplier.get(), "Provided collection may not be null");
     }
     
     @Nonnull
