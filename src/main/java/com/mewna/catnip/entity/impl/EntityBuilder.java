@@ -303,20 +303,14 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public TextChannel createTextChannel(@Nonnull final JsonObject data) {
-        return createTextChannel(data.getString("guild_id"), data);
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    public TextChannel createTextChannel(@Nullable final String guildId, @Nonnull final JsonObject data) {
+    public TextChannel createTextChannel(@Nonnull final String guildId, @Nonnull final JsonObject data) {
         return TextChannelImpl.builder()
                 .catnip(catnip)
-                .id(data.getString("id"))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .name(data.getString("name"))
-                .guildId(guildId)
+                .guildIdAsLong(Long.parseUnsignedLong(guildId))
                 .position(data.getInteger("position", -1))
-                .parentId(data.getString("parent_id"))
+                .parentIdAsLong(Long.parseUnsignedLong(data.getString("parent_id")))
                 .overrides(immutableListOf(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
                 .topic(data.getString("topic"))
                 .nsfw(data.getBoolean("nsfw", false))
@@ -326,20 +320,14 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public VoiceChannel createVoiceChannel(@Nonnull final JsonObject data) {
-        return createVoiceChannel(data.getString("guild_id"), data);
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    public VoiceChannel createVoiceChannel(@Nullable final String guildId, @Nonnull final JsonObject data) {
+    public VoiceChannel createVoiceChannel(@Nonnull final String guildId, @Nonnull final JsonObject data) {
         return VoiceChannelImpl.builder()
                 .catnip(catnip)
-                .id(data.getString("id"))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .name(data.getString("name"))
-                .guildId(guildId)
+                .guildIdAsLong(Long.parseUnsignedLong(guildId))
                 .position(data.getInteger("position", -1))
-                .parentId(data.getString("parent_id"))
+                .parentIdAsLong(Long.parseUnsignedLong(data.getString("parent_id")))
                 .overrides(immutableListOf(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
                 .bitrate(data.getInteger("bitrate", 0))
                 .userLimit(data.getInteger("user_limit", 0))
@@ -348,20 +336,13 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Category createCategory(@Nonnull final JsonObject data) {
-        return createCategory(data.getString("guild_id"), data);
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    public Category createCategory(@Nullable final String guildId, @Nonnull final JsonObject data) {
+    public Category createCategory(@Nonnull final String guildId, @Nonnull final JsonObject data) {
         return CategoryImpl.builder()
                 .catnip(catnip)
-                .id(data.getString("id"))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .name(data.getString("name"))
-                .guildId(guildId)
+                .guildIdAsLong(Long.parseUnsignedLong(guildId))
                 .position(data.getInteger("position", -1))
-                .parentId(data.getString("parent_id"))
                 .overrides(immutableListOf(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
                 .build();
     }
@@ -371,8 +352,8 @@ public final class EntityBuilder {
     public UserDMChannel createUserDM(@Nonnull final JsonObject data) {
         return UserDMChannelImpl.builder()
                 .catnip(catnip)
-                .id(data.getString("id"))
-                .userId(data.getJsonArray("recipients").getJsonObject(0).getString("id"))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .userIdAsLong(Long.parseUnsignedLong(data.getJsonArray("recipients").getJsonObject(0).getString("id")))
                 .build();
     }
     
@@ -381,11 +362,11 @@ public final class EntityBuilder {
     public GroupDMChannel createGroupDM(@Nonnull final JsonObject data) {
         return GroupDMChannelImpl.builder()
                 .catnip(catnip)
-                .id(data.getString("id"))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .recipients(immutableListOf(data.getJsonArray("recipients"), this::createUser))
                 .icon(data.getString("icon"))
-                .ownerId(data.getString("owner_id"))
-                .applicationId(data.getString("application_id"))
+                .ownerIdAsLong(Long.parseUnsignedLong(data.getString("owner_id")))
+                .applicationIdAsLong(Long.parseUnsignedLong(data.getString("application_id")))
                 .build();
     }
     

@@ -53,11 +53,11 @@ public class VoiceChannelImpl implements VoiceChannel, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String id;
+    private long idAsLong;
     private String name;
-    private String guildId;
+    private long guildIdAsLong;
     private int position;
-    private String parentId;
+    private long parentIdAsLong;
     private List<PermissionOverride> overrides;
     private int bitrate;
     private int userLimit;
@@ -69,12 +69,12 @@ public class VoiceChannelImpl implements VoiceChannel, RequiresCatnip {
     
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Long.hashCode(idAsLong);
     }
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof VoiceChannel && ((VoiceChannel) obj).id().equals(id);
+        return obj instanceof VoiceChannel && ((VoiceChannel) obj).idAsLong() == idAsLong;
     }
     
     @Override
