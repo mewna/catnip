@@ -54,8 +54,8 @@ public class MemberImpl implements Member, RequiresCatnip, Timestamped {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String id;
-    private String guildId;
+    private long idAsLong;
+    private long guildIdAsLong;
     private String nick;
     private Set<String> roleIds;
     private String joinedAt;
@@ -75,16 +75,16 @@ public class MemberImpl implements Member, RequiresCatnip, Timestamped {
     
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Long.hashCode(idAsLong);
     }
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Member && ((Member) obj).id().equals(id);
+        return obj instanceof Member && ((Member) obj).idAsLong() == idAsLong;
     }
     
     @Override
     public String toString() {
-        return String.format("Member (%s, %s)", id, nick);
+        return String.format("Member (%s, %s)", idAsLong, nick);
     }
 }

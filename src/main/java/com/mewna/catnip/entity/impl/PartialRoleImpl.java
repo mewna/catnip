@@ -51,8 +51,8 @@ public class PartialRoleImpl implements PartialRole, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String id;
-    private String guildId;
+    private long idAsLong;
+    private long guildIdAsLong;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
@@ -61,16 +61,16 @@ public class PartialRoleImpl implements PartialRole, RequiresCatnip {
     
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Long.hashCode(idAsLong);
     }
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof PartialRole && ((PartialRole) obj).id().equals(id);
+        return obj instanceof PartialRole && ((PartialRole) obj).idAsLong() == idAsLong;
     }
     
     @Override
     public String toString() {
-        return String.format("PartialRole (%s)", id);
+        return String.format("PartialRole (%s)", idAsLong);
     }
 }
