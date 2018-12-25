@@ -304,13 +304,14 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public TextChannel createTextChannel(@Nonnull final String guildId, @Nonnull final JsonObject data) {
+        final String parentId = data.getString("parent_id");
         return TextChannelImpl.builder()
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .name(data.getString("name"))
                 .guildIdAsLong(Long.parseUnsignedLong(guildId))
                 .position(data.getInteger("position", -1))
-                .parentIdAsLong(Long.parseUnsignedLong(data.getString("parent_id")))
+                .parentIdAsLong(parentId == null ? 0 : Long.parseUnsignedLong(parentId))
                 .overrides(immutableListOf(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
                 .topic(data.getString("topic"))
                 .nsfw(data.getBoolean("nsfw", false))
@@ -321,13 +322,14 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public VoiceChannel createVoiceChannel(@Nonnull final String guildId, @Nonnull final JsonObject data) {
+        final String parentId = data.getString("parent_id");
         return VoiceChannelImpl.builder()
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .name(data.getString("name"))
                 .guildIdAsLong(Long.parseUnsignedLong(guildId))
                 .position(data.getInteger("position", -1))
-                .parentIdAsLong(Long.parseUnsignedLong(data.getString("parent_id")))
+                .parentIdAsLong(parentId == null ? 0 : Long.parseUnsignedLong(parentId))
                 .overrides(immutableListOf(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
                 .bitrate(data.getInteger("bitrate", 0))
                 .userLimit(data.getInteger("user_limit", 0))
