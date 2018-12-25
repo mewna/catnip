@@ -61,25 +61,35 @@ public class RestUser extends RestHandler {
     public RestUser(final CatnipImpl catnip) {
         super(catnip);
     }
-    
+
     @Nonnull
     @CheckReturnValue
     public CompletionStage<User> getCurrentUser() {
+        return getCurrentUserRaw().thenApply(getEntityBuilder()::createUser);
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> getCurrentUserRaw() {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_CURRENT_USER,
                 ImmutableMap.of()))
-                .thenApply(ResponsePayload::object)
-                .thenApply(getEntityBuilder()::createUser);
+                .thenApply(ResponsePayload::object);
     }
-    
+
     @Nonnull
     @CheckReturnValue
     public CompletionStage<User> getUser(@Nonnull final String userId) {
+        return getUserRaw(userId).thenApply(getEntityBuilder()::createUser);
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> getUserRaw(@Nonnull final String userId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_USER,
                 ImmutableMap.of("user.id", userId)))
-                .thenApply(ResponsePayload::object)
-                .thenApply(getEntityBuilder()::createUser);
+                .thenApply(ResponsePayload::object);
     }
-    
+
     @Nonnull
     public CompletionStage<User> modifyCurrentUser(@Nullable final String username, @Nullable final URI avatarData) {
         final JsonObject body = new JsonObject();
@@ -88,10 +98,15 @@ public class RestUser extends RestHandler {
             body.put("avatar", avatarData.toString());
         }
         body.put("username", username);
+
+        return modifyCurrentUserRaw(body).thenApply(getEntityBuilder()::createUser);
+    }
+
+    @Nonnull
+    public CompletionStage<JsonObject> modifyCurrentUserRaw(@Nonnull final JsonObject body) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.MODIFY_CURRENT_USER,
                 ImmutableMap.of(), body))
-                .thenApply(ResponsePayload::object)
-                .thenApply(getEntityBuilder()::createUser);
+                .thenApply(ResponsePayload::object);
     }
     
     @Nonnull
@@ -118,12 +133,10 @@ public class RestUser extends RestHandler {
         return getCurrentUserGuildsRaw(before, after, limit)
                 .thenApply(mapObjectContents(getEntityBuilder()::createPartialGuild));
     }
-    
-    //TODO make public when we add raw methods for the other routes
-    //keeping this private for consistency with the rest of the methods
+
     @Nonnull
     @CheckReturnValue
-    private CompletionStage<JsonArray> getCurrentUserGuildsRaw(@Nullable final String before, @Nullable final String after,
+    public CompletionStage<JsonArray> getCurrentUserGuildsRaw(@Nullable final String before, @Nullable final String after,
                                                                @Nonnegative final int limit) {
         final Collection<String> params = new ArrayList<>();
         if(before != null) {
@@ -143,14 +156,19 @@ public class RestUser extends RestHandler {
                 ImmutableMap.of()))
                 .thenApply(ResponsePayload::array);
     }
-    
+
     @Nonnull
     @CheckReturnValue
     public CompletionStage<DMChannel> createDM(@Nonnull final String recipientId) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_DM,
-                ImmutableMap.of(), new JsonObject().put("recipient_id", recipientId)))
-                .thenApply(ResponsePayload::object)
+        return createDMRaw(new JsonObject().put("recipient_id", recipientId))
                 .thenApply(getEntityBuilder()::createUserDM);
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> createDMRaw(@Nonnull final JsonObject body) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_DM, ImmutableMap.of(), body))
+                .thenApply(ResponsePayload::object);
     }
     
     @Nonnull
@@ -159,21 +177,31 @@ public class RestUser extends RestHandler {
                 ImmutableMap.of()))
                 .thenApply(__ -> null);
     }
-    
+
     @Nonnull
     @CheckReturnValue
     public CompletionStage<ApplicationInfo> getCurrentApplicationInformation() {
+        return getCurrentApplicationInformationRaw().thenApply(getEntityBuilder()::createApplicationInfo);
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> getCurrentApplicationInformationRaw() {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_CURRENT_APPLICATION_INFORMATION,
                 ImmutableMap.of()))
-                .thenApply(ResponsePayload::object)
-                .thenApply(getEntityBuilder()::createApplicationInfo);
+                .thenApply(ResponsePayload::object);
     }
-    
+
     @Nonnull
     @CheckReturnValue
     public CompletionStage<GatewayInfo> getGatewayBot() {
+        return getGatewayBotRaw().thenApply(e -> getEntityBuilder().createGatewayInfo(e));
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> getGatewayBotRaw() {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GATEWAY_BOT, ImmutableMap.of()))
-                .thenApply(ResponsePayload::object)
-                .thenApply(e -> getEntityBuilder().createGatewayInfo(e));
+                .thenApply(ResponsePayload::object);
     }
 }
