@@ -371,7 +371,7 @@ public class CatnipImpl implements Catnip {
         //the one we use, allow blocking but log a warn, as that case won't
         //actually lead to a deadlock, but will still block an event loop thread.
         final Context currentContext = Vertx.currentContext();
-        if(currentContext != null && currentContext.isEventLoopContext()) {
+        if(currentContext != null && Context.isOnEventLoopThread()) {
             if(currentContext.owner() == vertx) {
                 throw new IllegalStateException(
                         "Catnip instances cannot be created inside event loop threads " +
