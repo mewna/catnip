@@ -33,6 +33,9 @@ import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.misc.Ready;
 import com.mewna.catnip.entity.misc.Resumed;
+import com.mewna.catnip.entity.user.Presence;
+import com.mewna.catnip.entity.user.Presence.OnlineStatus;
+import com.mewna.catnip.entity.user.PresenceUpdate;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.internal.CatnipImpl;
 import io.vertx.core.json.JsonArray;
@@ -239,7 +242,13 @@ public final class DispatchEmitter {
                 break;
             }
             case Raw.PRESENCE_UPDATE: {
-                catnip.eventBus().publish(type, entityBuilder.createPresenceUpdate(data));
+                final PresenceUpdate presence = entityBuilder.createPresenceUpdate(data);
+                if(presence.status() == OnlineStatus.INVISIBLE) {
+                    catnip.logAdapter().warn("Received a presence update with 'invisible' as the online status, " +
+                            "but we should never get this. If you report this to Discord, include the following " +
+                            "JSON in your report: {}", payload.encodePrettily());
+                }
+                catnip.eventBus().publish(type, presence);
                 break;
             }
             
