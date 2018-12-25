@@ -33,6 +33,7 @@ import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
+import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -46,22 +47,32 @@ public class RestInvite extends RestHandler {
     public RestInvite(final CatnipImpl catnip) {
         super(catnip);
     }
-    
+
     @Nonnull
     @CheckReturnValue
     public CompletionStage<Invite> getInvite(@Nonnull final String code) {
+        return getInviteRaw(code).thenApply(getEntityBuilder()::createInvite);
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> getInviteRaw(@Nonnull final String code) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_INVITE,
                 ImmutableMap.of("invite.code", code)))
-                .thenApply(ResponsePayload::object)
-                .thenApply(getEntityBuilder()::createInvite);
+                .thenApply(ResponsePayload::object);
     }
-    
+
     @Nonnull
     @CheckReturnValue
     public CompletionStage<Invite> deleteInvite(@Nonnull final String code) {
+        return deleteInviteRaw(code).thenApply(getEntityBuilder()::createInvite);
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> deleteInviteRaw(@Nonnull final String code) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_INVITE,
                 ImmutableMap.of("invite.code", code)))
-                .thenApply(ResponsePayload::object)
-                .thenApply(getEntityBuilder()::createInvite);
+                .thenApply(ResponsePayload::object);
     }
 }

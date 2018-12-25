@@ -102,59 +102,89 @@ public class RestGuild extends RestHandler {
                         ImmutableMap.of(), array))
                 .thenApply(__ -> null);
     }
-    
+
     @Nonnull
     @CheckReturnValue
     @SuppressWarnings("TypeMayBeWeakened")
     public CompletionStage<GuildChannel> createGuildChannel(@Nonnull final String guildId, @Nonnull final ChannelData data) {
+        return createGuildChannelRaw(guildId, data).thenApply(getEntityBuilder()::createGuildChannel);
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> createGuildChannelRaw(@Nonnull final String guildId, @Nonnull final ChannelData data) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.CREATE_GUILD_CHANNEL.withMajorParam(guildId),
                         ImmutableMap.of(), data.toJson()))
-                .thenApply(ResponsePayload::object)
-                .thenApply(getEntityBuilder()::createGuildChannel);
+                .thenApply(ResponsePayload::object);
     }
-    
+
     @Nonnull
     @CheckReturnValue
     public CompletionStage<GuildEmbed> getGuildEmbed(@Nonnull final String guildId) {
+        return getGuildEmbedRaw(guildId).thenApply(getEntityBuilder()::createGuildEmbed);
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> getGuildEmbedRaw(@Nonnull final String guildId) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.GET_GUILD_EMBED.withMajorParam(guildId),
                         ImmutableMap.of()))
-                .thenApply(ResponsePayload::object)
-                .thenApply(getEntityBuilder()::createGuildEmbed);
+                .thenApply(ResponsePayload::object);
     }
-    
+
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<GuildEmbed> modifyGuildEmbed(@Nonnull final String guildId, @Nullable final String channelId, final boolean enabled) {
+    public CompletionStage<GuildEmbed> modifyGuildEmbed(@Nonnull final String guildId, @Nullable final String channelId,
+                                                        final boolean enabled) {
+        return modifyGuildEmbedRaw(guildId, channelId, enabled).thenApply(getEntityBuilder()::createGuildEmbed);
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> modifyGuildEmbedRaw(@Nonnull final String guildId, @Nullable final String channelId,
+                                                        final boolean enabled) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.MODIFY_GUILD_EMBED.withMajorParam(guildId),
                         ImmutableMap.of(), new JsonObject().put("channel_id", channelId).put("enabled", enabled)))
-                .thenApply(ResponsePayload::object)
-                .thenApply(getEntityBuilder()::createGuildEmbed);
+                .thenApply(ResponsePayload::object);
     }
-    
+
     @Nonnull
     @CheckReturnValue
     @SuppressWarnings("TypeMayBeWeakened")
     public CompletionStage<Role> createGuildRole(@Nonnull final String guildId, @Nonnull final RoleData roleData) {
+        return createGuildRoleRaw(guildId, roleData).thenApply(obj -> getEntityBuilder().createRole(guildId, obj));
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> createGuildRoleRaw(@Nonnull final String guildId, @Nonnull final RoleData roleData) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.CREATE_GUILD_ROLE.withMajorParam(guildId),
                         ImmutableMap.of(), roleData.toJson()))
-                .thenApply(ResponsePayload::object)
-                .thenApply(obj -> getEntityBuilder().createRole(guildId, obj));
+                .thenApply(ResponsePayload::object);
     }
-    
+
+
     @Nonnull
     @CheckReturnValue
     @SuppressWarnings("TypeMayBeWeakened")
     public CompletionStage<Role> modifyGuildRole(@Nonnull final String guildId, @Nonnull final String roleId,
                                                  @Nonnull final RoleData roleData) {
+        return modifyGuildRoleRaw(guildId, roleId, roleData)
+                .thenApply(obj -> getEntityBuilder().createRole(guildId, obj));
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> modifyGuildRoleRaw(@Nonnull final String guildId, @Nonnull final String roleId,
+                                                 @Nonnull final RoleData roleData) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.MODIFY_GUILD_ROLE.withMajorParam(guildId),
                         ImmutableMap.of("role.id", roleId), roleData.toJson()))
-                .thenApply(ResponsePayload::object)
-                .thenApply(obj -> getEntityBuilder().createRole(guildId, obj));
+                .thenApply(ResponsePayload::object);
     }
     
     @Nonnull
@@ -165,36 +195,52 @@ public class RestGuild extends RestHandler {
                         ImmutableMap.of("role.id", roleId)))
                 .thenApply(__ -> null);
     }
-    
+
     @Nonnull
     @CheckReturnValue
     public CompletionStage<List<Role>> getGuildRoles(@Nonnull final String guildId) {
-        return getCatnip().requester()
-                .queue(new OutboundRequest(Routes.GET_GUILD_ROLES.withMajorParam(guildId),
-                        ImmutableMap.of()))
-                .thenApply(ResponsePayload::array)
+        return getGuildRolesRaw(guildId)
                 .thenApply(mapObjectContents(e -> getEntityBuilder().createRole(guildId, e)))
                 .thenApply(Collections::unmodifiableList);
     }
-    
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonArray> getGuildRolesRaw(@Nonnull final String guildId) {
+        return getCatnip().requester()
+                .queue(new OutboundRequest(Routes.GET_GUILD_ROLES.withMajorParam(guildId),
+                        ImmutableMap.of()))
+                .thenApply(ResponsePayload::array);
+    }
+
     @Nonnull
     @CheckReturnValue
     public CompletionStage<Guild> getGuild(@Nonnull final String guildId) {
+        return getGuildRaw(guildId).thenApply(getEntityBuilder()::createGuild);
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> getGuildRaw(@Nonnull final String guildId) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.GET_GUILD.withMajorParam(guildId),
                         ImmutableMap.of()))
-                .thenApply(ResponsePayload::object)
-                .thenApply(getEntityBuilder()::createGuild);
+                .thenApply(ResponsePayload::object);
     }
-    
+
     @Nonnull
     @CheckReturnValue
     public CompletionStage<Guild> createGuild(@Nonnull final GuildData guild) {
+        return createGuildRaw(guild.toJson()).thenApply(getEntityBuilder()::createGuild);
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> createGuildRaw(@Nonnull final JsonObject guild) {
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.CREATE_GUILD,
-                        ImmutableMap.of(), guild.toJson()))
-                .thenApply(ResponsePayload::object)
-                .thenApply(getEntityBuilder()::createGuild);
+                        ImmutableMap.of(), guild))
+                .thenApply(ResponsePayload::object);
     }
     
     @Nonnull
@@ -204,35 +250,50 @@ public class RestGuild extends RestHandler {
                         ImmutableMap.of()))
                 .thenApply(__ -> null);
     }
-    
+
     @Nonnull
     @CheckReturnValue
     public CompletionStage<List<GuildChannel>> getGuildChannels(@Nonnull final String guildId) {
-        return getCatnip().requester()
-                .queue(new OutboundRequest(Routes.GET_GUILD_CHANNELS.withMajorParam(guildId),
-                        ImmutableMap.of()))
-                .thenApply(ResponsePayload::array)
+        return getGuildChannelsRaw(guildId)
                 .thenApply(mapObjectContents(getEntityBuilder()::createChannel))
                 // All elements are guaranteed to be instances of GuildChannel,
                 // so it's safe to do a cast, plus this way we avoid copying the list.
                 .thenApply(RestHandler::uncheckedCast);
     }
-    
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonArray> getGuildChannelsRaw(@Nonnull final String guildId) {
+        return getCatnip().requester()
+                .queue(new OutboundRequest(Routes.GET_GUILD_CHANNELS.withMajorParam(guildId),
+                        ImmutableMap.of()))
+                .thenApply(ResponsePayload::array);
+    }
+
     @Nonnull
     @CheckReturnValue
     public CompletionStage<List<CreatedInvite>> getGuildInvites(@Nonnull final String guildId) {
+        return getGuildInvitesRaw(guildId).thenApply(mapObjectContents(getEntityBuilder()::createCreatedInvite));
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonArray> getGuildInvitesRaw(@Nonnull final String guildId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_INVITES.withMajorParam(guildId),
                 ImmutableMap.of()))
-                .thenApply(ResponsePayload::array)
-                .thenApply(mapObjectContents(getEntityBuilder()::createCreatedInvite));
+                .thenApply(ResponsePayload::array);
     }
-    
+
     @Nonnull
     public CompletionStage<Guild> modifyGuild(@Nonnull final String guildId, @Nonnull final GuildEditFields fields) {
+        return modifyGuildRaw(guildId, fields.payload()).thenApply(getEntityBuilder()::createGuild);
+    }
+
+    @Nonnull
+    public CompletionStage<JsonObject> modifyGuildRaw(@Nonnull final String guildId, @Nonnull final JsonObject fields) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.MODIFY_GUILD.withMajorParam(guildId),
-                ImmutableMap.of(), fields.payload()))
-                .thenApply(ResponsePayload::object)
-                .thenApply(getEntityBuilder()::createGuild);
+                ImmutableMap.of(), fields))
+                .thenApply(ResponsePayload::object);
     }
     
     @Nonnull
@@ -254,12 +315,10 @@ public class RestGuild extends RestHandler {
         return listGuildMembersRaw(guildId, limit, after)
                 .thenApply(mapObjectContents(o -> getEntityBuilder().createMember(guildId, o)));
     }
-    
-    //TODO make public when we add raw methods for the other routes
-    //keeping this private for consistency with the rest of the methods
+
     @Nonnull
     @CheckReturnValue
-    private CompletionStage<JsonArray> listGuildMembersRaw(@Nonnull final String guildId, @Nonnegative final int limit,
+    public CompletionStage<JsonArray> listGuildMembersRaw(@Nonnull final String guildId, @Nonnegative final int limit,
                                                            @Nullable final String after) {
         final Collection<String> params = new ArrayList<>();
         if(limit > 0) {
@@ -276,23 +335,33 @@ public class RestGuild extends RestHandler {
                 ImmutableMap.of()))
                 .thenApply(ResponsePayload::array);
     }
-    
+
     @Nonnull
     @CheckReturnValue
     public CompletionStage<List<GuildBan>> getGuildBans(@Nonnull final String guildId) {
+        return getGuildBansRaw(guildId).thenApply(mapObjectContents(getEntityBuilder()::createGuildBan));
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonArray> getGuildBansRaw(@Nonnull final String guildId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BANS.withMajorParam(guildId),
                 ImmutableMap.of()))
-                .thenApply(ResponsePayload::array)
-                .thenApply(mapObjectContents(getEntityBuilder()::createGuildBan));
+                .thenApply(ResponsePayload::array);
     }
-    
+
     @Nonnull
     @CheckReturnValue
     public CompletionStage<GuildBan> getGuildBan(@Nonnull final String guildId, @Nonnull final String userId) {
+        return getGuildBanRaw(guildId, userId).thenApply(getEntityBuilder()::createGuildBan);
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> getGuildBanRaw(@Nonnull final String guildId, @Nonnull final String userId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BAN.withMajorParam(guildId),
                 ImmutableMap.of("user.id", userId)))
-                .thenApply(ResponsePayload::object)
-                .thenApply(getEntityBuilder()::createGuildBan);
+                .thenApply(ResponsePayload::object);
     }
     
     @Nonnull
@@ -335,14 +404,19 @@ public class RestGuild extends RestHandler {
                 ImmutableMap.of("user.id", userId)))
                 .thenApply(e -> null);
     }
-    
+
     @Nonnull
     @CheckReturnValue
     public CompletionStage<Member> getGuildMember(@Nonnull final String guildId, @Nonnull final String userId) {
+        return getGuildMemberRaw(guildId, userId).thenApply(e -> getEntityBuilder().createMember(guildId, e));
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> getGuildMemberRaw(@Nonnull final String guildId, @Nonnull final String userId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_MEMBER.withMajorParam(guildId),
                 ImmutableMap.of("user.id", userId)))
-                .thenApply(ResponsePayload::object)
-                .thenApply(e -> getEntityBuilder().createMember(guildId, e));
+                .thenApply(ResponsePayload::object);
     }
     
     @Nonnull
@@ -360,32 +434,47 @@ public class RestGuild extends RestHandler {
                 ImmutableMap.of("user.id", userId, "role.id", roleId)))
                 .thenApply(e -> null);
     }
-    
+
     @Nonnull
     @CheckReturnValue
     public CompletionStage<Integer> getGuildPruneCount(@Nonnull final String guildId, @Nonnegative final int days) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_PRUNE_COUNT.withMajorParam(guildId).withQueryString("?days=" + days),
-                ImmutableMap.of()))
-                .thenApply(ResponsePayload::object)
-                .thenApply(e -> e.getInteger("pruned"));
+        return getGuildPruneCountRaw(guildId, days).thenApply(e -> e.getInteger("pruned"));
     }
-    
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> getGuildPruneCountRaw(@Nonnull final String guildId, @Nonnegative final int days) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_PRUNE_COUNT
+                .withMajorParam(guildId).withQueryString("?days=" + days), ImmutableMap.of()))
+                .thenApply(ResponsePayload::object);
+    }
+
     @Nonnull
     @CheckReturnValue
     public CompletionStage<Integer> beginGuildPrune(@Nonnull final String guildId, @Nonnegative final int days) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.BEGIN_GUILD_PRUNE.withMajorParam(guildId).withQueryString("?days=" + days),
-                ImmutableMap.of()))
-                .thenApply(ResponsePayload::object)
-                .thenApply(e -> e.getInteger("pruned"));
+        return beginGuildPruneRaw(guildId, days).thenApply(e -> e.getInteger("pruned"));
     }
-    
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> beginGuildPruneRaw(@Nonnull final String guildId, @Nonnegative final int days) {
+        return getCatnip().requester().queue(new OutboundRequest(Routes.BEGIN_GUILD_PRUNE
+                .withMajorParam(guildId).withQueryString("?days=" + days), ImmutableMap.of()))
+                .thenApply(ResponsePayload::object);
+    }
+
     @Nonnull
     @CheckReturnValue
     public CompletionStage<List<VoiceRegion>> getGuildVoiceRegions(@Nonnull final String guildId) {
+        return getGuildVoiceRegionsRaw(guildId).thenApply(mapObjectContents(getEntityBuilder()::createVoiceRegion));
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonArray> getGuildVoiceRegionsRaw(@Nonnull final String guildId) {
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_VOICE_REGIONS.withQueryString(guildId),
                 ImmutableMap.of()))
-                .thenApply(ResponsePayload::array)
-                .thenApply(mapObjectContents(getEntityBuilder()::createVoiceRegion));
+                .thenApply(ResponsePayload::array);
     }
     
     public AuditLogPaginator getGuildAuditLog(@Nonnull final String guildId) {
@@ -408,12 +497,10 @@ public class RestGuild extends RestHandler {
         return getGuildAuditLogRaw(guildId, userId, beforeEntryId, type, limit)
                 .thenApply(getEntityBuilder()::createAuditLog);
     }
-    
-    //TODO make public when we add raw methods for the other routes
-    //keeping this private for consistency with the rest of the methods
+
     @Nonnull
     @CheckReturnValue
-    private CompletionStage<JsonObject> getGuildAuditLogRaw(@Nonnull final String guildId, @Nullable final String userId,
+    public CompletionStage<JsonObject> getGuildAuditLogRaw(@Nonnull final String guildId, @Nullable final String userId,
                                                             @Nullable final String beforeEntryId, @Nullable final ActionType type,
                                                             @Nonnegative final int limit) {
         final Collection<String> params = new ArrayList<>();
