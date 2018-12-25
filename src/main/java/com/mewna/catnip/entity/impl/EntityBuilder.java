@@ -898,29 +898,34 @@ public final class EntityBuilder {
                         data.getJsonArray("voice_states"), e -> createVoiceState(id, e)));
             }
         }
+        final String afkChannelId = data.getString("afk_channel_id");
+        final String embedChannelId = data.getString("embed_channel_id");
+        final String applicationId = data.getString("application_id");
+        final String widgetChannelId = data.getString("widget_channel_id");
+        final String systemChannelId = data.getString("system_channel_id");
         return GuildImpl.builder()
                 .catnip(catnip)
-                .id(id)
+                .idAsLong(Long.parseUnsignedLong(id))
                 .name(data.getString("name"))
                 .icon(data.getString("icon"))
                 .splash(data.getString("splash"))
                 .owned(data.getBoolean("owner", false))
-                .ownerId(data.getString("owner_id"))
+                .ownerIdAsLong(Long.parseUnsignedLong(data.getString("owner_id")))
                 .permissions(Permission.toSet(data.getLong("permissions", 0L)))
                 .region(data.getString("region"))
-                .afkChannelId(data.getString("afk_channel_id", null))
+                .afkChannelIdAsLong(afkChannelId == null ? 0 : Long.parseUnsignedLong(afkChannelId))
                 .afkTimeout(data.getInteger("afk_timeout", 0))
                 .embedEnabled(data.getBoolean("embed_enabled", false))
-                .embedChannelId(data.getString("embed_channel_id"))
+                .embedChannelIdAsLong(embedChannelId == null ? 0 : Long.parseUnsignedLong(embedChannelId))
                 .verificationLevel(VerificationLevel.byKey(data.getInteger("verification_level", 0)))
                 .defaultMessageNotifications(NotificationLevel.byKey(data.getInteger("default_message_notifications", 0)))
                 .explicitContentFilter(ContentFilterLevel.byKey(data.getInteger("explicit_content_filter", 0)))
                 .features(stringListOf(data.getJsonArray("features")))
                 .mfaLevel(MFALevel.byKey(data.getInteger("mfa_level", 0)))
-                .applicationId(data.getString("application_id"))
+                .applicationIdAsLong(applicationId == null ? 0 : Long.parseUnsignedLong(applicationId))
                 .widgetEnabled(data.getBoolean("widget_enabled", false))
-                .widgetChannelId(data.getString("widget_channel_id"))
-                .systemChannelId(data.getString("system_channel_id"))
+                .widgetChannelIdAsLong(widgetChannelId == null ? 0 : Long.parseUnsignedLong(widgetChannelId))
+                .systemChannelIdAsLong(systemChannelId == null ? 0 : Long.parseUnsignedLong(systemChannelId))
                 .joinedAt(data.getString("joined_at"))
                 .large(data.getBoolean("large", false))
                 .unavailable(data.getBoolean("unavailable", false))
@@ -933,7 +938,7 @@ public final class EntityBuilder {
     public UnavailableGuild createUnavailableGuild(@Nonnull final JsonObject data) {
         return UnavailableGuildImpl.builder()
                 .catnip(catnip)
-                .id(data.getString("id"))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .unavailable(data.getBoolean("unavailable"))
                 .build();
     }
@@ -943,7 +948,7 @@ public final class EntityBuilder {
     public PartialGuild createPartialGuild(@Nonnull final JsonObject data) {
         return PartialGuildImpl.builder()
                 .catnip(catnip)
-                .id(data.getString("id"))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .name(data.getString("name"))
                 .icon(data.getString("icon"))
                 .owned(data.getBoolean("owner", false))
@@ -956,7 +961,7 @@ public final class EntityBuilder {
     public GatewayGuildBan createGatewayGuildBan(@Nonnull final JsonObject data) {
         return GatewayGuildBanImpl.builder()
                 .catnip(catnip)
-                .guildId(data.getString("guild_id"))
+                .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id")))
                 .user(createUser(data.getJsonObject("user")))
                 .build();
     }
@@ -1013,7 +1018,7 @@ public final class EntityBuilder {
     public InviteChannel createInviteChannel(@Nonnull final JsonObject data) {
         return InviteChannelImpl.builder()
                 .catnip(catnip)
-                .id(data.getString("id"))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .name(data.getString("name"))
                 .type(ChannelType.byKey(data.getInteger("type")))
                 .build();
@@ -1024,7 +1029,7 @@ public final class EntityBuilder {
     public InviteGuild createInviteGuild(@Nonnull final JsonObject data) {
         return InviteGuildImpl.builder()
                 .catnip(catnip)
-                .id(data.getString("id"))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .name(data.getString("name"))
                 .icon(data.getString("icon"))
                 .splash(data.getString("splash"))
@@ -1038,7 +1043,7 @@ public final class EntityBuilder {
     public Inviter createInviter(@Nonnull final JsonObject data) {
         return InviterImpl.builder()
                 .catnip(catnip)
-                .id(data.getString("id"))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .username(data.getString("username"))
                 .discriminator(data.getString("discriminator"))
                 .avatar(data.getString("avatar"))
@@ -1064,9 +1069,9 @@ public final class EntityBuilder {
     public Webhook createWebhook(@Nonnull final JsonObject data) {
         return WebhookImpl.builder()
                 .catnip(catnip)
-                .id(data.getString("id"))
-                .guildId(data.getString("guild_id"))
-                .channelId(data.getString("channel_id"))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id")))
+                .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
                 .user(createUser(data.getJsonObject("user")))
                 .name(data.getString("name"))
                 .avatar(data.getString("avatar"))
@@ -1077,32 +1082,35 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public WebhooksUpdate createWebhooksUpdate(@Nonnull final JsonObject data) {
+        final String channelId = data.getString("channel_id");
         return WebhooksUpdateImpl.builder()
                 .catnip(catnip)
-                .guildId(data.getString("guild_id"))
-                .channelId(data.getString("channel_id"))
+                .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id")))
+                .channelIdAsLong(channelId == null ? 0 : Long.parseUnsignedLong(channelId))
                 .build();
     }
     
     @Nonnull
     @CheckReturnValue
     public DeletedMessage createDeletedMessage(@Nonnull final JsonObject data) {
+        final String guildId = data.getString("guild_id");
         return DeletedMessageImpl.builder()
                 .catnip(catnip)
-                .id(data.getString("id"))
-                .channelId(data.getString("channel_id"))
-                .guildId(data.getString("guild_id"))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
+                .guildIdAsLong(guildId == null ? 0 : Long.parseUnsignedLong(guildId))
                 .build();
     }
     
     @Nonnull
     @CheckReturnValue
     public BulkDeletedMessages createBulkDeletedMessages(@Nonnull final JsonObject data) {
+        final String guildId = data.getString("guild_id");
         return BulkDeletedMessagesImpl.builder()
                 .catnip(catnip)
-                .ids(ImmutableList.copyOf(data.getJsonArray("ids").stream().map(e -> (String) e).collect(Collectors.toList())))
-                .channelId(data.getString("channel_id"))
-                .guildId(data.getString("guild_id"))
+                .ids(stringListOf(data.getJsonArray("ids")))
+                .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
+                .guildIdAsLong(guildId == null ? 0 : Long.parseUnsignedLong(guildId))
                 .build();
     }
     
@@ -1113,15 +1121,8 @@ public final class EntityBuilder {
                 .catnip(catnip)
                 .version(data.getInteger("v"))
                 .user(createUser(data.getJsonObject("user")))
-                .trace(ImmutableList.copyOf(data.getJsonArray("_trace")
-                        .stream()
-                        .map(e -> (String) e)
-                        .toArray(String[]::new)))
-                .guilds(ImmutableSet.copyOf(data.getJsonArray("guilds")
-                        .stream()
-                        .map(e -> (JsonObject) e)
-                        .map(this::createUnavailableGuild)
-                        .toArray(UnavailableGuild[]::new)))
+                .trace(stringListOf(data.getJsonArray("_trace")))
+                .guilds(ImmutableSet.copyOf(immutableListOf(data.getJsonArray("guilds"), this::createUnavailableGuild)))
                 .build();
     }
     
@@ -1130,7 +1131,7 @@ public final class EntityBuilder {
     public Resumed createResumed(@Nonnull final JsonObject data) {
         return ResumedImpl.builder()
                 .catnip(catnip)
-                .trace(ImmutableList.copyOf(data.getJsonArray("_trace").stream().map(e -> (String) e).collect(Collectors.toList())))
+                .trace(stringListOf(data.getJsonArray("_trace")))
                 .build();
     }
     
@@ -1158,7 +1159,7 @@ public final class EntityBuilder {
             case MESSAGE_DELETE:
                 return MessageDeleteInfoImpl.builder()
                         .catnip(catnip)
-                        .channelId(data.getString("channel_id"))
+                        .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
                         .deletedMessagesCount(Integer.parseUnsignedInt(data.getString("count")))
                         .build();
             case CHANNEL_OVERWRITE_CREATE:
@@ -1166,7 +1167,7 @@ public final class EntityBuilder {
             case CHANNEL_OVERWRITE_DELETE:
                 return OverrideUpdateInfoImpl.builder()
                         .catnip(catnip)
-                        .overriddenEntityId(data.getString("id"))
+                        .overriddenEntityIdAsLong(Long.parseLong(data.getString("id")))
                         .overrideType(OverrideType.byKey(data.getString("type")))
                         .roleName(data.getString("role_name"))
                         .build();
@@ -1180,11 +1181,12 @@ public final class EntityBuilder {
     public AuditLogEntry createAuditLogEntry(@Nonnull final JsonObject data, @Nonnull final Map<String, Webhook> webhooks,
                                              @Nonnull final Map<String, User> users) {
         final ActionType type = ActionType.byKey(data.getInteger("action_type"));
+        final String targetId = data.getString("target_id");
         return AuditLogEntryImpl.builder()
                 .catnip(catnip)
-                .id(data.getString("id"))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .user(users.get(data.getString("user_id")))
-                .targetId(data.getString("target_id"))
+                .targetIdAsLong(targetId == null ? 0 : Long.parseUnsignedLong(targetId))
                 .webhook(webhooks.get(data.getString("target_id")))
                 .type(type)
                 .reason(data.getString("reason"))
@@ -1209,7 +1211,7 @@ public final class EntityBuilder {
     public ApplicationInfo createApplicationInfo(@Nonnull final JsonObject data) {
         return ApplicationInfoImpl.builder()
                 .catnip(catnip)
-                .id(data.getString("id"))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .name(data.getString("name"))
                 .icon(data.getString("icon"))
                 .description(data.getString("description"))

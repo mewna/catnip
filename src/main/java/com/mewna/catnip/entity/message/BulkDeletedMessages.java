@@ -29,6 +29,7 @@ package com.mewna.catnip.entity.message;
 
 import com.mewna.catnip.entity.Entity;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
@@ -44,17 +45,40 @@ public interface BulkDeletedMessages extends Entity {
      * @return The ids of the messages that were deleted.
      */
     @Nonnull
+    @CheckReturnValue
     List<String> ids();
     
     /**
      * @return The id of the channel the messages were deleted in.
      */
     @Nonnull
-    String channelId();
+    @CheckReturnValue
+    default String channelId() {
+        return Long.toUnsignedString(channelIdAsLong());
+    }
+    
+    /**
+     * @return The id of the channel the messages were deleted in.
+     */
+    @CheckReturnValue
+    long channelIdAsLong();
     
     /**
      * @return The id of the guild the messages were deleted in, if applicable.
      */
     @Nullable
-    String guildId();
+    @CheckReturnValue
+    default String guildId() {
+        final long id = guildIdAsLong();
+        if(id == 0) {
+            return null;
+        }
+        return Long.toUnsignedString(id);
+    }
+    
+    /**
+     * @return The id of the guild the messages were deleted in, if applicable.
+     */
+    @CheckReturnValue
+    long guildIdAsLong();
 }
