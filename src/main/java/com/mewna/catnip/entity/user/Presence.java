@@ -83,6 +83,10 @@ public interface Presence {
         IDLE,
         DND,
         OFFLINE,
+        /**
+         * Can only be sent; we should NEVER recv. this.
+         */
+        INVISIBLE,
         ;
         
         @Nonnull
@@ -99,6 +103,9 @@ public interface Presence {
                 }
                 case "offline": {
                     return OFFLINE;
+                }
+                case "invisible": {
+                    return  INVISIBLE;
                 }
                 default: {
                     throw new IllegalArgumentException("Unknown status: " + status);
