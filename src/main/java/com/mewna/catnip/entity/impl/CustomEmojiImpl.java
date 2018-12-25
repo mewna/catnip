@@ -53,8 +53,8 @@ public class CustomEmojiImpl implements CustomEmoji, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String id;
-    private String guildId;
+    private long idAsLong;
+    private long guildIdAsLong;
     private String name;
     private List<String> roles;
     private User user;
@@ -69,12 +69,12 @@ public class CustomEmojiImpl implements CustomEmoji, RequiresCatnip {
     
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Long.hashCode(idAsLong);
     }
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof CustomEmoji && ((CustomEmoji) obj).id().equals(id);
+        return obj instanceof CustomEmoji && ((CustomEmoji) obj).idAsLong() == idAsLong;
     }
     
     @Override

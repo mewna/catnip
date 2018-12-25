@@ -29,6 +29,7 @@ package com.mewna.catnip.entity.voice;
 
 import com.mewna.catnip.entity.Entity;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
 /**
@@ -42,17 +43,28 @@ public interface VoiceServerUpdate extends Entity {
      * @return The token used for voice connections.
      */
     @Nonnull
+    @CheckReturnValue
     String token();
     
     /**
      * @return The id of the guild whose voice server this is.
      */
     @Nonnull
-    String guildId();
+    @CheckReturnValue
+    default String guildId() {
+        return Long.toUnsignedString(guildIdAsLong());
+    }
+    
+    /**
+     * @return The id of the guild whose voice server this is.
+     */
+    @CheckReturnValue
+    long guildIdAsLong();
     
     /**
      * @return The endpoint to open voice connections to.
      */
     @Nonnull
+    @CheckReturnValue
     String endpoint();
 }

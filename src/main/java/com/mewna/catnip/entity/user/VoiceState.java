@@ -32,6 +32,7 @@ import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.impl.VoiceStateImpl;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -47,24 +48,60 @@ public interface VoiceState extends Entity {
      * @return The id of the guild this voice state is for, if applicable.
      */
     @Nullable
-    String guildId();
+    @CheckReturnValue
+    default String guildId() {
+        final long id = guildIdAsLong();
+        if(id == 0) {
+            return null;
+        }
+        return Long.toUnsignedString(id);
+    }
+    
+    /**
+     * @return The id of the guild this voice state is for, if applicable.
+     */
+    @CheckReturnValue
+    long guildIdAsLong();
     
     /**
      * @return The channel the user is connected to, if applicable.
      */
     @Nullable
-    String channelId();
+    @CheckReturnValue
+    default String channelId() {
+        final long id = channelIdAsLong();
+        if(id == 0) {
+            return null;
+        }
+        return Long.toUnsignedString(id);
+    }
+    
+    /**
+     * @return The channel the user is connected to, if applicable.
+     */
+    @CheckReturnValue
+    long channelIdAsLong();
     
     /**
      * @return The user's id.
      */
     @Nonnull
-    String userId();
+    @CheckReturnValue
+    default String userId() {
+        return Long.toUnsignedString(userIdAsLong());
+    }
+    
+    /**
+     * @return The user's id.
+     */
+    @CheckReturnValue
+    long userIdAsLong();
     
     /**
      * @return The guild member who owns the voice state.
      */
     @Nullable
+    @CheckReturnValue
     Member member();
     
     /**
@@ -72,30 +109,36 @@ public interface VoiceState extends Entity {
      * user.
      */
     @Nullable
+    @CheckReturnValue
     String sessionId();
     
     /**
      * @return Whether the user has been deafened.
      */
+    @CheckReturnValue
     boolean deaf();
     
     /**
      * @return Whether the user has been muted.
      */
+    @CheckReturnValue
     boolean mute();
     
     /**
      * @return Whether the user has deafened themself.
      */
+    @CheckReturnValue
     boolean selfDeaf();
     
     /**
      * @return Whether the user has muted themself.
      */
+    @CheckReturnValue
     boolean selfMute();
     
     /**
      * @return Whether the user has been suppressed.
      */
+    @CheckReturnValue
     boolean suppress();
 }

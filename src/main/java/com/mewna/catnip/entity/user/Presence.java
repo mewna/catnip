@@ -247,7 +247,15 @@ public interface Presence {
         ActivityTimestamps timestamps();
         
         @Nullable
-        String applicationId();
+        default String applicationId() {
+            final long id = applicationIdAsLong();
+            if(id == 0) {
+                return null;
+            }
+            return Long.toUnsignedString(id);
+        }
+        
+        long applicationIdAsLong();
         
         @Nullable
         String details();
