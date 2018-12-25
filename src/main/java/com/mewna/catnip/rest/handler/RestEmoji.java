@@ -52,30 +52,47 @@ public class RestEmoji extends RestHandler {
     public RestEmoji(final CatnipImpl catnip) {
         super(catnip);
     }
-    
+
     @Nonnull
     public CompletionStage<List<CustomEmoji>> listGuildEmojis(@Nonnull final String guildId) {
+        return listGuildEmojisRaw(guildId)
+                .thenApply(mapObjectContents(e -> getEntityBuilder().createCustomEmoji(guildId, e)))
+                .thenApply(Collections::unmodifiableList);
+    }
+
+    @Nonnull
+    public CompletionStage<JsonArray> listGuildEmojisRaw(@Nonnull final String guildId) {
         return getCatnip().requester().queue(
                 new OutboundRequest(
                         Routes.LIST_GUILD_EMOJIS.withMajorParam(guildId),
                         ImmutableMap.of()))
-                .thenApply(ResponsePayload::array)
-                .thenApply(mapObjectContents(e -> getEntityBuilder().createCustomEmoji(guildId, e)))
-                .thenApply(Collections::unmodifiableList);
+                .thenApply(ResponsePayload::array);
     }
-    
+
     @Nonnull
     public CompletionStage<CustomEmoji> getGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId) {
+        return getGuildEmojiRaw(guildId, emojiId).thenApply(e -> getEntityBuilder().createCustomEmoji(guildId, e));
+    }
+
+    @Nonnull
+    public CompletionStage<JsonObject> getGuildEmojiRaw(@Nonnull final String guildId, @Nonnull final String emojiId) {
         return getCatnip().requester().queue(
                 new OutboundRequest(
                         Routes.GET_GUILD_EMOJI.withMajorParam(guildId),
                         ImmutableMap.of("emojis.id", emojiId)))
-                .thenApply(ResponsePayload::object)
-                .thenApply(e -> getEntityBuilder().createCustomEmoji(guildId, e));
+                .thenApply(ResponsePayload::object);
     }
-    
+
     @Nonnull
     public CompletionStage<CustomEmoji> createGuildEmoji(@Nonnull final String guildId, @Nonnull final String name,
+                                                         @Nonnull final URI imageData, @Nonnull final Collection<String> roles) {
+        return createGuildEmojiRaw(guildId, name, imageData, roles)
+                .thenApply(e -> getEntityBuilder().createEmoji(guildId, e))
+                .thenApply(CustomEmoji.class::cast);
+    }
+
+    @Nonnull
+    public CompletionStage<JsonObject> createGuildEmojiRaw(@Nonnull final String guildId, @Nonnull final String name,
                                                          @Nonnull final URI imageData, @Nonnull final Collection<String> roles) {
         Utils.validateImageUri(imageData);
         final JsonArray rolesArray;
@@ -94,9 +111,7 @@ public class RestEmoji extends RestHandler {
                                 .put("image", imageData.toString())
                                 .put("roles", rolesArray)
                 ))
-                .thenApply(ResponsePayload::object)
-                .thenApply(e -> getEntityBuilder().createEmoji(guildId, e))
-                .thenApply(CustomEmoji.class::cast);
+                .thenApply(ResponsePayload::object);
     }
     
     @Nonnull
@@ -104,9 +119,17 @@ public class RestEmoji extends RestHandler {
                                                          @Nonnull final byte[] image, @Nonnull final Collection<String> roles) {
         return createGuildEmoji(guildId, name, Utils.asImageDataUri(image), roles);
     }
-    
+
     @Nonnull
     public CompletionStage<CustomEmoji> modifyGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId,
+                                                         @Nonnull final String name, @Nonnull final Collection<String> roles) {
+        return modifyGuildEmojiRaw(guildId, emojiId, name, roles)
+                .thenApply(e -> getEntityBuilder().createEmoji(guildId, e))
+                .thenApply(CustomEmoji.class::cast);
+    }
+
+    @Nonnull
+    public CompletionStage<JsonObject> modifyGuildEmojiRaw(@Nonnull final String guildId, @Nonnull final String emojiId,
                                                          @Nonnull final String name, @Nonnull final Collection<String> roles) {
         final JsonArray rolesArray;
         if(roles.isEmpty()) {
@@ -123,9 +146,7 @@ public class RestEmoji extends RestHandler {
                                 .put("name", name)
                                 .put("roles", rolesArray)
                 ))
-                .thenApply(ResponsePayload::object)
-                .thenApply(e -> getEntityBuilder().createEmoji(guildId, e))
-                .thenApply(CustomEmoji.class::cast);
+                .thenApply(ResponsePayload::object);
     }
     
     @Nonnull
