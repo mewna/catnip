@@ -33,6 +33,7 @@ import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
+import io.vertx.core.json.JsonArray;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -43,13 +44,18 @@ public class RestVoice extends RestHandler {
     public RestVoice(final CatnipImpl catnip) {
         super(catnip);
     }
-    
+
     @Nonnull
     @CheckReturnValue
     public CompletionStage<List<VoiceRegion>> listVoiceRegions() {
+        return listVoiceRegionsRaw().thenApply(mapObjectContents(getEntityBuilder()::createVoiceRegion));
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonArray> listVoiceRegionsRaw() {
         return getCatnip().requester().queue(new OutboundRequest(Routes.LIST_VOICE_REGIONS,
                 ImmutableMap.of()))
-                .thenApply(ResponsePayload::array)
-                .thenApply(mapObjectContents(getEntityBuilder()::createVoiceRegion));
+                .thenApply(ResponsePayload::array);
     }
 }
