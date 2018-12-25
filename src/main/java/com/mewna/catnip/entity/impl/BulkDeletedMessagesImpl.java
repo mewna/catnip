@@ -53,8 +53,8 @@ public class BulkDeletedMessagesImpl implements BulkDeletedMessages, RequiresCat
     private transient Catnip catnip;
     
     private List<String> ids;
-    private String channelId;
-    private String guildId;
+    private long channelIdAsLong;
+    private long guildIdAsLong;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {

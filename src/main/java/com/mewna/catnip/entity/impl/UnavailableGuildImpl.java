@@ -51,7 +51,7 @@ public class UnavailableGuildImpl implements UnavailableGuild, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String id;
+    private long idAsLong;
     private boolean unavailable;
     
     @Override
@@ -61,16 +61,16 @@ public class UnavailableGuildImpl implements UnavailableGuild, RequiresCatnip {
     
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Long.hashCode(idAsLong);
     }
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof UnavailableGuild && ((UnavailableGuild) obj).id().equals(id);
+        return obj instanceof UnavailableGuild && ((UnavailableGuild) obj).idAsLong() == idAsLong;
     }
     
     @Override
     public String toString() {
-        return String.format("UnavailableGuild (%s)", id);
+        return String.format("UnavailableGuild (%s)", idAsLong);
     }
 }
