@@ -47,6 +47,8 @@ import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
 import com.mewna.catnip.shard.CatnipShard;
+import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
+import com.mewna.catnip.shard.ShardControlMessage;
 import com.mewna.catnip.shard.ShardInfo;
 import com.mewna.catnip.shard.event.EventBuffer;
 import com.mewna.catnip.shard.manager.ShardManager;
@@ -362,6 +364,8 @@ public class CatnipImpl implements Catnip {
         
         // Shards
         codec(ShardInfo.class);
+        codec(ShardConnectState.class);
+        codec(ShardControlMessage.class);
         
         //if we are in a vertx context, check whether or not it's a worker
         //context. If it isn't (aka it's an event loop context), we can't safely
