@@ -78,7 +78,7 @@ public abstract class AbstractShardManager implements ShardManager {
     
     @Nonnull
     @Override
-    public Future<List<String>> trace(@Nonnegative final int shard) {
+    public CompletableFuture<List<String>> trace(@Nonnegative final int shard) {
         final Future<List<String>> future = Future.future();
         catnip.eventBus().<JsonArray>send(CatnipShard.controlAddress(shard), new JsonObject().put("mode", "TRACE"),
                 reply -> {
@@ -90,7 +90,23 @@ public abstract class AbstractShardManager implements ShardManager {
                         future.fail(reply.cause());
                     }
                 });
-        return future;
+        return VertxCompletableFuture.from(catnip.vertx(), future);
+    }
+    
+    @Nonnull
+    @Override
+    public CompletableFuture<Long> latency(final int shard) {
+        final Future<Long> future = Future.future();
+        catnip.eventBus().<Long>send(CatnipShard.controlAddress(shard), new JsonObject().put("mode", "LATENCY"),
+                reply -> {
+                    if(reply.succeeded()) {
+                        // ow
+                        future.complete(reply.result().body());
+                    } else {
+                        future.fail(reply.cause());
+                    }
+                });
+        return VertxCompletableFuture.from(catnip.vertx(), future);
     }
     
     @Nonnull

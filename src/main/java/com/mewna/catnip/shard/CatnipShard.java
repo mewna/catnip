@@ -57,6 +57,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.zip.Inflater;
@@ -83,6 +84,8 @@ public class CatnipShard extends AbstractVerticle {
     private final AtomicReference<ShardState> stateRef = new AtomicReference<>(null);
     private final AtomicReference<Presence> currentPresence = new AtomicReference<>(null);
     private final AtomicBoolean heartbeatAcked = new AtomicBoolean(true);
+    private final AtomicLong lastHeartbeat = new AtomicLong(-1L);
+    private final AtomicLong lastHeartbeatLatency = new AtomicLong(-1L);
     private final byte[] decompressBuffer = new byte[1024];
     
     private final Deque<JsonObject> messageQueue = new ConcurrentLinkedDeque<>();
@@ -198,9 +201,6 @@ public class CatnipShard extends AbstractVerticle {
                 }
             }
         });
-        // Start gateway poll
-        //catnip.eventBus().publish(websocketMessagePollAddress(), null);
-        //catnip.eventBus().publish(websocketMessagePresenceUpdatePollAddress(), null);
     }
     
     @Override
@@ -239,6 +239,10 @@ public class CatnipShard extends AbstractVerticle {
             }
             case "CONNECTED": {
                 msg.reply(stateRef.get().socketOpen().get());
+                break;
+            }
+            case "LATENCY": {
+                msg.reply(lastHeartbeatLatency.get());
                 break;
             }
             default: {
@@ -454,6 +458,7 @@ public class CatnipShard extends AbstractVerticle {
                 }
                 catnip.eventBus().publish(websocketMessageSendAddress(),
                         basePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().seqnum(id)));
+                lastHeartbeat.set(System.currentTimeMillis());
                 heartbeatAcked.set(false);
             } else {
                 catnip.vertx().cancelTimer(timerId);
@@ -525,6 +530,7 @@ public class CatnipShard extends AbstractVerticle {
     
     private void handleHeartbeatAck(final Message<JsonObject> msg, final JsonObject event) {
         heartbeatAcked.set(true);
+        lastHeartbeatLatency.set(System.currentTimeMillis() - lastHeartbeat.get());
     }
     
     private void handleInvalidSession(final Message<JsonObject> msg, final JsonObject event) {

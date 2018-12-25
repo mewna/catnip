@@ -92,7 +92,18 @@ public interface ShardManager {
      * @return The shard's trace.
      */
     @Nonnull
-    Future<List<String>> trace(@Nonnegative int shard);
+    CompletableFuture<List<String>> trace(@Nonnegative int shard);
+    
+    /**
+     * Return the shard's computed gateway latency, ie. the time it takes for
+     * the shard to send a heartbeat to Discord and get a response.
+     *
+     * @param shard The shard ID to get gateway latency for.
+     *
+     * @return The shard's computed gateway latency.
+     */
+    @Nonnull
+    CompletableFuture<Long> latency(@Nonnegative int shard);
     
     /**
      * Checks whether or not the shard with the given ID is currently connected
