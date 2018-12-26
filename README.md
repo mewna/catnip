@@ -79,7 +79,7 @@ Also check out the [examples](https://github.com/mewna/catnip/tree/master/src/ma
 
 - JDA is very nice, but doesn't allow for as much freedom with customizing the internals;
   it's more / less "do it this way or use another lib" in my experience.
-- D4J and Javacord feel like they're stuck in v3 development hell.
+- ~~D4J and~~ Javacord feels like ~~they're~~ it's stuck in v3 development hell. I've been informed that D4J is doing pretty well.
 - I wanted to make a lib built on vert.x.
 
 ### Why vert.x?
