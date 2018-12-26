@@ -34,6 +34,7 @@ import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.shard.LifecycleEvent.Raw;
 import com.mewna.catnip.util.BufferOutputStream;
+import com.mewna.catnip.util.JsonUtil;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
@@ -52,14 +53,10 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.ArrayDeque;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterOutputStream;
 
@@ -81,20 +78,18 @@ public class CatnipShard extends AbstractVerticle {
     
     private final HttpClient client;
     
-    private final AtomicReference<ShardState> stateRef = new AtomicReference<>(null);
-    private final AtomicReference<Presence> currentPresence = new AtomicReference<>(null);
-    private final AtomicBoolean heartbeatAcked = new AtomicBoolean(true);
-    private final AtomicLong lastHeartbeat = new AtomicLong(-1L);
-    private final AtomicLong lastHeartbeatLatency = new AtomicLong(-1L);
     private final byte[] decompressBuffer = new byte[1024];
+    private final Deque<JsonObject> messageQueue = new ArrayDeque<>();
+    private final Deque<PresenceImpl> presenceQueue = new ArrayDeque<>();
     
-    private final Deque<JsonObject> messageQueue = new ConcurrentLinkedDeque<>();
-    private final Deque<PresenceImpl> presenceQueue = new ConcurrentLinkedDeque<>();
-    
-    private final AtomicBoolean presenceRateLimitRecheckQueued = new AtomicBoolean();
-    private final AtomicBoolean sendRateLimitRecheckQueued = new AtomicBoolean();
-    
-    private List<String> trace = new ArrayList<>();
+    private volatile ShardState state;
+    private volatile Presence currentPresence;
+    private volatile boolean heartbeatAcked = true;
+    private volatile long lastHeartbeat = -1; //use System.nanoTime() as that is monotonic
+    private volatile long lastHeartbeatLatency = -1;
+    private volatile boolean presenceRateLimitRecheckQueued;
+    private volatile boolean sendRateLimitRecheckQueued;
+    private volatile List<String> trace = Collections.emptyList();
     
     public CatnipShard(@Nonnull final Catnip catnip, @Nonnegative final int id, @Nonnegative final int limit,
                        @Nullable final Presence presence) {
@@ -157,22 +152,22 @@ public class CatnipShard extends AbstractVerticle {
         catnip.eventBus().consumer(websocketMessagePresenceUpdateQueueAddress(), this::handlePresenceUpdateQueue);
         catnip.eventBus().consumer(websocketMessagePresenceUpdateAddress(), this::handlePresenceUpdate);
         catnip.eventBus().consumer(websocketMessagePresenceUpdatePollAddress(), presence -> {
-            if(stateRef.get() != null) {
+            if(state != null) {
                 while(!presenceQueue.isEmpty()) {
                     if(catnip.gatewayRatelimiter().checkRatelimit(websocketMessagePresenceUpdateAddress(), 60_000L, 5).left) {
-                        if(!presenceRateLimitRecheckQueued.get()) {
-                            presenceRateLimitRecheckQueued.set(true);
+                        if(!presenceRateLimitRecheckQueued) {
+                            presenceRateLimitRecheckQueued = true;
                             catnip.vertx().setTimer(1000, __ -> catnip.eventBus().publish(websocketMessagePresenceUpdatePollAddress(), null));
                         }
                         break;
                     }
-                    presenceRateLimitRecheckQueued.set(false);
+                    presenceRateLimitRecheckQueued = false;
                     final PresenceImpl update = presenceQueue.pop();
                     final JsonObject object = new JsonObject()
                             .put("op", GatewayOp.STATUS_UPDATE.opcode())
                             .put("d", update.asJson());
                     catnip.eventBus().publish(websocketMessageSendAddress(), object);
-                    currentPresence.set(update);
+                    currentPresence = update;
                 }
             }
         });
@@ -182,20 +177,20 @@ public class CatnipShard extends AbstractVerticle {
                         state.body()
                 )));
         catnip.eventBus().consumer(websocketMessagePollAddress(), msg -> {
-            if(stateRef.get() != null) {
+            if(state != null) {
                 while(!messageQueue.isEmpty()) {
                     // We only do up to 110 messages/min, to allow for room just in case
                     final ImmutablePair<Boolean, Long> check = catnip.gatewayRatelimiter()
                             .checkRatelimit("catnip:gateway:" + id + ":outgoing-send", 60_000L, 110);
                     if(check.left) {
                         // We got ratelimited, stop sending and try again in 1s
-                        if(!sendRateLimitRecheckQueued.get()) {
-                            sendRateLimitRecheckQueued.set(true);
+                        if(!sendRateLimitRecheckQueued) {
+                            sendRateLimitRecheckQueued = true;
                             catnip.vertx().setTimer(1000, __ -> catnip.eventBus().publish(websocketMessagePollAddress(), null));
                         }
                         break;
                     }
-                    sendRateLimitRecheckQueued.set(false);
+                    sendRateLimitRecheckQueued = false;
                     final JsonObject payload = messageQueue.pop();
                     catnip.eventBus().publish(websocketMessageSendAddress(), payload);
                 }
@@ -210,7 +205,7 @@ public class CatnipShard extends AbstractVerticle {
     private void handlePresenceUpdate(final Message<PresenceImpl> message) {
         final PresenceImpl impl = message.body();
         if(impl == null) {
-            message.reply(currentPresence.get());
+            message.reply(currentPresence);
             return;
         }
         catnip.eventBus().publish(websocketMessagePresenceUpdateQueueAddress(), impl);
@@ -237,11 +232,11 @@ public class CatnipShard extends AbstractVerticle {
                 break;
             }
             case CONNECTED: {
-                msg.reply(stateRef.get().socketOpen().get());
+                msg.reply(state.socketOpen());
                 break;
             }
             case LATENCY: {
-                msg.reply(lastHeartbeatLatency.get());
+                msg.reply(lastHeartbeatLatency);
                 break;
             }
             default: {
@@ -256,13 +251,13 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void doStop() {
-        if(stateRef.get() != null) {
-            stateRef.get().socket().close((short) 4000);
-            stateRef.get().socketOpen().set(false);
+        if(state != null) {
+            state.socket().close((short) 4000);
+            state.socketOpen(false);
         }
         messageQueue.clear();
         presenceQueue.clear();
-        heartbeatAcked.set(true);
+        heartbeatAcked = true;
     }
     
     private void connectSocket(final Message<ShardControlMessage> msg) {
@@ -275,11 +270,11 @@ public class CatnipShard extends AbstractVerticle {
                     socket.frameHandler(frame -> handleSocketFrame(msg, frame))
                             .closeHandler(this::handleSocketClose)
                             .exceptionHandler(Throwable::printStackTrace);
-                    stateRef.set(new ShardState(socket));
-                    stateRef.get().socketOpen().set(true);
+                    state = new ShardState(socket);
+                    state.socketOpen(true);
                 },
                 failure -> {
-                    stateRef.set(null);
+                    state = null;
                     catnip.logAdapter().error("Couldn't connect socket:", failure);
                     catnip.eventBus().publish("RAW_STATUS", new JsonObject().put("status", "down:fail-connect")
                             .put("shard", id));
@@ -289,7 +284,7 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void handleBinaryData(final Message<ShardControlMessage> msg, final Buffer binary) {
-        final ShardState state = stateRef.get();
+        final ShardState state = this.state;
         if(state == null) {
             return;
         }
@@ -352,7 +347,7 @@ public class CatnipShard extends AbstractVerticle {
                     catnip.logAdapter().warn("Shard {}: gateway websocket closing with code {}: {}",
                             id, closeCode, frame.closeReason());
                 }
-                stateRef.get().socketOpen().set(false);
+                state.socketOpen(false);
             }
         } catch(final Exception e) {
             e.printStackTrace();
@@ -411,7 +406,7 @@ public class CatnipShard extends AbstractVerticle {
         try {
             catnip.eventBus().publish("RAW_STATUS", new JsonObject().put("status", "down:socket-close")
                     .put("shard", id));
-            stateRef.set(null);
+            state = null;
             catnip.shardManager().addToConnectQueue(id);
         } catch(final Exception e) {
             catnip.logAdapter().error("Failure closing socket:", e);
@@ -429,8 +424,8 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void handleSocketSend(final Message<JsonObject> msg) {
-        final ShardState shardState = stateRef.get();
-        if(shardState != null && shardState.socket() != null && shardState.socketOpen().get()) {
+        final ShardState shardState = state;
+        if(shardState != null && shardState.socket() != null && shardState.socketOpen()) {
             JsonObject payload = msg.body();
             for(final Extension extension : catnip.extensionManager().extensions()) {
                 for(final CatnipHook hook : extension.hooks()) {
@@ -443,12 +438,12 @@ public class CatnipShard extends AbstractVerticle {
     
     private void handleHello(final Message<ShardControlMessage> msg, final JsonObject event) {
         final JsonObject payload = event.getJsonObject("d");
-        trace = payload.getJsonArray("_trace").stream().map(e -> (String) e).collect(Collectors.toList());
+        trace = JsonUtil.toStringList(payload.getJsonArray("_trace"));
         
         catnip.vertx().setPeriodic(payload.getInteger("heartbeat_interval"), timerId -> {
-            final ShardState shardState = stateRef.get();
-            if(shardState != null && shardState.socket() != null && shardState.socketOpen().get()) {
-                if(!heartbeatAcked.get()) {
+            final ShardState shardState = state;
+            if(shardState != null && shardState.socket() != null && shardState.socketOpen()) {
+                if(!heartbeatAcked) {
                     // Zombie
                     catnip.logAdapter().warn("Shard {} zombied, queueing reconnect!", id);
                     catnip.vertx().cancelTimer(timerId);
@@ -457,8 +452,8 @@ public class CatnipShard extends AbstractVerticle {
                 }
                 catnip.eventBus().publish(websocketMessageSendAddress(),
                         basePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().seqnum(id)));
-                lastHeartbeat.set(System.currentTimeMillis());
-                heartbeatAcked.set(false);
+                lastHeartbeat = System.nanoTime();
+                heartbeatAcked = false;
             } else {
                 catnip.vertx().cancelTimer(timerId);
             }
@@ -482,8 +477,11 @@ public class CatnipShard extends AbstractVerticle {
         
         // Update trace and seqnum as needed
         if(data.getJsonArray("_trace", null) != null) {
-            trace = data.getJsonArray("_trace").stream().map(e -> (String) e).collect(Collectors.toList());
+            trace = JsonUtil.toStringList(data.getJsonArray("_trace"));
+        } else {
+            trace = Collections.emptyList(); //remove any old value
         }
+        
         if(event.getValue("s", null) != null) {
             catnip.sessionManager().seqnum(id, event.getInteger("s"));
         }
@@ -528,20 +526,20 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void handleHeartbeatAck(final Message<ShardControlMessage> msg, final JsonObject event) {
-        heartbeatAcked.set(true);
-        lastHeartbeatLatency.set(System.currentTimeMillis() - lastHeartbeat.get());
+        heartbeatAcked = true;
+        lastHeartbeatLatency = (System.nanoTime() - lastHeartbeat) / 1_000_000; //convert to millis
     }
     
     private void handleInvalidSession(final Message<ShardControlMessage> msg, final JsonObject event) {
         if(event.getBoolean("d")) {
             // Can resume
-            if(stateRef.get() != null) {
-                stateRef.get().socket().close();
+            if(state != null) {
+                state.socket().close();
             }
         } else {
             // Can't resume, clear old data
-            if(stateRef.get() != null) {
-                stateRef.get().socket().close();
+            if(state != null) {
+                state.socket().close();
                 catnip.sessionManager().clearSession(id);
                 catnip.sessionManager().clearSeqnum(id);
             }
@@ -550,8 +548,8 @@ public class CatnipShard extends AbstractVerticle {
     
     private void handleReconnectRequest(final Message<ShardControlMessage> msg, final JsonObject event) {
         // Just immediately disconnect
-        if(stateRef.get() != null) {
-            stateRef.get().socket().close();
+        if(state != null) {
+            state.socket().close();
         }
     }
     
@@ -646,7 +644,8 @@ public class CatnipShard extends AbstractVerticle {
         @Getter
         private final Buffer decompressBuffer = Buffer.buffer();
         @Getter
-        private final AtomicBoolean socketOpen = new AtomicBoolean(false);
+        @Setter
+        private volatile boolean socketOpen;
         @Getter
         @Setter
         private int readBufferPosition;

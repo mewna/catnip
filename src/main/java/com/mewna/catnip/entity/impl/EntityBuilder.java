@@ -27,9 +27,6 @@
 
 package com.mewna.catnip.entity.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.channel.*;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
@@ -72,9 +69,12 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import static com.mewna.catnip.util.JsonUtil.*;
 
 /**
  * @author natanbc
@@ -94,64 +94,6 @@ public final class EntityBuilder {
     @CheckReturnValue
     private static boolean isInvalid(@Nullable final JsonObject object, @Nonnull final String key) {
         return object == null || !object.containsKey(key);
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    public static <T> List<T> immutableListOf(@Nullable final JsonArray array, @Nonnull final Function<JsonObject, T> mapper) {
-        if(array == null) {
-            return ImmutableList.of();
-        }
-        final Collection<T> ret = new ArrayList<>(array.size());
-        for(final Object object : array) {
-            if(!(object instanceof JsonObject)) {
-                throw new IllegalArgumentException("Expected all values to be JsonObjects, but found " +
-                        (object == null ? "null" : object.getClass()));
-            }
-            ret.add(mapper.apply((JsonObject) object));
-        }
-        return ImmutableList.copyOf(ret);
-    }
-    
-    public static <T> Map<String, T> immutableMapOf(@Nullable final JsonArray array,
-                                                    @Nonnull final Function<JsonObject, String> keyFunction,
-                                                    @Nonnull final Function<JsonObject, T> mapper) {
-        if(array == null) {
-            return ImmutableMap.of();
-        }
-        
-        final Map<String, T> map = new HashMap<>(array.size());
-        
-        for(final Object object : array) {
-            if(!(object instanceof JsonObject)) {
-                throw new IllegalArgumentException("Expected all values to be JsonObjects, but found " +
-                        (object == null ? "null" : object.getClass()));
-            }
-            final JsonObject jsonObject = (JsonObject) object;
-            final String key = keyFunction.apply(jsonObject);
-            if(key == null || key.isEmpty()) {
-                throw new IllegalArgumentException("keyFunction returned null or empty string, which isn't allowed!");
-            }
-            map.put(key, mapper.apply(jsonObject));
-        }
-        return ImmutableMap.copyOf(map);
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    public static List<String> stringListOf(@Nullable final JsonArray array) {
-        if(array == null) {
-            return Collections.emptyList();
-        }
-        final Collection<String> ret = new ArrayList<>(array.size());
-        for(final Object object : array) {
-            if(!(object instanceof String)) {
-                throw new IllegalArgumentException("Expected all values to be strings, but found " +
-                        (object == null ? "null" : object.getClass()));
-            }
-            ret.add((String) object);
-        }
-        return ImmutableList.copyOf(ret);
     }
     
     @Nullable
@@ -231,7 +173,11 @@ public final class EntityBuilder {
             o.put("author", embedAuthorToJson(embed.author()));
         }
         if(!embed.fields().isEmpty()) {
-            o.put("fields", new JsonArray(embed.fields().stream().map(EntityBuilder::embedFieldToJson).collect(Collectors.toList())));
+            final JsonArray array = new JsonArray();
+            for(final Field field : embed.fields()) {
+                array.add(embedFieldToJson(field));
+            }
+            o.put("fields", array);
         }
         
         return o;
@@ -297,7 +243,7 @@ public final class EntityBuilder {
                 .video(video)
                 .provider(provider)
                 .author(author)
-                .fields(immutableListOf(data.getJsonArray("fields"), EntityBuilder::createField))
+                .fields(toList(data.getJsonArray("fields"), EntityBuilder::createField))
                 .build();
     }
     
@@ -312,7 +258,7 @@ public final class EntityBuilder {
                 .guildIdAsLong(Long.parseUnsignedLong(guildId))
                 .position(data.getInteger("position", -1))
                 .parentIdAsLong(parentId == null ? 0 : Long.parseUnsignedLong(parentId))
-                .overrides(immutableListOf(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
+                .overrides(toList(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
                 .topic(data.getString("topic"))
                 .nsfw(data.getBoolean("nsfw", false))
                 .rateLimitPerUser(data.getInteger("rate_limit_per_user", 0))
@@ -330,7 +276,7 @@ public final class EntityBuilder {
                 .guildIdAsLong(Long.parseUnsignedLong(guildId))
                 .position(data.getInteger("position", -1))
                 .parentIdAsLong(parentId == null ? 0 : Long.parseUnsignedLong(parentId))
-                .overrides(immutableListOf(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
+                .overrides(toList(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
                 .bitrate(data.getInteger("bitrate", 0))
                 .userLimit(data.getInteger("user_limit", 0))
                 .build();
@@ -345,7 +291,7 @@ public final class EntityBuilder {
                 .name(data.getString("name"))
                 .guildIdAsLong(Long.parseUnsignedLong(guildId))
                 .position(data.getInteger("position", -1))
-                .overrides(immutableListOf(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
+                .overrides(toList(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
                 .build();
     }
     
@@ -365,7 +311,7 @@ public final class EntityBuilder {
         return GroupDMChannelImpl.builder()
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
-                .recipients(immutableListOf(data.getJsonArray("recipients"), this::createUser))
+                .recipients(toList(data.getJsonArray("recipients"), this::createUser))
                 .icon(data.getString("icon"))
                 .ownerIdAsLong(Long.parseUnsignedLong(data.getString("owner_id")))
                 .applicationIdAsLong(Long.parseUnsignedLong(data.getString("application_id")))
@@ -508,7 +454,7 @@ public final class EntityBuilder {
                 .activity(createActivity(data.getJsonObject("game", null)))
                 .idAsLong(Long.parseUnsignedLong(data.getJsonObject("user").getString("id")))
                 .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id")))
-                .roles(ImmutableSet.copyOf(stringListOf(data.getJsonArray("roles"))))
+                .roles(toStringSet(data.getJsonArray("roles")))
                 .nick(data.getString("nick"))
                 .mobileStatus(mobileStatusString != null ? OnlineStatus.fromString(mobileStatusString) : null)
                 .webStatus(webStatusString != null ? OnlineStatus.fromString(webStatusString) : null)
@@ -657,7 +603,7 @@ public final class EntityBuilder {
                 .idAsLong(Long.parseUnsignedLong(id))
                 .guildIdAsLong(Long.parseUnsignedLong(guildId))
                 .nick(data.getString("nick"))
-                .roleIds(ImmutableSet.copyOf(stringListOf(data.getJsonArray("roles"))))
+                .roleIds(toStringSet(data.getJsonArray("roles")))
                 .joinedAt(joinedAt)
                 // If not present, it's probably(?) safe to assume not
                 .deaf(data.getBoolean("deaf", false))
@@ -685,7 +631,7 @@ public final class EntityBuilder {
                 .catnip(catnip)
                 .guildIdAsLong(Long.parseUnsignedLong(guild))
                 .user(createUser(data.getJsonObject("user")))
-                .roleIds(ImmutableSet.copyOf(stringListOf(data.getJsonArray("roles"))))
+                .roleIds(toStringSet(data.getJsonArray("roles")))
                 .nick(data.getString("nick"))
                 .build();
     }
@@ -745,7 +691,7 @@ public final class EntityBuilder {
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .guildIdAsLong(guildId == null ? 0 : Long.parseUnsignedLong(guildId))
                 .name(data.getString("name"))
-                .roles(stringListOf(data.getJsonArray("roles")))
+                .roles(toStringList(data.getJsonArray("roles")))
                 .user(userRaw == null ? null : createUser(userRaw))
                 .requiresColons(data.getBoolean("require_colons", true))
                 .managed(data.getBoolean("managed", false))
@@ -768,7 +714,7 @@ public final class EntityBuilder {
         return EmojiUpdateImpl.builder()
                 .catnip(catnip)
                 .guildIdAsLong(Long.parseUnsignedLong(guildId))
-                .emojis(immutableListOf(data.getJsonArray("emojis"),
+                .emojis(toList(data.getJsonArray("emojis"),
                         e -> createCustomEmoji(guildId, e)))
                 .build();
     }
@@ -844,11 +790,11 @@ public final class EntityBuilder {
                 .editedTimestamp(data.getString("edited_timestamp"))
                 .tts(data.getBoolean("tts", false))
                 .mentionsEveryone(data.getBoolean("mention_everyone", false))
-                .mentionedUsers(immutableListOf(data.getJsonArray("mentions"), this::createUser))
-                .mentionedRoles(stringListOf(data.getJsonArray("mention_roles")))
-                .attachments(immutableListOf(data.getJsonArray("attachments"), this::createAttachment))
-                .embeds(immutableListOf(data.getJsonArray("embeds"), this::createEmbed))
-                .reactions(immutableListOf(data.getJsonArray("reactions"), e -> createReaction(data.getString("guild_id"), e)))
+                .mentionedUsers(toList(data.getJsonArray("mentions"), this::createUser))
+                .mentionedRoles(toStringList(data.getJsonArray("mention_roles")))
+                .attachments(toList(data.getJsonArray("attachments"), this::createAttachment))
+                .embeds(toList(data.getJsonArray("embeds"), this::createEmbed))
+                .reactions(toList(data.getJsonArray("reactions"), e -> createReaction(data.getString("guild_id"), e)))
                 .nonce(String.valueOf(data.getValue("nonce")))
                 .pinned(data.getBoolean("pinned", false))
                 .type(MessageType.byId(data.getInteger("type", MessageType.DEFAULT.getId())))
@@ -867,7 +813,7 @@ public final class EntityBuilder {
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .guildIdAsLong(guildId == null ? 0 : Long.parseUnsignedLong(guildId))
                 .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
-                .embeds(immutableListOf(data.getJsonArray("embeds"), this::createEmbed))
+                .embeds(toList(data.getJsonArray("embeds"), this::createEmbed))
                 .build();
     }
     
@@ -896,27 +842,27 @@ public final class EntityBuilder {
         final String id = data.getString("id"); //optimization
         if(cache) {
             if(data.getJsonArray("roles") != null) {
-                catnip.cacheWorker().bulkCacheRoles(immutableListOf(data.getJsonArray("roles"),
+                catnip.cacheWorker().bulkCacheRoles(toList(data.getJsonArray("roles"),
                         e -> createRole(id, e)));
             }
             if(data.getJsonArray("channels") != null) {
-                catnip.cacheWorker().bulkCacheChannels(immutableListOf(data.getJsonArray("channels"),
+                catnip.cacheWorker().bulkCacheChannels(toList(data.getJsonArray("channels"),
                         e -> createGuildChannel(id, e)));
             }
             if(data.getJsonArray("members") != null) {
-                catnip.cacheWorker().bulkCacheMembers(immutableListOf(data.getJsonArray("members"),
+                catnip.cacheWorker().bulkCacheMembers(toList(data.getJsonArray("members"),
                         e -> createMember(id, e)));
             }
             if(data.getJsonArray("emojis") != null) {
-                catnip.cacheWorker().bulkCacheEmoji(immutableListOf(data.getJsonArray("emojis"),
+                catnip.cacheWorker().bulkCacheEmoji(toList(data.getJsonArray("emojis"),
                         e -> createCustomEmoji(id, e)));
             }
             if(data.getJsonArray("presences") != null) {
-                catnip.cacheWorker().bulkCachePresences(immutableMapOf(data.getJsonArray("presences"),
+                catnip.cacheWorker().bulkCachePresences(toMap(data.getJsonArray("presences"),
                         o -> o.getJsonObject("user").getString("id"), this::createPresence));
             }
             if(data.getJsonArray("voice_states") != null) {
-                catnip.cacheWorker().bulkCacheVoiceStates(immutableListOf(
+                catnip.cacheWorker().bulkCacheVoiceStates(toList(
                         data.getJsonArray("voice_states"), e -> createVoiceState(id, e)));
             }
         }
@@ -942,7 +888,7 @@ public final class EntityBuilder {
                 .verificationLevel(VerificationLevel.byKey(data.getInteger("verification_level", 0)))
                 .defaultMessageNotifications(NotificationLevel.byKey(data.getInteger("default_message_notifications", 0)))
                 .explicitContentFilter(ContentFilterLevel.byKey(data.getInteger("explicit_content_filter", 0)))
-                .features(stringListOf(data.getJsonArray("features")))
+                .features(toStringList(data.getJsonArray("features")))
                 .mfaLevel(MFALevel.byKey(data.getInteger("mfa_level", 0)))
                 .applicationIdAsLong(applicationId == null ? 0 : Long.parseUnsignedLong(applicationId))
                 .widgetEnabled(data.getBoolean("widget_enabled", false))
@@ -1055,7 +1001,7 @@ public final class EntityBuilder {
                 .name(data.getString("name"))
                 .icon(data.getString("icon"))
                 .splash(data.getString("splash"))
-                .features(stringListOf(data.getJsonArray("features")))
+                .features(toStringList(data.getJsonArray("features")))
                 .verificationLevel(VerificationLevel.byKey(data.getInteger("verification_level", 0)))
                 .build();
     }
@@ -1130,7 +1076,7 @@ public final class EntityBuilder {
         final String guildId = data.getString("guild_id");
         return BulkDeletedMessagesImpl.builder()
                 .catnip(catnip)
-                .ids(stringListOf(data.getJsonArray("ids")))
+                .ids(toStringList(data.getJsonArray("ids")))
                 .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
                 .guildIdAsLong(guildId == null ? 0 : Long.parseUnsignedLong(guildId))
                 .build();
@@ -1143,8 +1089,8 @@ public final class EntityBuilder {
                 .catnip(catnip)
                 .version(data.getInteger("v"))
                 .user(createUser(data.getJsonObject("user")))
-                .trace(stringListOf(data.getJsonArray("_trace")))
-                .guilds(ImmutableSet.copyOf(immutableListOf(data.getJsonArray("guilds"), this::createUnavailableGuild)))
+                .trace(toStringList(data.getJsonArray("_trace")))
+                .guilds(toSet(data.getJsonArray("guilds"), this::createUnavailableGuild))
                 .build();
     }
     
@@ -1153,7 +1099,7 @@ public final class EntityBuilder {
     public Resumed createResumed(@Nonnull final JsonObject data) {
         return ResumedImpl.builder()
                 .catnip(catnip)
-                .trace(stringListOf(data.getJsonArray("_trace")))
+                .trace(toStringList(data.getJsonArray("_trace")))
                 .build();
     }
     
@@ -1212,7 +1158,7 @@ public final class EntityBuilder {
                 .webhook(webhooks.get(data.getString("target_id")))
                 .type(type)
                 .reason(data.getString("reason"))
-                .changes(immutableListOf(data.getJsonArray("changes"), this::createAuditLogChange))
+                .changes(toList(data.getJsonArray("changes"), this::createAuditLogChange))
                 .options(data.containsKey("options") ? createOptionalEntryInfo(data.getJsonObject("options"), type) : null)
                 .build();
     }
@@ -1220,10 +1166,10 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public List<AuditLogEntry> createAuditLog(@Nonnull final JsonObject data) {
-        final Map<String, Webhook> webhooks = immutableMapOf(data.getJsonArray("webhooks"), x -> x.getString("id"), this::createWebhook);
-        final Map<String, User> users = immutableMapOf(data.getJsonArray("users"), x -> x.getString("id"), this::createUser);
+        final Map<String, Webhook> webhooks = toMap(data.getJsonArray("webhooks"), x -> x.getString("id"), this::createWebhook);
+        final Map<String, User> users = toMap(data.getJsonArray("users"), x -> x.getString("id"), this::createUser);
         
-        return immutableListOf(data.getJsonArray("audit_log_entries"), e ->
+        return toList(data.getJsonArray("audit_log_entries"), e ->
                 createAuditLogEntry(e, webhooks, users)
         );
     }
@@ -1237,10 +1183,7 @@ public final class EntityBuilder {
                 .name(data.getString("name"))
                 .icon(data.getString("icon"))
                 .description(data.getString("description"))
-                .rpcOrigins(ImmutableList.copyOf(data.getJsonArray("rpc_origins", new JsonArray())
-                        .stream()
-                        .map(Object::toString)
-                        .collect(Collectors.toList())))
+                .rpcOrigins(toStringList(data.getJsonArray("rpc_origins")))
                 .publicBot(data.getBoolean("bot_public"))
                 .requiresCodeGrant(data.getBoolean("bot_require_code_grant"))
                 .owner(createUser(data.getJsonObject("owner")))

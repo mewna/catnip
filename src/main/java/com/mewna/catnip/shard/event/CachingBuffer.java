@@ -30,6 +30,7 @@ package com.mewna.catnip.shard.event;
 import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.GatewayOp;
+import com.mewna.catnip.util.JsonUtil;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import lombok.AllArgsConstructor;
@@ -42,7 +43,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.stream.Collectors;
 
 import static com.mewna.catnip.shard.CatnipShard.LARGE_THRESHOLD;
 import static com.mewna.catnip.shard.DiscordEvent.Raw;
@@ -101,9 +101,7 @@ public class CachingBuffer extends AbstractBuffer {
         final JsonObject d = event.getJsonObject("d");
         switch(type) {
             case Raw.READY: {
-                final Set<String> guilds = d.getJsonArray("guilds").stream()
-                        .map(e -> ((JsonObject) e).getString("id"))
-                        .collect(Collectors.toSet());
+                final Set<String> guilds = JsonUtil.toSet(d.getJsonArray("guilds"), g -> g.getString("id"));
                 buffers.put(id, new BufferState(id, guilds));
                 catnip().logAdapter().debug("Prepared new BufferState for shard {} with {} guilds.", id, guilds.size());
                 // READY is also a cache event, as it does come with

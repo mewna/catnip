@@ -32,6 +32,7 @@ import com.mewna.catnip.entity.guild.audit.ActionType;
 import com.mewna.catnip.entity.guild.audit.AuditLogEntry;
 import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.util.JsonUtil;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -92,8 +93,8 @@ public abstract class AuditLogPaginator extends BasePaginator<AuditLogEntry, Jso
         //inlined EntityBuilder.immutableListOf and EntityBuilder.createAuditLog
         //this is done so we can do less allocations and only parse the entries
         //we need to.
-        final Map<String, Webhook> webhooks = EntityBuilder.immutableMapOf(data.getJsonArray("webhooks"), x -> x.getString("id"), builder::createWebhook);
-        final Map<String, User> users = EntityBuilder.immutableMapOf(data.getJsonArray("users"), x -> x.getString("id"), builder::createUser);
+        final Map<String, Webhook> webhooks = JsonUtil.toMap(data.getJsonArray("webhooks"), x -> x.getString("id"), builder::createWebhook);
+        final Map<String, User> users = JsonUtil.toMap(data.getJsonArray("users"), x -> x.getString("id"), builder::createUser);
         final JsonArray entries = data.getJsonArray("audit_log_entries");
         
         for(final Object object : entries) {
