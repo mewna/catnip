@@ -72,6 +72,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -90,7 +91,7 @@ public class CatnipImpl implements Catnip {
     private final Rest rest = new Rest(this);
     private final ExtensionManager extensionManager = new DefaultExtensionManager(this);
     private final AtomicReference<User> selfUser = new AtomicReference<>(null);
-    private final Set<String> unavailableGuilds = new HashSet<>();
+    private final Set<String> unavailableGuilds = ConcurrentHashMap.newKeySet();
     private final AtomicReference<GatewayInfo> gatewayInfo = new AtomicReference<>(null);
     
     private RestRequester requester;
