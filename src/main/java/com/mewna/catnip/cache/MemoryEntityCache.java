@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.cache;
 
-import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.cache.view.*;
 import com.mewna.catnip.entity.channel.Channel;
@@ -51,7 +50,10 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -260,23 +262,6 @@ public class MemoryEntityCache implements EntityCacheWorker {
     @CheckReturnValue
     protected <T> MutableNamedCacheView<T> createNamedCacheView(@Nonnull final Function<T, String> nameFunction) {
         return new DefaultNamedCacheView<>(nameFunction);
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    private static <T> Function<JsonArray, List<T>> mapObjectContents(@Nonnull final Function<JsonObject, T> builder) {
-        return array -> {
-            final Collection<T> result = new ArrayList<>(array.size());
-            for(final Object object : array) {
-                if(!(object instanceof JsonObject)) {
-                    throw new IllegalArgumentException("Expected array to contain only objects, but found " +
-                            (object == null ? "null" : object.getClass())
-                    );
-                }
-                result.add(builder.apply((JsonObject) object));
-            }
-            return ImmutableList.copyOf(result);
-        };
     }
     
     private void cacheChannel(final Channel channel) {

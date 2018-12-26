@@ -62,6 +62,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 
+import static com.mewna.catnip.util.JsonUtil.mapObjectContents;
+
 /**
  * @author amy
  * @since 9/3/18.

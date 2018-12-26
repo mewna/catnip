@@ -27,10 +27,10 @@
 
 package com.mewna.catnip.shard.manager;
 
-import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.ShardControlMessage;
+import com.mewna.catnip.util.JsonUtil;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import lombok.Getter;
@@ -45,7 +45,6 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 /**
  * @author amy
@@ -84,8 +83,7 @@ public abstract class AbstractShardManager implements ShardManager {
                 reply -> {
                     if(reply.succeeded()) {
                         // ow
-                        future.complete(ImmutableList.copyOf(reply.result().body().stream()
-                                .map(e -> (String) e).collect(Collectors.toList())));
+                        future.complete(JsonUtil.toStringList(reply.result().body()));
                     } else {
                         future.fail(reply.cause());
                     }
