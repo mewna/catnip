@@ -40,6 +40,7 @@ import com.mewna.catnip.util.PermissionUtil;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.awt.*;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -139,6 +140,41 @@ public interface Member extends Snowflake {
     @Nullable
     @CheckReturnValue
     OffsetDateTime joinedAt();
+    
+    /**
+     * The member's color, as shown in the official Discord Client, or {@code null} if they have no roles with a color.
+     * <br>This will iterate over all the roles this member has, so try to avoid calling this method multiple times
+     * if you only need the value once.
+     *
+     * @return A {@link Color color} representing the member's color, as shown in the official Discord Client.
+     */
+    @Nullable
+    @CheckReturnValue
+    default Color color() {
+        int color = -1;
+        int highest = Integer.MIN_VALUE;
+        long roleId = 0;
+        
+        final CacheView<Role> cache = catnip().cache().roles(guildId());
+        for (final String id : roleIds()) {
+            final Role role = cache.getById(id);
+            if (role != null && role.color() != 0) {
+                if (role.position() == highest) {
+                    final long idAsLong = role.idAsLong();
+                    if (idAsLong > roleId) {
+                        color = role.color();
+                        highest = role.position();
+                        roleId = idAsLong;
+                    }
+                } else if (role.position() > highest) {
+                    color = role.color();
+                    highest = role.position();
+                    roleId = role.idAsLong();
+                }
+            }
+        }
+        return color == -1 ? null : new Color(color);
+    }
     
     /**
      * Creates a DM channel with this member's user.
