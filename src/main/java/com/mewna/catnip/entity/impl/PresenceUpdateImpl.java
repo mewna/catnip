@@ -52,10 +52,10 @@ public class PresenceUpdateImpl implements PresenceUpdate, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
+    private long idAsLong;
+    private long guildIdAsLong;
     private OnlineStatus status;
     private Activity activity;
-    private String id;
-    private String guildId;
     private Set<String> roles;
     private String nick;
     private OnlineStatus mobileStatus;

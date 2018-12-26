@@ -47,9 +47,21 @@ public interface GuildEmbed extends RequiresCatnip {
     boolean enabled();
     
     /**
-     * @return The id the embed is enabled for.
+     * @return The id the embed is enabled for. {@code null} if not enabled.
      */
     @Nullable
     @CheckReturnValue
-    String channelId();
+    default String channelId() {
+        final long id = channelIdAsLong();
+        if(id == 0) {
+            return null;
+        }
+        return Long.toUnsignedString(id);
+    }
+    
+    /**
+     * @return The id the embed is enabled for. {@code 0} if not enabled.
+     */
+    @CheckReturnValue
+    long channelIdAsLong();
 }

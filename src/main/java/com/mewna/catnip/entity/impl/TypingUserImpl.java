@@ -51,9 +51,9 @@ public class TypingUserImpl implements TypingUser, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String id;
-    private String channelId;
-    private String guildId;
+    private long idAsLong;
+    private long channelIdAsLong;
+    private long guildIdAsLong;
     private long timestamp;
     
     public void catnip(@Nonnull final Catnip catnip) {

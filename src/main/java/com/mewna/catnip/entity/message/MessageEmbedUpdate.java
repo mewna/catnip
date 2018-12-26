@@ -28,7 +28,11 @@
 package com.mewna.catnip.entity.message;
 
 import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.channel.MessageChannel;
+import com.mewna.catnip.entity.channel.TextChannel;
+import com.mewna.catnip.entity.guild.Guild;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
@@ -43,11 +47,49 @@ import java.util.List;
  */
 public interface MessageEmbedUpdate extends Snowflake {
     @Nullable
-    String guildId();
+    @CheckReturnValue
+    default String guildId() {
+        final long id = guildIdAsLong();
+        if(id == 0) {
+            return null;
+        }
+        return Long.toUnsignedString(id);
+    }
+    
+    @CheckReturnValue
+    long guildIdAsLong();
+    
+    @Nullable
+    @CheckReturnValue
+    default Guild guild() {
+        final long id = guildIdAsLong();
+        if(id == 0) {
+            return null;
+        } else {
+            return catnip().cache().guild(id);
+        }
+    }
     
     @Nonnull
-    String channelId();
+    @CheckReturnValue
+    default String channelId() {
+        return Long.toUnsignedString(channelIdAsLong());
+    }
+    
+    @CheckReturnValue
+    long channelIdAsLong();
+    
+    @CheckReturnValue
+    default MessageChannel channel() {
+        final long guild = guildIdAsLong();
+        if(guild != 0) {
+            return (TextChannel) catnip().cache().channel(guild, channelIdAsLong());
+        } else {
+            return catnip().cache().dmChannel(channelIdAsLong());
+        }
+    }
     
     @Nonnull
+    @CheckReturnValue
     List<Embed> embeds();
 }

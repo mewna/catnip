@@ -51,11 +51,11 @@ import java.util.List;
 public class TextChannelImpl implements TextChannel, RequiresCatnip {
     private transient Catnip catnip;
     
-    private String id;
+    private long idAsLong;
     private String name;
-    private String guildId;
+    private long guildIdAsLong;
     private int position;
-    private String parentId;
+    private long parentIdAsLong;
     private List<PermissionOverride> overrides;
     private String topic;
     private boolean nsfw;
@@ -68,12 +68,12 @@ public class TextChannelImpl implements TextChannel, RequiresCatnip {
     
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Long.hashCode(idAsLong);
     }
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof TextChannel && ((TextChannel) obj).id().equals(id);
+        return obj instanceof TextChannel && ((TextChannel) obj).idAsLong() == idAsLong;
     }
     
     @Override

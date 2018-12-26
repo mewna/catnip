@@ -30,6 +30,7 @@ package com.mewna.catnip.entity.guild;
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.user.User;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -44,11 +45,13 @@ public interface GuildBan extends Entity {
      * @return The user who was banned.
      */
     @Nonnull
+    @CheckReturnValue
     User user();
     
     /**
      * @return The reason for the ban, if provided.
      */
     @Nullable
+    @CheckReturnValue
     String reason();
 }

@@ -141,7 +141,15 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @CheckReturnValue
-    String ownerId();
+    default String ownerId() {
+        return Long.toUnsignedString(ownerIdAsLong());
+    }
+    
+    /**
+     * @return The id of the user who owns the guild.
+     */
+    @CheckReturnValue
+    long ownerIdAsLong();
     
     /**
      * @return Total permissions for the user in the guild. Does NOT include
@@ -163,7 +171,19 @@ public interface Guild extends Snowflake {
      */
     @Nullable
     @CheckReturnValue
-    String afkChannelId();
+    default String afkChannelId() {
+        final long id = afkChannelIdAsLong();
+        if(id == 0) {
+            return null;
+        }
+        return Long.toUnsignedString(id);
+    }
+    
+    /**
+     * @return The id of the afk voice channel for the guild.
+     */
+    @CheckReturnValue
+    long afkChannelIdAsLong();
     
     /**
      * @return The amount of time a user must be afk for before they're moved
@@ -183,7 +203,19 @@ public interface Guild extends Snowflake {
      */
     @Nullable
     @CheckReturnValue
-    String embedChannelId();
+    default String embedChannelId() {
+        final long id = embedChannelIdAsLong();
+        if(id == 0) {
+            return null;
+        }
+        return Long.toUnsignedString(id);
+    }
+    
+    /**
+     * @return The channel the guild embed is for, if enabled.
+     */
+    @CheckReturnValue
+    long embedChannelIdAsLong();
     
     /**
      * @return The verification level set for the guild.
@@ -225,7 +257,19 @@ public interface Guild extends Snowflake {
      */
     @Nullable
     @CheckReturnValue
-    String applicationId();
+    default String applicationId() {
+        final long id = applicationIdAsLong();
+        if(id == 0) {
+            return null;
+        }
+        return Long.toUnsignedString(id);
+    }
+    
+    /**
+     * @return The id of the application that created this guild.
+     */
+    @CheckReturnValue
+    long applicationIdAsLong();
     
     /**
      * @return Whether or not the guild's widget is enabled.
@@ -238,7 +282,19 @@ public interface Guild extends Snowflake {
      */
     @Nullable
     @CheckReturnValue
-    String widgetChannelId();
+    default String widgetChannelId() {
+        final long id = widgetChannelIdAsLong();
+        if(id == 0) {
+            return null;
+        }
+        return Long.toUnsignedString(id);
+    }
+    
+    /**
+     * @return The channel the guild's widget is set for, if enabled.
+     */
+    @CheckReturnValue
+    long widgetChannelIdAsLong();
     
     /**
      * @return The id of the channel used for system messages (ex. the built-in
@@ -246,7 +302,20 @@ public interface Guild extends Snowflake {
      */
     @Nullable
     @CheckReturnValue
-    String systemChannelId();
+    default String systemChannelId() {
+        final long id = systemChannelIdAsLong();
+        if(id == 0) {
+            return null;
+        }
+        return Long.toUnsignedString(id);
+    }
+    
+    /**
+     * @return The id of the channel used for system messages (ex. the built-in
+     * member join messages).
+     */
+    @CheckReturnValue
+    long systemChannelIdAsLong();
     
     //The following fields are only sent in GUILD_CREATE
     

@@ -70,7 +70,15 @@ public interface GuildChannel extends Channel {
      */
     @Nonnull
     @CheckReturnValue
-    String guildId();
+    default String guildId() {
+        return Long.toUnsignedString(guildIdAsLong());
+    }
+    
+    /**
+     * @return The id of the guild this channel is in.
+     */
+    @CheckReturnValue
+    long guildIdAsLong();
     
     /**
      * @return The position of the channel.
@@ -84,7 +92,20 @@ public interface GuildChannel extends Channel {
      */
     @Nullable
     @CheckReturnValue
-    String parentId();
+    default String parentId() {
+        final long id = parentIdAsLong();
+        if(id == 0) {
+            return null;
+        }
+        return Long.toUnsignedString(id);
+    }
+    
+    /**
+     * @return The id of the {@link Category} that is the parent of this
+     * channel. A value of {@code 0} means no parent.
+     */
+    @CheckReturnValue
+    long parentIdAsLong();
     
     /**
      * @return The permission overrides set on this channel. Will never be
