@@ -561,9 +561,29 @@ public final class EntityBuilder {
         if(data == null) {
             return null;
         } else {
+            // Defend against stringly-typed timestamps.
+            // I asked Jake, he says that integers >53 bits are automatically
+            // serialized to strings. Since this field is user-provided, it
+            // means that an irresponsible end-user could send large-enough
+            // integers to hit this cap and thereby end up causing :fire: for
+            // us.
+            // Therefore, this defends against that exact issue.
+            long start;
+            try {
+                start = data.getLong("start", -1L);
+            } catch(final ClassCastException ignored) {
+                start = Long.parseLong(data.getString("start", "-1"));
+            }
+            long end;
+            try {
+                end = data.getLong("end", -1L);
+            } catch(final ClassCastException ignored) {
+                end = Long.parseLong(data.getString("end", "-1"));
+            }
+            
             return ActivityTimestampsImpl.builder()
-                    .start(data.getLong("start", -1L))
-                    .end(data.getLong("end", -1L))
+                    .start(start)
+                    .end(end)
                     .build();
         }
     }
