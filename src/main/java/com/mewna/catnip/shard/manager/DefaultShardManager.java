@@ -30,7 +30,7 @@ package com.mewna.catnip.shard.manager;
 import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
-import io.vertx.core.json.JsonObject;
+import com.mewna.catnip.shard.ShardControlMessage;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -148,10 +148,10 @@ public class DefaultShardManager extends AbstractShardManager {
     private void connect() {
         final int nextId = connectQueue.removeFirst();
         catnip().logAdapter().info("Connecting shard {} (queue len {})", nextId, connectQueue.size());
-        catnip().eventBus().<JsonObject>send(CatnipShard.controlAddress(nextId), new JsonObject().put("mode", "START"),
+        catnip().eventBus().<ShardConnectState>send(CatnipShard.controlAddress(nextId), ShardControlMessage.START,
                 reply -> {
                     if(reply.succeeded()) {
-                        final ShardConnectState state = ShardConnectState.valueOf(reply.result().body().getString("state"));
+                        final ShardConnectState state = reply.result().body();
                         switch(state) {
                             case READY:
                             case RESUMED: {
@@ -189,7 +189,7 @@ public class DefaultShardManager extends AbstractShardManager {
     @Override
     public void shutdown() {
         shardIds.forEach(i -> {
-            catnip().eventBus().send(CatnipShard.controlAddress(i), new JsonObject().put("mode", "SHUTDOWN"));
+            catnip().eventBus().send(CatnipShard.controlAddress(i), ShardControlMessage.SHUTDOWN);
         });
     }
 }

@@ -54,7 +54,7 @@ public class PartialMemberImpl implements PartialMember, RequiresCatnip {
     private transient Catnip catnip;
     
     private User user;
-    private String guildId;
+    private long guildIdAsLong;
     private Set<String> roleIds;
     private String nick;
     
@@ -65,12 +65,12 @@ public class PartialMemberImpl implements PartialMember, RequiresCatnip {
     
     @Override
     public int hashCode() {
-        return id().hashCode();
+        return Long.hashCode(idAsLong());
     }
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof PartialMember && ((PartialMember) obj).id().equals(id());
+        return obj instanceof PartialMember && ((PartialMember) obj).idAsLong() == idAsLong();
     }
     
     @Override

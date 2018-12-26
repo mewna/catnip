@@ -51,7 +51,7 @@ public class PermissionOverrideImpl implements PermissionOverride, RequiresCatni
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String id;
+    private long idAsLong;
     private OverrideType type;
     private long allowRaw;
     private long denyRaw;
@@ -63,16 +63,16 @@ public class PermissionOverrideImpl implements PermissionOverride, RequiresCatni
     
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Long.hashCode(idAsLong);
     }
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof PermissionOverride && ((PermissionOverride) obj).id().equals(id);
+        return obj instanceof PermissionOverride && ((PermissionOverride) obj).idAsLong() == idAsLong;
     }
     
     @Override
     public String toString() {
-        return String.format("PermissionOverride (%s)", id);
+        return String.format("PermissionOverride (%s)", idAsLong);
     }
 }

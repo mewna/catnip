@@ -29,6 +29,8 @@ package com.mewna.catnip.entity.guild;
 
 import com.mewna.catnip.entity.Snowflake;
 
+import javax.annotation.CheckReturnValue;
+
 /**
  * An unavailable guild.
  *
@@ -39,5 +41,6 @@ public interface UnavailableGuild extends Snowflake {
     /**
      * @return Whether the guild is unavailable.
      */
+    @CheckReturnValue
     boolean unavailable();
 }

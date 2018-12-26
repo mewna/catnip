@@ -69,13 +69,39 @@ public interface GroupDMChannel extends DMChannel {
      */
     @Nonnull
     @CheckReturnValue
-    String ownerId();
+    default String ownerId() {
+        return Long.toUnsignedString(ownerIdAsLong());
+    }
+    
+    /**
+     * @return The ID of the user who owns the group DM.
+     */
+    @CheckReturnValue
+    long ownerIdAsLong();
     
     /**
      * @return The ID of the application that created the group DM.
+     * May be {@code null}.
+     *
+     * Bots shouldn't ever have this value being null.
      */
     @CheckReturnValue
-    String applicationId();
+    default String applicationId() {
+        final long id = applicationIdAsLong();
+        if(id == 0) {
+            return null;
+        }
+        return Long.toUnsignedString(id);
+    }
+    
+    /**
+     * @return The ID of the application that created the group DM.
+     * A value of {@code 0} means this group wasn't created by an application.
+     *
+     * Bots shouldn't ever have this value being 0.
+     */
+    @CheckReturnValue
+    long applicationIdAsLong();
     
     @Override
     @JsonIgnore

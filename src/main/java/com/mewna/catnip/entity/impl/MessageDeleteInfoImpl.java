@@ -51,7 +51,7 @@ public class MessageDeleteInfoImpl implements MessageDeleteInfo, RequiresCatnip 
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String channelId;
+    private long channelIdAsLong;
     private int deletedMessagesCount;
     
     @Override

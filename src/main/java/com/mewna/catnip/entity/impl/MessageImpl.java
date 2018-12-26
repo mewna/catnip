@@ -60,8 +60,8 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String id;
-    private String channelId;
+    private long idAsLong;
+    private long channelIdAsLong;
     private User author;
     private String content;
     private String timestamp;
@@ -75,10 +75,10 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
     private List<Reaction> reactions;
     private String nonce;
     private boolean pinned;
-    private String webhookId;
+    private long webhookIdAsLong;
     private MessageType type;
     private Member member;
-    private String guildId;
+    private long guildIdAsLong;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
@@ -113,12 +113,12 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
     
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Long.hashCode(idAsLong);
     }
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Message && ((Message) obj).id().equals(id);
+        return obj instanceof Message && ((Message) obj).idAsLong() == idAsLong;
     }
     
     @Override
@@ -134,7 +134,7 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
     public static class AttachmentImpl implements Attachment, RequiresCatnip {
         private transient Catnip catnip;
         
-        private String id;
+        private long idAsLong;
         private String fileName;
         private int size;
         private String url;
@@ -149,12 +149,12 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
         
         @Override
         public int hashCode() {
-            return id.hashCode();
+            return Long.hashCode(idAsLong);
         }
         
         @Override
         public boolean equals(final Object obj) {
-            return obj instanceof Attachment && ((Attachment) obj).id().equals(id);
+            return obj instanceof Attachment && ((Attachment) obj).idAsLong() == idAsLong;
         }
         
         @Override

@@ -51,8 +51,8 @@ public class WebhooksUpdateImpl implements WebhooksUpdate, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String channelId;
-    private String guildId;
+    private long channelIdAsLong;
+    private long guildIdAsLong;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {

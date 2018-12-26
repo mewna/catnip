@@ -43,7 +43,16 @@ import java.util.List;
 public interface AuditLogEntry extends Snowflake {
     @Nullable
     @CheckReturnValue
-    String targetId();
+    default String targetId() {
+        final long id = targetIdAsLong();
+        if(id == 0) {
+            return null;
+        }
+        return Long.toUnsignedString(id);
+    }
+    
+    @CheckReturnValue
+    long targetIdAsLong();
     
     @Nonnull
     @CheckReturnValue

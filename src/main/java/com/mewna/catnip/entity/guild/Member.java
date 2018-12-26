@@ -58,22 +58,23 @@ import java.util.stream.Collectors;
 @JsonDeserialize(as = MemberImpl.class)
 public interface Member extends Snowflake {
     /**
-     * The unique snowflake ID of the user.
-     *
-     * @return User's ID. Never null.
-     */
-    @Nonnull
-    @CheckReturnValue
-    String id();
-    
-    /**
      * The id of the guild this member is from.
      *
      * @return String representing the guild ID.
      */
     @Nonnull
     @CheckReturnValue
-    String guildId();
+    default String guildId() {
+        return Long.toUnsignedString(guildIdAsLong());
+    }
+    
+    /**
+     * The id of the guild this member is from.
+     *
+     * @return Long representing the guild ID.
+     */
+    @CheckReturnValue
+    long guildIdAsLong();
     
     /**
      * The user's nickname in this guild.

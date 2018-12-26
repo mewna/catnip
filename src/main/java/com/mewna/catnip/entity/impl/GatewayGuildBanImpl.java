@@ -52,7 +52,7 @@ public class GatewayGuildBanImpl implements GatewayGuildBan, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String guildId;
+    private long guildIdAsLong;
     
     private User user;
     

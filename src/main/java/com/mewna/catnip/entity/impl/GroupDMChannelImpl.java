@@ -53,11 +53,11 @@ public class GroupDMChannelImpl implements GroupDMChannel, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String id;
+    private long idAsLong;
     private List<User> recipients;
     private String icon;
-    private String ownerId;
-    private String applicationId;
+    private long ownerIdAsLong;
+    private long applicationIdAsLong;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
@@ -66,12 +66,12 @@ public class GroupDMChannelImpl implements GroupDMChannel, RequiresCatnip {
     
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Long.hashCode(idAsLong);
     }
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof GroupDMChannel && ((GroupDMChannel) obj).id().equals(id);
+        return obj instanceof GroupDMChannel && ((GroupDMChannel) obj).idAsLong() == idAsLong;
     }
     
     @Override

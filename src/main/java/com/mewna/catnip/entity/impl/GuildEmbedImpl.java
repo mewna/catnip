@@ -51,7 +51,7 @@ public class GuildEmbedImpl implements GuildEmbed {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String channelId;
+    private long channelIdAsLong;
     private boolean enabled;
     
     @Override

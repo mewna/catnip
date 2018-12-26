@@ -150,7 +150,7 @@ public class PresenceImpl implements Presence, RequiresCatnip {
         private ActivityType type;
         private String url;
         private ActivityTimestamps timestamps;
-        private String applicationId;
+        private long applicationIdAsLong;
         private String details;
         private String state;
         private ActivityParty party;

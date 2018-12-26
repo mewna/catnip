@@ -42,8 +42,8 @@ import java.util.List;
  */
 public interface Emoji extends Snowflake {
     /**
-     * ID of this emojis, or null if it has no ID.
-     * <br>Always null for {@link #unicode() unicode} emojis.
+     * ID of this emoji, or null if it has no ID.
+     * <br>Always null for {@link #unicode() unicode} emoji.
      *
      * @return String representing the ID.
      */
@@ -52,7 +52,7 @@ public interface Emoji extends Snowflake {
     String id();
     
     /**
-     * Name of this emojis, if it's {@link #custom() custom}, or it's {@link #unicode() unicode} value.
+     * Name of this emoji, if it's {@link #custom() custom}, or it's {@link #unicode() unicode} value.
      *
      * @return String representing the name or unicode value.
      */
@@ -61,8 +61,8 @@ public interface Emoji extends Snowflake {
     String name();
     
     /**
-     * Roles that are allowed to use this emojis. If empty, all users can use it.
-     * <br>Always empty for {@link #unicode() unicode} emojis.
+     * Roles that are allowed to use this emoji. If empty, all users can use it.
+     * <br>Always empty for {@link #unicode() unicode} emoji.
      *
      * @return List of role IDs allowed.
      */
@@ -71,17 +71,17 @@ public interface Emoji extends Snowflake {
     List<String> roles();
     
     /**
-     * User who uploaded this emojis.
-     * <br>Always null for {@link #unicode() unicode} emojis.
+     * User who uploaded this emoji.
+     * <br>Always null for {@link #unicode() unicode} emoji.
      *
-     * @return User who uploaded the emojis.
+     * @return User who uploaded the emoji.
      */
     @Nullable
     @CheckReturnValue
     User user();
     
     /**
-     * Whether this emojis must be wrapped in colons.
+     * Whether this emoji must be wrapped in colons.
      *
      * @return True if it should be wrapped in colons, false otherwise.
      */
@@ -89,8 +89,8 @@ public interface Emoji extends Snowflake {
     boolean requiresColons();
     
     /**
-     * Whether this emojis is managed.
-     * <br>Always false for {@link #unicode() unicode} emojis.
+     * Whether this emoji is managed.
+     * <br>Always false for {@link #unicode() unicode} emoji.
      *
      * @return True if it's managed, false otherwise.
      */
@@ -98,8 +98,8 @@ public interface Emoji extends Snowflake {
     boolean managed();
     
     /**
-     * Whether this emojis is animated.
-     * <br>Always false for {@link #unicode() unicode} emojis.
+     * Whether this emoji is animated.
+     * <br>Always false for {@link #unicode() unicode} emoji.
      *
      * @return True if it's animated, false otherwise.
      */
@@ -107,18 +107,18 @@ public interface Emoji extends Snowflake {
     boolean animated();
     
     /**
-     * Whether this emojis is {@link CustomEmoji custom}.
+     * Whether this emoji is {@link CustomEmoji custom}.
      *
-     * @return True if this emojis is custom, false otherwise.
+     * @return True if this emoji is custom, false otherwise.
      */
     @CheckReturnValue
     boolean custom();
     
     /**
-     * Whether this emojis is {@link UnicodeEmoji unicode}.
+     * Whether this emoji is {@link UnicodeEmoji unicode}.
      * <br>This method is equivalent to {@link #custom() {@code !custom()}}.
      *
-     * @return True if this emojis is custom, false otherwise.
+     * @return True if this emoji is custom, false otherwise.
      */
     @CheckReturnValue
     default boolean unicode() {
@@ -126,9 +126,9 @@ public interface Emoji extends Snowflake {
     }
     
     /**
-     * A string that may be sent in a message and will render this emojis, if the user has permission to.
+     * A string that may be sent in a message and will render this emoji, if the user has permission to.
      *
-     * @return A string that yields this emojis when inside a message.
+     * @return A string that yields this emoji when inside a message.
      */
     @Nonnull
     @CheckReturnValue
@@ -137,14 +137,14 @@ public interface Emoji extends Snowflake {
     /**
      * A string that may be added as a reaction to a message, if the user has permission to.
      *
-     * @return A string that yields this emojis when added as a reaction.
+     * @return A string that yields this emoji when added as a reaction.
      */
     @Nonnull
     @CheckReturnValue
     String forReaction();
     
     /**
-     * Checks whether or not this emojis is the provided emoji string.
+     * Checks whether or not this emoji is the provided emoji string.
      * <br>If this emoji is {@link UnicodeEmoji unicode}, it's
      * {@link #name() name} is compared for equality with the provided string.
      * <br>If this emoji is {@link CustomEmoji custom}, the following checks,
@@ -166,10 +166,12 @@ public interface Emoji extends Snowflake {
         @Override
         @Nonnull
         @CheckReturnValue
-        String id();
-        
+        default String id() {
+            return Long.toUnsignedString(idAsLong());
+        }
+    
         /**
-         * ID of guild that owns this emojis, or null if it has no guild.
+         * ID of guild that owns this emoji, or {@code null} if it has no guild.
          * <p/>
          * NOTE: This may be null in the case of a reaction, because the data
          * may not be available to get the id for the emoji!
@@ -178,7 +180,24 @@ public interface Emoji extends Snowflake {
          */
         @Nullable
         @CheckReturnValue
-        String guildId();
+        default String guildId() {
+            final long id = guildIdAsLong();
+            if(id == 0) {
+                return null;
+            }
+            return Long.toUnsignedString(id);
+        }
+    
+        /**
+         * ID of guild that owns this emoji, or {@code 0} if it has no guild.
+         * <p/>
+         * NOTE: This may be null in the case of a reaction, because the data
+         * may not be available to get the id for the emoji!
+         *
+         * @return Long representing the ID.
+         */
+        @CheckReturnValue
+        long guildIdAsLong();
         
         @Override
         @CheckReturnValue
@@ -210,6 +229,11 @@ public interface Emoji extends Snowflake {
     interface UnicodeEmoji extends Emoji {
         @Override
         default String id() {
+            throw new IllegalStateException("Unicode emojis have no IDs!");
+        }
+    
+        @Override
+        default long idAsLong() {
             throw new IllegalStateException("Unicode emojis have no IDs!");
         }
         
