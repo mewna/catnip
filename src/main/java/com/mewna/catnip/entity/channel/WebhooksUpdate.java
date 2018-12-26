@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.impl.WebhooksUpdateImpl;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
 /**
@@ -45,10 +46,32 @@ public interface WebhooksUpdate extends Entity {
      * @return The id of the guild that webhooks were updated in.
      */
     @Nonnull
-    String guildId();
+    @CheckReturnValue
+    default String guildId() {
+        return Long.toUnsignedString(guildIdAsLong());
+    }
+    
+    /**
+     * @return The id of the guild that webhooks were updated in.
+     */
+    @CheckReturnValue
+    long guildIdAsLong();
     
     /**
      * @return The id of the channel that webhooks were updated in.
      */
-    String channelId();
+    @CheckReturnValue
+    default String channelId() {
+        final long id = channelIdAsLong();
+        if(id == 0) {
+            return null;
+        }
+        return Long.toUnsignedString(id);
+    }
+    
+    /**
+     * @return The id of the channel that webhooks were updated in.
+     */
+    @CheckReturnValue
+    long channelIdAsLong();
 }

@@ -53,8 +53,8 @@ public class UserDMChannelImpl implements UserDMChannel, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String id;
-    private String userId;
+    private long idAsLong;
+    private long userIdAsLong;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
@@ -63,12 +63,12 @@ public class UserDMChannelImpl implements UserDMChannel, RequiresCatnip {
     
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Long.hashCode(idAsLong);
     }
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof UserDMChannel && ((UserDMChannel) obj).id().equals(id);
+        return obj instanceof UserDMChannel && ((UserDMChannel) obj).idAsLong() == idAsLong;
     }
     
     @Override
@@ -79,6 +79,6 @@ public class UserDMChannelImpl implements UserDMChannel, RequiresCatnip {
     @Nullable
     @Override
     public User recipient() {
-        return catnip.cache().user(userId);
+        return catnip.cache().user(userIdAsLong);
     }
 }

@@ -452,7 +452,7 @@ public class CatnipShard extends AbstractVerticle {
                     // Zombie
                     catnip.logAdapter().warn("Shard {} zombied, queueing reconnect!", id);
                     catnip.vertx().cancelTimer(timerId);
-                    catnip.eventBus().publish(controlAddress(id), new JsonObject().put("mode", "STOP"));
+                    catnip.eventBus().publish(controlAddress(id), ShardControlMessage.STOP);
                     return;
                 }
                 catnip.eventBus().publish(websocketMessageSendAddress(),

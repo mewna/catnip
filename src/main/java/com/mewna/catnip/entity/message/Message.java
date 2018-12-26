@@ -65,6 +65,7 @@ public interface Message extends Snowflake {
      * @return enum representing the message type. Never null.
      */
     @Nonnull
+    @CheckReturnValue
     MessageType type();
     
     /**
@@ -73,6 +74,7 @@ public interface Message extends Snowflake {
      *
      * @return True if the message is to be spoken, false otherwise.
      */
+    @CheckReturnValue
     boolean tts();
     
     /**
@@ -81,6 +83,7 @@ public interface Message extends Snowflake {
      * @return {@link OffsetDateTime Date and time} the message was sent.
      */
     @Nonnull
+    @CheckReturnValue
     OffsetDateTime timestamp();
     
     /**
@@ -89,6 +92,7 @@ public interface Message extends Snowflake {
      *
      * @return True if the message is pinned, false otherwise.
      */
+    @CheckReturnValue
     boolean pinned();
     
     /**
@@ -96,6 +100,7 @@ public interface Message extends Snowflake {
      *
      * @return True if the message mentions everyone, false otherwise.
      */
+    @CheckReturnValue
     boolean mentionsEveryone();
     
     /**
@@ -106,6 +111,7 @@ public interface Message extends Snowflake {
      * @return unique String nonce for the message. Can be null.
      */
     @Nullable
+    @CheckReturnValue
     String nonce();
     
     /**
@@ -114,6 +120,7 @@ public interface Message extends Snowflake {
      * @return List of Users. Never null.
      */
     @Nonnull
+    @CheckReturnValue
     List<User> mentionedUsers();
     
     /**
@@ -124,6 +131,7 @@ public interface Message extends Snowflake {
      * @return List of Roles. Never null.
      */
     @Nonnull
+    @CheckReturnValue
     List<String> mentionedRoles();
     
     /**
@@ -134,15 +142,8 @@ public interface Message extends Snowflake {
      * @return Member representation of the {@link Message#author() author}. Can be null.
      */
     @Nullable
+    @CheckReturnValue
     Member member();
-    
-    /**
-     * The unique snowflake ID of the message.
-     *
-     * @return String containing the message ID. Never null.
-     */
-    @Nonnull
-    String id();
     
     /**
      * List of embeds in the message.
@@ -150,6 +151,7 @@ public interface Message extends Snowflake {
      * @return List of embeds. Never null.
      */
     @Nonnull
+    @CheckReturnValue
     List<Embed> embeds();
     
     /**
@@ -159,6 +161,7 @@ public interface Message extends Snowflake {
      * @return The {@link OffsetDateTime date and time} the message was last edited. Null if the message was never edited.
      */
     @Nullable
+    @CheckReturnValue
     OffsetDateTime editedTimestamp();
     
     /**
@@ -168,6 +171,7 @@ public interface Message extends Snowflake {
      * @return String containing the message body. Never null.
      */
     @Nonnull
+    @CheckReturnValue
     String content();
     
     /**
@@ -176,7 +180,18 @@ public interface Message extends Snowflake {
      * @return String representing the channel ID. Never null.
      */
     @Nonnull
-    String channelId();
+    @CheckReturnValue
+    default String channelId() {
+        return Long.toUnsignedString(channelIdAsLong());
+    }
+    
+    /**
+     * The snowflake ID of the channel this message was sent in.
+     *
+     * @return String representing the channel ID. Never null.
+     */
+    @CheckReturnValue
+    long channelIdAsLong();
     
     /**
      * The channel this message was sent in.
@@ -186,11 +201,11 @@ public interface Message extends Snowflake {
      */
     @CheckReturnValue
     default MessageChannel channel() {
-        final String guild = guildId();
-        if(guild != null) {
-            return (TextChannel) catnip().cache().channel(guild, channelId());
+        final long guild = guildIdAsLong();
+        if(guild != 0) {
+            return (TextChannel) catnip().cache().channel(guild, channelIdAsLong());
         } else {
-            return catnip().cache().dmChannel(channelId());
+            return catnip().cache().dmChannel(channelIdAsLong());
         }
     }
     
@@ -202,6 +217,7 @@ public interface Message extends Snowflake {
      * @see Message#member() Guild-specific representation of the author.
      */
     @Nonnull
+    @CheckReturnValue
     User author();
     
     /**
@@ -210,6 +226,7 @@ public interface Message extends Snowflake {
      * @return List of files sent with the message. Never null.
      */
     @Nonnull
+    @CheckReturnValue
     List<Attachment> attachments();
     
     /**
@@ -219,6 +236,7 @@ public interface Message extends Snowflake {
      * @return List of reactions added to the message. Never null.
      */
     @Nonnull
+    @CheckReturnValue
     List<Reaction> reactions();
     
     /**
@@ -227,7 +245,22 @@ public interface Message extends Snowflake {
      * @return String representing the guild ID. Null if sent in DMs.
      */
     @Nullable
-    String guildId();
+    @CheckReturnValue
+    default String guildId() {
+        final long id = guildIdAsLong();
+        if(id == 0) {
+            return null;
+        }
+        return Long.toUnsignedString(id);
+    }
+    
+    /**
+     * The snowflake ID of the guild this message was sent in.
+     *
+     * @return Long representing the guild ID. Null if sent in DMs.
+     */
+    @CheckReturnValue
+    long guildIdAsLong();
     
     /**
      * The guild this message was sent in. May be null.
@@ -238,11 +271,11 @@ public interface Message extends Snowflake {
     @Nullable
     @CheckReturnValue
     default Guild guild() {
-        if(guildId() == null) {
+        final long id = guildIdAsLong();
+        if(id == 0) {
             return null;
         } else {
-            //noinspection ConstantConditions
-            return catnip().cache().guild(guildId());
+            return catnip().cache().guild(id);
         }
     }
     
@@ -252,7 +285,22 @@ public interface Message extends Snowflake {
      * @return String representing the webhook ID. Null if not sent by a webhook.
      */
     @Nullable
-    String webhookId();
+    @CheckReturnValue
+    default String webhookId() {
+        final long id = webhookIdAsLong();
+        if(id == 0) {
+            return null;
+        }
+        return Long.toUnsignedString(id);
+    }
+    
+    /**
+     * The snowflake ID of the webhook this message was sent by.
+     *
+     * @return Long representing the webhook ID. {@code 0} if not sent by a webhook.
+     */
+    @CheckReturnValue
+    long webhookIdAsLong();
     
     /**
      * Adds a reaction to this message.

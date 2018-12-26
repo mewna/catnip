@@ -44,7 +44,9 @@ public interface Snowflake extends Entity {
      * @return String representing the ID.
      */
     @CheckReturnValue
-    String id();
+    default String id() {
+        return Long.toUnsignedString(idAsLong());
+    }
     
     /**
      * The ID of this snowflake, as a long.
@@ -52,9 +54,7 @@ public interface Snowflake extends Entity {
      * @return Long representing the ID.
      */
     @CheckReturnValue
-    default long idAsLong() {
-        return Long.parseUnsignedLong(id());
-    }
+    long idAsLong();
     
     /**
      * The time this snowflake was generated.

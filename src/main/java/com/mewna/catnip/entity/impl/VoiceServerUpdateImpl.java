@@ -51,8 +51,8 @@ public class VoiceServerUpdateImpl implements VoiceServerUpdate, RequiresCatnip 
     @JsonIgnore
     private transient Catnip catnip;
     
+    private long guildIdAsLong;
     private String token;
-    private String guildId;
     private String endpoint;
     
     public void catnip(@Nonnull final Catnip catnip) {

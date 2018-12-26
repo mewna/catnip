@@ -52,9 +52,9 @@ public class WebhookImpl implements Webhook, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String id;
-    private String guildId;
-    private String channelId;
+    private long idAsLong;
+    private long guildIdAsLong;
+    private long channelIdAsLong;
     private User user;
     private String name;
     private String avatar;
@@ -67,16 +67,16 @@ public class WebhookImpl implements Webhook, RequiresCatnip {
     
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Long.hashCode(idAsLong);
     }
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Webhook && ((Webhook) obj).id().equals(id);
+        return obj instanceof Webhook && ((Webhook) obj).idAsLong() == idAsLong;
     }
     
     @Override
     public String toString() {
-        return String.format("Webhook (%s)", name == null ? id : name);
+        return String.format("Webhook (%s)", name == null ? idAsLong : name);
     }
 }

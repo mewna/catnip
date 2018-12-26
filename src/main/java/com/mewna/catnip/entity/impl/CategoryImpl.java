@@ -53,11 +53,11 @@ public class CategoryImpl implements Category, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String id;
+    private long idAsLong;
     private String name;
-    private String guildId;
+    private long guildIdAsLong;
     private int position;
-    private String parentId;
+    private long parentIdAsLong;
     private List<PermissionOverride> overrides;
     
     @Override
@@ -67,12 +67,12 @@ public class CategoryImpl implements Category, RequiresCatnip {
     
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Long.hashCode(idAsLong);
     }
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Category && ((Category) obj).id().equals(id);
+        return obj instanceof Category && ((Category) obj).idAsLong() == idAsLong;
     }
     
     @Override

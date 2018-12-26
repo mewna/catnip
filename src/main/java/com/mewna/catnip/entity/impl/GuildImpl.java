@@ -60,27 +60,27 @@ public class GuildImpl implements Guild, RequiresCatnip, Timestamped {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String id;
+    private long idAsLong;
     private String name;
     private String icon;
     private String splash;
     private boolean owned;
-    private String ownerId;
+    private long ownerIdAsLong;
     private Set<Permission> permissions;
     private String region;
-    private String afkChannelId;
+    private long afkChannelIdAsLong;
     private int afkTimeout;
     private boolean embedEnabled;
-    private String embedChannelId;
+    private long embedChannelIdAsLong;
     private VerificationLevel verificationLevel;
     private NotificationLevel defaultMessageNotifications;
     private ContentFilterLevel explicitContentFilter;
     private List<String> features;
     private MFALevel mfaLevel;
-    private String applicationId;
+    private long applicationIdAsLong;
     private boolean widgetEnabled;
-    private String widgetChannelId;
-    private String systemChannelId;
+    private long widgetChannelIdAsLong;
+    private long systemChannelIdAsLong;
     private String joinedAt;
     private boolean large;
     private boolean unavailable;
@@ -95,14 +95,14 @@ public class GuildImpl implements Guild, RequiresCatnip, Timestamped {
     @Nullable
     @CheckReturnValue
     public String iconUrl(@Nonnull final ImageOptions options) {
-        return CDNFormat.iconUrl(id, icon, options);
+        return CDNFormat.iconUrl(id(), icon, options);
     }
     
     @Override
     @Nullable
     @CheckReturnValue
     public String splashUrl(@Nonnull final ImageOptions options) {
-        return CDNFormat.splashUrl(id, splash, options);
+        return CDNFormat.splashUrl(id(), splash, options);
     }
     
     @Nonnull
@@ -112,7 +112,17 @@ public class GuildImpl implements Guild, RequiresCatnip, Timestamped {
     }
     
     @Override
+    public int hashCode() {
+        return Long.hashCode(idAsLong);
+    }
+    
+    @Override
+    public boolean equals(final Object obj) {
+        return obj instanceof Guild && ((Guild)obj).idAsLong() == idAsLong;
+    }
+    
+    @Override
     public String toString() {
-        return String.format("Guild (%s, %s)", name, id);
+        return String.format("Guild (%s, %s)", name, idAsLong);
     }
 }

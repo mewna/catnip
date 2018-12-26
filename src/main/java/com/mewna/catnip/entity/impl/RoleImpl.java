@@ -49,8 +49,8 @@ import javax.annotation.Nonnull;
 public class RoleImpl implements Role, RequiresCatnip {
     private transient Catnip catnip;
     
-    private String id;
-    private String guildId;
+    private long idAsLong;
+    private long guildIdAsLong;
     private String name;
     private int color;
     private boolean hoist;
@@ -66,12 +66,12 @@ public class RoleImpl implements Role, RequiresCatnip {
     
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Long.hashCode(idAsLong);
     }
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Role && ((Role) obj).id().equals(id);
+        return obj instanceof Role && ((Role) obj).idAsLong() == idAsLong;
     }
     
     @Override

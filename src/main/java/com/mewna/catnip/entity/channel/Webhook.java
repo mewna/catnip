@@ -58,14 +58,30 @@ public interface Webhook extends Snowflake {
      */
     @Nonnull
     @CheckReturnValue
-    String guildId();
+    default String guildId() {
+        return Long.toUnsignedString(guildIdAsLong());
+    }
+    
+    /**
+     * @return The id of the guild this webhook is for.
+     */
+    @CheckReturnValue
+    long guildIdAsLong();
     
     /**
      * @return The id of the channel this webhook is for.
      */
     @Nonnull
     @CheckReturnValue
-    String channelId();
+    default String channelId() {
+        return Long.toUnsignedString(channelIdAsLong());
+    }
+    
+    /**
+     * @return The id of the channel this webhook is for.
+     */
+    @CheckReturnValue
+    long channelIdAsLong();
     
     /**
      * @return The user that created this webhook.

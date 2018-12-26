@@ -54,11 +54,11 @@ public class VoiceStateImpl implements VoiceState, RequiresCatnip {
     private transient Catnip catnip;
     
     @JsonProperty
-    private String guildId;
+    private long guildIdAsLong;
     @JsonProperty
-    private String channelId;
+    private long channelIdAsLong;
     @JsonProperty
-    private String userId;
+    private long userIdAsLong;
     @JsonProperty
     private String sessionId;
     @JsonProperty
@@ -75,10 +75,10 @@ public class VoiceStateImpl implements VoiceState, RequiresCatnip {
     @Nullable
     @Override
     public Member member() {
-        if(guildId == null) {
+        if(guildIdAsLong == 0) {
             return null;
         } else {
-            return catnip.cache().member(guildId, userId);
+            return catnip.cache().member(guildIdAsLong, userIdAsLong);
         }
     }
     
@@ -88,6 +88,6 @@ public class VoiceStateImpl implements VoiceState, RequiresCatnip {
     
     @Override
     public String toString() {
-        return String.format("VoiceState (%s, %s - %s)", userId, guildId, channelId);
+        return String.format("VoiceState (%s, %s - %s)", userIdAsLong, guildIdAsLong, channelIdAsLong);
     }
 }

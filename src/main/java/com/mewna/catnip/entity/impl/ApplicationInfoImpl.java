@@ -53,7 +53,7 @@ public class ApplicationInfoImpl implements ApplicationInfo, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String id;
+    private long idAsLong;
     private String icon;
     private String name;
     private String description;

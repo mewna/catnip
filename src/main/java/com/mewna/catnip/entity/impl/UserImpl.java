@@ -58,8 +58,8 @@ public class UserImpl implements User, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
+    private long idAsLong;
     private String username;
-    private String id;
     private String discriminator;
     private String avatar;
     private boolean bot;
@@ -84,7 +84,7 @@ public class UserImpl implements User, RequiresCatnip {
     @Nullable
     @CheckReturnValue
     public String avatarUrl(@Nonnull final ImageOptions options) {
-        return CDNFormat.avatarUrl(id, avatar, options);
+        return CDNFormat.avatarUrl(id(), avatar, options);
     }
     
     @Nullable
@@ -114,12 +114,12 @@ public class UserImpl implements User, RequiresCatnip {
     
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Long.hashCode(idAsLong);
     }
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof User && ((User) obj).id().equals(id);
+        return obj instanceof User && ((User) obj).idAsLong() == idAsLong;
     }
     
     @Override

@@ -131,15 +131,6 @@ public interface User extends Snowflake {
     String username();
     
     /**
-     * The unique snowflake ID of the user.
-     *
-     * @return User's ID. never null.
-     */
-    @Nonnull
-    @CheckReturnValue
-    String id();
-    
-    /**
      * Discriminator of the user, used to tell Amy#0001 from Amy#0002.
      *
      * @return 4 digit discriminator as a string. Never null.

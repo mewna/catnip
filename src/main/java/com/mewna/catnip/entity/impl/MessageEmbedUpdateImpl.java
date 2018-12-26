@@ -53,9 +53,9 @@ public class MessageEmbedUpdateImpl implements MessageEmbedUpdate, RequiresCatni
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String id;
-    private String guildId;
-    private String channelId;
+    private long idAsLong;
+    private long guildIdAsLong;
+    private long channelIdAsLong;
     private List<Embed> embeds;
     
     @Override

@@ -53,7 +53,7 @@ public class EmojiUpdateImpl implements EmojiUpdate, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String guildId;
+    private long guildIdAsLong;
     private List<CustomEmoji> emojis;
     
     @Override

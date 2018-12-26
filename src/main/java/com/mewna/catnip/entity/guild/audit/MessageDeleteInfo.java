@@ -36,9 +36,14 @@ import javax.annotation.Nonnull;
  */
 @SuppressWarnings("unused")
 public interface MessageDeleteInfo extends OptionalEntryInfo {
-    @CheckReturnValue
     @Nonnull
-    String channelId();
+    @CheckReturnValue
+    default String channelId() {
+        return Long.toUnsignedString(channelIdAsLong());
+    }
+    
+    @CheckReturnValue
+    long channelIdAsLong();
     
     @CheckReturnValue
     int deletedMessagesCount();

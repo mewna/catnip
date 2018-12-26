@@ -51,9 +51,9 @@ public class DeletedMessageImpl implements DeletedMessage, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String id;
-    private String channelId;
-    private String guildId;
+    private long idAsLong;
+    private long channelIdAsLong;
+    private long guildIdAsLong;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
@@ -62,16 +62,16 @@ public class DeletedMessageImpl implements DeletedMessage, RequiresCatnip {
     
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Long.hashCode(idAsLong);
     }
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof DeletedMessage && ((DeletedMessage) obj).id().equals(id);
+        return obj instanceof DeletedMessage && ((DeletedMessage) obj).idAsLong() == idAsLong;
     }
     
     @Override
     public String toString() {
-        return String.format("DeletedMessage (%s)", id);
+        return String.format("DeletedMessage (%s)", idAsLong);
     }
 }

@@ -95,7 +95,7 @@ public class InviteImpl implements Invite, RequiresCatnip {
     public static class InviterImpl implements Inviter, RequiresCatnip {
         private transient Catnip catnip;
         
-        private String id;
+        private long idAsLong;
         private String username;
         private String discriminator;
         private String avatar;
@@ -119,7 +119,7 @@ public class InviteImpl implements Invite, RequiresCatnip {
         @Nullable
         @Override
         public String avatarUrl(@Nonnull final ImageOptions options) {
-            return CDNFormat.avatarUrl(id, avatar, options);
+            return CDNFormat.avatarUrl(id(), avatar, options);
         }
         
         @Nullable
@@ -149,12 +149,12 @@ public class InviteImpl implements Invite, RequiresCatnip {
         
         @Override
         public int hashCode() {
-            return id.hashCode();
+            return Long.hashCode(idAsLong);
         }
         
         @Override
         public boolean equals(final Object obj) {
-            return obj instanceof Inviter && ((Inviter) obj).id().equals(id);
+            return obj instanceof Inviter && ((Inviter) obj).idAsLong() == idAsLong;
         }
         
         @Override
@@ -172,7 +172,7 @@ public class InviteImpl implements Invite, RequiresCatnip {
     public static class InviteGuildImpl implements InviteGuild, RequiresCatnip {
         private transient Catnip catnip;
         
-        private String id;
+        private long idAsLong;
         private String name;
         private String icon;
         private String splash;
@@ -187,23 +187,23 @@ public class InviteImpl implements Invite, RequiresCatnip {
         @Nullable
         @Override
         public String iconUrl(@Nonnull final ImageOptions options) {
-            return CDNFormat.iconUrl(id, icon, options);
+            return CDNFormat.iconUrl(id(), icon, options);
         }
         
         @Nullable
         @Override
         public String splashUrl(@Nonnull final ImageOptions options) {
-            return CDNFormat.splashUrl(id, splash, options);
+            return CDNFormat.splashUrl(id(), splash, options);
         }
         
         @Override
         public int hashCode() {
-            return id.hashCode();
+            return Long.hashCode(idAsLong);
         }
         
         @Override
         public boolean equals(final Object obj) {
-            return obj instanceof InviteGuild && ((InviteGuild) obj).id().equals(id);
+            return obj instanceof InviteGuild && ((InviteGuild) obj).idAsLong() == idAsLong;
         }
         
         @Override
@@ -221,7 +221,7 @@ public class InviteImpl implements Invite, RequiresCatnip {
     public static class InviteChannelImpl implements InviteChannel, RequiresCatnip {
         private transient Catnip catnip;
         
-        private String id;
+        private long idAsLong;
         private String name;
         private ChannelType type;
         
@@ -232,12 +232,12 @@ public class InviteImpl implements Invite, RequiresCatnip {
         
         @Override
         public int hashCode() {
-            return id.hashCode();
+            return Long.hashCode(idAsLong);
         }
         
         @Override
         public boolean equals(final Object obj) {
-            return obj instanceof InviteChannel && ((InviteChannel) obj).id().equals(id);
+            return obj instanceof InviteChannel && ((InviteChannel) obj).idAsLong() == idAsLong;
         }
         
         @Override
