@@ -40,6 +40,8 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 
+import static com.mewna.catnip.util.JsonUtil.mapObjectContents;
+
 public class RestVoice extends RestHandler {
     public RestVoice(final CatnipImpl catnip) {
         super(catnip);

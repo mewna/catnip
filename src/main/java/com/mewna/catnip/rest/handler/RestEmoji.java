@@ -44,6 +44,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 
+import static com.mewna.catnip.util.JsonUtil.mapObjectContents;
+
 /**
  * @author natanbc
  * @since 9/5/18.

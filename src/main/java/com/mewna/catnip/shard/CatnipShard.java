@@ -34,6 +34,7 @@ import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.shard.LifecycleEvent.Raw;
 import com.mewna.catnip.util.BufferOutputStream;
+import com.mewna.catnip.util.JsonUtil;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
@@ -56,7 +57,6 @@ import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterOutputStream;
 
@@ -438,7 +438,7 @@ public class CatnipShard extends AbstractVerticle {
     
     private void handleHello(final Message<ShardControlMessage> msg, final JsonObject event) {
         final JsonObject payload = event.getJsonObject("d");
-        trace = payload.getJsonArray("_trace").stream().map(e -> (String) e).collect(Collectors.toList());
+        trace = JsonUtil.toStringList(payload.getJsonArray("_trace"));
         
         catnip.vertx().setPeriodic(payload.getInteger("heartbeat_interval"), timerId -> {
             final ShardState shardState = state;
@@ -477,8 +477,11 @@ public class CatnipShard extends AbstractVerticle {
         
         // Update trace and seqnum as needed
         if(data.getJsonArray("_trace", null) != null) {
-            trace = data.getJsonArray("_trace").stream().map(e -> (String) e).collect(Collectors.toList());
+            trace = JsonUtil.toStringList(data.getJsonArray("_trace"));
+        } else {
+            trace = Collections.emptyList(); //remove any old value
         }
+        
         if(event.getValue("s", null) != null) {
             catnip.sessionManager().seqnum(id, event.getInteger("s"));
         }
