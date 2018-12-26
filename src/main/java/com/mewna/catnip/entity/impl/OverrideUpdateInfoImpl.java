@@ -54,7 +54,7 @@ public class OverrideUpdateInfoImpl implements OverrideUpdateInfo, RequiresCatni
     
     private String roleName;
     private OverrideType overrideType;
-    private String overriddenEntityId;
+    private long overriddenEntityIdAsLong;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {

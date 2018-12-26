@@ -57,7 +57,7 @@ public class PartialGuildImpl implements PartialGuild, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String id;
+    private long idAsLong;
     private String name;
     private String icon;
     private boolean owned;
@@ -72,6 +72,21 @@ public class PartialGuildImpl implements PartialGuild, RequiresCatnip {
     @Nullable
     @CheckReturnValue
     public String iconUrl(@Nonnull final ImageOptions options) {
-        return CDNFormat.iconUrl(id, icon, options);
+        return CDNFormat.iconUrl(id(), icon, options);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Long.hashCode(idAsLong);
+    }
+    
+    @Override
+    public boolean equals(final Object obj) {
+        return obj instanceof PartialGuild && ((PartialGuild)obj).idAsLong() == idAsLong;
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("PartialGuild (%s, %s)", name, idAsLong);
     }
 }

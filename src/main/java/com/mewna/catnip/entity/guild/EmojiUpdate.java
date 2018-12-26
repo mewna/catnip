@@ -45,7 +45,16 @@ public interface EmojiUpdate extends Entity {
      * @return The id of the guild whose emojis were updated.
      */
     @Nonnull
-    String guildId();
+    @CheckReturnValue
+    default String guildId() {
+        return Long.toUnsignedString(guildIdAsLong());
+    }
+    
+    /**
+     * @return The id of the guild whose emojis were updated.
+     */
+    @CheckReturnValue
+    long guildIdAsLong();
     
     /**
      * @return A non-{@code null}, possibly-empty list of the guild's emojis.

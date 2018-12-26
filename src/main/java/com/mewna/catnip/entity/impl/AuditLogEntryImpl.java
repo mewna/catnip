@@ -57,8 +57,8 @@ public class AuditLogEntryImpl implements AuditLogEntry, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private String id;
-    private String targetId;
+    private long idAsLong;
+    private long targetIdAsLong;
     private User user;
     private String reason;
     private OptionalEntryInfo options;
@@ -73,16 +73,16 @@ public class AuditLogEntryImpl implements AuditLogEntry, RequiresCatnip {
     
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Long.hashCode(idAsLong);
     }
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof AuditLogEntryImpl && ((AuditLogEntryImpl) obj).id().equals(id);
+        return obj instanceof AuditLogEntry && ((AuditLogEntry) obj).idAsLong() == idAsLong;
     }
     
     @Override
     public String toString() {
-        return String.format("Audit Log Entry (%s)", id);
+        return String.format("Audit Log Entry (%s)", idAsLong);
     }
 }

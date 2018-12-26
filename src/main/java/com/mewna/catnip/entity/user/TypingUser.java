@@ -29,6 +29,7 @@ package com.mewna.catnip.entity.user;
 
 import com.mewna.catnip.entity.Snowflake;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -44,17 +45,41 @@ public interface TypingUser extends Snowflake {
      * @return The id of the channel being typed in.
      */
     @Nonnull
-    String channelId();
+    @CheckReturnValue
+    default String channelId() {
+        return Long.toUnsignedString(channelIdAsLong());
+    }
+    
+    /**
+     * @return The id of the channel being typed in.
+     */
+    @CheckReturnValue
+    long channelIdAsLong();
     
     /**
      * @return The id of the guild being typed in, if applicable.
      */
     @Nullable
-    String guildId();
+    @CheckReturnValue
+    default String guildId() {
+        final long id = guildIdAsLong();
+        if(id == 0) {
+            return null;
+        }
+        return Long.toUnsignedString(id);
+    }
+    
+    /**
+     * @return The id of the guild being typed in, if applicable.
+     */
+    @CheckReturnValue
+    long guildIdAsLong();
+    
     
     /**
      * @return The time the typing started at.
      */
     @Nonnegative
+    @CheckReturnValue
     long timestamp();
 }

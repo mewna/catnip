@@ -56,7 +56,12 @@ public interface UserDMChannel extends DMChannel {
     
     @Nonnull
     @CheckReturnValue
-    String userId();
+    default String userId() {
+        return Long.toUnsignedString(userIdAsLong());
+    }
+    
+    @CheckReturnValue
+    long userIdAsLong();
     
     @Override
     @JsonIgnore

@@ -105,10 +105,6 @@ public interface Invite extends Entity {
     interface Inviter extends Snowflake {
         @Nonnull
         @CheckReturnValue
-        String id();
-        
-        @Nonnull
-        @CheckReturnValue
         String username();
         
         @Nonnull
@@ -144,10 +140,6 @@ public interface Invite extends Entity {
     }
     
     interface InviteGuild extends Snowflake {
-        @Nonnull
-        @CheckReturnValue
-        String id();
-        
         @Nonnull
         @CheckReturnValue
         String name();
@@ -190,10 +182,6 @@ public interface Invite extends Entity {
     }
     
     interface InviteChannel extends Snowflake {
-        @Nonnull
-        @CheckReturnValue
-        String id();
-        
         @Nonnull
         @CheckReturnValue
         String name();

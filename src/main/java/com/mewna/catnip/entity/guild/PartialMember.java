@@ -30,6 +30,7 @@ package com.mewna.catnip.entity.guild;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.user.User;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
@@ -39,20 +40,30 @@ import java.util.Set;
  * @since 10/4/18.
  */
 public interface PartialMember extends Snowflake {
-    @Nonnull
-    default String id() {
-        return user().id();
+    @Override
+    @CheckReturnValue
+    default long idAsLong() {
+        return user().idAsLong();
     }
     
     @Nonnull
+    @CheckReturnValue
     User user();
     
     @Nonnull
-    String guildId();
+    @CheckReturnValue
+    default String guildId() {
+        return Long.toUnsignedString(guildIdAsLong());
+    }
+    
+    @CheckReturnValue
+    long guildIdAsLong();
     
     @Nonnull
+    @CheckReturnValue
     Set<String> roleIds();
     
     @Nullable
+    @CheckReturnValue
     String nick();
 }
