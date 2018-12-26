@@ -37,7 +37,9 @@ import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -73,15 +75,17 @@ public class DefaultExtensionManager implements ExtensionManager {
     @Nonnull
     @Override
     public Set<Extension> matchingExtensions(@Nonnull final String regex) {
-        return ImmutableSet.copyOf(loadedExtensions.stream()
-                .filter(e -> e.name().matches(regex))
+        //small optimization
+        final Pattern pattern = Pattern.compile(regex);
+        return Collections.unmodifiableSet(loadedExtensions.stream()
+                .filter(e -> pattern.matcher(e.name()).matches())
                 .collect(Collectors.toSet()));
     }
     
     @Nonnull
     @Override
     public <T extends Extension> Set<? extends T> matchingExtensions(@Nonnull final Class<T> extensionClass) {
-        return ImmutableSet.copyOf(loadedExtensions.stream()
+        return Collections.unmodifiableSet(loadedExtensions.stream()
                 .filter(extensionClass::isInstance)
                 .map(extensionClass::cast)
                 .collect(Collectors.toSet()));
