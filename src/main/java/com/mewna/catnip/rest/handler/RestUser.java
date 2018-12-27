@@ -154,7 +154,6 @@ public class RestUser extends RestHandler {
         if(limit <= 100) {
             builder.append("limit", Integer.toString(limit));
         }
-        
         String query = builder.build();
         
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_CURRENT_USER_GUILDS.withQueryString(query),
