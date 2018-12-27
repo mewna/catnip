@@ -37,6 +37,7 @@ import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
+import com.mewna.catnip.util.QueryStringBuilder;
 import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.pagination.GuildPaginator;
 import io.vertx.core.json.JsonArray;
@@ -140,20 +141,22 @@ public class RestUser extends RestHandler {
     @CheckReturnValue
     public CompletionStage<JsonArray> getCurrentUserGuildsRaw(@Nullable final String before, @Nullable final String after,
                                                                @Nonnegative final int limit) {
-        final Collection<String> params = new ArrayList<>();
+        final QueryStringBuilder builder = new QueryStringBuilder();
+        
         if(before != null) {
-            params.add("before=" + before);
+            builder.append("before", before);
         }
+        
         if(after != null) {
-            params.add("before=" + after);
+            builder.append("before", after);
         }
+        
         if(limit <= 100) {
-            params.add("limit=" + limit);
+            builder.append("limit", Integer.toString(limit));
         }
-        String query = String.join("&", params);
-        if(!query.isEmpty()) {
-            query = '?' + query;
-        }
+        
+        String query = builder.build();
+        
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_CURRENT_USER_GUILDS.withQueryString(query),
                 ImmutableMap.of()))
                 .thenApply(ResponsePayload::array);
