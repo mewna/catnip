@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author CircuitRCAY, Natan
+ * @author CircuitRCAY, natanbc
  *
  */
 @SuppressWarnings("UnusedReturnValue")
