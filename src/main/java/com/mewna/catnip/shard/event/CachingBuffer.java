@@ -101,7 +101,7 @@ public class CachingBuffer extends AbstractBuffer {
         final JsonObject d = event.getJsonObject("d");
         switch(type) {
             case Raw.READY: {
-                final Set<String> guilds = JsonUtil.toSet(d.getJsonArray("guilds"), g -> g.getString("id"));
+                final Set<String> guilds = JsonUtil.toMutableSet(d.getJsonArray("guilds"), g -> g.getString("id"));
                 buffers.put(id, new BufferState(id, guilds));
                 catnip().logAdapter().debug("Prepared new BufferState for shard {} with {} guilds.", id, guilds.size());
                 // READY is also a cache event, as it does come with
