@@ -40,11 +40,10 @@ import com.mewna.catnip.util.PermissionUtil;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.awt.*;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
+import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
@@ -95,9 +94,9 @@ public interface Member extends Snowflake {
     Set<String> roleIds();
     
     /**
-     * The user's roles in this guild.
+     * The member's roles in the guild.
      *
-     * @return A {@link Set} of the user's roles.
+     * @return A {@link Set} of the member's roles.
      */
     @Nonnull
     @CheckReturnValue
@@ -106,6 +105,26 @@ public interface Member extends Snowflake {
         return Collections.unmodifiableSet(roleIds().stream()
                 .map(roles::getById)
                 .collect(Collectors.toSet()));
+    }
+    
+    /**
+     * The member's roles in the guild, sorted from lowest to highest.
+     *
+     * @return A {@link List} of the member's roles.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default List<Role> orderedRoles() {
+        final CacheView<Role> roles = catnip().cache().roles(guildId());
+        final List<Role> ordered = new ArrayList<>(roleIds().size());
+        for(final String id : roleIds()) {
+            final Role role = roles.getById(id);
+            if(role != null) {
+                ordered.add(role);
+            }
+        }
+        Collections.sort(ordered);
+        return ordered;
     }
     
     /**
@@ -139,6 +158,30 @@ public interface Member extends Snowflake {
     @Nullable
     @CheckReturnValue
     OffsetDateTime joinedAt();
+    
+    /**
+     * The member's color, as shown in the official Discord Client, or {@code null} if they have no roles with a color.
+     * <br>This will iterate over all the roles this member has, so try to avoid calling this method multiple times
+     * if you only need the value once.
+     *
+     * @return A {@link Color color} representing the member's color, as shown in the official Discord Client.
+     */
+    @Nullable
+    @CheckReturnValue
+    default Color color() {
+        Role highest = null;
+        
+        final CacheView<Role> cache = catnip().cache().roles(guildId());
+        for (final String id : roleIds()) {
+            final Role role = cache.getById(id);
+            if (role != null && role.color() != 0) {
+                if(highest == null || role.compareTo(highest) > 0) {
+                    highest = role;
+                }
+            }
+        }
+        return highest == null ? null : new Color(highest.color());
+    }
     
     /**
      * Creates a DM channel with this member's user.

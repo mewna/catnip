@@ -44,7 +44,7 @@ import java.util.Set;
  */
 @SuppressWarnings("unused")
 @JsonDeserialize(as = RoleImpl.class)
-public interface Role extends Snowflake {
+public interface Role extends Snowflake, Comparable<Role> {
     /**
      * The name of the role. Not unique
      *
@@ -136,4 +136,13 @@ public interface Role extends Snowflake {
      */
     @CheckReturnValue
     boolean mentionable();
+    
+    @Override
+    default int compareTo(@Nonnull final Role o) {
+        if(position() != o.position()) {
+            return position() - o.position();
+        }
+        final long creationDiff = (o.idAsLong() >> 22) - (idAsLong() >> 22);
+        return creationDiff > 0 ? 1 : creationDiff < 0 ? -1 : 0;
+    }
 }

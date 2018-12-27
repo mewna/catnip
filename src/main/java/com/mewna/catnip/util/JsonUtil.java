@@ -55,9 +55,16 @@ public final class JsonUtil {
         }
         return Collections.unmodifiableList(ret);
     }
+    
     @Nonnull
     @CheckReturnValue
     public static <T> Set<T> toSet(@Nullable final JsonArray array, @Nonnull final Function<JsonObject, T> mapper) {
+        return Collections.unmodifiableSet(toMutableSet(array, mapper));
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public static <T> Set<T> toMutableSet(@Nullable final JsonArray array, @Nonnull final Function<JsonObject, T> mapper) {
         if(array == null) {
             return Collections.emptySet();
         }
@@ -69,7 +76,7 @@ public final class JsonUtil {
             }
             ret.add(mapper.apply((JsonObject) object));
         }
-        return Collections.unmodifiableSet(ret);
+        return ret;
     }
     
     @Nonnull
