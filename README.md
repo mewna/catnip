@@ -6,7 +6,8 @@
 
 
 A Discord API wrapper in Java. Fully async / reactive, built on top of
-[vert.x](https://vertx.io).
+[vert.x](https://vertx.io). catnip tries to map roughly 1:1 to how the Discord 
+API works, both in terms of events and REST methods available.
 
 Join our [Discord server](https://discord.gg/yeF2HpP)!
 
@@ -79,6 +80,10 @@ Also check out the [examples](https://github.com/mewna/catnip/tree/master/src/ma
 
 - JDA is very nice, but doesn't allow for as much freedom with customizing the internals;
   it's more / less "do it this way or use another lib" in my experience.
+- Discord4J is built on [Project Reactor](https://projectreactor.io/); I wanted to be able 
+  to choose a reactive:tm: implementation to use with the lib and not be stuck with just one.
+- I didn't want ten billion events for every possible case. catnip maps more/less 1:1 with the
+  Discord API, which none of the other libs seem to do.
 - I wanted to make a lib built on vert.x.
 
 ### Why vert.x?
