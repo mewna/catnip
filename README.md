@@ -82,9 +82,18 @@ Also check out the [examples](https://github.com/mewna/catnip/tree/master/src/ma
   it's more / less "do it this way or use another lib" in my experience.
 - Discord4J is built on [Project Reactor](https://projectreactor.io/); I wanted to be able 
   to choose a reactive:tm: implementation to use with the lib and not be stuck with just one.
+- From my small understanding, D4J makes you handle ratelimits manually. I don't really wanna
+  do that. (I do know that there's some util. classes they provide for it, but meh)
 - I didn't want ten billion events for every possible case. catnip maps more/less 1:1 with the
-  Discord API, which none of the other libs seem to do.
+  Discord API, and any "extra" events on top of that need to be user-provided via extensions or
+  other means. I guess really I just didn't want my lib to be as "high-level" as other libs are.
+- I wanted to try to maximize extensibility / customizability, beyond just making it modular. Things
+  like being able to intercept raw websocket messages (as JSON), write custom distributed cache handlers,
+  ... are incredibly useful.
+- I like everything returning `CompletionStage`s instead of custom classes. I do get why other libs
+  have them, I just wanted to not.
 - I wanted to make a lib built on vert.x.
+- To take over the world and convert all Java bots. :^)
 
 ### Why vert.x?
 
