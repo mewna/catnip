@@ -59,20 +59,8 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
     
     @Nullable
     @Override
-    public T put(@Nonnull final String key, @Nonnull final T value) {
-        return put(Long.parseUnsignedLong(key), value);
-    }
-    
-    @Nullable
-    @Override
     public T remove(final long key) {
         return map.remove(key);
-    }
-    
-    @Nullable
-    @Override
-    public T remove(@Nonnull final String key) {
-        return remove(Long.parseUnsignedLong(key));
     }
     
     @Override
@@ -155,17 +143,16 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
     @Nonnull
     @Override
     public Optional<T> reduce(@Nonnull final BinaryOperator<T> accumulator) {
-        boolean foundAny = false;
-        T result = null;
-        for(final T element : map.values()) {
-            if(!foundAny) {
-                foundAny = true;
-                result = element;
-            } else {
-                result = accumulator.apply(result, element);
-            }
+        final Iterator<T> it = map.values().iterator();
+        if(!it.hasNext()) {
+            return Optional.empty();
         }
-        return foundAny ? Optional.of(result) : Optional.empty();
+        T result = it.next();
+        while(it.hasNext()) {
+            final T element = it.next();
+            result = accumulator.apply(result, element);
+        }
+        return Optional.of(result);
     }
     
     @Override
@@ -205,37 +192,35 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
     @Nonnull
     @Override
     public Optional<T> min(@Nonnull final Comparator<? super T> comparator) {
-        boolean foundAny = false;
-        T min = null;
-        for(final T element : map.values()) {
-            if(!foundAny) {
+        final Iterator<T> it = map.values().iterator();
+        if(!it.hasNext()) {
+            return Optional.empty();
+        }
+        T min = it.next();
+        while(it.hasNext()) {
+            final T element = it.next();
+            if(comparator.compare(min, element) > 0) {
                 min = element;
-                foundAny = true;
-            } else {
-                if(comparator.compare(min, element) > 0) {
-                    min = element;
-                }
             }
         }
-        return foundAny ? Optional.of(min) : Optional.empty();
+        return Optional.of(min);
     }
     
     @Nonnull
     @Override
     public Optional<T> max(@Nonnull final Comparator<? super T> comparator) {
-        boolean foundAny = false;
-        T max = null;
-        for(final T element : map.values()) {
-            if(!foundAny) {
+        final Iterator<T> it = map.values().iterator();
+        if(!it.hasNext()) {
+            return Optional.empty();
+        }
+        T max = it.next();
+        while(it.hasNext()) {
+            final T element = it.next();
+            if(comparator.compare(max, element) < 0) {
                 max = element;
-                foundAny = true;
-            } else {
-                if(comparator.compare(max, element) < 0) {
-                    max = element;
-                }
             }
         }
-        return foundAny ? Optional.of(max) : Optional.empty();
+        return Optional.of(max);
     }
     
     @Override
@@ -264,7 +249,15 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
     @Nonnull
     @Override
     public Collection<T> snapshot() {
-        return snapshot(() -> new ArrayList<>((int) size()));
+        final Collection<T> values = map.values();
+        final Collection<T> r = new ArrayList<>((int)size());
+        //this is actually more efficient than addAll(),
+        //as addAll() on ArrayList requires calls Collection#toArray(),
+        //while this won't allocate any temporary array due to the
+        //initial size of the list.
+        //noinspection UseBulkOperation
+        values.forEach(r::add);
+        return r;
     }
     
     @Nonnull

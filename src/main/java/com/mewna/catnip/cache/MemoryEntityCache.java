@@ -52,8 +52,6 @@ import javax.annotation.Nullable;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -109,7 +107,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
             if(m.nick() != null) {
                 return m.nick();
             }
-            final User u = user(m.id());
+            final User u = user(m.idAsLong());
             return u == null ? null : u.username();
         };
     }
@@ -120,7 +118,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
      *
      * @return A new guild cache view.
      *
-     * @implNote Default to calling {@link #createNamedCacheView(Function)}
+     * @implNote Defaults to calling {@link #createNamedCacheView(Function)}.
      */
     @SuppressWarnings("WeakerAccess")
     @Nonnull
@@ -135,7 +133,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
      *
      * @return A new user cache view.
      *
-     * @implNote Default to calling {@link #createNamedCacheView(Function)}
+     * @implNote Defaults to calling {@link #createNamedCacheView(Function)}.
      */
     @SuppressWarnings("WeakerAccess")
     @Nonnull
@@ -150,7 +148,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
      *
      * @return A new DM channel cache view.
      *
-     * @implNote Default to calling {@link #createCacheView()}
+     * @implNote Defaults to calling {@link #createCacheView()}.
      */
     @SuppressWarnings("WeakerAccess")
     @Nonnull
@@ -165,7 +163,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
      *
      * @return A new presence cache view.
      *
-     * @implNote Default to calling {@link #createCacheView()}
+     * @implNote Defaults to calling {@link #createCacheView()}.
      */
     @SuppressWarnings("WeakerAccess")
     @Nonnull
@@ -180,7 +178,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
      *
      * @return A new guild channel cache view.
      *
-     * @implNote Default to calling {@link #createNamedCacheView(Function)}
+     * @implNote Defaults to calling {@link #createNamedCacheView(Function)}.
      */
     @SuppressWarnings("WeakerAccess")
     @Nonnull
@@ -195,7 +193,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
      *
      * @return A new role cache view.
      *
-     * @implNote Default to calling {@link #createNamedCacheView(Function)}
+     * @implNote Defaults to calling {@link #createNamedCacheView(Function)}.
      */
     @SuppressWarnings("WeakerAccess")
     @Nonnull
@@ -210,7 +208,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
      *
      * @return A new member cache view.
      *
-     * @implNote Default to calling {@link #createNamedCacheView(Function)}
+     * @implNote Defaults to calling {@link #createNamedCacheView(Function)}.
      */
     @SuppressWarnings("WeakerAccess")
     @Nonnull
@@ -225,13 +223,28 @@ public class MemoryEntityCache implements EntityCacheWorker {
      *
      * @return A new emoji cache view.
      *
-     * @implNote Default to calling {@link #createNamedCacheView(Function)}
+     * @implNote Defaults to calling {@link #createNamedCacheView(Function)}.
      */
     @SuppressWarnings("WeakerAccess")
     @Nonnull
     @CheckReturnValue
     protected MutableNamedCacheView<CustomEmoji> createEmojiCacheView() {
         return createNamedCacheView(CustomEmoji::name);
+    }
+    
+    /**
+     * Creates a new voice state cache view. Subclasses can override this method to
+     * use a different cache view implementation.
+     *
+     * @return A new voice state cache view.
+     *
+     * @implNote Defaults to calling {@link #createCacheView()}.
+     */
+    @SuppressWarnings("WeakerAccess")
+    @Nonnull
+    @CheckReturnValue
+    protected MutableCacheView<VoiceState> createVoiceStateCacheView() {
+        return createCacheView();
     }
     
     /**
@@ -267,42 +280,41 @@ public class MemoryEntityCache implements EntityCacheWorker {
     private void cacheChannel(final Channel channel) {
         if(channel.isGuild()) {
             final GuildChannel gc = (GuildChannel) channel;
-            guildChannelCache.computeIfAbsent(Long.parseUnsignedLong(gc.guildId()),
+            guildChannelCache.computeIfAbsent(gc.guildIdAsLong(),
                     __ -> createGuildChannelCacheView())
-                    .put(gc.id(), gc);
+                    .put(gc.idAsLong(), gc);
         } else if(channel.isUserDM()) {
             final UserDMChannel dm = (UserDMChannel) channel;
-            dmChannelCache.put(dm.userId(), dm);
+            dmChannelCache.put(dm.userIdAsLong(), dm);
         } else {
             catnip.logAdapter().warn("I don't know how to cache channel {}: isCategory={}, isDM={}, isGroupDM={}," +
                             "isGuild={}, isText={}, isUserDM={}, isVoice={}",
-                    channel.id(), channel.isCategory(), channel.isDM(), channel.isGroupDM(), channel.isGuild(),
+                    channel.idAsLong(), channel.isCategory(), channel.isDM(), channel.isGroupDM(), channel.isGuild(),
                     channel.isText(), channel.isUserDM(), channel.isVoice());
         }
     }
     
     private void cacheRole(final Role role) {
-        roleCache.computeIfAbsent(Long.parseUnsignedLong(role.guildId()), __ -> createRoleCacheView())
-                .put(role.id(), role);
+        roleCache.computeIfAbsent(role.guildIdAsLong(), __ -> createRoleCacheView())
+                .put(role.idAsLong(), role);
     }
     
     private void cacheUser(final User user) {
-        userCache.put(user.id(), user);
+        userCache.put(user.idAsLong(), user);
     }
     
     private void cacheMember(final Member member) {
-        memberCache.computeIfAbsent(Long.parseUnsignedLong(member.guildId()), __ -> createMemberCacheView())
-                .put(member.id(), member);
+        memberCache.computeIfAbsent(member.guildIdAsLong(), __ -> createMemberCacheView())
+                .put(member.idAsLong(), member);
     }
     
     private void cacheEmoji(final CustomEmoji emoji) {
-        emojiCache.computeIfAbsent(Long.parseUnsignedLong(Objects.requireNonNull(emoji.guildId(), "Cannot cache emoji with null guild id!")),
-                __ -> createEmojiCacheView())
-                .put(emoji.id(), emoji);
+        emojiCache.computeIfAbsent(emoji.guildIdAsLong(), __ -> createEmojiCacheView())
+                .put(emoji.idAsLong(), emoji);
     }
     
     private void cachePresence(final String id, final Presence presence) {
-        presenceCache.put(id, presence);
+        presenceCache.put(Long.parseUnsignedLong(id), presence);
     }
     
     @Nonnull
@@ -329,15 +341,15 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 final Channel channel = entityBuilder.createChannel(payload);
                 if(channel.isGuild()) {
                     final GuildChannel gc = (GuildChannel) channel;
-                    final MutableNamedCacheView<GuildChannel> channels = guildChannelCache.get(Long.parseLong(gc.guildId()));
+                    final MutableNamedCacheView<GuildChannel> channels = guildChannelCache.get(gc.guildIdAsLong());
                     if(channels != null) {
-                        channels.remove(gc.id());
+                        channels.remove(gc.idAsLong());
                     }
                 } else if(channel.isUserDM()) {
                     final UserDMChannel dm = (UserDMChannel) channel;
-                    dmChannelCache.remove(dm.userId());
+                    dmChannelCache.remove(dm.userIdAsLong());
                 } else {
-                    catnip.logAdapter().warn("I don't know how to delete non-guild channel {}!", channel.id());
+                    catnip.logAdapter().warn("I don't know how to delete non-guild channel {}!", channel.idAsLong());
                 }
                 break;
             }
@@ -349,19 +361,19 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 final Future<Void> future = Future.future();
                 catnip().vertx().executeBlocking(f -> {
                     final Guild guild = entityBuilder.createGuild(payload);
-                    guildCache.put(guild.id(), guild);
+                    guildCache.put(guild.idAsLong(), guild);
                     f.complete(null);
                 }, __ -> future.complete(null));
                 return future;
             }
             case Raw.GUILD_UPDATE: {
                 final Guild guild = entityBuilder.createGuild(payload);
-                guildCache.put(guild.id(), guild);
+                guildCache.put(guild.idAsLong(), guild);
                 break;
             }
             case Raw.GUILD_DELETE: {
                 final Guild guild = entityBuilder.createGuild(payload);
-                guildCache.remove(guild.id());
+                guildCache.remove(guild.idAsLong());
                 break;
             }
             // Roles
@@ -382,7 +394,10 @@ public class MemoryEntityCache implements EntityCacheWorker {
             case Raw.GUILD_ROLE_DELETE: {
                 final String guild = payload.getString("guild_id");
                 final String role = payload.getString("role_id");
-                Optional.ofNullable(roleCache.get(Long.parseLong(guild))).ifPresent(e -> e.remove(role));
+                final MutableCacheView<Role> cache = roleCache.get(Long.parseUnsignedLong(guild));
+                if(cache != null) {
+                    cache.remove(Long.parseUnsignedLong(role));
+                }
                 break;
             }
             // Members
@@ -421,7 +436,10 @@ public class MemoryEntityCache implements EntityCacheWorker {
             case Raw.GUILD_MEMBER_REMOVE: {
                 final String guild = payload.getString("guild_id");
                 final String user = payload.getJsonObject("user").getString("id");
-                Optional.ofNullable(memberCache.get(Long.parseLong(guild))).ifPresent(e -> e.remove(user));
+                final MutableCacheView<Member> cache = memberCache.get(Long.parseUnsignedLong(guild));
+                if(cache != null) {
+                    cache.remove(Long.parseUnsignedLong(user));
+                }
                 break;
             }
             // Member chunking
@@ -491,13 +509,13 @@ public class MemoryEntityCache implements EntityCacheWorker {
     }
     
     private void cacheVoiceState(final VoiceState state) {
-        final String guild = state.guildId();
-        if(guild == null) {
-            catnip.logAdapter().warn("Not caching voice state for {} due to null guild", state.userId());
+        final long guild = state.guildIdAsLong();
+        if(guild == 0) {
+            catnip.logAdapter().warn("Not caching voice state for {} due to null guild", state.userIdAsLong());
             return;
         }
-        voiceStateCache.computeIfAbsent(Long.parseUnsignedLong(guild), __ -> createCacheView())
-                .put(state.userId(), state);
+        voiceStateCache.computeIfAbsent(guild, __ -> createVoiceStateCacheView())
+                .put(state.userIdAsLong(), state);
     }
     
     @Override
