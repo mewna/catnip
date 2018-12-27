@@ -146,21 +146,23 @@ public class CompositeCacheView<T> implements CacheView<T> {
     @Nonnull
     @Override
     public Optional<T> reduce(@Nonnull final BinaryOperator<T> accumulator) {
-        boolean foundAny = false;
-        T result = null;
-        for(final CacheView<T> view : sources) {
-            if(!foundAny) {
-                result = view.reduce(accumulator).orElse(null);
-                foundAny = true;
-            } else {
-                result = view.reduce(result, accumulator);
+        final Iterator<? extends CacheView<T>> it = sources.iterator();
+        Optional<T> maybeFirst = Optional.empty();
+        while(!maybeFirst.isPresent()) {
+            if(!it.hasNext()) {
+                return Optional.empty();
             }
+            maybeFirst = it.next().reduce(accumulator);
+        }
+        T result = maybeFirst.get();
+        while(it.hasNext()) {
+            result = accumulator.apply(result, it.next().reduce(accumulator).orElse(null));
         }
         //this could be Optional.ofNullable, but this method will ensure equal
         //behaviour to the equivalent method in DefaultCacheView, which would also
         //throw if the accumulator resulted in a null value
         //noinspection ConstantConditions
-        return foundAny ? Optional.of(result) : Optional.empty();
+        return Optional.of(result);
     }
     
     @Override
@@ -192,50 +194,59 @@ public class CompositeCacheView<T> implements CacheView<T> {
         return true;
     }
     
+    @Override
+    public boolean noneMatch(@Nonnull final Predicate<? super T> predicate) {
+        return !anyMatch(predicate);
+    }
+    
     @Nonnull
     @Override
     public Optional<T> min(@Nonnull final Comparator<? super T> comparator) {
-        boolean foundAny = false;
-        T min = null;
-        for(final CacheView<T> view : sources) {
-            final T viewMin = view.min(comparator).orElse(null);
-            if(!foundAny) {
-                min = viewMin;
-                foundAny = true;
-            } else {
-                if(comparator.compare(min, viewMin) > 0) {
-                    min = viewMin;
-                }
+        final Iterator<? extends CacheView<T>> it = sources.iterator();
+        Optional<T> maybeFirst = Optional.empty();
+        while(!maybeFirst.isPresent()) {
+            if(!it.hasNext()) {
+                return Optional.empty();
+            }
+            maybeFirst = it.next().min(comparator);
+        }
+        T min = maybeFirst.get();
+        while(it.hasNext()) {
+            final T other = it.next().min(comparator).orElse(null);
+            if(comparator.compare(min, other) > 0) {
+                min = other;
             }
         }
         //this could be Optional.ofNullable, but this method will ensure equal
         //behaviour to the equivalent method in DefaultCacheView, which would also
         //throw if the accumulator resulted in a null value
         //noinspection ConstantConditions
-        return foundAny ? Optional.of(min) : Optional.empty();
+        return Optional.of(min);
     }
     
     @Nonnull
     @Override
     public Optional<T> max(@Nonnull final Comparator<? super T> comparator) {
-        boolean foundAny = false;
-        T max = null;
-        for(final CacheView<T> view : sources) {
-            final T viewMax = view.max(comparator).orElse(null);
-            if(!foundAny) {
-                max = viewMax;
-                foundAny = true;
-            } else {
-                if(comparator.compare(max, viewMax) < 0) {
-                    max = viewMax;
-                }
+        final Iterator<? extends CacheView<T>> it = sources.iterator();
+        Optional<T> maybeFirst = Optional.empty();
+        while(!maybeFirst.isPresent()) {
+            if(!it.hasNext()) {
+                return Optional.empty();
+            }
+            maybeFirst = it.next().max(comparator);
+        }
+        T max = maybeFirst.get();
+        while(it.hasNext()) {
+            final T other = it.next().max(comparator).orElse(null);
+            if(comparator.compare(max, other) < 0) {
+                max = other;
             }
         }
         //this could be Optional.ofNullable, but this method will ensure equal
         //behaviour to the equivalent method in DefaultCacheView, which would also
         //throw if the accumulator resulted in a null value
         //noinspection ConstantConditions
-        return foundAny ? Optional.of(max) : Optional.empty();
+        return Optional.of(max);
     }
     
     @Nonnegative
@@ -246,11 +257,6 @@ public class CompositeCacheView<T> implements CacheView<T> {
             count += view.count(filter);
         }
         return count;
-    }
-    
-    @Override
-    public boolean noneMatch(@Nonnull final Predicate<? super T> predicate) {
-        return !anyMatch(predicate);
     }
     
     @Nonnull

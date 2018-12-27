@@ -36,7 +36,7 @@ public class DefaultNamedCacheViewTests {
     @Test
     public void findByName() {
         final DefaultNamedCacheView<String> cache = new DefaultNamedCacheView<>(Function.identity());
-        cache.put("123", "string");
+        cache.put(123, "string");
         Assertions.assertFalse(cache.findByName("string").isEmpty());
         Assertions.assertTrue(cache.findByName("StRiNg").isEmpty());
     }
@@ -44,14 +44,14 @@ public class DefaultNamedCacheViewTests {
     @Test
     public void findByNameIgnoreCase() {
         final DefaultNamedCacheView<String> cache = new DefaultNamedCacheView<>(Function.identity());
-        cache.put("123", "string");
+        cache.put(123, "string");
         Assertions.assertFalse(cache.findByName("StRiNg", true).isEmpty());
     }
     
     @Test
     public void findByNameContains() {
         final DefaultNamedCacheView<String> cache = new DefaultNamedCacheView<>(Function.identity());
-        cache.put("123", "string");
+        cache.put(123, "string");
         Assertions.assertFalse(cache.findByNameContains("tri").isEmpty());
         Assertions.assertTrue(cache.findByNameContains("tRi").isEmpty());
     }
@@ -59,14 +59,14 @@ public class DefaultNamedCacheViewTests {
     @Test
     public void findByNameContainsIgnoreCase() {
         final DefaultNamedCacheView<String> cache = new DefaultNamedCacheView<>(Function.identity());
-        cache.put("123", "string");
+        cache.put(123, "string");
         Assertions.assertFalse(cache.findByNameContains("tRi", true).isEmpty());
     }
     
     @Test
     public void findByNameStartsWith() {
         final DefaultNamedCacheView<String> cache = new DefaultNamedCacheView<>(Function.identity());
-        cache.put("123", "string");
+        cache.put(123, "string");
         Assertions.assertFalse(cache.findByNameStartsWith("str").isEmpty());
         Assertions.assertTrue(cache.findByNameStartsWith("StR").isEmpty());
     }
@@ -74,14 +74,14 @@ public class DefaultNamedCacheViewTests {
     @Test
     public void findByNameStartsWithIgnoreCase() {
         final DefaultNamedCacheView<String> cache = new DefaultNamedCacheView<>(Function.identity());
-        cache.put("123", "string");
+        cache.put(123, "string");
         Assertions.assertFalse(cache.findByNameStartsWith("StR", true).isEmpty());
     }
     
     @Test
     public void findByNameEndsWith() {
         final DefaultNamedCacheView<String> cache = new DefaultNamedCacheView<>(Function.identity());
-        cache.put("123", "string");
+        cache.put(123, "string");
         Assertions.assertFalse(cache.findByNameEndsWith("ing").isEmpty());
         Assertions.assertTrue(cache.findByNameEndsWith("iNg").isEmpty());
     }
@@ -89,7 +89,7 @@ public class DefaultNamedCacheViewTests {
     @Test
     public void findByNameEndsWithIgnoreCase() {
         final DefaultNamedCacheView<String> cache = new DefaultNamedCacheView<>(Function.identity());
-        cache.put("123", "string");
+        cache.put(123, "string");
         Assertions.assertFalse(cache.findByNameEndsWith("iNg", true).isEmpty());
     }
 }
