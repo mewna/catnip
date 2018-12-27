@@ -277,20 +277,7 @@ public class RestChannel extends RestHandler {
     public CompletionStage<JsonArray> getReactionsRaw(@Nonnull final String channelId, @Nonnull final String messageId,
                                                        @Nonnull final String emoji, @Nullable final String before,
                                                        @Nullable final String after, @Nonnegative final int limit) {
-        /*final Collection<String> params = new ArrayList<>();
-        if(limit > 0) {
-            params.add("limit=" + limit);
-        }
-        if(before != null) {
-            params.add("before=" + before);
-        }
-        if(after != null) {
-            params.add("after=" + after);
-        }
-        String query = String.join("&", params);
-        if(!query.isEmpty()) {
-            query = '?' + query;
-        }*/
+      
         
         final QueryStringBuilder builder = new QueryStringBuilder();
         if(limit > 0) {
@@ -346,25 +333,25 @@ public class RestChannel extends RestHandler {
     public CompletionStage<JsonArray> getChannelMessagesRaw(@Nonnull final String channelId, @Nullable final String before,
                                                              @Nullable final String after, @Nullable final String around,
                                                              @Nonnegative final int limit) {
-        final QueryStringBuilder queryStringBuilder = new QueryStringBuilder();
+        final QueryStringBuilder builder = new QueryStringBuilder();
         
         if(limit > 0) {
-            queryStringBuilder.append("limit", Integer.toString(limit));
+            builder.append("limit", Integer.toString(limit));
         }
         
         if(after != null) {
-            queryStringBuilder.append("after", after);
+            builder.append("after", after);
         }
         
         if(around != null) {
-            queryStringBuilder.append("around", around);
+            builder.append("around", around);
         }
         
         if(before != null) {
-            queryStringBuilder.append("before", before);
+            builder.append("before", before);
         }
         
-        final String query = queryStringBuilder.build();
+        final String query = builder.build();
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.GET_CHANNEL_MESSAGES.withMajorParam(channelId).withQueryString(query),
                         ImmutableMap.of()))
