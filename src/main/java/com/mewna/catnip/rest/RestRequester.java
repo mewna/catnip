@@ -375,7 +375,7 @@ public class RestRequester {
         @Override
         public String toString() {
             return String.format("OutboundRequest (%s, %s, object=%s, array=%s, buffers=%s, failures=%s)",
-                    route, params, object == null, array == null, buffers != null && !buffers.isEmpty(), failedAttempts);
+                    route, params, object != null, array != null, buffers != null && !buffers.isEmpty(), failedAttempts);
         }
     }
     

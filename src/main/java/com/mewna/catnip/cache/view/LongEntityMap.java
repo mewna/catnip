@@ -27,38 +27,40 @@
 
 package com.mewna.catnip.cache.view;
 
+import com.koloboke.collect.LongIterator;
+import com.koloboke.compile.ConcurrentModificationUnchecked;
+import com.koloboke.compile.KolobokeMap;
+
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.function.LongPredicate;
+import java.util.Map;
 
-/**
- * Mutable {@link CacheView cache view}, which allows modifications to the storage. Used by
- * {@link com.mewna.catnip.cache.MemoryEntityCache MemoryEntityCache} to
- * allow custom implementations.
- *
- * @param <T> Type of the entity held by this cache.
- *
- * @author natanbc
- * @since 12/23/18
- */
-public interface MutableCacheView<T> extends CacheView<T> {
-    void removeIf(@Nonnull LongPredicate predicate);
+@KolobokeMap
+@ConcurrentModificationUnchecked
+public interface LongEntityMap<T> extends Map<Long, T> {
+    @Nonnull
+    @CheckReturnValue
+    static <T> LongEntityMap<T> create(@Nonnegative final int expectedSize) {
+        return new KolobokeLongEntityMap<>(expectedSize);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    static <T> LongEntityMap<T> create() {
+        return create(10);
+    }
+    
+    @Nonnull
+    LongIterator iterator();
     
     @Nullable
     T put(long key, @Nonnull T value);
     
-    @Deprecated
     @Nullable
-    default T put(@Nonnull final String key, @Nonnull final T value) {
-        return put(Long.parseUnsignedLong(key), value);
-    }
+    T get(long key);
     
     @Nullable
-    T remove(final long key);
-    
-    @Deprecated
-    @Nullable
-    default T remove(@Nonnull final String key) {
-        return remove(Long.parseUnsignedLong(key));
-    }
+    T remove(long key);
 }
