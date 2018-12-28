@@ -644,7 +644,7 @@ public final class EntityBuilder {
                 .catnip(catnip)
                 .guildIdAsLong(guildId == null ? 0 : Long.parseUnsignedLong(guildId))
                 .channelIdAsLong(channelId == null ? 0 : Long.parseUnsignedLong(channelId))
-                .userIdAsLong(Long.parseLong(data.getString("user_id")))
+                .userIdAsLong(Long.parseUnsignedLong(data.getString("user_id")))
                 .sessionId(data.getString("session_id"))
                 .deaf(data.getBoolean("deaf"))
                 .mute(data.getBoolean("mute"))
@@ -1135,7 +1135,7 @@ public final class EntityBuilder {
             case CHANNEL_OVERWRITE_DELETE:
                 return OverrideUpdateInfoImpl.builder()
                         .catnip(catnip)
-                        .overriddenEntityIdAsLong(Long.parseLong(data.getString("id")))
+                        .overriddenEntityIdAsLong(Long.parseUnsignedLong(data.getString("id")))
                         .overrideType(OverrideType.byKey(data.getString("type")))
                         .roleName(data.getString("role_name"))
                         .build();
