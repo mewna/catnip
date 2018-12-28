@@ -117,6 +117,9 @@ public class CatnipImpl implements Catnip {
     }
     
     private void applyOptions(@Nonnull final CatnipOptions options) {
+        // TODO: Should probably make this behave like #diff
+        // so that we don't need to update this every single time that the
+        // options change.
         this.options = options;
         requester = new RestRequester(this, options.restBucketBackend(), options.restHttpClient());
         shardManager = options.shardManager();
@@ -158,7 +161,8 @@ public class CatnipImpl implements Catnip {
     private Map<String, Pair<Object, Object>> diff(@Nonnull final CatnipOptions patch) {
         final Map<String, Pair<Object, Object>> diff = new LinkedHashMap<>();
         // Yeah this is ugly reflection bs, I know. But this allows it to
-        // automatically diff it without having to
+        // automatically diff it without having to know about what every
+        // field is.
         for(final Field field : patch.getClass().getDeclaredFields()) {
             // Don't compare tokens because there's no point
             if(!field.getName().equals("token")) {
