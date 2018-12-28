@@ -205,7 +205,8 @@ public interface Message extends Snowflake {
         if(guild != 0) {
             return (TextChannel) catnip().cache().channel(guild, channelIdAsLong());
         } else {
-            return catnip().cache().dmChannel(channelIdAsLong());
+            //TODO: should we change cache to store by private channel id instead?
+            return catnip().cache().dmChannel(author().idAsLong());
         }
     }
     
