@@ -47,6 +47,7 @@ import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.invite.InviteCreateOptions;
+import com.mewna.catnip.util.QueryStringBuilder;
 import com.mewna.catnip.util.pagination.MessagePaginator;
 import com.mewna.catnip.util.pagination.ReactionPaginator;
 import io.vertx.core.json.JsonArray;
@@ -276,20 +277,21 @@ public class RestChannel extends RestHandler {
     public CompletionStage<JsonArray> getReactionsRaw(@Nonnull final String channelId, @Nonnull final String messageId,
                                                        @Nonnull final String emoji, @Nullable final String before,
                                                        @Nullable final String after, @Nonnegative final int limit) {
-        final Collection<String> params = new ArrayList<>();
+      
+        
+        final QueryStringBuilder builder = new QueryStringBuilder();
         if(limit > 0) {
-            params.add("limit=" + limit);
+            builder.append("limit", Integer.toString(limit));
         }
         if(before != null) {
-            params.add("before=" + before);
+            builder.append("before", before);
         }
+        
         if(after != null) {
-            params.add("after=" + after);
+            builder.append("after", after);
         }
-        String query = String.join("&", params);
-        if(!query.isEmpty()) {
-            query = '?' + query;
-        }
+        
+        String query = builder.build();
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.GET_REACTIONS.withMajorParam(channelId).withQueryString(query),
                         ImmutableMap.of("message.id", messageId, "emojis", encodeUTF8(emoji))))
@@ -331,23 +333,25 @@ public class RestChannel extends RestHandler {
     public CompletionStage<JsonArray> getChannelMessagesRaw(@Nonnull final String channelId, @Nullable final String before,
                                                              @Nullable final String after, @Nullable final String around,
                                                              @Nonnegative final int limit) {
-        final Collection<String> params = new ArrayList<>();
+        final QueryStringBuilder builder = new QueryStringBuilder();
+        
         if(limit > 0) {
-            params.add("limit=" + limit);
+            builder.append("limit", Integer.toString(limit));
         }
+        
         if(after != null) {
-            params.add("after=" + after);
+            builder.append("after", after);
         }
+        
         if(around != null) {
-            params.add("around=" + around);
+            builder.append("around", around);
         }
+        
         if(before != null) {
-            params.add("before=" + before);
+            builder.append("before", before);
         }
-        String query = String.join("&", params);
-        if(!query.isEmpty()) {
-            query = '?' + query;
-        }
+        
+        final String query = builder.build();
         return getCatnip().requester()
                 .queue(new OutboundRequest(Routes.GET_CHANNEL_MESSAGES.withMajorParam(channelId).withQueryString(query),
                         ImmutableMap.of()))

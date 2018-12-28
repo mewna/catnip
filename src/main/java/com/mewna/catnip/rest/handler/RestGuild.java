@@ -40,6 +40,7 @@ import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.guild.*;
+import com.mewna.catnip.util.QueryStringBuilder;
 import com.mewna.catnip.util.pagination.AuditLogPaginator;
 import com.mewna.catnip.util.pagination.MemberPaginator;
 import io.vertx.core.json.JsonArray;
@@ -322,17 +323,18 @@ public class RestGuild extends RestHandler {
     @CheckReturnValue
     public CompletionStage<JsonArray> listGuildMembersRaw(@Nonnull final String guildId, @Nonnegative final int limit,
                                                            @Nullable final String after) {
-        final Collection<String> params = new ArrayList<>();
+        
+        final QueryStringBuilder builder = new QueryStringBuilder();
+        
         if(limit > 0) {
-            params.add("limit=" + limit);
+            builder.append("limit", Integer.toString(limit));
         }
-        if(after != null && !after.isEmpty()) {
-            params.add("after=" + after);
+        if (after != null && !after.isEmpty()) {
+            builder.append("after", after);
         }
-        String query = String.join("&", params);
-        if(!query.isEmpty()) {
-            query = '?' + query;
-        }
+        
+        String query = builder.build();
+        
         return getCatnip().requester().queue(new OutboundRequest(Routes.LIST_GUILD_MEMBERS.withMajorParam(guildId).withQueryString(query),
                 ImmutableMap.of()))
                 .thenApply(ResponsePayload::array);
@@ -370,17 +372,14 @@ public class RestGuild extends RestHandler {
     public CompletionStage<Void> createGuildBan(@Nonnull final String guildId, @Nonnull final String userId,
                                                 @Nullable final String reason,
                                                 @Nonnegative final int deleteMessageDays) {
-        final Collection<String> params = new ArrayList<>();
+        final QueryStringBuilder builder = new QueryStringBuilder();
         if(deleteMessageDays <= 7) {
-            params.add("delete-message-days=" + deleteMessageDays);
+            builder.append("delete-message-days" + deleteMessageDays);
         }
         if(reason != null && !reason.isEmpty()) {
-            params.add("reason=" + encodeUTF8(reason));
+            builder.append("reason" + encodeUTF8(reason));
         }
-        String query = String.join("&", params);
-        if(!query.isEmpty()) {
-            query = '?' + query;
-        }
+        final String query = builder.build();
         return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_GUILD_BAN.withMajorParam(guildId).withQueryString(query),
                 ImmutableMap.of("user.id", userId)))
                 .thenApply(e -> null);
@@ -446,8 +445,9 @@ public class RestGuild extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonObject> getGuildPruneCountRaw(@Nonnull final String guildId, @Nonnegative final int days) {
+        String query = new QueryStringBuilder().append("days", Integer.toString(days)).build();
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_PRUNE_COUNT
-                .withMajorParam(guildId).withQueryString("?days=" + days), ImmutableMap.of()))
+                .withMajorParam(guildId).withQueryString(query), ImmutableMap.of()))
                 .thenApply(ResponsePayload::object);
     }
 
@@ -460,8 +460,10 @@ public class RestGuild extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonObject> beginGuildPruneRaw(@Nonnull final String guildId, @Nonnegative final int days) {
+        String query = new QueryStringBuilder().append("days", Integer.toString(days)).build();
+                
         return getCatnip().requester().queue(new OutboundRequest(Routes.BEGIN_GUILD_PRUNE
-                .withMajorParam(guildId).withQueryString("?days=" + days), ImmutableMap.of()))
+                .withMajorParam(guildId).withQueryString(query), ImmutableMap.of()))
                 .thenApply(ResponsePayload::object);
     }
 
@@ -505,23 +507,27 @@ public class RestGuild extends RestHandler {
     public CompletionStage<JsonObject> getGuildAuditLogRaw(@Nonnull final String guildId, @Nullable final String userId,
                                                             @Nullable final String beforeEntryId, @Nullable final ActionType type,
                                                             @Nonnegative final int limit) {
-        final Collection<String> params = new ArrayList<>();
+        
+        
+        final QueryStringBuilder builder = new QueryStringBuilder();
+        
         if(userId != null) {
-            params.add("user_id=" + userId);
+            builder.append("user_id", userId);
         }
+        
         if(beforeEntryId != null) {
-            params.add("before=" + beforeEntryId);
+            builder.append("before", beforeEntryId);
         }
+        
         if(limit <= 100) {
-            params.add("limit=" + limit);
+            builder.append("limit", Integer.toString(limit));
         }
+        
         if(type != null) {
-            params.add("action_type=" + type);
+            builder.append("action_type", type.toString());
         }
-        String query = String.join("&", params);
-        if(!query.isEmpty()) {
-            query = '?' + query;
-        }
+        
+        String query = builder.build();
         return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_AUDIT_LOG.withMajorParam(guildId).withQueryString(query),
                 ImmutableMap.of()))
                 .thenApply(ResponsePayload::object);
