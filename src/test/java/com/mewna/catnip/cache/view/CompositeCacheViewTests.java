@@ -42,16 +42,16 @@ public class CompositeCacheViewTests {
     @Test
     public void getById() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
-        cache.put("123", "some string");
+        cache.put(123, "some string");
         Assertions.assertEquals(composite(cache).getById(123), "some string");
     }
     
     @Test
     public void size() {
         final DefaultCacheView<String> cache1 = new DefaultCacheView<>();
-        cache1.put("123", "some string");
+        cache1.put(123, "some string");
         final DefaultCacheView<String> cache2 = new DefaultCacheView<>();
-        cache2.put("456", "some other string");
+        cache2.put(456, "some other string");
         Assertions.assertEquals(composite(cache1, cache2).size(), 2);
     }
     
@@ -63,54 +63,54 @@ public class CompositeCacheViewTests {
     @Test
     public void isNotEmpty() {
         final DefaultCacheView<String> cache1 = new DefaultCacheView<>();
-        cache1.put("123", "some string");
+        cache1.put(123, "some string");
         final DefaultCacheView<String> cache2 = new DefaultCacheView<>();
-        cache2.put("456", "some other string");
+        cache2.put(456, "some other string");
         Assertions.assertFalse(composite(cache1, cache2).isEmpty());
     }
     
     @Test
     public void findAny() {
         final DefaultCacheView<String> cache1 = new DefaultCacheView<>();
-        cache1.put("123", "some string");
+        cache1.put(123, "some string");
         final DefaultCacheView<String> cache2 = new DefaultCacheView<>();
-        cache2.put("456", "some other string");
+        cache2.put(456, "some other string");
         Assertions.assertEquals(composite(cache1, cache2).findAny(__ -> true), "some string");
     }
     
     @Test
     public void findAnyNoMatches() {
         final DefaultCacheView<String> cache1 = new DefaultCacheView<>();
-        cache1.put("123", "some string");
+        cache1.put(123, "some string");
         final DefaultCacheView<String> cache2 = new DefaultCacheView<>();
-        cache2.put("456", "some other string");
+        cache2.put(456, "some other string");
         Assertions.assertNull(composite(cache1, cache2).findAny(__ -> false));
     }
     
     @Test
     public void find() {
         final DefaultCacheView<String> cache1 = new DefaultCacheView<>();
-        cache1.put("123", "some string");
+        cache1.put(123, "some string");
         final DefaultCacheView<String> cache2 = new DefaultCacheView<>();
-        cache2.put("456", "some other string");
+        cache2.put(456, "some other string");
         Assertions.assertEquals(composite(cache1, cache2).find(__ -> true).size(), 2);
     }
     
     @Test
     public void findNoMatches() {
         final DefaultCacheView<String> cache1 = new DefaultCacheView<>();
-        cache1.put("123", "some string");
+        cache1.put(123, "some string");
         final DefaultCacheView<String> cache2 = new DefaultCacheView<>();
-        cache2.put("456", "some other string");
+        cache2.put(456, "some other string");
         Assertions.assertTrue(composite(cache1, cache2).find(__ -> false).isEmpty());
     }
     
     @Test
     public void collect1() {
         final DefaultCacheView<String> cache1 = new DefaultCacheView<>();
-        cache1.put("123", "some string");
+        cache1.put(123, "some string");
         final DefaultCacheView<String> cache2 = new DefaultCacheView<>();
-        cache2.put("456", "some other string");
+        cache2.put(456, "some other string");
         final List<String> list = composite(cache1, cache2).collect(Collectors.toList());
         Assertions.assertEquals(list.size(), 2);
         Assertions.assertTrue(list.contains("some string"));
@@ -120,9 +120,9 @@ public class CompositeCacheViewTests {
     @Test
     public void collect2() {
         final DefaultCacheView<String> cache1 = new DefaultCacheView<>();
-        cache1.put("123", "some string");
+        cache1.put(123, "some string");
         final DefaultCacheView<String> cache2 = new DefaultCacheView<>();
-        cache2.put("456", "some other string");
+        cache2.put(456, "some other string");
         final List<String> list = composite(cache1, cache2).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         Assertions.assertEquals(list.size(), 2);
         Assertions.assertTrue(list.contains("some string"));
@@ -132,9 +132,9 @@ public class CompositeCacheViewTests {
     @Test
     public void reduce1() {
         final DefaultCacheView<String> cache1 = new DefaultCacheView<>();
-        cache1.put("123", "some string");
+        cache1.put(123, "some string");
         final DefaultCacheView<String> cache2 = new DefaultCacheView<>();
-        cache2.put("456", "some other string");
+        cache2.put(456, "some other string");
         final String s = composite(cache1, cache2).reduce("", String::concat, String::concat);
         Assertions.assertEquals(s.length(), "some string".length() + "some other string".length());
         Assertions.assertTrue(
@@ -146,9 +146,9 @@ public class CompositeCacheViewTests {
     @Test
     public void reduce2() {
         final DefaultCacheView<String> cache1 = new DefaultCacheView<>();
-        cache1.put("123", "some string");
+        cache1.put(123, "some string");
         final DefaultCacheView<String> cache2 = new DefaultCacheView<>();
-        cache2.put("456", "some other string");
+        cache2.put(456, "some other string");
         final String s = composite(cache1, cache2).reduce("", String::concat);
         Assertions.assertEquals(s.length(), "some string".length() + "some other string".length());
         Assertions.assertTrue(
@@ -166,9 +166,9 @@ public class CompositeCacheViewTests {
     @Test
     public void reduce3() {
         final DefaultCacheView<String> cache1 = new DefaultCacheView<>();
-        cache1.put("123", "some string");
+        cache1.put(123, "some string");
         final DefaultCacheView<String> cache2 = new DefaultCacheView<>();
-        cache2.put("456", "some other string");
+        cache2.put(456, "some other string");
         final Optional<String> maybeS = composite(cache1, cache2).reduce(String::concat);
         Assertions.assertTrue(maybeS.isPresent());
         final String s = maybeS.get();
@@ -182,9 +182,9 @@ public class CompositeCacheViewTests {
     @Test
     public void anyMatch() {
         final DefaultCacheView<String> cache1 = new DefaultCacheView<>();
-        cache1.put("123", "some string");
+        cache1.put(123, "some string");
         final DefaultCacheView<String> cache2 = new DefaultCacheView<>();
-        cache2.put("456", "some other string");
+        cache2.put(456, "some other string");
         Assertions.assertTrue(composite(cache1, cache2).anyMatch("some string"::equals));
     }
     
@@ -196,9 +196,9 @@ public class CompositeCacheViewTests {
     @Test
     public void allMatch() {
         final DefaultCacheView<String> cache1 = new DefaultCacheView<>();
-        cache1.put("123", "some string");
+        cache1.put(123, "some string");
         final DefaultCacheView<String> cache2 = new DefaultCacheView<>();
-        cache2.put("456", "some other string");
+        cache2.put(456, "some other string");
         Assertions.assertFalse(composite(cache1, cache2).allMatch("some string"::equals));
     }
     
@@ -210,9 +210,9 @@ public class CompositeCacheViewTests {
     @Test
     public void noneMatch() {
         final DefaultCacheView<String> cache1 = new DefaultCacheView<>();
-        cache1.put("123", "some string");
+        cache1.put(123, "some string");
         final DefaultCacheView<String> cache2 = new DefaultCacheView<>();
-        cache2.put("456", "some other string");
+        cache2.put(456, "some other string");
         Assertions.assertFalse(composite(cache1, cache2).noneMatch("some string"::equals));
     }
     
@@ -224,9 +224,9 @@ public class CompositeCacheViewTests {
     @Test
     public void min() {
         final DefaultCacheView<String> cache1 = new DefaultCacheView<>();
-        cache1.put("123", "some string");
+        cache1.put(123, "some string");
         final DefaultCacheView<String> cache2 = new DefaultCacheView<>();
-        cache2.put("456", "some other string");
+        cache2.put(456, "some other string");
         final Optional<String> min = composite(cache1, cache2).min(Comparator.comparingInt(String::length));
         Assertions.assertTrue(min.isPresent());
         Assertions.assertEquals(min.get(), "some string");
@@ -235,9 +235,9 @@ public class CompositeCacheViewTests {
     @Test
     public void max() {
         final DefaultCacheView<String> cache1 = new DefaultCacheView<>();
-        cache1.put("123", "some string");
+        cache1.put(123, "some string");
         final DefaultCacheView<String> cache2 = new DefaultCacheView<>();
-        cache2.put("456", "some other string");
+        cache2.put(456, "some other string");
         final Optional<String> max = composite(cache1, cache2).max(Comparator.comparingInt(String::length));
         Assertions.assertTrue(max.isPresent());
         Assertions.assertEquals(max.get(), "some other string");
@@ -249,9 +249,9 @@ public class CompositeCacheViewTests {
         final DefaultCacheView<String> cache2 = new DefaultCacheView<>();
         final CompositeCacheView<String> cache = composite(cache1, cache2);
         Assertions.assertTrue(cache.keys().isEmpty());
-        cache1.put("123", "some string");
+        cache1.put(123, "some string");
         Assertions.assertEquals(cache.keys().size(), 1);
-        cache2.put("456", "some other string");
+        cache2.put(456, "some other string");
         Assertions.assertEquals(cache.keys().size(), 2);
         
         Assertions.assertTrue(cache.keys().contains(123L));
@@ -265,9 +265,9 @@ public class CompositeCacheViewTests {
         final DefaultCacheView<String> cache2 = new DefaultCacheView<>();
         final CompositeCacheView<String> cache = composite(cache1, cache2);
         Assertions.assertTrue(cache.values().isEmpty());
-        cache1.put("123", "some string");
+        cache1.put(123, "some string");
         Assertions.assertEquals(cache.values().size(), 1);
-        cache2.put("456", "some other string");
+        cache2.put(456, "some other string");
         Assertions.assertEquals(cache.values().size(), 2);
         
         Assertions.assertTrue(cache.values().contains("some string"));
@@ -281,9 +281,9 @@ public class CompositeCacheViewTests {
         final DefaultCacheView<String> cache2 = new DefaultCacheView<>();
         final CompositeCacheView<String> cache = composite(cache1, cache2);
         Assertions.assertEquals(cache.count(__ -> true), 0);
-        cache1.put("123", "some string");
+        cache1.put(123, "some string");
         Assertions.assertEquals(cache.count(__ -> true), 1);
-        cache2.put("456", "some other string");
+        cache2.put(456, "some other string");
         Assertions.assertEquals(cache.count(__ -> true), 2);
         Assertions.assertEquals(cache.count("some string"::equals), 1);
         Assertions.assertEquals(cache.count("some other string"::equals), 1);
@@ -297,11 +297,11 @@ public class CompositeCacheViewTests {
         final CompositeCacheView<String> cache = composite(cache1, cache2);
         final Collection<String> snapshot1 = cache.snapshot();
         Assertions.assertTrue(cache.values().isEmpty());
-        cache1.put("123", "some string");
+        cache1.put(123, "some string");
         Assertions.assertTrue(snapshot1.isEmpty());
         Assertions.assertEquals(cache.values().size(), 1);
         final Collection<String> snapshot2 = cache.snapshot();
-        cache2.put("456", "some other string");
+        cache2.put(456, "some other string");
         Assertions.assertEquals(cache.values().size(), 2);
         Assertions.assertEquals(snapshot2.size(), 1);
         
