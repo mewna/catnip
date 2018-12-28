@@ -37,14 +37,14 @@ public class DefaultCacheViewTests {
     @Test
     public void getById() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
-        cache.put("123", "some string");
+        cache.put(123, "some string");
         Assertions.assertEquals(cache.getById(123), "some string");
     }
     
     @Test
     public void size() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
-        cache.put("123", "some string");
+        cache.put(123, "some string");
         Assertions.assertEquals(cache.size(), 1);
     }
     
@@ -57,45 +57,45 @@ public class DefaultCacheViewTests {
     @Test
     public void isNotEmpty() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
-        cache.put("123", "some string");
+        cache.put(123, "some string");
         Assertions.assertFalse(cache.isEmpty());
     }
     
     @Test
     public void findAny() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
-        cache.put("123", "some string");
+        cache.put(123, "some string");
         Assertions.assertEquals(cache.findAny(__ -> true), "some string");
     }
     
     @Test
     public void findAnyNoMatches() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
-        cache.put("123", "some string");
+        cache.put(123, "some string");
         Assertions.assertNull(cache.findAny(__ -> false));
     }
     
     @Test
     public void find() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
-        cache.put("123", "some string");
-        cache.put("456", "some other string");
+        cache.put(123, "some string");
+        cache.put(456, "some other string");
         Assertions.assertEquals(cache.find(__ -> true).size(), 2);
     }
     
     @Test
     public void findNoMatches() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
-        cache.put("123", "some string");
-        cache.put("456", "some other string");
+        cache.put(123, "some string");
+        cache.put(456, "some other string");
         Assertions.assertTrue(cache.find(__ -> false).isEmpty());
     }
     
     @Test
     public void collect1() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
-        cache.put("123", "some string");
-        cache.put("456", "some other string");
+        cache.put(123, "some string");
+        cache.put(456, "some other string");
         final List<String> list = cache.collect(Collectors.toList());
         Assertions.assertEquals(list.size(), 2);
         Assertions.assertTrue(list.contains("some string"));
@@ -105,8 +105,8 @@ public class DefaultCacheViewTests {
     @Test
     public void collect2() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
-        cache.put("123", "some string");
-        cache.put("456", "some other string");
+        cache.put(123, "some string");
+        cache.put(456, "some other string");
         final List<String> list = cache.collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         Assertions.assertEquals(list.size(), 2);
         Assertions.assertTrue(list.contains("some string"));
@@ -116,8 +116,8 @@ public class DefaultCacheViewTests {
     @Test
     public void reduce1() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
-        cache.put("123", "some string");
-        cache.put("456", "some other string");
+        cache.put(123, "some string");
+        cache.put(456, "some other string");
         final String s = cache.reduce("", String::concat, String::concat);
         Assertions.assertEquals(s.length(), "some string".length() + "some other string".length());
         Assertions.assertTrue(
@@ -129,8 +129,8 @@ public class DefaultCacheViewTests {
     @Test
     public void reduce2() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
-        cache.put("123", "some string");
-        cache.put("456", "some other string");
+        cache.put(123, "some string");
+        cache.put(456, "some other string");
         final String s = cache.reduce("", String::concat);
         Assertions.assertEquals(s.length(), "some string".length() + "some other string".length());
         Assertions.assertTrue(
@@ -149,8 +149,8 @@ public class DefaultCacheViewTests {
     @Test
     public void reduce3() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
-        cache.put("123", "some string");
-        cache.put("456", "some other string");
+        cache.put(123, "some string");
+        cache.put(456, "some other string");
         final Optional<String> maybeS = cache.reduce(String::concat);
         Assertions.assertTrue(maybeS.isPresent());
         final String s = maybeS.get();
@@ -164,8 +164,8 @@ public class DefaultCacheViewTests {
     @Test
     public void anyMatch() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
-        cache.put("123", "some string");
-        cache.put("456", "some other string");
+        cache.put(123, "some string");
+        cache.put(456, "some other string");
         Assertions.assertTrue(cache.anyMatch("some string"::equals));
     }
     
@@ -178,8 +178,8 @@ public class DefaultCacheViewTests {
     @Test
     public void allMatch() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
-        cache.put("123", "some string");
-        cache.put("456", "some other string");
+        cache.put(123, "some string");
+        cache.put(456, "some other string");
         Assertions.assertFalse(cache.allMatch("some string"::equals));
     }
     
@@ -192,8 +192,8 @@ public class DefaultCacheViewTests {
     @Test
     public void noneMatch() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
-        cache.put("123", "some string");
-        cache.put("456", "some other string");
+        cache.put(123, "some string");
+        cache.put(456, "some other string");
         Assertions.assertFalse(cache.noneMatch("some string"::equals));
     }
     
@@ -206,8 +206,8 @@ public class DefaultCacheViewTests {
     @Test
     public void min() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
-        cache.put("123", "some string");
-        cache.put("456", "some other string");
+        cache.put(123, "some string");
+        cache.put(456, "some other string");
         final Optional<String> min = cache.min(Comparator.comparingInt(String::length));
         Assertions.assertTrue(min.isPresent());
         Assertions.assertEquals(min.get(), "some string");
@@ -216,8 +216,8 @@ public class DefaultCacheViewTests {
     @Test
     public void max() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
-        cache.put("123", "some string");
-        cache.put("456", "some other string");
+        cache.put(123, "some string");
+        cache.put(456, "some other string");
         final Optional<String> max = cache.max(Comparator.comparingInt(String::length));
         Assertions.assertTrue(max.isPresent());
         Assertions.assertEquals(max.get(), "some other string");
@@ -227,9 +227,9 @@ public class DefaultCacheViewTests {
     public void count() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
         Assertions.assertEquals(cache.count(__ -> true), 0);
-        cache.put("123", "some string");
+        cache.put(123, "some string");
         Assertions.assertEquals(cache.count(__ -> true), 1);
-        cache.put("456", "some other string");
+        cache.put(456, "some other string");
         Assertions.assertEquals(cache.count(__ -> true), 2);
         Assertions.assertEquals(cache.count("some string"::equals), 1);
         Assertions.assertEquals(cache.count("some other string"::equals), 1);
@@ -240,9 +240,9 @@ public class DefaultCacheViewTests {
     public void keys() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
         Assertions.assertTrue(cache.keys().isEmpty());
-        cache.put("123", "some string");
+        cache.put(123, "some string");
         Assertions.assertEquals(cache.keys().size(), 1);
-        cache.put("456", "some other string");
+        cache.put(456, "some other string");
         Assertions.assertEquals(cache.keys().size(), 2);
         
         Assertions.assertTrue(cache.keys().contains(123L));
@@ -254,9 +254,9 @@ public class DefaultCacheViewTests {
     public void values() {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
         Assertions.assertTrue(cache.values().isEmpty());
-        cache.put("123", "some string");
+        cache.put(123, "some string");
         Assertions.assertEquals(cache.values().size(), 1);
-        cache.put("456", "some other string");
+        cache.put(456, "some other string");
         Assertions.assertEquals(cache.values().size(), 2);
         
         Assertions.assertTrue(cache.values().contains("some string"));
@@ -269,11 +269,11 @@ public class DefaultCacheViewTests {
         final DefaultCacheView<String> cache = new DefaultCacheView<>();
         final Collection<String> snapshot1 = cache.snapshot();
         Assertions.assertTrue(cache.values().isEmpty());
-        cache.put("123", "some string");
+        cache.put(123, "some string");
         Assertions.assertTrue(snapshot1.isEmpty());
         Assertions.assertEquals(cache.values().size(), 1);
         final Collection<String> snapshot2 = cache.snapshot();
-        cache.put("456", "some other string");
+        cache.put(456, "some other string");
         Assertions.assertEquals(cache.values().size(), 2);
         Assertions.assertEquals(snapshot2.size(), 1);
     
