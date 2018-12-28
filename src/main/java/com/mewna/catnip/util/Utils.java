@@ -41,6 +41,8 @@ import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
+import java.util.function.LongPredicate;
 
 public final class Utils {
     public static final List<String> VALID_CONTENT_TYPES = Arrays.asList(
@@ -51,6 +53,10 @@ public final class Utils {
     public static final long DISCORD_EPOCH = 1420070400000L;
     
     private Utils() {
+    }
+    
+    public static void removeIf(@Nonnull final Map<Long, ?> map, @Nonnull final LongPredicate predicate) {
+        map.keySet().removeIf(predicate::test);
     }
     
     @Nonnull

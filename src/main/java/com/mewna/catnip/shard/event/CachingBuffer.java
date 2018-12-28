@@ -106,7 +106,7 @@ public class CachingBuffer extends AbstractBuffer {
                 catnip().logAdapter().debug("Prepared new BufferState for shard {} with {} guilds.", id, guilds.size());
                 // READY is also a cache event, as it does come with
                 // information about the current user
-                maybeCache(type, d).setHandler(_res -> emitter().emit(event));
+                maybeCache(type, id, d).setHandler(_res -> emitter().emit(event));
                 break;
             }
             case Raw.GUILD_CREATE: {
@@ -114,7 +114,7 @@ public class CachingBuffer extends AbstractBuffer {
                 final BufferState bufferState = buffers.get(id);
                 // Make sure to cache guild
                 // This will always succeed unless something goes horribly wrong
-                maybeCache(type, d).setHandler(_res -> {
+                maybeCache(type, id, d).setHandler(_res -> {
                     // Trigger member chunking
                     final Integer memberCount = d.getInteger("member_count");
                     if(memberCount > LARGE_THRESHOLD) {
@@ -170,7 +170,7 @@ public class CachingBuffer extends AbstractBuffer {
                     final BufferState bufferState = buffers.get(id);
                     if(bufferState != null) {
                         final String guild = d.getString("guild_id");
-                        cacheAndDispatch(type, d, event);
+                        cacheAndDispatch(type, d, id, event);
                         bufferState.acceptChunk(guild);
                         if(bufferState.doneChunking(guild)) {
                             emitter().emit(bufferState.guildCreate(guild));
@@ -206,11 +206,11 @@ public class CachingBuffer extends AbstractBuffer {
                         }
                     } else {
                         // Emit if the payload has no guild id
-                        cacheAndDispatch(type, d, event);
+                        cacheAndDispatch(type, d, id, event);
                     }
                 } else {
                     // Emit if not buffering right now
-                    cacheAndDispatch(type, d, event);
+                    cacheAndDispatch(type, d, id, event);
                 }
                 break;
             }
@@ -218,7 +218,7 @@ public class CachingBuffer extends AbstractBuffer {
     }
     
     // Yeah just lazy af here I know, but no need to fetch data a second time
-    private void cacheAndDispatch(final String type, final JsonObject d, final JsonObject event) {
+    private void cacheAndDispatch(final String type, final JsonObject d, final int id, final JsonObject event) {
         if(DELETE_EVENTS.contains(type)) {
             // We want to update cache AFTER we dispatch the event to
             // subconsumers, to avoid a race around cache accesses.
@@ -226,16 +226,16 @@ public class CachingBuffer extends AbstractBuffer {
             // just invoked in a synchronous loop (see EventBusImpl in v.x),
             // which means that this is safe:tm: to do here.
             emitter().emit(event);
-            maybeCache(type, d);
+            maybeCache(type, id, d);
         } else {
-            maybeCache(type, d).setHandler(_res -> emitter().emit(event));
+            maybeCache(type, id, d).setHandler(_res -> emitter().emit(event));
         }
     }
     
-    private Future<Void> maybeCache(final String eventType, final JsonObject data) {
+    private Future<Void> maybeCache(final String eventType, final int shardId, final JsonObject data) {
         if(CACHE_EVENTS.contains(eventType)) {
             try {
-                return catnip().cacheWorker().updateCache(eventType, data);
+                return catnip().cacheWorker().updateCache(eventType, shardId, data);
             } catch(final Exception e) {
                 catnip().logAdapter().warn("Got error updating cache for payload {}", eventType, e);
                 catnip().logAdapter().warn("Payload: {}", data.encodePrettily());

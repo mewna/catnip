@@ -30,7 +30,7 @@ package com.mewna.catnip;
 import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
-import com.mewna.catnip.cache.MemoryEntityCache;
+import com.mewna.catnip.cache.SplitMemoryEntityCache;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.extension.Extension;
@@ -101,11 +101,11 @@ public final class CatnipOptions implements Cloneable {
     @Nonnull
     private EventBuffer eventBuffer = new CachingBuffer();
     /**
-     * The cache worker for catnip to use. Defaults to {@link MemoryEntityCache}.
+     * The cache worker for catnip to use. Defaults to {@link SplitMemoryEntityCache}.
      * Change this if you want to use your own {@link EntityCacheWorker}.
      */
     @Nonnull
-    private EntityCacheWorker cacheWorker = new MemoryEntityCache();
+    private EntityCacheWorker cacheWorker = new SplitMemoryEntityCache();
     /**
      * The set of cache flags for catnip to obey. Used to prevent caching certain
      * things.

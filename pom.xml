@@ -18,6 +18,10 @@
         <commons.lang.version>3.7</commons.lang.version>
         <guava.version>24.1-jre</guava.version>
         <jsr305.version>3.0.2</jsr305.version>
+
+        <koloboke-compile.version>0.5.1</koloboke-compile.version>
+        <koloboke-impl.version>1.0.0</koloboke-impl.version>
+
         <!--
         We force higher netty versions than what v.x uses so that it can be
         J9+-compat
@@ -106,6 +110,19 @@
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
             <version>${jsr305.version}</version>
+        </dependency>
+
+        <!-- Collections -->
+        <dependency>
+            <groupId>com.koloboke</groupId>
+            <artifactId>koloboke-compile</artifactId>
+            <version>${koloboke-compile.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.koloboke</groupId>
+            <artifactId>koloboke-impl-common-jdk8</artifactId>
+            <version>${koloboke-impl.version}</version>
         </dependency>
 
         <!-- Netty upgrades -->
