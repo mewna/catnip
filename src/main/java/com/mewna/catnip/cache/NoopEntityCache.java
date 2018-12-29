@@ -43,6 +43,7 @@ import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import lombok.experimental.Accessors;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -57,36 +58,41 @@ import java.util.Map;
 public class NoopEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
-    public Future<Void> updateCache(@Nonnull final String eventType, @Nonnull final JsonObject payload) {
+    public Future<Void> updateCache(@Nonnull final String eventType, @Nonnegative final int shardId, @Nonnull final JsonObject payload) {
         return Future.succeededFuture();
     }
     
     @Override
-    public void bulkCacheUsers(@Nonnull final Collection<User> users) {
+    public void bulkCacheUsers(@Nonnegative final int shardId, @Nonnull final Collection<User> users) {
     }
     
     @Override
-    public void bulkCacheChannels(@Nonnull final Collection<GuildChannel> channels) {
+    public void bulkCacheChannels(@Nonnegative final int shardId, @Nonnull final Collection<GuildChannel> channels) {
     }
     
     @Override
-    public void bulkCacheRoles(@Nonnull final Collection<Role> roles) {
+    public void bulkCacheRoles(@Nonnegative final int shardId, @Nonnull final Collection<Role> roles) {
     }
     
     @Override
-    public void bulkCacheMembers(@Nonnull final Collection<Member> members) {
+    public void bulkCacheMembers(@Nonnegative final int shardId, @Nonnull final Collection<Member> members) {
     }
     
     @Override
-    public void bulkCacheEmoji(@Nonnull final Collection<CustomEmoji> emoji) {
+    public void bulkCacheEmoji(@Nonnegative final int shardId, @Nonnull final Collection<CustomEmoji> emoji) {
     }
     
     @Override
-    public void bulkCachePresences(@Nonnull final Map<String, Presence> presences) {
+    public void bulkCachePresences(@Nonnegative final int shardId, @Nonnull final Map<String, Presence> presences) {
     }
     
     @Override
-    public void bulkCacheVoiceStates(@Nonnull final Collection<VoiceState> voiceStates) {
+    public void bulkCacheVoiceStates(@Nonnegative final int shardId, @Nonnull final Collection<VoiceState> voiceStates) {
+    }
+    
+    @Override
+    public void invalidateShard(final int id) {
+    
     }
     
     @Nullable

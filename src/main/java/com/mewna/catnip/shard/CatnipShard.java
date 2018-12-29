@@ -540,6 +540,7 @@ public class CatnipShard extends AbstractVerticle {
             // Can't resume, clear old data
             if(state != null) {
                 state.socket().close();
+                catnip.cacheWorker().invalidateShard(id);
                 catnip.sessionManager().clearSession(id);
                 catnip.sessionManager().clearSeqnum(id);
             }

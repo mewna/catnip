@@ -47,6 +47,7 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.format.DateTimeFormatter;
@@ -55,8 +56,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.LongPredicate;
 
 import static com.mewna.catnip.shard.DiscordEvent.Raw;
+import static com.mewna.catnip.util.Utils.removeIf;
 
 /**
  * @author amy
@@ -64,13 +67,9 @@ import static com.mewna.catnip.shard.DiscordEvent.Raw;
  */
 @Accessors(fluent = true, chain = true)
 @SuppressWarnings({"unused", "MismatchedQueryAndUpdateOfCollection"})
-public class MemoryEntityCache implements EntityCacheWorker {
+public abstract class MemoryEntityCache implements EntityCacheWorker {
     @SuppressWarnings("WeakerAccess")
     protected final MutableNamedCacheView<Guild> guildCache = createGuildCacheView();
-    @SuppressWarnings("WeakerAccess")
-    protected final MutableNamedCacheView<User> userCache = createUserCacheView();
-    @SuppressWarnings("WeakerAccess")
-    protected final MutableCacheView<UserDMChannel> dmChannelCache = createDMChannelCacheView();
     @SuppressWarnings("WeakerAccess")
     protected final Map<Long, MutableNamedCacheView<Member>> memberCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
@@ -81,8 +80,6 @@ public class MemoryEntityCache implements EntityCacheWorker {
     protected final Map<Long, MutableNamedCacheView<CustomEmoji>> emojiCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
     protected final Map<Long, MutableCacheView<VoiceState>> voiceStateCache = new ConcurrentHashMap<>();
-    @SuppressWarnings("WeakerAccess")
-    protected final MutableCacheView<Presence> presenceCache = createPresenceCacheView();
     @SuppressWarnings("WeakerAccess")
     protected final AtomicReference<User> selfUser = new AtomicReference<>(null);
     @Getter
@@ -277,49 +274,73 @@ public class MemoryEntityCache implements EntityCacheWorker {
         return new DefaultNamedCacheView<>(nameFunction);
     }
     
-    private void cacheChannel(final Channel channel) {
-        if(channel.isGuild()) {
-            final GuildChannel gc = (GuildChannel) channel;
-            guildChannelCache.computeIfAbsent(gc.guildIdAsLong(),
-                    __ -> createGuildChannelCacheView())
-                    .put(gc.idAsLong(), gc);
-        } else if(channel.isUserDM()) {
-            final UserDMChannel dm = (UserDMChannel) channel;
-            dmChannelCache.put(dm.userIdAsLong(), dm);
-        } else {
-            catnip.logAdapter().warn("I don't know how to cache channel {}: isCategory={}, isDM={}, isGroupDM={}," +
-                            "isGuild={}, isText={}, isUserDM={}, isVoice={}",
-                    channel.idAsLong(), channel.isCategory(), channel.isDM(), channel.isGroupDM(), channel.isGuild(),
-                    channel.isText(), channel.isUserDM(), channel.isVoice());
-        }
+    protected abstract MutableNamedCacheView<User> userCache(int shardId);
+    protected abstract MutableCacheView<UserDMChannel> dmChannelCache(int shardId);
+    protected abstract MutableCacheView<Presence> presenceCache(int shardId);
+    
+    protected MutableNamedCacheView<Guild> guildCache(final int shardId) {
+        return guildCache;
+    }
+    
+    protected MutableNamedCacheView<Member> memberCache(final long guildId, final boolean onlyGet) {
+        return onlyGet ? memberCache.get(guildId) : memberCache.computeIfAbsent(guildId, __ -> createMemberCacheView());
+    }
+    
+    protected void deleteMemberCache(final long guildId) {
+        memberCache.remove(guildId);
+    }
+    
+    protected MutableNamedCacheView<Role> roleCache(final long guildId, final boolean onlyGet) {
+        return onlyGet ? roleCache.get(guildId) : roleCache.computeIfAbsent(guildId, __ -> createRoleCacheView());
+    }
+    
+    protected void deleteRoleCache(final long guildId) {
+        roleCache.remove(guildId);
+    }
+    
+    protected MutableNamedCacheView<GuildChannel> channelCache(final long guildId, final boolean onlyGet) {
+        return onlyGet ? guildChannelCache.get(guildId) : guildChannelCache.computeIfAbsent(guildId, __ -> createGuildChannelCacheView());
+    }
+    
+    protected void deleteChannelCache(final long guildId) {
+        guildChannelCache.remove(guildId);
+    }
+    
+    protected MutableNamedCacheView<CustomEmoji> emojiCache(final long guildId, final boolean onlyGet) {
+        return onlyGet ? emojiCache.get(guildId) : emojiCache.computeIfAbsent(guildId, __ -> createEmojiCacheView());
+    }
+    
+    protected void deleteEmojiCache(final long guildId) {
+        emojiCache.remove(guildId);
+    }
+    
+    protected MutableCacheView<VoiceState> voiceStateCache(final long guildId, final boolean onlyGet) {
+        return onlyGet ? voiceStateCache.get(guildId) : voiceStateCache.computeIfAbsent(guildId, __ -> createVoiceStateCacheView());
+    }
+    
+    protected void deleteVoiceStateCache(final long guildId) {
+        voiceStateCache.remove(guildId);
+    }
+    
+    protected int shardId(final long entityId) {
+        return (int)((entityId >> 22) % catnip.shardManager().shardCount());
     }
     
     private void cacheRole(final Role role) {
-        roleCache.computeIfAbsent(role.guildIdAsLong(), __ -> createRoleCacheView())
-                .put(role.idAsLong(), role);
-    }
-    
-    private void cacheUser(final User user) {
-        userCache.put(user.idAsLong(), user);
+        roleCache(role.guildIdAsLong(), false).put(role.idAsLong(), role);
     }
     
     private void cacheMember(final Member member) {
-        memberCache.computeIfAbsent(member.guildIdAsLong(), __ -> createMemberCacheView())
-                .put(member.idAsLong(), member);
+        memberCache(member.guildIdAsLong(), false).put(member.idAsLong(), member);
     }
     
     private void cacheEmoji(final CustomEmoji emoji) {
-        emojiCache.computeIfAbsent(emoji.guildIdAsLong(), __ -> createEmojiCacheView())
-                .put(emoji.idAsLong(), emoji);
-    }
-    
-    private void cachePresence(final String id, final Presence presence) {
-        presenceCache.put(Long.parseUnsignedLong(id), presence);
+        emojiCache(emoji.guildIdAsLong(), false).put(emoji.idAsLong(), emoji);
     }
     
     @Nonnull
     @Override
-    public Future<Void> updateCache(@Nonnull final String eventType, @Nonnull final JsonObject payload) {
+    public Future<Void> updateCache(@Nonnull final String eventType, @Nonnegative final int shardId, @Nonnull final JsonObject payload) {
         switch(eventType) {
             // Lifecycle
             case Raw.READY: {
@@ -327,27 +348,34 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 break;
             }
             // Channels
-            case Raw.CHANNEL_CREATE: {
-                final Channel channel = entityBuilder.createChannel(payload);
-                cacheChannel(channel);
-                break;
-            }
+            case Raw.CHANNEL_CREATE:
             case Raw.CHANNEL_UPDATE: {
                 final Channel channel = entityBuilder.createChannel(payload);
-                cacheChannel(channel);
+                if(channel.isGuild()) {
+                    final GuildChannel gc = (GuildChannel) channel;
+                    channelCache(gc.guildIdAsLong(), false).put(gc.idAsLong(), gc);
+                } else if(channel.isUserDM()) {
+                    final UserDMChannel dm = (UserDMChannel) channel;
+                    dmChannelCache(shardId).put(dm.userIdAsLong(), dm);
+                } else {
+                    catnip.logAdapter().warn("I don't know how to cache channel {}: isCategory={}, isDM={}, isGroupDM={}," +
+                                    "isGuild={}, isText={}, isUserDM={}, isVoice={}",
+                            channel.idAsLong(), channel.isCategory(), channel.isDM(), channel.isGroupDM(), channel.isGuild(),
+                            channel.isText(), channel.isUserDM(), channel.isVoice());
+                }
                 break;
             }
             case Raw.CHANNEL_DELETE: {
                 final Channel channel = entityBuilder.createChannel(payload);
                 if(channel.isGuild()) {
                     final GuildChannel gc = (GuildChannel) channel;
-                    final MutableNamedCacheView<GuildChannel> channels = guildChannelCache.get(gc.guildIdAsLong());
+                    final MutableNamedCacheView<GuildChannel> channels = channelCache(gc.guildIdAsLong(), true);
                     if(channels != null) {
                         channels.remove(gc.idAsLong());
                     }
                 } else if(channel.isUserDM()) {
                     final UserDMChannel dm = (UserDMChannel) channel;
-                    dmChannelCache.remove(dm.userIdAsLong());
+                    dmChannelCache(shardId).remove(dm.userIdAsLong());
                 } else {
                     catnip.logAdapter().warn("I don't know how to delete non-guild channel {}!", channel.idAsLong());
                 }
@@ -361,19 +389,28 @@ public class MemoryEntityCache implements EntityCacheWorker {
                 final Future<Void> future = Future.future();
                 catnip().vertx().executeBlocking(f -> {
                     final Guild guild = entityBuilder.createGuild(payload);
-                    guildCache.put(guild.idAsLong(), guild);
+                    guildCache(shardId(guild.idAsLong())).put(guild.idAsLong(), guild);
                     f.complete(null);
                 }, __ -> future.complete(null));
                 return future;
             }
             case Raw.GUILD_UPDATE: {
-                final Guild guild = entityBuilder.createGuild(payload);
-                guildCache.put(guild.idAsLong(), guild);
-                break;
+                final Future<Void> future = Future.future();
+                catnip().vertx().executeBlocking(f -> {
+                    final Guild guild = entityBuilder.createGuild(payload);
+                    guildCache(shardId(guild.idAsLong())).put(guild.idAsLong(), guild);
+                    f.complete(null);
+                }, __ -> future.complete(null));
+                return future;
             }
             case Raw.GUILD_DELETE: {
-                final Guild guild = entityBuilder.createGuild(payload);
-                guildCache.remove(guild.idAsLong());
+                final long guildId = Long.parseUnsignedLong(payload.getString("id"));
+                guildCache(shardId(guildId)).remove(guildId);
+                deleteMemberCache(guildId);
+                deleteRoleCache(guildId);
+                deleteChannelCache(guildId);
+                deleteEmojiCache(guildId);
+                deleteVoiceStateCache(guildId);
                 break;
             }
             // Roles
@@ -394,7 +431,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
             case Raw.GUILD_ROLE_DELETE: {
                 final String guild = payload.getString("guild_id");
                 final String role = payload.getString("role_id");
-                final MutableCacheView<Role> cache = roleCache.get(Long.parseUnsignedLong(guild));
+                final MutableCacheView<Role> cache = roleCache(Long.parseUnsignedLong(guild), true);
                 if(cache != null) {
                     cache.remove(Long.parseUnsignedLong(role));
                 }
@@ -404,7 +441,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
             case Raw.GUILD_MEMBER_ADD: {
                 final Member member = entityBuilder.createMember(payload.getString("guild_id"), payload);
                 final User user = entityBuilder.createUser(payload.getJsonObject("user"));
-                cacheUser(user);
+                userCache(shardId).put(user.idAsLong(), user);
                 cacheMember(member);
                 break;
             }
@@ -436,7 +473,7 @@ public class MemoryEntityCache implements EntityCacheWorker {
             case Raw.GUILD_MEMBER_REMOVE: {
                 final String guild = payload.getString("guild_id");
                 final String user = payload.getJsonObject("user").getString("id");
-                final MutableCacheView<Member> cache = memberCache.get(Long.parseUnsignedLong(guild));
+                final MutableCacheView<Member> cache = memberCache(Long.parseUnsignedLong(guild), true);
                 if(cache != null) {
                     cache.remove(Long.parseUnsignedLong(user));
                 }
@@ -485,10 +522,10 @@ public class MemoryEntityCache implements EntityCacheWorker {
                             .put("discriminator", user.getString("discriminator", old.discriminator()))
                             .put("avatar", user.getString("avatar", old.avatar()))
                     );
-                    cacheUser(updated);
+                    userCache(shardId).put(updated.idAsLong(), updated);
                     if(!catnip.cacheFlags().contains(CacheFlag.DROP_GAME_STATUSES)) {
                         final Presence presence = entityBuilder.createPresence(payload);
-                        cachePresence(id, presence);
+                        presenceCache(shardId).put(updated.idAsLong(), presence);
                     }
                 } else if(catnip.chunkMembers()) {
                     catnip.logAdapter().warn("Received PRESENCE_UPDATE for unknown user {}!? (member chunking enabled)", id);
@@ -514,49 +551,61 @@ public class MemoryEntityCache implements EntityCacheWorker {
             catnip.logAdapter().warn("Not caching voice state for {} due to null guild", state.userIdAsLong());
             return;
         }
-        voiceStateCache.computeIfAbsent(guild, __ -> createVoiceStateCacheView())
-                .put(state.userIdAsLong(), state);
+        voiceStateCache(guild, false).put(state.userIdAsLong(), state);
     }
     
     @Override
-    public void bulkCacheUsers(@Nonnull final Collection<User> users) {
-        users.forEach(this::cacheUser);
+    public void bulkCacheUsers(@Nonnegative final int shardId, @Nonnull final Collection<User> users) {
+        final MutableCacheView<User> cache = userCache(shardId);
+        users.forEach(u -> cache.put(u.idAsLong(), u));
     }
     
     @Override
-    public void bulkCacheChannels(@Nonnull final Collection<GuildChannel> channels) {
-        channels.forEach(this::cacheChannel);
+    public void bulkCacheChannels(@Nonnegative final int shardId, @Nonnull final Collection<GuildChannel> channels) {
+        channels.forEach(gc -> channelCache(gc.guildIdAsLong(), false).put(gc.idAsLong(), gc));
     }
     
     @Override
-    public void bulkCacheRoles(@Nonnull final Collection<Role> roles) {
+    public void bulkCacheRoles(@Nonnegative final int shardId, @Nonnull final Collection<Role> roles) {
         roles.forEach(this::cacheRole);
     }
     
     @Override
-    public void bulkCacheMembers(@Nonnull final Collection<Member> members) {
+    public void bulkCacheMembers(@Nonnegative final int shardId, @Nonnull final Collection<Member> members) {
         members.forEach(this::cacheMember);
     }
     
     @Override
-    public void bulkCacheEmoji(@Nonnull final Collection<CustomEmoji> emoji) {
+    public void bulkCacheEmoji(@Nonnegative final int shardId, @Nonnull final Collection<CustomEmoji> emoji) {
         emoji.forEach(this::cacheEmoji);
     }
     
     @Override
-    public void bulkCachePresences(@Nonnull final Map<String, Presence> presences) {
-        presences.forEach(this::cachePresence);
+    public void bulkCachePresences(@Nonnegative final int shardId, @Nonnull final Map<String, Presence> presences) {
+        final MutableCacheView<Presence> cache = presenceCache(shardId);
+        presences.forEach((id, presence) -> cache.put(Long.parseUnsignedLong(id), presence));
     }
     
     @Override
-    public void bulkCacheVoiceStates(@Nonnull final Collection<VoiceState> voiceStates) {
+    public void bulkCacheVoiceStates(@Nonnegative final int shardId, @Nonnull final Collection<VoiceState> voiceStates) {
         voiceStates.forEach(this::cacheVoiceState);
+    }
+    
+    @Override
+    public void invalidateShard(final int id) {
+        final int shardCount = catnip().shardManager().shardCount();
+        final LongPredicate predicate = entityId -> (entityId >> 22) % shardCount == id;
+        removeIf(memberCache, predicate);
+        removeIf(roleCache, predicate);
+        removeIf(guildChannelCache, predicate);
+        removeIf(emojiCache, predicate);
+        removeIf(voiceStateCache, predicate);
     }
     
     @Nullable
     @Override
     public Guild guild(final long id) {
-        return guildCache.getById(id);
+        return guildCache(shardId(id)).getById(id);
     }
     
     @Nonnull
@@ -567,33 +616,15 @@ public class MemoryEntityCache implements EntityCacheWorker {
     
     @Nullable
     @Override
-    public User user(final long id) {
-        return userCache.getById(id);
-    }
-    
-    @Nullable
-    @Override
-    public Presence presence(final long id) {
-        return presenceCache.getById(id);
-    }
-    
-    @Nonnull
-    @Override
-    public CacheView<Presence> presences() {
-        return presenceCache;
-    }
-    
-    @Nullable
-    @Override
     public Member member(final long guildId, final long id) {
-        final MutableNamedCacheView<Member> cache = memberCache.get(guildId);
+        final MutableNamedCacheView<Member> cache = memberCache(guildId, true);
         return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
     public NamedCacheView<Member> members(final long guildId) {
-        final MutableNamedCacheView<Member> cache = memberCache.get(guildId);
+        final MutableNamedCacheView<Member> cache = memberCache(guildId, true);
         return cache == null ? NamedCacheView.empty() : cache;
     }
     
@@ -603,23 +634,17 @@ public class MemoryEntityCache implements EntityCacheWorker {
         return new CompositeNamedCacheView<>(memberCache.values(), memberNameFunction());
     }
     
-    @Nonnull
-    @Override
-    public NamedCacheView<User> users() {
-        return userCache;
-    }
-    
     @Nullable
     @Override
     public Role role(final long guildId, final long id) {
-        final MutableNamedCacheView<Role> cache = roleCache.get(guildId);
+        final MutableNamedCacheView<Role> cache = roleCache(guildId, true);
         return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
     public NamedCacheView<Role> roles(final long guildId) {
-        final MutableNamedCacheView<Role> cache = roleCache.get(guildId);
+        final MutableNamedCacheView<Role> cache = roleCache(guildId, true);
         return cache == null ? NamedCacheView.empty() : cache;
     }
     
@@ -632,14 +657,14 @@ public class MemoryEntityCache implements EntityCacheWorker {
     @Nullable
     @Override
     public GuildChannel channel(final long guildId, final long id) {
-        final MutableNamedCacheView<GuildChannel> cache = guildChannelCache.get(guildId);
+        final MutableNamedCacheView<GuildChannel> cache = channelCache(guildId, true);
         return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
     public NamedCacheView<GuildChannel> channels(final long guildId) {
-        final MutableNamedCacheView<GuildChannel> cache = guildChannelCache.get(guildId);
+        final MutableNamedCacheView<GuildChannel> cache = channelCache(guildId, true);
         return cache == null ? NamedCacheView.empty() : cache;
     }
     
@@ -651,27 +676,15 @@ public class MemoryEntityCache implements EntityCacheWorker {
     
     @Nullable
     @Override
-    public UserDMChannel dmChannel(final long id) {
-        return dmChannelCache.getById(id);
-    }
-    
-    @Nonnull
-    @Override
-    public CacheView<UserDMChannel> dmChannels() {
-        return dmChannelCache;
-    }
-    
-    @Nullable
-    @Override
     public CustomEmoji emoji(final long guildId, final long id) {
-        final MutableNamedCacheView<CustomEmoji> cache = emojiCache.get(guildId);
+        final MutableNamedCacheView<CustomEmoji> cache = emojiCache(guildId, true);
         return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
     public NamedCacheView<CustomEmoji> emojis(final long guildId) {
-        final MutableNamedCacheView<CustomEmoji> cache = emojiCache.get(guildId);
+        final MutableNamedCacheView<CustomEmoji> cache = emojiCache(guildId, true);
         return cache == null ? NamedCacheView.empty() : cache;
     }
     
@@ -684,14 +697,14 @@ public class MemoryEntityCache implements EntityCacheWorker {
     @Nullable
     @Override
     public VoiceState voiceState(final long guildId, final long id) {
-        final MutableCacheView<VoiceState> cache = voiceStateCache.get(guildId);
+        final MutableCacheView<VoiceState> cache = voiceStateCache(guildId, true);
         return cache == null ? null : cache.getById(id);
     }
     
     @Nonnull
     @Override
     public CacheView<VoiceState> voiceStates(final long guildId) {
-        final MutableCacheView<VoiceState> cache = voiceStateCache.get(guildId);
+        final MutableCacheView<VoiceState> cache = voiceStateCache(guildId, true);
         return cache == null ? CacheView.empty() : cache;
     }
     

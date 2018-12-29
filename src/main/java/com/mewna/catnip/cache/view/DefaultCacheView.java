@@ -27,11 +27,14 @@
 
 package com.mewna.catnip.cache.view;
 
+import com.koloboke.collect.LongIterator;
+
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.*;
 import java.util.stream.Collector;
 
@@ -44,53 +47,102 @@ import java.util.stream.Collector;
  * @since 12/15/18
  */
 public class DefaultCacheView<T> implements MutableCacheView<T> {
-    protected final Map<Long, T> map = new ConcurrentHashMap<>();
+    protected final LongEntityMap<T> map = LongEntityMap.create();
+    protected final ReadWriteLock lock = new ReentrantReadWriteLock();
     
-    @Nonnull
-    public Map<Long, T> map() {
-        return map;
+    @Override
+    public void removeIf(@Nonnull final LongPredicate predicate) {
+        lock.writeLock().lock();
+        try {
+            final LongIterator iterator = map.iterator();
+            while(iterator.hasNext()) {
+                if(predicate.test(iterator.nextLong())) {
+                    iterator.remove();
+                }
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
     
     @Nullable
     @Override
     public T put(final long key, @Nonnull final T value) {
-        return map.put(key, value);
+        lock.writeLock().lock();
+        try {
+            return map.put(key, value);
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
     
     @Nullable
     @Override
     public T remove(final long key) {
-        return map.remove(key);
+        lock.writeLock().lock();
+        try {
+            return map.remove(key);
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
     
     @Override
     public void forEach(final Consumer<? super T> action) {
-        map.values().forEach(action);
+        lock.readLock().lock();
+        try {
+            for(final T element : map.values()) {
+                action.accept(element);
+            }
+        } finally {
+            lock.readLock().unlock();
+        }
     }
     
     @Nonnegative
     @Override
     public long size() {
-        return map.size();
+        lock.readLock().lock();
+        try {
+            return map.size();
+        } finally {
+            lock.readLock().unlock();
+        }
     }
     
     @Override
     public boolean isEmpty() {
-        return map.isEmpty();
+        lock.readLock().lock();
+        try {
+            return map.isEmpty();
+        } finally {
+            lock.readLock().unlock();
+        }
     }
     
     @Override
     public T getById(final long id) {
-        return map.get(id);
+        lock.readLock().lock();
+        try {
+            return map.get(id);
+        } finally {
+            lock.readLock().unlock();
+        }
     }
     
     @Override
     public T findAny(@Nonnull final Predicate<? super T> filter) {
-        return map.values()
-                .stream()
-                .filter(filter)
-                .findAny()
-                .orElse(null);
+        lock.readLock().lock();
+        try {
+            for(final T element : map.values()) {
+                if(filter.test(element)) {
+                    return element;
+                }
+            }
+            return null;
+        } finally {
+            lock.readLock().unlock();
+        }
     }
     
     @Nonnull
@@ -103,12 +155,17 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
     @Override
     public <C extends Collection<T>> C find(@Nonnull final Predicate<? super T> filter, @Nonnull final Supplier<C> supplier) {
         final C collection = Objects.requireNonNull(supplier.get(), "Provided collection may not be null");
-        for(final T element : map.values()) {
-            if(filter.test(element)) {
-                collection.add(element);
+        lock.readLock().lock();
+        try {
+            for(final T element : map.values()) {
+                if(filter.test(element)) {
+                    collection.add(element);
+                }
             }
+            return collection;
+        } finally {
+            lock.readLock().unlock();
         }
-        return collection;
     }
     
     @Nonnull
@@ -116,72 +173,107 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
     public <A, R> R collect(@Nonnull final Collector<? super T, A, R> collector) {
         final A a = collector.supplier().get();
         final BiConsumer<A, ? super T> accumulator = collector.accumulator();
-        for(final T element : map.values()) {
-            accumulator.accept(a, element);
+        lock.readLock().lock();
+        try {
+            for(final T element : map.values()) {
+                accumulator.accept(a, element);
+            }
+            return collector.finisher().apply(a);
+        } finally {
+            lock.readLock().unlock();
         }
-        return collector.finisher().apply(a);
     }
     
     @Override
     public <R> R collect(@Nonnull final Supplier<R> supplier, @Nonnull final BiConsumer<R, ? super T> accumulator, @Nonnull final BiConsumer<R, R> combiner) {
         final R result = supplier.get();
-        for(final T element : map.values()) {
-            accumulator.accept(result, element);
+        lock.readLock().lock();
+        try {
+            for(final T element : map.values()) {
+                accumulator.accept(result, element);
+            }
+            return result;
+        } finally {
+            lock.readLock().unlock();
         }
-        return result;
     }
     
     @Override
     public <U> U reduce(final U identity, @Nonnull final BiFunction<U, ? super T, U> accumulator, @Nonnull final BinaryOperator<U> combiner) {
-        U result = identity;
-        for(final T element : map.values()) {
-            result = accumulator.apply(result, element);
+        lock.readLock().lock();
+        try {
+            U result = identity;
+            for(final T element : map.values()) {
+                result = accumulator.apply(result, element);
+            }
+            return result;
+        } finally {
+            lock.readLock().unlock();
         }
-        return result;
     }
     
     @Nonnull
     @Override
     public Optional<T> reduce(@Nonnull final BinaryOperator<T> accumulator) {
-        final Iterator<T> it = map.values().iterator();
-        if(!it.hasNext()) {
-            return Optional.empty();
+        lock.readLock().lock();
+        try {
+            final Iterator<T> it = map.values().iterator();
+            if(!it.hasNext()) {
+                return Optional.empty();
+            }
+            T result = it.next();
+            while(it.hasNext()) {
+                final T element = it.next();
+                result = accumulator.apply(result, element);
+            }
+            return Optional.of(result);
+        } finally {
+            lock.readLock().unlock();
         }
-        T result = it.next();
-        while(it.hasNext()) {
-            final T element = it.next();
-            result = accumulator.apply(result, element);
-        }
-        return Optional.of(result);
     }
     
     @Override
     public T reduce(final T identity, @Nonnull final BinaryOperator<T> accumulator) {
-        T result = identity;
-        for (final T element : map.values()) {
-            result = accumulator.apply(result, element);
+        lock.readLock().lock();
+        try {
+            T result = identity;
+            for (final T element : map.values()) {
+                result = accumulator.apply(result, element);
+            }
+            return result;
+        } finally {
+            lock.readLock().unlock();
         }
-        return result;
     }
     
     @Override
     public boolean anyMatch(@Nonnull final Predicate<? super T> predicate) {
-        for(final T element : map.values()) {
-            if(predicate.test(element)) {
-                return true;
+        lock.readLock().lock();
+        try {
+            for(final T element : map.values()) {
+                if(predicate.test(element)) {
+                    return true;
+                }
             }
+            return false;
+        } finally {
+            lock.readLock().unlock();
         }
-        return false;
     }
     
     @Override
     public boolean allMatch(@Nonnull final Predicate<? super T> predicate) {
-        for(final T element : map.values()) {
-            if(!predicate.test(element)) {
-                return false;
+        lock.readLock().lock();
+        try {
+            for(final T element : map.values()) {
+                if(!predicate.test(element)) {
+                    return false;
+                }
             }
+            return true;
+        } finally {
+            lock.readLock().unlock();
         }
-        return true;
     }
     
     @Override
@@ -192,46 +284,61 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
     @Nonnull
     @Override
     public Optional<T> min(@Nonnull final Comparator<? super T> comparator) {
-        final Iterator<T> it = map.values().iterator();
-        if(!it.hasNext()) {
-            return Optional.empty();
-        }
-        T min = it.next();
-        while(it.hasNext()) {
-            final T element = it.next();
-            if(comparator.compare(min, element) > 0) {
-                min = element;
+        lock.readLock().lock();
+        try {
+            final Iterator<T> it = map.values().iterator();
+            if(!it.hasNext()) {
+                return Optional.empty();
             }
+            T min = it.next();
+            while(it.hasNext()) {
+                final T element = it.next();
+                if(comparator.compare(min, element) > 0) {
+                    min = element;
+                }
+            }
+            return Optional.of(min);
+        } finally {
+            lock.readLock().unlock();
         }
-        return Optional.of(min);
     }
     
     @Nonnull
     @Override
     public Optional<T> max(@Nonnull final Comparator<? super T> comparator) {
-        final Iterator<T> it = map.values().iterator();
-        if(!it.hasNext()) {
-            return Optional.empty();
-        }
-        T max = it.next();
-        while(it.hasNext()) {
-            final T element = it.next();
-            if(comparator.compare(max, element) < 0) {
-                max = element;
+        lock.readLock().lock();
+        try {
+            final Iterator<T> it = map.values().iterator();
+            if(!it.hasNext()) {
+                return Optional.empty();
             }
+            T max = it.next();
+            while(it.hasNext()) {
+                final T element = it.next();
+                if(comparator.compare(max, element) < 0) {
+                    max = element;
+                }
+            }
+            return Optional.of(max);
+        } finally {
+            lock.readLock().unlock();
         }
-        return Optional.of(max);
     }
     
     @Override
     public long count(@Nonnull final Predicate<? super T> filter) {
-        long count = 0;
-        for(final T element : map.values()) {
-            if(filter.test(element)) {
-                count++;
+        lock.readLock().lock();
+        try {
+            long count = 0;
+            for(final T element : map.values()) {
+                if(filter.test(element)) {
+                    count++;
+                }
             }
+            return count;
+        } finally {
+            lock.readLock().unlock();
         }
-        return count;
     }
     
     @Nonnull
@@ -249,23 +356,33 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
     @Nonnull
     @Override
     public Collection<T> snapshot() {
-        final Collection<T> values = map.values();
-        final Collection<T> r = new ArrayList<>((int)size());
-        //this is actually more efficient than addAll(),
-        //as addAll() on ArrayList requires calls Collection#toArray(),
-        //while this won't allocate any temporary array due to the
-        //initial size of the list.
-        //noinspection UseBulkOperation
-        values.forEach(r::add);
-        return r;
+        lock.readLock().lock();
+        try {
+            final Collection<T> values = map.values();
+            final Collection<T> r = new ArrayList<>((int)size());
+            //this is actually more efficient than addAll(),
+            //as addAll() on ArrayList requires calls Collection#toArray(),
+            //while this won't allocate any temporary array due to the
+            //initial size of the list.
+            //noinspection UseBulkOperation
+            values.forEach(r::add);
+            return r;
+        } finally {
+            lock.readLock().unlock();
+        }
     }
     
     @Nonnull
     @Override
     public <C extends Collection<T>> C snapshot(@Nonnull final Supplier<C> supplier) {
-        final Collection<T> values = map.values();
         final C r = Objects.requireNonNull(supplier.get(), "Provided collection may not be null");
-        r.addAll(values);
+        lock.readLock().lock();
+        try {
+            final Collection<T> values = map.values();
+            r.addAll(values);
+        } finally {
+            lock.readLock().unlock();
+        }
         return r;
     }
     
