@@ -33,7 +33,6 @@ import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.misc.Ready;
 import com.mewna.catnip.entity.misc.Resumed;
-import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.OnlineStatus;
 import com.mewna.catnip.entity.user.PresenceUpdate;
 import com.mewna.catnip.entity.user.User;
@@ -182,7 +181,7 @@ public final class DispatchEmitter {
                     ((CatnipImpl) catnip).markUnavailable(id);
                     catnip.eventBus().publish(Raw.GUILD_UNAVAILABLE, entityBuilder.createUnavailableGuild(data));
                 } else {
-                    catnip.eventBus().publish(type, entityBuilder.createGuild(data, false));
+                    catnip.eventBus().publish(type, entityBuilder.createGuild(data));
                 }
                 break;
             }

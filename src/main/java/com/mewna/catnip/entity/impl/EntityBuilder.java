@@ -65,6 +65,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
@@ -580,8 +581,11 @@ public final class EntityBuilder {
     @CheckReturnValue
     public Member createMember(@Nonnull final String guildId, @Nonnull final String id, @Nonnull final JsonObject data) {
         final JsonObject userData = data.getJsonObject("user");
+        final long guild = Long.parseUnsignedLong(guildId);
         if(userData != null) {
-            catnip.cacheWorker().bulkCacheUsers(Collections.singletonList(createUser(userData)));
+            catnip.cacheWorker().bulkCacheUsers(
+                    (int)((guild >> 22) % catnip.shardManager().shardCount()),
+                    Collections.singletonList(createUser(userData)));
         }
         final String joinedAt;
         if(data.getString("joined_at", null) != null) {
@@ -601,7 +605,7 @@ public final class EntityBuilder {
         return MemberImpl.builder()
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(id))
-                .guildIdAsLong(Long.parseUnsignedLong(guildId))
+                .guildIdAsLong(guild)
                 .nick(data.getString("nick"))
                 .roleIds(toStringSet(data.getJsonArray("roles")))
                 .joinedAt(joinedAt)
@@ -830,42 +834,40 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Guild createGuild(@Nonnull final JsonObject data) {
-        return createGuild(data, true);
+    public Guild createAndCacheGuild(@Nonnegative final int shardId, @Nonnull final JsonObject data) {
+        // As we don't store these fields on the guild object itself, we have
+        // to update them in the cache
+        final String id = data.getString("id"); //optimization
+        if(data.getJsonArray("roles") != null) {
+            catnip.cacheWorker().bulkCacheRoles(shardId, toList(data.getJsonArray("roles"),
+                    e -> createRole(id, e)));
+        }
+        if(data.getJsonArray("channels") != null) {
+            catnip.cacheWorker().bulkCacheChannels(shardId, toList(data.getJsonArray("channels"),
+                    e -> createGuildChannel(id, e)));
+        }
+        if(data.getJsonArray("members") != null) {
+            catnip.cacheWorker().bulkCacheMembers(shardId, toList(data.getJsonArray("members"),
+                    e -> createMember(id, e)));
+        }
+        if(data.getJsonArray("emojis") != null) {
+            catnip.cacheWorker().bulkCacheEmoji(shardId, toList(data.getJsonArray("emojis"),
+                    e -> createCustomEmoji(id, e)));
+        }
+        if(data.getJsonArray("presences") != null) {
+            catnip.cacheWorker().bulkCachePresences(shardId, toMap(data.getJsonArray("presences"),
+                    o -> o.getJsonObject("user").getString("id"), this::createPresence));
+        }
+        if(data.getJsonArray("voice_states") != null) {
+            catnip.cacheWorker().bulkCacheVoiceStates(shardId, toList(
+                    data.getJsonArray("voice_states"), e -> createVoiceState(id, e)));
+        }
+        return createGuild(data);
     }
     
     @Nonnull
     @CheckReturnValue
-    public Guild createGuild(@Nonnull final JsonObject data, final boolean cache) {
-        // As we don't store these fields on the guild object itself, we have
-        // to update them in the cache
-        final String id = data.getString("id"); //optimization
-        if(cache) {
-            if(data.getJsonArray("roles") != null) {
-                catnip.cacheWorker().bulkCacheRoles(toList(data.getJsonArray("roles"),
-                        e -> createRole(id, e)));
-            }
-            if(data.getJsonArray("channels") != null) {
-                catnip.cacheWorker().bulkCacheChannels(toList(data.getJsonArray("channels"),
-                        e -> createGuildChannel(id, e)));
-            }
-            if(data.getJsonArray("members") != null) {
-                catnip.cacheWorker().bulkCacheMembers(toList(data.getJsonArray("members"),
-                        e -> createMember(id, e)));
-            }
-            if(data.getJsonArray("emojis") != null) {
-                catnip.cacheWorker().bulkCacheEmoji(toList(data.getJsonArray("emojis"),
-                        e -> createCustomEmoji(id, e)));
-            }
-            if(data.getJsonArray("presences") != null) {
-                catnip.cacheWorker().bulkCachePresences(toMap(data.getJsonArray("presences"),
-                        o -> o.getJsonObject("user").getString("id"), this::createPresence));
-            }
-            if(data.getJsonArray("voice_states") != null) {
-                catnip.cacheWorker().bulkCacheVoiceStates(toList(
-                        data.getJsonArray("voice_states"), e -> createVoiceState(id, e)));
-            }
-        }
+    public Guild createGuild(@Nonnull final JsonObject data) {
         final String afkChannelId = data.getString("afk_channel_id");
         final String embedChannelId = data.getString("embed_channel_id");
         final String applicationId = data.getString("application_id");
@@ -873,7 +875,7 @@ public final class EntityBuilder {
         final String systemChannelId = data.getString("system_channel_id");
         return GuildImpl.builder()
                 .catnip(catnip)
-                .idAsLong(Long.parseUnsignedLong(id))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .name(data.getString("name"))
                 .icon(data.getString("icon"))
                 .splash(data.getString("splash"))
