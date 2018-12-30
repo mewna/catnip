@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: maven:3.5.3-jdk-11
+      - image: maven:3.5.3-jdk-8
     working_directory: ~/catnip
 
     environment:
