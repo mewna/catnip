@@ -35,8 +35,6 @@ import com.mewna.catnip.entity.message.Embed.Image;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -60,7 +58,6 @@ import java.util.List;
 @Accessors(fluent = true, chain = true)
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class EmbedBuilder {
-    private static final Logger LOGGER = LoggerFactory.getLogger(EmbedBuilder.class);
     private final List<Field> fields = new ArrayList<>();
     // @formatter:off
     private String title;
@@ -109,16 +106,15 @@ public class EmbedBuilder {
         ZoneOffset offset;
         try {
             offset = ZoneOffset.from(temporal);
-        } catch(DateTimeException ignored) {
+        } catch(final DateTimeException ignored) {
             offset = ZoneOffset.UTC;
         }
         try {
             timestamp = OffsetDateTime.of(LocalDateTime.from(temporal), offset);
-        } catch(DateTimeException ignored) {
+        } catch(final DateTimeException ignored) {
             try {
                 timestamp = OffsetDateTime.ofInstant(Instant.from(temporal), offset);
-            } catch(DateTimeException exc) {
-                LOGGER.error("Error when obtaining an OffsetDateTime from a TemporalAccessor!", exc);
+            } catch(final DateTimeException exc) {
                 throw new DateTimeException("Unable to obtain OffsetDateTime from TemporalAccessor: " +
                         temporal + " of type " + temporal.getClass().getName(), exc);
             }
