@@ -174,7 +174,7 @@ public class CatnipImpl implements Catnip {
                         diff.put(field.getName(), ImmutablePair.of(original, input));
                     }
                 } catch(final IllegalAccessException e) {
-                    e.printStackTrace();
+                    logAdapter.error("Reflection did a \uD83D\uDCA9", e);
                 }
             }
         }
