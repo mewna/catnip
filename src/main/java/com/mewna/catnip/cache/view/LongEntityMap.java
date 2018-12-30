@@ -28,8 +28,6 @@
 package com.mewna.catnip.cache.view;
 
 import com.koloboke.collect.LongIterator;
-import com.koloboke.compile.ConcurrentModificationUnchecked;
-import com.koloboke.compile.KolobokeMap;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -37,8 +35,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
 
-@KolobokeMap
-@ConcurrentModificationUnchecked
 public interface LongEntityMap<T> extends Map<Long, T> {
     @Nonnull
     @CheckReturnValue
