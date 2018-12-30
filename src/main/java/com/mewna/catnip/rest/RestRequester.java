@@ -245,7 +245,7 @@ public class RestRequester {
                         
                         executeHttpRequest(r, route, bucket, builder.build());
                     } catch(final Exception e) {
-                        e.printStackTrace();
+                        catnip.logAdapter().error("Failed to send multipart request", e);
                     }
                 } else {
                     final String encoded;
