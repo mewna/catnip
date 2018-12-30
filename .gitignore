@@ -3,5 +3,6 @@
 .idea/copyright/*.xml
 .idea/dictionaries/*.xml
 .idea/libraries
+.idea/sonarlint
 target/
 *.iml
