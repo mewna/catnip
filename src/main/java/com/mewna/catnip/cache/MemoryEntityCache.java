@@ -388,7 +388,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                 // significant amount of time while the guild is being cached.
                 final Future<Void> future = Future.future();
                 catnip().vertx().executeBlocking(f -> {
-                    final Guild guild = entityBuilder.createGuild(payload);
+                    final Guild guild = entityBuilder.createAndCacheGuild(shardId, payload);
                     guildCache(shardId(guild.idAsLong())).put(guild.idAsLong(), guild);
                     f.complete(null);
                 }, __ -> future.complete(null));
