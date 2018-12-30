@@ -40,6 +40,9 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.*;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -61,6 +64,7 @@ public class EmbedBuilder {
     private String description;
     private String url;
     private Integer color;
+    private OffsetDateTime timestamp;
     private Footer footer;
     private Image image;
     private Thumbnail thumbnail;
@@ -72,11 +76,50 @@ public class EmbedBuilder {
         description = embed.description();
         url = embed.url();
         color = embed.color();
+        timestamp = embed.timestamp();
         footer = embed.footer();
         image = embed.image();
         thumbnail = embed.thumbnail();
         author = embed.author();
         fields.addAll(embed.fields());
+    }
+    
+    /**
+     * Sets the timestamp of the embed. A {@link TemporalAccessor} that isn't an {@link OffsetDateTime}
+     * will be converted to one if possible.
+     *
+     * @param temporal A {@link TemporalAccessor} to set.
+     * @throws DateTimeException If the {@link TemporalAccessor} cannot be converted to an {@link OffsetDateTime}.
+     * @return Itself.
+     */
+    @Nonnull
+    @CheckReturnValue
+    public EmbedBuilder timestamp(@Nullable final TemporalAccessor temporal) {
+        if(temporal == null) {
+            timestamp = null;
+            return this;
+        }
+        if(temporal instanceof OffsetDateTime) {
+            timestamp = (OffsetDateTime) temporal;
+            return this;
+        }
+        ZoneOffset offset;
+        try {
+            offset = ZoneOffset.from(temporal);
+        } catch(final DateTimeException ignored) {
+            offset = ZoneOffset.UTC;
+        }
+        try {
+            timestamp = OffsetDateTime.of(LocalDateTime.from(temporal), offset);
+        } catch(final DateTimeException ignored) {
+            try {
+                timestamp = OffsetDateTime.ofInstant(Instant.from(temporal), offset);
+            } catch(final DateTimeException exc) {
+                throw new DateTimeException("Unable to obtain OffsetDateTime from TemporalAccessor: " +
+                        temporal + " of type " + temporal.getClass().getName(), exc);
+            }
+        }
+        return this;
     }
     
     /**
@@ -276,6 +319,9 @@ public class EmbedBuilder {
         }
         if(color != null) {
             builder.color(color);
+        }
+        if(timestamp != null) {
+            builder.timestamp(timestamp.format(DateTimeFormatter.ISO_INSTANT));
         }
         if(footer != null) {
             if(footer.text().length() > 2048) {
