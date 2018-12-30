@@ -269,7 +269,7 @@ public class CatnipShard extends AbstractVerticle {
                     catnip.eventBus().publish(Raw.CONNECTED, shardInfo());
                     socket.frameHandler(frame -> handleSocketFrame(msg, frame))
                             .closeHandler(this::handleSocketClose)
-                            .exceptionHandler(Throwable::printStackTrace);
+                            .exceptionHandler(t -> catnip.logAdapter().error("Exception in Websocket", t));
                     state = new ShardState(socket);
                     state.socketOpen(true);
                 },
@@ -350,7 +350,7 @@ public class CatnipShard extends AbstractVerticle {
                 state.socketOpen(false);
             }
         } catch(final Exception e) {
-            e.printStackTrace();
+            catnip.logAdapter().error("Failed to handle socket frame", e);
         }
     }
     
