@@ -32,7 +32,6 @@ import com.mewna.catnip.entity.impl.EmbedImpl.*;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Embed.*;
 import com.mewna.catnip.entity.message.Embed.Image;
-import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -68,7 +67,6 @@ public class EmbedBuilder {
     private String description;
     private String url;
     private Integer color;
-    @Setter(AccessLevel.NONE)
     private OffsetDateTime timestamp;
     private Footer footer;
     private Image image;
@@ -108,7 +106,6 @@ public class EmbedBuilder {
             timestamp = (OffsetDateTime) temporal;
             return this;
         }
-        /* -- basically copied from JDA -- */
         ZoneOffset offset;
         try {
             offset = ZoneOffset.from(temporal);
