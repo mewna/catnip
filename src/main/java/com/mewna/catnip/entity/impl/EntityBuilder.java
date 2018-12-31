@@ -148,6 +148,10 @@ public final class EntityBuilder {
     @SuppressWarnings("ConstantConditions")
     public JsonObject embedToJson(final Embed embed) {
         final JsonObject o = new JsonObject();
+        final OffsetDateTime timestamp = embed.timestamp(); // to avoid parsing timestamp twice
+        if(timestamp != null) {
+            o.put("timestamp", timestamp.format(DateTimeFormatter.ISO_INSTANT));
+        }
         
         if(embed.title() != null) {
             o.put("title", embed.title());
