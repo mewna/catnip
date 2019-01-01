@@ -31,13 +31,12 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.ShardControlMessage;
 import com.mewna.catnip.util.JsonUtil;
-import io.vertx.core.Future;
+import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import io.vertx.core.json.JsonArray;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -78,48 +77,48 @@ public abstract class AbstractShardManager implements ShardManager {
     @Nonnull
     @Override
     public CompletableFuture<List<String>> trace(@Nonnegative final int shard) {
-        final Future<List<String>> future = Future.future();
+        final CompletableFuture<List<String>> future = new SafeVertxCompletableFuture<>(catnip);
         catnip.eventBus().<JsonArray>send(CatnipShard.controlAddress(shard), ShardControlMessage.TRACE,
                 reply -> {
                     if(reply.succeeded()) {
                         // ow
                         future.complete(JsonUtil.toStringList(reply.result().body()));
                     } else {
-                        future.fail(reply.cause());
+                        future.completeExceptionally(reply.cause());
                     }
                 });
-        return VertxCompletableFuture.from(catnip.vertx(), future);
+        return future;
     }
     
     @Nonnull
     @Override
     public CompletableFuture<Long> latency(final int shard) {
-        final Future<Long> future = Future.future();
+        final CompletableFuture<Long> future = new SafeVertxCompletableFuture<>(catnip);
         catnip.eventBus().<Long>send(CatnipShard.controlAddress(shard), ShardControlMessage.LATENCY,
                 reply -> {
                     if(reply.succeeded()) {
                         // ow
                         future.complete(reply.result().body());
                     } else {
-                        future.fail(reply.cause());
+                        future.completeExceptionally(reply.cause());
                     }
                 });
-        return VertxCompletableFuture.from(catnip.vertx(), future);
+        return future;
     }
     
     @Nonnull
     @Override
     @CheckReturnValue
     public CompletableFuture<Boolean> isConnected(@Nonnegative final int id) {
-        final Future<Boolean> future = Future.future();
+        final CompletableFuture<Boolean> future = new SafeVertxCompletableFuture<>(catnip);
         catnip.eventBus().<Boolean>send(CatnipShard.controlAddress(id), ShardControlMessage.CONNECTED,
                 reply -> {
                     if(reply.succeeded()) {
                         future.complete(reply.result().body());
                     } else {
-                        future.fail(reply.cause());
+                        future.completeExceptionally(reply.cause());
                     }
                 });
-        return VertxCompletableFuture.from(catnip.vertx(), future);
+        return future;
     }
 }
