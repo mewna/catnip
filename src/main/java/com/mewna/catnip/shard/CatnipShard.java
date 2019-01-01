@@ -232,7 +232,7 @@ public class CatnipShard extends AbstractVerticle {
                 break;
             }
             case CONNECTED: {
-                msg.reply(state.socketOpen());
+                msg.reply(state != null && state.socketOpen());
                 break;
             }
             case LATENCY: {
