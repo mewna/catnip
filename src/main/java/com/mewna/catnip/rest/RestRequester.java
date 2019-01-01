@@ -33,6 +33,7 @@ import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.rest.Routes.Route;
 import com.mewna.catnip.rest.bucket.BucketBackend;
 import com.mewna.catnip.util.CatnipMeta;
+import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
@@ -43,7 +44,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.*;
 import lombok.experimental.Accessors;
-import me.escoffier.vertx.completablefuture.VertxCompletableFuture;
 import okhttp3.*;
 import okio.BufferedSink;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -92,7 +92,7 @@ public class RestRequester {
     public CompletionStage<ResponsePayload> queue(final OutboundRequest r) {
         final Future<ResponsePayload> future = Future.future();
         getBucket(r.route.baseRoute()).queue(future, r);
-        return VertxCompletableFuture.from(catnip.vertx(), future);
+        return SafeVertxCompletableFuture.from(catnip, future);
     }
     
     private Bucket getBucket(final String key) {

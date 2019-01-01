@@ -56,6 +56,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -75,7 +76,20 @@ public interface Catnip {
      * @return A new catnip instance.
      */
     static Catnip catnip(@Nonnull final String token) {
-        return catnip(token, Vertx.vertx());
+        return catnipAsync(token).join();
+    }
+    
+    /**
+     * Create a new catnip instance with the given token.
+     * <p/>
+     * <strong>This method may block while validating the provided token.</strong>
+     *
+     * @param token The token to be used for all API operations.
+     *
+     * @return A new catnip instance.
+     */
+    static CompletableFuture<Catnip> catnipAsync(@Nonnull final String token) {
+        return catnipAsync(token, Vertx.vertx());
     }
     
     /**
@@ -88,7 +102,20 @@ public interface Catnip {
      * @return A new catnip instance.
      */
     static Catnip catnip(@Nonnull final CatnipOptions options) {
-        return catnip(options, Vertx.vertx());
+        return catnipAsync(options).join();
+    }
+    
+    /**
+     * Create a new catnip instance with the given options.
+     * <p/>
+     * <strong>This method may block while validating the provided token.</strong>
+     *
+     * @param options The options to be applied to the catnip instance.
+     *
+     * @return A new catnip instance.
+     */
+    static CompletableFuture<Catnip> catnipAsync(@Nonnull final CatnipOptions options) {
+        return catnipAsync(options, Vertx.vertx());
     }
     
     /**
@@ -102,7 +129,21 @@ public interface Catnip {
      * @return A new catnip instance.
      */
     static Catnip catnip(@Nonnull final String token, @Nonnull final Vertx vertx) {
-        return catnip(new CatnipOptions(token), vertx);
+        return catnipAsync(token, vertx).join();
+    }
+    
+    /**
+     * Create a new catnip instance with the given token and vert.x instance.
+     * <p/>
+     * <strong>This method may block while validating the provided token.</strong>
+     *
+     * @param token The token to be used for all API operations.
+     * @param vertx The vert.x instance used to run the bot.
+     *
+     * @return A new catnip instance.
+     */
+    static CompletableFuture<Catnip> catnipAsync(@Nonnull final String token, @Nonnull final Vertx vertx) {
+        return catnipAsync(new CatnipOptions(token), vertx);
     }
     
     /**
@@ -116,6 +157,20 @@ public interface Catnip {
      * @return A new catnip instance.
      */
     static Catnip catnip(@Nonnull final CatnipOptions options, @Nonnull final Vertx vertx) {
+        return catnipAsync(options, vertx).join();
+    }
+    
+    /**
+     * Create a new catnip instance with the given options and vert.x instance.
+     * <p/>
+     * <strong>This method may block while validating the provided token.</strong>
+     *
+     * @param options The options to be applied to the catnip instance.
+     * @param vertx   The vert.x instance used to run the bot.
+     *
+     * @return A new catnip instance.
+     */
+    static CompletableFuture<Catnip> catnipAsync(@Nonnull final CatnipOptions options, @Nonnull final Vertx vertx) {
         return new CatnipImpl(vertx, options).setup();
     }
     
