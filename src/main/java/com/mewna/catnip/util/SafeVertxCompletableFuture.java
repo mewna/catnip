@@ -369,7 +369,7 @@ public class SafeVertxCompletableFuture<T> extends CompletableFuture<T> {
                 throw new IllegalStateException("Possible deadlock detected. Avoid blocking event loop threads");
             } else {
                 catnip.logAdapter().warn(
-                        "Possible deadlock detected",
+                        "Event loop block detected",
                         new Throwable("Blocking method call location"));
             }
         }
