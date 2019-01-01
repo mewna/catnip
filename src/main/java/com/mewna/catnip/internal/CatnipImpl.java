@@ -57,7 +57,6 @@ import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.util.JsonPojoCodec;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.logging.LogAdapter;
-import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
@@ -71,7 +70,11 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -310,104 +313,18 @@ public class CatnipImpl implements Catnip {
     }
     
     @Nonnull
-    public Catnip setup() {
-        // Register codecs
-        // God I hate having to do this
-        // This is necessary to make Vert.x allow passing arbitrary objects
-        // over the bus tho, since it doesn't obey typical Java serialization
-        // stuff (for reasons I don't really get) and won't just dump stuff to
-        // JSON when it doesn't have a codec
-        // *sigh*
-        // This is mainly important for distributed catnip; locally it'll just
-        // not apply any transformations
+    public CompletableFuture<Catnip> setup() {
+        codecs();
         
-        // Lifecycle
-        codec(ReadyImpl.class);
-        codec(ResumedImpl.class);
-        
-        // Messages
-        codec(MessageImpl.class);
-        codec(DeletedMessageImpl.class);
-        codec(BulkDeletedMessagesImpl.class);
-        codec(TypingUserImpl.class);
-        codec(ReactionUpdateImpl.class);
-        codec(BulkRemovedReactionsImpl.class);
-        codec(MessageEmbedUpdateImpl.class);
-        
-        // Channels
-        codec(CategoryImpl.class);
-        codec(GroupDMChannelImpl.class);
-        codec(TextChannelImpl.class);
-        codec(UserDMChannelImpl.class);
-        codec(VoiceChannelImpl.class);
-        codec(WebhookImpl.class);
-        codec(ChannelPinsUpdateImpl.class);
-        codec(WebhooksUpdateImpl.class);
-        
-        // Guilds
-        codec(GuildImpl.class);
-        codec(GatewayGuildBanImpl.class);
-        codec(EmojiUpdateImpl.class);
-        
-        // Roles
-        codec(RoleImpl.class);
-        codec(PartialRoleImpl.class);
-        codec(PermissionOverrideImpl.class);
-        
-        // Members
-        codec(MemberImpl.class);
-        codec(PartialMemberImpl.class);
-        
-        // Users
-        codec(UserImpl.class);
-        codec(PresenceImpl.class);
-        codec(PresenceUpdateImpl.class);
-        
-        // Voice
-        codec(VoiceStateImpl.class);
-        codec(VoiceServerUpdateImpl.class);
-        
-        // Shards
-        codec(ShardInfo.class);
-        codec(ShardConnectState.class);
-        codec(ShardControlMessage.class);
-        
-        //if we are in a vertx context, check whether or not it's a worker
-        //context. If it isn't (aka it's an event loop context), we can't safely
-        //block the thread, so it's better to just throw an exception instead,
-        //as the join() call below would deadlock.
-        //exception: if the context owner is a different vertx instance than
-        //the one we use, allow blocking but log a warn, as that case won't
-        //actually lead to a deadlock, but will still block an event loop thread.
-        final Context currentContext = Vertx.currentContext();
-        if(currentContext != null && Context.isOnEventLoopThread()) {
-            if(currentContext.owner() == vertx) {
-                throw new IllegalStateException(
-                        "Catnip instances cannot be created inside event loop threads " +
-                                "as that could cause a deadlock. Instantiate the Catnip object " +
-                                "in an executeBlocking() context."
-                );
-            } else {
-                logAdapter.warn(
-                        "Catnip instance created inside event loop thread. " +
-                                "Creating a catnip instance blocks the current thread, " +
-                                "which should not be done on event loop threads. Create the " +
-                                "Catnip instance in an executeBlocking() context instead.",
-                        new Throwable("Blocking method call location"));
-            }
-        }
-        
-        // Since this is running outside of the vert.x event loop when it's
-        // called, we can safely block it to do this http request.
-        rest.user().getGatewayBot()
-                .thenAccept(gateway -> {
+        return rest.user().getGatewayBot()
+                .thenApply(gateway -> {
                     gatewayInfo.set(gateway);
                     logAdapter.info("Token validated!");
+                    
+                    //this is actually needed because generics are dumb
+                    return (Catnip)this;
                 })
-                .toCompletableFuture()
-                .join();
-        
-        return this;
+                .toCompletableFuture();
     }
     
     private void injectSelf() {
@@ -417,14 +334,78 @@ public class CatnipImpl implements Catnip {
         cache.catnip(this);
     }
     
-    private <T> void codec(@Nonnull final Class<T> cls) {
+    private void codecs() {
         try {
-            eventBus().registerDefaultCodec(cls, new JsonPojoCodec<>(this, cls));
+            // Register codecs
+            // God I hate having to do this
+            // This is necessary to make Vert.x allow passing arbitrary objects
+            // over the bus tho, since it doesn't obey typical Java serialization
+            // stuff (for reasons I don't really get) and won't just dump stuff to
+            // JSON when it doesn't have a codec
+            // *sigh*
+            // This is mainly important for distributed catnip; locally it'll just
+            // not apply any transformations
+    
+            // Lifecycle
+            codec(ReadyImpl.class);
+            codec(ResumedImpl.class);
+    
+            // Messages
+            codec(MessageImpl.class);
+            codec(DeletedMessageImpl.class);
+            codec(BulkDeletedMessagesImpl.class);
+            codec(TypingUserImpl.class);
+            codec(ReactionUpdateImpl.class);
+            codec(BulkRemovedReactionsImpl.class);
+            codec(MessageEmbedUpdateImpl.class);
+    
+            // Channels
+            codec(CategoryImpl.class);
+            codec(GroupDMChannelImpl.class);
+            codec(TextChannelImpl.class);
+            codec(UserDMChannelImpl.class);
+            codec(VoiceChannelImpl.class);
+            codec(WebhookImpl.class);
+            codec(ChannelPinsUpdateImpl.class);
+            codec(WebhooksUpdateImpl.class);
+    
+            // Guilds
+            codec(GuildImpl.class);
+            codec(GatewayGuildBanImpl.class);
+            codec(EmojiUpdateImpl.class);
+    
+            // Roles
+            codec(RoleImpl.class);
+            codec(PartialRoleImpl.class);
+            codec(PermissionOverrideImpl.class);
+    
+            // Members
+            codec(MemberImpl.class);
+            codec(PartialMemberImpl.class);
+    
+            // Users
+            codec(UserImpl.class);
+            codec(PresenceImpl.class);
+            codec(PresenceUpdateImpl.class);
+    
+            // Voice
+            codec(VoiceStateImpl.class);
+            codec(VoiceServerUpdateImpl.class);
+    
+            // Shards
+            codec(ShardInfo.class);
+            codec(ShardConnectState.class);
+            codec(ShardControlMessage.class);
         } catch(final IllegalStateException e) {
-            logAdapter.debug("Couldn't register the codec for {} because it's already registered." +
-                    "This is probably because you're running multiple catnip instances on the same vert.x" +
-                    "instance. If you're sure this is correct, you can ignore this warning.", cls.getName(), e);
+            //only log once instead of one time per codec
+            logAdapter.debug("Couldn't register codecs because they are already registered. " +
+                    "This is probably because you're running multiple catnip instances on the same vert.x " +
+                    "instance. If you're sure this is correct, you can ignore this warning.", e);
         }
+    }
+    
+    private <T> void codec(@Nonnull final Class<T> cls) {
+        eventBus().registerDefaultCodec(cls, new JsonPojoCodec<>(this, cls));
     }
     
     @Nonnull
