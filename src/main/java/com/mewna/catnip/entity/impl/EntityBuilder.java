@@ -438,12 +438,14 @@ public final class EntityBuilder {
         final JsonObject clientStatus = data.getJsonObject("client_status");
         final String mobileStatusString = clientStatus == null ? null : clientStatus.getString("mobile");
         final String webStatusString = clientStatus == null ? null : clientStatus.getString("web");
+        final String desktopStatusString = clientStatus == null ? null : clientStatus.getString("desktop");
         return PresenceImpl.builder()
                 .catnip(catnip)
                 .status(OnlineStatus.fromString(data.getString("status")))
                 .activity(createActivity(data.getJsonObject("game", null)))
                 .mobileStatus(mobileStatusString != null ? OnlineStatus.fromString(mobileStatusString) : null)
                 .webStatus(webStatusString != null ? OnlineStatus.fromString(webStatusString) : null)
+                .desktopStatus(desktopStatusString != null ? OnlineStatus.fromString(desktopStatusString) : null)
                 .build();
     }
     
@@ -453,6 +455,7 @@ public final class EntityBuilder {
         final JsonObject clientStatus = data.getJsonObject("client_status");
         final String mobileStatusString = clientStatus == null ? null : clientStatus.getString("mobile");
         final String webStatusString = clientStatus == null ? null : clientStatus.getString("web");
+        final String desktopStatusString = clientStatus == null ? null : clientStatus.getString("desktop");
         return PresenceUpdateImpl.builder()
                 .catnip(catnip)
                 .status(OnlineStatus.fromString(data.getString("status")))
@@ -463,6 +466,7 @@ public final class EntityBuilder {
                 .nick(data.getString("nick"))
                 .mobileStatus(mobileStatusString != null ? OnlineStatus.fromString(mobileStatusString) : null)
                 .webStatus(webStatusString != null ? OnlineStatus.fromString(webStatusString) : null)
+                .desktopStatus(desktopStatusString != null ? OnlineStatus.fromString(desktopStatusString) : null)
                 .build();
     }
     

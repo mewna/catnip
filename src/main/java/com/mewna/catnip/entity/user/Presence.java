@@ -75,6 +75,9 @@ public interface Presence {
     OnlineStatus webStatus();
     
     @Nullable
+    OnlineStatus desktopStatus();
+    
+    @Nullable
     Activity activity();
     
     @Accessors(fluent = true, chain = true)
