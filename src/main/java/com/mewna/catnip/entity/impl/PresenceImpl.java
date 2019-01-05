@@ -59,6 +59,7 @@ public class PresenceImpl implements Presence, RequiresCatnip {
     private Activity activity;
     private OnlineStatus mobileStatus;
     private OnlineStatus webStatus;
+    private OnlineStatus desktopStatus;
     
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
