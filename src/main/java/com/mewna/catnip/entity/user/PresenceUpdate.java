@@ -79,4 +79,10 @@ public interface PresenceUpdate extends Presence, Snowflake {
      */
     @Nullable
     OnlineStatus webStatus();
+    
+    /**
+     * @return Online status reported for the user's desktop client.
+     */
+    @Nullable
+    OnlineStatus desktopStatus();
 }
