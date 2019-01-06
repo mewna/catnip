@@ -31,14 +31,12 @@ import com.mewna.catnip.Catnip
 import com.mewna.catnip.entity.message.Message
 import com.mewna.catnip.shard.DiscordEvent
 
-object ScalaExample {
-  def main(args: Array[String]): Unit = {
-    val catnip = Catnip.catnip("your token here")
-    catnip.on(DiscordEvent.MESSAGE_CREATE, (msg: Message) => {
-      if(msg.content().equals("!ping")) {
-        msg.channel().sendMessage("pong!")
-      }
-    })
-    catnip.connect()
-  }
+object ScalaExample extends App {
+  private val catnip = Catnip.catnip("your token here")
+  catnip.on(DiscordEvent.MESSAGE_CREATE, (msg: Message) => {
+    if(msg.content().equals("!ping")) {
+      msg.channel().sendMessage("pong!")
+    }
+  })
+  catnip.connect()
 }
