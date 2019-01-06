@@ -76,6 +76,16 @@ catnip.connect();
 
 Also check out the [examples](https://github.com/mewna/catnip/tree/master/src/main/example/basic) for Kotlin and Scala usage.
 
+### Custom event bus events
+
+Because vert.x is intended to be used in clustered mode as well as in a single-node configuration,
+emitting events over the built-in event bus requires registering a codec for the events that you
+want to fire. If you have an event class `MyEvent`, you can just do something to the effect of
+```Java
+eventBus().registerDefaultCodec(MyEvent.class, new JsonPojoCodec<>(this, MyEvent.class));
+```
+where `JsonPojoCodec` is `com.mewna.catnip.util.JsonPojoCodec` and is safe to use.
+
 ## Why write a fourth Java lib?
 
 - JDA is very nice, but doesn't allow for as much freedom with customizing the internals;
