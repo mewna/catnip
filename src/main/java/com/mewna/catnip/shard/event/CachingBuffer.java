@@ -132,6 +132,7 @@ public class CachingBuffer extends AbstractBuffer {
                             // No guilds left, can just dispatch normally
                             buffers.remove(id);
                             emitter().emit(event);
+                            bufferState.replay();
                         } else {
                             // Remove READY guild if necessary, otherwise buffer
                             if(bufferState.readyGuilds().contains(guild)) {
