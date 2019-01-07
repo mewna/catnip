@@ -58,13 +58,13 @@ public class RestEmoji extends RestHandler {
     @Nonnull
     public CompletionStage<List<CustomEmoji>> listGuildEmojis(@Nonnull final String guildId) {
         return listGuildEmojisRaw(guildId)
-                .thenApply(mapObjectContents(e -> getEntityBuilder().createCustomEmoji(guildId, e)))
+                .thenApply(mapObjectContents(e -> entityBuilder().createCustomEmoji(guildId, e)))
                 .thenApply(Collections::unmodifiableList);
     }
 
     @Nonnull
     public CompletionStage<JsonArray> listGuildEmojisRaw(@Nonnull final String guildId) {
-        return getCatnip().requester().queue(
+        return catnip().requester().queue(
                 new OutboundRequest(
                         Routes.LIST_GUILD_EMOJIS.withMajorParam(guildId),
                         ImmutableMap.of()))
@@ -73,12 +73,12 @@ public class RestEmoji extends RestHandler {
 
     @Nonnull
     public CompletionStage<CustomEmoji> getGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId) {
-        return getGuildEmojiRaw(guildId, emojiId).thenApply(e -> getEntityBuilder().createCustomEmoji(guildId, e));
+        return getGuildEmojiRaw(guildId, emojiId).thenApply(e -> entityBuilder().createCustomEmoji(guildId, e));
     }
 
     @Nonnull
     public CompletionStage<JsonObject> getGuildEmojiRaw(@Nonnull final String guildId, @Nonnull final String emojiId) {
-        return getCatnip().requester().queue(
+        return catnip().requester().queue(
                 new OutboundRequest(
                         Routes.GET_GUILD_EMOJI.withMajorParam(guildId),
                         ImmutableMap.of("emojis.id", emojiId)))
@@ -89,7 +89,7 @@ public class RestEmoji extends RestHandler {
     public CompletionStage<CustomEmoji> createGuildEmoji(@Nonnull final String guildId, @Nonnull final String name,
                                                          @Nonnull final URI imageData, @Nonnull final Collection<String> roles) {
         return createGuildEmojiRaw(guildId, name, imageData, roles)
-                .thenApply(e -> getEntityBuilder().createEmoji(guildId, e))
+                .thenApply(e -> entityBuilder().createEmoji(guildId, e))
                 .thenApply(CustomEmoji.class::cast);
     }
 
@@ -104,7 +104,7 @@ public class RestEmoji extends RestHandler {
             rolesArray = new JsonArray();
             roles.forEach(rolesArray::add);
         }
-        return getCatnip().requester().queue(
+        return catnip().requester().queue(
                 new OutboundRequest(
                         Routes.CREATE_GUILD_EMOJI.withMajorParam(guildId),
                         ImmutableMap.of(),
@@ -126,7 +126,7 @@ public class RestEmoji extends RestHandler {
     public CompletionStage<CustomEmoji> modifyGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId,
                                                          @Nonnull final String name, @Nonnull final Collection<String> roles) {
         return modifyGuildEmojiRaw(guildId, emojiId, name, roles)
-                .thenApply(e -> getEntityBuilder().createEmoji(guildId, e))
+                .thenApply(e -> entityBuilder().createEmoji(guildId, e))
                 .thenApply(CustomEmoji.class::cast);
     }
 
@@ -140,7 +140,7 @@ public class RestEmoji extends RestHandler {
             rolesArray = new JsonArray();
             roles.forEach(rolesArray::add);
         }
-        return getCatnip().requester().queue(
+        return catnip().requester().queue(
                 new OutboundRequest(
                         Routes.MODIFY_GUILD_EMOJI.withMajorParam(guildId),
                         ImmutableMap.of("emojis.id", emojiId),
@@ -153,7 +153,7 @@ public class RestEmoji extends RestHandler {
     
     @Nonnull
     public CompletionStage<Void> deleteGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId) {
-        return getCatnip().requester().queue(
+        return catnip().requester().queue(
                 new OutboundRequest(
                         Routes.DELETE_GUILD_EMOJI.withMajorParam(guildId),
                         ImmutableMap.of("emojis.id", emojiId)))

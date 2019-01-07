@@ -50,13 +50,13 @@ public class RestVoice extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletionStage<List<VoiceRegion>> listVoiceRegions() {
-        return listVoiceRegionsRaw().thenApply(mapObjectContents(getEntityBuilder()::createVoiceRegion));
+        return listVoiceRegionsRaw().thenApply(mapObjectContents(entityBuilder()::createVoiceRegion));
     }
 
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonArray> listVoiceRegionsRaw() {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.LIST_VOICE_REGIONS,
+        return catnip().requester().queue(new OutboundRequest(Routes.LIST_VOICE_REGIONS,
                 ImmutableMap.of()))
                 .thenApply(ResponsePayload::array);
     }

@@ -87,7 +87,7 @@ public class RestChannel extends RestHandler {
 
     @Nonnull
     public CompletionStage<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Message message) {
-        return sendMessageRaw(channelId, message).thenApply(getEntityBuilder()::createMessage);
+        return sendMessageRaw(channelId, message).thenApply(entityBuilder()::createMessage);
     }
 
     @Nonnull
@@ -97,20 +97,20 @@ public class RestChannel extends RestHandler {
             json.put("content", message.content());
         }
         if(message.embeds() != null && !message.embeds().isEmpty()) {
-            json.put("embed", getEntityBuilder().embedToJson(message.embeds().get(0)));
+            json.put("embed", entityBuilder().embedToJson(message.embeds().get(0)));
         }
         if(json.getValue("embed", null) == null && json.getValue("content", null) == null) {
             throw new IllegalArgumentException("Can't build a message with no content and no embeds!");
         }
         
-        return getCatnip().requester().
+        return catnip().requester().
                 queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json))
                 .thenApply(ResponsePayload::object);
     }
 
     @Nonnull
     public final CompletionStage<Message> sendMessage(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
-        return sendMessageRaw(channelId, options).thenApply(getEntityBuilder()::createMessage);
+        return sendMessageRaw(channelId, options).thenApply(entityBuilder()::createMessage);
     }
 
     @Nonnull
@@ -122,14 +122,14 @@ public class RestChannel extends RestHandler {
         }
         
         if(options.embed() != null) {
-            json.put("embed", getEntityBuilder().embedToJson(options.embed()));
+            json.put("embed", entityBuilder().embedToJson(options.embed()));
         }
         
         if(json.getValue("embed", null) == null && json.getValue("content", null) == null && !options.hasFiles()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
         }
         
-        return getCatnip().requester().
+        return catnip().requester().
                 queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json).buffers(options.files()))
                 .thenApply(ResponsePayload::object);
     }
@@ -137,13 +137,13 @@ public class RestChannel extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletionStage<Message> getMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
-        return getMessageRaw(channelId, messageId).thenApply(getEntityBuilder()::createMessage);
+        return getMessageRaw(channelId, messageId).thenApply(entityBuilder()::createMessage);
     }
 
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonObject> getMessageRaw(@Nonnull final String channelId, @Nonnull final String messageId) {
-        return getCatnip().requester().queue(
+        return catnip().requester().queue(
                 new OutboundRequest(Routes.GET_CHANNEL_MESSAGE.withMajorParam(channelId),
                         ImmutableMap.of("message.id", messageId)))
                 .thenApply(ResponsePayload::object);
@@ -164,7 +164,7 @@ public class RestChannel extends RestHandler {
     @Nonnull
     public CompletionStage<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
                                                 @Nonnull final Message message) {
-        return editMessageRaw(channelId, messageId, message).thenApply(getEntityBuilder()::createMessage);
+        return editMessageRaw(channelId, messageId, message).thenApply(entityBuilder()::createMessage);
     }
 
     @Nonnull
@@ -176,12 +176,12 @@ public class RestChannel extends RestHandler {
         }
         json.put("content", message.content());
         if(message.embeds() != null && !message.embeds().isEmpty()) {
-            json.put("embed", getEntityBuilder().embedToJson(message.embeds().get(0)));
+            json.put("embed", entityBuilder().embedToJson(message.embeds().get(0)));
         }
         if(json.getValue("embed", null) == null && json.getValue("content", null) == null) {
             throw new IllegalArgumentException("Can't build a message with no content and no embed!");
         }
-        return getCatnip().requester()
+        return catnip().requester()
                 .queue(new OutboundRequest(Routes.EDIT_MESSAGE.withMajorParam(channelId),
                         ImmutableMap.of("message.id", messageId), json))
                 .thenApply(ResponsePayload::object);
@@ -189,13 +189,13 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     public CompletionStage<Void> deleteMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_MESSAGE.withMajorParam(channelId),
+        return catnip().requester().queue(new OutboundRequest(Routes.DELETE_MESSAGE.withMajorParam(channelId),
                 ImmutableMap.of("message.id", messageId))).thenApply(__ -> null);
     }
     
     @Nonnull
     public CompletionStage<Void> deleteMessages(@Nonnull final String channelId, @Nonnull final List<String> messageIds) {
-        return getCatnip().requester()
+        return catnip().requester()
                 .queue(new OutboundRequest(Routes.BULK_DELETE_MESSAGES.withMajorParam(channelId),
                         ImmutableMap.of(), new JsonObject().put("messages", new JsonArray(messageIds))))
                 .thenApply(__ -> null);
@@ -204,7 +204,7 @@ public class RestChannel extends RestHandler {
     @Nonnull
     public CompletionStage<Void> addReaction(@Nonnull final String channelId, @Nonnull final String messageId,
                                              @Nonnull final String emoji) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_REACTION.withMajorParam(channelId),
+        return catnip().requester().queue(new OutboundRequest(Routes.CREATE_REACTION.withMajorParam(channelId),
                 ImmutableMap.of("message.id", messageId, "emojis", encodeUTF8(emoji)), new JsonObject()))
                 .thenApply(__ -> null);
     }
@@ -218,7 +218,7 @@ public class RestChannel extends RestHandler {
     @Nonnull
     public CompletionStage<Void> deleteOwnReaction(@Nonnull final String channelId, @Nonnull final String messageId,
                                                    @Nonnull final String emoji) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_OWN_REACTION.withMajorParam(channelId),
+        return catnip().requester().queue(new OutboundRequest(Routes.DELETE_OWN_REACTION.withMajorParam(channelId),
                 ImmutableMap.of("message.id", messageId, "emojis", encodeUTF8(emoji))))
                 .thenApply(__ -> null);
     }
@@ -232,7 +232,7 @@ public class RestChannel extends RestHandler {
     @Nonnull
     public CompletionStage<Void> deleteUserReaction(@Nonnull final String channelId, @Nonnull final String messageId,
                                                     @Nonnull final String userId, @Nonnull final String emoji) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_USER_REACTION.withMajorParam(channelId),
+        return catnip().requester().queue(new OutboundRequest(Routes.DELETE_USER_REACTION.withMajorParam(channelId),
                 ImmutableMap.of("message.id", messageId, "emojis", encodeUTF8(emoji), "user.id", userId)))
                 .thenApply(__ -> null);
     }
@@ -245,7 +245,7 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     public CompletionStage<Void> deleteAllReactions(@Nonnull final String channelId, @Nonnull final String messageId) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_ALL_REACTIONS.withMajorParam(channelId),
+        return catnip().requester().queue(new OutboundRequest(Routes.DELETE_ALL_REACTIONS.withMajorParam(channelId),
                 ImmutableMap.of("message.id", messageId)))
                 .thenApply(__ -> null);
     }
@@ -254,7 +254,7 @@ public class RestChannel extends RestHandler {
     @CheckReturnValue
     public ReactionPaginator getReactions(@Nonnull final String channelId, @Nonnull final String messageId,
                                           @Nonnull final String emoji) {
-        return new ReactionPaginator(getEntityBuilder()) {
+        return new ReactionPaginator(entityBuilder()) {
             @Nonnull
             @CheckReturnValue
             @Override
@@ -292,7 +292,7 @@ public class RestChannel extends RestHandler {
         }
         
         String query = builder.build();
-        return getCatnip().requester()
+        return catnip().requester()
                 .queue(new OutboundRequest(Routes.GET_REACTIONS.withMajorParam(channelId).withQueryString(query),
                         ImmutableMap.of("message.id", messageId, "emojis", encodeUTF8(emoji))))
                 .thenApply(ResponsePayload::array);
@@ -302,7 +302,7 @@ public class RestChannel extends RestHandler {
                                                     @Nonnull final String emoji, @Nullable final String before,
                                                     @Nullable final String after, @Nonnegative final int limit) {
         return getReactionsRaw(channelId, messageId, emoji, before, after, limit)
-                .thenApply(mapObjectContents(getEntityBuilder()::createUser))
+                .thenApply(mapObjectContents(entityBuilder()::createUser))
                 .thenApply(Collections::unmodifiableList);
     }
     
@@ -317,7 +317,7 @@ public class RestChannel extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public MessagePaginator getChannelMessages(@Nonnull final String channelId) {
-        return new MessagePaginator(getEntityBuilder()) {
+        return new MessagePaginator(entityBuilder()) {
             @Nonnull
             @CheckReturnValue
             @Override
@@ -352,7 +352,7 @@ public class RestChannel extends RestHandler {
         }
         
         final String query = builder.build();
-        return getCatnip().requester()
+        return catnip().requester()
                 .queue(new OutboundRequest(Routes.GET_CHANNEL_MESSAGES.withMajorParam(channelId).withQueryString(query),
                         ImmutableMap.of()))
                 .thenApply(ResponsePayload::array);
@@ -362,13 +362,13 @@ public class RestChannel extends RestHandler {
                                                              @Nullable final String after, @Nullable final String around,
                                                              @Nonnegative final int limit) {
         return getChannelMessagesRaw(channelId, before, after, around, limit)
-                .thenApply(mapObjectContents(getEntityBuilder()::createMessage))
+                .thenApply(mapObjectContents(entityBuilder()::createMessage))
                 .thenApply(Collections::unmodifiableList);
     }
     
     @Nonnull
     public CompletionStage<Void> triggerTypingIndicator(@Nonnull final String channelId) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.TRIGGER_TYPING_INDICATOR.withMajorParam(channelId),
+        return catnip().requester().queue(new OutboundRequest(Routes.TRIGGER_TYPING_INDICATOR.withMajorParam(channelId),
                 ImmutableMap.of(), new JsonObject()))
                 .thenApply(__ -> null);
     }
@@ -376,13 +376,13 @@ public class RestChannel extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletionStage<Channel> getChannelById(@Nonnull final String channelId) {
-        return getChannelByIdRaw(channelId).thenApply(getEntityBuilder()::createChannel);
+        return getChannelByIdRaw(channelId).thenApply(entityBuilder()::createChannel);
     }
 
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonObject> getChannelByIdRaw(@Nonnull final String channelId) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_CHANNEL.withMajorParam(channelId),
+        return catnip().requester().queue(new OutboundRequest(Routes.GET_CHANNEL.withMajorParam(channelId),
                 ImmutableMap.of()))
                 .thenApply(ResponsePayload::object);
     }
@@ -390,13 +390,13 @@ public class RestChannel extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletionStage<Channel> deleteChannel(@Nonnull final String channelId) {
-        return deleteChannelRaw(channelId).thenApply(getEntityBuilder()::createChannel);
+        return deleteChannelRaw(channelId).thenApply(entityBuilder()::createChannel);
     }
 
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonObject> deleteChannelRaw(@Nonnull final String channelId) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_CHANNEL.withMajorParam(channelId),
+        return catnip().requester().queue(new OutboundRequest(Routes.DELETE_CHANNEL.withMajorParam(channelId),
                 ImmutableMap.of()))
                 .thenApply(ResponsePayload::object);
     }
@@ -405,14 +405,14 @@ public class RestChannel extends RestHandler {
     @CheckReturnValue
     public CompletionStage<CreatedInvite> createInvite(@Nonnull final String channelId,
                                                        @Nullable final InviteCreateOptions options) {
-        return createInviteRaw(channelId, options).thenApply(getEntityBuilder()::createCreatedInvite);
+        return createInviteRaw(channelId, options).thenApply(entityBuilder()::createCreatedInvite);
     }
 
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonObject> createInviteRaw(@Nonnull final String channelId,
                                                        @Nullable final InviteCreateOptions options) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_CHANNEL_INVITE.withMajorParam(channelId),
+        return catnip().requester().queue(new OutboundRequest(Routes.CREATE_CHANNEL_INVITE.withMajorParam(channelId),
                 ImmutableMap.of(), (options == null ? InviteCreateOptions.create() : options).toJson()))
                 .thenApply(ResponsePayload::object);
     }
@@ -420,13 +420,13 @@ public class RestChannel extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletionStage<List<CreatedInvite>> getChannelInvites(@Nonnull final String channelId) {
-        return getChannelInvitesRaw(channelId).thenApply(mapObjectContents(getEntityBuilder()::createCreatedInvite));
+        return getChannelInvitesRaw(channelId).thenApply(mapObjectContents(entityBuilder()::createCreatedInvite));
     }
 
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonArray> getChannelInvitesRaw(@Nonnull final String channelId) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_CHANNEL_INVITES.withMajorParam(channelId),
+        return catnip().requester().queue(new OutboundRequest(Routes.GET_CHANNEL_INVITES.withMajorParam(channelId),
                 ImmutableMap.of()))
                 .thenApply(ResponsePayload::array);
     }
@@ -435,20 +435,20 @@ public class RestChannel extends RestHandler {
     @Nonnull
     public CompletionStage<GuildChannel> modifyChannel(@Nonnull final String channelId,
                                                        @Nonnull final ChannelEditFields fields) {
-        return modifyChannelRaw(channelId, fields).thenApply(getEntityBuilder()::createGuildChannel);
+        return modifyChannelRaw(channelId, fields).thenApply(entityBuilder()::createGuildChannel);
     }
 
     @Nonnull
     public CompletionStage<JsonObject> modifyChannelRaw(@Nonnull final String channelId,
                                                        @Nonnull final ChannelEditFields fields) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.MODIFY_CHANNEL.withMajorParam(channelId),
+        return catnip().requester().queue(new OutboundRequest(Routes.MODIFY_CHANNEL.withMajorParam(channelId),
                 ImmutableMap.of(), fields.payload()))
                 .thenApply(ResponsePayload::object);
     }
     
     @Nonnull
     public CompletionStage<Void> deletePermissionOverride(@Nonnull final String channelId, @Nonnull final String overwriteId) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_CHANNEL_PERMISSION.withMajorParam(channelId),
+        return catnip().requester().queue(new OutboundRequest(Routes.DELETE_CHANNEL_PERMISSION.withMajorParam(channelId),
                 ImmutableMap.of("overwrite.id", overwriteId)))
                 .thenApply(__ -> null);
     }
@@ -463,7 +463,7 @@ public class RestChannel extends RestHandler {
     public CompletionStage<Void> editPermissionOverride(@Nonnull final String channelId, @Nonnull final String overwriteId,
                                                         @Nonnull final Collection<Permission> allowed,
                                                         @Nonnull final Collection<Permission> denied, final boolean isMember) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.EDIT_CHANNEL_PERMISSIONS.withMajorParam(channelId),
+        return catnip().requester().queue(new OutboundRequest(Routes.EDIT_CHANNEL_PERMISSIONS.withMajorParam(channelId),
                 ImmutableMap.of("overwrite.id", overwriteId), new JsonObject()
                 .put("allow", Permission.from(allowed))
                 .put("deny", Permission.from(denied))
@@ -481,20 +481,20 @@ public class RestChannel extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletionStage<List<Message>> getPinnedMessages(@Nonnull final String channelId) {
-        return getChannelInvitesRaw(channelId).thenApply(mapObjectContents(getEntityBuilder()::createMessage));
+        return getChannelInvitesRaw(channelId).thenApply(mapObjectContents(entityBuilder()::createMessage));
     }
 
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonArray> getPinnedMessagesRaw(@Nonnull final String channelId) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_PINNED_MESSAGES.withMajorParam(channelId),
+        return catnip().requester().queue(new OutboundRequest(Routes.GET_PINNED_MESSAGES.withMajorParam(channelId),
                 ImmutableMap.of()))
                 .thenApply(ResponsePayload::array);
     }
     
     @Nonnull
     public CompletionStage<Void> deletePinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_PINNED_CHANNEL_MESSAGE.withMajorParam(channelId),
+        return catnip().requester().queue(new OutboundRequest(Routes.DELETE_PINNED_CHANNEL_MESSAGE.withMajorParam(channelId),
                 ImmutableMap.of("message.id", messageId)))
                 .thenApply(__ -> null);
     }
@@ -506,7 +506,7 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     public CompletionStage<Void> addPinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.ADD_PINNED_CHANNEL_MESSAGE.withMajorParam(channelId),
+        return catnip().requester().queue(new OutboundRequest(Routes.ADD_PINNED_CHANNEL_MESSAGE.withMajorParam(channelId),
                 ImmutableMap.of("message.id", messageId), new JsonObject()))
                 .thenApply(__ -> null);
     }
@@ -519,13 +519,13 @@ public class RestChannel extends RestHandler {
     @Nonnull
     public CompletionStage<Webhook> createWebhook(@Nonnull final String channelId, @Nonnull final String name,
                                                   @Nullable final String avatar) {
-        return createWebhookRaw(channelId, name, avatar).thenApply(getEntityBuilder()::createWebhook);
+        return createWebhookRaw(channelId, name, avatar).thenApply(entityBuilder()::createWebhook);
     }
 
     @Nonnull
     public CompletionStage<JsonObject> createWebhookRaw(@Nonnull final String channelId, @Nonnull final String name,
                                                   @Nullable final String avatar) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.CREATE_WEBHOOK.withMajorParam(channelId),
+        return catnip().requester().queue(new OutboundRequest(Routes.CREATE_WEBHOOK.withMajorParam(channelId),
                 ImmutableMap.of(), new JsonObject().put("name", name).put("avatar", avatar)))
                 .thenApply(ResponsePayload::object);
     }
