@@ -427,7 +427,7 @@ public class CatnipImpl implements Catnip {
     
     @Nullable
     @Override
-    public GatewayInfo getGatewayInfo() {
+    public GatewayInfo gatewayInfo() {
         return gatewayInfo.get();
     }
 }

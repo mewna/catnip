@@ -51,13 +51,13 @@ public class RestInvite extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletionStage<Invite> getInvite(@Nonnull final String code) {
-        return getInviteRaw(code).thenApply(getEntityBuilder()::createInvite);
+        return getInviteRaw(code).thenApply(entityBuilder()::createInvite);
     }
 
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonObject> getInviteRaw(@Nonnull final String code) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_INVITE,
+        return catnip().requester().queue(new OutboundRequest(Routes.GET_INVITE,
                 ImmutableMap.of("invite.code", code)))
                 .thenApply(ResponsePayload::object);
     }
@@ -65,13 +65,13 @@ public class RestInvite extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletionStage<Invite> deleteInvite(@Nonnull final String code) {
-        return deleteInviteRaw(code).thenApply(getEntityBuilder()::createInvite);
+        return deleteInviteRaw(code).thenApply(entityBuilder()::createInvite);
     }
 
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonObject> deleteInviteRaw(@Nonnull final String code) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_INVITE,
+        return catnip().requester().queue(new OutboundRequest(Routes.DELETE_INVITE,
                 ImmutableMap.of("invite.code", code)))
                 .thenApply(ResponsePayload::object);
     }

@@ -59,13 +59,13 @@ public class RestWebhook extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletionStage<Webhook> getWebhook(@Nonnull final String webhookId) {
-        return getWebhookRaw(webhookId).thenApply(getEntityBuilder()::createWebhook);
+        return getWebhookRaw(webhookId).thenApply(entityBuilder()::createWebhook);
     }
 
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonObject> getWebhookRaw(@Nonnull final String webhookId) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_WEBHOOK.withMajorParam(webhookId),
+        return catnip().requester().queue(new OutboundRequest(Routes.GET_WEBHOOK.withMajorParam(webhookId),
                 ImmutableMap.of()))
                 .thenApply(ResponsePayload::object);
     }
@@ -73,13 +73,13 @@ public class RestWebhook extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletionStage<List<Webhook>> getGuildWebhooks(@Nonnull final String guildId) {
-        return getGuildWebhooksRaw(guildId).thenApply(mapObjectContents(getEntityBuilder()::createWebhook));
+        return getGuildWebhooksRaw(guildId).thenApply(mapObjectContents(entityBuilder()::createWebhook));
     }
 
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonArray> getGuildWebhooksRaw(@Nonnull final String guildId) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_WEBHOOKS.withMajorParam(guildId),
+        return catnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_WEBHOOKS.withMajorParam(guildId),
                 ImmutableMap.of()))
                 .thenApply(ResponsePayload::array);
     }
@@ -87,13 +87,13 @@ public class RestWebhook extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletionStage<List<Webhook>> getChannelWebhooks(@Nonnull final String channelId) {
-        return getChannelWebhooksRaw(channelId).thenApply(mapObjectContents(getEntityBuilder()::createWebhook));
+        return getChannelWebhooksRaw(channelId).thenApply(mapObjectContents(entityBuilder()::createWebhook));
     }
 
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonArray> getChannelWebhooksRaw(@Nonnull final String channelId) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.GET_CHANNEL_WEBHOOKS.withMajorParam(channelId),
+        return catnip().requester().queue(new OutboundRequest(Routes.GET_CHANNEL_WEBHOOKS.withMajorParam(channelId),
                 ImmutableMap.of()))
                 .thenApply(ResponsePayload::array);
     }
@@ -101,13 +101,13 @@ public class RestWebhook extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletionStage<Webhook> modifyWebhook(@Nonnull final String webhookId, @Nonnull final WebhookEditFields fields) {
-        return modifyWebhookRaw(webhookId, fields).thenApply(getEntityBuilder()::createWebhook);
+        return modifyWebhookRaw(webhookId, fields).thenApply(entityBuilder()::createWebhook);
     }
 
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonObject> modifyWebhookRaw(@Nonnull final String webhookId, @Nonnull final WebhookEditFields fields) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.MODIFY_WEBHOOK.withMajorParam(webhookId),
+        return catnip().requester().queue(new OutboundRequest(Routes.MODIFY_WEBHOOK.withMajorParam(webhookId),
                 ImmutableMap.of(), fields.payload()))
                 .thenApply(ResponsePayload::object);
     }
@@ -115,7 +115,7 @@ public class RestWebhook extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletionStage<Void> deleteWebhook(@Nonnull final String webhookId) {
-        return getCatnip().requester().queue(new OutboundRequest(Routes.DELETE_WEBHOOK.withMajorParam(webhookId),
+        return catnip().requester().queue(new OutboundRequest(Routes.DELETE_WEBHOOK.withMajorParam(webhookId),
                 ImmutableMap.of()))
                 .thenApply(__ -> null);
     }
@@ -142,7 +142,7 @@ public class RestWebhook extends RestHandler {
         }
 
         if(options.embed() != null) {
-            json.put("embed", getEntityBuilder().embedToJson(options.embed()));
+            json.put("embed", entityBuilder().embedToJson(options.embed()));
         }
 
         if(json.getValue("embed", null) == null && json.getValue("content", null) == null
@@ -157,7 +157,7 @@ public class RestWebhook extends RestHandler {
             json.put("avatar_url", avatarUrl);
         }
 
-        return executeWebhookRaw(webhookId, webhookToken, json, options).thenApply(getEntityBuilder()::createMessage);
+        return executeWebhookRaw(webhookId, webhookToken, json, options).thenApply(entityBuilder()::createMessage);
     }
 
     @Nonnull
@@ -165,7 +165,7 @@ public class RestWebhook extends RestHandler {
     @SuppressWarnings("WeakerAccess")
     public CompletionStage<JsonObject> executeWebhookRaw(@Nonnull final String webhookId, @Nonnull final String webhookToken,
                                                          @Nonnull final JsonObject body, @Nonnull final MessageOptions options) {
-        return getCatnip().requester().
+        return catnip().requester().
                 queue(new OutboundRequest(Routes.EXECUTE_WEBHOOK.withMajorParam(webhookId),
                         ImmutableMap.of("webhook.token", webhookToken), body).needsToken(false)
                         .buffers(options.files()))

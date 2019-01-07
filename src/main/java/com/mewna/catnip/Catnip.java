@@ -179,7 +179,7 @@ public interface Catnip {
      */
     @Nonnull
     @CheckReturnValue
-    static String getShardCountUrl() {
+    static String shardCountUrl() {
         // TODO: Allow injecting other endpoints for eg. mocks?
         //return "https://discordapp.com/api/v6/gateway/bot";
         return RestRequester.API_HOST + RestRequester.API_BASE + Routes.GET_GATEWAY_BOT.baseRoute();
@@ -191,7 +191,7 @@ public interface Catnip {
      */
     @Nullable
     @CheckReturnValue
-    GatewayInfo getGatewayInfo();
+    GatewayInfo gatewayInfo();
     
     /**
      * @return The vert.x instance being used by this catnip instance.
