@@ -35,15 +35,13 @@ import com.mewna.catnip.shard.DiscordEvent
  * @author amy
  * @since 12/8/18.
  */
-object KotlinExample {
-    @JvmStatic
-    fun main(args: Array<String>) {
-        val catnip = Catnip.catnip("your token here")
-        catnip.on<Message>(DiscordEvent.MESSAGE_CREATE) { msg ->
-            if (msg.content() == "!ping") {
-                msg.channel().sendMessage("pong!")
-            }
+
+fun main(args: Array<String>) {
+    val catnip = Catnip.catnip("your token here")
+    catnip.on<Message>(DiscordEvent.MESSAGE_CREATE) { msg ->
+        if (msg.content() == "!ping") {
+            msg.channel().sendMessage("pong!")
         }
-        catnip.connect()
     }
+    catnip.connect()
 }
