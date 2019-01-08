@@ -28,7 +28,6 @@
 package com.mewna.catnip.entity.misc;
 
 import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -78,8 +77,8 @@ public interface ApplicationInfo extends Snowflake {
     boolean requiresCodeGrant();
     
     /**
-     * @return The user who owns the application.
+     * @return The entity that owns the application.
      */
     @Nonnull
-    User owner();
+    ApplicationOwner owner();
 }
