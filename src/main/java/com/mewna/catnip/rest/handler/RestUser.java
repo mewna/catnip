@@ -48,8 +48,6 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
 
@@ -59,18 +57,18 @@ import static com.mewna.catnip.util.JsonUtil.mapObjectContents;
  * @author amy
  * @since 9/3/18.
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class RestUser extends RestHandler {
     public RestUser(final CatnipImpl catnip) {
         super(catnip);
     }
-
+    
     @Nonnull
     @CheckReturnValue
     public CompletionStage<User> getCurrentUser() {
         return getCurrentUserRaw().thenApply(entityBuilder()::createUser);
     }
-
+    
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonObject> getCurrentUserRaw() {
@@ -78,13 +76,13 @@ public class RestUser extends RestHandler {
                 ImmutableMap.of()))
                 .thenApply(ResponsePayload::object);
     }
-
+    
     @Nonnull
     @CheckReturnValue
     public CompletionStage<User> getUser(@Nonnull final String userId) {
         return getUserRaw(userId).thenApply(entityBuilder()::createUser);
     }
-
+    
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonObject> getUserRaw(@Nonnull final String userId) {
@@ -92,7 +90,7 @@ public class RestUser extends RestHandler {
                 ImmutableMap.of("user.id", userId)))
                 .thenApply(ResponsePayload::object);
     }
-
+    
     @Nonnull
     public CompletionStage<User> modifyCurrentUser(@Nullable final String username, @Nullable final URI avatarData) {
         final JsonObject body = new JsonObject();
@@ -101,10 +99,10 @@ public class RestUser extends RestHandler {
             body.put("avatar", avatarData.toString());
         }
         body.put("username", username);
-
+        
         return modifyCurrentUserRaw(body).thenApply(entityBuilder()::createUser);
     }
-
+    
     @Nonnull
     public CompletionStage<JsonObject> modifyCurrentUserRaw(@Nonnull final JsonObject body) {
         return catnip().requester().queue(new OutboundRequest(Routes.MODIFY_CURRENT_USER,
@@ -136,11 +134,11 @@ public class RestUser extends RestHandler {
         return getCurrentUserGuildsRaw(before, after, limit)
                 .thenApply(mapObjectContents(entityBuilder()::createPartialGuild));
     }
-
+    
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonArray> getCurrentUserGuildsRaw(@Nullable final String before, @Nullable final String after,
-                                                               @Nonnegative final int limit) {
+                                                              @Nonnegative final int limit) {
         final QueryStringBuilder builder = new QueryStringBuilder();
         
         if(before != null) {
@@ -154,20 +152,20 @@ public class RestUser extends RestHandler {
         if(limit <= 100) {
             builder.append("limit", Integer.toString(limit));
         }
-        String query = builder.build();
+        final String query = builder.build();
         
         return catnip().requester().queue(new OutboundRequest(Routes.GET_CURRENT_USER_GUILDS.withQueryString(query),
                 ImmutableMap.of()))
                 .thenApply(ResponsePayload::array);
     }
-
+    
     @Nonnull
     @CheckReturnValue
     public CompletionStage<DMChannel> createDM(@Nonnull final String recipientId) {
         return createDMRaw(new JsonObject().put("recipient_id", recipientId))
                 .thenApply(entityBuilder()::createUserDM);
     }
-
+    
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonObject> createDMRaw(@Nonnull final JsonObject body) {
@@ -181,13 +179,13 @@ public class RestUser extends RestHandler {
                 ImmutableMap.of()))
                 .thenApply(__ -> null);
     }
-
+    
     @Nonnull
     @CheckReturnValue
     public CompletionStage<ApplicationInfo> getCurrentApplicationInformation() {
         return getCurrentApplicationInformationRaw().thenApply(entityBuilder()::createApplicationInfo);
     }
-
+    
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonObject> getCurrentApplicationInformationRaw() {
@@ -195,13 +193,13 @@ public class RestUser extends RestHandler {
                 ImmutableMap.of()))
                 .thenApply(ResponsePayload::object);
     }
-
+    
     @Nonnull
     @CheckReturnValue
     public CompletionStage<GatewayInfo> getGatewayBot() {
         return getGatewayBotRaw().thenApply(e -> entityBuilder().createGatewayInfo(e));
     }
-
+    
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonObject> getGatewayBotRaw() {
