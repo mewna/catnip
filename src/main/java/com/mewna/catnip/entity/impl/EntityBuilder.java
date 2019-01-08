@@ -1196,7 +1196,20 @@ public final class EntityBuilder {
                 .rpcOrigins(toStringList(data.getJsonArray("rpc_origins")))
                 .publicBot(data.getBoolean("bot_public"))
                 .requiresCodeGrant(data.getBoolean("bot_require_code_grant"))
-                .owner(createUser(data.getJsonObject("owner")))
+                .owner(createApplicationOwner(data.getJsonObject("owner")))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public ApplicationOwner createApplicationOwner(@Nonnull final JsonObject data) {
+        return ApplicationOwnerImpl.builder()
+                .catnip(catnip)
+                .username(data.getString("username"))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .discriminator(data.getString("discriminator"))
+                .avatar(data.getString("avatar", null))
+                .bot(data.getBoolean("bot", false))
                 .build();
     }
     
