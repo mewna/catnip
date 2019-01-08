@@ -43,17 +43,18 @@ import java.util.concurrent.CompletionStage;
  * @author natanbc
  * @since 9/14/18
  */
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class RestInvite extends RestHandler {
     public RestInvite(final CatnipImpl catnip) {
         super(catnip);
     }
-
+    
     @Nonnull
     @CheckReturnValue
     public CompletionStage<Invite> getInvite(@Nonnull final String code) {
         return getInviteRaw(code).thenApply(entityBuilder()::createInvite);
     }
-
+    
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonObject> getInviteRaw(@Nonnull final String code) {
@@ -61,13 +62,13 @@ public class RestInvite extends RestHandler {
                 ImmutableMap.of("invite.code", code)))
                 .thenApply(ResponsePayload::object);
     }
-
+    
     @Nonnull
     @CheckReturnValue
     public CompletionStage<Invite> deleteInvite(@Nonnull final String code) {
         return deleteInviteRaw(code).thenApply(entityBuilder()::createInvite);
     }
-
+    
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonObject> deleteInviteRaw(@Nonnull final String code) {
