@@ -90,6 +90,7 @@ public class CatnipShard extends AbstractVerticle {
     private volatile boolean presenceRateLimitRecheckQueued;
     private volatile boolean sendRateLimitRecheckQueued;
     private volatile List<String> trace = Collections.emptyList();
+    private volatile boolean clientClose = false;
     
     public CatnipShard(@Nonnull final Catnip catnip, @Nonnegative final int id, @Nonnegative final int limit,
                        @Nullable final Presence presence) {
@@ -240,7 +241,7 @@ public class CatnipShard extends AbstractVerticle {
                 break;
             }
             default: {
-                catnip.logAdapter().warn("Shard {} Got unknown control message: {}", id, body.name());
+                catnip.logAdapter().warn("Shard {}/{}: Got unknown control message: {}", id, limit, body.name());
                 break;
             }
         }
@@ -252,6 +253,7 @@ public class CatnipShard extends AbstractVerticle {
     
     private void doStop() {
         if(state != null) {
+            clientClose = true;
             state.socket().close((short) 4000);
             state.socketOpen(false);
         }
@@ -269,13 +271,13 @@ public class CatnipShard extends AbstractVerticle {
                     catnip.eventBus().publish(Raw.CONNECTED, shardInfo());
                     socket.frameHandler(frame -> handleSocketFrame(msg, frame))
                             .closeHandler(this::handleSocketClose)
-                            .exceptionHandler(t -> catnip.logAdapter().error("Exception in Websocket", t));
+                            .exceptionHandler(t -> catnip.logAdapter().error("Shard {}/{}: Exception in Websocket", id, limit, t));
                     state = new ShardState(socket);
                     state.socketOpen(true);
                 },
                 failure -> {
                     state = null;
-                    catnip.logAdapter().error("Couldn't connect socket:", failure);
+                    catnip.logAdapter().error("Shard {}/{}: Couldn't connect socket:", id, limit, failure);
                     catnip.eventBus().publish("RAW_STATUS", new JsonObject().put("status", "down:fail-connect")
                             .put("shard", id));
                     // If we totally fail to connect socket, don't need to worry as much
@@ -312,7 +314,7 @@ public class CatnipShard extends AbstractVerticle {
                 }
                 handleSocketData(msg, decompressed.toJsonObject());
             } catch(final IOException e) {
-                catnip.logAdapter().error("Error decompressing payload", e);
+                catnip.logAdapter().error("Shard {}/{}: Error decompressing payload", id, limit, e);
             } finally {
                 state.readBufferPosition(0);
             }
@@ -328,29 +330,34 @@ public class CatnipShard extends AbstractVerticle {
                 handleBinaryData(msg, frame.binaryData());
             }
             if(frame.isClose()) {
+                
                 final short closeCode = frame.closeStatusCode();
                 if(closeCode == GatewayCloseCode.INVALID_SEQ.code() || closeCode == GatewayCloseCode.SESSION_TIMEOUT.code()) {
                     // These two close codes invalidate your session (and afaik do not send an OP9).
                     catnip.sessionManager().clearSeqnum(id);
                     catnip.sessionManager().clearSession(id);
                 }
-                if(closeCode >= 4000) {
-                    final GatewayCloseCode code = GatewayCloseCode.byId(closeCode);
-                    if(code != null) {
-                        catnip.logAdapter().warn("Shard {}: gateway websocket closed with code {}: {}: {}",
-                                id, closeCode, code.name(), code.message());
-                    } else {
-                        catnip.logAdapter().warn("Shard {}: gateway websocket closing with code {}: {}",
-                                id, closeCode, frame.closeReason());
-                    }
+                if(clientClose) {
+                    catnip.logAdapter().info("Shard {}/{}: We closed the websocket with code {}", id, limit, closeCode);
                 } else {
-                    catnip.logAdapter().warn("Shard {}: gateway websocket closing with code {}: {}",
-                            id, closeCode, frame.closeReason());
+                    if(closeCode >= 4000) {
+                        final GatewayCloseCode code = GatewayCloseCode.byId(closeCode);
+                        if(code != null) {
+                            catnip.logAdapter().warn("Shard {}/{}: gateway websocket closed with code {}: {}: {}",
+                                    id, limit, closeCode, code.name(), code.message());
+                        } else {
+                            catnip.logAdapter().warn("Shard {}/{}: gateway websocket closing with code {}: {}",
+                                    id, limit, closeCode, frame.closeReason());
+                        }
+                    } else {
+                        catnip.logAdapter().warn("Shard {}/{}: gateway websocket closing with code {}: {}",
+                                id, limit, closeCode, frame.closeReason());
+                    }
                 }
                 state.socketOpen(false);
             }
         } catch(final Exception e) {
-            catnip.logAdapter().error("Failed to handle socket frame", e);
+            catnip.logAdapter().error("Shard {}/{}: Failed to handle socket frame", id, limit, e);
         }
     }
     
@@ -402,14 +409,14 @@ public class CatnipShard extends AbstractVerticle {
     
     private void handleSocketClose(final Void __) {
         catnip.eventBus().publish(Raw.DISCONNECTED, shardInfo());
-        catnip.logAdapter().warn("Socket closing!");
+        catnip.logAdapter().warn("Shard {}/{}: Socket closing!", id, limit);
         try {
             catnip.eventBus().publish("RAW_STATUS", new JsonObject().put("status", "down:socket-close")
                     .put("shard", id));
             state = null;
             catnip.shardManager().addToConnectQueue(id);
         } catch(final Exception e) {
-            catnip.logAdapter().error("Failure closing socket:", e);
+            catnip.logAdapter().error("Shard {}/{}: Failure closing socket:", id, limit, e);
         }
     }
     
@@ -445,7 +452,7 @@ public class CatnipShard extends AbstractVerticle {
             if(shardState != null && shardState.socket() != null && shardState.socketOpen()) {
                 if(!heartbeatAcked) {
                     // Zombie
-                    catnip.logAdapter().warn("Shard {} zombied, queueing reconnect!", id);
+                    catnip.logAdapter().warn("Shard {}/{}: Heartbeat zombie, queueing reconnect!", id, limit);
                     catnip.vertx().cancelTimer(timerId);
                     catnip.eventBus().publish(controlAddress(id), ShardControlMessage.STOP);
                     return;
@@ -534,11 +541,13 @@ public class CatnipShard extends AbstractVerticle {
         if(event.getBoolean("d")) {
             // Can resume
             if(state != null) {
+                clientClose = true;
                 state.socket().close();
             }
         } else {
             // Can't resume, clear old data
             if(state != null) {
+                clientClose = true;
                 state.socket().close();
                 catnip.cacheWorker().invalidateShard(id);
                 catnip.sessionManager().clearSession(id);
@@ -550,6 +559,7 @@ public class CatnipShard extends AbstractVerticle {
     private void handleReconnectRequest(final Message<ShardControlMessage> msg, final JsonObject event) {
         // Just immediately disconnect
         if(state != null) {
+            clientClose = true;
             state.socket().close();
         }
     }
