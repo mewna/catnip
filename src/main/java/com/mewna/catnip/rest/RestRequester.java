@@ -45,6 +45,7 @@ import io.vertx.core.json.JsonObject;
 import lombok.*;
 import lombok.experimental.Accessors;
 import okhttp3.*;
+import okhttp3.internal.http.HttpMethod;
 import okio.BufferedSink;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -76,7 +77,7 @@ public class RestRequester {
     public static final String API_HOST = "https://discordapp.com";
     private static final int API_VERSION = 6;
     public static final String API_BASE = "/api/v" + API_VERSION;
-    
+    private static final RequestBody EMPTY_BODY = RequestBody.create(null, new byte[0]);
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
     private final Catnip catnip;
     private final OkHttpClient _http;
@@ -264,6 +265,8 @@ public class RestRequester {
                     RequestBody body = null;
                     if(encoded != null) {
                         body = RequestBody.create(MediaType.parse("application/json"), encoded);
+                    } else if(HttpMethod.requiresRequestBody(r.route.method().name().toUpperCase())) {
+                        body = EMPTY_BODY;
                     }
                     executeHttpRequest(r, route, bucket, body);
                 }
@@ -345,6 +348,8 @@ public class RestRequester {
         @Setter
         private Future<ResponsePayload> future;
         private int failedAttempts;
+        @Setter
+        private boolean emptyBody;
         
         public OutboundRequest() {
         }
