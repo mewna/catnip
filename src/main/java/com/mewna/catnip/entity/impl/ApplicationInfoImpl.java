@@ -32,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.misc.ApplicationInfo;
-import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.entity.misc.ApplicationOwner;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -60,7 +60,7 @@ public class ApplicationInfoImpl implements ApplicationInfo, RequiresCatnip {
     private List<String> rpcOrigins;
     private boolean publicBot;
     private boolean requiresCodeGrant;
-    private User owner;
+    private ApplicationOwner owner;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
