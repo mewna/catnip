@@ -30,9 +30,10 @@
 
 (defn run []
       (def catnip (Catnip/catnip "your token here"))
-      (catnip/on DiscordEvent/MESSAGE_CREATE
+      (.on catnip DiscordEvent/MESSAGE_CREATE
                  (fn [msg]
                      (.sendMessage (.channel msg) "Test")
                      )
                  )
+      (.connect catnip)
       )
