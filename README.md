@@ -35,7 +35,8 @@ No. Use a real build tool like [Maven](https://maven.apache.org/) or [Gradle](ht
   or [write your own cache handler](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/cache/EntityCacheWorker.java).
 - You can disable individual events.
 - You can disable all events, and handle gateway events directly.
-- Customizable ratelimit handling - wanna store your [sessions/seqnums](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/shard/session/SessionManager.java) 
+- Customizable ratelimit/session data handling - wanna store your 
+  [sessions/seqnums](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/shard/session/SessionManager.java) 
   and [REST ratelimit data](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/rest/bucket/BucketBackend.java)
   in Redis, but [gateway ratelimits](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/internal/ratelimit/Ratelimiter.java)
   in memory? You can do that!
