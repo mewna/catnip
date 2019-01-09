@@ -495,15 +495,9 @@ public class CatnipShard extends AbstractVerticle {
         
         switch(type) {
             case "READY": {
-                // Reply after IDENTIFY ratelimit
                 catnip.sessionManager().session(id, data.getString("session_id"));
-                if(id == limit - 1) {
-                    // No need to delay
-                    msg.reply(READY);
-                } else {
-                    // More shards to go, delay
-                    catnip.vertx().setTimer(5500L, __ -> msg.reply(READY));
-                }
+                // Reply after IDENTIFY ratelimit
+                catnip.vertx().setTimer(5500L, __ -> msg.reply(READY));
                 catnip.eventBus().publish(Raw.IDENTIFIED, shardInfo());
                 break;
             }
