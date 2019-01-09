@@ -75,6 +75,19 @@ catnip.on(DiscordEvent.MESSAGE_CREATE, msg -> {
 catnip.connect();
 ```
 
+You can also create a catnip instance asynchronously:
+
+```Java
+Catnip.catnipAsync("your token here").thenAccept(catnip -> {
+    catnip.on(DiscordEvent.MESSAGE_CREATE, msg -> {
+        if(msg.content().startsWith("!ping")) {
+            msg.channel().sendMessage("pong!");
+        }
+    });
+    catnip.connect();
+});
+```
+
 Also check out the [examples](https://github.com/mewna/catnip/tree/master/src/main/example/basic) for Kotlin and Scala usage.
 
 ### Custom event bus events
