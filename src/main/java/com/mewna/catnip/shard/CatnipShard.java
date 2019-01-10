@@ -90,7 +90,7 @@ public class CatnipShard extends AbstractVerticle {
     private volatile boolean presenceRateLimitRecheckQueued;
     private volatile boolean sendRateLimitRecheckQueued;
     private volatile List<String> trace = Collections.emptyList();
-    private volatile boolean clientClose = false;
+    private volatile boolean clientClose;
     
     public CatnipShard(@Nonnull final Catnip catnip, @Nonnegative final int id, @Nonnegative final int limit,
                        @Nullable final Presence presence) {
@@ -220,11 +220,11 @@ public class CatnipShard extends AbstractVerticle {
                 break;
             }
             case STOP: {
-                doStop();
+                shutdownShard();
                 break;
             }
             case SHUTDOWN: {
-                doStop();
+                shutdownShard();
                 catnip.vertx().undeploy(deploymentID());
                 break;
             }
@@ -251,11 +251,10 @@ public class CatnipShard extends AbstractVerticle {
         connectSocket(msg);
     }
     
-    private void doStop() {
+    private void shutdownShard() {
         if(state != null) {
             clientClose = true;
             state.socket().close((short) 4000);
-            state.socketOpen(false);
         }
         messageQueue.clear();
         presenceQueue.clear();
@@ -328,7 +327,6 @@ public class CatnipShard extends AbstractVerticle {
                 handleBinaryData(msg, frame.binaryData());
             }
             if(frame.isClose()) {
-                
                 final short closeCode = frame.closeStatusCode();
                 if(closeCode == GatewayCloseCode.INVALID_SEQ.code() || closeCode == GatewayCloseCode.SESSION_TIMEOUT.code()) {
                     // These two close codes invalidate your session (and afaik do not send an OP9).
@@ -426,15 +424,14 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void handleSocketSend(final Message<JsonObject> msg) {
-        final ShardState shardState = state;
-        if(shardState != null && shardState.socket() != null && shardState.socketOpen()) {
+        if(state != null && state.socket() != null && state.socketOpen()) {
             JsonObject payload = msg.body();
             for(final Extension extension : catnip.extensionManager().extensions()) {
                 for(final CatnipHook hook : extension.hooks()) {
                     payload = hook.rawGatewaySendHook(payload);
                 }
             }
-            shardState.socket().writeTextMessage(payload.encode());
+            state.socket().writeTextMessage(payload.encode());
         }
     }
     
