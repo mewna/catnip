@@ -278,8 +278,6 @@ public class CatnipShard extends AbstractVerticle {
                 failure -> {
                     state = null;
                     catnip.logAdapter().error("Shard {}/{}: Couldn't connect socket:", id, limit, failure);
-                    catnip.eventBus().publish("RAW_STATUS", new JsonObject().put("status", "down:fail-connect")
-                            .put("shard", id));
                     // If we totally fail to connect socket, don't need to worry as much
                     catnip.vertx().setTimer(500L, __ -> msg.reply(FAILED));
                 });
@@ -404,15 +402,12 @@ public class CatnipShard extends AbstractVerticle {
         }
         // Emit messages for subconsumers
         catnip.eventBus().publish(websocketMessageRecvAddress(op), payload);
-        catnip.eventBus().publish("RAW_WS", payload);
     }
     
     private void handleSocketClose(final Void __) {
         catnip.eventBus().publish(Raw.DISCONNECTED, shardInfo());
         catnip.logAdapter().warn("Shard {}/{}: Socket closing!", id, limit);
         try {
-            catnip.eventBus().publish("RAW_STATUS", new JsonObject().put("status", "down:socket-close")
-                    .put("shard", id));
             state = null;
             catnip.shardManager().addToConnectQueue(id);
         } catch(final Exception e) {
@@ -517,7 +512,6 @@ public class CatnipShard extends AbstractVerticle {
         // has finished booting.
         event.put("shard", new JsonObject().put("id", id).put("limit", limit));
         catnip.eventBuffer().buffer(event);
-        catnip.eventBus().publish("RAW_DISPATCH", event);
     }
     
     private void handleHeartbeat(final Message<ShardControlMessage> msg, final JsonObject event) {
@@ -539,6 +533,7 @@ public class CatnipShard extends AbstractVerticle {
                 state.socket().close();
             }
         } else {
+            catnip.logAdapter().info("Session invalidated (OP 9), clearing shard data and reconnecting");
             // Can't resume, clear old data
             if(state != null) {
                 clientClose = true;
