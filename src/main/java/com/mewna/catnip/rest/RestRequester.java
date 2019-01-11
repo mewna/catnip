@@ -284,6 +284,7 @@ public class RestRequester {
             final long wait = global.reset() - System.currentTimeMillis() + bucket.latency();
             catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
                     bucketRoute.baseRoute(), route.baseRoute(), wait);
+            catnip.logAdapter().warn("Hit GLOBAL ratelimit, waiting {}ms and retrying...", wait);
             catnip.vertx().setTimer(wait, __ -> {
                 global.resetBucket();
                 bucket.retry(r);
