@@ -15,7 +15,7 @@ Licensed under the [BSD 3-Clause License](https://tldrlegal.com/license/bsd-3-cl
 
 ## Installation
 
-[Get it on Jitpack](https://jitpack.io/#mewna/catnip)
+[Get it on Jitpack](https://jitpack.io/#com.mewna/catnip)
 
 Current version: ![GitHub tag (latest by date)](https://img.shields.io/github/tag-date/mewna/catnip.svg?style=popout)
 
