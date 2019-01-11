@@ -271,6 +271,10 @@ public final class DispatchEmitter {
                 // ws events anyway
                 break;
             }
+            case Raw.GIFT_CODE_UPDATE: {
+                // See docs on Raw#GIFT_CODE_UPDATE for why this is here.
+                break;
+            }
             
             default: {
                 catnip.logAdapter().warn("Got unimplemented gateway event: {}", type);

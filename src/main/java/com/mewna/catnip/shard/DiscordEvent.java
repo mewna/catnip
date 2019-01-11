@@ -139,6 +139,14 @@ public interface DiscordEvent {
         String RESUMED                      = "RESUMED";
         String TYPING_START                 = "TYPING_START";
         String VOICE_STATE_UPDATE           = "VOICE_STATE_UPDATE";
+        /**
+         * Jake has explicitly said that this is not for bots and will not be
+         * documented, so we can safely ignore it. It's here for the sake of
+         * completeness.
+         *
+         * See https://github.com/discordapp/discord-api-docs/issues/803
+         */
+        String GIFT_CODE_UPDATE             = "GIFT_CODE_UPDATE";
         // @formatter:on
     }
 }
