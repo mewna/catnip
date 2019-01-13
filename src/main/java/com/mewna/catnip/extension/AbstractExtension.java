@@ -78,7 +78,7 @@ public abstract class AbstractExtension extends AbstractVerticle implements Exte
     
     @Override
     public <T> MessageConsumer<T> on(@Nonnull final EventType<T> type) {
-        final MessageConsumer<T> consumer = catnip().eventBus().consumer(type.key());
+        final MessageConsumer<T> consumer = catnip().dispatchManager().createConsumer(type.key());
         context.addCloseHook(consumer::unregister);
         return consumer;
     }

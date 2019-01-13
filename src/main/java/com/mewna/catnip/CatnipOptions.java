@@ -38,6 +38,8 @@ import com.mewna.catnip.rest.bucket.BucketBackend;
 import com.mewna.catnip.rest.bucket.MemoryBucketBackend;
 import com.mewna.catnip.shard.DiscordEvent.Raw;
 import com.mewna.catnip.shard.event.CachingBuffer;
+import com.mewna.catnip.shard.event.DefaultDispatchManager;
+import com.mewna.catnip.shard.event.DispatchManager;
 import com.mewna.catnip.shard.event.EventBuffer;
 import com.mewna.catnip.shard.manager.DefaultShardManager;
 import com.mewna.catnip.shard.manager.ShardManager;
@@ -119,6 +121,11 @@ public final class CatnipOptions implements Cloneable {
      */
     @Nonnull
     private BucketBackend restBucketBackend = new MemoryBucketBackend();
+    /**
+     * Manages event dispatching and consumers. Defaults to {@link DefaultDispatchManager}.
+     */
+    @Nonnull
+    private DispatchManager dispatchManager = new DefaultDispatchManager();
     /**
      * Whether or not catnip should chunk members. Do not disable this if you
      * don't know what it does.
