@@ -136,57 +136,76 @@ public class RestRequester {
                     }
                     // This is a final 1-element array so we can mutate it inside of callbacks
                     // *sigh*
-                    final ResponsePayload[] payload = {new ResponsePayload(body)};
+                    final ResponsePayload payload = new ResponsePayload(body);
                     if(headers.contains("X-Ratelimit-Global")) {
-                        // We hit a global ratelimit, update
-                        final Bucket global = getBucket("GLOBAL");
-                        final long retry = Long.parseLong(headers.get("Retry-After"));
-                        global.remaining(0).thenAcceptBoth(global.limit(1), (___, ____) -> {
-                            // 500ms buffer for safety; we don't use a specific bucket's
-                            // latency because the ratelimit is global, not per-bucket.
-                            final long globalReset = System.currentTimeMillis() + retry + 500L;
-                            // CatnipImpl.vertx().setTimer(globalReset, __ -> global.resetBucket());
-                            global.reset(TimeUnit.MILLISECONDS.toSeconds(globalReset)).thenAccept(_____ -> bucket.retry(r));
-                        });
+                        handleGlobalRatelimit(headers, bucket, r);
                     } else if(ratelimited) {
-                        // We got ratelimited, back the fuck off
-                        bucket.updateFromHeaders(headers).thenAccept(___ -> {
-                            if(hasMemeReactionRatelimits) {
-                                // Ratelimits are a meme with reactions
-                                catnip.vertx().setTimer(250L, ____ -> bucket.retry(r));
-                            } else {
-                                // Try and compute from headers
-                                bucket.updateFromHeaders(headers).thenAccept(____ -> bucket.retry(r));
-                            }
-                        });
+                        handleRouteRatelimit(headers, bucket, r, hasMemeReactionRatelimits);
                     } else {
-                        // We're good, run it through hooks and complete the future.
-                        bucket.updateFromHeaders(headers).thenAccept(___ -> {
-                            for(final Extension extension : catnip.extensionManager().extensions()) {
-                                for(final CatnipHook hook : extension.hooks()) {
-                                    payload[0] = hook.rawRestReceiveDataHook(r.route, payload[0]);
-                                }
-                            }
-                            r.future.complete(payload[0]);
-                            bucket.finishRequest();
-                            bucket.submit();
-                        });
+                        finishRequest(headers, bucket, r, payload);
                     }
                 } else {
-                    // Fail request, resubmit to queue if failed less than 3 times, complete with error otherwise.
-                    r.failed();
-                    if(r.failedAttempts() >= 3) {
-                        catnip.logAdapter().debug("Request {} failed, giving up!", r);
-                        r.future.fail(failureCause);
-                        bucket.finishRequest();
-                        bucket.submit();
-                    } else {
-                        catnip.logAdapter().debug("Request {} failed, retrying ({} / 3)!", r, r.failedAttempts() + 1);
-                        bucket.retry(r);
-                    }
+                    failRequest(bucket, r, failureCause);
                 }
             });
         });
+    }
+    
+    private void handleGlobalRatelimit(final MultiMap headers, final Bucket bucket, final OutboundRequest r) {
+        // We hit a global ratelimit, update
+        final Bucket global = getBucket("GLOBAL");
+        final long retry = Long.parseLong(headers.get("Retry-After"));
+        global.remaining(0).thenAcceptBoth(global.limit(1), (___, ____) -> {
+            // 500ms buffer for safety; we don't use a specific bucket's
+            // latency because the ratelimit is global, not per-bucket.
+            final long globalReset = System.currentTimeMillis() + retry + 500L;
+            // CatnipImpl.vertx().setTimer(globalReset, __ -> global.resetBucket());
+            global.reset(TimeUnit.MILLISECONDS.toSeconds(globalReset)).thenAccept(_____ -> bucket.retry(r));
+        });
+    }
+    
+    private void handleRouteRatelimit(final MultiMap headers, final Bucket bucket, final OutboundRequest r,
+                                      final boolean hasMemeReactionRatelimits) {
+        // We got ratelimited, back the fuck off
+        bucket.updateFromHeaders(headers).thenAccept(___ -> {
+            if(hasMemeReactionRatelimits) {
+                // Ratelimits are a meme with reactions
+                catnip.vertx().setTimer(250L, ____ -> bucket.retry(r));
+            } else {
+                // Try and compute from headers
+                bucket.updateFromHeaders(headers).thenAccept(____ -> bucket.retry(r));
+            }
+        });
+    }
+    
+    private void finishRequest(final MultiMap headers, final Bucket bucket, final OutboundRequest r,
+                               final ResponsePayload finalPayload) {
+        final ResponsePayload[] payload = {finalPayload};
+        // We're good, run it through hooks and complete the future.
+        bucket.updateFromHeaders(headers).thenAccept(___ -> {
+            for(final Extension extension : catnip.extensionManager().extensions()) {
+                for(final CatnipHook hook : extension.hooks()) {
+                    payload[0] = hook.rawRestReceiveDataHook(r.route, payload[0]);
+                }
+            }
+            r.future.complete(payload[0]);
+            bucket.finishRequest();
+            bucket.submit();
+        });
+    }
+    
+    private void failRequest(final Bucket bucket, final OutboundRequest r, final Throwable failureCause) {
+        // Fail request, resubmit to queue if failed less than 3 times, complete with error otherwise.
+        r.failed();
+        if(r.failedAttempts() >= 3) {
+            catnip.logAdapter().debug("Request {} failed, giving up!", r);
+            r.future.fail(failureCause);
+            bucket.finishRequest();
+            bucket.submit();
+        } else {
+            catnip.logAdapter().debug("Request {} failed, retrying ({} / 3)!", r, r.failedAttempts() + 1);
+            bucket.retry(r);
+        }
     }
     
     private void request(final OutboundRequest r) {
