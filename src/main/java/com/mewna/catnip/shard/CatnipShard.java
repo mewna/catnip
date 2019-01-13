@@ -489,7 +489,7 @@ public class CatnipShard extends AbstractVerticle {
             case "READY": {
                 catnip.sessionManager().session(id, data.getString("session_id"));
                 // Reply after IDENTIFY ratelimit
-                catnip.vertx().setTimer(5500L, __ -> msg.reply(READY));
+                msg.reply(READY);
                 catnip.eventBus().publish(Raw.IDENTIFIED, shardInfo());
                 break;
             }
