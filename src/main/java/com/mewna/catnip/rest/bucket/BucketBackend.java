@@ -34,6 +34,7 @@ import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author amy
@@ -42,34 +43,34 @@ import javax.annotation.Nonnull;
 @SuppressWarnings("UnusedReturnValue")
 public interface BucketBackend {
     @Nonnull
-    BucketBackend limit(@Nonnull String route, @Nonnegative long value);
+    CompletableFuture<BucketBackend> limit(@Nonnull String route, @Nonnegative long value);
     
     @Nonnegative
-    long limit(@Nonnull String route);
+    CompletableFuture<Long> limit(@Nonnull String route);
     
     @Nonnull
-    BucketBackend remaining(@Nonnull String route, @Nonnegative long value);
+    CompletableFuture<BucketBackend> remaining(@Nonnull String route, @Nonnegative long value);
     
     @Nonnegative
-    long remaining(@Nonnull String route);
+    CompletableFuture<Long> remaining(@Nonnull String route);
     
     @Nonnull
-    BucketBackend reset(@Nonnull String route, @Nonnegative long value);
+    CompletableFuture<BucketBackend> reset(@Nonnull String route, @Nonnegative long value);
     
     @Nonnegative
-    long reset(@Nonnull String route);
+    CompletableFuture<Long> reset(@Nonnull String route);
     
     @Nonnull
-    BucketBackend latency(@Nonnull String route, @Nonnegative long value);
+    CompletableFuture<BucketBackend> latency(@Nonnull String route, @Nonnegative long value);
     
     @Nonnegative
-    long latency(@Nonnull String route);
+    CompletableFuture<Long> latency(@Nonnull String route);
     
     @Nonnull
-    BucketBackend lastRequest(@Nonnull String route, @Nonnegative long time);
+    CompletableFuture<BucketBackend> lastRequest(@Nonnull String route, @Nonnegative long time);
     
     @Nonnegative
-    long lastRequest(@Nonnull String route);
+    CompletableFuture<Long> lastRequest(@Nonnull String route);
     
     @Getter
     @Setter

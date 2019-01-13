@@ -27,9 +27,12 @@
 
 package com.mewna.catnip.rest.bucket;
 
+import com.mewna.catnip.util.SafeVertxCompletableFuture;
+
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -41,69 +44,69 @@ public class MemoryBucketBackend implements BucketBackend {
     
     @Nonnull
     @Override
-    public BucketBackend limit(@Nonnull final String route, @Nonnegative final long value) {
+    public CompletableFuture<BucketBackend> limit(@Nonnull final String route, @Nonnegative final long value) {
         final BucketContainer container = buckets.computeIfAbsent(route, __ -> new BucketContainer());
         container.limit(value);
-        return this;
+        return SafeVertxCompletableFuture.completedFuture(this);
     }
     
     @Nonnegative
     @Override
-    public long limit(@Nonnull final String route) {
-        return buckets.computeIfAbsent(route, __ -> new BucketContainer()).limit();
+    public CompletableFuture<Long> limit(@Nonnull final String route) {
+        return SafeVertxCompletableFuture.completedFuture(buckets.computeIfAbsent(route, __ -> new BucketContainer()).limit());
     }
     
     @Nonnull
     @Override
-    public BucketBackend remaining(@Nonnull final String route, @Nonnegative final long value) {
+    public CompletableFuture<BucketBackend> remaining(@Nonnull final String route, @Nonnegative final long value) {
         final BucketContainer container = buckets.computeIfAbsent(route, __ -> new BucketContainer());
         container.remaining(value);
-        return this;
+        return SafeVertxCompletableFuture.completedFuture(this);
     }
     
     @Nonnegative
     @Override
-    public long remaining(@Nonnull final String route) {
-        return buckets.computeIfAbsent(route, __ -> new BucketContainer()).remaining();
+    public CompletableFuture<Long> remaining(@Nonnull final String route) {
+        return SafeVertxCompletableFuture.completedFuture(buckets.computeIfAbsent(route, __ -> new BucketContainer()).remaining());
     }
     
     @Nonnull
     @Override
-    public BucketBackend reset(@Nonnull final String route, @Nonnegative final long value) {
+    public CompletableFuture<BucketBackend> reset(@Nonnull final String route, @Nonnegative final long value) {
         final BucketContainer container = buckets.computeIfAbsent(route, __ -> new BucketContainer());
         container.reset(value);
-        return this;
+        return SafeVertxCompletableFuture.completedFuture(this);
     }
     
     @Nonnegative
     @Override
-    public long reset(@Nonnull final String route) {
-        return buckets.computeIfAbsent(route, __ -> new BucketContainer()).reset();
+    public CompletableFuture<Long> reset(@Nonnull final String route) {
+        return SafeVertxCompletableFuture.completedFuture(buckets.computeIfAbsent(route, __ -> new BucketContainer()).reset());
     }
     
     @Nonnull
     @Override
-    public BucketBackend latency(@Nonnull final String route, final long value) {
+    public CompletableFuture<BucketBackend> latency(@Nonnull final String route, final long value) {
         final BucketContainer container = buckets.computeIfAbsent(route, __ -> new BucketContainer());
         container.latency(value);
-        return this;
+        return SafeVertxCompletableFuture.completedFuture(this);
     }
     
     @Override
-    public long latency(@Nonnull final String route) {
-        return buckets.computeIfAbsent(route, __ -> new BucketContainer()).latency();
+    public CompletableFuture<Long> latency(@Nonnull final String route) {
+        return SafeVertxCompletableFuture.completedFuture(buckets.computeIfAbsent(route, __ -> new BucketContainer()).latency());
     }
     
     @Nonnull
     @Override
-    public BucketBackend lastRequest(@Nonnull final String route, final long time) {
+    public CompletableFuture<BucketBackend> lastRequest(@Nonnull final String route, final long time) {
         final BucketContainer container = buckets.computeIfAbsent(route, __ -> new BucketContainer());
         container.lastRequest(time);
-        return this;
+        return SafeVertxCompletableFuture.completedFuture(this);
     }
     
     @Override
-    public long lastRequest(@Nonnull final String route) {
-        return buckets.computeIfAbsent(route, __ -> new BucketContainer()).lastRequest();
+    public CompletableFuture<Long> lastRequest(@Nonnull final String route) {
+        return SafeVertxCompletableFuture.completedFuture(buckets.computeIfAbsent(route, __ -> new BucketContainer()).lastRequest());
     }
 }

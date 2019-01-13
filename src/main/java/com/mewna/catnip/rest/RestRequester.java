@@ -49,18 +49,13 @@ import okhttp3.internal.http.HttpMethod;
 import okio.BufferedSink;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static io.vertx.core.http.HttpMethod.GET;
 
@@ -104,87 +99,94 @@ public class RestRequester {
                                 final Buffer body, final MultiMap headers, final boolean succeeded,
                                 final Throwable failureCause) {
         final long now = System.currentTimeMillis();
-        bucket.latency(now - bucket.lastRequest());
-        if(succeeded) {
-            catnip.logAdapter().debug("Completed request {}", r);
-            if(statusCode < 200 || statusCode > 299) {
-                if(statusCode == 401) {
-                    catnip.logAdapter().warn("Token probably invalid: got {} '{}', route: {} {}, request {}, body {}",
-                            statusCode, statusMessage, r.route.method().name(), r.route.baseRoute(), r, body.toString());
-                    r.future.fail("Invalid token");
-                    return;
-                } else if(statusCode != 429) {
-                    catnip.logAdapter().warn("Got unexpected HTTP status: {} '{}', route: {} {}, request {}, body {}", statusCode,
-                            statusMessage, r.route.method().name(), r.route.baseRoute(), r, body.toString());
-                }
-            }
-            boolean ratelimited = false;
-            final boolean hasMemeReactionRatelimits = r.route.method() != GET
-                    && r.route.baseRoute().contains("/reactions/");
-            if(statusCode == 429) {
-                ratelimited = true;
-                // Reactions are a HUGE meme
-                // We hit *roughly* one 429 / reaction if we're adding many
-                // reactions. I *think* this is ok?
-                // TODO: Warn if we hit the meme ratelimit a lot
-                if(!hasMemeReactionRatelimits) {
-                    catnip.logAdapter().error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
-                            r.route.baseRoute(),
-                            headers.get("X-Ratelimit-Global"),
-                            headers.get("X-Ratelimit-Limit"),
-                            headers.get("X-Ratelimit-Reset")
-                    );
-                }
-            }
-            ResponsePayload payload = new ResponsePayload(body);
-            if(headers.contains("X-Ratelimit-Global")) {
-                // We hit a global ratelimit, update
-                final Bucket global = getBucket("GLOBAL");
-                final long retry = Long.parseLong(headers.get("Retry-After"));
-                global.remaining(0);
-                global.limit(1);
-                // 500ms buffer for safety; we don't use a specific bucket's
-                // latency because the ratelimit is global, not per-bucket.
-                final long globalReset = System.currentTimeMillis() + retry + 500L;
-                // CatnipImpl.vertx().setTimer(globalReset, __ -> global.resetBucket());
-                global.reset(TimeUnit.MILLISECONDS.toSeconds(globalReset));
-                bucket.retry(r);
-            } else if(ratelimited) {
-                // We got ratelimited, back the fuck off
-                bucket.updateFromHeaders(headers);
-                if(hasMemeReactionRatelimits) {
-                    // Ratelimits are a meme with reactions
-                    catnip.vertx().setTimer(250L, __ -> bucket.retry(r));
+        
+        //noinspection CodeBlock2Expr
+        bucket.lastRequest().thenAccept(lastRequest -> {
+            bucket.latency(now - lastRequest).thenAccept(__ -> {
+                if(succeeded) {
+                    catnip.logAdapter().debug("Completed request {}", r);
+                    if(statusCode < 200 || statusCode > 299) {
+                        if(statusCode == 401) {
+                            catnip.logAdapter().warn("Token probably invalid: got {} '{}', route: {} {}, request {}, body {}",
+                                    statusCode, statusMessage, r.route.method().name(), r.route.baseRoute(), r, body.toString());
+                            r.future.fail("Invalid token");
+                            return;
+                        } else if(statusCode != 429) {
+                            catnip.logAdapter().warn("Got unexpected HTTP status: {} '{}', route: {} {}, request {}, body {}", statusCode,
+                                    statusMessage, r.route.method().name(), r.route.baseRoute(), r, body.toString());
+                        }
+                    }
+                    boolean ratelimited = false;
+                    final boolean hasMemeReactionRatelimits = r.route.method() != GET
+                            && r.route.baseRoute().contains("/reactions/");
+                    if(statusCode == 429) {
+                        ratelimited = true;
+                        // Reactions are a HUGE meme
+                        // We hit *roughly* one 429 / reaction if we're adding many
+                        // reactions. I *think* this is ok?
+                        // TODO: Warn if we hit the meme ratelimit a lot
+                        if(!hasMemeReactionRatelimits) {
+                            catnip.logAdapter().error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
+                                    r.route.baseRoute(),
+                                    headers.get("X-Ratelimit-Global"),
+                                    headers.get("X-Ratelimit-Limit"),
+                                    headers.get("X-Ratelimit-Reset")
+                            );
+                        }
+                    }
+                    // This is a final 1-element array so we can mutate it inside of callbacks
+                    // *sigh*
+                    final ResponsePayload[] payload = {new ResponsePayload(body)};
+                    if(headers.contains("X-Ratelimit-Global")) {
+                        // We hit a global ratelimit, update
+                        final Bucket global = getBucket("GLOBAL");
+                        final long retry = Long.parseLong(headers.get("Retry-After"));
+                        global.remaining(0).thenAcceptBoth(global.limit(1), (___, ____) -> {
+                            // 500ms buffer for safety; we don't use a specific bucket's
+                            // latency because the ratelimit is global, not per-bucket.
+                            final long globalReset = System.currentTimeMillis() + retry + 500L;
+                            // CatnipImpl.vertx().setTimer(globalReset, __ -> global.resetBucket());
+                            global.reset(TimeUnit.MILLISECONDS.toSeconds(globalReset)).thenAccept(_____ -> bucket.retry(r));
+                        });
+                    } else if(ratelimited) {
+                        // We got ratelimited, back the fuck off
+                        bucket.updateFromHeaders(headers).thenAccept(___ -> {
+                            if(hasMemeReactionRatelimits) {
+                                // Ratelimits are a meme with reactions
+                                catnip.vertx().setTimer(250L, ____ -> bucket.retry(r));
+                            } else {
+                                // Try and compute from headers
+                                bucket.updateFromHeaders(headers).thenAccept(____ -> bucket.retry(r));
+                            }
+                        });
+                    } else {
+                        // We're good, run it through hooks and complete the future.
+                        bucket.updateFromHeaders(headers).thenAccept(___ -> {
+                            for(final Extension extension : catnip.extensionManager().extensions()) {
+                                for(final CatnipHook hook : extension.hooks()) {
+                                    payload[0] = hook.rawRestReceiveDataHook(r.route, payload[0]);
+                                }
+                            }
+                            r.future.complete(payload[0]);
+                            bucket.finishRequest();
+                            bucket.submit();
+                        });
+                    }
                 } else {
-                    // Try and compute from headers
-                    bucket.updateFromHeaders(headers);
-                    bucket.retry(r);
-                }
-            } else {
-                // We're good, run it through hooks and complete the future.
-                bucket.updateFromHeaders(headers);
-                for(final Extension extension : catnip.extensionManager().extensions()) {
-                    for(final CatnipHook hook : extension.hooks()) {
-                        payload = hook.rawRestReceiveDataHook(r.route, payload);
+                    // Fail request, resubmit to queue if failed less than 3 times, complete with error otherwise.
+                    r.failed();
+                    if(r.failedAttempts() >= 3) {
+                        catnip.logAdapter().debug("Request {} failed, giving up!", r);
+                        r.future.fail(failureCause);
+                        bucket.finishRequest();
+                        bucket.submit();
+                    } else {
+                        catnip.logAdapter().debug("Request {} failed, retrying ({} / 3)!", r, r.failedAttempts() + 1);
+                        bucket.retry(r);
                     }
                 }
-                r.future.complete(payload);
-                bucket.finishRequest();
-                bucket.submit();
-            }
-        } else {
-            // Fail request, resubmit to queue if failed less than 3 times, complete with error otherwise.
-            r.failed();
-            if(r.failedAttempts() >= 3) {
-                catnip.logAdapter().debug("Request {} failed, giving up!", r);
-                r.future.fail(failureCause);
-                bucket.finishRequest();
-                bucket.submit();
-            } else {
-                catnip.logAdapter().debug("Request {} failed, retrying ({} / 3)!", r, r.failedAttempts() + 1);
-                bucket.retry(r);
-            }
-        }
+            });
+        });
     }
     
     private void request(final OutboundRequest r) {
@@ -198,137 +200,153 @@ public class RestRequester {
         final Bucket bucket = getBucket(bucketRoute.baseRoute());
         final Bucket global = getBucket("GLOBAL");
         
-        if(global.remaining() == 0 && global.reset() < System.currentTimeMillis()) {
-            global.resetBucket();
-        }
+        final Route finalRoute = route;
         
-        if(global.remaining() > 0) {
-            // Can request
-            if(bucket.remaining() == 0 && bucket.reset() < System.currentTimeMillis()) {
-                bucket.resetBucket();
-            }
-            // add/remove/remove_all routes for reactions have a meme 1/0.25s
-            // ratelimit, which isn't accurately reflected in the responses
-            // from the API. Instead, we just try anyway and re-queue if we get
-            // a 429.
-            // Assuming you're messing with N reactions, where N > 1, you'll
-            // run into ~(N-1) 429s. I *think* this is okay?
-            final boolean hasMemeReactionRatelimits = route.method() != GET
-                    && route.baseRoute().contains("/reactions/");
-            if(bucket.remaining() > 0 || hasMemeReactionRatelimits) {
-                // Do request and update bucket
-                catnip.logAdapter().debug("Making request: {} {} (bucket {})", route.method().name(),
-                        API_BASE + route.baseRoute(), bucket.route);
-                // v.x is dumb and doesn't support multipart, so we use okhttp instead /shrug
-                if(r.buffers != null) {
-                    try {
-                        @SuppressWarnings("UnnecessarilyQualifiedInnerClassAccess")
-                        final MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
-                        
-                        for(int index = 0; index < r.buffers.size(); index++) {
-                            final ImmutablePair<String, Buffer> pair = r.buffers.get(index);
-                            builder.addFormDataPart("file" + index, pair.left, new MultipartRequestBody(pair.right));
-                        }
-                        if(r.object != null) {
-                            for(final Extension extension : catnip.extensionManager().extensions()) {
-                                for(final CatnipHook hook : extension.hooks()) {
-                                    r.object = hook.rawRestSendObjectHook(route, r.object);
-                                }
-                            }
-                            builder.addFormDataPart("payload_json", r.object.encode());
-                        } else if(r.array != null) {
-                            builder.addFormDataPart("payload_json", r.array.encode());
-                        } else {
-                            builder.addFormDataPart("payload_json", new JsonObject()
-                                    .putNull("content")
-                                    .putNull("embed").encode());
-                        }
-                        
-                        executeHttpRequest(r, route, bucket, builder.build());
-                    } catch(final Exception e) {
-                        catnip.logAdapter().error("Failed to send multipart request", e);
-                    }
-                } else {
-                    final String encoded;
-                    if(r.object != null) {
-                        for(final Extension extension : catnip.extensionManager().extensions()) {
-                            for(final CatnipHook hook : extension.hooks()) {
-                                r.object = hook.rawRestSendObjectHook(route, r.object);
-                            }
-                        }
-                        encoded = r.object.encode();
-                    } else if(r.array != null) {
-                        encoded = r.array.encode();
-                    } else {
-                        encoded = null;
-                    }
-                    RequestBody body = null;
-                    if(encoded != null) {
-                        body = RequestBody.create(MediaType.parse("application/json"), encoded);
-                    } else if(HttpMethod.requiresRequestBody(r.route.method().name().toUpperCase())) {
-                        body = EMPTY_BODY;
-                    }
-                    executeHttpRequest(r, route, bucket, body);
-                }
+        global.remaining().thenAcceptBoth(global.reset(), (globalRemaining, globalReset) -> {
+            final CompletableFuture<Void> resetFuture;
+            if(globalRemaining == 0 && globalReset < System.currentTimeMillis()) {
+                resetFuture = global.resetBucket();
             } else {
-                final long wait = bucket.reset() - System.currentTimeMillis() + bucket.latency();
-                catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
-                        bucketRoute.baseRoute(), route.baseRoute(), wait);
-                catnip.vertx().setTimer(wait, __ -> {
-                    bucket.resetBucket();
-                    bucket.retry(r);
-                });
+                resetFuture = SafeVertxCompletableFuture.completedFuture(null);
             }
-        } else {
-            // Global rl, retry later
-            final long wait = global.reset() - System.currentTimeMillis() + bucket.latency();
-            catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
-                    bucketRoute.baseRoute(), route.baseRoute(), wait);
-            catnip.logAdapter().warn("Hit GLOBAL ratelimit, waiting {}ms and retrying...", wait);
-            catnip.vertx().setTimer(wait, __ -> {
-                global.resetBucket();
-                bucket.retry(r);
+            
+            resetFuture.thenAccept(__ -> {
+                if(globalRemaining > 0) {
+                    // Can do some requests
+                    bucket.remaining().thenAcceptBoth(bucket.reset(), (remaining, reset) -> {
+                        final CompletableFuture<Void> future;
+                        if(remaining == 0 && reset < System.currentTimeMillis()) {
+                            future = bucket.resetBucket();
+                        } else {
+                            future = SafeVertxCompletableFuture.completedFuture(null);
+                        }
+                        future.thenAccept(___ -> {
+                            // add/remove/remove_all routes for reactions have a meme 1/0.25s
+                            // ratelimit, which isn't accurately reflected in the responses
+                            // from the API. Instead, we just try anyway and re-queue if we get
+                            // a 429.
+                            // Assuming you're messing with N reactions, where N > 1, you'll
+                            // run into ~(N-1) 429s. I *think* this is okay?
+                            final boolean hasMemeReactionRatelimits = finalRoute.method() != GET
+                                    && finalRoute.baseRoute().contains("/reactions/");
+                            if(remaining > 0 || hasMemeReactionRatelimits) {
+                                // Do request and update bucket
+                                catnip.logAdapter().debug("Making request: {} {} (bucket {})", finalRoute.method().name(),
+                                        API_BASE + finalRoute.baseRoute(), bucket.route);
+                                // v.x is dumb and doesn't support multipart, so we use okhttp instead /shrug
+                                if(r.buffers != null) {
+                                    try {
+                                        @SuppressWarnings("UnnecessarilyQualifiedInnerClassAccess")
+                                        final MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
+                                        
+                                        for(int index = 0; index < r.buffers.size(); index++) {
+                                            final ImmutablePair<String, Buffer> pair = r.buffers.get(index);
+                                            builder.addFormDataPart("file" + index, pair.left, new MultipartRequestBody(pair.right));
+                                        }
+                                        if(r.object != null) {
+                                            for(final Extension extension : catnip.extensionManager().extensions()) {
+                                                for(final CatnipHook hook : extension.hooks()) {
+                                                    r.object = hook.rawRestSendObjectHook(finalRoute, r.object);
+                                                }
+                                            }
+                                            builder.addFormDataPart("payload_json", r.object.encode());
+                                        } else if(r.array != null) {
+                                            builder.addFormDataPart("payload_json", r.array.encode());
+                                        } else {
+                                            builder.addFormDataPart("payload_json", new JsonObject()
+                                                    .putNull("content")
+                                                    .putNull("embed").encode());
+                                        }
+                                        
+                                        executeHttpRequest(r, finalRoute, bucket, builder.build());
+                                    } catch(final Exception e) {
+                                        catnip.logAdapter().error("Failed to send multipart request", e);
+                                    }
+                                } else {
+                                    final String encoded;
+                                    if(r.object != null) {
+                                        for(final Extension extension : catnip.extensionManager().extensions()) {
+                                            for(final CatnipHook hook : extension.hooks()) {
+                                                r.object = hook.rawRestSendObjectHook(finalRoute, r.object);
+                                            }
+                                        }
+                                        encoded = r.object.encode();
+                                    } else if(r.array != null) {
+                                        encoded = r.array.encode();
+                                    } else {
+                                        encoded = null;
+                                    }
+                                    RequestBody body = null;
+                                    if(encoded != null) {
+                                        body = RequestBody.create(MediaType.parse("application/json"), encoded);
+                                    } else if(HttpMethod.requiresRequestBody(r.route.method().name().toUpperCase())) {
+                                        body = EMPTY_BODY;
+                                    }
+                                    executeHttpRequest(r, finalRoute, bucket, body);
+                                }
+                            } else {
+                                // Route ratelimited, retry later
+                                bucket.latency().thenAccept(latency -> {
+                                    final long wait = reset - System.currentTimeMillis() + latency;
+                                    catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
+                                            bucketRoute.baseRoute(), finalRoute.baseRoute(), wait);
+                                    catnip.vertx().setTimer(wait, ____ -> bucket.resetBucket().thenAccept(_____ -> bucket.retry(r)));
+                                });
+                            }
+                        });
+                    });
+                } else {
+                    // Global rl, retry later
+                    bucket.latency().thenAccept(latency -> {
+                        final long wait = globalReset - System.currentTimeMillis() + latency;
+                        catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
+                                bucketRoute.baseRoute(), finalRoute.baseRoute(), wait);
+                        catnip.logAdapter().warn("Hit GLOBAL ratelimit, waiting {}ms and retrying...", wait);
+                        catnip.vertx().setTimer(wait, ___ -> global.resetBucket().thenAccept(____ -> bucket.retry(r)));
+                    });
+                }
             });
-        }
+        });
     }
     
     private void executeHttpRequest(final OutboundRequest r, final Route route, final Bucket bucket, final RequestBody body) {
-        bucket.lastRequest(System.currentTimeMillis());
-        final Context context = catnip.vertx().getOrCreateContext();
-        final Request.Builder requestBuilder = new Request.Builder().url(API_HOST + API_BASE + route.baseRoute())
-                .method(route.method().name(), body)
-                .header("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')');
-        if(r.needsToken()) {
-            requestBuilder.header("Authorization", "Bot " + catnip.token());
-        }
-        _http.newCall(requestBuilder.build()).enqueue(new Callback() {
-            @Override
-            public void onFailure(@Nonnull final Call call, @Nonnull final IOException e) {
-                handleResponse(r, bucket, -1, "", null, null,
-                        false, e);
+        bucket.lastRequest(System.currentTimeMillis()).thenAccept(__ -> {
+            final Context context = catnip.vertx().getOrCreateContext();
+            final Request.Builder requestBuilder = new Request.Builder().url(API_HOST + API_BASE + route.baseRoute())
+                    .method(route.method().name(), body)
+                    .header("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')');
+            if(r.needsToken()) {
+                requestBuilder.header("Authorization", "Bot " + catnip.token());
             }
-            
-            @Override
-            public void onResponse(@Nonnull final Call call, @Nonnull final Response resp) throws IOException {
-                //ensure we close it no matter what
-                try(final Response response = resp) {
-                    final int code = response.code();
-                    final String message = response.message();
-                    if(response.body() == null) {
-                        context.runOnContext(__ ->
-                                handleResponse(r, bucket, code, message, null, null,
-                                        false, new NoStackTraceThrowable("body == null")));
-                    } else {
-                        final byte[] bodyBytes = response.body().bytes();
-                        
-                        final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
-                        response.headers().toMultimap().forEach(headers::add);
-                        context.runOnContext(__ ->
-                                handleResponse(r, bucket, code, message, Buffer.buffer(bodyBytes),
-                                        headers, true, null));
+            _http.newCall(requestBuilder.build()).enqueue(new Callback() {
+                @Override
+                public void onFailure(@Nonnull final Call call, @Nonnull final IOException e) {
+                    handleResponse(r, bucket, -1, "", null, null,
+                            false, e);
+                }
+                
+                @Override
+                public void onResponse(@Nonnull final Call call, @Nonnull final Response resp) throws IOException {
+                    //ensure we close it no matter what
+                    try(final Response response = resp) {
+                        final int code = response.code();
+                        final String message = response.message();
+                        if(response.body() == null) {
+                            context.runOnContext(__ ->
+                                    handleResponse(r, bucket, code, message, null, null,
+                                            false, new NoStackTraceThrowable("body == null")));
+                        } else {
+                            final byte[] bodyBytes = response.body().bytes();
+                            
+                            final MultiMap headers = MultiMap.caseInsensitiveMultiMap();
+                            response.headers().toMultimap().forEach(headers::add);
+                            context.runOnContext(__ ->
+                                    handleResponse(r, bucket, code, message, Buffer.buffer(bodyBytes),
+                                            headers, true, null));
+                        }
                     }
                 }
-            }
+            });
         });
     }
     
@@ -414,61 +432,80 @@ public class RestRequester {
         private final String route;
         private final Deque<OutboundRequest> queue = new ConcurrentLinkedDeque<>();
         
-        long remaining() {
+        @CheckReturnValue
+        CompletableFuture<Long> remaining() {
             return bucketBackend.remaining(route);
         }
         
+        @CheckReturnValue
         @SuppressWarnings("SameParameterValue")
-        void remaining(final long l) {
-            bucketBackend.remaining(route, l);
+        CompletableFuture<Void> remaining(final long l) {
+            return bucketBackend.remaining(route, l).thenApply(__ -> null);
         }
         
-        long reset() {
+        @CheckReturnValue
+        CompletableFuture<Long> reset() {
             return bucketBackend.reset(route);
         }
         
-        void reset(final long l) {
-            bucketBackend.reset(route, l);
+        @CheckReturnValue
+        CompletableFuture<Void> reset(final long l) {
+            return bucketBackend.reset(route, l).thenApply(__ -> null);
         }
         
+        @CheckReturnValue
         @SuppressWarnings("unused")
-        long limit() {
+        CompletableFuture<Long> limit() {
             return bucketBackend.limit(route);
         }
         
+        @CheckReturnValue
         @SuppressWarnings("SameParameterValue")
-        void limit(final long l) {
-            bucketBackend.limit(route, l);
+        CompletableFuture<Void> limit(final long l) {
+            return bucketBackend.limit(route, l).thenApply(__ -> null);
         }
         
-        long latency() {
+        @CheckReturnValue
+        CompletableFuture<Long> latency() {
             return bucketBackend.latency(route);
         }
         
-        void latency(final long l) {
-            bucketBackend.latency(route, l);
+        @CheckReturnValue
+        CompletableFuture<Void> latency(final long l) {
+            return bucketBackend.latency(route, l).thenApply(__ -> null);
         }
         
-        long lastRequest() {
+        @CheckReturnValue
+        CompletableFuture<Long> lastRequest() {
             return bucketBackend.lastRequest(route);
         }
         
-        void lastRequest(final long l) {
-            bucketBackend.lastRequest(route, l);
+        @CheckReturnValue
+        CompletableFuture<Void> lastRequest(final long l) {
+            return bucketBackend.lastRequest(route, l).thenApply(__ -> null);
         }
         
-        void resetBucket() {
-            bucketBackend.remaining(route, bucketBackend.limit(route));
-            bucketBackend.reset(route, -1L);
+        @CheckReturnValue
+        CompletableFuture<Void> resetBucket() {
+            final Future<Void> future = Future.future();
+            bucketBackend.limit(route).thenAccept(limit -> {
+                bucketBackend.remaining(route, limit);
+                bucketBackend.reset(route, -1L);
+            });
+            
+            return SafeVertxCompletableFuture.from(catnip, future);
         }
         
-        void updateFromHeaders(final MultiMap headers) {
+        @CheckReturnValue
+        CompletableFuture<Void> updateFromHeaders(final MultiMap headers) {
             if(!(headers.contains("X-Ratelimit-Limit") && headers.contains("X-Ratelimit-Remaining") && headers.contains("X-Ratelimit-Reset"))) {
-                return;
+                return SafeVertxCompletableFuture.completedFuture(null);
             }
-            bucketBackend.limit(route, Integer.parseInt(headers.get("X-Ratelimit-Limit")));
-            bucketBackend.remaining(route, Integer.parseInt(headers.get("X-Ratelimit-Remaining")));
-            bucketBackend.reset(route, TimeUnit.SECONDS.toMillis(Integer.parseInt(headers.get("X-Ratelimit-Reset"))));
+            final List<CompletableFuture<?>> futures = new ArrayList<>();
+            futures.add(bucketBackend.limit(route, Integer.parseInt(headers.get("X-Ratelimit-Limit"))));
+            futures.add(bucketBackend.remaining(route, Integer.parseInt(headers.get("X-Ratelimit-Remaining"))));
+            futures.add(bucketBackend.reset(route, TimeUnit.SECONDS.toMillis(Integer.parseInt(headers.get("X-Ratelimit-Reset")))));
+            return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
         }
         
         void queue(final Future<ResponsePayload> future, final OutboundRequest request) {
