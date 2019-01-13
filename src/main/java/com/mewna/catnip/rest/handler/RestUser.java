@@ -93,6 +93,11 @@ public class RestUser extends RestHandler {
     
     @Nonnull
     public CompletionStage<User> modifyCurrentUser(@Nullable final String username, @Nullable final URI avatarData) {
+        return modifyCurrentUserRaw(username, avatarData).thenApply(entityBuilder()::createUser);
+    }
+    
+    @Nonnull
+    public CompletionStage<JsonObject> modifyCurrentUserRaw(@Nullable final String username, @Nullable final URI avatarData) {
         final JsonObject body = new JsonObject();
         if(avatarData != null) {
             Utils.validateImageUri(avatarData);
@@ -100,11 +105,6 @@ public class RestUser extends RestHandler {
         }
         body.put("username", username);
         
-        return modifyCurrentUserRaw(body).thenApply(entityBuilder()::createUser);
-    }
-    
-    @Nonnull
-    public CompletionStage<JsonObject> modifyCurrentUserRaw(@Nonnull final JsonObject body) {
         return catnip().requester().queue(new OutboundRequest(Routes.MODIFY_CURRENT_USER,
                 ImmutableMap.of(), body))
                 .thenApply(ResponsePayload::object);
@@ -162,14 +162,15 @@ public class RestUser extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletionStage<DMChannel> createDM(@Nonnull final String recipientId) {
-        return createDMRaw(new JsonObject().put("recipient_id", recipientId))
+        return createDMRaw(recipientId)
                 .thenApply(entityBuilder()::createUserDM);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonObject> createDMRaw(@Nonnull final JsonObject body) {
-        return catnip().requester().queue(new OutboundRequest(Routes.CREATE_DM, ImmutableMap.of(), body))
+    public CompletionStage<JsonObject> createDMRaw(@Nonnull final String recipientId) {
+        return catnip().requester().queue(new OutboundRequest(Routes.CREATE_DM, ImmutableMap.of(),
+                new JsonObject().put("recipient_id", recipientId)))
                 .thenApply(ResponsePayload::object);
     }
     

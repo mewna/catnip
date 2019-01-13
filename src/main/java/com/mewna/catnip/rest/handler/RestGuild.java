@@ -231,15 +231,15 @@ public class RestGuild extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletionStage<Guild> createGuild(@Nonnull final GuildData guild) {
-        return createGuildRaw(guild.toJson()).thenApply(entityBuilder()::createGuild);
+        return createGuildRaw(guild).thenApply(entityBuilder()::createGuild);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonObject> createGuildRaw(@Nonnull final JsonObject guild) {
+    public CompletionStage<JsonObject> createGuildRaw(@Nonnull final GuildData guild) {
         return catnip().requester()
                 .queue(new OutboundRequest(Routes.CREATE_GUILD,
-                        ImmutableMap.of(), guild))
+                        ImmutableMap.of(), guild.toJson()))
                 .thenApply(ResponsePayload::object);
     }
     
@@ -286,13 +286,13 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     public CompletionStage<Guild> modifyGuild(@Nonnull final String guildId, @Nonnull final GuildEditFields fields) {
-        return modifyGuildRaw(guildId, fields.payload()).thenApply(entityBuilder()::createGuild);
+        return modifyGuildRaw(guildId, fields).thenApply(entityBuilder()::createGuild);
     }
     
     @Nonnull
-    public CompletionStage<JsonObject> modifyGuildRaw(@Nonnull final String guildId, @Nonnull final JsonObject fields) {
+    public CompletionStage<JsonObject> modifyGuildRaw(@Nonnull final String guildId, @Nonnull final GuildEditFields fields) {
         return catnip().requester().queue(new OutboundRequest(Routes.MODIFY_GUILD.withMajorParam(guildId),
-                ImmutableMap.of(), fields))
+                ImmutableMap.of(), fields.payload()))
                 .thenApply(ResponsePayload::object);
     }
     
