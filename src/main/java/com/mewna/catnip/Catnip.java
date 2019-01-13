@@ -42,6 +42,7 @@ import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.shard.EventType;
+import com.mewna.catnip.shard.event.DispatchManager;
 import com.mewna.catnip.shard.event.EventBuffer;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.ratelimit.Ratelimiter;
@@ -211,6 +212,15 @@ public interface Catnip {
     @Nonnull
     @CheckReturnValue
     EventBus eventBus();
+    
+    /**
+     * Handles dispatching and listening to events.
+     *
+     * @return The current dispatch manager instance.
+     */
+    @Nonnull
+    @CheckReturnValue
+    DispatchManager dispatchManager();
     
     /**
      * Start all shards asynchronously. To customize the shard spawning /
@@ -479,7 +489,7 @@ public interface Catnip {
      * @return The vert.x message consumer.
      */
     default <T> MessageConsumer<T> on(@Nonnull final EventType<T> type) {
-        return eventBus().consumer(type.key());
+        return dispatchManager().createConsumer(type.key());
     }
     
     /**
@@ -493,7 +503,7 @@ public interface Catnip {
      * @return The vert.x message consumer.
      */
     default <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler) {
-        return eventBus().consumer(type.key(), message -> handler.accept(message.body()));
+        return on(type).handler(m -> handler.accept(m.body()));
     }
     
     /**
