@@ -56,6 +56,7 @@ import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.util.JsonPojoCodec;
 import com.mewna.catnip.util.PermissionUtil;
+import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.logging.LogAdapter;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
@@ -91,6 +92,8 @@ public class CatnipImpl implements Catnip {
     private final Vertx vertx;
     private final String token;
     private final boolean logExtensionOverrides;
+    private final boolean validateToken;
+    
     private final Rest rest = new Rest(this);
     private final ExtensionManager extensionManager = new DefaultExtensionManager(this);
     private final AtomicReference<User> selfUser = new AtomicReference<>(null);
@@ -117,6 +120,7 @@ public class CatnipImpl implements Catnip {
         applyOptions(options);
         token = options.token();
         logExtensionOverrides = options.logExtensionOverrides();
+        validateToken = options.validateToken();
     }
     
     private void applyOptions(@Nonnull final CatnipOptions options) {
@@ -316,15 +320,19 @@ public class CatnipImpl implements Catnip {
     public CompletableFuture<Catnip> setup() {
         codecs();
         
-        return rest.user().getGatewayBot()
-                .thenApply(gateway -> {
-                    gatewayInfo.set(gateway);
-                    logAdapter.info("Token validated!");
-                    
-                    //this is actually needed because generics are dumb
-                    return (Catnip)this;
-                })
-                .toCompletableFuture();
+        if(validateToken) {
+            return rest.user().getGatewayBot()
+                    .thenApply(gateway -> {
+                        gatewayInfo.set(gateway);
+                        logAdapter.info("Token validated!");
+                
+                        //this is actually needed because generics are dumb
+                        return (Catnip) this;
+                    })
+                    .toCompletableFuture();
+        } else {
+            return SafeVertxCompletableFuture.completedFuture(this);
+        }
     }
     
     private void injectSelf() {
@@ -345,11 +353,11 @@ public class CatnipImpl implements Catnip {
             // *sigh*
             // This is mainly important for distributed catnip; locally it'll just
             // not apply any transformations
-    
+            
             // Lifecycle
             codec(ReadyImpl.class);
             codec(ResumedImpl.class);
-    
+            
             // Messages
             codec(MessageImpl.class);
             codec(DeletedMessageImpl.class);
@@ -358,7 +366,7 @@ public class CatnipImpl implements Catnip {
             codec(ReactionUpdateImpl.class);
             codec(BulkRemovedReactionsImpl.class);
             codec(MessageEmbedUpdateImpl.class);
-    
+            
             // Channels
             codec(CategoryImpl.class);
             codec(GroupDMChannelImpl.class);
@@ -368,30 +376,30 @@ public class CatnipImpl implements Catnip {
             codec(WebhookImpl.class);
             codec(ChannelPinsUpdateImpl.class);
             codec(WebhooksUpdateImpl.class);
-    
+            
             // Guilds
             codec(GuildImpl.class);
             codec(GatewayGuildBanImpl.class);
             codec(EmojiUpdateImpl.class);
-    
+            
             // Roles
             codec(RoleImpl.class);
             codec(PartialRoleImpl.class);
             codec(PermissionOverrideImpl.class);
-    
+            
             // Members
             codec(MemberImpl.class);
             codec(PartialMemberImpl.class);
-    
+            
             // Users
             codec(UserImpl.class);
             codec(PresenceImpl.class);
             codec(PresenceUpdateImpl.class);
-    
+            
             // Voice
             codec(VoiceStateImpl.class);
             codec(VoiceServerUpdateImpl.class);
-    
+            
             // Shards
             codec(ShardInfo.class);
             codec(ShardConnectState.class);

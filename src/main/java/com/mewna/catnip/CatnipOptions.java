@@ -70,6 +70,8 @@ import java.util.Set;
 public final class CatnipOptions implements Cloneable {
     /**
      * The token for catnip to use.
+     * <p/>
+     * May not be overridden by extensions.
      */
     @Nonnull
     private final String token;
@@ -157,8 +159,17 @@ public final class CatnipOptions implements Cloneable {
     /**
      * Whether or not extensions overriding options should be logged. Defaults
      * to {@code true}.
+     * <p/>
+     * May not be overridden by extensions.
      */
     private boolean logExtensionOverrides = true;
+    /**
+     * Whether or not to validate the provided token when setting up catnip. It
+     * is HIGHLY recommended that you leave this with the default setting.
+     * <p/>
+     * May not be overridden by extensions.
+     */
+    private boolean validateToken = true;
     
     @Override
     public Object clone() {
