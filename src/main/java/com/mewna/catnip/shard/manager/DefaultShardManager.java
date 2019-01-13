@@ -153,18 +153,25 @@ public class DefaultShardManager extends AbstractShardManager {
                     if(reply.succeeded()) {
                         final ShardConnectState state = reply.result().body();
                         switch(state) {
-                            case READY:
+                            case READY: {
+                                catnip().logAdapter().info("Connected shard {}", nextId);
+                                catnip().vertx().setTimer(5500, __ -> poll());
+                                break;
+                            }
                             case RESUMED: {
-                                catnip().logAdapter().info("Connected shard {} with state {}", nextId, reply.result().body());
+                                catnip().logAdapter().info("Resumed shard {}", nextId);
+                                poll();
                                 break;
                             }
                             case FAILED: {
                                 catnip().logAdapter().warn("Failed connecting shard {}, re-queueing", nextId);
                                 addToConnectQueue(nextId);
+                                poll();
                                 break;
                             }
                             default: {
                                 catnip().logAdapter().error("Got unexpected / unknown shard connect state: {}", state);
+                                poll();
                                 break;
                             }
                         }
@@ -172,8 +179,8 @@ public class DefaultShardManager extends AbstractShardManager {
                     } else {
                         catnip().logAdapter().warn("Failed connecting shard {} entirely, re-queueing", nextId);
                         addToConnectQueue(nextId);
+                        poll();
                     }
-                    poll();
                 });
     }
     
