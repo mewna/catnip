@@ -135,36 +135,38 @@ public class RestWebhook extends RestHandler {
     public CompletionStage<Message> executeWebhook(@Nonnull final String webhookId, @Nonnull final String webhookToken,
                                                    @Nullable final String username, @Nullable final String avatarUrl,
                                                    @Nonnull final MessageOptions options) {
-        final JsonObject json = new JsonObject();
-        
-        if(options.content() != null && !options.content().isEmpty()) {
-            json.put("content", options.content());
-        }
-        
-        if(options.embed() != null) {
-            json.put("embed", entityBuilder().embedToJson(options.embed()));
-        }
-        
-        if(json.getValue("embed", null) == null && json.getValue("content", null) == null
-                && !options.hasFiles()) {
-            throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
-        }
-        
-        if(username != null && !username.isEmpty()) {
-            json.put("username", username);
-        }
-        if(avatarUrl != null && !avatarUrl.isEmpty()) {
-            json.put("avatar_url", avatarUrl);
-        }
-        
-        return executeWebhookRaw(webhookId, webhookToken, json, options).thenApply(entityBuilder()::createMessage);
+        return executeWebhookRaw(webhookId, webhookToken, username, avatarUrl, options)
+                .thenApply(entityBuilder()::createMessage);
     }
     
     @Nonnull
     @CheckReturnValue
     @SuppressWarnings("WeakerAccess")
     public CompletionStage<JsonObject> executeWebhookRaw(@Nonnull final String webhookId, @Nonnull final String webhookToken,
-                                                         @Nonnull final JsonObject body, @Nonnull final MessageOptions options) {
+                                                         @Nullable final String username, @Nullable final String avatarUrl,
+                                                         @Nonnull final MessageOptions options) {
+        final JsonObject body = new JsonObject();
+    
+        if(options.content() != null && !options.content().isEmpty()) {
+            body.put("content", options.content());
+        }
+    
+        if(options.embed() != null) {
+            body.put("embed", entityBuilder().embedToJson(options.embed()));
+        }
+    
+        if(body.getValue("embed", null) == null && body.getValue("content", null) == null
+                && !options.hasFiles()) {
+            throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
+        }
+    
+        if(username != null && !username.isEmpty()) {
+            body.put("username", username);
+        }
+        if(avatarUrl != null && !avatarUrl.isEmpty()) {
+            body.put("avatar_url", avatarUrl);
+        }
+        
         return catnip().requester().
                 queue(new OutboundRequest(Routes.EXECUTE_WEBHOOK.withMajorParam(webhookId),
                         ImmutableMap.of("webhook.token", webhookToken), body).needsToken(false)
