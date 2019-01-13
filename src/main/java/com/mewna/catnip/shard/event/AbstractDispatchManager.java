@@ -34,7 +34,7 @@ import lombok.experimental.Accessors;
 public abstract class AbstractDispatchManager implements DispatchManager {
     @Getter
     @Accessors(fluent = true)
-    private volatile Catnip catnip;
+    private Catnip catnip;
     
     @Override
     public void catnip(final Catnip catnip) {
