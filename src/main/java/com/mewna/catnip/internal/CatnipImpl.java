@@ -50,6 +50,7 @@ import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
 import com.mewna.catnip.shard.ShardControlMessage;
 import com.mewna.catnip.shard.ShardInfo;
+import com.mewna.catnip.shard.event.DispatchManager;
 import com.mewna.catnip.shard.event.EventBuffer;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.ratelimit.Ratelimiter;
@@ -97,6 +98,7 @@ public class CatnipImpl implements Catnip {
     private final Set<String> unavailableGuilds = ConcurrentHashMap.newKeySet();
     private final AtomicReference<GatewayInfo> gatewayInfo = new AtomicReference<>(null);
     
+    private DispatchManager dispatchManager;
     private RestRequester requester;
     private ShardManager shardManager;
     private SessionManager sessionManager;
@@ -124,6 +126,7 @@ public class CatnipImpl implements Catnip {
         // so that we don't need to update this every single time that the
         // options change.
         this.options = options;
+        dispatchManager = options.dispatchManager();
         requester = new RestRequester(this, options.restBucketBackend(), options.restHttpClient());
         shardManager = options.shardManager();
         sessionManager = options.sessionManager();
@@ -329,6 +332,7 @@ public class CatnipImpl implements Catnip {
     
     private void injectSelf() {
         // Inject catnip instance into dependent fields
+        dispatchManager.catnip(this);
         shardManager.catnip(this);
         eventBuffer.catnip(this);
         cache.catnip(this);
