@@ -138,20 +138,20 @@ public class RestRequester {
                     // *sigh*
                     final ResponsePayload payload = new ResponsePayload(body);
                     if(headers.contains("X-Ratelimit-Global")) {
-                        handleGlobalRatelimit(headers, bucket, r);
+                        handleGlobalRatelimitPost(headers, bucket, r);
                     } else if(ratelimited) {
-                        handleRouteRatelimit(headers, bucket, r, hasMemeReactionRatelimits);
+                        handleRouteRatelimitPost(headers, bucket, r, hasMemeReactionRatelimits);
                     } else {
-                        finishRequest(headers, bucket, r, payload);
+                        finishRequestPost(headers, bucket, r, payload);
                     }
                 } else {
-                    failRequest(bucket, r, failureCause);
+                    failRequestPost(bucket, r, failureCause);
                 }
             });
         });
     }
     
-    private void handleGlobalRatelimit(final MultiMap headers, final Bucket bucket, final OutboundRequest r) {
+    private void handleGlobalRatelimitPost(final MultiMap headers, final Bucket bucket, final OutboundRequest r) {
         // We hit a global ratelimit, update
         final Bucket global = getBucket("GLOBAL");
         final long retry = Long.parseLong(headers.get("Retry-After"));
@@ -164,8 +164,8 @@ public class RestRequester {
         });
     }
     
-    private void handleRouteRatelimit(final MultiMap headers, final Bucket bucket, final OutboundRequest r,
-                                      final boolean hasMemeReactionRatelimits) {
+    private void handleRouteRatelimitPost(final MultiMap headers, final Bucket bucket, final OutboundRequest r,
+                                          final boolean hasMemeReactionRatelimits) {
         // We got ratelimited, back the fuck off
         bucket.updateFromHeaders(headers).thenAccept(___ -> {
             if(hasMemeReactionRatelimits) {
@@ -178,8 +178,8 @@ public class RestRequester {
         });
     }
     
-    private void finishRequest(final MultiMap headers, final Bucket bucket, final OutboundRequest r,
-                               final ResponsePayload finalPayload) {
+    private void finishRequestPost(final MultiMap headers, final Bucket bucket, final OutboundRequest r,
+                                   final ResponsePayload finalPayload) {
         final ResponsePayload[] payload = {finalPayload};
         // We're good, run it through hooks and complete the future.
         bucket.updateFromHeaders(headers).thenAccept(___ -> {
@@ -194,7 +194,7 @@ public class RestRequester {
         });
     }
     
-    private void failRequest(final Bucket bucket, final OutboundRequest r, final Throwable failureCause) {
+    private void failRequestPost(final Bucket bucket, final OutboundRequest r, final Throwable failureCause) {
         // Fail request, resubmit to queue if failed less than 3 times, complete with error otherwise.
         r.failed();
         if(r.failedAttempts() >= 3) {
@@ -254,77 +254,95 @@ public class RestRequester {
                                         API_BASE + finalRoute.baseRoute(), bucket.route);
                                 // v.x is dumb and doesn't support multipart, so we use okhttp instead /shrug
                                 if(r.buffers != null) {
-                                    try {
-                                        @SuppressWarnings("UnnecessarilyQualifiedInnerClassAccess")
-                                        final MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
-                                        
-                                        for(int index = 0; index < r.buffers.size(); index++) {
-                                            final ImmutablePair<String, Buffer> pair = r.buffers.get(index);
-                                            builder.addFormDataPart("file" + index, pair.left, new MultipartRequestBody(pair.right));
-                                        }
-                                        if(r.object != null) {
-                                            for(final Extension extension : catnip.extensionManager().extensions()) {
-                                                for(final CatnipHook hook : extension.hooks()) {
-                                                    r.object = hook.rawRestSendObjectHook(finalRoute, r.object);
-                                                }
-                                            }
-                                            builder.addFormDataPart("payload_json", r.object.encode());
-                                        } else if(r.array != null) {
-                                            builder.addFormDataPart("payload_json", r.array.encode());
-                                        } else {
-                                            builder.addFormDataPart("payload_json", new JsonObject()
-                                                    .putNull("content")
-                                                    .putNull("embed").encode());
-                                        }
-                                        
-                                        executeHttpRequest(r, finalRoute, bucket, builder.build());
-                                    } catch(final Exception e) {
-                                        catnip.logAdapter().error("Failed to send multipart request", e);
-                                    }
+                                    handleRouteBufferBodySend(bucket, finalRoute, r);
                                 } else {
-                                    final String encoded;
-                                    if(r.object != null) {
-                                        for(final Extension extension : catnip.extensionManager().extensions()) {
-                                            for(final CatnipHook hook : extension.hooks()) {
-                                                r.object = hook.rawRestSendObjectHook(finalRoute, r.object);
-                                            }
-                                        }
-                                        encoded = r.object.encode();
-                                    } else if(r.array != null) {
-                                        encoded = r.array.encode();
-                                    } else {
-                                        encoded = null;
-                                    }
-                                    RequestBody body = null;
-                                    if(encoded != null) {
-                                        body = RequestBody.create(MediaType.parse("application/json"), encoded);
-                                    } else if(HttpMethod.requiresRequestBody(r.route.method().name().toUpperCase())) {
-                                        body = EMPTY_BODY;
-                                    }
-                                    executeHttpRequest(r, finalRoute, bucket, body);
+                                    handleRouteJsonBodySend(bucket, finalRoute, r);
                                 }
                             } else {
-                                // Route ratelimited, retry later
-                                bucket.latency().thenAccept(latency -> {
-                                    final long wait = reset - System.currentTimeMillis() + latency;
-                                    catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
-                                            bucketRoute.baseRoute(), finalRoute.baseRoute(), wait);
-                                    catnip.vertx().setTimer(wait, ____ -> bucket.resetBucket().thenAccept(_____ -> bucket.retry(r)));
-                                });
+                                handleRouteRatelimitPre(bucket, bucketRoute, finalRoute, r, reset);
                             }
                         });
                     });
                 } else {
-                    // Global rl, retry later
-                    bucket.latency().thenAccept(latency -> {
-                        final long wait = globalReset - System.currentTimeMillis() + latency;
-                        catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
-                                bucketRoute.baseRoute(), finalRoute.baseRoute(), wait);
-                        catnip.logAdapter().warn("Hit GLOBAL ratelimit, waiting {}ms and retrying...", wait);
-                        catnip.vertx().setTimer(wait, ___ -> global.resetBucket().thenAccept(____ -> bucket.retry(r)));
-                    });
+                    handleGlobalRatelimitPre(bucket, global, bucketRoute, finalRoute, r, globalReset);
                 }
             });
+        });
+    }
+    
+    private void handleRouteBufferBodySend(final Bucket bucket, final Route finalRoute, final OutboundRequest r) {
+        try {
+            @SuppressWarnings("UnnecessarilyQualifiedInnerClassAccess")
+            final MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
+        
+            for(int index = 0; index < r.buffers.size(); index++) {
+                final ImmutablePair<String, Buffer> pair = r.buffers.get(index);
+                builder.addFormDataPart("file" + index, pair.left, new MultipartRequestBody(pair.right));
+            }
+            if(r.object != null) {
+                for(final Extension extension : catnip.extensionManager().extensions()) {
+                    for(final CatnipHook hook : extension.hooks()) {
+                        r.object = hook.rawRestSendObjectHook(finalRoute, r.object);
+                    }
+                }
+                builder.addFormDataPart("payload_json", r.object.encode());
+            } else if(r.array != null) {
+                builder.addFormDataPart("payload_json", r.array.encode());
+            } else {
+                builder.addFormDataPart("payload_json", new JsonObject()
+                        .putNull("content")
+                        .putNull("embed").encode());
+            }
+        
+            executeHttpRequest(r, finalRoute, bucket, builder.build());
+        } catch(final Exception e) {
+            catnip.logAdapter().error("Failed to send multipart request", e);
+        }
+    }
+    
+    private void handleRouteJsonBodySend(final Bucket bucket, final Route finalRoute, final OutboundRequest r) {
+        final String encoded;
+        if(r.object != null) {
+            for(final Extension extension : catnip.extensionManager().extensions()) {
+                for(final CatnipHook hook : extension.hooks()) {
+                    r.object = hook.rawRestSendObjectHook(finalRoute, r.object);
+                }
+            }
+            encoded = r.object.encode();
+        } else if(r.array != null) {
+            encoded = r.array.encode();
+        } else {
+            encoded = null;
+        }
+        RequestBody body = null;
+        if(encoded != null) {
+            body = RequestBody.create(MediaType.parse("application/json"), encoded);
+        } else if(HttpMethod.requiresRequestBody(r.route.method().name().toUpperCase())) {
+            body = EMPTY_BODY;
+        }
+        executeHttpRequest(r, finalRoute, bucket, body);
+    }
+    
+    private void handleRouteRatelimitPre(final Bucket bucket, final Route bucketRoute, final Route finalRoute,
+                                         final OutboundRequest r, final long reset) {
+        // Route ratelimited, retry later
+        bucket.latency().thenAccept(latency -> {
+            final long wait = reset - System.currentTimeMillis() + latency;
+            catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
+                    bucketRoute.baseRoute(), finalRoute.baseRoute(), wait);
+            catnip.vertx().setTimer(wait, ____ -> bucket.resetBucket().thenAccept(_____ -> bucket.retry(r)));
+        });
+    }
+    
+    private void handleGlobalRatelimitPre(final Bucket bucket, final Bucket global, final Route bucketRoute,
+                                          final Route finalRoute, final OutboundRequest r, final long globalReset) {
+        // Global rl, retry later
+        bucket.latency().thenAccept(latency -> {
+            final long wait = globalReset - System.currentTimeMillis() + latency;
+            catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
+                    bucketRoute.baseRoute(), finalRoute.baseRoute(), wait);
+            catnip.logAdapter().warn("Hit GLOBAL ratelimit, waiting {}ms and retrying...", wait);
+            catnip.vertx().setTimer(wait, ___ -> global.resetBucket().thenAccept(____ -> bucket.retry(r)));
         });
     }
     
