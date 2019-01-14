@@ -97,7 +97,6 @@ public class CatnipImpl implements Catnip {
     
     private final Rest rest = new Rest(this);
     private final ExtensionManager extensionManager = new DefaultExtensionManager(this);
-    private final AtomicReference<User> selfUser = new AtomicReference<>(null);
     private final Set<String> unavailableGuilds = ConcurrentHashMap.newKeySet();
     private final AtomicReference<GatewayInfo> gatewayInfo = new AtomicReference<>(null);
     
@@ -208,7 +207,7 @@ public class CatnipImpl implements Catnip {
     @Nullable
     @Override
     public User selfUser() {
-        return selfUser.get();
+        return cache().selfUser();
     }
     
     @Override
@@ -217,13 +216,6 @@ public class CatnipImpl implements Catnip {
         if(vertx) {
             this.vertx.close();
         }
-    }
-    
-    @Nonnull
-    @SuppressWarnings("UnusedReturnValue")
-    public Catnip selfUser(@Nonnull final User self) {
-        selfUser.set(self);
-        return this;
     }
     
     @Nonnull
