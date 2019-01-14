@@ -725,6 +725,12 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
         return new CompositeCacheView<>(voiceStateCache.values());
     }
     
+    @Nullable
+    @Override
+    public User selfUser() {
+        return selfUser.get();
+    }
+    
     @Nonnull
     @Override
     public EntityCache catnip(@Nonnull final Catnip catnip) {
