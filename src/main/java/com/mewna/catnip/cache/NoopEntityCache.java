@@ -317,6 +317,12 @@ public class NoopEntityCache implements EntityCacheWorker {
         return CacheView.empty();
     }
     
+    @Nullable
+    @Override
+    public User selfUser() {
+        return null;
+    }
+    
     @Nonnull
     @Override
     public EntityCache catnip(@Nonnull final Catnip catnip) {
