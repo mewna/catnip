@@ -278,46 +278,57 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     protected abstract MutableCacheView<UserDMChannel> dmChannelCache(int shardId);
     protected abstract MutableCacheView<Presence> presenceCache(int shardId);
     
+    @SuppressWarnings("WeakerAccess")
     protected MutableNamedCacheView<Guild> guildCache(final int shardId) {
         return guildCache;
     }
     
+    @SuppressWarnings("WeakerAccess")
     protected MutableNamedCacheView<Member> memberCache(final long guildId, final boolean onlyGet) {
         return onlyGet ? memberCache.get(guildId) : memberCache.computeIfAbsent(guildId, __ -> createMemberCacheView());
     }
     
+    @SuppressWarnings("WeakerAccess")
     protected void deleteMemberCache(final long guildId) {
         memberCache.remove(guildId);
     }
     
+    @SuppressWarnings("WeakerAccess")
     protected MutableNamedCacheView<Role> roleCache(final long guildId, final boolean onlyGet) {
         return onlyGet ? roleCache.get(guildId) : roleCache.computeIfAbsent(guildId, __ -> createRoleCacheView());
     }
     
+    @SuppressWarnings("WeakerAccess")
     protected void deleteRoleCache(final long guildId) {
         roleCache.remove(guildId);
     }
     
+    @SuppressWarnings("WeakerAccess")
     protected MutableNamedCacheView<GuildChannel> channelCache(final long guildId, final boolean onlyGet) {
         return onlyGet ? guildChannelCache.get(guildId) : guildChannelCache.computeIfAbsent(guildId, __ -> createGuildChannelCacheView());
     }
     
+    @SuppressWarnings("WeakerAccess")
     protected void deleteChannelCache(final long guildId) {
         guildChannelCache.remove(guildId);
     }
     
+    @SuppressWarnings("WeakerAccess")
     protected MutableNamedCacheView<CustomEmoji> emojiCache(final long guildId, final boolean onlyGet) {
         return onlyGet ? emojiCache.get(guildId) : emojiCache.computeIfAbsent(guildId, __ -> createEmojiCacheView());
     }
     
+    @SuppressWarnings("WeakerAccess")
     protected void deleteEmojiCache(final long guildId) {
         emojiCache.remove(guildId);
     }
     
+    @SuppressWarnings("WeakerAccess")
     protected MutableCacheView<VoiceState> voiceStateCache(final long guildId, final boolean onlyGet) {
         return onlyGet ? voiceStateCache.get(guildId) : voiceStateCache.computeIfAbsent(guildId, __ -> createVoiceStateCacheView());
     }
     
+    @SuppressWarnings("WeakerAccess")
     protected void deleteVoiceStateCache(final long guildId) {
         voiceStateCache.remove(guildId);
     }

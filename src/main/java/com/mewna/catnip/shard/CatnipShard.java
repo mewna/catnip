@@ -57,6 +57,7 @@ import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterOutputStream;
 
@@ -407,10 +408,14 @@ public class CatnipShard extends AbstractVerticle {
         catnip.logAdapter().warn("Shard {}/{}: Socket closing!", id, limit);
         try {
             state = null;
-            catnip.shardManager().addToConnectQueue(id);
+            requeue();
         } catch(final Exception e) {
             catnip.logAdapter().error("Shard {}/{}: Failure closing socket:", id, limit, e);
         }
+    }
+    
+    private void requeue() {
+        catnip.shardManager().addToConnectQueue(id);
     }
     
     private void handleSocketQueue(final Message<JsonObject> msg) {
@@ -519,7 +524,7 @@ public class CatnipShard extends AbstractVerticle {
     
     private void handleHeartbeatAck(final Message<ShardControlMessage> msg, final JsonObject event) {
         heartbeatAcked = true;
-        lastHeartbeatLatency = (System.nanoTime() - lastHeartbeat) / 1_000_000; //convert to millis
+        lastHeartbeatLatency = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - lastHeartbeat);
     }
     
     private void handleInvalidSession(final Message<ShardControlMessage> msg, final JsonObject event) {
@@ -528,6 +533,10 @@ public class CatnipShard extends AbstractVerticle {
             if(state != null) {
                 clientClose = true;
                 state.socket().close();
+            } else {
+                // Realistically this shouldn't ever be called, but this is more of a
+                // "for my own sanity" thing than anything.
+                requeue();
             }
         } else {
             catnip.logAdapter().info("Session invalidated (OP 9), clearing shard data and reconnecting");
@@ -538,6 +547,10 @@ public class CatnipShard extends AbstractVerticle {
                 catnip.cacheWorker().invalidateShard(id);
                 catnip.sessionManager().clearSession(id);
                 catnip.sessionManager().clearSeqnum(id);
+            } else {
+                // Realistically this shouldn't ever be called, but this is more of a
+                // "for my own sanity" thing than anything.
+                requeue();
             }
         }
     }
