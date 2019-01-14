@@ -88,7 +88,6 @@ public final class DispatchEmitter {
                         .map(Snowflake::id)
                         .forEach(((CatnipImpl) catnip)::markUnavailable);
                 final Ready ready = entityBuilder.createReady(data);
-                ((CatnipImpl) catnip).selfUser(ready.user());
                 catnip.dispatchManager().dispatchEvent(type, ready);
                 break;
             }
@@ -236,7 +235,6 @@ public final class DispatchEmitter {
             // Users
             case Raw.USER_UPDATE: {
                 final User user = entityBuilder.createUser(data);
-                ((CatnipImpl) user).selfUser(user);
                 catnip.dispatchManager().dispatchEvent(type, user);
                 break;
             }

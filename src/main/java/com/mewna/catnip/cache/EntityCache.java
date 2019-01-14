@@ -454,4 +454,11 @@ public interface EntityCache {
      */
     @Nonnull
     CacheView<VoiceState> voiceStates();
+    
+    /**
+     * @return The currently-logged-in user. May be {@code null} if no shards
+     * have logged in.
+     */
+    @Nullable
+    User selfUser();
 }
