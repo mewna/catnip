@@ -368,8 +368,7 @@ public interface Catnip {
      * worker without having to tell the end-user to specify options. By
      * default, options that get injected will be logged.
      *
-     *
-     * @param extension The extension injecting the options.
+     * @param extension      The extension injecting the options.
      * @param optionsPatcher Function responsible for updating the settings.
      *
      * @return Itself.
@@ -377,6 +376,7 @@ public interface Catnip {
      * @throws IllegalArgumentException When the given extension isn't loaded.
      */
     @Nonnull
+    @SuppressWarnings("UnusedReturnValue")
     Catnip injectOptions(@Nonnull Extension extension, @Nonnull Function<CatnipOptions, CatnipOptions> optionsPatcher);
     
     /**
