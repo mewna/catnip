@@ -51,7 +51,9 @@ public class AuditLogChangeImpl implements AuditLogChange, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
+    @JsonProperty
     private Object oldValue;
+    @JsonProperty
     private Object newValue;
     private String key;
     

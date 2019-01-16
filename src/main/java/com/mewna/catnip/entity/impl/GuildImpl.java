@@ -81,6 +81,7 @@ public class GuildImpl implements Guild, RequiresCatnip, Timestamped {
     private boolean widgetEnabled;
     private long widgetChannelIdAsLong;
     private long systemChannelIdAsLong;
+    @JsonProperty
     private String joinedAt;
     private boolean large;
     private boolean unavailable;

@@ -58,6 +58,7 @@ public class MemberImpl implements Member, RequiresCatnip, Timestamped {
     private long guildIdAsLong;
     private String nick;
     private Set<String> roleIds;
+    @JsonProperty
     private String joinedAt;
     private boolean deaf;
     private boolean mute;
