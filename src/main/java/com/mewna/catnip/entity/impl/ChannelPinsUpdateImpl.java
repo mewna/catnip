@@ -55,6 +55,7 @@ public class ChannelPinsUpdateImpl implements ChannelPinsUpdate, RequiresCatnip,
     private transient Catnip catnip;
     
     private long channelIdAsLong;
+    @JsonProperty
     private String lastPinTimestamp;
     
     @Nullable
