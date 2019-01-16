@@ -173,7 +173,7 @@ public class RestRequester {
                 catnip.vertx().setTimer(250L, ____ -> bucket.retry(r));
             } else {
                 // Try and compute from headers
-                bucket.updateFromHeaders(headers).thenAccept(____ -> bucket.retry(r));
+                bucket.retry(r);
             }
         });
     }
@@ -330,7 +330,7 @@ public class RestRequester {
             final long wait = reset - System.currentTimeMillis() + latency;
             catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
                     bucketRoute.baseRoute(), finalRoute.baseRoute(), wait);
-            catnip.vertx().setTimer(wait, ____ -> bucket.resetBucket().thenAccept(_____ -> bucket.retry(r)));
+            catnip.vertx().setTimer(wait, __ -> bucket.resetBucket().thenAccept(___ -> bucket.retry(r)));
         });
     }
     
@@ -528,6 +528,7 @@ public class RestRequester {
             bucketBackend.limit(route).thenAccept(limit -> {
                 bucketBackend.remaining(route, limit);
                 bucketBackend.reset(route, -1L);
+                future.complete(null);
             });
             
             return SafeVertxCompletableFuture.from(catnip, future);
