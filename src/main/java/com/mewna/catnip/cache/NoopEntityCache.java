@@ -39,6 +39,7 @@ import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
+import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import lombok.experimental.Accessors;
@@ -48,6 +49,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author amy
@@ -109,6 +111,12 @@ public class NoopEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
+    public CompletableFuture<Guild> guildAsync(final long id) {
+        return SafeVertxCompletableFuture.completedFuture(null);
+    }
+    
+    @Nonnull
+    @Override
     public NamedCacheView<Guild> guilds() {
         return NamedCacheView.empty();
     }
@@ -125,6 +133,12 @@ public class NoopEntityCache implements EntityCacheWorker {
         return null;
     }
     
+    @Nonnull
+    @Override
+    public CompletableFuture<User> userAsync(final long id) {
+        return SafeVertxCompletableFuture.completedFuture(null);
+    }
+    
     @Nullable
     @Override
     public Presence presence(@Nonnull final String id) {
@@ -135,6 +149,12 @@ public class NoopEntityCache implements EntityCacheWorker {
     @Override
     public Presence presence(final long id) {
         return null;
+    }
+    
+    @Nonnull
+    @Override
+    public CompletableFuture<Presence> presenceAsync(final long id) {
+        return SafeVertxCompletableFuture.completedFuture(null);
     }
     
     @Nonnull
@@ -153,6 +173,12 @@ public class NoopEntityCache implements EntityCacheWorker {
     @Override
     public Member member(final long guildId, final long id) {
         return null;
+    }
+    
+    @Nonnull
+    @Override
+    public CompletableFuture<Member> memberAsync(final long guildId, final long id) {
+        return SafeVertxCompletableFuture.completedFuture(null);
     }
     
     @Nonnull
@@ -193,6 +219,12 @@ public class NoopEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
+    public CompletableFuture<Role> roleAsync(final long guildId, final long id) {
+        return SafeVertxCompletableFuture.completedFuture(null);
+    }
+    
+    @Nonnull
+    @Override
     public NamedCacheView<Role> roles(@Nonnull final String guildId) {
         return NamedCacheView.empty();
     }
@@ -219,6 +251,12 @@ public class NoopEntityCache implements EntityCacheWorker {
     @Override
     public GuildChannel channel(final long guildId, final long id) {
         return null;
+    }
+    
+    @Nonnull
+    @Override
+    public CompletableFuture<GuildChannel> channelAsync(final long guildId, final long id) {
+        return SafeVertxCompletableFuture.completedFuture(null);
     }
     
     @Nonnull
@@ -253,6 +291,12 @@ public class NoopEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
+    public CompletableFuture<UserDMChannel> dmChannelAsync(final long id) {
+        return SafeVertxCompletableFuture.completedFuture(null);
+    }
+    
+    @Nonnull
+    @Override
     public CacheView<UserDMChannel> dmChannels() {
         return CacheView.empty();
     }
@@ -267,6 +311,12 @@ public class NoopEntityCache implements EntityCacheWorker {
     @Override
     public CustomEmoji emoji(final long guildId, final long id) {
         return null;
+    }
+    
+    @Nonnull
+    @Override
+    public CompletableFuture<CustomEmoji> emojiAsync(final long guildId, final long id) {
+        return SafeVertxCompletableFuture.completedFuture(null);
     }
     
     @Nonnull
@@ -301,6 +351,12 @@ public class NoopEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
+    public CompletableFuture<VoiceState> voiceStateAsync(final long guildId, final long id) {
+        return SafeVertxCompletableFuture.completedFuture(null);
+    }
+    
+    @Nonnull
+    @Override
     public CacheView<VoiceState> voiceStates(@Nonnull final String guildId) {
         return CacheView.empty();
     }
@@ -321,6 +377,12 @@ public class NoopEntityCache implements EntityCacheWorker {
     @Override
     public User selfUser() {
         return null;
+    }
+    
+    @Nonnull
+    @Override
+    public CompletableFuture<User> selfUserAsync() {
+        return SafeVertxCompletableFuture.completedFuture(null);
     }
     
     @Nonnull
