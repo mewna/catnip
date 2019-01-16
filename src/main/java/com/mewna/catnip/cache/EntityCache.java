@@ -39,8 +39,10 @@ import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * If you're looking to implement your own caching system, you want
@@ -71,7 +73,20 @@ public interface EntityCache {
      * @return The guild, or {@code null} if it isn't cached.
      */
     @Nullable
-    Guild guild(final long id);
+    default Guild guild(final long id) {
+        return guildAsync(id).join();
+    }
+    
+    /**
+     * Get the guild with the specified id asynchronously.
+     *
+     * @param id The id of the guild to fetch.
+     *
+     * @return A future that completes with a possibly-{@code null} guild.
+     */
+    @Nonnull
+    @CheckReturnValue
+    CompletableFuture<Guild> guildAsync(final long id);
     
     /**
      * @return A view of the current guild cache. Updates to the cache will update this view.
@@ -99,7 +114,20 @@ public interface EntityCache {
      * @return The user, or {@code null} if it isn't cached.
      */
     @Nullable
-    User user(long id);
+    default User user(final long id) {
+        return userAsync(id).join();
+    }
+    
+    /**
+     * Get the user with the specified id asynchronously.
+     *
+     * @param id The id of the user to fetch.
+     *
+     * @return A future that completes with a possibly-{@code null} user.
+     */
+    @Nonnull
+    @CheckReturnValue
+    CompletableFuture<User> userAsync(final long id);
     
     /**
      * @return A view of the current user cache. Updates to the cache will update this view.
@@ -129,7 +157,20 @@ public interface EntityCache {
      * @return The user's presence, or {@code null} if it isn't cached.
      */
     @Nullable
-    Presence presence(long id);
+    default Presence presence(final long id) {
+        return presenceAsync(id).join();
+    }
+    
+    /**
+     * Get the presence with the specified id asynchronously.
+     *
+     * @param id The id of the presence to fetch.
+     *
+     * @return A future that completes with a possibly-{@code null} presence.
+     */
+    @Nonnull
+    @CheckReturnValue
+    CompletableFuture<Presence> presenceAsync(long id);
     
     /**
      * @return A view of the current presence cache. Updates to the cache will update this view.
@@ -161,7 +202,21 @@ public interface EntityCache {
      * @return The member, or {@code null} if it isn't cached.
      */
     @Nullable
-    Member member(long guildId, long id);
+    default Member member(final long guildId, final long id) {
+        return memberAsync(guildId, id).join();
+    }
+    
+    /**
+     * Get the member with the specified id asynchronously.
+     *
+     * @param guildId The id of the guild the member is in.
+     * @param id      The id of the member to fetch.
+     *
+     * @return A future that completes with a possibly-{@code null} member.
+     */
+    @Nonnull
+    @CheckReturnValue
+    CompletableFuture<Member> memberAsync(long guildId, long id);
     
     /**
      * Get all members for the guild with the given ID.
@@ -218,7 +273,21 @@ public interface EntityCache {
      * @return The role, or {@code null} if it isn't cached.
      */
     @Nullable
-    Role role(long guildId, long id);
+    default Role role(final long guildId, final long id) {
+        return roleAsync(guildId, id).join();
+    }
+    
+    /**
+     * Get the role with the specified id asynchronously.
+     *
+     * @param guildId The id of the guild that owns the role.
+     * @param id      The id of the role to fetch.
+     *
+     * @return A future that completes with a possibly-{@code null} role.
+     */
+    @Nonnull
+    @CheckReturnValue
+    CompletableFuture<Role> roleAsync(long guildId, long id);
     
     /**
      * Get all roles for the guild with the given ID.
@@ -275,7 +344,21 @@ public interface EntityCache {
      * @return The channel, or {@code null} if it isn't cached.
      */
     @Nullable
-    GuildChannel channel(long guildId, long id);
+    default GuildChannel channel(final long guildId, final long id) {
+        return channelAsync(guildId, id).join();
+    }
+    
+    /**
+     * Get the guild channel with the specified id asynchronously.
+     *
+     * @param guildId The id of the guild that owns the channel.
+     * @param id      The id of the guild channel to fetch.
+     *
+     * @return A future that completes with a possibly-{@code null} channel.
+     */
+    @Nonnull
+    @CheckReturnValue
+    CompletableFuture<GuildChannel> channelAsync(long guildId, long id);
     
     /**
      * Get all channels for the guild with the given ID.
@@ -328,7 +411,20 @@ public interface EntityCache {
      * @return The channel, or {@code null} if it isn't cached.
      */
     @Nullable
-    UserDMChannel dmChannel(long id);
+    default UserDMChannel dmChannel(final long id) {
+        return dmChannelAsync(id).join();
+    }
+    
+    /**
+     * Get the dm channel with the specified id asynchronously.
+     *
+     * @param id The id of the dm channel to fetch.
+     *
+     * @return A future that completes with a possibly-{@code null} dm channel.
+     */
+    @Nonnull
+    @CheckReturnValue
+    CompletableFuture<UserDMChannel> dmChannelAsync(long id);
     
     /**
      * Get all DM channels cached in this entity cache.
@@ -363,7 +459,22 @@ public interface EntityCache {
      * @return The custom emojis, or {@code null} if it isn't cached.
      */
     @Nullable
-    CustomEmoji emoji(long guildId, long id);
+    default CustomEmoji emoji(final long guildId, final long id) {
+        return emojiAsync(guildId, id).join();
+    }
+    
+    /**
+     * Get the custom emoji with the specified id asynchronously.
+     *
+     * @param guildId The id of the guild that owns the emoji.
+     * @param id      The id of the custom emoji to fetch.
+     *
+     * @return A future that completes with a possibly-{@code null} custom
+     * emoji.
+     */
+    @Nonnull
+    @CheckReturnValue
+    CompletableFuture<CustomEmoji> emojiAsync(long guildId, long id);
     
     /**
      * Get all custom emojis for the guild with the given ID.
@@ -406,7 +517,21 @@ public interface EntityCache {
      * @return The requested voice state, or {@code null} if it isn't cached.
      */
     @Nullable
-    VoiceState voiceState(long guildId, long id);
+    default VoiceState voiceState(final long guildId, final long id) {
+        return voiceStateAsync(guildId, id).join();
+    }
+    
+    /**
+     * Get the voice state with the specified id asynchronously.
+     *
+     * @param guildId The id of the guild for the voice state.
+     * @param id      The id of the voice state to fetch.
+     *
+     * @return A future that completes with a possibly-{@code null} voice state.
+     */
+    @Nonnull
+    @CheckReturnValue
+    CompletableFuture<VoiceState> voiceStateAsync(long guildId, long id);
     
     /**
      * Get the voice state for the user with the given ID, possibly in the
@@ -460,5 +585,17 @@ public interface EntityCache {
      * have logged in.
      */
     @Nullable
-    User selfUser();
+    default User selfUser() {
+        return selfUserAsync().join();
+    }
+    
+    /**
+     * Get the currently-logged-in user.
+     * *
+     *
+     * @return A future that completes with a possibly-{@code null} user.
+     */
+    @Nonnull
+    @CheckReturnValue
+    CompletableFuture<User> selfUserAsync();
 }
