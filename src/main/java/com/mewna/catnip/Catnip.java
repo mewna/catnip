@@ -69,7 +69,7 @@ import java.util.function.Function;
 public interface Catnip {
     /**
      * Create a new catnip instance with the given token.
-     * <p/>
+     * <p>
      * <strong>This method may block while validating the provided token.</strong>
      *
      * @param token The token to be used for all API operations.
@@ -82,7 +82,7 @@ public interface Catnip {
     
     /**
      * Create a new catnip instance with the given token.
-     * <p/>
+     * <p>
      * <strong>This method may block while validating the provided token.</strong>
      *
      * @param token The token to be used for all API operations.
@@ -95,7 +95,7 @@ public interface Catnip {
     
     /**
      * Create a new catnip instance with the given options.
-     * <p/>
+     * <p>
      * <strong>This method may block while validating the provided token.</strong>
      *
      * @param options The options to be applied to the catnip instance.
@@ -108,7 +108,7 @@ public interface Catnip {
     
     /**
      * Create a new catnip instance with the given options.
-     * <p/>
+     * <p>
      * <strong>This method may block while validating the provided token.</strong>
      *
      * @param options The options to be applied to the catnip instance.
@@ -121,7 +121,7 @@ public interface Catnip {
     
     /**
      * Create a new catnip instance with the given token and vert.x instance.
-     * <p/>
+     * <p>
      * <strong>This method may block while validating the provided token.</strong>
      *
      * @param token The token to be used for all API operations.
@@ -135,7 +135,7 @@ public interface Catnip {
     
     /**
      * Create a new catnip instance with the given token and vert.x instance.
-     * <p/>
+     * <p>
      * <strong>This method may block while validating the provided token.</strong>
      *
      * @param token The token to be used for all API operations.
@@ -149,7 +149,7 @@ public interface Catnip {
     
     /**
      * Create a new catnip instance with the given options and vert.x instance.
-     * <p/>
+     * <p>
      * <strong>This method may block while validating the provided token.</strong>
      *
      * @param options The options to be applied to the catnip instance.
@@ -163,7 +163,7 @@ public interface Catnip {
     
     /**
      * Create a new catnip instance with the given options and vert.x instance.
-     * <p/>
+     * <p>
      * <strong>This method may block while validating the provided token.</strong>
      *
      * @param options The options to be applied to the catnip instance.

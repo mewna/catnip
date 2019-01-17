@@ -45,7 +45,7 @@ public interface ShardCondition {
      * Get the future for this shard condition. This function is called
      * ASYNCHRONOUSLY and must be ASYNCHRONOUS to avoid blocking the vert.x
      * event loop threads.
-     * <p/>
+     * <p>
      * This is run prior to sharding.
      *
      * @return The future for this shard condition.
