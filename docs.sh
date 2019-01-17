@@ -5,5 +5,5 @@
 
 rm -rf docs
 export JAVA_HOME="/usr/lib/jvm/java-8-openjdk/"
-mvn clean javadoc:javadoc
+mvn clean compile javadoc:javadoc
 cp -r target/site/apidocs ./docs
