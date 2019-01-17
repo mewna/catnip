@@ -23,6 +23,10 @@ Current version: ![GitHub tag (latest by date)](https://img.shields.io/github/ta
 
 No. Use a real build tool like [Maven](https://maven.apache.org/) or [Gradle](https://gradle.org/).
 
+### Javadocs?
+
+[Get them here.](https://mewna.github.io/catnip/)
+
 ## Features
 
 - Automatic sharding
@@ -99,6 +103,15 @@ want to fire. If you have an event class `MyEvent`, you can just do something to
 eventBus().registerDefaultCodec(MyEvent.class, new JsonPojoCodec<>(this, MyEvent.class));
 ```
 where `JsonPojoCodec` is `com.mewna.catnip.util.JsonPojoCodec` and is safe to use.
+
+## Useful extensions
+
+- `catnip-voice` - Voice support for your catnip bot. 
+  https://github.com/natanbc/catnip-voice
+- `catnip-utilities` - Some extensions for typesafe commands, event waiters, reaction menus, 
+  and more. https://github.com/queer/catnip-utilities 
+- `catnip-rxjava2` - RxJava 2 Observable support for catnip. 
+  https://github.com/queer/catnip-rxjava2
 
 ## Why write a fourth Java lib?
 
