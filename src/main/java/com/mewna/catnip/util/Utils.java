@@ -27,6 +27,9 @@
 
 package com.mewna.catnip.util;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -43,6 +46,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.function.LongPredicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class Utils {
     public static final List<String> VALID_CONTENT_TYPES = Arrays.asList(
@@ -51,6 +56,7 @@ public final class Utils {
             "image/gif"
     );
     public static final long DISCORD_EPOCH = 1420070400000L;
+    private static final Pattern WEBHOOK_PATTERN = Pattern.compile("https://discordapp\\.com/api/webhooks/(\\d+)/([\\w\\W]+)");
     
     private Utils() {
     }
@@ -162,5 +168,13 @@ public final class Utils {
             return false;
         }
         return str.regionMatches(true, str.length() - length, search, 0, length);
+    }
+    
+    @CheckReturnValue
+    public static Pair<String, String> parseWebhook(@Nonnull final String url) {
+        final Matcher matcher = WEBHOOK_PATTERN.matcher(url);
+        final String id = matcher.group(1);
+        final String token = matcher.group(2);
+        return ImmutablePair.of(id, token);
     }
 }

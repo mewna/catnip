@@ -73,6 +73,20 @@ public class RestWebhook extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
+    public CompletionStage<Webhook> getWebhookToken(@Nonnull final String webhookId, @Nonnull final String token) {
+        return getWebhookTokenRaw(webhookId, token).thenApply(entityBuilder()::createWebhook);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> getWebhookTokenRaw(@Nonnull final String webhookId, @Nonnull final String token) {
+        return catnip().requester().queue(new OutboundRequest(Routes.GET_WEBHOOK_TOKEN.withMajorParam(webhookId),
+                ImmutableMap.of("webhook.token", token)))
+                .thenApply(ResponsePayload::object);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public CompletionStage<List<Webhook>> getGuildWebhooks(@Nonnull final String guildId) {
         return getGuildWebhooksRaw(guildId).thenApply(mapObjectContents(entityBuilder()::createWebhook));
     }
