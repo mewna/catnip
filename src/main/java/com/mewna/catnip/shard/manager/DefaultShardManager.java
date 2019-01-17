@@ -177,7 +177,7 @@ public class DefaultShardManager extends AbstractShardManager {
                         }
                         conditions().forEach(e -> e.postshard(state));
                     } else {
-                        catnip().logAdapter().warn("Failed connecting shard {} entirely, re-queueing", nextId);
+                        catnip().logAdapter().warn("Failed connecting shard {} entirely, re-queueing", nextId, reply.cause());
                         addToConnectQueue(nextId);
                         poll();
                     }
