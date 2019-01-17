@@ -39,6 +39,7 @@ import lombok.Value;
 import lombok.experimental.Accessors;
 
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -102,7 +103,7 @@ public class CachingBuffer extends AbstractBuffer {
         switch(type) {
             case Raw.READY: {
                 final Set<String> guilds = JsonUtil.toMutableSet(d.getJsonArray("guilds"), g -> g.getString("id"));
-                buffers.put(id, new BufferState(id, guilds));
+                buffers.put(id, new BufferState(id, new HashSet<>(guilds)));
                 catnip().logAdapter().debug("Prepared new BufferState for shard {} with {} guilds.", id, guilds.size());
                 // READY is also a cache event, as it does come with
                 // information about the current user
@@ -128,14 +129,15 @@ public class CachingBuffer extends AbstractBuffer {
                                 ));
                     }
                     if(bufferState != null) {
-                        if(bufferState.readyGuilds().isEmpty()) {
+                        // Add the guild to be awaited so that we can buffer members
+                        bufferState.awaitGuild(guild);
+                        if(bufferState.awaitedGuilds().isEmpty()) {
                             // No guilds left, can just dispatch normally
-                            buffers.remove(id);
                             emitter().emit(event);
                             bufferState.replay();
                         } else {
                             // Remove READY guild if necessary, otherwise buffer
-                            if(bufferState.readyGuilds().contains(guild)) {
+                            if(bufferState.awaitedGuilds().contains(guild)) {
                                 bufferState.recvGuild(guild);
                                 
                                 if(catnip().chunkMembers() && memberCount > LARGE_THRESHOLD) {
@@ -150,8 +152,7 @@ public class CachingBuffer extends AbstractBuffer {
                                     emitter().emit(event);
                                     bufferState.replayGuild(guild);
                                     // Replay all buffered events once we run out
-                                    if(bufferState.readyGuilds().isEmpty()) {
-                                        buffers.remove(id);
+                                    if(bufferState.awaitedGuilds().isEmpty()) {
                                         bufferState.replay();
                                     }
                                 }
@@ -179,14 +180,14 @@ public class CachingBuffer extends AbstractBuffer {
                             // by a little bit to allow chunk caching to finish
                             bufferState.replayGuild(guild);
                             // Replay all buffered events once we run out
-                            if(bufferState.readyGuilds().isEmpty()) {
-                                buffers.remove(id);
+                            if(bufferState.awaitedGuilds().isEmpty()) {
                                 bufferState.replay();
                             }
                         }
                     }
                 }
                 // We very explicitly DON'T break here because this is SUPPOSED to fall through to the next case
+                // Please don't PR a break into this!
             }
             default: {
                 // Buffer and replay later
@@ -194,7 +195,7 @@ public class CachingBuffer extends AbstractBuffer {
                 if(bufferState != null) {
                     final String guildId = d.getString("guild_id", null);
                     if(guildId != null) {
-                        if(bufferState.readyGuilds().contains(guildId)) {
+                        if(bufferState.awaitedGuilds().contains(guildId)) {
                             // If we have a guild id, and we have a guild being awaited,
                             // buffer the event
                             bufferState.recvGuildEvent(guildId, event);
@@ -250,15 +251,18 @@ public class CachingBuffer extends AbstractBuffer {
     @Value
     @Accessors(fluent = true)
     private final class BufferState {
-        
         private int id;
-        private final Set<String> readyGuilds;
+        private final Set<String> awaitedGuilds;
         private final Map<String, Deque<JsonObject>> guildBuffers = new ConcurrentHashMap<>();
         private final Map<String, Counter> guildChunkCount = new ConcurrentHashMap<>();
         private final Deque<JsonObject> buffer = new ConcurrentLinkedDeque<>();
         
+        void awaitGuild(final String id) {
+            awaitedGuilds.add(id);
+        }
+        
         void recvGuild(final String id) {
-            readyGuilds.remove(id);
+            awaitedGuilds.remove(id);
         }
         
         void recvGuildEvent(final String id, final JsonObject event) {
