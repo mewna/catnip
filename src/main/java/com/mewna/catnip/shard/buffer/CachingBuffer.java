@@ -111,7 +111,6 @@ public class CachingBuffer extends AbstractBuffer {
             }
             case Raw.GUILD_CREATE: {
                 handleGuildCreate(bufferState, event);
-                
                 break;
             }
             case Raw.GUILD_MEMBERS_CHUNK: {
@@ -158,34 +157,28 @@ public class CachingBuffer extends AbstractBuffer {
             }
             // Add the guild to be awaited so that we can buffer members
             bufferState.awaitGuild(guild);
-            if(bufferState.awaitedGuilds().isEmpty()) {
-                // No guilds left, can just dispatch normally
-                emitter().emit(event);
-                bufferState.replay();
-            } else {
-                // Remove READY guild if necessary, otherwise buffer
-                if(bufferState.awaitedGuilds().contains(guild)) {
-                    bufferState.recvGuild(guild);
-                    
-                    if(catnip().chunkMembers() && memberCount > LARGE_THRESHOLD) {
-                        // If we're chunking members, calculate how many chunks we have to await
-                        int chunks = memberCount / 1000;
-                        if(memberCount % 1000 != 0) {
-                            // Not a perfect 1k, add a chunk to make up for how math works
-                            chunks += 1;
-                        }
-                        bufferState.initialGuildChunkCount(guild, chunks, event);
-                    } else {
-                        emitter().emit(event);
-                        bufferState.replayGuild(guild);
-                        // Replay all buffered events once we run out
-                        if(bufferState.awaitedGuilds().isEmpty()) {
-                            bufferState.replay();
-                        }
+            
+            // Remove READY guild if necessary, otherwise buffer
+            if(bufferState.awaitedGuilds().contains(guild)) {
+                if(catnip().chunkMembers() && memberCount > LARGE_THRESHOLD) {
+                    // If we're chunking members, calculate how many chunks we have to await
+                    int chunks = memberCount / 1000;
+                    if(memberCount % 1000 != 0) {
+                        // Not a perfect 1k, add a chunk to make up for how math works
+                        chunks += 1;
                     }
+                    bufferState.initialGuildChunkCount(guild, chunks, event);
                 } else {
-                    bufferState.buffer(event);
+                    emitter().emit(event);
+                    bufferState.recvGuild(guild);
+                    bufferState.replayGuild(guild);
+                    // Replay all buffered events once we run out
+                    if(bufferState.awaitedGuilds().isEmpty()) {
+                        bufferState.replay();
+                    }
                 }
+            } else {
+                bufferState.buffer(event);
             }
         });
     }
@@ -202,6 +195,7 @@ public class CachingBuffer extends AbstractBuffer {
                 emitter().emit(bufferState.guildCreate(guild));
                 // If we're finished chunking that guild, defer doing everything needed
                 // by a little bit to allow chunk caching to finish
+                bufferState.recvGuild(guild);
                 bufferState.replayGuild(guild);
                 // Replay all buffered events once we run out
                 if(bufferState.awaitedGuilds().isEmpty()) {
@@ -222,11 +216,10 @@ public class CachingBuffer extends AbstractBuffer {
                 // buffer the event
                 bufferState.recvGuildEvent(guildId, event);
             } else {
-                // If the payload is for a non-buffered guild, but we currently
-                // have a BufferState, then it should be buffered, since it's
-                // probably that we received a (buffered) GUILD_CREATE and then
-                // started receiving events for it
-                bufferState.buffer(event);
+                // If we're not awaiting the guild, it means that we're done
+                // buffering events for the guild - ie. all member chunks have
+                // been recv'd - and so we can emit
+                cacheAndDispatch(eventType, payloadData, id, event);
             }
         } else {
             // Emit if the payload has no guild id
