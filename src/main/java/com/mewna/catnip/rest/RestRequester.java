@@ -142,7 +142,7 @@ public class RestRequester {
                     } else if(ratelimited) {
                         handleRouteRatelimitPost(headers, bucket, r, hasMemeReactionRatelimits);
                     } else {
-                        finishRequestPost(headers, bucket, r, payload);
+                        finishRequestPost(headers, bucket, r, payload, statusCode);
                     }
                 } else {
                     failRequestPost(bucket, r, failureCause);
@@ -179,7 +179,7 @@ public class RestRequester {
     }
     
     private void finishRequestPost(final MultiMap headers, final Bucket bucket, final OutboundRequest r,
-                                   final ResponsePayload finalPayload) {
+                                   final ResponsePayload finalPayload, final int statusCode) {
         final ResponsePayload[] payload = {finalPayload};
         // We're good, run it through hooks and complete the future.
         bucket.updateFromHeaders(headers).thenAccept(___ -> {
@@ -188,9 +188,23 @@ public class RestRequester {
                     payload[0] = hook.rawRestReceiveDataHook(r.route, payload[0]);
                 }
             }
-            r.future.complete(payload[0]);
-            bucket.finishRequest();
-            bucket.submit();
+            
+            // We got a 400, meaning there's errors. Fail the request with this and move on.
+            if(statusCode == 400) {
+                final RestPayloadException exception = new RestPayloadException();
+                final JsonObject errors = payload[0].object();
+                errors.forEach(e -> {
+                    //noinspection unchecked
+                    exception.addFailure(e.getKey(), (List<String>) e.getValue());
+                });
+                r.future.fail(exception);
+                bucket.finishRequest();
+                bucket.submit();
+            } else {
+                r.future.complete(payload[0]);
+                bucket.finishRequest();
+                bucket.submit();
+            }
         });
     }
     
