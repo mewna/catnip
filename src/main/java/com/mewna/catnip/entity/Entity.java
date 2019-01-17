@@ -29,6 +29,7 @@ package com.mewna.catnip.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.util.CatnipMeta;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
@@ -55,7 +56,15 @@ public interface Entity {
     @JsonIgnore
     @SuppressWarnings("ClassReferencesSubclass")
     static <T> T fromJson(@Nonnull final Catnip catnip, @Nonnull final Class<T> type, @Nonnull final JsonObject json) {
-        final T t = json.mapTo(type);
+        final String v = json.getString("v");
+        final JsonObject data = json.getJsonObject("d");
+        
+        if(!CatnipMeta.VERSION.equals(v)) {
+            catnip.logAdapter().warn("Attempting to deserialize an entity from catnip v{}, but we're on v{}! " +
+                    "This may not work, so update your versions!");
+        }
+        
+        final T t = data.mapTo(type);
         // Yeah I know this is a Bad Thing:tm: to do with referencing the
         // subclass, but it was the easiest way to do things :<
         if(t instanceof RequiresCatnip) {
@@ -80,6 +89,9 @@ public interface Entity {
     @Nonnull
     @JsonIgnore
     default JsonObject toJson() {
-        return JsonObject.mapFrom(this);
+        return new JsonObject()
+                .put("d", JsonObject.mapFrom(this))
+                .put("v", CatnipMeta.VERSION)
+                ;
     }
 }
