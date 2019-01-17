@@ -107,6 +107,7 @@ public class CatnipShard extends AbstractVerticle {
     private volatile boolean sendRateLimitRecheckQueued;
     private volatile List<String> trace = Collections.emptyList();
     private volatile boolean clientClose;
+    private volatile long heartbeatTask;
     
     public CatnipShard(@Nonnull final Catnip catnip, @Nonnegative final int id, @Nonnegative final int limit,
                        @Nullable final Presence presence) {
@@ -419,6 +420,7 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void handleSocketClose(final Void __) {
+        vertx.cancelTimer(heartbeatTask);
         catnip.eventBus().publish(Raw.DISCONNECTED, shardInfo());
         catnip.logAdapter().warn("Shard {}/{}: Socket closing!", id, limit);
         try {
@@ -460,12 +462,14 @@ public class CatnipShard extends AbstractVerticle {
         trace = JsonUtil.toStringList(payload.getJsonArray("_trace"));
         
         catnip.vertx().setPeriodic(payload.getInteger("heartbeat_interval"), timerId -> {
+            heartbeatTask = timerId;
+            
             final ShardState shardState = state;
             if(shardState != null && shardState.socket() != null && shardState.socketOpen()) {
                 if(!heartbeatAcked) {
                     // Zombie
                     catnip.logAdapter().warn("Shard {}/{}: Heartbeat zombie, queueing reconnect!", id, limit);
-                    catnip.vertx().cancelTimer(timerId);
+                    catnip.vertx().cancelTimer(heartbeatTask);
                     catnip.eventBus().publish(controlAddress(id), ShardControlMessage.STOP);
                     return;
                 }
@@ -474,7 +478,7 @@ public class CatnipShard extends AbstractVerticle {
                 lastHeartbeat = System.nanoTime();
                 heartbeatAcked = false;
             } else {
-                catnip.vertx().cancelTimer(timerId);
+                catnip.vertx().cancelTimer(heartbeatTask);
             }
         });
         
