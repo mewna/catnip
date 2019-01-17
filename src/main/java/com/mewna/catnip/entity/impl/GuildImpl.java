@@ -85,7 +85,6 @@ public class GuildImpl implements Guild, RequiresCatnip, Timestamped {
     private String joinedAt;
     private boolean large;
     private boolean unavailable;
-    private long memberCount;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
