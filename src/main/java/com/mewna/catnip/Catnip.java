@@ -30,6 +30,7 @@ package com.mewna.catnip;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCache;
 import com.mewna.catnip.cache.EntityCacheWorker;
+import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.ActivityType;
@@ -47,10 +48,12 @@ import com.mewna.catnip.shard.event.EventBuffer;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.SessionManager;
+import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.logging.LogAdapter;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -58,6 +61,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -521,4 +525,30 @@ public interface Catnip {
      * @param vertx Whether or not to shut down the vert.x instance.
      */
     void shutdown(boolean vertx);
+    
+    /**
+     * Get a webhook object for the specified webhook URL. This method will
+     * attempt to validate the webhook.
+     *
+     * @param webhookUrl The URL of the webhook.
+     *
+     * @return A stage that completes when the webhook is validated.
+     */
+    default CompletionStage<Webhook> parseWebhook(final String webhookUrl) {
+        final Pair<String, String> parse = Utils.parseWebhook(webhookUrl);
+        return parseWebhook(parse.getLeft(), parse.getRight());
+    }
+    
+    /**
+     * Get a webhook object for the specified webhook URL. This method will
+     * attempt to validate the webhook.
+     *
+     * @param id    The webhook's id.
+     * @param token The webhook's token.
+     *
+     * @return A stage that completes when the webhook is validated.
+     */
+    default CompletionStage<Webhook> parseWebhook(final String id, final String token) {
+        return rest().webhook().getWebhookToken(id, token);
+    }
 }

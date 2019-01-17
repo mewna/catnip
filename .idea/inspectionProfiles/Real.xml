@@ -105,7 +105,7 @@
       <option name="useParameterizedTypeForCollectionMethods" value="true" />
       <option name="doNotWeakenToJavaLangObject" value="true" />
       <option name="onlyWeakentoInterface" value="true" />
-      <stopClasses>com.mewna.catnip.entity.User,com.mewna.catnip.rest.guild.PartialGuild,okhttp3.OkHttpClient,io.vertx.core.json.JsonArray,com.mewna.catnip.rest.invite.InviteCreateOptions,com.mewna.catnip.entity.guild.PermissionOverride,java.util.Collection,com.mewna.catnip.rest.guild.GuildData,com.mewna.catnip.rest.guild.ChannelData,com.mewna.catnip.rest.guild.RoleData</stopClasses>
+      <stopClasses>com.mewna.catnip.entity.User,com.mewna.catnip.rest.guild.PartialGuild,okhttp3.OkHttpClient,io.vertx.core.json.JsonArray,com.mewna.catnip.rest.invite.InviteCreateOptions,com.mewna.catnip.entity.guild.PermissionOverride,java.util.Collection,com.mewna.catnip.rest.guild.GuildData,com.mewna.catnip.rest.guild.ChannelData,com.mewna.catnip.rest.guild.RoleData,java.lang.String</stopClasses>
     </inspection_tool>
     <inspection_tool class="UnnecessarilyQualifiedInnerClassAccess" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoreReferencesNeedingImport" value="false" />
