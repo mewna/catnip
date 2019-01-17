@@ -45,6 +45,9 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static com.mewna.catnip.shard.ShardAddress.CONTROL;
+import static com.mewna.catnip.shard.ShardAddress.computeAddress;
+
 /**
  * @author amy
  * @since 11/13/18.
@@ -78,7 +81,7 @@ public abstract class AbstractShardManager implements ShardManager {
     @Override
     public CompletableFuture<List<String>> trace(@Nonnegative final int shard) {
         final CompletableFuture<List<String>> future = new SafeVertxCompletableFuture<>(catnip);
-        catnip.eventBus().<JsonArray>send(CatnipShard.controlAddress(shard), ShardControlMessage.TRACE,
+        catnip.eventBus().<JsonArray>send(computeAddress(CONTROL, shard), ShardControlMessage.TRACE,
                 reply -> {
                     if(reply.succeeded()) {
                         // ow
@@ -94,7 +97,7 @@ public abstract class AbstractShardManager implements ShardManager {
     @Override
     public CompletableFuture<Long> latency(final int shard) {
         final CompletableFuture<Long> future = new SafeVertxCompletableFuture<>(catnip);
-        catnip.eventBus().<Long>send(CatnipShard.controlAddress(shard), ShardControlMessage.LATENCY,
+        catnip.eventBus().<Long>send(computeAddress(CONTROL, shard), ShardControlMessage.LATENCY,
                 reply -> {
                     if(reply.succeeded()) {
                         // ow
@@ -111,7 +114,7 @@ public abstract class AbstractShardManager implements ShardManager {
     @CheckReturnValue
     public CompletableFuture<Boolean> isConnected(@Nonnegative final int id) {
         final CompletableFuture<Boolean> future = new SafeVertxCompletableFuture<>(catnip);
-        catnip.eventBus().<Boolean>send(CatnipShard.controlAddress(id), ShardControlMessage.CONNECTED,
+        catnip.eventBus().<Boolean>send(computeAddress(CONTROL, id), ShardControlMessage.CONNECTED,
                 reply -> {
                     if(reply.succeeded()) {
                         future.complete(reply.result().body());

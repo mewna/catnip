@@ -45,6 +45,9 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.mewna.catnip.shard.ShardAddress.CONTROL;
+import static com.mewna.catnip.shard.ShardAddress.computeAddress;
+
 /**
  * @author amy
  * @since 8/15/18.
@@ -148,7 +151,7 @@ public class DefaultShardManager extends AbstractShardManager {
     private void connect() {
         final int nextId = connectQueue.removeFirst();
         catnip().logAdapter().info("Connecting shard {} (queue len {})", nextId, connectQueue.size());
-        catnip().eventBus().<ShardConnectState>send(CatnipShard.controlAddress(nextId), ShardControlMessage.START,
+        catnip().eventBus().<ShardConnectState>send(computeAddress(CONTROL, nextId), ShardControlMessage.START,
                 reply -> {
                     if(reply.succeeded()) {
                         final ShardConnectState state = reply.result().body();
@@ -196,7 +199,7 @@ public class DefaultShardManager extends AbstractShardManager {
     @Override
     public void shutdown() {
         shardIds.forEach(i -> {
-            catnip().eventBus().send(CatnipShard.controlAddress(i), ShardControlMessage.SHUTDOWN);
+            catnip().eventBus().send(computeAddress(CONTROL, i), ShardControlMessage.SHUTDOWN);
         });
     }
 }

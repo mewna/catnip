@@ -47,6 +47,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 import static com.mewna.catnip.shard.CatnipShard.LARGE_THRESHOLD;
 import static com.mewna.catnip.shard.DiscordEvent.Raw;
+import static com.mewna.catnip.shard.ShardAddress.WEBSOCKET_QUEUE;
+import static com.mewna.catnip.shard.ShardAddress.computeAddress;
 
 /**
  * An implementation of {@link EventBuffer} used for the case of caching all
@@ -147,7 +149,7 @@ public class CachingBuffer extends AbstractBuffer {
             final Integer memberCount = payloadData.getInteger("member_count");
             if(memberCount > LARGE_THRESHOLD) {
                 // Chunk members
-                catnip().eventBus().publish(CatnipShard.websocketMessageQueueAddress(shardId),
+                catnip().eventBus().publish(computeAddress(WEBSOCKET_QUEUE, shardId),
                         CatnipShard.basePayload(GatewayOp.REQUEST_GUILD_MEMBERS,
                                 new JsonObject()
                                         .put("guild_id", guild)

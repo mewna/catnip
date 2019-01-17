@@ -82,6 +82,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static com.mewna.catnip.shard.ShardAddress.*;
+
 /**
  * @author amy
  * @since 8/31/18.
@@ -240,29 +242,28 @@ public class CatnipImpl implements Catnip {
     @Override
     public void openVoiceConnection(@Nonnull final String guildId, @Nonnull final String channelId) {
         PermissionUtil.checkPermissions(this, guildId, channelId, Permission.CONNECT);
-        eventBus().send(CatnipShard.websocketMessageVoiceStateUpdateQueueAddress(shardIdFor(guildId)),
+        eventBus().send(computeAddress(VOICE_STATE_UPDATE_QUEUE, shardIdFor(guildId)),
                 new JsonObject()
                         .put("guild_id", guildId)
                         .put("channel_id", channelId)
                         .put("self_mute", false)
-                        .put("self_deaf", false)
-        );
+                        .put("self_deaf", false));
     }
     
     @Override
     public void closeVoiceConnection(@Nonnull final String guildId) {
-        eventBus().send(CatnipShard.websocketMessageVoiceStateUpdateQueueAddress(shardIdFor(guildId)),
+        eventBus().send(computeAddress(VOICE_STATE_UPDATE_QUEUE, shardIdFor(guildId)),
                 new JsonObject()
                         .put("guild_id", guildId)
                         .putNull("channel_id")
                         .put("self_mute", false)
-                        .put("self_deaf", false)
-        );
+                        .put("self_deaf", false));
     }
     
     @Override
     public void presence(@Nonnegative final int shardId, @Nonnull final Consumer<Presence> callback) {
-        eventBus().send(CatnipShard.websocketMessagePresenceUpdateAddress(shardId), null,
+        eventBus().send(
+                computeAddress(PRESENCE_UPDATE_REQUEST, shardId), null,
                 result -> callback.accept((Presence) result.result().body()));
     }
     
@@ -279,7 +280,7 @@ public class CatnipImpl implements Catnip {
     
     @Override
     public void presence(@Nonnull final Presence presence, @Nonnegative final int shardId) {
-        eventBus().publish(CatnipShard.websocketMessagePresenceUpdateAddress(shardId), presence);
+        eventBus().publish(computeAddress(PRESENCE_UPDATE_REQUEST, shardId), presence);
     }
     
     @Override
