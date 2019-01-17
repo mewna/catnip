@@ -33,6 +33,8 @@ import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.shard.LifecycleEvent.Raw;
+import com.mewna.catnip.shard.manager.AbstractShardManager;
+import com.mewna.catnip.shard.manager.DefaultShardManager;
 import com.mewna.catnip.util.BufferOutputStream;
 import com.mewna.catnip.util.JsonUtil;
 import io.vertx.core.AbstractVerticle;
@@ -64,6 +66,19 @@ import java.util.zip.InflaterOutputStream;
 import static com.mewna.catnip.shard.CatnipShard.ShardConnectState.*;
 
 /**
+ * A catnip shard encapsulates a single websocket connection to Discord's
+ * real-time gateway. Shards are implemented as vert.x verticles and should be
+ * un/deployed as such; see {@link DefaultShardManager} and
+ * {@link AbstractShardManager} for more.
+ * <p/>
+ * Shards are controlled by sending messages over the vert.x event bus; it is
+ * NOT recommended that you store a reference to a shard verticle anywhere. To
+ * send a message to a shard:
+ * <ol>
+ *     <li>Get the shard's control address with {@link #controlAddress(int)}.</li>
+ *     <li>Send a {@link ShardControlMessage} to it.</li>
+ * </ol>
+ *
  * @author amy
  * @since 8/31/18.
  */
