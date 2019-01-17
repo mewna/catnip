@@ -119,8 +119,6 @@ where `JsonPojoCodec` is `com.mewna.catnip.util.JsonPojoCodec` and is safe to us
   it's more / less "do it this way or use another lib" in my experience.
 - Discord4J is built on [Project Reactor](https://projectreactor.io/); I wanted to be able 
   to choose a reactive:tm: implementation to use with the lib and not be stuck with just one.
-- From my small understanding, D4J makes you handle ratelimits manually. I don't really wanna
-  do that. (I do know that there's some util. classes they provide for it, but meh)
 - I didn't want ten billion events for every possible case. catnip maps more/less 1:1 with the
   Discord API, and any "extra" events on top of that need to be user-provided via extensions or
   other means. I guess really I just didn't want my lib to be as "high-level" as other libs are.
