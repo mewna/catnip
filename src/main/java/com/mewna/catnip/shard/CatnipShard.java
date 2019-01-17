@@ -159,10 +159,7 @@ public class CatnipShard extends AbstractVerticle {
                     }
                     presenceRateLimitRecheckQueued = false;
                     final PresenceImpl update = presenceQueue.pop();
-                    // TODO: Make this use #basePayload()
-                    final JsonObject object = new JsonObject()
-                            .put("op", GatewayOp.STATUS_UPDATE.opcode())
-                            .put("d", update.asJson());
+                    final JsonObject object = basePayload(GatewayOp.STATUS_UPDATE, update.asJson());
                     catnip.eventBus().publish(computeAddress(WEBSOCKET_SEND, id), object);
                     currentPresence = update;
                 }
