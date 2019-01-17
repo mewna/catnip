@@ -907,7 +907,6 @@ public final class EntityBuilder {
                 .joinedAt(data.getString("joined_at"))
                 .large(data.getBoolean("large", false))
                 .unavailable(data.getBoolean("unavailable", false))
-                .memberCount(data.getInteger("member_count", -1))
                 .build();
     }
     
