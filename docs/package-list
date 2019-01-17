@@ -22,6 +22,7 @@ com.mewna.catnip.rest.guild
 com.mewna.catnip.rest.handler
 com.mewna.catnip.rest.invite
 com.mewna.catnip.shard
+com.mewna.catnip.shard.buffer
 com.mewna.catnip.shard.event
 com.mewna.catnip.shard.manager
 com.mewna.catnip.shard.ratelimit
