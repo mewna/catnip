@@ -63,6 +63,7 @@ public class CreatedInviteImpl implements CreatedInvite, RequiresCatnip, Timesta
     private int maxUses;
     private int maxAge;
     private boolean temporary;
+    @JsonProperty
     private String createdAt;
     private boolean revoked;
     

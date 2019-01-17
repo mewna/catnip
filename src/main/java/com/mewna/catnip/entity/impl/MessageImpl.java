@@ -64,14 +64,18 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
     private long channelIdAsLong;
     private User author;
     private String content;
+    @JsonProperty
     private String timestamp;
+    @JsonProperty
     private String editedTimestamp;
     private boolean tts;
     private boolean mentionsEveryone;
     private List<User> mentionedUsers;
     private List<String> mentionedRoles;
+    @JsonProperty
     private List<Attachment> attachments;
     private List<Embed> embeds;
+    @JsonProperty
     private List<Reaction> reactions;
     private String nonce;
     private boolean pinned;

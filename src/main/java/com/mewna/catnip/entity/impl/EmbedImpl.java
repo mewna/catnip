@@ -54,6 +54,7 @@ public class EmbedImpl implements Embed, Timestamped {
     private EmbedType type;
     private String description;
     private String url;
+    @JsonProperty
     private String timestamp;
     private Integer color;
     private Footer footer;
@@ -62,6 +63,7 @@ public class EmbedImpl implements Embed, Timestamped {
     private Video video;
     private Provider provider;
     private Author author;
+    @JsonProperty
     private List<? extends Field> fields;
     
     @Override
