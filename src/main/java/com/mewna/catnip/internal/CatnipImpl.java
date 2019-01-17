@@ -51,7 +51,7 @@ import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
 import com.mewna.catnip.shard.ShardControlMessage;
 import com.mewna.catnip.shard.ShardInfo;
 import com.mewna.catnip.shard.event.DispatchManager;
-import com.mewna.catnip.shard.event.EventBuffer;
+import com.mewna.catnip.shard.buffer.EventBuffer;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.SessionManager;

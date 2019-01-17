@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2019 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,22 +25,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.shard.event;
+package com.mewna.catnip.shard.buffer;
 
+import com.mewna.catnip.Catnip;
 import io.vertx.core.json.JsonObject;
 
 /**
- * A no-op implementation of {@link EventBuffer}. The no-op buffer simply
- * passes all incoming events to the event bus, without any processing or
- * buffering (eg. for caching). This is mainly useful for the case of writing a
- * "stateless" (ie. cacheless) bot.
+ * Used for buffering events for things like caching.
  *
  * @author amy
  * @since 9/9/18.
  */
-public class NoopBuffer extends AbstractBuffer {
-    @Override
-    public void buffer(final JsonObject event) {
-        emitter().emit(event);
-    }
+@SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
+public interface EventBuffer {
+    /**
+     * Buffers a single event.
+     *
+     * @param event The event to buffer.
+     */
+    void buffer(JsonObject event);
+    
+    void catnip(Catnip catnip);
 }

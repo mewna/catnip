@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2019 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,25 +25,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.shard.event;
+package com.mewna.catnip.shard.buffer;
 
 import com.mewna.catnip.Catnip;
-import io.vertx.core.json.JsonObject;
+import com.mewna.catnip.shard.DispatchEmitter;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 
 /**
- * Used for buffering events for things like caching.
- *
  * @author amy
  * @since 9/9/18.
  */
-@SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
-public interface EventBuffer {
-    /**
-     * Buffers a single event.
-     *
-     * @param event The event to buffer.
-     */
-    void buffer(JsonObject event);
+@Accessors(fluent = true)
+@SuppressWarnings("FieldCanBeLocal")
+public abstract class AbstractBuffer implements EventBuffer {
+    @Getter(AccessLevel.PROTECTED)
+    private Catnip catnip;
+    @Getter(AccessLevel.PROTECTED)
+    private DispatchEmitter emitter;
     
-    void catnip(Catnip catnip);
+    @Override
+    public void catnip(final Catnip catnip) {
+        this.catnip = catnip;
+        emitter = new DispatchEmitter(catnip);
+    }
 }
