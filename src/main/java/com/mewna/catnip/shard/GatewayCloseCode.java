@@ -37,7 +37,7 @@ import javax.annotation.Nonnegative;
  * gateway when we do something bad that's within the scope of what the gateway
  * handles. This just copies the error messages directly from the docs because
  * I think that they're probably good enough.
- * <p/>
+ * <p>
  * See also: https://discordapp.com/developers/docs/topics/opcodes-and-status-codes
  *
  * @author amy

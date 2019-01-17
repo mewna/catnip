@@ -44,13 +44,13 @@ import java.util.function.Function;
 /**
  * <strong>If you are unsure if you need to implement this interface, you
  * probably want {@link AbstractExtension} instead.</strong>
- * <p/>
+ * <p>
  * An extension is like a "plugin" of sorts - basically, it gives a
  * standardized way to provide extra functionality on top of catnip that is
  * *not* user-level application code. An example of this is providing a command
  * library of some sort. Your library code would be implemented as an extension
  * that an end-user could then optionally load in.
- * <p/>
+ * <p>
  * Note that this class extends {@link Verticle}. This is because extensions
  * are expected to be deployed as vert.x verticles. A proper catnip
  * implementation will keep track of these deployments to allow unloading or
@@ -58,7 +58,7 @@ import java.util.function.Function;
  * the easiest way for a custom extension to be "compliant" is to simply extend
  * {@link AbstractExtension}, which itself extends {@link AbstractVerticle}, as
  * well as implementing this interface.
- * <p/>
+ * <p>
  * Extensions are deployed as vert.x verticles. vert.x provides two lifecycle
  * hooks - {@link Verticle#start(Future)} and {@link Verticle#stop(Future)} -
  * that should be used for managing an extension's lifecycle. This is not, say,
@@ -69,7 +69,7 @@ import java.util.function.Function;
  * are provided as convenience methods for when a {@link Future} is not needed,
  * and will automatically be available if implementations are based off of
  * {@link AbstractExtension} or {@link AbstractVerticle}.
- * <p/>
+ * <p>
  * Note that the lifecycle callbacks are called <strong>SYNCHRONOUSLY</strong>
  * by vert.x, and as such you should take care to not block the event loop in
  * those callbacks!

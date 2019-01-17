@@ -172,7 +172,7 @@ public interface Emoji extends Snowflake {
     
         /**
          * ID of guild that owns this emoji, or {@code null} if it has no guild.
-         * <p/>
+         * <p>
          * NOTE: This may be null in the case of a reaction, because the data
          * may not be available to get the id for the emoji!
          *
@@ -190,7 +190,7 @@ public interface Emoji extends Snowflake {
     
         /**
          * ID of guild that owns this emoji, or {@code 0} if it has no guild.
-         * <p/>
+         * <p>
          * NOTE: This may be null in the case of a reaction, because the data
          * may not be available to get the id for the emoji!
          *

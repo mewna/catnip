@@ -40,11 +40,11 @@ import javax.annotation.Nullable;
  * that can't be added / won't be added / just aren't currently in the library.
  * Methods on this class are called <strong>SYNCHRONOUSLY</strong>, and so any
  * implementations of it should take this into consideration.
- * <p/>
+ * <p>
  * For example, if you had a message-caching extension, you could use this to
  * inject the cached data into {@code MESSAGE_UPDATE} events, to make the data
  * in the event actually be "complete."
- * <p/>
+ * <p>
  * Again, this is a <strong>TERRIBLE</strong> idea. <strong>You should only use
  * this if you have <em>absolutely no other choice</em>.</strong> It is
  * <em>highly</em> recommended that you try to find an alternative to using
@@ -82,7 +82,7 @@ public interface CatnipHook {
      * Called when a payload is received in a REST request response. Note that,
      * due to how the Discord API works, it is possible that the data received
      * may be empty. The default behaviour is an identity function.
-     * <p/>
+     * <p>
      * <strong>THIS METHOD DOES NOT SUPPORT CHANGING THE ROUTE.</strong>
      *
      * @param response The incoming data.
@@ -98,7 +98,7 @@ public interface CatnipHook {
      * Note that, due to how the Discord API works, it is possible that the
      * data received may be empty. The default behaviour is an identity
      * function.
-     * <p/>
+     * <p>
      * <strong>THIS METHOD DOES NOT SUPPORT CHANGING THE ROUTE.</strong>
      *
      * @param json The outgoing JSON data.
