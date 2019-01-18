@@ -179,6 +179,10 @@ public class RestRequester {
         bucket.updateFromHeaders(headers).thenAccept(___ -> {
             if(hasMemeReactionRatelimits) {
                 // Ratelimits are a meme with reactions
+                // TODO: Trying to add this 250ms delay to the ratelimit-reset timer breaks?
+                // I tried adding this in to the bucket reset timer; that ended with a ton of 429s
+                // I'm not entirely sure why
+                // Someone who's braver than me can try to figure it out :meowupsidedown:
                 catnip.vertx().setTimer(250L, ____ -> bucket.retry(r));
             } else {
                 // Try and compute from headers
