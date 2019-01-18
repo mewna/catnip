@@ -53,6 +53,8 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
@@ -99,10 +101,24 @@ public class RestRequester {
                                 final Buffer body, final MultiMap headers, final boolean succeeded,
                                 final Throwable failureCause) {
         final long now = System.currentTimeMillis();
-        
         //noinspection CodeBlock2Expr
         bucket.lastRequest().thenAccept(lastRequest -> {
-            bucket.latency(now - lastRequest).thenAccept(__ -> {
+            final long dateHeader;
+            if(headers.contains("Date")) {
+                // Parse date header
+                // According to JDA, this is the correct format for it.
+                // I trust them more than I trust my own attempts to get it right.
+                // https://github.com/DV8FromTheWorld/JDA/blob/2e771e053d6ad94c1aebddbfe72e0aa519d9b3ed/src/main/java/net/dv8tion/jda/core/requests/ratelimit/BotRateLimiter.java#L150-L166
+                dateHeader = OffsetDateTime.parse(headers.get("Date"), DateTimeFormatter.RFC_1123_DATE_TIME)
+                        .toInstant().toEpochMilli();
+            } else {
+                // We set the bucket's "last request" time to the timestamp of
+                // right before we started the request. If it happens that we
+                // don't get a Date header from Discord, we can use this
+                // timestamp to try to get a somewhat-accurate idea of latency.
+                dateHeader = lastRequest;
+            }
+            bucket.latency(now - dateHeader).thenAccept(__ -> {
                 if(succeeded) {
                     catnip.logAdapter().debug("Completed request {}", r);
                     if(statusCode < 200 || statusCode > 299) {
