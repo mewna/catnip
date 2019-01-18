@@ -150,10 +150,11 @@ public class DefaultShardManager extends AbstractShardManager {
     }
     
     private void connect() {
-        final int nextId = connectQueue.removeFirst();
+        final int nextId = connectQueue.peekFirst();
         catnip().logAdapter().info("Connecting shard {} (queue len {})", nextId, connectQueue.size());
         catnip().eventBus().<ShardConnectState>send(computeAddress(CONTROL, nextId), ShardControlMessage.START,
                 reply -> {
+                    connectQueue.removeFirst();
                     if(reply.succeeded()) {
                         final ShardConnectState state = reply.result().body();
                         switch(state) {

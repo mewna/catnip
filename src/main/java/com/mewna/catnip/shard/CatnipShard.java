@@ -99,9 +99,11 @@ public class CatnipShard extends AbstractVerticle {
     private final byte[] decompressBuffer = new byte[1024];
     private final Deque<JsonObject> messageQueue = new ArrayDeque<>();
     private final Deque<PresenceImpl> presenceQueue = new ArrayDeque<>();
+    
     // This is an AtomicLong instead of a volatile long because IntelliJ got
     // A N G E R Y because I guess longs don't get written atomically.
     private final AtomicLong heartbeatTask = new AtomicLong(-1L);
+    
     private volatile ShardState state;
     private volatile Presence currentPresence;
     private volatile boolean heartbeatAcked = true;
@@ -111,6 +113,8 @@ public class CatnipShard extends AbstractVerticle {
     private volatile boolean sendRateLimitRecheckQueued;
     private volatile List<String> trace = Collections.emptyList();
     private volatile boolean clientClose;
+    private volatile boolean gotReady;
+    private volatile boolean shouldReconnect = true;
     
     public CatnipShard(@Nonnull final Catnip catnip, @Nonnegative final int id, @Nonnegative final int limit,
                        @Nullable final Presence presence) {
@@ -247,6 +251,7 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void shutdownShard() {
+        gotReady = false;
         if(state != null) {
             clientClose = true;
             state.socket().close((short) 4000);
@@ -268,12 +273,14 @@ public class CatnipShard extends AbstractVerticle {
                             .exceptionHandler(t -> catnip.logAdapter().error("Shard {}/{}: Exception in Websocket", id, limit, t));
                     state = new ShardState(socket);
                     state.socketOpen(true);
+                    shouldReconnect = true;
                 },
                 failure -> {
                     state = null;
                     catnip.logAdapter().error("Shard {}/{}: Couldn't connect socket:", id, limit, failure);
                     // If we totally fail to connect socket, don't need to worry as much
-                    catnip.vertx().setTimer(500L, __ -> msg.reply(FAILED));
+                    // vertx.setTimer(500L, __ -> msg.reply(FAILED));
+                    msg.reply(FAILED);
                 });
     }
     
@@ -402,7 +409,10 @@ public class CatnipShard extends AbstractVerticle {
         catnip.logAdapter().warn("Shard {}/{}: Socket closing!", id, limit);
         try {
             state = null;
-            requeue();
+            gotReady = false;
+            if(shouldReconnect) {
+                requeue();
+            }
         } catch(final Exception e) {
             catnip.logAdapter().error("Shard {}/{}: Failure closing socket:", id, limit, e);
         }
@@ -489,6 +499,7 @@ public class CatnipShard extends AbstractVerticle {
         
         switch(type) {
             case "READY": {
+                gotReady = true;
                 catnip.sessionManager().session(id, data.getString("session_id"));
                 // Reply after IDENTIFY ratelimit
                 msg.reply(READY);
@@ -496,6 +507,7 @@ public class CatnipShard extends AbstractVerticle {
                 break;
             }
             case "RESUMED": {
+                gotReady = true;
                 // RESUME is fine, just reply immediately
                 msg.reply(RESUMED);
                 catnip.eventBus().publish(Raw.RESUMED, shardInfo());
@@ -540,6 +552,11 @@ public class CatnipShard extends AbstractVerticle {
             // Can't resume, clear old data
             if(state != null) {
                 clientClose = true;
+                if(!gotReady) {
+                    shouldReconnect = false;
+                    // vertx.setTimer(500L, __ -> msg.reply(FAILED));
+                    msg.reply(FAILED);
+                }
                 state.socket().close();
                 catnip.cacheWorker().invalidateShard(id);
                 catnip.sessionManager().clearSession(id);
