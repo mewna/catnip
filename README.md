@@ -94,6 +94,13 @@ Catnip.catnipAsync("your token here").thenAccept(catnip -> {
 
 Also check out the [examples](https://github.com/mewna/catnip/tree/master/src/main/example/basic) for Kotlin and Scala usage.
 
+### Modular usage
+
+catnip supports being used in REST-only or shards-only configurations. The nice thing about catnip
+is that using it like this is **exactly the same** as using it normally. The only difference is
+that to use catnip in REST-only mode, you don't call `catnip.connect()` and use 
+`catnip.rest().whatever()` instead. 
+
 ### Custom event bus events
 
 Because vert.x is intended to be used in clustered mode as well as in a single-node configuration,
