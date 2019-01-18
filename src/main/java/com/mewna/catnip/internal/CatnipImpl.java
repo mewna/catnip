@@ -46,12 +46,11 @@ import com.mewna.catnip.extension.manager.DefaultExtensionManager;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
-import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
 import com.mewna.catnip.shard.ShardControlMessage;
 import com.mewna.catnip.shard.ShardInfo;
-import com.mewna.catnip.shard.event.DispatchManager;
 import com.mewna.catnip.shard.buffer.EventBuffer;
+import com.mewna.catnip.shard.event.DispatchManager;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.SessionManager;
@@ -59,6 +58,7 @@ import com.mewna.catnip.util.JsonPojoCodec;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.logging.LogAdapter;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
@@ -79,7 +79,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static com.mewna.catnip.shard.ShardAddress.*;
@@ -261,10 +260,12 @@ public class CatnipImpl implements Catnip {
     }
     
     @Override
-    public void presence(@Nonnegative final int shardId, @Nonnull final Consumer<Presence> callback) {
+    public CompletableFuture<Presence> presence(@Nonnegative final int shardId) {
+        final Future<Presence> future = Future.future();
         eventBus().send(
                 computeAddress(PRESENCE_UPDATE_REQUEST, shardId), null,
-                result -> callback.accept((Presence) result.result().body()));
+                result -> future.complete((Presence) result.result().body()));
+        return SafeVertxCompletableFuture.from(this, future);
     }
     
     @Override
@@ -321,7 +322,7 @@ public class CatnipImpl implements Catnip {
                     .thenApply(gateway -> {
                         gatewayInfo.set(gateway);
                         logAdapter.info("Token validated!");
-                
+                        
                         //this is actually needed because generics are dumb
                         return (Catnip) this;
                     })
