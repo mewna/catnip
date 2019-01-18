@@ -43,8 +43,8 @@ import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.RestRequester;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.shard.EventType;
-import com.mewna.catnip.shard.event.DispatchManager;
 import com.mewna.catnip.shard.buffer.EventBuffer;
+import com.mewna.catnip.shard.event.DispatchManager;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.SessionManager;
@@ -428,10 +428,9 @@ public interface Catnip {
     /**
      * Get the presence for the specified shard.
      *
-     * @param shardId  The shard id to get presence for.
-     * @param callback The callback invoked when the presence is fetched.
+     * @param shardId The shard id to get presence for.
      */
-    void presence(@Nonnegative final int shardId, @Nonnull final Consumer<Presence> callback);
+    CompletionStage<Presence> presence(@Nonnegative final int shardId);
     
     /**
      * Update the presence for all shards.
