@@ -77,6 +77,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -260,7 +261,7 @@ public class CatnipImpl implements Catnip {
     }
     
     @Override
-    public CompletableFuture<Presence> presence(@Nonnegative final int shardId) {
+    public CompletionStage<Presence> presence(@Nonnegative final int shardId) {
         final Future<Presence> future = Future.future();
         eventBus().send(
                 computeAddress(PRESENCE_UPDATE_REQUEST, shardId), null,

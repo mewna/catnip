@@ -35,7 +35,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * Manages the lifecycle of shards - starting, stopping, resuming, etc.
@@ -92,7 +92,7 @@ public interface ShardManager {
      * @return The shard's trace.
      */
     @Nonnull
-    CompletableFuture<List<String>> trace(@Nonnegative int shard);
+    CompletionStage<List<String>> trace(@Nonnegative int shard);
     
     /**
      * Return the shard's computed gateway latency, ie. the time it takes for
@@ -103,7 +103,7 @@ public interface ShardManager {
      * @return The shard's computed gateway latency.
      */
     @Nonnull
-    CompletableFuture<Long> latency(@Nonnegative int shard);
+    CompletionStage<Long> latency(@Nonnegative int shard);
     
     /**
      * Checks whether or not the shard with the given ID is currently connected
@@ -124,7 +124,7 @@ public interface ShardManager {
      */
     @Nonnull
     @CheckReturnValue
-    CompletableFuture<Boolean> isConnected(@Nonnegative int id);
+    CompletionStage<Boolean> isConnected(@Nonnegative int id);
     
     /**
      * @return The catnip instance this shard manager is for.

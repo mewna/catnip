@@ -43,6 +43,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.mewna.catnip.shard.ShardAddress.CONTROL;
@@ -79,7 +80,7 @@ public abstract class AbstractShardManager implements ShardManager {
     
     @Nonnull
     @Override
-    public CompletableFuture<List<String>> trace(@Nonnegative final int shard) {
+    public CompletionStage<List<String>> trace(@Nonnegative final int shard) {
         final CompletableFuture<List<String>> future = new SafeVertxCompletableFuture<>(catnip);
         catnip.eventBus().<JsonArray>send(computeAddress(CONTROL, shard), ShardControlMessage.TRACE,
                 reply -> {
@@ -95,7 +96,7 @@ public abstract class AbstractShardManager implements ShardManager {
     
     @Nonnull
     @Override
-    public CompletableFuture<Long> latency(final int shard) {
+    public CompletionStage<Long> latency(final int shard) {
         final CompletableFuture<Long> future = new SafeVertxCompletableFuture<>(catnip);
         catnip.eventBus().<Long>send(computeAddress(CONTROL, shard), ShardControlMessage.LATENCY,
                 reply -> {
@@ -112,7 +113,7 @@ public abstract class AbstractShardManager implements ShardManager {
     @Nonnull
     @Override
     @CheckReturnValue
-    public CompletableFuture<Boolean> isConnected(@Nonnegative final int id) {
+    public CompletionStage<Boolean> isConnected(@Nonnegative final int id) {
         final CompletableFuture<Boolean> future = new SafeVertxCompletableFuture<>(catnip);
         catnip.eventBus().<Boolean>send(computeAddress(CONTROL, id), ShardControlMessage.CONNECTED,
                 reply -> {
