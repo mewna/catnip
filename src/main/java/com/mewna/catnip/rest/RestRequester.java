@@ -36,6 +36,7 @@ import com.mewna.catnip.util.CatnipMeta;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.impl.ConcurrentHashSet;
@@ -158,7 +159,7 @@ public class RestRequester {
                     } else if(ratelimited) {
                         handleRouteRatelimitPost(headers, bucket, r, hasMemeReactionRatelimits);
                     } else {
-                        finishRequestPost(headers, bucket, r, payload, statusCode);
+                        finishRequestPost(headers, bucket, r, payload, statusCode, hasMemeReactionRatelimits);
                     }
                 } else {
                     failRequestPost(bucket, r, failureCause);
@@ -195,7 +196,8 @@ public class RestRequester {
     }
     
     private void finishRequestPost(final MultiMap headers, final Bucket bucket, final OutboundRequest r,
-                                   final ResponsePayload finalPayload, final int statusCode) {
+                                   final ResponsePayload finalPayload, final int statusCode,
+                                   final boolean hasMemeReactionRatelimits) {
         final ResponsePayload[] payload = {finalPayload};
         // We're good, run it through hooks and complete the future.
         bucket.updateFromHeaders(headers).thenAccept(___ -> {
@@ -217,9 +219,16 @@ public class RestRequester {
                 bucket.finishRequest();
                 bucket.submit();
             } else {
-                r.future.complete(payload[0]);
-                bucket.finishRequest();
-                bucket.submit();
+                final Handler<Long> callback = __ -> {
+                    r.future.complete(payload[0]);
+                    bucket.finishRequest();
+                    bucket.submit();
+                };
+                if(hasMemeReactionRatelimits) {
+                    catnip.vertx().setTimer(250L, callback);
+                } else {
+                    callback.handle(-1L);
+                }
             }
         });
     }
@@ -272,10 +281,8 @@ public class RestRequester {
                         future.thenAccept(___ -> {
                             // add/remove/remove_all routes for reactions have a meme 1/0.25s
                             // ratelimit, which isn't accurately reflected in the responses
-                            // from the API. Instead, we just try anyway and re-queue if we get
-                            // a 429.
-                            // Assuming you're messing with N reactions, where N > 1, you'll
-                            // run into ~(N-1) 429s. I *think* this is okay?
+                            // from the API. We handle this in the post-request phase where
+                            // we check if it's a reaction route, and delay by 250ms if it is.
                             final boolean hasMemeReactionRatelimits = finalRoute.method() != GET
                                     && finalRoute.baseRoute().contains("/reactions/");
                             if(remaining > 0 || hasMemeReactionRatelimits) {
