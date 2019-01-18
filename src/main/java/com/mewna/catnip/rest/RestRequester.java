@@ -213,8 +213,8 @@ public class RestRequester {
                 bucket.finishRequest();
                 bucket.submit();
             } else {
+                r.future.complete(payload[0]);
                 final Handler<Long> callback = __ -> {
-                    r.future.complete(payload[0]);
                     bucket.finishRequest();
                     bucket.submit();
                 };
