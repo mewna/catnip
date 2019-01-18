@@ -38,6 +38,7 @@ import com.mewna.catnip.rest.bucket.BucketBackend;
 import com.mewna.catnip.rest.bucket.MemoryBucketBackend;
 import com.mewna.catnip.shard.DiscordEvent.Raw;
 import com.mewna.catnip.shard.buffer.CachingBuffer;
+import com.mewna.catnip.shard.buffer.NoopBuffer;
 import com.mewna.catnip.shard.event.DefaultDispatchManager;
 import com.mewna.catnip.shard.event.DispatchManager;
 import com.mewna.catnip.shard.buffer.EventBuffer;
@@ -94,13 +95,16 @@ public final class CatnipOptions implements Cloneable {
     private Ratelimiter gatewayRatelimiter = new MemoryRatelimiter();
     /**
      * The log adapter for catnip to use. Defaults to {@link DefaultLogAdapter},
-     * which uses SLF4j.
+     * which uses SLF4J.
      */
     @Nonnull
     private LogAdapter logAdapter = new DefaultLogAdapter();
     /**
      * The event buffer for catnip to use. Defaults to {@link CachingBuffer}.
-     * Do NOT change this if you don't know what you're doing!
+     * If you want to use an alternative event buffering strategy (ex. no
+     * buffering, only buffer certain events, ...) you can write your own
+     * implementation. For no buffering, {@link NoopBuffer} is provided.
+     * <p>Do NOT change this if you don't know what you're doing!</p>
      */
     @Nonnull
     private EventBuffer eventBuffer = new CachingBuffer();
