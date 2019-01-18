@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
 import com.mewna.catnip.shard.ShardControlMessage;
+import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -139,7 +140,7 @@ public class DefaultShardManager extends AbstractShardManager {
             catnip().vertx().setTimer(1000L, __ -> poll());
             return;
         }
-        CompletableFuture.allOf(conditions().stream().map(ShardCondition::preshard).toArray(CompletableFuture[]::new))
+        SafeVertxCompletableFuture.allOf(conditions().stream().map(ShardCondition::preshard).toArray(CompletableFuture[]::new))
                 .thenAccept(__ -> connect())
                 .exceptionally(e -> {
                     catnip().logAdapter().warn("Couldn't complete shard conditions, polling again in 1s", e);

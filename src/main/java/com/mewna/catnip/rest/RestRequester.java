@@ -557,7 +557,7 @@ public class RestRequester {
             futures.add(bucketBackend.limit(route, Integer.parseInt(headers.get("X-Ratelimit-Limit"))));
             futures.add(bucketBackend.remaining(route, Integer.parseInt(headers.get("X-Ratelimit-Remaining"))));
             futures.add(bucketBackend.reset(route, TimeUnit.SECONDS.toMillis(Integer.parseInt(headers.get("X-Ratelimit-Reset")))));
-            return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+            return SafeVertxCompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
         }
         
         void queue(final Future<ResponsePayload> future, final OutboundRequest request) {
