@@ -60,6 +60,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterOutputStream;
 
@@ -76,8 +77,8 @@ import static com.mewna.catnip.shard.ShardAddress.*;
  * NOT recommended that you store a reference to a shard verticle anywhere. To
  * send a message to a shard:
  * <ol>
- *     <li>Get the shard's control address with {@code ShardAddress.computeAddress(ShardAddress.CONTROL, id)}.</li>
- *     <li>Send a {@link ShardControlMessage} to it.</li>
+ * <li>Get the shard's control address with {@code ShardAddress.computeAddress(ShardAddress.CONTROL, id)}.</li>
+ * <li>Send a {@link ShardControlMessage} to it.</li>
  * </ol>
  *
  * @author amy
@@ -98,7 +99,9 @@ public class CatnipShard extends AbstractVerticle {
     private final byte[] decompressBuffer = new byte[1024];
     private final Deque<JsonObject> messageQueue = new ArrayDeque<>();
     private final Deque<PresenceImpl> presenceQueue = new ArrayDeque<>();
-    
+    // This is an AtomicLong instead of a volatile long because IntelliJ got
+    // A N G E R Y because I guess longs don't get written atomically.
+    private final AtomicLong heartbeatTask = new AtomicLong(-1L);
     private volatile ShardState state;
     private volatile Presence currentPresence;
     private volatile boolean heartbeatAcked = true;
@@ -108,7 +111,6 @@ public class CatnipShard extends AbstractVerticle {
     private volatile boolean sendRateLimitRecheckQueued;
     private volatile List<String> trace = Collections.emptyList();
     private volatile boolean clientClose;
-    private volatile long heartbeatTask;
     
     public CatnipShard(@Nonnull final Catnip catnip, @Nonnegative final int id, @Nonnegative final int limit,
                        @Nullable final Presence presence) {
@@ -394,7 +396,8 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void handleSocketClose(final Void __) {
-        vertx.cancelTimer(heartbeatTask);
+        final boolean cancel = vertx.cancelTimer(heartbeatTask.get());
+        catnip.logAdapter().debug("Canceled timer task from socket close: {}", cancel);
         catnip.eventBus().publish(Raw.DISCONNECTED, shardInfo());
         catnip.logAdapter().warn("Shard {}/{}: Socket closing!", id, limit);
         try {
@@ -435,16 +438,15 @@ public class CatnipShard extends AbstractVerticle {
         final JsonObject payload = event.getJsonObject("d");
         trace = JsonUtil.toStringList(payload.getJsonArray("_trace"));
         
-        catnip.vertx().setPeriodic(payload.getInteger("heartbeat_interval"), timerId -> {
-            heartbeatTask = timerId;
-            
+        final long taskId = catnip.vertx().setPeriodic(payload.getInteger("heartbeat_interval"), timerId -> {
             final ShardState shardState = state;
             if(shardState != null && shardState.socket() != null && shardState.socketOpen()) {
                 if(!heartbeatAcked) {
                     // Zombie
                     catnip.logAdapter().warn("Shard {}/{}: Heartbeat zombie, queueing reconnect!", id, limit);
-                    catnip.vertx().cancelTimer(heartbeatTask);
-                    catnip.eventBus().publish(computeAddress(CONTROL, id), ShardControlMessage.STOP);
+                    // catnip.vertx().cancelTimer(heartbeatTask);
+                    // catnip.eventBus().publish(computeAddress(CONTROL, id), ShardControlMessage.STOP);
+                    state.socket().close();
                     return;
                 }
                 catnip.eventBus().publish(computeAddress(WEBSOCKET_SEND, id),
@@ -452,9 +454,11 @@ public class CatnipShard extends AbstractVerticle {
                 lastHeartbeat = System.nanoTime();
                 heartbeatAcked = false;
             } else {
-                catnip.vertx().cancelTimer(heartbeatTask);
+                final boolean cancel = catnip.vertx().cancelTimer(heartbeatTask.get());
+                catnip.logAdapter().debug("Canceled timer task inside of itself: {}", cancel);
             }
         });
+        heartbeatTask.set(taskId);
         
         // Check if we can RESUME instead
         if(catnip.sessionManager().session(id) != null && catnip.sessionManager().seqnum(id) > 0) {
