@@ -138,21 +138,13 @@ public class RestRequester {
                             && r.route.baseRoute().contains("/reactions/");
                     if(statusCode == 429) {
                         ratelimited = true;
-                        // Reactions are a HUGE meme
-                        // We hit *roughly* one 429 / reaction if we're adding many
-                        // reactions. I *think* this is ok?
-                        // TODO: Warn if we hit the meme ratelimit a lot
-                        if(!hasMemeReactionRatelimits) {
-                            catnip.logAdapter().error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
-                                    r.route.baseRoute(),
-                                    headers.get("X-Ratelimit-Global"),
-                                    headers.get("X-Ratelimit-Limit"),
-                                    headers.get("X-Ratelimit-Reset")
-                            );
-                        }
+                        catnip.logAdapter().error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
+                                r.route.baseRoute(),
+                                headers.get("X-Ratelimit-Global"),
+                                headers.get("X-Ratelimit-Limit"),
+                                headers.get("X-Ratelimit-Reset")
+                        );
                     }
-                    // This is a final 1-element array so we can mutate it inside of callbacks
-                    // *sigh*
                     final ResponsePayload payload = new ResponsePayload(body);
                     if(headers.contains("X-Ratelimit-Global")) {
                         handleGlobalRatelimitPost(headers, bucket, r);
@@ -198,6 +190,8 @@ public class RestRequester {
     private void finishRequestPost(final MultiMap headers, final Bucket bucket, final OutboundRequest r,
                                    final ResponsePayload finalPayload, final int statusCode,
                                    final boolean hasMemeReactionRatelimits) {
+        // This is a final 1-element array so we can mutate it inside of callbacks
+        // *sigh*
         final ResponsePayload[] payload = {finalPayload};
         // We're good, run it through hooks and complete the future.
         bucket.updateFromHeaders(headers).thenAccept(___ -> {
@@ -311,7 +305,7 @@ public class RestRequester {
         try {
             @SuppressWarnings("UnnecessarilyQualifiedInnerClassAccess")
             final MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
-        
+            
             for(int index = 0; index < r.buffers.size(); index++) {
                 final ImmutablePair<String, Buffer> pair = r.buffers.get(index);
                 builder.addFormDataPart("file" + index, pair.left, new MultipartRequestBody(pair.right));
@@ -330,7 +324,7 @@ public class RestRequester {
                         .putNull("content")
                         .putNull("embed").encode());
             }
-        
+            
             executeHttpRequest(r, finalRoute, bucket, builder.build());
         } catch(final Exception e) {
             catnip.logAdapter().error("Failed to send multipart request", e);
