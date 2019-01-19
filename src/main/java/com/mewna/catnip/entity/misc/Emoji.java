@@ -28,6 +28,7 @@
 package com.mewna.catnip.entity.misc;
 
 import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.CheckReturnValue;
@@ -168,6 +169,24 @@ public interface Emoji extends Snowflake {
         @CheckReturnValue
         default String id() {
             return Long.toUnsignedString(idAsLong());
+        }
+    
+        /**
+         * Guild that owns this emoji, or {@code null} if it has no guild.
+         * <p>
+         * NOTE: This may be null in the case of a reaction, because the data
+         * may not be available to get the id for the emoji!
+         *
+         * @return String representing the ID.
+         */
+        @Nullable
+        @CheckReturnValue
+        default Guild guild() {
+            final long id = guildIdAsLong();
+            if(id == 0) {
+                return null;
+            }
+            return catnip().cache().guild(guildIdAsLong());
         }
     
         /**

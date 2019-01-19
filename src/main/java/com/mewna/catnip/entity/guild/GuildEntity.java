@@ -24,34 +24,49 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package com.mewna.catnip.entity.guild;
 
-package com.mewna.catnip.entity.message;
-
-import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.entity.guild.GuildEntity;
+import com.mewna.catnip.entity.Entity;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
 /**
- * Fired when a message is deleted.
+ * An entity which is guild-scoped in catnip.
  *
- * @author amy
- * @since 10/4/18.
+ * @author AdrianTodt
+ * @since 1/19/19.
  */
-public interface DeletedMessage extends GuildEntity, Snowflake {
+public interface GuildEntity extends Entity {
+    
     /**
-     * @return The id of the channel where it was deleted.
+     * The id of the guild this entity is from.
+     *
+     * @return String representing the guild ID.
      */
     @Nonnull
     @CheckReturnValue
-    default String channelId() {
-        return Long.toUnsignedString(channelIdAsLong());
+    default String guildId() {
+        return Long.toUnsignedString(guildIdAsLong());
     }
     
     /**
-     * @return The id of the channel where it was deleted.
+     * The id of the guild this entity is from.
+     *
+     * @return Long representing the guild ID.
      */
     @CheckReturnValue
-    long channelIdAsLong();
+    long guildIdAsLong();
+    
+    /**
+     * The guild this entity is from.
+     *
+     * @return Guild represented by the guild ID.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Guild guild() {
+        return catnip().cache().guild(guildIdAsLong());
+    }
+    
 }

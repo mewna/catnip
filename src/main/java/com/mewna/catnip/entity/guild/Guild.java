@@ -131,6 +131,24 @@ public interface Guild extends Snowflake {
     }
     
     /**
+     * @return The self member as an user of the guild.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Member selfMember() {
+        return members().getById(catnip().selfUser().idAsLong());
+    }
+    
+    /**
+     * @return The guild owner of the guild.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Member owner() {
+        return members().getById(ownerIdAsLong());
+    }
+    
+    /**
      * @return Whether the guild is owned by the current user.
      */
     @CheckReturnValue

@@ -31,6 +31,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.DMChannel;
+import com.mewna.catnip.entity.guild.Guild;
+import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.impl.UserImpl;
 import com.mewna.catnip.entity.util.ImageOptions;
 
@@ -131,6 +133,26 @@ public interface User extends Snowflake {
     String username();
     
     /**
+     * The user's effective name shown in a guild.
+     *
+     * @return User's nickname in the guild, if set, otherwise the username.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default String effectiveName(@Nonnull final Guild guild) {
+        final String username = username();
+    
+        final Member member = guild.members().getById(idAsLong());
+        
+        if(member == null) {
+            return username;
+        }
+    
+        final String nick = member.nick();
+        return nick != null ? nick : username;
+    }
+    
+    /**
      * Discriminator of the user, used to tell Amy#0001 from Amy#0002.
      *
      * @return 4 digit discriminator as a string. Never null.
@@ -138,6 +160,17 @@ public interface User extends Snowflake {
     @Nonnull
     @CheckReturnValue
     String discriminator();
+    
+    /**
+     * The DiscordTag of the user, which is the username, an hash, and the discriminator.
+     *
+     * @return User's DiscordTag. Never null.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default String discordTag() {
+        return username() + '#' + discriminator();
+    }
     
     /**
      * User's avatar hash.
