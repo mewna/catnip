@@ -362,9 +362,11 @@ public class RestRequester {
                                          final OutboundRequest r, final long reset) {
         // Route ratelimited, retry later
         bucket.latency().thenAccept(latency -> {
-            final long wait = reset - System.currentTimeMillis() + latency;
-            catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
-                    bucketRoute.baseRoute(), finalRoute.baseRoute(), wait);
+            // Depending on a number of factors, it's possible that this number
+            // becomes negative. This defends against that possibility.
+            final long wait = Math.abs(reset - System.currentTimeMillis() + latency);
+            catnip.logAdapter().debug("Hit ratelimit on bucket {}:{} for route {}, waiting {}ms and retrying...",
+                    bucketRoute.method(), bucketRoute.baseRoute(), finalRoute.baseRoute(), wait);
             catnip.vertx().setTimer(wait, __ -> bucket.resetBucket().thenAccept(___ -> bucket.retry(r)));
         });
     }
@@ -373,9 +375,11 @@ public class RestRequester {
                                           final Route finalRoute, final OutboundRequest r, final long globalReset) {
         // Global rl, retry later
         bucket.latency().thenAccept(latency -> {
-            final long wait = globalReset - System.currentTimeMillis() + latency;
-            catnip.logAdapter().debug("Hit ratelimit on bucket {} for route {}, waiting {}ms and retrying...",
-                    bucketRoute.baseRoute(), finalRoute.baseRoute(), wait);
+            // Depending on a number of factors, it's possible that this number
+            // becomes negative. This defends against that possibility.
+            final long wait = Math.abs(globalReset - System.currentTimeMillis() + latency);
+            catnip.logAdapter().debug("Hit global ratelimit on bucket {}:{} for route {}, waiting {}ms and retrying...",
+                    bucketRoute.method(), bucketRoute.baseRoute(), finalRoute.baseRoute(), wait);
             catnip.logAdapter().warn("Hit GLOBAL ratelimit, waiting {}ms and retrying...", wait);
             catnip.vertx().setTimer(wait, ___ -> global.resetBucket().thenAccept(____ -> bucket.retry(r)));
         });
