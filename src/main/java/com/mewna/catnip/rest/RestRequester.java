@@ -364,7 +364,7 @@ public class RestRequester {
         bucket.latency().thenAccept(latency -> {
             // Depending on a number of factors, it's possible that this number
             // becomes negative. This defends against that possibility.
-            final long wait = Math.max(0, reset - System.currentTimeMillis() + latency);
+            final long wait = Math.max(1, reset - System.currentTimeMillis() + latency);
             catnip.logAdapter().debug("Hit ratelimit on bucket {}:{} for route {}, waiting {}ms and retrying...",
                     bucketRoute.method(), bucketRoute.baseRoute(), finalRoute.baseRoute(), wait);
             catnip.vertx().setTimer(wait, __ -> bucket.resetBucket().thenAccept(___ -> bucket.retry(r)));
@@ -377,7 +377,7 @@ public class RestRequester {
         bucket.latency().thenAccept(latency -> {
             // Depending on a number of factors, it's possible that this number
             // becomes negative. This defends against that possibility.
-            final long wait = Math.max(0, globalReset - System.currentTimeMillis() + latency);
+            final long wait = Math.max(1, globalReset - System.currentTimeMillis() + latency);
             catnip.logAdapter().debug("Hit global ratelimit on bucket {}:{} for route {}, waiting {}ms and retrying...",
                     bucketRoute.method(), bucketRoute.baseRoute(), finalRoute.baseRoute(), wait);
             catnip.logAdapter().warn("Hit GLOBAL ratelimit, waiting {}ms and retrying...", wait);
