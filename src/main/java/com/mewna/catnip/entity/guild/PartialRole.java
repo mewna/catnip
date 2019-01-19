@@ -29,20 +29,9 @@ package com.mewna.catnip.entity.guild;
 
 import com.mewna.catnip.entity.Snowflake;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
-
 /**
  * @author amy
  * @since 10/4/18.
  */
-public interface PartialRole extends Snowflake {
-    @Nonnull
-    @CheckReturnValue
-    default String guildId() {
-        return Long.toUnsignedString(guildIdAsLong());
-    }
-    
-    @CheckReturnValue
-    long guildIdAsLong();
+public interface PartialRole extends GuildEntity, Snowflake {
 }

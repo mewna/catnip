@@ -39,7 +39,7 @@ import java.util.Set;
  * @author amy
  * @since 10/4/18.
  */
-public interface PartialMember extends Snowflake {
+public interface PartialMember extends GuildEntity, Snowflake {
     @Override
     @CheckReturnValue
     default long idAsLong() {
@@ -49,15 +49,6 @@ public interface PartialMember extends Snowflake {
     @Nonnull
     @CheckReturnValue
     User user();
-    
-    @Nonnull
-    @CheckReturnValue
-    default String guildId() {
-        return Long.toUnsignedString(guildIdAsLong());
-    }
-    
-    @CheckReturnValue
-    long guildIdAsLong();
     
     @Nonnull
     @CheckReturnValue

@@ -34,6 +34,7 @@ import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.impl.MemberImpl;
+import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
 
@@ -42,8 +43,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.time.OffsetDateTime;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
@@ -55,25 +56,15 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("unused")
 @JsonDeserialize(as = MemberImpl.class)
-public interface Member extends Snowflake {
+public interface Member extends GuildEntity, Snowflake {
     /**
-     * The id of the guild this member is from.
-     *
-     * @return String representing the guild ID.
+     * The user equivalent to this member.
      */
     @Nonnull
     @CheckReturnValue
-    default String guildId() {
-        return Long.toUnsignedString(guildIdAsLong());
+    default User user() {
+        return catnip().cache().user(idAsLong());
     }
-    
-    /**
-     * The id of the guild this member is from.
-     *
-     * @return Long representing the guild ID.
-     */
-    @CheckReturnValue
-    long guildIdAsLong();
     
     /**
      * The user's nickname in this guild.
@@ -83,6 +74,18 @@ public interface Member extends Snowflake {
     @Nullable
     @CheckReturnValue
     String nick();
+    
+    /**
+     * The user's effective name show in this guild.
+     *
+     * @return User's nickname, if set, otherwise the username.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default String effectiveName() {
+        final String nick = nick();
+        return nick != null ? nick : user().username();
+    }
     
     /**
      * The ids of the user's roles in this guild.

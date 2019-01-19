@@ -44,7 +44,7 @@ import java.util.Set;
  */
 @SuppressWarnings("unused")
 @JsonDeserialize(as = RoleImpl.class)
-public interface Role extends Snowflake, Comparable<Role> {
+public interface Role extends GuildEntity, Snowflake, Comparable<Role> {
     /**
      * The name of the role. Not unique
      *
@@ -52,23 +52,6 @@ public interface Role extends Snowflake, Comparable<Role> {
      */
     @Nonnull
     String name();
-    
-    /**
-     * The id of the guild this role is from.
-     *
-     * @return String representing the guild ID.
-     */
-    @Nonnull
-    default String guildId() {
-        return Long.toUnsignedString(guildIdAsLong());
-    }
-    
-    /**
-     * The id of the guild this role is from.
-     *
-     * @return Long representing the guild ID.
-     */
-    long guildIdAsLong();
     
     /**
      * Integer representation of the role color.

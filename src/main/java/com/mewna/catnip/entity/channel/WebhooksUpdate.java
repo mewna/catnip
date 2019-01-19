@@ -28,11 +28,10 @@
 package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.Entity;
+import com.mewna.catnip.entity.guild.GuildEntity;
 import com.mewna.catnip.entity.impl.WebhooksUpdateImpl;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
 
 /**
  * Fired over the event bus when a webhook update event is received.
@@ -41,22 +40,7 @@ import javax.annotation.Nonnull;
  * @since 11/10/18.
  */
 @JsonDeserialize(as = WebhooksUpdateImpl.class)
-public interface WebhooksUpdate extends Entity {
-    /**
-     * @return The id of the guild that webhooks were updated in.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default String guildId() {
-        return Long.toUnsignedString(guildIdAsLong());
-    }
-    
-    /**
-     * @return The id of the guild that webhooks were updated in.
-     */
-    @CheckReturnValue
-    long guildIdAsLong();
-    
+public interface WebhooksUpdate extends GuildEntity {
     /**
      * @return The id of the channel that webhooks were updated in.
      */
