@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.entity.guild;
 
-import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.CheckReturnValue;
@@ -39,22 +38,8 @@ import javax.annotation.Nonnull;
  * @author amy
  * @since 10/6/18.
  */
-public interface GatewayGuildBan extends Entity {
-    /**
-     * @return The id of the guild where the user was banned.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default String guildId() {
-        return Long.toUnsignedString(guildIdAsLong());
-    }
-    
-    /**
-     * @return The id of the guild where the user was banned.
-     */
-    @CheckReturnValue
-    long guildIdAsLong();
-    
+public interface GatewayGuildBan extends GuildEntity {
+
     /**
      * @return The user who was banned.
      */
