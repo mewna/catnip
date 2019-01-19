@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.entity.guild;
 
-import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 
 import javax.annotation.CheckReturnValue;
@@ -40,22 +39,7 @@ import java.util.List;
  * @author amy
  * @since 10/9/18.
  */
-public interface EmojiUpdate extends Entity {
-    /**
-     * @return The id of the guild whose emojis were updated.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default String guildId() {
-        return Long.toUnsignedString(guildIdAsLong());
-    }
-    
-    /**
-     * @return The id of the guild whose emojis were updated.
-     */
-    @CheckReturnValue
-    long guildIdAsLong();
-    
+public interface EmojiUpdate extends GuildEntity {
     /**
      * @return A non-{@code null}, possibly-empty list of the guild's emojis.
      */

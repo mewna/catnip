@@ -29,9 +29,9 @@ package com.mewna.catnip.entity.user;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.guild.GuildEntity;
 import com.mewna.catnip.entity.impl.PresenceUpdateImpl;
 
-import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
@@ -41,21 +41,7 @@ import java.util.Set;
  * @since 12/14/18
  */
 @JsonDeserialize(as = PresenceUpdateImpl.class)
-public interface PresenceUpdate extends Presence, Snowflake {
-    /**
-     * @return ID of the guild.
-     */
-    @Nonnull
-    default String guildId() {
-        return Long.toUnsignedString(guildIdAsLong());
-    }
-    
-    /**
-     * @return ID of the guild.
-     */
-    @CheckReturnValue
-    long guildIdAsLong();
-    
+public interface PresenceUpdate extends Presence, GuildEntity, Snowflake {
     /**
      * @return Roles the user has.
      */

@@ -29,6 +29,7 @@ package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.guild.GuildEntity;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.rest.RestRequester;
@@ -52,22 +53,7 @@ import java.util.concurrent.CompletionStage;
  * @since 9/15/18
  */
 @SuppressWarnings("unused")
-public interface Webhook extends Snowflake {
-    /**
-     * @return The id of the guild this webhook is for.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default String guildId() {
-        return Long.toUnsignedString(guildIdAsLong());
-    }
-    
-    /**
-     * @return The id of the guild this webhook is for.
-     */
-    @CheckReturnValue
-    long guildIdAsLong();
-    
+public interface Webhook extends GuildEntity, Snowflake {
     /**
      * @return The id of the channel this webhook is for.
      */

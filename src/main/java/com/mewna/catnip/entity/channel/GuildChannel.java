@@ -28,6 +28,7 @@
 package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mewna.catnip.entity.guild.GuildEntity;
 import com.mewna.catnip.entity.guild.PermissionOverride;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
 import com.mewna.catnip.entity.misc.CreatedInvite;
@@ -57,28 +58,13 @@ import java.util.function.Consumer;
  * @since 9/12/18
  */
 @SuppressWarnings("unused")
-public interface GuildChannel extends Channel {
+public interface GuildChannel extends GuildEntity, Channel {
     /**
      * @return The name of the channel.
      */
     @Nonnull
     @CheckReturnValue
     String name();
-    
-    /**
-     * @return The id of the guild this channel is in. Never {@code null}.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default String guildId() {
-        return Long.toUnsignedString(guildIdAsLong());
-    }
-    
-    /**
-     * @return The id of the guild this channel is in.
-     */
-    @CheckReturnValue
-    long guildIdAsLong();
     
     /**
      * @return The position of the channel.
