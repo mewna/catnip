@@ -81,17 +81,27 @@ public class RestRequester {
     private final OkHttpClient _http;
     private final Collection<Bucket> submittedBuckets = new ConcurrentHashSet<>();
     private final BucketBackend bucketBackend;
+    private final Requester requester;
     
     public RestRequester(final Catnip catnip, final BucketBackend bucketBackend, final OkHttpClient _http) {
         this.catnip = catnip;
         this.bucketBackend = bucketBackend;
         this._http = _http;
+        requester = new DefaultRequester(catnip, new DefaultRateLimiter(catnip.vertx()), _http);
     }
     
     public CompletionStage<ResponsePayload> queue(final OutboundRequest r) {
-        final Future<ResponsePayload> future = Future.future();
+        //easier way of testing new requester
+        final Requester.OutboundRequest rr = new Requester.OutboundRequest(r.route(), r.params())
+                .object(r.object())
+                .array(r.array())
+                .buffers(r.buffers())
+                .needsToken(r.needsToken())
+                .emptyBody(r.emptyBody());
+        return requester.queue(rr);
+        /*final Future<ResponsePayload> future = Future.future();
         getBucket(r.route.baseRoute()).queue(future, r);
-        return SafeVertxCompletableFuture.from(catnip, future);
+        return SafeVertxCompletableFuture.from(catnip, future);*/
     }
     
     private Bucket getBucket(final String key) {
