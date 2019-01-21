@@ -39,7 +39,6 @@ import lombok.Value;
 import lombok.experimental.Accessors;
 
 import java.util.Deque;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -131,7 +130,7 @@ public class CachingBuffer extends AbstractBuffer {
         final JsonObject payloadData = event.getJsonObject("d");
         final String eventType = event.getString("t");
         final Set<String> guilds = JsonUtil.toMutableSet(payloadData.getJsonArray("guilds"), g -> g.getString("id"));
-        buffers.put(shardId, new BufferState(shardId, new HashSet<>(guilds)));
+        buffers.put(shardId, new BufferState(shardId, guilds));
         catnip().logAdapter().debug("Prepared new BufferState for shard {} with {} guilds.", shardId, guilds.size());
         // READY is also a cache event, as it does come with
         // information about the current user
@@ -147,7 +146,8 @@ public class CachingBuffer extends AbstractBuffer {
         maybeCache(Raw.GUILD_CREATE, shardId, payloadData).setHandler(_res -> {
             // Trigger member chunking
             final Integer memberCount = payloadData.getInteger("member_count");
-            if(memberCount > LARGE_THRESHOLD) {
+            if(catnip().chunkMembers() //only send the request if needed
+                    && memberCount > LARGE_THRESHOLD) {
                 // Chunk members
                 catnip().eventBus().publish(computeAddress(WEBSOCKET_QUEUE, shardId),
                         CatnipShard.basePayload(GatewayOp.REQUEST_GUILD_MEMBERS,
