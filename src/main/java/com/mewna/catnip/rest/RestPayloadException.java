@@ -29,7 +29,6 @@ package com.mewna.catnip.rest;
 
 import com.google.common.collect.ImmutableMap;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,17 +37,14 @@ import java.util.Map;
  * @since 1/17/19.
  */
 public class RestPayloadException extends Exception {
-    private final Map<String, List<String>> failures = new HashMap<>();
+    private final Map<String, List<String>> failures;
     
-    public RestPayloadException() {
+    public RestPayloadException(final Map<String, List<String>> failures) {
         super(null, null, false, false);
-    }
-    
-    void addFailure(final String key, final List<String> reasons) {
-        failures.put(key, reasons);
+        this.failures = ImmutableMap.copyOf(failures);
     }
     
     public final Map<String, List<String>> failures() {
-        return ImmutableMap.copyOf(failures);
+        return failures;
     }
 }

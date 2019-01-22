@@ -25,66 +25,28 @@
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.rest;
+package com.mewna.catnip.rest.ratelimit;
 
+import com.mewna.catnip.Catnip;
 import com.mewna.catnip.rest.Routes.Route;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletionStage;
 
-public interface Requester {
+public interface RateLimiter {
+    void catnip(@Nonnull Catnip catnip);
+    
     @Nonnull
     @CheckReturnValue
-    CompletionStage<ResponsePayload> queue(@Nonnull OutboundRequest r);
+    CompletionStage<Void> requestExecution(@Nonnull Route route);
     
-    @Getter
-    @Accessors(fluent = true)
-    @SuppressWarnings("unused")
-    final class OutboundRequest {
-        private final Route route;
-        private final Map<String, String> params;
-        @Setter
-        private JsonObject object;
-        @Setter
-        private JsonArray array;
-        @Setter
-        private boolean needsToken = true;
-        
-        @Setter
-        private List<ImmutablePair<String, Buffer>> buffers;
-        
-        @Setter
-        private boolean emptyBody;
-        
-        public OutboundRequest(final Route route, final Map<String, String> params) {
-            this.route = route;
-            this.params = params;
-        }
-        
-        public OutboundRequest(final Route route, final Map<String, String> params, final JsonObject object) {
-            this(route, params);
-            this.object = object;
-        }
-        
-        public OutboundRequest(final Route route, final Map<String, String> params, final JsonArray array) {
-            this(route, params);
-            this.array = array;
-        }
-        
-        @Override
-        public String toString() {
-            return String.format("OutboundRequest (%s, %s, object=%s, array=%s, buffers=%s)",
-                    route, params, object != null, array != null, buffers != null && !buffers.isEmpty());
-        }
-    }
+    void updateRemaining(@Nonnull Route route, int remaining);
+    void updateLimit(@Nonnull Route route, int limit);
+    void updateReset(@Nonnull Route route, long resetTimestamp);
+    
+    //called after above 3 to signal no further updates will be done
+    void updateDone(@Nonnull Route route);
+    
+    void updateGlobalRateLimit(long resetTimestamp);
 }
