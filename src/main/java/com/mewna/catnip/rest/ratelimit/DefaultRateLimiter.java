@@ -25,8 +25,10 @@
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.rest;
+package com.mewna.catnip.rest.ratelimit;
 
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.rest.Routes.Route;
 import io.vertx.core.Vertx;
 
 import javax.annotation.Nonnull;
@@ -40,23 +42,24 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class DefaultRateLimiter implements RateLimiter {
     private static final CompletionStage<Void> EXECUTE_NOW = CompletableFuture.completedFuture(null);
     private final Map<String, BucketContainer> buckets = new ConcurrentHashMap<>();
-    private final Vertx vertx;
     private volatile long globalRateLimitReset;
+    private Vertx vertx;
     
-    public DefaultRateLimiter(final Vertx vertx) {
-        this.vertx = vertx;
-    }
-    
-    private static void log(String message) {
-        System.out.println("[" + java.lang.management.ManagementFactory.getRuntimeMXBean().getUptime() + "] " + message);
+    @Override
+    public void catnip(@Nonnull final Catnip catnip) {
+        vertx = catnip.vertx();
     }
     
     @Nonnull
     @Override
-    public CompletionStage<Void> requestExecution(@Nonnull final String route) {
-        log("Requested execution for route " + route);
-        final BucketContainer container = buckets.computeIfAbsent(route, __ -> new BucketContainer());
+    public CompletionStage<Void> requestExecution(@Nonnull final Route route) {
+        final BucketContainer container = buckets.computeIfAbsent(route.ratelimitKey(), __ -> new BucketContainer());
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized(container) {
+            if(container.remaining > 0) {
+                container.remaining--;
+                return EXECUTE_NOW;
+            }
             final CompletableFuture<Void> future = new CompletableFuture<>();
             container.queue.offer(future);
             queueExecution(container);
@@ -65,37 +68,37 @@ public class DefaultRateLimiter implements RateLimiter {
     }
     
     @Override
-    public void updateLimit(@Nonnull final String route, final int limit) {
-        final BucketContainer container = buckets.computeIfAbsent(route, __ -> new BucketContainer());
+    public void updateLimit(@Nonnull final Route route, final int limit) {
+        final BucketContainer container = buckets.computeIfAbsent(route.ratelimitKey(), __ -> new BucketContainer());
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized(container) {
-            log("limit = " + limit);
             container.limit = limit;
         }
     }
     
     @Override
-    public void updateRemaining(@Nonnull final String route, final int remaining) {
-        final BucketContainer container = buckets.computeIfAbsent(route, __ -> new BucketContainer());
+    public void updateRemaining(@Nonnull final Route route, final int remaining) {
+        final BucketContainer container = buckets.computeIfAbsent(route.ratelimitKey(), __ -> new BucketContainer());
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized(container) {
-            log("remaining = " + remaining);
             container.remaining = remaining;
         }
     }
     
     @Override
-    public void updateReset(@Nonnull final String route, final long resetTimestamp) {
-        final BucketContainer container = buckets.computeIfAbsent(route, __ -> new BucketContainer());
+    public void updateReset(@Nonnull final Route route, final long resetTimestamp) {
+        final BucketContainer container = buckets.computeIfAbsent(route.ratelimitKey(), __ -> new BucketContainer());
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized(container) {
-            log("reset = " + (resetTimestamp - System.currentTimeMillis()));
             container.reset = resetTimestamp;
         }
     }
     
     @Override
-    public void updateDone(@Nonnull final String route) {
-        final BucketContainer container = buckets.computeIfAbsent(route, __ -> new BucketContainer());
+    public void updateDone(@Nonnull final Route route) {
+        final BucketContainer container = buckets.computeIfAbsent(route.ratelimitKey(), __ -> new BucketContainer());
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized(container) {
-            log("bucket updated, queue size = " + container.queue.size());
             if(!container.queue.isEmpty()) {
                 queueExecution(container);
             }
@@ -115,24 +118,20 @@ public class DefaultRateLimiter implements RateLimiter {
         if(container.timerId != null) {
             return;
         }
-        log("retrying in " + retryAfter(container.reset));
         container.timerId = vertx.setTimer(retryAfter(container.reset), __ -> {
             synchronized(container) {
                 container.timerId = null;
                 final long now = System.currentTimeMillis();
                 if(Math.max(container.reset, globalRateLimitReset) < now) {
                     container.remaining = container.limit;
-                    log("queue = " + container.queue.size() + ", remaining = " + container.limit);
                     while(!container.queue.isEmpty() && container.remaining > 0) {
                         container.remaining--;
-                        log("completing");
                         container.queue.poll().complete(null);
                     }
                     //if the queue is not empty, execution will be re queued once a request
                     //completes and calls updateBucket
                     return;
                 }
-                log("still not enough, retrying later");
                 //not enough time, queue again
                 queueExecution(container);
             }

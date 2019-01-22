@@ -25,85 +25,103 @@
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.rest;
+package com.mewna.catnip.rest.requester;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
+import com.mewna.catnip.rest.ResponsePayload;
+import com.mewna.catnip.rest.RestPayloadException;
 import com.mewna.catnip.rest.Routes.Route;
+import com.mewna.catnip.rest.ratelimit.RateLimiter;
 import com.mewna.catnip.util.CatnipMeta;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import io.vertx.core.Context;
-import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.impl.NoStackTraceThrowable;
 import io.vertx.core.json.JsonObject;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 import okhttp3.*;
 import okhttp3.Request.Builder;
 import okhttp3.internal.http.HttpMethod;
 import okio.BufferedSink;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import static io.vertx.core.http.HttpMethod.GET;
+import static io.vertx.core.http.HttpMethod.PUT;
 
-public class DefaultRequester implements Requester {
-    public static final String API_HOST = "https://discordapp.com";
-    private static final int API_VERSION = 6;
-    public static final String API_BASE = "/api/v" + API_VERSION;
-    private static final RequestBody EMPTY_BODY = RequestBody.create(null, new byte[0]);
+public abstract class AbstractRequester implements Requester {
+    public static final RequestBody EMPTY_BODY = RequestBody.create(null, new byte[0]);
     
-    private final Catnip catnip;
-    private final RateLimiter rateLimiter;
-    private final OkHttpClient client;
+    protected final RateLimiter rateLimiter;
+    protected final OkHttpClient.Builder clientBuilder;
+    protected Catnip catnip;
+    private volatile OkHttpClient client;
     
-    public DefaultRequester(final Catnip catnip, final RateLimiter rateLimiter, final OkHttpClient client) {
-        this.catnip = catnip;
+    public AbstractRequester(@Nonnull final RateLimiter rateLimiter, @Nonnull final OkHttpClient.Builder clientBuilder) {
         this.rateLimiter = rateLimiter;
-        this.client = client;
+        this.clientBuilder = clientBuilder;
+    }
+    
+    @Override
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
+        rateLimiter.catnip(catnip);
     }
     
     @Nonnull
     @Override
     public CompletionStage<ResponsePayload> queue(@Nonnull final OutboundRequest r) {
         final CompletableFuture<ResponsePayload> future = new SafeVertxCompletableFuture<>(catnip);
-        rateLimiter.requestExecution(r.route().baseRoute())
-                .thenRun(() -> executeRequest(r, future))
-                .exceptionally(e -> {
-                    future.completeExceptionally(e);
-                    return null;
-                });
+        final Bucket bucket = getBucket(r.route());
+        bucket.queueRequest(new QueuedRequest(r, r.route(), future, bucket));
         return future;
     }
     
-    private void executeRequest(@Nonnull final OutboundRequest r, @Nonnull final CompletableFuture<ResponsePayload> future) {
-        Route route = r.route();
+    @Nonnull
+    @CheckReturnValue
+    protected abstract Bucket getBucket(@Nonnull Route route);
+    
+    @Nonnull
+    @CheckReturnValue
+    protected synchronized OkHttpClient client() {
+        if(client != null) {
+            return client;
+        }
+        return client = clientBuilder.build();
+    }
+    
+    protected void executeRequest(@Nonnull final QueuedRequest request) {
+        Route route = request.route();
         // Compile route for usage
-        for(final Entry<String, String> stringStringEntry : r.params().entrySet()) {
+        for(final Entry<String, String> stringStringEntry : request.request().params().entrySet()) {
             route = route.compile(stringStringEntry.getKey(), stringStringEntry.getValue());
         }
-        if(r.buffers() != null) {
-            handleRouteBufferBodySend(route, r, future);
+        if(request.request().buffers() != null) {
+            handleRouteBufferBodySend(route, request);
         } else {
-            handleRouteJsonBodySend(route, r, future);
+            handleRouteJsonBodySend(route, request);
         }
     }
     
-    private void handleRouteBufferBodySend(final Route finalRoute, final OutboundRequest r, final CompletableFuture<ResponsePayload> future) {
+    protected void handleRouteBufferBodySend(@Nonnull final Route finalRoute, @Nonnull final QueuedRequest request) {
         try {
             @SuppressWarnings("UnnecessarilyQualifiedInnerClassAccess")
             final MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
-            
+            final OutboundRequest r = request.request();
             for(int index = 0; index < r.buffers().size(); index++) {
                 final ImmutablePair<String, Buffer> pair = r.buffers().get(index);
                 builder.addFormDataPart("file" + index, pair.left, new MultipartRequestBody(pair.right));
@@ -123,13 +141,14 @@ public class DefaultRequester implements Requester {
                         .putNull("embed").encode());
             }
             
-            executeHttpRequest(r, finalRoute, builder.build(), future);
+            executeHttpRequest(finalRoute, builder.build(), request);
         } catch(final Exception e) {
             catnip.logAdapter().error("Failed to send multipart request", e);
         }
     }
     
-    private void handleRouteJsonBodySend(final Route finalRoute, final OutboundRequest r, final CompletableFuture<ResponsePayload> future) {
+    protected void handleRouteJsonBodySend(@Nonnull final Route finalRoute, @Nonnull final QueuedRequest request) {
+        final OutboundRequest r = request.request();
         final String encoded;
         if(r.object() != null) {
             for(final Extension extension : catnip.extensionManager().extensions()) {
@@ -149,22 +168,22 @@ public class DefaultRequester implements Requester {
         } else if(HttpMethod.requiresRequestBody(r.route().method().name().toUpperCase())) {
             body = EMPTY_BODY;
         }
-        executeHttpRequest(r, finalRoute, body, future);
+        executeHttpRequest(finalRoute, body, request);
     }
     
-    private void executeHttpRequest(final OutboundRequest r, final Route route, final RequestBody body, final CompletableFuture<ResponsePayload> future) {
+    protected void executeHttpRequest(@Nonnull final Route route, @Nullable final RequestBody body,
+                                      @Nonnull final QueuedRequest request) {
         final Context context = catnip.vertx().getOrCreateContext();
         final Builder requestBuilder = new Builder().url(API_HOST + API_BASE + route.baseRoute())
                 .method(route.method().name(), body)
                 .header("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')');
-        if(r.needsToken()) {
+        if(request.request().needsToken()) {
             requestBuilder.header("Authorization", "Bot " + catnip.token());
         }
-        client.newCall(requestBuilder.build()).enqueue(new Callback() {
+        client().newCall(requestBuilder.build()).enqueue(new Callback() {
             @Override
             public void onFailure(@Nonnull final Call call, @Nonnull final IOException e) {
-                //massive failure
-                future.completeExceptionally(e);
+                request.bucket.failedRequest(request, e);
             }
         
             @Override
@@ -172,36 +191,35 @@ public class DefaultRequester implements Requester {
                 //ensure we close it no matter what
                 try(final Response response = resp) {
                     final int code = response.code();
-                    final String message = response.message();
+                    final long requestEnd = System.currentTimeMillis();
                     if(response.body() == null) {
                         context.runOnContext(__ ->
-                                handleResponse(r, code, message, null, response.headers(),
-                                        new NoStackTraceThrowable("body == null"), future));
+                                handleResponse(code, requestEnd, null, response.headers(), request));
                     } else {
                         final byte[] bodyBytes = response.body().bytes();
                     
                         context.runOnContext(__ ->
-                                handleResponse(r, code, message, Buffer.buffer(bodyBytes),
-                                        response.headers(), null, future));
+                                handleResponse(code, requestEnd, Buffer.buffer(bodyBytes),
+                                        response.headers(), request));
                     }
                 }
             }
         });
     }
     
-    private void handleResponse(final OutboundRequest r, final int statusCode, final String statusMessage,
+    protected void handleResponse(final int statusCode, final long requestEnd,
                                 final Buffer body, final Headers headers,
-                                final Throwable failureCause, final CompletableFuture<ResponsePayload> future) {
+                                @Nonnull final QueuedRequest request) {
+        final OutboundRequest r = request.request();
         final long latency;
         final String serverTime = headers.get("Date");
         if(serverTime != null) {
-            final long now = System.currentTimeMillis();
             // Parse date header
             // According to JDA, this is the correct format for it.
             // I trust them more than I trust my own attempts to get it right.
             // https://github.com/DV8FromTheWorld/JDA/blob/2e771e053d6ad94c1aebddbfe72e0aa519d9b3ed/src/main/java/net/dv8tion/jda/core/requests/ratelimit/BotRateLimiter.java#L150-L166
-            latency =  OffsetDateTime.parse(serverTime, DateTimeFormatter.RFC_1123_DATE_TIME)
-                    .toInstant().toEpochMilli() - now;
+            latency = OffsetDateTime.parse(serverTime, DateTimeFormatter.RFC_1123_DATE_TIME)
+                    .toInstant().toEpochMilli() - requestEnd;
         } else {
             // We set the bucket's "last request" time to the timestamp of
             // right before we started the request. If it happens that we
@@ -210,24 +228,27 @@ public class DefaultRequester implements Requester {
             latency = 0;
         }
         if(statusCode == 429) {
-            System.out.println("FUCK WE GOT 429");
+            catnip.logAdapter().error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
+                    r.route().baseRoute(),
+                    headers.get("X-Ratelimit-Global"),
+                    headers.get("X-Ratelimit-Limit"),
+                    headers.get("X-Ratelimit-Reset")
+            );
             String retry = headers.get("Retry-After");
             if(retry == null || retry.isEmpty()) {
                 retry = body.toJsonObject().getValue("retry_after").toString();
             }
             final long retryAfter = Long.parseLong(retry);
-            System.out.println("retry after = " + retryAfter);
             if(Boolean.parseBoolean(headers.get("X-RateLimit-Global"))) {
-                System.out.println("global");
                 rateLimiter.updateGlobalRateLimit(System.currentTimeMillis() + latency + retryAfter);
             } else {
-                System.out.println("not global");
-                updateBucket(r.route().baseRoute(), headers, retryAfter, latency);
+                updateBucket(r.route(), headers,
+                        System.currentTimeMillis() + latency + retryAfter, latency);
             }
-            rateLimiter.requestExecution(r.route().baseRoute())
-                    .thenRun(() -> executeRequest(r, future))
+            rateLimiter.requestExecution(r.route())
+                    .thenRun(() -> executeRequest(request))
                     .exceptionally(e -> {
-                        future.completeExceptionally(e);
+                        request.future().completeExceptionally(e);
                         return null;
                     });
         } else {
@@ -239,59 +260,62 @@ public class DefaultRequester implements Requester {
             }
             // We got a 400, meaning there's errors. Fail the request with this and move on.
             if(statusCode == 400) {
-                final RestPayloadException exception = new RestPayloadException();
+                final Map<String, List<String>> failures = new HashMap<>();
                 final JsonObject errors = payload.object();
                 errors.forEach(e -> {
                     //noinspection unchecked
-                    exception.addFailure(e.getKey(), (List<String>) e.getValue());
+                    failures.put(e.getKey(), (List<String>) e.getValue());
                 });
-                future.completeExceptionally(exception);
-                updateBucket(r.route().baseRoute(), headers, -1, latency);
+                request.future().completeExceptionally(new RestPayloadException(failures));
+                updateBucket(r.route(), headers, -1, latency);
+                request.bucket().requestDone();
             } else {
-                future.complete(payload);
-                final Handler<Long> callback = __ -> {
-                    updateBucket(r.route().baseRoute(), headers, -1, latency);
-                };
-                final boolean hasMemeReactionRateLimits = r.route().method() != GET
-                        && r.route().baseRoute().contains("/reactions/");
-                if(hasMemeReactionRateLimits) {
-                    catnip.vertx().setTimer(250L, callback);
-                } else {
-                    callback.handle(null);
-                }
+                request.future().complete(payload);
+                updateBucket(r.route(), headers, -1, latency);
+                request.bucket().requestDone();
             }
         }
         
     }
     
-    private void updateBucket(@Nonnull final String bucket, @Nonnull final Headers headers,
+    protected void updateBucket(@Nonnull final Route route, @Nonnull final Headers headers,
                               final long retryAfter, final long latency) {
         final String rateLimitReset = headers.get("X-RateLimit-Reset");
         final String rateLimitRemaining = headers.get("X-RateLimit-Remaining");
         final String rateLimitLimit = headers.get("X-RateLimit-Limit");
         
         if(retryAfter > 0) {
-            rateLimiter.updateRemaining(bucket, 0);
-            rateLimiter.updateReset(bucket, retryAfter);
+            rateLimiter.updateRemaining(route, 0);
+            rateLimiter.updateReset(route, retryAfter);
         }
         
-        if(rateLimitReset != null) {
-            rateLimiter.updateReset(bucket, latency + Long.parseLong(rateLimitReset) * 1000);
+        if(route.method() == PUT && route.baseRoute().contains("/reactions/")) {
+            rateLimiter.updateLimit(route, 1);
+            rateLimiter.updateReset(route, System.currentTimeMillis()
+                    //somehow adding the latency here actually makes 429s happen?????
+                    // + latency
+                    + 250);
+        } else {
+            if(rateLimitReset != null) {
+                //there used to be a + latency here but, just like above, it also made 429s more likely
+                //to happen. don't ask me why.
+                rateLimiter.updateReset(route, Long.parseLong(rateLimitReset) * 1000);
+            }
+    
+            if(rateLimitLimit != null) {
+                rateLimiter.updateLimit(route, Integer.parseInt(rateLimitLimit));
+            }
         }
-        
+    
         if(rateLimitRemaining != null) {
-            rateLimiter.updateRemaining(bucket, Integer.parseInt(rateLimitRemaining));
+            rateLimiter.updateRemaining(route, Integer.parseInt(rateLimitRemaining));
         }
         
-        if(rateLimitLimit != null) {
-            rateLimiter.updateLimit(bucket, Integer.parseInt(rateLimitLimit));
-        }
-        
-        rateLimiter.updateDone(bucket);
+        rateLimiter.updateDone(route);
     }
     
     @RequiredArgsConstructor
-    private static class MultipartRequestBody extends RequestBody {
+    protected static class MultipartRequestBody extends RequestBody {
         private static final MediaType contentType = MediaType.parse("application/octet-stream; charset=utf-8");
         
         private final Buffer buffer;
@@ -306,5 +330,32 @@ public class DefaultRequester implements Requester {
         public void writeTo(final BufferedSink sink) throws IOException {
             sink.write(buffer.getBytes());
         }
+    }
+    
+    @RequiredArgsConstructor
+    @Getter
+    @Accessors(fluent = true)
+    protected static class QueuedRequest {
+        protected final OutboundRequest request;
+        protected final Route route;
+        protected final CompletableFuture<ResponsePayload> future;
+        protected final Bucket bucket;
+        protected int failedAttempts;
+        
+        protected void failed() {
+            failedAttempts++;
+        }
+        
+        protected boolean shouldRetry() {
+            return failedAttempts < 3;
+        }
+    }
+    
+    protected interface Bucket {
+        void queueRequest(@Nonnull QueuedRequest request);
+        
+        void failedRequest(@Nonnull QueuedRequest request, @Nonnull Throwable failureCause);
+        
+        void requestDone();
     }
 }
