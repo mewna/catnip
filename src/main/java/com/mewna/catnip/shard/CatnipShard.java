@@ -29,6 +29,7 @@ package com.mewna.catnip.shard;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.impl.PresenceImpl;
+import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
@@ -264,8 +265,17 @@ public class CatnipShard extends AbstractVerticle {
     private void connectSocket(final Message<ShardControlMessage> msg) {
         catnip.eventBus().publish(Raw.CONNECTING, shardInfo());
         
+        final GatewayInfo info = catnip.gatewayInfo();
+        if(info != null) {
+            connectSocket(msg, info.url());
+        } else {
+            catnip.fetchGatewayInfo().thenAccept(i -> connectSocket(msg, i.url()));
+        }
+    }
+    
+    private void connectSocket(final Message<ShardControlMessage> msg, final String url) {
         //noinspection ConstantConditions
-        client.websocketAbs(catnip.gatewayInfo().url(), null, null, null,
+        client.websocketAbs(url, null, null, null,
                 socket -> {
                     catnip.eventBus().publish(Raw.CONNECTED, shardInfo());
                     socket.frameHandler(frame -> handleSocketFrame(msg, frame))

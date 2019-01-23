@@ -186,6 +186,18 @@ public interface Catnip {
     GatewayInfo gatewayInfo();
     
     /**
+     * Fetches the gateway info and updates the cache. Calls made to {@link #gatewayInfo()}
+     * after this stage completes successfully are guaranteed to return a non null value.
+     *
+     * Updates the cached gateway info.
+     *
+     * @return The gateway info fetched from discord.
+     */
+    @Nonnull
+    @CheckReturnValue
+    CompletionStage<GatewayInfo> fetchGatewayInfo();
+    
+    /**
      * @return The vert.x instance being used by this catnip instance.
      */
     @Nonnull
