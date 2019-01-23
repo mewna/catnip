@@ -221,10 +221,6 @@ public abstract class AbstractRequester implements Requester {
             latency = OffsetDateTime.parse(serverTime, DateTimeFormatter.RFC_1123_DATE_TIME)
                     .toInstant().toEpochMilli() - requestEnd;
         } else {
-            // We set the bucket's "last request" time to the timestamp of
-            // right before we started the request. If it happens that we
-            // don't get a Date header from Discord, we can use this
-            // timestamp to try to get a somewhat-accurate idea of latency.
             latency = 0;
         }
         if(statusCode == 429) {
