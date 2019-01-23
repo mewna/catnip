@@ -319,9 +319,8 @@ public class CatnipImpl implements Catnip {
         codecs();
         
         if(validateToken) {
-            return rest.user().getGatewayBot()
+            return fetchGatewayInfo()
                     .thenApply(gateway -> {
-                        gatewayInfo.set(gateway);
                         logAdapter.info("Token validated!");
                         
                         //this is actually needed because generics are dumb
@@ -437,5 +436,15 @@ public class CatnipImpl implements Catnip {
     @Override
     public GatewayInfo gatewayInfo() {
         return gatewayInfo.get();
+    }
+    
+    @Nonnull
+    @Override
+    public CompletionStage<GatewayInfo> fetchGatewayInfo() {
+        return rest.user().getGatewayBot()
+                .thenApply(g -> {
+                    gatewayInfo.set(g);
+                    return g;
+                });
     }
 }
