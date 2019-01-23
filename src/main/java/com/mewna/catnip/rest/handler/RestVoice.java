@@ -31,8 +31,8 @@ import com.google.common.collect.ImmutableMap;
 import com.mewna.catnip.entity.misc.VoiceRegion;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
-import com.mewna.catnip.rest.RestRequester.OutboundRequest;
 import com.mewna.catnip.rest.Routes;
+import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
 import io.vertx.core.json.JsonArray;
 
 import javax.annotation.CheckReturnValue;

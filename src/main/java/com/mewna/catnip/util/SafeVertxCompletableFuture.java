@@ -363,6 +363,10 @@ public class SafeVertxCompletableFuture<T> extends CompletableFuture<T> {
     }
     
     private void checkBlock() {
+        if(isDone() || isCompletedExceptionally()) {
+            //if we're done/completed we won't block
+            return;
+        }
         final Context currentContext = Vertx.currentContext();
         if(currentContext != null && Context.isOnEventLoopThread()) {
             if(currentContext.owner() == catnip.vertx()) {

@@ -34,14 +34,15 @@ import com.mewna.catnip.cache.SplitMemoryEntityCache;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.extension.Extension;
-import com.mewna.catnip.rest.bucket.BucketBackend;
-import com.mewna.catnip.rest.bucket.MemoryBucketBackend;
+import com.mewna.catnip.rest.ratelimit.DefaultRateLimiter;
+import com.mewna.catnip.rest.requester.Requester;
+import com.mewna.catnip.rest.requester.SerialRequester;
 import com.mewna.catnip.shard.DiscordEvent.Raw;
 import com.mewna.catnip.shard.buffer.CachingBuffer;
+import com.mewna.catnip.shard.buffer.EventBuffer;
 import com.mewna.catnip.shard.buffer.NoopBuffer;
 import com.mewna.catnip.shard.event.DefaultDispatchManager;
 import com.mewna.catnip.shard.event.DispatchManager;
-import com.mewna.catnip.shard.buffer.EventBuffer;
 import com.mewna.catnip.shard.manager.DefaultShardManager;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.ratelimit.MemoryRatelimiter;
@@ -121,11 +122,6 @@ public final class CatnipOptions implements Cloneable {
     @Nonnull
     private Set<CacheFlag> cacheFlags = EnumSet.noneOf(CacheFlag.class);
     /**
-     * The REST bucket backend for catnip to use. Defaults to {@link MemoryBucketBackend}.
-     */
-    @Nonnull
-    private BucketBackend restBucketBackend = new MemoryBucketBackend();
-    /**
      * Manages event dispatching and consumers. Defaults to {@link DefaultDispatchManager}.
      */
     @Nonnull
@@ -162,11 +158,8 @@ public final class CatnipOptions implements Cloneable {
      */
     @Nonnull
     private Set<String> disabledEvents = ImmutableSet.of();
-    /**
-     * The OkHTTP client to be used for REST requests.
-     */
     @Nonnull
-    private OkHttpClient restHttpClient = new OkHttpClient();
+    private Requester requester = new SerialRequester(new DefaultRateLimiter(), new OkHttpClient.Builder());
     /**
      * Whether or not extensions overriding options should be logged. Defaults
      * to {@code true}.
