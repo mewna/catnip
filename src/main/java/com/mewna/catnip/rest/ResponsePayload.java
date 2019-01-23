@@ -34,7 +34,7 @@ import io.vertx.core.json.JsonObject;
 public class ResponsePayload {
     private final Buffer buffer;
     
-    ResponsePayload(final Buffer buffer) {
+    public ResponsePayload(final Buffer buffer) {
         this.buffer = buffer;
     }
     

@@ -45,7 +45,7 @@ import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.DefaultExtensionManager;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.rest.Rest;
-import com.mewna.catnip.rest.RestRequester;
+import com.mewna.catnip.rest.requester.Requester;
 import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
 import com.mewna.catnip.shard.ShardControlMessage;
 import com.mewna.catnip.shard.ShardInfo;
@@ -103,7 +103,7 @@ public class CatnipImpl implements Catnip {
     private final AtomicReference<GatewayInfo> gatewayInfo = new AtomicReference<>(null);
     
     private DispatchManager dispatchManager;
-    private RestRequester requester;
+    private Requester requester;
     private ShardManager shardManager;
     private SessionManager sessionManager;
     private Ratelimiter gatewayRatelimiter;
@@ -132,7 +132,7 @@ public class CatnipImpl implements Catnip {
         // options change.
         this.options = options;
         dispatchManager = options.dispatchManager();
-        requester = new RestRequester(this, options.restBucketBackend(), options.restHttpClient());
+        requester = options.requester();
         shardManager = options.shardManager();
         sessionManager = options.sessionManager();
         gatewayRatelimiter = options.gatewayRatelimiter();
@@ -339,6 +339,7 @@ public class CatnipImpl implements Catnip {
         shardManager.catnip(this);
         eventBuffer.catnip(this);
         cache.catnip(this);
+        requester.catnip(this);
     }
     
     private void codecs() {

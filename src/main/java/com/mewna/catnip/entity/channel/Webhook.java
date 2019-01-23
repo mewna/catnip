@@ -32,7 +32,7 @@ import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.guild.GuildEntity;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
-import com.mewna.catnip.rest.RestRequester;
+import com.mewna.catnip.rest.requester.Requester;
 import com.mewna.catnip.util.PermissionUtil;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
@@ -103,7 +103,7 @@ public interface Webhook extends GuildEntity, Snowflake {
     @Nonnull
     @CheckReturnValue
     default String url() {
-        return String.format("%s/webhooks/%s/%s", RestRequester.API_BASE, id(), token());
+        return String.format("%s/webhooks/%s/%s", Requester.API_BASE, id(), token());
     }
     
     /**

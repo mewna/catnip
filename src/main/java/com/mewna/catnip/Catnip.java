@@ -40,8 +40,6 @@ import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.Rest;
-import com.mewna.catnip.rest.RestRequester;
-import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.shard.EventType;
 import com.mewna.catnip.shard.buffer.EventBuffer;
 import com.mewna.catnip.shard.event.DispatchManager;
@@ -177,17 +175,6 @@ public interface Catnip {
      */
     static CompletableFuture<Catnip> catnipAsync(@Nonnull final CatnipOptions options, @Nonnull final Vertx vertx) {
         return new CatnipImpl(vertx, options).setup();
-    }
-    
-    /**
-     * @return The URL used to fetch recommended shard count.
-     */
-    @Nonnull
-    @CheckReturnValue
-    static String shardCountUrl() {
-        // TODO: Allow injecting other endpoints for eg. mocks?
-        //return "https://discordapp.com/api/v6/gateway/bot";
-        return RestRequester.API_HOST + RestRequester.API_BASE + Routes.GET_GATEWAY_BOT.baseRoute();
     }
     
     /**

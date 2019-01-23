@@ -141,6 +141,8 @@ public final class Routes {
         private String baseRoute;
         @Getter
         private String majorParam;
+        @Getter
+        private String ratelimitKey;
         
         public Route() {
         }
@@ -148,11 +150,16 @@ public final class Routes {
         public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute) {
             this(method, baseRoute, null);
         }
-        
+    
         public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute, @Nullable final String majorParam) {
+            this(method, baseRoute, majorParam, baseRoute);
+        }
+    
+        public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute, @Nullable final String majorParam, @Nonnull final String ratelimitKey) {
             this.method = method;
             this.baseRoute = baseRoute;
             this.majorParam = majorParam;
+            this.ratelimitKey = ratelimitKey;
         }
         
         @Nonnull
@@ -162,27 +169,31 @@ public final class Routes {
             if(majorParam == null) {
                 throw new IllegalStateException("This route takes no major params!");
             }
-            return new Route(method, baseRoute.replace('{' + majorParam + '}', value));
+            final String majorParamString = '{' + majorParam + '}';
+            final String ratelimitRoute = baseRoute.substring(0, baseRoute.indexOf(majorParamString))
+                    + value;
+            return new Route(method, baseRoute.replace(majorParamString, value), null,
+                    ratelimitRoute);
         }
         
         @Nonnull
         @CheckReturnValue
         @SuppressWarnings("TypeMayBeWeakened")
-        Route compile(@Nonnull final String param, @Nonnull final String value) {
+        public Route compile(@Nonnull final String param, @Nonnull final String value) {
             if(param.equalsIgnoreCase(majorParam)) {
                 return this;
             }
-            return new Route(method, baseRoute.replace('{' + param + '}', value));
+            return new Route(method, baseRoute.replace('{' + param + '}', value), majorParam, ratelimitKey);
         }
         
         @Nonnull
         @CheckReturnValue
-        Route copy() {
-            return new Route(method, baseRoute, majorParam);
+        public Route copy() {
+            return new Route(method, baseRoute, majorParam, ratelimitKey);
         }
         
         public Route withQueryString(final String qs) {
-            return new Route(method, baseRoute + qs, majorParam);
+            return new Route(method, baseRoute + qs, majorParam, ratelimitKey);
         }
         
         @Override
