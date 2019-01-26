@@ -62,16 +62,7 @@ public abstract class AbstractShardManager implements ShardManager {
     @Getter
     @Setter
     private Catnip catnip;
-    
-    @SuppressWarnings("WeakerAccess")
-    protected void deployShard(@Nonnegative final int id, @Nonnegative final int count) {
-        // because each shard has its own presence, so no global presence on catnip class
-        @SuppressWarnings("TypeMayBeWeakened")
-        final CatnipShard shard = new CatnipShard(catnip, id, count, catnip.initialPresence());
-        catnip.vertx().deployVerticle(shard);
-        addToConnectQueue(id);
-    }
-    
+
     @Override
     public ShardManager addCondition(@Nonnull final ShardCondition condition) {
         conditions.add(condition);

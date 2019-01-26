@@ -62,6 +62,10 @@ public interface LifecycleEvent {
      * gateway. The payload is a shard id / total pair.
      */
     EventType<ShardInfo> RESUMED      = event(Raw.RESUMED, ShardInfo.class);
+    /**
+     * Fired when the shard has closed the gateway websocket.
+     */
+    EventType<ShardInfo> CLOSED       = event(Raw.CLOSED, ShardInfo.class);
     // @formatter:on
     
     interface Raw {
@@ -71,6 +75,7 @@ public interface LifecycleEvent {
         String DISCONNECTED = "DISCONNECTED";
         String IDENTIFIED   = "IDENTIFIED";
         String RESUMED      = "RESUMED";
+        String CLOSED       = "CLOSED";
         // @formatter:on
     }
 }
