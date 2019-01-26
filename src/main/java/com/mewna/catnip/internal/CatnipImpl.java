@@ -46,7 +46,7 @@ import com.mewna.catnip.extension.manager.DefaultExtensionManager;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.requester.Requester;
-import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
+import com.mewna.catnip.shard.ShardConnectState;
 import com.mewna.catnip.shard.ShardControlMessage;
 import com.mewna.catnip.shard.ShardInfo;
 import com.mewna.catnip.shard.buffer.EventBuffer;

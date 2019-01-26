@@ -9,21 +9,6 @@ package com.mewna.catnip.shard;
  */
 public enum ShardControlMessage {
     /**
-     * Start the shard.
-     */
-    START,
-    
-    /**
-     * Stop the shard. Will allow it to reconnect itself.
-     */
-    STOP,
-    
-    /**
-     * Stop the shard and undeploy the verticle.
-     */
-    SHUTDOWN,
-    
-    /**
      * Get the shard's trace. Used for debugging w/ Discord.
      */
     TRACE,
@@ -37,4 +22,9 @@ public enum ShardControlMessage {
      * Get the shard's current heartbeat latency.
      */
     LATENCY,
+    
+    /**
+     * Connect the shard.
+     */
+    CONNECT,
 }
