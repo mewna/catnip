@@ -27,7 +27,7 @@
 
 package com.mewna.catnip.shard.manager;
 
-import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
+import com.mewna.catnip.shard.ShardConnectState;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.CompletableFuture;
