@@ -29,25 +29,26 @@ package com.mewna.catnip.shard.manager;
 
 import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.shard.CatnipShard;
-import com.mewna.catnip.shard.CatnipShard.ShardConnectState;
-import com.mewna.catnip.shard.ShardControlMessage;
+import com.mewna.catnip.shard.LifecycleEvent;
+import com.mewna.catnip.shard.ShardConnectState;
+import com.mewna.catnip.shard.ShardInfo;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
+import io.vertx.core.eventbus.MessageConsumer;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.mewna.catnip.shard.ShardAddress.CONTROL;
 import static com.mewna.catnip.shard.ShardAddress.computeAddress;
+import static com.mewna.catnip.shard.ShardControlMessage.CONNECT;
 
 /**
  * @author amy
@@ -57,7 +58,9 @@ import static com.mewna.catnip.shard.ShardAddress.computeAddress;
 public class DefaultShardManager extends AbstractShardManager {
     @Getter
     private final Deque<Integer> connectQueue = new ConcurrentLinkedDeque<>();
+    private final Set<MessageConsumer> consumers;
     private final Collection<Integer> shardIds;
+    private final Map<Integer, String> shards;
     @Getter
     private int shardCount;
     
@@ -84,6 +87,8 @@ public class DefaultShardManager extends AbstractShardManager {
     public DefaultShardManager(@Nonnegative final int shardCount, final Collection<Integer> shardIds) {
         this.shardCount = shardCount;
         this.shardIds = new ArrayList<>(shardIds);
+        this.consumers = new HashSet<>();
+        this.shards = new ConcurrentHashMap<>();
     }
     
     private static <T> int iterableLength(@Nonnull final Iterable<T> iterable) {
@@ -107,6 +112,11 @@ public class DefaultShardManager extends AbstractShardManager {
     
     @Override
     public void start() {
+        consumers.add(catnip().eventBus().<ShardInfo>consumer(LifecycleEvent.Raw.CLOSED, closeHandler -> {
+            catnip().logAdapter().info("Shard {} closed, re-queuing...", closeHandler.body().getId());
+            addToConnectQueue(closeHandler.body().getId());
+        }));
+        
         if(shardCount == 0) {
             // Load shard count from API
             catnip().rest().user().getGatewayBot().thenAccept(gatewayInfo -> {
@@ -125,68 +135,78 @@ public class DefaultShardManager extends AbstractShardManager {
     
     private void loadShards() {
         catnip().logAdapter().info("Booting {}(/{}) shards", shardIds.size(), shardCount);
-        
-        // Deploy verticles
-        for(final Integer id : shardIds) {
-            deployShard(id, shardCount);
-            catnip().logAdapter().info("Deployed shard {}/{}", id, shardCount);
-        }
-        // Start verticles
+        connectQueue.addAll(shardIds);
         poll();
     }
     
     private void poll() {
         if(connectQueue.isEmpty()) {
-            catnip().vertx().setTimer(1000L, __ -> poll());
+            catnip().vertx().setTimer(1000L, t -> poll());
             return;
         }
+        
         SafeVertxCompletableFuture.allOf(conditions().stream().map(ShardCondition::preshard).toArray(CompletableFuture[]::new))
-                .thenAccept(__ -> connect())
+                .thenAccept(t -> {
+                    final int id = connectQueue.removeFirst();
+                    undeploy(id);
+                    catnip().logAdapter().info("Connecting shard {} (queue len {})", id, connectQueue.size());
+                    
+                    catnip().vertx().deployVerticle(new CatnipShard(catnip(), id, shardCount, catnip().initialPresence()), deployResult -> {
+                        if(deployResult.failed()) {
+                            catnip().logAdapter().error("Deploying shard {} failed, re-queueing!", id, deployResult.cause());
+                            addToConnectQueue(id);
+                            poll();
+                            return;
+                        }
+                        shards.put(id, deployResult.result());
+                        catnip().logAdapter().info("Deployed shard {}(/{})", id, shardCount);
+                        connectShard(id);
+                    });
+                })
                 .exceptionally(e -> {
                     catnip().logAdapter().warn("Couldn't complete shard conditions, polling again in 1s", e);
-                    catnip().vertx().setTimer(1000L, __ -> poll());
+                    catnip().vertx().setTimer(1000L, t -> poll());
                     return null;
                 });
     }
     
-    private void connect() {
-        final int nextId = connectQueue.peekFirst();
-        catnip().logAdapter().info("Connecting shard {} (queue len {})", nextId, connectQueue.size());
-        catnip().eventBus().<ShardConnectState>send(computeAddress(CONTROL, nextId), ShardControlMessage.START,
-                reply -> {
-                    connectQueue.removeFirst();
-                    if(reply.succeeded()) {
-                        final ShardConnectState state = reply.result().body();
-                        switch(state) {
-                            case READY: {
-                                catnip().logAdapter().info("Connected shard {}", nextId);
-                                catnip().vertx().setTimer(5500, __ -> poll());
-                                break;
-                            }
-                            case RESUMED: {
-                                catnip().logAdapter().info("Resumed shard {}", nextId);
-                                poll();
-                                break;
-                            }
-                            case FAILED: {
-                                catnip().logAdapter().warn("Failed connecting shard {}, re-queueing", nextId);
-                                addToConnectQueue(nextId);
-                                poll();
-                                break;
-                            }
-                            default: {
-                                catnip().logAdapter().error("Got unexpected / unknown shard connect state: {}", state);
-                                poll();
-                                break;
-                            }
-                        }
-                        conditions().forEach(e -> e.postshard(state));
-                    } else {
-                        catnip().logAdapter().warn("Failed connecting shard {} entirely, re-queueing", nextId, reply.cause());
-                        addToConnectQueue(nextId);
-                        poll();
-                    }
-                });
+    private void undeploy(final int id) {
+        String deployment = shards.remove(id);
+        if (deployment != null)
+            catnip().vertx().undeploy(deployment);
+    }
+    
+    private void connectShard(final int id) {
+        catnip().eventBus().<ShardConnectState>send(computeAddress(CONTROL, id), CONNECT, result -> {
+            if(result.failed()) {
+                catnip().logAdapter().error("Something went really wrong while trying to connect shard {}, re-queueing...", id, result.cause());
+                addToConnectQueue(id);
+                poll();
+                return;
+            }
+            
+            final ShardConnectState state = result.result().body();
+            switch(state) {
+                case READY:
+                    catnip().logAdapter().info("Connected shard {}(/{})", id, shardCount);
+                    catnip().vertx().setTimer(5500, t -> poll());
+                    break;
+                case RESUMED:
+                    catnip().logAdapter().info("Resumed shard {}(/{})", id, shardCount);
+                    poll();
+                    break;
+                case FAILED:
+                    catnip().logAdapter().error("Failed connecting shard {}(/{}), re-queueing...", id, shardCount);
+                    addToConnectQueue(id);
+                    poll();
+                    break;
+                default:
+                    catnip().logAdapter().error("This shouldn't happen, but we got unknown state for shard {}: {}", id, state);
+                    poll();
+                    break;
+            }
+            conditions().forEach(e -> e.postshard(state));
+        });
     }
     
     @Override
@@ -200,8 +220,9 @@ public class DefaultShardManager extends AbstractShardManager {
     
     @Override
     public void shutdown() {
-        shardIds.forEach(i -> {
-            catnip().eventBus().send(computeAddress(CONTROL, i), ShardControlMessage.SHUTDOWN);
-        });
+        consumers.forEach(MessageConsumer::unregister);
+        consumers.clear();
+        shards.values().forEach(shard -> catnip().vertx().undeploy(shard));
+        shards.clear();
     }
 }
