@@ -128,6 +128,7 @@ public class CatnipShard extends AbstractVerticle {
     private final String presenceUpdateRequest;
     private final String presenceUpdatePoll;
     private final String voiceStateUpdateQueue;
+    private final String outgoingSend;
     
     public CatnipShard(@Nonnull final Catnip catnip, @Nonnegative final int id, @Nonnegative final int limit,
                        @Nullable final Presence presence) {
@@ -148,6 +149,7 @@ public class CatnipShard extends AbstractVerticle {
         presenceUpdateRequest = computeAddress(PRESENCE_UPDATE_REQUEST, id);
         presenceUpdatePoll = computeAddress(PRESENCE_UPDATE_POLL, id);
         voiceStateUpdateQueue = computeAddress(VOICE_STATE_UPDATE_QUEUE, id);
+        outgoingSend = "catnip:gateway:" + id + ":outgoing-send";
     }
     
     public static JsonObject basePayload(@Nonnull final GatewayOp op) {
@@ -182,7 +184,7 @@ public class CatnipShard extends AbstractVerticle {
                         while(!messageQueue.isEmpty()) {
                             // We only do up to 110 messages/min, to allow for room just in case
                             final ImmutablePair<Boolean, Long> check = catnip.gatewayRatelimiter()
-                                    .checkRatelimit("catnip:gateway:" + id + ":outgoing-send", 60_000L, 110);
+                                    .checkRatelimit(outgoingSend, 60_000L, 110);
                             if(check.left) {
                                 // We got ratelimited, stop sending and try again in 1s
                                 if(!sendRateLimitRecheckQueued) {
