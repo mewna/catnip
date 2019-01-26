@@ -210,7 +210,7 @@ public class CatnipShard extends AbstractVerticle {
         if(socket != null) {
             closedByClient = true;
             
-            if (socketOpen)
+            if(socketOpen)
                 socket.close((short) 4000);
             
             socketOpen = false;
@@ -294,21 +294,22 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void stateReply(ShardConnectState state) {
-        if (message != null) {
+        if(message != null) {
             message.reply(state);
             message = null;
         }
     }
     
+    @SuppressWarnings("squid:HiddenFieldCheck")
     private void connectSocket(final String url) {
         client.websocketAbs(url, null, null, null,
-                ws -> {
-                    socket = ws;
+                socket -> {
+                    this.socket = socket;
                     socketOpen = true;
                     
                     catnip.eventBus().publish(Raw.CONNECTED, shardInfo());
-                    ws.frameHandler(this::handleSocketFrame)
-                            .closeHandler(t -> handleSocketClose())
+                    socket.frameHandler(this::handleSocketFrame)
+                            .closeHandler(this::handleSocketClose)
                             .exceptionHandler(t -> catnip.logAdapter().error("Shard {}/{}: Exception in Websocket", id, limit, t));
                 },
                 failure -> {
@@ -408,6 +409,7 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void handleSocketCloseFrame(final WebSocketFrame frame) {
+        socketOpen = false;
         final short closeCode = frame.closeStatusCode();
         if(closeCode == GatewayCloseCode.INVALID_SEQ.code() || closeCode == GatewayCloseCode.SESSION_TIMEOUT.code()) {
             // These two close codes invalidate your session (and afaik do not send an OP9).
@@ -431,16 +433,17 @@ public class CatnipShard extends AbstractVerticle {
                         id, limit, closeCode, frame.closeReason());
             }
         }
-        socketOpen = false;
     }
     
-    private void handleSocketClose() {
+    @SuppressWarnings("squid:S1172")
+    private void handleSocketClose(final Void ignored) {
         final boolean cancel = vertx.cancelTimer(heartbeatTask.get());
         catnip.logAdapter().debug("Canceled timer task from socket close: {}", cancel);
         catnip.eventBus().publish(Raw.DISCONNECTED, shardInfo());
         catnip.logAdapter().warn("Shard {}/{}: Socket closing!", id, limit);
         try {
             socket = null;
+            socketOpen = false;
             closedByClient = false;
             catnip.eventBus().publish(Raw.CLOSED, shardInfo());
         } catch(final Exception e) {
@@ -460,14 +463,13 @@ public class CatnipShard extends AbstractVerticle {
     
     private void handleSocketSend(final Message<JsonObject> msg) {
         if(socket != null && socketOpen) {
-            final WebSocket ws = socket;
             JsonObject payload = msg.body();
             for(final Extension extension : catnip.extensionManager().extensions()) {
                 for(final CatnipHook hook : extension.hooks()) {
                     payload = hook.rawGatewaySendHook(payload);
                 }
             }
-            ws.writeTextMessage(payload.encode());
+            socket.writeTextMessage(payload.encode());
         }
     }
     
@@ -556,14 +558,16 @@ public class CatnipShard extends AbstractVerticle {
     private void handleInvalidSession(final JsonObject event) {
         if(event.getBoolean("d")) {
             // Can resume
-            if(socket != null) {
+            if(socket != null && socketOpen) {
                 socket.close();
             }
         } else {
             catnip.logAdapter().info("Session invalidated (OP 9), clearing shard data and reconnecting");
             // Can't resume, clear old data
             if(socket != null) {
-                socket.close();
+                if(socketOpen) {
+                    socket.close();
+                }
                 catnip.cacheWorker().invalidateShard(id);
                 catnip.sessionManager().clearSession(id);
                 catnip.sessionManager().clearSeqnum(id);
@@ -575,7 +579,9 @@ public class CatnipShard extends AbstractVerticle {
         // Just immediately disconnect
         if(socket != null) {
             closedByClient = true;
-            socket.close();
+            if(socketOpen) {
+                socket.close();
+            }
         }
     }
     
