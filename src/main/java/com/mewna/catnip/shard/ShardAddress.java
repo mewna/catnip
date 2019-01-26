@@ -76,7 +76,8 @@ public enum ShardAddress {
     /**
      * Queue a voice state update.
      */
-    VOICE_STATE_UPDATE_QUEUE("catnip:gateway:ws-outgoing:$id:voice-state-update:queue");
+    VOICE_STATE_UPDATE_QUEUE("catnip:gateway:ws-outgoing:$id:voice-state-update:queue"),
+    ;
 
     private final String format;
     
