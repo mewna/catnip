@@ -208,11 +208,12 @@ public class CatnipShard extends AbstractVerticle {
         consumers.clear();
         
         if(socket != null) {
+            closedByClient = true;
+            
             if (socketOpen)
                 socket.close((short) 4000);
-    
+            
             socketOpen = false;
-            closedByClient = true;
         }
         messageQueue.clear();
         presenceQueue.clear();
@@ -255,7 +256,7 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void handleControlMessage(final Message<ShardControlMessage> msg) {
-        final com.mewna.catnip.shard.ShardControlMessage body = msg.body();
+        final ShardControlMessage body = msg.body();
         switch(body) {
             case TRACE:
                 msg.reply(new JsonArray(trace));
