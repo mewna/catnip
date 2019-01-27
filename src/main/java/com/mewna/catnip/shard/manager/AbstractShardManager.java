@@ -28,7 +28,6 @@
 package com.mewna.catnip.shard.manager;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.ShardControlMessage;
 import com.mewna.catnip.util.JsonUtil;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;

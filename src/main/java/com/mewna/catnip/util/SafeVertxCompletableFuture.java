@@ -39,6 +39,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+@SuppressWarnings("WeakerAccess")
 public class SafeVertxCompletableFuture<T> extends CompletableFuture<T> {
     private final Executor executor;
     private final Catnip catnip;

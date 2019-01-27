@@ -37,24 +37,11 @@ import javax.annotation.Nonnull;
 public enum ImageType {
     GIF, JPG, PNG, WEBP;
     
-    private final String alternativeExtension;
-    
-    ImageType(@Nonnull final String alternativeExtension) {
-        this.alternativeExtension = alternativeExtension;
-    }
-    
-    ImageType() {
-        this("png");
-    }
-    
     @Nonnull
     @CheckReturnValue
     public static ImageType fromExtension(@Nonnull final String extension) {
         for(final ImageType type : values()) {
-            if(type.getFileExtension().equals(extension)) {
-                return type;
-            }
-            if(type.alternativeExtension != null && type.alternativeExtension.equals(extension)) {
+            if(type.getFileExtension().equalsIgnoreCase(extension)) {
                 return type;
             }
         }

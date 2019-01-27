@@ -41,20 +41,18 @@ import java.net.URLConnection;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.LongPredicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("WeakerAccess")
 public final class Utils {
-    public static final List<String> VALID_CONTENT_TYPES = Arrays.asList(
+    public static final List<String> VALID_CONTENT_TYPES = Collections.unmodifiableList(Arrays.asList(
             "image/jpeg",
             "image/png",
             "image/gif"
-    );
+    ));
     public static final long DISCORD_EPOCH = 1420070400000L;
     private static final Pattern WEBHOOK_PATTERN = Pattern.compile("https://discordapp\\.com/api/webhooks/(\\d+)/([\\w\\W]+)");
     

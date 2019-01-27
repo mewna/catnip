@@ -136,7 +136,10 @@ public interface Guild extends Snowflake {
     @Nonnull
     @CheckReturnValue
     default Member selfMember() {
-        return members().getById(catnip().selfUser().idAsLong());
+        return members().getById(
+                Objects.requireNonNull(catnip().selfUser(), "Self user is null. This shouldn't ever happen")
+                        .idAsLong()
+        );
     }
     
     /**

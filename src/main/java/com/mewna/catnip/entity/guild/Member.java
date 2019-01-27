@@ -43,8 +43,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
@@ -63,7 +63,7 @@ public interface Member extends GuildEntity, Snowflake {
     @Nonnull
     @CheckReturnValue
     default User user() {
-        return catnip().cache().user(idAsLong());
+        return Objects.requireNonNull(catnip().cache().user(idAsLong()), "User not found. It may have been removed from the cache.");
     }
     
     /**

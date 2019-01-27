@@ -68,12 +68,15 @@ public interface Presence {
     @Nonnull
     OnlineStatus status();
     
+    @SuppressWarnings("EmptyMethod")
     @Nullable
     OnlineStatus mobileStatus();
     
+    @SuppressWarnings("EmptyMethod")
     @Nullable
     OnlineStatus webStatus();
     
+    @SuppressWarnings("EmptyMethod")
     @Nullable
     OnlineStatus desktopStatus();
     

@@ -29,7 +29,7 @@ package com.mewna.catnip.shard.manager;
 
 import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.shard.CatnipShard;
-import com.mewna.catnip.shard.LifecycleEvent;
+import com.mewna.catnip.shard.LifecycleEvent.Raw;
 import com.mewna.catnip.shard.ShardConnectState;
 import com.mewna.catnip.shard.ShardInfo;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
@@ -58,9 +58,9 @@ import static com.mewna.catnip.shard.ShardControlMessage.CONNECT;
 public class DefaultShardManager extends AbstractShardManager {
     @Getter
     private final Deque<Integer> connectQueue = new ConcurrentLinkedDeque<>();
-    private final Set<MessageConsumer> consumers;
+    private final Collection<MessageConsumer> consumers = new HashSet<>();
+    private final Map<Integer, String> shards = new ConcurrentHashMap<>();
     private final Collection<Integer> shardIds;
-    private final Map<Integer, String> shards;
     @Getter
     private int shardCount;
     
@@ -87,8 +87,6 @@ public class DefaultShardManager extends AbstractShardManager {
     public DefaultShardManager(@Nonnegative final int shardCount, final Collection<Integer> shardIds) {
         this.shardCount = shardCount;
         this.shardIds = new ArrayList<>(shardIds);
-        this.consumers = new HashSet<>();
-        this.shards = new ConcurrentHashMap<>();
     }
     
     private static <T> int iterableLength(@Nonnull final Iterable<T> iterable) {
@@ -112,7 +110,7 @@ public class DefaultShardManager extends AbstractShardManager {
     
     @Override
     public void start() {
-        consumers.add(catnip().eventBus().<ShardInfo>consumer(LifecycleEvent.Raw.CLOSED, closeHandler -> {
+        consumers.add(catnip().eventBus().<ShardInfo>consumer(Raw.CLOSED, closeHandler -> {
             catnip().logAdapter().info("Shard {} closed, re-queuing...", closeHandler.body().getId());
             addToConnectQueue(closeHandler.body().getId());
         }));
@@ -171,9 +169,10 @@ public class DefaultShardManager extends AbstractShardManager {
     }
     
     private void undeploy(final int id) {
-        String deployment = shards.remove(id);
-        if (deployment != null)
+        final String deployment = shards.remove(id);
+        if(deployment != null) {
             catnip().vertx().undeploy(deployment);
+        }
     }
     
     private void connectShard(final int id) {
