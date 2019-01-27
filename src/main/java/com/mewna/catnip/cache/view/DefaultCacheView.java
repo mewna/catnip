@@ -46,6 +46,7 @@ import java.util.stream.Collector;
  * @author natanbc
  * @since 12/15/18
  */
+@SuppressWarnings("WeakerAccess")
 public class DefaultCacheView<T> implements MutableCacheView<T> {
     protected final LongEntityMap<T> map = LongEntityMap.create();
     protected final ReadWriteLock lock = new ReentrantReadWriteLock();

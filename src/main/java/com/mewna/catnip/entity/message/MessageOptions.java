@@ -28,8 +28,6 @@
 package com.mewna.catnip.entity.message;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.io.ByteStreams;
-import com.google.common.io.Files;
 import io.vertx.core.buffer.Buffer;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -37,9 +35,11 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,7 +80,7 @@ public class MessageOptions {
             throw new IllegalArgumentException("file cannot be read!");
         }
         try {
-            return addFile(name, Files.toByteArray(file));
+            return addFile(name, Files.readAllBytes(file.toPath()));
         } catch(final IOException exc) {
             throw new IllegalArgumentException("cannot read data from file!", exc);
         }
@@ -90,7 +90,18 @@ public class MessageOptions {
     @Nonnull
     public MessageOptions addFile(@Nonnull final String name, @Nonnull final InputStream stream) {
         try {
-            return addFile(name, ByteStreams.toByteArray(stream));
+            final ByteArrayOutputStream out = new ByteArrayOutputStream(Math.max(32, stream.available()));
+            final byte[] buf = new byte[Math.min(4096, stream.available() > 0 ? stream.available() : 4096)];
+            long total = 0;
+            while(true) {
+                final int r = stream.read(buf);
+                if(r == -1) {
+                    break;
+                }
+                out.write(buf, 0, r);
+                total += r;
+            }
+            return addFile(name, out.toByteArray());
         } catch(final IOException exc) {
             throw new IllegalArgumentException("cannot read data from inputstream!", exc);
         }

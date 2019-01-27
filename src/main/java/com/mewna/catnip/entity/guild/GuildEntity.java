@@ -30,6 +30,7 @@ import com.mewna.catnip.entity.Entity;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 /**
  * An entity which is guild-scoped in catnip.
@@ -66,7 +67,8 @@ public interface GuildEntity extends Entity {
     @Nonnull
     @CheckReturnValue
     default Guild guild() {
-        return catnip().cache().guild(guildIdAsLong());
+        return Objects.requireNonNull(catnip().cache().guild(guildIdAsLong()),
+                "Guild not found. It may have been removed from the cache");
     }
     
 }

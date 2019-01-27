@@ -48,6 +48,7 @@ import java.util.function.Consumer;
 @Accessors(fluent = true, chain = true)
 @Getter
 @Setter
+@SuppressWarnings("WeakerAccess")
 public class GuildData implements JsonConvertible {
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
@@ -74,6 +75,7 @@ public class GuildData implements JsonConvertible {
         return new GuildData(name);
     }
     
+    @SuppressWarnings("UnusedReturnValue")
     @Nonnull
     public GuildData name(final String name) {
         final String trimmed = name.trim();

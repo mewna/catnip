@@ -29,7 +29,7 @@ package com.mewna.catnip.util;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import java.util.List;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 /**
@@ -44,13 +44,13 @@ public class QueryStringBuilder {
     private boolean hasQueryParams;
     
     @Nonnull
-    public QueryStringBuilder append(@Nonnull String text) {
+    public QueryStringBuilder append(@Nonnull final String text) {
         sb.append(text);
         return this;
     }
     
     @Nonnull
-    public QueryStringBuilder append(@Nonnull String key, @Nonnull String value) {
+    public QueryStringBuilder append(@Nonnull final String key, @Nonnull final String value) {
         if(hasQueryParams) {
             sb.append('&').append(key).append('=').append(encode(value));
         } else {
@@ -61,7 +61,7 @@ public class QueryStringBuilder {
     }
     
     @Nonnull
-    public QueryStringBuilder append(@Nonnull String key, @Nonnull List<String> values) {
+    public QueryStringBuilder append(@Nonnull final String key, @Nonnull final Collection<String> values) {
         return append(key, values.stream().map(QueryStringBuilder::encode).collect(Collectors.joining(",")));
     }
     
@@ -72,14 +72,14 @@ public class QueryStringBuilder {
     }
     
     // A useless function
-    public QueryStringBuilder prependToUrl(@Nonnull String url) {
+    public QueryStringBuilder prepend(@Nonnull final String url) {
         sb.insert(0, url);
         return this;
     }
     
-    private static String encode(String input) {
-        StringBuilder resultStr = new StringBuilder();
-        for (char ch : input.toCharArray()) {
+    private static String encode(@Nonnull final String input) {
+        final StringBuilder resultStr = new StringBuilder();
+        for (final char ch : input.toCharArray()) {
             if (isUnsafe(ch)) {
                 resultStr.append('%');
                 resultStr.append(toHex(ch / 16));
@@ -91,11 +91,11 @@ public class QueryStringBuilder {
         return resultStr.toString();
     }
     
-    private static char toHex(int ch) {
+    private static char toHex(final int ch) {
         return (char) (ch < 10 ? '0' + ch : 'A' + ch - 10);
     }
     
-    private static boolean isUnsafe(char ch) {
+    private static boolean isUnsafe(final char ch) {
         return ch > 128 || UNSAFE_CHARS.indexOf(ch) >= 0;
     }
 }
