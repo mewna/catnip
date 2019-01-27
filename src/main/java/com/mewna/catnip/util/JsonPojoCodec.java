@@ -49,7 +49,7 @@ public class JsonPojoCodec<T> implements MessageCodec<T, T> {
     
     @Override
     public void encodeToWire(final Buffer buffer, final T t) {
-        byte[] data = JsonObject.mapFrom(t).encode().getBytes();
+        final byte[] data = JsonObject.mapFrom(t).encode().getBytes();
         buffer.appendInt(data.length);
         buffer.appendBytes(data);
     }

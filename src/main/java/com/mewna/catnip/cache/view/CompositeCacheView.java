@@ -42,6 +42,7 @@ import java.util.stream.Collector;
  * @author natanbc
  * @since 12/15/18
  */
+@SuppressWarnings("WeakerAccess")
 public class CompositeCacheView<T> implements CacheView<T> {
     protected final Collection<? extends CacheView<T>> sources;
     

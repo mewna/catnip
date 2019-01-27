@@ -109,6 +109,7 @@ public interface Extension extends Verticle {
      *
      * @param catnip The catnip instance to inject. May not be {@code null}.
      */
+    @SuppressWarnings("UnusedReturnValue")
     Extension catnip(@Nonnull Catnip catnip);
     
     /**

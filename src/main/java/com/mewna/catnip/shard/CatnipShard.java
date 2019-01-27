@@ -74,7 +74,7 @@ import static com.mewna.catnip.shard.ShardAddress.*;
  * send a message to a shard:
  * <ol>
  * <li>Get the shard's control address with {@code ShardAddress.computeAddress(ShardAddress.CONTROL, id)}.</li>
- * <li>Send a {@link com.mewna.catnip.shard.ShardControlMessage} to it.</li>
+ * <li>Send a {@link ShardControlMessage} to it.</li>
  * </ol>
  *
  * @author amy
@@ -94,7 +94,7 @@ public class CatnipShard extends AbstractVerticle {
     
     private final Deque<JsonObject> messageQueue = new ArrayDeque<>();
     private final Deque<PresenceImpl> presenceQueue = new ArrayDeque<>();
-    private final Set<MessageConsumer> consumers = new HashSet<>();
+    private final Collection<MessageConsumer> consumers = new HashSet<>();
     
     // This is an AtomicLong instead of a volatile long because IntelliJ got
     // A N G E R Y because I guess longs don't get written atomically.
@@ -107,9 +107,9 @@ public class CatnipShard extends AbstractVerticle {
     private volatile boolean presenceRateLimitRecheckQueued;
     private volatile boolean sendRateLimitRecheckQueued;
     private volatile List<String> trace = Collections.emptyList();
-    private volatile boolean connected = false;
-    private volatile boolean socketOpen = false;
-    private volatile boolean closedByClient = false;
+    private volatile boolean connected;
+    private volatile boolean socketOpen;
+    private volatile boolean closedByClient;
     
     private WebSocket socket;
     private Inflater inflater;
@@ -170,7 +170,7 @@ public class CatnipShard extends AbstractVerticle {
     
     @Override
     public void start() {
-        EventBus eventBus = catnip.eventBus();
+        final EventBus eventBus = catnip.eventBus();
         Collections.addAll(consumers,
                 eventBus.consumer(control, this::handleControlMessage),
                 eventBus.consumer(websocketQueue, this::handleSocketQueue),
@@ -210,8 +210,9 @@ public class CatnipShard extends AbstractVerticle {
         if(socket != null) {
             closedByClient = true;
             
-            if(socketOpen)
+            if(socketOpen) {
                 socket.close((short) 4000);
+            }
             
             socketOpen = false;
         }
@@ -293,7 +294,7 @@ public class CatnipShard extends AbstractVerticle {
         }
     }
     
-    private void stateReply(ShardConnectState state) {
+    private void stateReply(@Nonnull final ShardConnectState state) {
         if(message != null) {
             message.reply(state);
             message = null;

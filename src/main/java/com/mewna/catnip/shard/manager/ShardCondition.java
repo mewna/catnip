@@ -40,6 +40,7 @@ import java.util.concurrent.CompletableFuture;
  * @author amy
  * @since 11/14/18.
  */
+@SuppressWarnings("WeakerAccess")
 public interface ShardCondition {
     /**
      * Get the future for this shard condition. This function is called

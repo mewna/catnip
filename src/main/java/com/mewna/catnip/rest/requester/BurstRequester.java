@@ -29,14 +29,14 @@ package com.mewna.catnip.rest.requester;
 
 import com.mewna.catnip.rest.Routes.Route;
 import com.mewna.catnip.rest.ratelimit.RateLimiter;
-import okhttp3.OkHttpClient;
+import okhttp3.OkHttpClient.Builder;
 
 import javax.annotation.Nonnull;
 
 public class BurstRequester extends AbstractRequester {
     private final Bucket bucket = new BurstBucket(this);
     
-    public BurstRequester(@Nonnull final RateLimiter rateLimiter, @Nonnull final OkHttpClient.Builder clientBuilder) {
+    public BurstRequester(@Nonnull final RateLimiter rateLimiter, @Nonnull final Builder clientBuilder) {
         super(rateLimiter, clientBuilder);
     }
     
