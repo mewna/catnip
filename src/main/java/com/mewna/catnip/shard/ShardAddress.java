@@ -49,20 +49,10 @@ public enum ShardAddress {
     WEBSOCKET_QUEUE("catnip:gateway:ws-outgoing:$id:queue"),
     
     /**
-     * Used internally for controlling when to send websocket messages.
-     */
-    WEBSOCKET_POLL("catnip:gateway:ws-outgoing:$id:poll"),
-    
-    /**
      * Queue a new presence update. Used internally, but may be used if you're
      * sure.
      */
     PRESENCE_UPDATE_QUEUE("catnip:gateway:ws-outgoing:$id:presence-update:queue"),
-    
-    /**
-     * Used internally for controlling when to send presence updates.
-     */
-    PRESENCE_UPDATE_POLL("catnip:gateway:ws-outgoing:$id:presence-update:poll"),
     
     /**
      * Request the provided presence to be queued, <strong>OR</strong> request

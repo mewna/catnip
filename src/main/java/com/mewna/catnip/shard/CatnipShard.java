@@ -38,6 +38,7 @@ import com.mewna.catnip.shard.manager.AbstractShardManager;
 import com.mewna.catnip.shard.manager.DefaultShardManager;
 import com.mewna.catnip.util.BufferOutputStream;
 import com.mewna.catnip.util.JsonUtil;
+import com.mewna.catnip.util.task.GatewayTask;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.EventBus;
@@ -49,13 +50,15 @@ import io.vertx.core.http.WebSocket;
 import io.vertx.core.http.WebSocketFrame;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.Inflater;
@@ -92,8 +95,6 @@ public class CatnipShard extends AbstractVerticle {
     
     private final HttpClient client;
     
-    private final Deque<JsonObject> messageQueue = new ArrayDeque<>();
-    private final Deque<PresenceImpl> presenceQueue = new ArrayDeque<>();
     private final Collection<MessageConsumer> consumers = new HashSet<>();
     
     // This is an AtomicLong instead of a volatile long because IntelliJ got
@@ -123,12 +124,12 @@ public class CatnipShard extends AbstractVerticle {
     private final String control;
     private final String websocketQueue;
     private final String websocketSend;
-    private final String websocketPoll;
     private final String presenceUpdateQueue;
     private final String presenceUpdateRequest;
-    private final String presenceUpdatePoll;
     private final String voiceStateUpdateQueue;
-    private final String outgoingSend;
+    
+    private final GatewayTask<JsonObject> sendTask;
+    private final GatewayTask<PresenceImpl> presenceTask;
     
     public CatnipShard(@Nonnull final Catnip catnip, @Nonnegative final int id, @Nonnegative final int limit,
                        @Nullable final Presence presence) {
@@ -144,12 +145,18 @@ public class CatnipShard extends AbstractVerticle {
         control = computeAddress(CONTROL, id);
         websocketQueue = computeAddress(WEBSOCKET_QUEUE, id);
         websocketSend = computeAddress(WEBSOCKET_SEND, id);
-        websocketPoll = computeAddress(WEBSOCKET_POLL, id);
         presenceUpdateQueue = computeAddress(PRESENCE_UPDATE_QUEUE, id);
         presenceUpdateRequest = computeAddress(PRESENCE_UPDATE_REQUEST, id);
-        presenceUpdatePoll = computeAddress(PRESENCE_UPDATE_POLL, id);
         voiceStateUpdateQueue = computeAddress(VOICE_STATE_UPDATE_QUEUE, id);
-        outgoingSend = "catnip:gateway:" + id + ":outgoing-send";
+        
+        sendTask = GatewayTask.gatewaySendTask(catnip, "catnip:gateway:" + id + ":outgoing-send", object -> {
+            catnip.eventBus().publish(websocketSend, object);
+        });
+        presenceTask = GatewayTask.gatewayPresenceTask(catnip, presenceUpdateRequest, update -> {
+            catnip.eventBus().publish(websocketSend,
+                    basePayload(GatewayOp.STATUS_UPDATE, update.asJson()));
+            currentPresence = update;
+        });
     }
     
     public static JsonObject basePayload(@Nonnull final GatewayOp op) {
@@ -177,28 +184,7 @@ public class CatnipShard extends AbstractVerticle {
                 eventBus.consumer(websocketSend, this::handleSocketSend),
                 eventBus.consumer(presenceUpdateQueue, this::handlePresenceUpdateQueue),
                 eventBus.consumer(presenceUpdateRequest, this::handlePresenceUpdate),
-                eventBus.consumer(presenceUpdatePoll, this::handlePresenceUpdatePoll),
-                eventBus.consumer(voiceStateUpdateQueue, this::handleVoiceStateUpdateQueue),
-                eventBus.consumer(websocketPoll, msg -> {
-                    if(socket != null) {
-                        while(!messageQueue.isEmpty()) {
-                            // We only do up to 110 messages/min, to allow for room just in case
-                            final ImmutablePair<Boolean, Long> check = catnip.gatewayRatelimiter()
-                                    .checkRatelimit(outgoingSend, 60_000L, 110);
-                            if(check.left) {
-                                // We got ratelimited, stop sending and try again in 1s
-                                if(!sendRateLimitRecheckQueued) {
-                                    sendRateLimitRecheckQueued = true;
-                                    catnip.vertx().setTimer(1000, e -> catnip.eventBus().publish(websocketPoll, null));
-                                }
-                                break;
-                            }
-                            sendRateLimitRecheckQueued = false;
-                            final JsonObject payload = messageQueue.pop();
-                            catnip.eventBus().publish(websocketSend, payload);
-                        }
-                    }
-                })
+                eventBus.consumer(voiceStateUpdateQueue, this::handleVoiceStateUpdateQueue)
         );
     }
     
@@ -216,31 +202,9 @@ public class CatnipShard extends AbstractVerticle {
             
             socketOpen = false;
         }
-        messageQueue.clear();
-        presenceQueue.clear();
         heartbeatAcked = true;
         
         catnip.vertx().cancelTimer(heartbeatTask.get());
-    }
-    
-    @SuppressWarnings("Duplicates")
-    private void handlePresenceUpdatePoll(final Message<JsonObject> presence) {
-        if(socket != null) {
-            while(!presenceQueue.isEmpty()) {
-                if(catnip.gatewayRatelimiter().checkRatelimit(presenceUpdateRequest, 60_000L, 5).left) {
-                    if(!presenceRateLimitRecheckQueued) {
-                        presenceRateLimitRecheckQueued = true;
-                        catnip.vertx().setTimer(1000, e -> catnip.eventBus().publish(presenceUpdatePoll, null));
-                    }
-                    break;
-                }
-                presenceRateLimitRecheckQueued = false;
-                final PresenceImpl update = presenceQueue.pop();
-                final JsonObject object = basePayload(GatewayOp.STATUS_UPDATE, update.asJson());
-                catnip.eventBus().publish(websocketSend, object);
-                currentPresence = update;
-            }
-        }
     }
     
     private void handleVoiceStateUpdateQueue(final Message<JsonObject> message) {
@@ -453,13 +417,11 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void handleSocketQueue(final Message<JsonObject> msg) {
-        messageQueue.addLast(msg.body());
-        catnip.eventBus().publish(websocketPoll, null);
+        sendTask.offer(msg.body());
     }
     
     private void handlePresenceUpdateQueue(final Message<PresenceImpl> msg) {
-        presenceQueue.addLast(msg.body());
-        catnip.eventBus().publish(presenceUpdatePoll, null);
+        presenceTask.offer(msg.body());
     }
     
     private void handleSocketSend(final Message<JsonObject> msg) {
