@@ -37,6 +37,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -58,7 +59,7 @@ import java.util.List;
 @Accessors(fluent = true, chain = true)
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class EmbedBuilder {
-    private final List<Field> fields = new ArrayList<>();
+    private final List<Field> fields = new ArrayList<>(25);
     // @formatter:off
     private String title;
     private String description;
@@ -289,6 +290,38 @@ public class EmbedBuilder {
             throw new IllegalStateException("Tried to add an embed field, but we're at the cap (25)!");
         }
         fields.add(field);
+        return this;
+    }
+    
+    /**
+     * Replaces the field associated with a specific index with a new field more efficiently.
+     * @param index The <b>non-negative and under-25</b> index of the field to replace.
+     * @param name The <b>non-null</b> name of the new field.
+     * @param value The <b>non-null</b> value of the new field.
+     * @param inline Whether or not the field should be inline.
+     * @return Itself.
+     */
+    @Nonnull
+    @CheckReturnValue
+    public EmbedBuilder replaceAtIndex(@Nonnegative final int index, @Nonnull final String name, @Nonnull final String value, final boolean inline) {
+        return replaceAtIndex(index, new FieldImpl(name, value, inline));
+    }
+    
+    /**
+     * Replaces the field associated with a specific index with a new field more efficiently.
+     * @param index The <b>non-negative and under-25</b> index of the field to replace.
+     * @param field The <b>non-null</b> {@link Field field} instance.
+     * @throws IndexOutOfBoundsException If the field index is smaller than 0, larger than 24 or larger or equal to the amount of fields added.
+     * @return Itself.
+     */
+    
+    @Nonnull
+    @CheckReturnValue
+    public EmbedBuilder replaceAtIndex(@Nonnegative final int index, @Nonnull final Field field) {
+        if (index < 0 || index > 24 || index >= fields.size()) {
+            throw new IndexOutOfBoundsException("Tried to set a field with an out-of-bounds index!");
+        }
+        fields.set(index, field);
         return this;
     }
     
