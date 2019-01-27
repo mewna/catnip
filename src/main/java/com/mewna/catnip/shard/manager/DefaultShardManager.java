@@ -34,6 +34,7 @@ import com.mewna.catnip.shard.ShardConnectState;
 import com.mewna.catnip.shard.ShardInfo;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.task.QueueTask;
+import com.mewna.catnip.util.task.ShardConnectTask;
 import io.vertx.core.eventbus.MessageConsumer;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -43,7 +44,6 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -58,10 +58,7 @@ import static com.mewna.catnip.shard.ShardControlMessage.CONNECT;
 @Accessors(fluent = true)
 public class DefaultShardManager extends AbstractShardManager {
     @Getter
-    private final QueueTask<Integer> connectQueue = new QueueTask<>(
-            new ConcurrentLinkedQueue<>(),
-            this::startShard
-    );
+    private final QueueTask<Integer> connectQueue = new ShardConnectTask(this::startShard);
     private final Collection<MessageConsumer> consumers = new HashSet<>();
     private final Map<Integer, String> shards = new ConcurrentHashMap<>();
     private final Collection<Integer> shardIds;
