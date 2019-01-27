@@ -38,6 +38,7 @@ import java.util.function.Function;
  * @author natanbc
  * @since 10/9/18.
  */
+@SuppressWarnings("WeakerAccess")
 public abstract class ArrayOfObjectPaginator<T, P extends ArrayOfObjectPaginator<T, P>> extends BasePaginator<T, JsonArray, P> {
     private final Function<JsonObject, T> mapper;
     

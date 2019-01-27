@@ -172,7 +172,7 @@ public class CachingBuffer extends AbstractBuffer {
                     bufferState.initialGuildChunkCount(guild, chunks, event);
                 } else {
                     emitter().emit(event);
-                    bufferState.recvGuild(guild);
+                    bufferState.receiveGuild(guild);
                     bufferState.replayGuild(guild);
                     // Replay all buffered events once we run out
                     if(bufferState.awaitedGuilds().isEmpty()) {
@@ -197,7 +197,7 @@ public class CachingBuffer extends AbstractBuffer {
                 emitter().emit(bufferState.guildCreate(guild));
                 // If we're finished chunking that guild, defer doing everything needed
                 // by a little bit to allow chunk caching to finish
-                bufferState.recvGuild(guild);
+                bufferState.receiveGuild(guild);
                 bufferState.replayGuild(guild);
                 // Replay all buffered events once we run out
                 if(bufferState.awaitedGuilds().isEmpty()) {
@@ -216,11 +216,11 @@ public class CachingBuffer extends AbstractBuffer {
             if(bufferState.awaitedGuilds().contains(guildId)) {
                 // If we have a guild id, and we have a guild being awaited,
                 // buffer the event
-                bufferState.recvGuildEvent(guildId, event);
+                bufferState.receiveGuildEvent(guildId, event);
             } else {
                 // If we're not awaiting the guild, it means that we're done
                 // buffering events for the guild - ie. all member chunks have
-                // been recv'd - and so we can emit
+                // been received - and so we can emit
                 cacheAndDispatch(eventType, payloadData, id, event);
             }
         } else {
@@ -271,11 +271,11 @@ public class CachingBuffer extends AbstractBuffer {
             awaitedGuilds.add(id);
         }
         
-        void recvGuild(final String id) {
+        void receiveGuild(final String id) {
             awaitedGuilds.remove(id);
         }
         
-        void recvGuildEvent(final String id, final JsonObject event) {
+        void receiveGuildEvent(final String id, final JsonObject event) {
             final Deque<JsonObject> queue = guildBuffers.computeIfAbsent(id, __ -> new ConcurrentLinkedDeque<>());
             queue.addLast(event);
         }

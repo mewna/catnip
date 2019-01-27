@@ -35,6 +35,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
 
+@SuppressWarnings("NullableProblems")
 public interface LongEntityMap<T> extends Map<Long, T> {
     @Nonnull
     @CheckReturnValue

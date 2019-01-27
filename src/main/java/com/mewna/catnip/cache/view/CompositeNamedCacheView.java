@@ -44,6 +44,7 @@ import java.util.function.Supplier;
  * @author natanbc
  * @since 12/15/18
  */
+@SuppressWarnings("WeakerAccess")
 public class CompositeNamedCacheView<T> extends CompositeCacheView<T> implements NamedCacheView<T> {
     protected final Function<T, String> nameFunction;
     

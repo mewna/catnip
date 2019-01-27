@@ -63,6 +63,7 @@ import java.util.concurrent.CompletionStage;
 
 import static io.vertx.core.http.HttpMethod.PUT;
 
+@SuppressWarnings("WeakerAccess")
 public abstract class AbstractRequester implements Requester {
     public static final RequestBody EMPTY_BODY = RequestBody.create(null, new byte[0]);
     
@@ -323,7 +324,7 @@ public abstract class AbstractRequester implements Requester {
         }
         
         @Override
-        public void writeTo(final BufferedSink sink) throws IOException {
+        public void writeTo(@Nonnull final BufferedSink sink) throws IOException {
             sink.write(buffer.getBytes());
         }
     }

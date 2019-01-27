@@ -32,6 +32,7 @@ package com.mewna.catnip.util.pagination;
  * @since 10/10/18
  */
 @FunctionalInterface
+@SuppressWarnings("WeakerAccess")
 public interface PaginationCallback<T> {
     /**
      * Accepts a fetched entity. Pagination stops if this method returns false.
@@ -40,5 +41,6 @@ public interface PaginationCallback<T> {
      *
      * @return True, if more entities should be paginated.
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean accept(T entity);
 }

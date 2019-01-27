@@ -28,7 +28,6 @@
 package com.mewna.catnip.shard.manager;
 
 import com.mewna.catnip.Catnip;
-import io.vertx.core.Future;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -132,6 +131,7 @@ public interface ShardManager {
     @Nonnull
     Catnip catnip();
     
+    @SuppressWarnings("UnusedReturnValue")
     @Nonnull
     ShardManager catnip(@Nonnull Catnip catnip);
     

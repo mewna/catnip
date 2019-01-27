@@ -77,6 +77,7 @@ public interface Emoji extends Snowflake {
      *
      * @return User who uploaded the emoji.
      */
+    @SuppressWarnings("SameReturnValue")
     @Nullable
     @CheckReturnValue
     User user();
@@ -95,6 +96,7 @@ public interface Emoji extends Snowflake {
      *
      * @return True if it's managed, false otherwise.
      */
+    @SuppressWarnings("SameReturnValue")
     @CheckReturnValue
     boolean managed();
     
@@ -104,6 +106,7 @@ public interface Emoji extends Snowflake {
      *
      * @return True if it's animated, false otherwise.
      */
+    @SuppressWarnings("SameReturnValue")
     @CheckReturnValue
     boolean animated();
     
@@ -112,6 +115,7 @@ public interface Emoji extends Snowflake {
      *
      * @return True if this emoji is custom, false otherwise.
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     @CheckReturnValue
     boolean custom();
     
