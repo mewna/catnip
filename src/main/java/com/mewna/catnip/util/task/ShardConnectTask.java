@@ -27,40 +27,20 @@
 
 package com.mewna.catnip.util.task;
 
-import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
-public abstract class QueueTask<T> {
-    protected final Queue<T> queue;
-    protected final Consumer<T> action;
-    
-    public QueueTask(@Nonnull final Queue<T> queue, @Nonnull final Consumer<T> action) {
-        this.queue = queue;
-        this.action = action;
+public class ShardConnectTask extends QueueTask<Integer> {
+    public ShardConnectTask(@Nonnull final Consumer<Integer> action) {
+        super(new ConcurrentLinkedQueue<>(), action);
     }
     
-    public abstract void run();
-    
-    @Nonnull
-    @CheckReturnValue
-    public Queue<T> queue() {
-        return queue;
-    }
-    
-    @CheckReturnValue
-    public int size() {
-        return queue.size();
-    }
-    
-    public boolean offer(final T item) {
-        boolean inserted = false;
-        if(!queue.contains(item)) {
-            queue.add(item);
-            inserted = true;
+    @Override
+    public void run() {
+        if(queue.isEmpty()) {
+            return;
         }
-        run();
-        return inserted;
+        action.accept(queue.poll());
     }
 }

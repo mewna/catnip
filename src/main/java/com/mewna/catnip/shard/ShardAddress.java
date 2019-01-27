@@ -49,12 +49,6 @@ public enum ShardAddress {
     WEBSOCKET_QUEUE("catnip:gateway:ws-outgoing:$id:queue"),
     
     /**
-     * Queue a new presence update. Used internally, but may be used if you're
-     * sure.
-     */
-    PRESENCE_UPDATE_QUEUE("catnip:gateway:ws-outgoing:$id:presence-update:queue"),
-    
-    /**
      * Request the provided presence to be queued, <strong>OR</strong> request
      * for the shard's current presence to sent as a response to the message.
      * <p>
