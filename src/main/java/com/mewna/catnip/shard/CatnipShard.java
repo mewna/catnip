@@ -124,7 +124,6 @@ public class CatnipShard extends AbstractVerticle {
     private final String control;
     private final String websocketQueue;
     private final String websocketSend;
-    private final String presenceUpdateQueue;
     private final String presenceUpdateRequest;
     private final String voiceStateUpdateQueue;
     
@@ -145,7 +144,6 @@ public class CatnipShard extends AbstractVerticle {
         control = computeAddress(CONTROL, id);
         websocketQueue = computeAddress(WEBSOCKET_QUEUE, id);
         websocketSend = computeAddress(WEBSOCKET_SEND, id);
-        presenceUpdateQueue = computeAddress(PRESENCE_UPDATE_QUEUE, id);
         presenceUpdateRequest = computeAddress(PRESENCE_UPDATE_REQUEST, id);
         voiceStateUpdateQueue = computeAddress(VOICE_STATE_UPDATE_QUEUE, id);
         
@@ -182,7 +180,6 @@ public class CatnipShard extends AbstractVerticle {
                 eventBus.consumer(control, this::handleControlMessage),
                 eventBus.consumer(websocketQueue, this::handleSocketQueue),
                 eventBus.consumer(websocketSend, this::handleSocketSend),
-                eventBus.consumer(presenceUpdateQueue, this::handlePresenceUpdateQueue),
                 eventBus.consumer(presenceUpdateRequest, this::handlePresenceUpdate),
                 eventBus.consumer(voiceStateUpdateQueue, this::handleVoiceStateUpdateQueue)
         );
@@ -208,7 +205,7 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void handleVoiceStateUpdateQueue(final Message<JsonObject> message) {
-        catnip.eventBus().send(websocketQueue, basePayload(GatewayOp.VOICE_STATE_UPDATE, message.body()));
+        sendTask.offer(basePayload(GatewayOp.VOICE_STATE_UPDATE, message.body()));
     }
     
     private void handlePresenceUpdate(final Message<PresenceImpl> message) {
@@ -217,7 +214,7 @@ public class CatnipShard extends AbstractVerticle {
             message.reply(currentPresence);
             return;
         }
-        catnip.eventBus().publish(presenceUpdateQueue, impl);
+        presenceTask.offer(impl);
     }
     
     private void handleControlMessage(final Message<ShardControlMessage> msg) {
@@ -418,10 +415,6 @@ public class CatnipShard extends AbstractVerticle {
     
     private void handleSocketQueue(final Message<JsonObject> msg) {
         sendTask.offer(msg.body());
-    }
-    
-    private void handlePresenceUpdateQueue(final Message<PresenceImpl> msg) {
-        presenceTask.offer(msg.body());
     }
     
     private void handleSocketSend(final Message<JsonObject> msg) {
