@@ -33,6 +33,7 @@ import com.mewna.catnip.shard.LifecycleEvent.Raw;
 import com.mewna.catnip.shard.ShardConnectState;
 import com.mewna.catnip.shard.ShardInfo;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
+import com.mewna.catnip.util.task.QueueTask;
 import io.vertx.core.eventbus.MessageConsumer;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -42,7 +43,7 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -57,7 +58,10 @@ import static com.mewna.catnip.shard.ShardControlMessage.CONNECT;
 @Accessors(fluent = true)
 public class DefaultShardManager extends AbstractShardManager {
     @Getter
-    private final Deque<Integer> connectQueue = new ConcurrentLinkedDeque<>();
+    private final QueueTask<Integer> connectQueue = new QueueTask<>(
+            new ConcurrentLinkedQueue<>(),
+            this::startShard
+    );
     private final Collection<MessageConsumer> consumers = new HashSet<>();
     private final Map<Integer, String> shards = new ConcurrentHashMap<>();
     private final Collection<Integer> shardIds;
@@ -133,27 +137,20 @@ public class DefaultShardManager extends AbstractShardManager {
     
     private void loadShards() {
         catnip().logAdapter().info("Booting {}(/{}) shards", shardIds.size(), shardCount);
-        connectQueue.addAll(shardIds);
-        poll();
+        shardIds.forEach(connectQueue::offer);
     }
     
-    private void poll() {
-        if(connectQueue.isEmpty()) {
-            catnip().vertx().setTimer(1000L, t -> poll());
-            return;
-        }
-        
+    private void startShard(final int id) {
         SafeVertxCompletableFuture.allOf(conditions().stream().map(ShardCondition::preshard).toArray(CompletableFuture[]::new))
                 .thenAccept(t -> {
-                    final int id = connectQueue.removeFirst();
                     undeploy(id);
                     catnip().logAdapter().info("Connecting shard {} (queue len {})", id, connectQueue.size());
-                    
+                
                     catnip().vertx().deployVerticle(new CatnipShard(catnip(), id, shardCount, catnip().initialPresence()), deployResult -> {
                         if(deployResult.failed()) {
                             catnip().logAdapter().error("Deploying shard {} failed, re-queueing!", id, deployResult.cause());
                             addToConnectQueue(id);
-                            poll();
+                            connectQueue.run();
                             return;
                         }
                         shards.put(id, deployResult.result());
@@ -162,8 +159,8 @@ public class DefaultShardManager extends AbstractShardManager {
                     });
                 })
                 .exceptionally(e -> {
-                    catnip().logAdapter().warn("Couldn't complete shard conditions, polling again in 1s", e);
-                    catnip().vertx().setTimer(1000L, t -> poll());
+                    catnip().logAdapter().warn("Couldn't complete shard conditions, trying again in 1s", e);
+                    catnip().vertx().setTimer(1000L, __ -> startShard(id));
                     return null;
                 });
     }
@@ -180,7 +177,7 @@ public class DefaultShardManager extends AbstractShardManager {
             if(result.failed()) {
                 catnip().logAdapter().error("Something went really wrong while trying to connect shard {}, re-queueing...", id, result.cause());
                 addToConnectQueue(id);
-                poll();
+                connectQueue.run();
                 return;
             }
             
@@ -188,20 +185,20 @@ public class DefaultShardManager extends AbstractShardManager {
             switch(state) {
                 case READY:
                     catnip().logAdapter().info("Connected shard {}(/{})", id, shardCount);
-                    catnip().vertx().setTimer(5500, t -> poll());
+                    catnip().vertx().setTimer(5500, t -> connectQueue.run());
                     break;
                 case RESUMED:
                     catnip().logAdapter().info("Resumed shard {}(/{})", id, shardCount);
-                    poll();
+                    connectQueue.run();
                     break;
                 case FAILED:
                     catnip().logAdapter().error("Failed connecting shard {}(/{}), re-queueing...", id, shardCount);
                     addToConnectQueue(id);
-                    poll();
+                    connectQueue.run();
                     break;
                 default:
                     catnip().logAdapter().error("This shouldn't happen, but we got unknown state for shard {}: {}", id, state);
-                    poll();
+                    connectQueue.run();
                     break;
             }
             conditions().forEach(e -> e.postshard(state));
@@ -210,9 +207,7 @@ public class DefaultShardManager extends AbstractShardManager {
     
     @Override
     public void addToConnectQueue(@Nonnegative final int shard) {
-        if(!connectQueue.contains(shard)) {
-            connectQueue.add(shard);
-        } else {
+        if(!connectQueue.offer(shard)) {
             catnip().logAdapter().warn("Ignoring duplicate queue for shard {}", shard);
         }
     }
