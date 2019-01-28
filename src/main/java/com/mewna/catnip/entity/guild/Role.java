@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.entity.guild;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.impl.RoleImpl;
@@ -119,6 +120,16 @@ public interface Role extends GuildEntity, Snowflake, Comparable<Role> {
      */
     @CheckReturnValue
     boolean mentionable();
+    
+    /**
+     * @return A mention for this role that can be sent in a message.
+     */
+    @Nonnull
+    @JsonIgnore
+    @CheckReturnValue
+    default String asMention() {
+        return "<@&" + id() + '>';
+    }
     
     @Override
     default int compareTo(@Nonnull final Role o) {
