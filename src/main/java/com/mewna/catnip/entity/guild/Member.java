@@ -224,4 +224,14 @@ public interface Member extends GuildEntity, Snowflake {
         final long actual = PermissionUtil.effectivePermissions(catnip(), this, channel);
         return (actual & needed) == needed;
     }
+    
+    /**
+     * @return A mention for this member that can be sent in a message.
+     */
+    @Nonnull
+    @JsonIgnore
+    @CheckReturnValue
+    default String asMention() {
+        return nick() != null ? "<@!" + id() + '>' : "<@" + id() + '>';
+    }
 }
