@@ -61,7 +61,7 @@ public interface Entity {
         
         if(!CatnipMeta.VERSION.equals(v)) {
             catnip.logAdapter().warn("Attempting to deserialize an entity from catnip v{}, but we're on v{}! " +
-                    "This may not work, so update your versions!");
+                    "This may not work, so update your versions!", v, CatnipMeta.VERSION);
         }
         
         final T t = data.mapTo(type);
