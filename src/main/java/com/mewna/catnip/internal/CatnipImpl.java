@@ -71,6 +71,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.security.auth.login.LoginException;
 import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -322,9 +323,12 @@ public class CatnipImpl implements Catnip {
             return fetchGatewayInfo()
                     .thenApply(gateway -> {
                         logAdapter.info("Token validated!");
-                        
+    
                         //this is actually needed because generics are dumb
                         return (Catnip) this;
+                    }).exceptionally(e -> {
+                        logAdapter.warn("Couldn't validate token!");
+                        throw new RuntimeException(e);
                     })
                     .toCompletableFuture();
         } else {
@@ -443,8 +447,12 @@ public class CatnipImpl implements Catnip {
     public CompletionStage<GatewayInfo> fetchGatewayInfo() {
         return rest.user().getGatewayBot()
                 .thenApply(g -> {
-                    gatewayInfo.set(g);
-                    return g;
+                    if(g.valid()) {
+                        gatewayInfo.set(g);
+                        return g;
+                    } else {
+                        throw new RuntimeException("Gateway info not valid! Is your token valid?");
+                    }
                 });
     }
 }

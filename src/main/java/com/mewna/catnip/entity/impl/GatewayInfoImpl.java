@@ -56,6 +56,7 @@ public class GatewayInfoImpl implements GatewayInfo, RequiresCatnip {
     private int totalSessions;
     private int remainingSessions;
     private long resetAfter;
+    private boolean valid;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {

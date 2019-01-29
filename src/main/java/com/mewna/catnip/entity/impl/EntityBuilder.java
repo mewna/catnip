@@ -1216,13 +1216,28 @@ public final class EntityBuilder {
     @CheckReturnValue
     public GatewayInfo createGatewayInfo(@Nonnull final JsonObject data) {
         final JsonObject sessionStartLimit = data.getJsonObject("session_start_limit");
-        return GatewayInfoImpl.builder()
-                .catnip(catnip)
-                .url(data.getString("url"))
-                .shards(data.getInteger("shards"))
-                .totalSessions(sessionStartLimit.getInteger("total"))
-                .remainingSessions(sessionStartLimit.getInteger("remaining"))
-                .resetAfter(sessionStartLimit.getLong("reset_after"))
-                .build();
+        if(data.containsKey("shards")) {
+            // Valid data
+            return GatewayInfoImpl.builder()
+                    .catnip(catnip)
+                    .valid(true)
+                    .url(data.getString("url"))
+                    .shards(data.getInteger("shards"))
+                    .totalSessions(sessionStartLimit.getInteger("total"))
+                    .remainingSessions(sessionStartLimit.getInteger("remaining"))
+                    .resetAfter(sessionStartLimit.getLong("reset_after"))
+                    .build();
+        } else {
+            // Invalid data - probably borked token
+            return GatewayInfoImpl.builder()
+                    .catnip(catnip)
+                    .valid(false)
+                    .url("")
+                    .shards(0)
+                    .totalSessions(0)
+                    .remainingSessions(0)
+                    .resetAfter(0)
+                    .build();
+        }
     }
 }
