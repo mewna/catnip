@@ -29,12 +29,15 @@ package com.mewna.catnip.entity.user;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
+import com.mewna.catnip.entity.channel.VoiceChannel;
+import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.impl.VoiceStateImpl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
 
 /**
  * A user's voice state.
@@ -58,6 +61,19 @@ public interface VoiceState extends Entity {
     }
     
     /**
+     * @return The guild this voice state is for, if applicable.
+     */
+    @Nullable
+    @CheckReturnValue
+    default Guild guild() {
+        final long id = guildIdAsLong();
+        if(id == 0) {
+            return null;
+        }
+        return catnip().cache().guild(guildIdAsLong());
+    }
+    
+    /**
      * @return The id of the guild this voice state is for, if applicable.
      */
     @CheckReturnValue
@@ -74,6 +90,21 @@ public interface VoiceState extends Entity {
             return null;
         }
         return Long.toUnsignedString(id);
+    }
+    
+    /**
+     * @return The guild this voice state is for, if applicable.
+     */
+    @Nullable
+    @CheckReturnValue
+    default VoiceChannel channel() {
+        final long guildId = guildIdAsLong();
+        final long id = channelIdAsLong();
+        if(guildId == 0 || id == 0) {
+            return null;
+        }
+        return Objects.requireNonNull(catnip().cache().channel(guildId, id),
+                "Channel not found. It may have been removed from the cache").asVoiceChannel();
     }
     
     /**
@@ -98,11 +129,27 @@ public interface VoiceState extends Entity {
     long userIdAsLong();
     
     /**
+     * @return The user who owns the voice state.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default User user() {
+        return Objects.requireNonNull(catnip().cache().user(userIdAsLong()),
+                "User not found. It may have been removed from the cache");
+    }
+    
+    /**
      * @return The guild member who owns the voice state.
      */
     @Nullable
     @CheckReturnValue
-    Member member();
+    default Member member() {
+        final long id = guildIdAsLong();
+        if(id == 0) {
+            return null;
+        }
+        return catnip().cache().member(id, userIdAsLong());
+    }
     
     /**
      * @return The session id for this voice state. Only known for the current
