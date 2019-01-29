@@ -72,16 +72,6 @@ public class VoiceStateImpl implements VoiceState, RequiresCatnip {
     @JsonProperty
     private boolean suppress;
     
-    @Nullable
-    @Override
-    public Member member() {
-        if(guildIdAsLong == 0) {
-            return null;
-        } else {
-            return catnip.cache().member(guildIdAsLong, userIdAsLong);
-        }
-    }
-    
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
     }
