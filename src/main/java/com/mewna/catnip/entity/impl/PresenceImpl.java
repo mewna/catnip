@@ -61,6 +61,7 @@ public class PresenceImpl implements Presence, RequiresCatnip {
     private OnlineStatus webStatus;
     private OnlineStatus desktopStatus;
     
+    @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
     }
@@ -140,8 +141,8 @@ public class PresenceImpl implements Presence, RequiresCatnip {
         private String match;
     }
     
-    @Getter
-    @Setter
+    @Getter(onMethod_ = @JsonProperty)
+    @Setter(onMethod_ = @JsonProperty)
     @Builder
     @Accessors(fluent = true)
     @NoArgsConstructor
