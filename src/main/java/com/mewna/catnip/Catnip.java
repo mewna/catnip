@@ -418,11 +418,31 @@ public interface Catnip {
     void openVoiceConnection(@Nonnull String guildId, @Nonnull String channelId);
     
     /**
+     * Opens a voice connection to the provided guild and channel. The connection is
+     * opened asynchronously, with
+     * {@link com.mewna.catnip.shard.DiscordEvent#VOICE_STATE_UPDATE VOICE_STATE_UPDATE} and
+     * {@link com.mewna.catnip.shard.DiscordEvent#VOICE_SERVER_UPDATE VOICE_SERVER_UPDATE}
+     * events being fired when the connection is opened.
+     *
+     * @param guildId   Guild to connect.
+     * @param channelId Channel to connect.
+     */
+    //TODO self mute/self deaf?
+    void openVoiceConnection(long guildId, long channelId);
+    
+    /**
      * Closes the voice connection on the specified guild.
      *
      * @param guildId Guild to disconnect.
      */
     void closeVoiceConnection(@Nonnull String guildId);
+    
+    /**
+     * Closes the voice connection on the specified guild.
+     *
+     * @param guildId Guild to disconnect.
+     */
+    void closeVoiceConnection(long guildId);
     
     /**
      * Get the presence for the specified shard.

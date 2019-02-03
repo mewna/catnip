@@ -71,7 +71,6 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.security.auth.login.LoginException;
 import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -252,6 +251,11 @@ public class CatnipImpl implements Catnip {
     }
     
     @Override
+    public void openVoiceConnection(final long guildId, final long channelId) {
+        openVoiceConnection(String.valueOf(guildId), String.valueOf(channelId));
+    }
+    
+    @Override
     public void closeVoiceConnection(@Nonnull final String guildId) {
         eventBus().send(computeAddress(VOICE_STATE_UPDATE_QUEUE, shardIdFor(guildId)),
                 new JsonObject()
@@ -259,6 +263,11 @@ public class CatnipImpl implements Catnip {
                         .putNull("channel_id")
                         .put("self_mute", false)
                         .put("self_deaf", false));
+    }
+    
+    @Override
+    public void closeVoiceConnection(final long guildId) {
+        closeVoiceConnection(String.valueOf(guildId));
     }
     
     @Override
