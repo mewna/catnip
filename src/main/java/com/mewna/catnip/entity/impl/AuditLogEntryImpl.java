@@ -36,7 +36,6 @@ import com.mewna.catnip.entity.guild.audit.ActionType;
 import com.mewna.catnip.entity.guild.audit.AuditLogChange;
 import com.mewna.catnip.entity.guild.audit.AuditLogEntry;
 import com.mewna.catnip.entity.guild.audit.OptionalEntryInfo;
-import com.mewna.catnip.entity.misc.ApplicationOwner;
 import com.mewna.catnip.entity.user.User;
 import lombok.*;
 import lombok.experimental.Accessors;
