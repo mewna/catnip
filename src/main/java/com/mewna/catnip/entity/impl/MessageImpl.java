@@ -36,6 +36,7 @@ import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageType;
+import com.mewna.catnip.entity.misc.ApplicationOwner;
 import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
 import lombok.*;
@@ -87,6 +88,9 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
+        ((UserImpl) author).catnip(catnip);
+        mentionedUsers.forEach(user -> ((UserImpl) user).catnip(catnip));
+        ((MemberImpl) member).catnip(catnip);
     }
     
     @Nonnull

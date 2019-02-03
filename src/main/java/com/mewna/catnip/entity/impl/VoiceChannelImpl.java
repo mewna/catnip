@@ -65,6 +65,7 @@ public class VoiceChannelImpl implements VoiceChannel, RequiresCatnip {
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
+        overrides.forEach(override -> ((PermissionOverrideImpl) override).catnip(catnip));
     }
     
     @Override
