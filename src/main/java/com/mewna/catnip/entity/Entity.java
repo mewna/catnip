@@ -33,6 +33,7 @@ import com.mewna.catnip.util.CatnipMeta;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Field;
 
 /**
  * A single entity in catnip.
