@@ -63,7 +63,9 @@ public class ReadyImpl implements Ready, RequiresCatnip {
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
-        ((UserImpl) user).catnip(catnip);
+        if(user instanceof RequiresCatnip) {
+            ((RequiresCatnip) user).catnip(catnip);
+        }
     }
     
     @Override
