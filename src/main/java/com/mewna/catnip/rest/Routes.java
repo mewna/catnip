@@ -170,10 +170,8 @@ public final class Routes {
                 throw new IllegalStateException("This route takes no major params!");
             }
             final String majorParamString = '{' + majorParam + '}';
-            final String ratelimitRoute = baseRoute.substring(0, baseRoute.indexOf(majorParamString))
-                    + value;
             return new Route(method, baseRoute.replace(majorParamString, value), null,
-                    ratelimitRoute);
+                    baseRoute.replace(majorParamString, value));
         }
         
         @Nonnull

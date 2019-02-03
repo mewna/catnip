@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeUnit;
 
 import static io.vertx.core.http.HttpMethod.PUT;
 
@@ -181,6 +182,9 @@ public abstract class AbstractRequester implements Requester {
         if(request.request().needsToken()) {
             requestBuilder.header("Authorization", "Bot " + catnip.token());
         }
+        // Update request start time as soon as possible
+        // See QueuedRequest docs for why we do this
+        request.start = System.nanoTime();
         client().newCall(requestBuilder.build()).enqueue(new Callback() {
             @Override
             public void onFailure(@Nonnull final Call call, @Nonnull final IOException e) {
@@ -192,7 +196,8 @@ public abstract class AbstractRequester implements Requester {
                 //ensure we close it no matter what
                 try(final Response response = resp) {
                     final int code = response.code();
-                    final long requestEnd = System.currentTimeMillis();
+                    // See QueuedRequest docs for why we do this
+                    final long requestEnd = System.nanoTime();
                     if(response.body() == null) {
                         context.runOnContext(__ ->
                                 handleResponse(code, requestEnd, null, response.headers(), request));
@@ -208,22 +213,11 @@ public abstract class AbstractRequester implements Requester {
         });
     }
     
-    protected void handleResponse(final int statusCode, final long requestEnd,
-                                final Buffer body, final Headers headers,
-                                @Nonnull final QueuedRequest request) {
+    protected void handleResponse(final int statusCode, final long requestEnd, final Buffer body, final Headers headers,
+                                  @Nonnull final QueuedRequest request) {
         final OutboundRequest r = request.request();
-        final long latency;
-        final String serverTime = headers.get("Date");
-        if(serverTime != null) {
-            // Parse date header
-            // According to JDA, this is the correct format for it.
-            // I trust them more than I trust my own attempts to get it right.
-            // https://github.com/DV8FromTheWorld/JDA/blob/2e771e053d6ad94c1aebddbfe72e0aa519d9b3ed/src/main/java/net/dv8tion/jda/core/requests/ratelimit/BotRateLimiter.java#L150-L166
-            latency = OffsetDateTime.parse(serverTime, DateTimeFormatter.RFC_1123_DATE_TIME)
-                    .toInstant().toEpochMilli() - requestEnd;
-        } else {
-            latency = 0;
-        }
+        // See QueuedRequest docs for why we do this
+        final long latency = TimeUnit.NANOSECONDS.toMillis(requestEnd - request.start);
         if(statusCode == 429) {
             catnip.logAdapter().error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
                     r.route().baseRoute(),
@@ -290,13 +284,13 @@ public abstract class AbstractRequester implements Requester {
             rateLimiter.updateLimit(route, 1);
             rateLimiter.updateReset(route, System.currentTimeMillis()
                     //somehow adding the latency here actually makes 429s happen?????
-                    // + latency
+                    + latency
                     + 250);
         } else {
             if(rateLimitReset != null) {
                 //there used to be a + latency here but, just like above, it also made 429s more likely
                 //to happen. don't ask me why.
-                rateLimiter.updateReset(route, Long.parseLong(rateLimitReset) * 1000);
+                rateLimiter.updateReset(route, (Long.parseLong(rateLimitReset) * 1000) + latency);
             }
     
             if(rateLimitLimit != null) {
@@ -338,6 +332,11 @@ public abstract class AbstractRequester implements Requester {
         protected final CompletableFuture<ResponsePayload> future;
         protected final Bucket bucket;
         protected int failedAttempts;
+        // This is kinda weird, I know.
+        // Basically, using the date header for ratelimits (seems to?) give us
+        // meme ratelimit issues. We resolve this by measuring the request
+        // as precisely as we can with System#nanoTime() and go from there.
+        private long start;
         
         protected void failed() {
             failedAttempts++;
