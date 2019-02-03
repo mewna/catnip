@@ -59,5 +59,9 @@ public class EmojiUpdateImpl implements EmojiUpdate, RequiresCatnip {
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
+        for(final CustomEmoji emoji : emojis) {
+            if(emoji instanceof RequiresCatnip)
+                ((RequiresCatnip) emoji).catnip(catnip);
+        }
     }
 }
