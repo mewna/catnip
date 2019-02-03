@@ -62,6 +62,7 @@ public class GroupDMChannelImpl implements GroupDMChannel, RequiresCatnip {
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
+        recipients.forEach(recipient -> ((UserImpl) recipient).catnip(catnip));
     }
     
     @Override

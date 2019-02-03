@@ -87,6 +87,9 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
+        ((UserImpl) author).catnip(catnip);
+        mentionedUsers.forEach(user -> ((UserImpl) user).catnip(catnip));
+        ((MemberImpl) member).catnip(catnip);
     }
     
     @Nonnull

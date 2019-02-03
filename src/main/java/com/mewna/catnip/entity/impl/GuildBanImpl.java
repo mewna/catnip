@@ -58,5 +58,6 @@ public class GuildBanImpl implements GuildBan, RequiresCatnip {
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
+        ((UserImpl) user).catnip(catnip);
     }
 }

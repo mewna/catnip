@@ -66,9 +66,7 @@ public class ApplicationOwnerImpl implements ApplicationOwner, RequiresCatnip {
     }
     
     @Override
-    public void catnip(@Nonnull final Catnip catnip) {
-        this.catnip = catnip;
-    }
+    public void catnip(@Nonnull final Catnip catnip) { this.catnip = catnip; }
     
     @Override
     @CheckReturnValue

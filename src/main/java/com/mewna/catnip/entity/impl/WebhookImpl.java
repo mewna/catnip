@@ -63,6 +63,7 @@ public class WebhookImpl implements Webhook, RequiresCatnip {
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
+        ((UserImpl) user).catnip(catnip);
     }
     
     @Override
