@@ -183,6 +183,7 @@ public abstract class AbstractRequester implements Requester {
             requestBuilder.header("Authorization", "Bot " + catnip.token());
         }
         // Update request start time as soon as possible
+        // See QueuedRequest docs for why we do this
         request.start = System.nanoTime();
         client().newCall(requestBuilder.build()).enqueue(new Callback() {
             @Override
@@ -195,7 +196,8 @@ public abstract class AbstractRequester implements Requester {
                 //ensure we close it no matter what
                 try(final Response response = resp) {
                     final int code = response.code();
-                    final long requestEnd = System.nanoTime(); // System.currentTimeMillis();
+                    // See QueuedRequest docs for why we do this
+                    final long requestEnd = System.nanoTime();
                     if(response.body() == null) {
                         context.runOnContext(__ ->
                                 handleResponse(code, requestEnd, null, response.headers(), request));
@@ -214,20 +216,7 @@ public abstract class AbstractRequester implements Requester {
     protected void handleResponse(final int statusCode, final long requestEnd, final Buffer body, final Headers headers,
                                   @Nonnull final QueuedRequest request) {
         final OutboundRequest r = request.request();
-        /*
-        final long latency;
-        final String serverTime = headers.get("Date");
-        if(serverTime != null) {
-            // Parse date header
-            // According to JDA, this is the correct format for it.
-            // I trust them more than I trust my own attempts to get it right.
-            // https://github.com/DV8FromTheWorld/JDA/blob/2e771e053d6ad94c1aebddbfe72e0aa519d9b3ed/src/main/java/net/dv8tion/jda/core/requests/ratelimit/BotRateLimiter.java#L150-L166
-            latency = OffsetDateTime.parse(serverTime, DateTimeFormatter.RFC_1123_DATE_TIME)
-                    .toInstant().toEpochMilli() - requestEnd;
-        } else {
-            latency = 0;
-        }
-        */
+        // See QueuedRequest docs for why we do this
         final long latency = TimeUnit.NANOSECONDS.toMillis(requestEnd - request.start);
         if(statusCode == 429) {
             catnip.logAdapter().error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
@@ -343,6 +332,10 @@ public abstract class AbstractRequester implements Requester {
         protected final CompletableFuture<ResponsePayload> future;
         protected final Bucket bucket;
         protected int failedAttempts;
+        // This is kinda weird, I know.
+        // Basically, using the date header for ratelimits (seems to?) give us
+        // meme ratelimit issues. We resolve this by measuring the request
+        // as precisely as we can with System#nanoTime() and go from there.
         private long start;
         
         protected void failed() {
