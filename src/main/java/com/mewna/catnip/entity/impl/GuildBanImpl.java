@@ -32,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.guild.GuildBan;
+import com.mewna.catnip.entity.misc.ApplicationOwner;
 import com.mewna.catnip.entity.user.User;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -58,5 +59,6 @@ public class GuildBanImpl implements GuildBan, RequiresCatnip {
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
+        ((UserImpl) user).catnip(catnip);
     }
 }

@@ -63,6 +63,7 @@ public class CategoryImpl implements Category, RequiresCatnip {
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
+        overrides.forEach(override -> ((PermissionOverrideImpl) override).catnip(catnip));
     }
     
     @Override

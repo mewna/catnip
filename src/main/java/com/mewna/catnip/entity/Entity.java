@@ -33,6 +33,7 @@ import com.mewna.catnip.util.CatnipMeta;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Field;
 
 /**
  * A single entity in catnip.
@@ -72,6 +73,7 @@ public interface Entity {
         }
         return t;
     }
+    
     
     /**
      * Returns the catnip instance associated with this entity.
