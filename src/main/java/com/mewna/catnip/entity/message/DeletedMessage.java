@@ -29,7 +29,6 @@ package com.mewna.catnip.entity.message;
 
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.Channel;
-import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.GuildEntity;
 
 import javax.annotation.CheckReturnValue;
