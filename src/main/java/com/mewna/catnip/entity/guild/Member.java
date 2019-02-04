@@ -30,6 +30,7 @@ package com.mewna.catnip.entity.guild;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.cache.view.CacheView;
+import com.mewna.catnip.entity.Mentionable;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.channel.GuildChannel;
@@ -56,7 +57,7 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("unused")
 @JsonDeserialize(as = MemberImpl.class)
-public interface Member extends GuildEntity, Snowflake {
+public interface Member extends GuildEntity, Snowflake, Mentionable {
     /**
      * The user equivalent to this member.
      */
