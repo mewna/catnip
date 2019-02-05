@@ -332,7 +332,7 @@ public class CatnipImpl implements Catnip {
             return fetchGatewayInfo()
                     .thenApply(gateway -> {
                         logAdapter.info("Token validated!");
-    
+                        
                         //this is actually needed because generics are dumb
                         return (Catnip) this;
                     }).exceptionally(e -> {
@@ -393,6 +393,7 @@ public class CatnipImpl implements Catnip {
             codec(GuildImpl.class);
             codec(GatewayGuildBanImpl.class);
             codec(EmojiUpdateImpl.class);
+            codec(UnavailableGuildImpl.class);
             
             // Roles
             codec(RoleImpl.class);
