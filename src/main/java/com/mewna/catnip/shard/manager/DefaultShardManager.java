@@ -69,22 +69,18 @@ public class DefaultShardManager extends AbstractShardManager {
         this(0, new ArrayList<>());
     }
     
-    @SuppressWarnings({"WeakerAccess", "unused"})
     public DefaultShardManager(@Nonnegative final int customShardCount) {
         this(IntStream.range(0, customShardCount));
     }
     
-    @SuppressWarnings("WeakerAccess")
     public DefaultShardManager(final IntStream shardIds) {
         this(shardIds.boxed().collect(Collectors.toList()));
     }
     
-    @SuppressWarnings("WeakerAccess")
     public DefaultShardManager(final Iterable<Integer> shardIds) {
         this(iterableLength(shardIds), iterableToCollection(shardIds));
     }
     
-    @SuppressWarnings("WeakerAccess")
     public DefaultShardManager(@Nonnegative final int shardCount, final Collection<Integer> shardIds) {
         this.shardCount = shardCount;
         this.shardIds = new ArrayList<>(shardIds);
@@ -142,7 +138,7 @@ public class DefaultShardManager extends AbstractShardManager {
                 .thenAccept(t -> {
                     undeploy(id);
                     catnip().logAdapter().info("Connecting shard {} (queue len {})", id, connectQueue.size());
-                
+                    
                     catnip().vertx().deployVerticle(new CatnipShard(catnip(), id, shardCount, catnip().initialPresence()), deployResult -> {
                         if(deployResult.failed()) {
                             catnip().logAdapter().error("Deploying shard {} failed, re-queueing!", id, deployResult.cause());
@@ -157,7 +153,7 @@ public class DefaultShardManager extends AbstractShardManager {
                 })
                 .exceptionally(e -> {
                     catnip().logAdapter().warn("Couldn't complete shard conditions, trying again in 1s", e);
-                    catnip().vertx().setTimer(1000L, __ -> startShard(id));
+                    catnip().vertx().setTimer(1000L, t -> startShard(id));
                     return null;
                 });
     }
@@ -170,7 +166,21 @@ public class DefaultShardManager extends AbstractShardManager {
     }
     
     private void connectShard(final int id) {
+        final String deploymentId = shards.get(id);
+        
+        if(deploymentId == null) {
+            catnip().logAdapter().error("Cannot find deployment ID of shard {}, re-queueing...", id);
+            addToConnectQueue(id);
+            connectQueue.run();
+            return;
+        }
+        
         catnip().eventBus().<ShardConnectState>send(computeAddress(CONTROL, id), CONNECT, result -> {
+            // ignore the reply if deployment ID differs.
+            if(!deploymentId.equals(shards.get(id))) {
+                return;
+            }
+            
             if(result.failed()) {
                 catnip().logAdapter().error("Something went really wrong while trying to connect shard {}, re-queueing...", id, result.cause());
                 addToConnectQueue(id);
