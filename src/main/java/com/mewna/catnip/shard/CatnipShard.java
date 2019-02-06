@@ -272,7 +272,11 @@ public class CatnipShard extends AbstractVerticle {
                     catnip.eventBus().publish(Raw.CONNECTED, shardInfo());
                     socket.frameHandler(this::handleSocketFrame)
                             .closeHandler(this::handleSocketClose)
-                            .exceptionHandler(t -> catnip.logAdapter().error("Shard {}/{}: Exception in Websocket", id, limit, t));
+                            .exceptionHandler(t -> {
+                                this.socketOpen = false;
+                                catnip.logAdapter().error("Shard {}/{}: Exception in Websocket", id, limit, t);
+                            })
+                            .endHandler(end -> this.socketOpen = false);
                 },
                 failure -> {
                     socket = null;
@@ -439,7 +443,11 @@ public class CatnipShard extends AbstractVerticle {
                     // Zombie
                     catnip.logAdapter().warn("Shard {}/{}: Heartbeat zombie, queueing reconnect!", id, limit);
                     closedByClient = true;
-                    socket.close();
+                    try {
+                        socket.close();
+                    } catch(IllegalStateException e) {
+                        // we need to just ignore the exception, vert.x is really retarded
+                    }
                     return;
                 }
                 catnip.eventBus().publish(websocketSend, basePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().seqnum(id)));
@@ -512,22 +520,18 @@ public class CatnipShard extends AbstractVerticle {
     }
     
     private void handleInvalidSession(final JsonObject event) {
-        if(event.getBoolean("d")) {
-            // Can resume
-            if(socket != null && socketOpen) {
-                socket.close();
-            }
-        } else {
+        if(!event.getBoolean("d")) {
             catnip.logAdapter().info("Session invalidated (OP 9), clearing shard data and reconnecting");
-            // Can't resume, clear old data
-            if(socket != null) {
-                if(socketOpen) {
-                    socket.close();
-                }
-                catnip.cacheWorker().invalidateShard(id);
-                catnip.sessionManager().clearSession(id);
-                catnip.sessionManager().clearSeqnum(id);
-            }
+            
+            catnip.cacheWorker().invalidateShard(id);
+            catnip.sessionManager().clearSession(id);
+            catnip.sessionManager().clearSeqnum(id);
+
+            closedByClient = true;
+        }
+    
+        if(socket != null && socketOpen) {
+            socket.close();
         }
     }
     
