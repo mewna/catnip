@@ -115,8 +115,11 @@ class CodecTest {
         test(applicationInfo);
     }
     
-    //TODO ApplicationOwner
-    
+    @Test
+    void applicationOwner() {
+        test(applicationOwner(mockNip()));
+    }
+
     @Test
     void auditLogChange() {
         final AuditLogChange auditLogChange = AuditLogChangeImpl.builder()
@@ -299,7 +302,7 @@ class CodecTest {
                 .catnip(catnip)
                 .avatar("kotlin4lyfe.jpeg")
                 .bot(true)
-                .discriminator("0000")
+                .discriminator("0001")
                 .idAsLong(randomPositiveLong())
                 .username("Kotlin4Lyfe")
                 .build();
