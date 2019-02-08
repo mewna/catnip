@@ -28,8 +28,10 @@
 package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.guild.GuildEntity;
+import com.mewna.catnip.entity.impl.WebhookImpl;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageOptions;
@@ -56,6 +58,7 @@ import java.util.concurrent.CompletionStage;
  * @since 9/15/18
  */
 @SuppressWarnings("unused")
+@JsonDeserialize(as = WebhookImpl.class)
 public interface Webhook extends GuildEntity, Snowflake {
     /**
      * Send a message to this channel with the specified content.
