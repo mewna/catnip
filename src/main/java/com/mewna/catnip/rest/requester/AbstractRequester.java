@@ -38,6 +38,7 @@ import com.mewna.catnip.util.CatnipMeta;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import io.vertx.core.Context;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -253,7 +255,10 @@ public abstract class AbstractRequester implements Requester {
                 final JsonObject errors = payload.object();
                 errors.forEach(e -> {
                     //noinspection unchecked
-                    failures.put(e.getKey(), (List<String>) e.getValue());
+                    final JsonArray arr = (JsonArray) e.getValue();
+                    final List<String> errorStrings = new ArrayList<>();
+                    arr.stream().map(element -> (String) element).forEach(errorStrings::add);
+                    failures.put(e.getKey(), errorStrings);
                 });
                 request.future().completeExceptionally(new RestPayloadException(failures));
                 updateBucket(r.route(), headers, -1, latency);
@@ -280,15 +285,10 @@ public abstract class AbstractRequester implements Requester {
         
         if(route.method() == PUT && route.baseRoute().contains("/reactions/")) {
             rateLimiter.updateLimit(route, 1);
-            rateLimiter.updateReset(route, System.currentTimeMillis()
-                    //somehow adding the latency here actually makes 429s happen?????
-                    + latency
-                    + 250);
+            rateLimiter.updateReset(route, System.currentTimeMillis() + latency + 250);
         } else {
             if(rateLimitReset != null) {
-                //there used to be a + latency here but, just like above, it also made 429s more likely
-                //to happen. don't ask me why.
-                rateLimiter.updateReset(route, (Long.parseLong(rateLimitReset) * 1000) + latency);
+                rateLimiter.updateReset(route, Long.parseLong(rateLimitReset) * 1000 + latency);
             }
     
             if(rateLimitLimit != null) {
