@@ -30,6 +30,7 @@ package com.mewna.catnip.rest.requester;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
+import com.mewna.catnip.rest.ResponseException;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestPayloadException;
 import com.mewna.catnip.rest.Routes.Route;
@@ -261,6 +262,16 @@ public abstract class AbstractRequester implements Requester {
                     failures.put(e.getKey(), errorStrings);
                 });
                 request.future().completeExceptionally(new RestPayloadException(failures));
+                updateBucket(r.route(), headers, -1, latency);
+                request.bucket().requestDone();
+            } else if(statusCode > 400) {
+                final JsonObject response = payload.object();
+                final String message = response.getString("message", "No message.");
+                final int code = response.getInteger("code", -1);
+                final ResponseException exception = code != -1
+                        ? new ResponseException(String.format("HTTP Error Code: %d | JSON Message: %s | JSON Error Code: %d", statusCode, message, code))
+                        : new ResponseException(String.format("HTTP Error Code: %d | JSON Message: %s", statusCode, message));
+                request.future().completeExceptionally(exception);
                 updateBucket(r.route(), headers, -1, latency);
                 request.bucket().requestDone();
             } else {
