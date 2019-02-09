@@ -152,7 +152,7 @@ public class DefaultShardManager extends AbstractShardManager {
                     });
                 })
                 .exceptionally(e -> {
-                    catnip().logAdapter().warn("Couldn't complete shard conditions, trying again in 1s", e);
+                    catnip().logAdapter().debug("Couldn't complete shard conditions, trying again in 1s", e);
                     catnip().vertx().setTimer(1000L, t -> startShard(id));
                     return null;
                 });
