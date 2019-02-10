@@ -31,8 +31,37 @@ package com.mewna.catnip.rest;
  * @author SamOphis
  * @since 02/09/2019
  */
-public class ResponseException extends Exception {
-    public ResponseException(final String message) {
-        super(message);
+public class ResponseException extends RuntimeException {
+    private final int statusCode;
+    private final String statusMessage;
+    private final int jsonCode;
+    private final String jsonMessage;
+    
+    public ResponseException(final int statusCode, final String statusMessage, final int jsonCode, final String jsonMessage) {
+        super(
+                jsonCode == -1 ?
+                        String.format("HTTP Error Code: %d | JSON Message: %s", statusCode, jsonMessage) :
+                        String.format("HTTP Error Code: %d | JSON Message: %s | JSON Error Code: %d", statusCode, jsonMessage, jsonCode)
+        );
+        this.statusCode = statusCode;
+        this.statusMessage = statusMessage;
+        this.jsonCode = jsonCode;
+        this.jsonMessage = jsonMessage;
+    }
+    
+    public int statusCode() {
+        return statusCode;
+    }
+    
+    public String statusMessage() {
+        return statusMessage;
+    }
+    
+    public int jsonCode() {
+        return jsonCode;
+    }
+    
+    public String jsonMessage() {
+        return jsonMessage;
     }
 }
