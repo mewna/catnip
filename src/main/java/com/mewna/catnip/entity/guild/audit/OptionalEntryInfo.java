@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.entity.guild.audit;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.mewna.catnip.entity.Entity;
 
 /**
@@ -34,5 +35,6 @@ import com.mewna.catnip.entity.Entity;
  * @since 10/07/18
  */
 @SuppressWarnings({"WeakerAccess", "InterfaceMayBeAnnotatedFunctional"})
+@JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS)
 public interface OptionalEntryInfo extends Entity {
 }

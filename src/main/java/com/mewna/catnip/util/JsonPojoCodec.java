@@ -32,12 +32,17 @@ import com.mewna.catnip.entity.RequiresCatnip;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageCodec;
 import io.vertx.core.json.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author amy
  * @since 9/2/18.
  */
 public class JsonPojoCodec<T> implements MessageCodec<T, T> {
+    
+    private static final Logger log = LoggerFactory.getLogger(JsonPojoCodec.class);
+    
     private final Catnip catnip;
     private final Class<T> type;
     
@@ -57,7 +62,9 @@ public class JsonPojoCodec<T> implements MessageCodec<T, T> {
     @Override
     public T decodeFromWire(final int pos, final Buffer buffer) {
         final int length = buffer.getInt(pos);
-        final JsonObject data = new JsonObject(buffer.getString(pos + 4, pos + 4 + length));
+        final String rawJson = buffer.getString(pos + 4, pos + 4 + length);
+        log.trace("Received raw json {}", rawJson);
+        final JsonObject data = new JsonObject(rawJson);
         final T object = data.mapTo(type);
         if(object instanceof RequiresCatnip) {
             ((RequiresCatnip) object).catnip(catnip);

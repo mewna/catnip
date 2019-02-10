@@ -217,6 +217,7 @@ public interface Presence {
         String match();
     }
     
+    @JsonDeserialize(as = ActivityImpl.class)
     interface Activity {
         @Nonnull
         @CheckReturnValue
