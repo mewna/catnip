@@ -53,6 +53,8 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -214,8 +216,16 @@ public abstract class AbstractRequester implements Requester {
     
     protected void handleResponse(@Nonnull final Route route, final int statusCode, final long requestEnd,
                                   final Buffer body, final Headers headers, @Nonnull final QueuedRequest request) {
-        // See QueuedRequest docs for why we do this
-        final long latency = TimeUnit.NANOSECONDS.toMillis(requestEnd - request.start);
+        final String dateHeader = headers.get("Date");
+        final long requestDuration = TimeUnit.NANOSECONDS.toMillis(requestEnd - request.start);
+        final long latency;
+        if(dateHeader == null) {
+            latency = requestDuration;
+        } else {
+            final long now =System.currentTimeMillis();
+            final long date = OffsetDateTime.parse(dateHeader, DateTimeFormatter.RFC_1123_DATE_TIME).toInstant().toEpochMilli();
+            latency = now - date + requestDuration;
+        }
         if(statusCode == 429) {
             catnip.logAdapter().error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
                     route.baseRoute(),
@@ -332,10 +342,6 @@ public abstract class AbstractRequester implements Requester {
         protected final CompletableFuture<ResponsePayload> future;
         protected final Bucket bucket;
         protected int failedAttempts;
-        // This is kinda weird, I know.
-        // Basically, using the date header for ratelimits (seems to?) give us
-        // meme ratelimit issues. We resolve this by measuring the request
-        // as precisely as we can with System#nanoTime() and go from there.
         private long start;
         
         protected void failed() {
