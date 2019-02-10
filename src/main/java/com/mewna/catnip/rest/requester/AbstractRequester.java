@@ -218,13 +218,13 @@ public abstract class AbstractRequester implements Requester {
                                   final Buffer body, final Headers headers, @Nonnull final QueuedRequest request) {
         final String dateHeader = headers.get("Date");
         final long requestDuration = TimeUnit.NANOSECONDS.toMillis(requestEnd - request.start);
-        final long latency;
+        final long timeDifference;
         if(dateHeader == null) {
-            latency = requestDuration;
+            timeDifference = requestDuration;
         } else {
             final long now = System.currentTimeMillis();
             final long date = OffsetDateTime.parse(dateHeader, DateTimeFormatter.RFC_1123_DATE_TIME).toInstant().toEpochMilli();
-            latency = now - date + requestDuration;
+            timeDifference = now - date + requestDuration;
         }
         if(statusCode == 429) {
             catnip.logAdapter().error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
@@ -239,10 +239,10 @@ public abstract class AbstractRequester implements Requester {
             }
             final long retryAfter = Long.parseLong(retry);
             if(Boolean.parseBoolean(headers.get("X-RateLimit-Global"))) {
-                rateLimiter.updateGlobalRateLimit(System.currentTimeMillis() + latency + retryAfter);
+                rateLimiter.updateGlobalRateLimit(System.currentTimeMillis() + timeDifference + retryAfter);
             } else {
                 updateBucket(route, headers,
-                        System.currentTimeMillis() + latency + retryAfter, latency);
+                        System.currentTimeMillis() + timeDifference + retryAfter, timeDifference);
             }
             rateLimiter.requestExecution(route)
                     .thenRun(() -> executeRequest(request))
@@ -268,11 +268,11 @@ public abstract class AbstractRequester implements Requester {
                     failures.put(e.getKey(), errorStrings);
                 });
                 request.future().completeExceptionally(new RestPayloadException(failures));
-                updateBucket(route, headers, -1, latency);
+                updateBucket(route, headers, -1, timeDifference);
                 request.bucket().requestDone();
             } else {
                 request.future().complete(payload);
-                updateBucket(route, headers, -1, latency);
+                updateBucket(route, headers, -1, timeDifference);
                 request.bucket().requestDone();
             }
         }
@@ -280,14 +280,14 @@ public abstract class AbstractRequester implements Requester {
     }
     
     protected void updateBucket(@Nonnull final Route route, @Nonnull final Headers headers,
-                              final long retryAfter, final long latency) {
+                                final long retryAfter, final long timeDifference) {
         final String rateLimitReset = headers.get("X-RateLimit-Reset");
         final String rateLimitRemaining = headers.get("X-RateLimit-Remaining");
         final String rateLimitLimit = headers.get("X-RateLimit-Limit");
         
         catnip.logAdapter().trace(
-                "Updating headers for {} ({}): remaining = {}, limit = {}, reset = {}, retryAfter = {}, latency = {}",
-                route, route.ratelimitKey(), rateLimitRemaining, rateLimitLimit, rateLimitReset, retryAfter, latency
+                "Updating headers for {} ({}): remaining = {}, limit = {}, reset = {}, retryAfter = {}, timeDifference = {}",
+                route, route.ratelimitKey(), rateLimitRemaining, rateLimitLimit, rateLimitReset, retryAfter, timeDifference
         );
         
         if(retryAfter > 0) {
@@ -297,10 +297,10 @@ public abstract class AbstractRequester implements Requester {
         
         if(route.method() == PUT && route.baseRoute().contains("/reactions/")) {
             rateLimiter.updateLimit(route, 1);
-            rateLimiter.updateReset(route, System.currentTimeMillis() + latency + 250);
+            rateLimiter.updateReset(route, System.currentTimeMillis() + timeDifference + 250);
         } else {
             if(rateLimitReset != null) {
-                rateLimiter.updateReset(route, Long.parseLong(rateLimitReset) * 1000 + latency);
+                rateLimiter.updateReset(route, Long.parseLong(rateLimitReset) * 1000 + timeDifference);
             }
     
             if(rateLimitLimit != null) {
