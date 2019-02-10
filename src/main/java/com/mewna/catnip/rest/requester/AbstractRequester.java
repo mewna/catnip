@@ -53,6 +53,8 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -121,7 +123,6 @@ public abstract class AbstractRequester implements Requester {
     
     protected void handleRouteBufferBodySend(@Nonnull final Route finalRoute, @Nonnull final QueuedRequest request) {
         try {
-            @SuppressWarnings("UnnecessarilyQualifiedInnerClassAccess")
             final MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
             final OutboundRequest r = request.request();
             for(int index = 0; index < r.buffers().size(); index++) {
@@ -200,12 +201,12 @@ public abstract class AbstractRequester implements Requester {
                     final long requestEnd = System.nanoTime();
                     if(response.body() == null) {
                         context.runOnContext(__ ->
-                                handleResponse(code, requestEnd, null, response.headers(), request));
+                                handleResponse(route, code, requestEnd, null, response.headers(), request));
                     } else {
                         final byte[] bodyBytes = response.body().bytes();
                     
                         context.runOnContext(__ ->
-                                handleResponse(code, requestEnd, Buffer.buffer(bodyBytes),
+                                handleResponse(route, code, requestEnd, Buffer.buffer(bodyBytes),
                                         response.headers(), request));
                     }
                 }
@@ -213,14 +214,21 @@ public abstract class AbstractRequester implements Requester {
         });
     }
     
-    protected void handleResponse(final int statusCode, final long requestEnd, final Buffer body, final Headers headers,
-                                  @Nonnull final QueuedRequest request) {
-        final OutboundRequest r = request.request();
-        // See QueuedRequest docs for why we do this
-        final long latency = TimeUnit.NANOSECONDS.toMillis(requestEnd - request.start);
+    protected void handleResponse(@Nonnull final Route route, final int statusCode, final long requestEnd,
+                                  final Buffer body, final Headers headers, @Nonnull final QueuedRequest request) {
+        final String dateHeader = headers.get("Date");
+        final long requestDuration = TimeUnit.NANOSECONDS.toMillis(requestEnd - request.start);
+        final long timeDifference;
+        if(dateHeader == null) {
+            timeDifference = requestDuration;
+        } else {
+            final long now = System.currentTimeMillis();
+            final long date = OffsetDateTime.parse(dateHeader, DateTimeFormatter.RFC_1123_DATE_TIME).toInstant().toEpochMilli();
+            timeDifference = now - date + requestDuration;
+        }
         if(statusCode == 429) {
             catnip.logAdapter().error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
-                    r.route().baseRoute(),
+                    route.baseRoute(),
                     headers.get("X-Ratelimit-Global"),
                     headers.get("X-Ratelimit-Limit"),
                     headers.get("X-Ratelimit-Reset")
@@ -231,12 +239,12 @@ public abstract class AbstractRequester implements Requester {
             }
             final long retryAfter = Long.parseLong(retry);
             if(Boolean.parseBoolean(headers.get("X-RateLimit-Global"))) {
-                rateLimiter.updateGlobalRateLimit(System.currentTimeMillis() + latency + retryAfter);
+                rateLimiter.updateGlobalRateLimit(System.currentTimeMillis() + timeDifference + retryAfter);
             } else {
-                updateBucket(r.route(), headers,
-                        System.currentTimeMillis() + latency + retryAfter, latency);
+                updateBucket(route, headers,
+                        System.currentTimeMillis() + timeDifference + retryAfter, timeDifference);
             }
-            rateLimiter.requestExecution(r.route())
+            rateLimiter.requestExecution(route)
                     .thenRun(() -> executeRequest(request))
                     .exceptionally(e -> {
                         request.future().completeExceptionally(e);
@@ -246,7 +254,7 @@ public abstract class AbstractRequester implements Requester {
             ResponsePayload payload = new ResponsePayload(body);
             for(final Extension extension : catnip.extensionManager().extensions()) {
                 for(final CatnipHook hook : extension.hooks()) {
-                    payload = hook.rawRestReceiveDataHook(r.route(), payload);
+                    payload = hook.rawRestReceiveDataHook(route, payload);
                 }
             }
             // We got a 400, meaning there's errors. Fail the request with this and move on.
@@ -254,18 +262,17 @@ public abstract class AbstractRequester implements Requester {
                 final Map<String, List<String>> failures = new HashMap<>();
                 final JsonObject errors = payload.object();
                 errors.forEach(e -> {
-                    //noinspection unchecked
                     final JsonArray arr = (JsonArray) e.getValue();
                     final List<String> errorStrings = new ArrayList<>();
                     arr.stream().map(element -> (String) element).forEach(errorStrings::add);
                     failures.put(e.getKey(), errorStrings);
                 });
                 request.future().completeExceptionally(new RestPayloadException(failures));
-                updateBucket(r.route(), headers, -1, latency);
+                updateBucket(route, headers, -1, timeDifference);
                 request.bucket().requestDone();
             } else {
                 request.future().complete(payload);
-                updateBucket(r.route(), headers, -1, latency);
+                updateBucket(route, headers, -1, timeDifference);
                 request.bucket().requestDone();
             }
         }
@@ -273,10 +280,15 @@ public abstract class AbstractRequester implements Requester {
     }
     
     protected void updateBucket(@Nonnull final Route route, @Nonnull final Headers headers,
-                              final long retryAfter, final long latency) {
+                                final long retryAfter, final long timeDifference) {
         final String rateLimitReset = headers.get("X-RateLimit-Reset");
         final String rateLimitRemaining = headers.get("X-RateLimit-Remaining");
         final String rateLimitLimit = headers.get("X-RateLimit-Limit");
+        
+        catnip.logAdapter().trace(
+                "Updating headers for {} ({}): remaining = {}, limit = {}, reset = {}, retryAfter = {}, timeDifference = {}",
+                route, route.ratelimitKey(), rateLimitRemaining, rateLimitLimit, rateLimitReset, retryAfter, timeDifference
+        );
         
         if(retryAfter > 0) {
             rateLimiter.updateRemaining(route, 0);
@@ -285,10 +297,10 @@ public abstract class AbstractRequester implements Requester {
         
         if(route.method() == PUT && route.baseRoute().contains("/reactions/")) {
             rateLimiter.updateLimit(route, 1);
-            rateLimiter.updateReset(route, System.currentTimeMillis() + latency + 250);
+            rateLimiter.updateReset(route, System.currentTimeMillis() + timeDifference + 250);
         } else {
             if(rateLimitReset != null) {
-                rateLimiter.updateReset(route, Long.parseLong(rateLimitReset) * 1000 + latency);
+                rateLimiter.updateReset(route, Long.parseLong(rateLimitReset) * 1000 + timeDifference);
             }
     
             if(rateLimitLimit != null) {
@@ -330,10 +342,6 @@ public abstract class AbstractRequester implements Requester {
         protected final CompletableFuture<ResponsePayload> future;
         protected final Bucket bucket;
         protected int failedAttempts;
-        // This is kinda weird, I know.
-        // Basically, using the date header for ratelimits (seems to?) give us
-        // meme ratelimit issues. We resolve this by measuring the request
-        // as precisely as we can with System#nanoTime() and go from there.
         private long start;
         
         protected void failed() {

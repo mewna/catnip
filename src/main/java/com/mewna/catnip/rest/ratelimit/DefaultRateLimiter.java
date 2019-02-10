@@ -29,7 +29,6 @@ package com.mewna.catnip.rest.ratelimit;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.rest.Routes.Route;
-import io.vertx.core.Vertx;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
@@ -43,19 +42,21 @@ public class DefaultRateLimiter implements RateLimiter {
     private static final CompletionStage<Void> EXECUTE_NOW = CompletableFuture.completedFuture(null);
     private final Map<String, BucketContainer> buckets = new ConcurrentHashMap<>();
     private volatile long globalRateLimitReset;
-    private Vertx vertx;
+    private Catnip catnip;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
-        vertx = catnip.vertx();
+        this.catnip = catnip;
     }
     
     @Nonnull
     @Override
     public CompletionStage<Void> requestExecution(@Nonnull final Route route) {
+        catnip.logAdapter().trace("Requested execution for route {} (ratelimit key = {})", route, route.ratelimitKey());
         final BucketContainer container = buckets.computeIfAbsent(route.ratelimitKey(), __ -> new BucketContainer());
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized(container) {
+            catnip.logAdapter().trace("{} remaining requests", container.remaining);
             if(container.remaining > 0) {
                 container.remaining--;
                 return EXECUTE_NOW;
@@ -111,14 +112,17 @@ public class DefaultRateLimiter implements RateLimiter {
     }
     
     private synchronized long retryAfter(final long bucketReset) {
-        return Math.max(1, Math.max(bucketReset, globalRateLimitReset) - System.currentTimeMillis());
+        catnip.logAdapter().trace("Calculating retry timestamp (bucket = {}, global = {})", bucketReset, globalRateLimitReset);
+        final long retry = Math.max(1, Math.max(bucketReset, globalRateLimitReset) - System.currentTimeMillis());
+        catnip.logAdapter().trace("Retrying in {} ms", retry);
+        return retry;
     }
     
     private void queueExecution(@Nonnull final BucketContainer container) {
         if(container.timerId != null) {
             return;
         }
-        container.timerId = vertx.setTimer(retryAfter(container.reset), __ -> {
+        container.timerId = catnip.vertx().setTimer(retryAfter(container.reset), __ -> {
             synchronized(container) {
                 container.timerId = null;
                 final long now = System.currentTimeMillis();

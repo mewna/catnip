@@ -193,13 +193,23 @@ public final class Routes {
         public Route withQueryString(final String qs) {
             return new Route(method, baseRoute + qs, majorParam, ratelimitKey);
         }
-        
+    
+        @Override
+        public int hashCode() {
+            return baseRoute.hashCode();
+        }
+    
         @Override
         public boolean equals(final Object o) {
             if(!(o instanceof Route)) {
                 return false;
             }
             return baseRoute.equalsIgnoreCase(((Route) o).baseRoute);
+        }
+    
+        @Override
+        public String toString() {
+            return method + " " + baseRoute;
         }
     }
     // @formatter:on
