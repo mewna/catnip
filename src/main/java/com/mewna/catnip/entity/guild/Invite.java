@@ -27,10 +27,12 @@
 
 package com.mewna.catnip.entity.guild;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
 import com.mewna.catnip.entity.guild.Guild.VerificationLevel;
+import com.mewna.catnip.entity.impl.InviteImpl;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
@@ -102,6 +104,7 @@ public interface Invite extends Entity {
         return catnip().rest().invite().deleteInvite(code());
     }
     
+    @JsonDeserialize(as = InviteImpl.InviterImpl.class)
     interface Inviter extends Snowflake {
         @Nonnull
         @CheckReturnValue
@@ -139,6 +142,7 @@ public interface Invite extends Entity {
         String effectiveAvatarUrl();
     }
     
+    @JsonDeserialize(as = InviteImpl.InviteGuildImpl.class)
     interface InviteGuild extends Snowflake {
         @Nonnull
         @CheckReturnValue
@@ -181,6 +185,7 @@ public interface Invite extends Entity {
         }
     }
     
+    @JsonDeserialize(as = InviteImpl.InviteChannelImpl.class)
     interface InviteChannel extends Snowflake {
         @Nonnull
         @CheckReturnValue

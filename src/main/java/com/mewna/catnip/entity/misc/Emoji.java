@@ -27,8 +27,11 @@
 
 package com.mewna.catnip.entity.misc;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.guild.Guild;
+import com.mewna.catnip.entity.impl.CustomEmojiImpl;
 import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.CheckReturnValue;
@@ -41,6 +44,7 @@ import java.util.List;
  * @author natanbc
  * @since 9/5/18.
  */
+@JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS)
 public interface Emoji extends Snowflake {
     /**
      * ID of this emoji, or null if it has no ID.
@@ -167,6 +171,7 @@ public interface Emoji extends Snowflake {
     @CheckReturnValue
     boolean is(@Nonnull String emoji);
     
+    @JsonDeserialize(as = CustomEmojiImpl.class)
     interface CustomEmoji extends Emoji {
         @Override
         @Nonnull
