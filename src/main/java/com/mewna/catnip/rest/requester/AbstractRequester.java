@@ -254,6 +254,9 @@ public abstract class AbstractRequester implements Requester {
                         return null;
                     });
         } else {
+            updateBucket(route, headers, -1, timeDifference);
+            request.bucket().requestDone();
+            
             ResponsePayload payload = new ResponsePayload(body);
             for(final Extension extension : catnip.extensionManager().extensions()) {
                 for(final CatnipHook hook : extension.hooks()) {
@@ -262,8 +265,6 @@ public abstract class AbstractRequester implements Requester {
             }
             // We got a 400, meaning there's errors. Fail the request with this and move on.
             if(statusCode == 400) {
-                updateBucket(route, headers, -1, timeDifference);
-                request.bucket().requestDone();
                 final Map<String, List<String>> failures = new HashMap<>();
                 final JsonObject errors = payload.object();
                 errors.forEach(e -> {
@@ -277,14 +278,10 @@ public abstract class AbstractRequester implements Requester {
                 final JsonObject response = payload.object();
                 final String message = response.getString("message", "No message.");
                 final int code = response.getInteger("code", -1);
-                updateBucket(route, headers, -1, timeDifference);
-                request.bucket().requestDone();
                 request.future().completeExceptionally(
                         new ResponseException(statusCode, statusMessage, code, message)
                 );
             } else {
-                updateBucket(route, headers, -1, timeDifference);
-                request.bucket().requestDone();
                 request.future().complete(payload);
             }
         }
