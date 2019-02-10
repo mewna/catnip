@@ -198,16 +198,17 @@ public abstract class AbstractRequester implements Requester {
                 //ensure we close it no matter what
                 try(final Response response = resp) {
                     final int code = response.code();
+                    final String message = response.message();
                     // See QueuedRequest docs for why we do this
                     final long requestEnd = System.nanoTime();
                     if(response.body() == null) {
                         context.runOnContext(__ ->
-                                handleResponse(route, code, requestEnd, null, response.headers(), request));
+                                handleResponse(route, code, message, requestEnd, null, response.headers(), request));
                     } else {
                         final byte[] bodyBytes = response.body().bytes();
                     
                         context.runOnContext(__ ->
-                                handleResponse(route, code, requestEnd, Buffer.buffer(bodyBytes),
+                                handleResponse(route, code, message, requestEnd, Buffer.buffer(bodyBytes),
                                         response.headers(), request));
                     }
                 }
@@ -215,8 +216,9 @@ public abstract class AbstractRequester implements Requester {
         });
     }
     
-    protected void handleResponse(@Nonnull final Route route, final int statusCode, final long requestEnd,
-                                  final Buffer body, final Headers headers, @Nonnull final QueuedRequest request) {
+    protected void handleResponse(@Nonnull final Route route, final int statusCode, @Nonnull final String statusMessage,
+                                  final long requestEnd, final Buffer body, final Headers headers,
+                                  @Nonnull final QueuedRequest request) {
         final String dateHeader = headers.get("Date");
         final long requestDuration = TimeUnit.NANOSECONDS.toMillis(requestEnd - request.start);
         final long timeDifference;
@@ -260,6 +262,8 @@ public abstract class AbstractRequester implements Requester {
             }
             // We got a 400, meaning there's errors. Fail the request with this and move on.
             if(statusCode == 400) {
+                updateBucket(route, headers, -1, timeDifference);
+                request.bucket().requestDone();
                 final Map<String, List<String>> failures = new HashMap<>();
                 final JsonObject errors = payload.object();
                 errors.forEach(e -> {
@@ -269,22 +273,19 @@ public abstract class AbstractRequester implements Requester {
                     failures.put(e.getKey(), errorStrings);
                 });
                 request.future().completeExceptionally(new RestPayloadException(failures));
-                updateBucket(route, headers, -1, timeDifference);
-                request.bucket().requestDone();
             } else if(statusCode > 400) {
                 final JsonObject response = payload.object();
                 final String message = response.getString("message", "No message.");
                 final int code = response.getInteger("code", -1);
-                final ResponseException exception = code != -1
-                        ? new ResponseException(String.format("HTTP Error Code: %d | JSON Message: %s | JSON Error Code: %d", statusCode, message, code))
-                        : new ResponseException(String.format("HTTP Error Code: %d | JSON Message: %s", statusCode, message));
-                request.future().completeExceptionally(exception);
-                updateBucket(r.route(), headers, -1, latency);
-                request.bucket().requestDone();
-            } else {
-                request.future().complete(payload);
                 updateBucket(route, headers, -1, timeDifference);
                 request.bucket().requestDone();
+                request.future().completeExceptionally(
+                        new ResponseException(statusCode, statusMessage, code, message)
+                );
+            } else {
+                updateBucket(route, headers, -1, timeDifference);
+                request.bucket().requestDone();
+                request.future().complete(payload);
             }
         }
         
