@@ -515,7 +515,7 @@ public class RestGuild extends RestHandler {
             builder.append("before", beforeEntryId);
         }
         
-        if(limit <= 100) {
+        if(limit <= 100 && limit >= 1) {
             builder.append("limit", Integer.toString(limit));
         }
         
