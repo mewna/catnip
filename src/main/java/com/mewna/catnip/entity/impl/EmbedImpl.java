@@ -79,8 +79,8 @@ public class EmbedImpl implements Embed, Timestamped {
         return parseTimestamp(timestamp);
     }
     
-    @Getter
-    @Setter
+    @Getter(onMethod_ = @JsonProperty)
+    @Setter(onMethod_ = @JsonProperty)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -91,8 +91,8 @@ public class EmbedImpl implements Embed, Timestamped {
         private String proxyIconUrl;
     }
     
-    @Getter
-    @Setter
+    @Getter(onMethod_ = @JsonProperty)
+    @Setter(onMethod_ = @JsonProperty)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -102,8 +102,8 @@ public class EmbedImpl implements Embed, Timestamped {
         private boolean inline;
     }
     
-    @Getter
-    @Setter
+    @Getter(onMethod_ = @JsonProperty)
+    @Setter(onMethod_ = @JsonProperty)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -113,8 +113,8 @@ public class EmbedImpl implements Embed, Timestamped {
         private String proxyIconUrl;
     }
     
-    @Getter
-    @Setter
+    @Getter(onMethod_ = @JsonProperty)
+    @Setter(onMethod_ = @JsonProperty)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -125,8 +125,8 @@ public class EmbedImpl implements Embed, Timestamped {
         private int width;
     }
     
-    @Getter
-    @Setter
+    @Getter(onMethod_ = @JsonProperty)
+    @Setter(onMethod_ = @JsonProperty)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -135,8 +135,8 @@ public class EmbedImpl implements Embed, Timestamped {
         private String url;
     }
     
-    @Getter
-    @Setter
+    @Getter(onMethod_ = @JsonProperty)
+    @Setter(onMethod_ = @JsonProperty)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -147,8 +147,8 @@ public class EmbedImpl implements Embed, Timestamped {
         private int width;
     }
     
-    @Getter
-    @Setter
+    @Getter(onMethod_ = @JsonProperty)
+    @Setter(onMethod_ = @JsonProperty)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor

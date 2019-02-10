@@ -86,8 +86,8 @@ public class InviteImpl implements Invite, RequiresCatnip {
         return String.format("Invite (%s)", code);
     }
     
-    @Getter
-    @Setter
+    @Getter(onMethod_ = @JsonProperty)
+    @Setter(onMethod_ = @JsonProperty)
     @Builder
     @Accessors(fluent = true)
     @NoArgsConstructor
@@ -163,8 +163,8 @@ public class InviteImpl implements Invite, RequiresCatnip {
         }
     }
     
-    @Getter
-    @Setter
+    @Getter(onMethod_ = @JsonProperty)
+    @Setter(onMethod_ = @JsonProperty)
     @Builder
     @Accessors(fluent = true)
     @NoArgsConstructor
@@ -212,8 +212,8 @@ public class InviteImpl implements Invite, RequiresCatnip {
         }
     }
     
-    @Getter
-    @Setter
+    @Getter(onMethod_ = @JsonProperty)
+    @Setter(onMethod_ = @JsonProperty)
     @Builder
     @Accessors(fluent = true)
     @NoArgsConstructor

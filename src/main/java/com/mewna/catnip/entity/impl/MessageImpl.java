@@ -141,8 +141,8 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
         return String.format("Message (%s)", content);
     }
     
-    @Getter
-    @Setter
+    @Getter(onMethod_ = @JsonProperty)
+    @Setter(onMethod_ = @JsonProperty)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -178,8 +178,8 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
         }
     }
     
-    @Getter
-    @Setter
+    @Getter(onMethod_ = @JsonProperty)
+    @Setter(onMethod_ = @JsonProperty)
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
