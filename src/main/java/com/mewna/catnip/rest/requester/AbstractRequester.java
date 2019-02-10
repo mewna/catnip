@@ -222,7 +222,7 @@ public abstract class AbstractRequester implements Requester {
         if(dateHeader == null) {
             latency = requestDuration;
         } else {
-            final long now =System.currentTimeMillis();
+            final long now = System.currentTimeMillis();
             final long date = OffsetDateTime.parse(dateHeader, DateTimeFormatter.RFC_1123_DATE_TIME).toInstant().toEpochMilli();
             latency = now - date + requestDuration;
         }
