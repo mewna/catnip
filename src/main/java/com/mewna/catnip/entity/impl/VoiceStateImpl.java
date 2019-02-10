@@ -31,13 +31,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.user.VoiceState;
 import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * @author amy

@@ -28,10 +28,12 @@
 package com.mewna.catnip.entity.message;
 
 import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.guild.GuildEntity;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Fired when a message is deleted.
@@ -54,4 +56,13 @@ public interface DeletedMessage extends GuildEntity, Snowflake {
      */
     @CheckReturnValue
     long channelIdAsLong();
+    
+    /**
+     * @return The channel entity where it was deleted.
+     */
+    @Nullable
+    @CheckReturnValue
+    default Channel channel() {
+        return catnip().cache().channel(guildId(), channelId());
+    }
 }

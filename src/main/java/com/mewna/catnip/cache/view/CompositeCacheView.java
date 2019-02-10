@@ -102,7 +102,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
     @Nonnull
     @Override
     public Collection<T> find(@Nonnull final Predicate<? super T> filter) {
-        final Collection<T> collection = new ArrayList<>();
+        final Collection<T> collection = new HashSet<>();
         for(final CacheView<T> c : sources) {
             c.find(filter, () -> collection);
         }

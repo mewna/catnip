@@ -69,6 +69,9 @@ public class AuditLogEntryImpl implements AuditLogEntry, RequiresCatnip {
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
+        if(user instanceof RequiresCatnip) {
+            ((RequiresCatnip) user).catnip(catnip);
+        }
     }
     
     @Override

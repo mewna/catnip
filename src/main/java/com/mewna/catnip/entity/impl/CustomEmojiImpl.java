@@ -65,6 +65,9 @@ public class CustomEmojiImpl implements CustomEmoji, RequiresCatnip {
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
+        if(user instanceof RequiresCatnip) {
+            ((RequiresCatnip) user).catnip(catnip);
+        }
     }
     
     @Override
