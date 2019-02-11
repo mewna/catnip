@@ -27,7 +27,9 @@
 
 package com.mewna.catnip.entity.misc;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.impl.ApplicationInfoImpl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -39,6 +41,7 @@ import java.util.List;
  * @author amy
  * @since 10/17/18.
  */
+@JsonDeserialize(as = ApplicationInfoImpl.class)
 public interface ApplicationInfo extends Snowflake {
     /**
      * @return The application's name.

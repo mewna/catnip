@@ -27,7 +27,9 @@
 
 package com.mewna.catnip.entity.guild.audit;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.impl.AuditLogEntryImpl;
 import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.CheckReturnValue;
@@ -40,6 +42,7 @@ import java.util.List;
  * @since 10/07/18
  */
 @SuppressWarnings("unused")
+@JsonDeserialize(as = AuditLogEntryImpl.class)
 public interface AuditLogEntry extends Snowflake {
     @Nullable
     @CheckReturnValue
