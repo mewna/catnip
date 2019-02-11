@@ -27,7 +27,9 @@
 
 package com.mewna.catnip.entity.misc;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.guild.Invite;
+import com.mewna.catnip.entity.impl.CreatedInviteImpl;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -37,6 +39,7 @@ import java.time.OffsetDateTime;
  * @author natanbc
  * @since 9/14/18
  */
+@JsonDeserialize(as = CreatedInviteImpl.class)
 public interface CreatedInvite extends Invite {
     @Nonnegative
     int uses();

@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.impl.CustomEmojiImpl;
+import com.mewna.catnip.entity.impl.UnicodeEmojiImpl;
 import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.CheckReturnValue;
@@ -254,6 +255,7 @@ public interface Emoji extends Snowflake {
         }
     }
     
+    @JsonDeserialize(as = UnicodeEmojiImpl.class)
     interface UnicodeEmoji extends Emoji {
         @Override
         default String id() {

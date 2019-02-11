@@ -27,7 +27,9 @@
 
 package com.mewna.catnip.entity.voice;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.guild.GuildEntity;
+import com.mewna.catnip.entity.impl.VoiceServerUpdateImpl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -38,6 +40,7 @@ import javax.annotation.Nonnull;
  * @author amy
  * @since 10/6/18.
  */
+@JsonDeserialize(as = VoiceServerUpdateImpl.class)
 public interface VoiceServerUpdate extends GuildEntity {
     /**
      * @return The token used for voice connections.

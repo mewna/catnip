@@ -51,6 +51,7 @@ import java.util.concurrent.CompletionStage;
  * @since 9/14/18
  */
 @SuppressWarnings("unused")
+@JsonDeserialize(as = InviteImpl.class)
 public interface Invite extends Entity {
     /**
      * @return The code for this invite.
