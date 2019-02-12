@@ -184,6 +184,9 @@ public abstract class AbstractRequester implements Requester {
         if(request.request().needsToken()) {
             requestBuilder.header("Authorization", "Bot " + catnip.token());
         }
+        if(request.request().reason() != null) {
+            requestBuilder.addHeader(Requester.REASON_HEADER, request.request().reason());
+        }
         // Update request start time as soon as possible
         // See QueuedRequest docs for why we do this
         request.start = System.nanoTime();
