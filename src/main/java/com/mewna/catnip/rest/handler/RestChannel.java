@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.concurrent.CompletionStage;
 
 import static com.mewna.catnip.util.JsonUtil.mapObjectContents;
+import static com.mewna.catnip.util.Utils.encodeUTF8;
 
 /**
  * @author amy
@@ -187,17 +188,29 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public CompletionStage<Void> deleteMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
+    public CompletionStage<Void> deleteMessage(@Nonnull final String channelId, @Nonnull final String messageId,
+                                               @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.DELETE_MESSAGE.withMajorParam(channelId),
-                ImmutableMap.of("message.id", messageId))).thenApply(__ -> null);
+                ImmutableMap.of("message.id", messageId)).reason(reason)).thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    public CompletionStage<Void> deleteMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
+        return deleteMessage(channelId, messageId, null);
+    }
+    
+    @Nonnull
+    public CompletionStage<Void> deleteMessages(@Nonnull final String channelId, @Nonnull final List<String> messageIds,
+                                                @Nullable final String reason) {
+        return catnip().requester()
+                .queue(new OutboundRequest(Routes.BULK_DELETE_MESSAGES.withMajorParam(channelId),
+                        ImmutableMap.of(), new JsonObject().put("messages", new JsonArray(messageIds)), reason))
+                .thenApply(__ -> null);
     }
     
     @Nonnull
     public CompletionStage<Void> deleteMessages(@Nonnull final String channelId, @Nonnull final List<String> messageIds) {
-        return catnip().requester()
-                .queue(new OutboundRequest(Routes.BULK_DELETE_MESSAGES.withMajorParam(channelId),
-                        ImmutableMap.of(), new JsonObject().put("messages", new JsonArray(messageIds))))
-                .thenApply(__ -> null);
+        return deleteMessages(channelId, messageIds, null);
     }
     
     @Nonnull
@@ -387,31 +400,46 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<Channel> deleteChannel(@Nonnull final String channelId) {
-        return deleteChannelRaw(channelId).thenApply(entityBuilder()::createChannel);
+    public CompletionStage<Channel> deleteChannel(@Nonnull final String channelId, @Nullable final String reason) {
+        return deleteChannelRaw(channelId, reason).thenApply(entityBuilder()::createChannel);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonObject> deleteChannelRaw(@Nonnull final String channelId) {
+    public CompletionStage<Channel> deleteChannel(@Nonnull final String channelId) {
+        return deleteChannel(channelId, null);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> deleteChannelRaw(@Nonnull final String channelId, @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.DELETE_CHANNEL.withMajorParam(channelId),
-                ImmutableMap.of()))
+                ImmutableMap.of()).reason(reason))
                 .thenApply(ResponsePayload::object);
     }
     
     @Nonnull
     @CheckReturnValue
     public CompletionStage<CreatedInvite> createInvite(@Nonnull final String channelId,
+                                                       @Nullable final InviteCreateOptions options,
+                                                       @Nullable final String reason) {
+        return createInviteRaw(channelId, options, reason).thenApply(entityBuilder()::createCreatedInvite);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<CreatedInvite> createInvite(@Nonnull final String channelId,
                                                        @Nullable final InviteCreateOptions options) {
-        return createInviteRaw(channelId, options).thenApply(entityBuilder()::createCreatedInvite);
+        return createInvite(channelId, options, null);
     }
     
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonObject> createInviteRaw(@Nonnull final String channelId,
-                                                       @Nullable final InviteCreateOptions options) {
+                                                       @Nullable final InviteCreateOptions options,
+                                                       @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.CREATE_CHANNEL_INVITE.withMajorParam(channelId),
-                ImmutableMap.of(), (options == null ? InviteCreateOptions.create() : options).toJson()))
+                ImmutableMap.of(), (options == null ? InviteCreateOptions.create() : options).toJson(), reason))
                 .thenApply(ResponsePayload::object);
     }
     
@@ -431,48 +459,89 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     public CompletionStage<GuildChannel> modifyChannel(@Nonnull final String channelId,
+                                                       @Nonnull final ChannelEditFields fields,
+                                                       @Nullable final String reason) {
+        return modifyChannelRaw(channelId, fields, reason).thenApply(entityBuilder()::createGuildChannel);
+    }
+    
+    @Nonnull
+    public CompletionStage<GuildChannel> modifyChannel(@Nonnull final String channelId,
                                                        @Nonnull final ChannelEditFields fields) {
-        return modifyChannelRaw(channelId, fields).thenApply(entityBuilder()::createGuildChannel);
+        return modifyChannel(channelId, fields, null);
     }
     
     @Nonnull
     public CompletionStage<JsonObject> modifyChannelRaw(@Nonnull final String channelId,
-                                                        @Nonnull final ChannelEditFields fields) {
+                                                        @Nonnull final ChannelEditFields fields,
+                                                        @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.MODIFY_CHANNEL.withMajorParam(channelId),
-                ImmutableMap.of(), fields.payload()))
+                ImmutableMap.of(), fields.payload(), reason))
                 .thenApply(ResponsePayload::object);
     }
     
     @Nonnull
-    public CompletionStage<Void> deletePermissionOverride(@Nonnull final String channelId, @Nonnull final String overwriteId) {
+    public CompletionStage<Void> deletePermissionOverride(@Nonnull final String channelId,
+                                                          @Nonnull final String overwriteId, @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.DELETE_CHANNEL_PERMISSION.withMajorParam(channelId),
-                ImmutableMap.of("overwrite.id", overwriteId)))
+                ImmutableMap.of("overwrite.id", overwriteId)).reason(reason))
                 .thenApply(__ -> null);
     }
     
     @Nonnull
     public CompletionStage<Void> deletePermissionOverride(@Nonnull final String channelId,
+                                                          @Nonnull final PermissionOverride overwrite,
+                                                          @Nullable final String reason) {
+        return deletePermissionOverride(channelId, overwrite.id(), reason);
+    }
+    
+    @Nonnull
+    public CompletionStage<Void> deletePermissionOverride(@Nonnull final String channelId,
                                                           @Nonnull final PermissionOverride overwrite) {
-        return deletePermissionOverride(channelId, overwrite.id());
+        return deletePermissionOverride(channelId, overwrite, null);
     }
     
     @Nonnull
     public CompletionStage<Void> editPermissionOverride(@Nonnull final String channelId, @Nonnull final String overwriteId,
                                                         @Nonnull final Collection<Permission> allowed,
-                                                        @Nonnull final Collection<Permission> denied, final boolean isMember) {
+                                                        @Nonnull final Collection<Permission> denied,
+                                                        final boolean isMember, @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.EDIT_CHANNEL_PERMISSIONS.withMajorParam(channelId),
                 ImmutableMap.of("overwrite.id", overwriteId), new JsonObject()
                 .put("allow", Permission.from(allowed))
                 .put("deny", Permission.from(denied))
-                .put("type", isMember ? "member" : "role")))
+                .put("type", isMember ? "member" : "role"),
+                reason
+        ))
                 .thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    public CompletionStage<Void> editPermissionOverride(@Nonnull final String channelId, @Nonnull final String overwriteId,
+                                                        @Nonnull final Collection<Permission> allowed,
+                                                        @Nonnull final Collection<Permission> denied,
+                                                        final boolean isMember) {
+        return editPermissionOverride(channelId, overwriteId, allowed, denied, isMember, null);
+    }
+    
+    @Nonnull
+    public CompletionStage<Void> editPermissionOverride(@Nonnull final String channelId, @Nonnull final PermissionOverride overwrite,
+                                                        @Nonnull final Collection<Permission> allowed,
+                                                        @Nonnull final Collection<Permission> denied,
+                                                        @Nullable final String reason) {
+        return editPermissionOverride(channelId,
+                overwrite.id(),
+                allowed,
+                denied,
+                overwrite.type() == OverrideType.MEMBER,
+                reason
+        );
     }
     
     @Nonnull
     public CompletionStage<Void> editPermissionOverride(@Nonnull final String channelId, @Nonnull final PermissionOverride overwrite,
                                                         @Nonnull final Collection<Permission> allowed,
                                                         @Nonnull final Collection<Permission> denied) {
-        return editPermissionOverride(channelId, overwrite.id(), allowed, denied, overwrite.type() == OverrideType.MEMBER);
+        return editPermissionOverride(channelId, overwrite, allowed, denied, null);
     }
     
     @Nonnull
@@ -515,15 +584,21 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     public CompletionStage<Webhook> createWebhook(@Nonnull final String channelId, @Nonnull final String name,
+                                                  @Nullable final String avatar, @Nullable final String reason) {
+        return createWebhookRaw(channelId, name, avatar, reason).thenApply(entityBuilder()::createWebhook);
+    }
+    
+    @Nonnull
+    public CompletionStage<Webhook> createWebhook(@Nonnull final String channelId, @Nonnull final String name,
                                                   @Nullable final String avatar) {
-        return createWebhookRaw(channelId, name, avatar).thenApply(entityBuilder()::createWebhook);
+        return createWebhook(channelId, name, avatar, null);
     }
     
     @Nonnull
     public CompletionStage<JsonObject> createWebhookRaw(@Nonnull final String channelId, @Nonnull final String name,
-                                                        @Nullable final String avatar) {
+                                                        @Nullable final String avatar, @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.CREATE_WEBHOOK.withMajorParam(channelId),
-                ImmutableMap.of(), new JsonObject().put("name", name).put("avatar", avatar)))
+                ImmutableMap.of(), new JsonObject().put("name", name).put("avatar", avatar), reason))
                 .thenApply(ResponsePayload::object);
     }
 }

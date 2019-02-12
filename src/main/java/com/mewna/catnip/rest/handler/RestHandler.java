@@ -59,14 +59,4 @@ abstract class RestHandler {
         return (T) object;
     }
     
-    // Copied from JDA:
-    // https://github.com/DV8FromTheWorld/JDA/blob/9e593c5d5e1abf0967998ac5fcc0d915495e0758/src/main/java/net/dv8tion/jda/core/utils/MiscUtil.java#L179-L198
-    // Thank JDA devs! <3
-    static String encodeUTF8(final String chars) {
-        try {
-            return URLEncoder.encode(chars, "UTF-8");
-        } catch(final UnsupportedEncodingException e) {
-            throw new AssertionError(e); // thanks JDK 1.4
-        }
-    }
 }

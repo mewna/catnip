@@ -37,6 +37,7 @@ import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -65,15 +66,21 @@ public class RestInvite extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<Invite> deleteInvite(@Nonnull final String code) {
-        return deleteInviteRaw(code).thenApply(entityBuilder()::createInvite);
+    public CompletionStage<Invite> deleteInvite(@Nonnull final String code, @Nullable final String reason) {
+        return deleteInviteRaw(code, reason).thenApply(entityBuilder()::createInvite);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonObject> deleteInviteRaw(@Nonnull final String code) {
+    public CompletionStage<Invite> deleteInvite(@Nonnull final String code) {
+        return deleteInvite(code, null);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> deleteInviteRaw(@Nonnull final String code, @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.DELETE_INVITE,
-                ImmutableMap.of("invite.code", code)))
+                ImmutableMap.of("invite.code", code)).reason(reason))
                 .thenApply(ResponsePayload::object);
     }
 }

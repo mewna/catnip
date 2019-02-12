@@ -38,6 +38,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
@@ -88,15 +89,26 @@ public class RestEmoji extends RestHandler {
     
     @Nonnull
     public CompletionStage<CustomEmoji> createGuildEmoji(@Nonnull final String guildId, @Nonnull final String name,
-                                                         @Nonnull final URI imageData, @Nonnull final Collection<String> roles) {
-        return createGuildEmojiRaw(guildId, name, imageData, roles)
+                                                         @Nonnull final URI imageData,
+                                                         @Nonnull final Collection<String> roles,
+                                                         @Nullable final String reason) {
+        return createGuildEmojiRaw(guildId, name, imageData, roles, reason)
                 .thenApply(e -> entityBuilder().createEmoji(guildId, e))
                 .thenApply(CustomEmoji.class::cast);
     }
     
     @Nonnull
+    public CompletionStage<CustomEmoji> createGuildEmoji(@Nonnull final String guildId, @Nonnull final String name,
+                                                         @Nonnull final URI imageData,
+                                                         @Nonnull final Collection<String> roles) {
+        return createGuildEmoji(guildId, name, imageData, roles, null);
+    }
+    
+    @Nonnull
     public CompletionStage<JsonObject> createGuildEmojiRaw(@Nonnull final String guildId, @Nonnull final String name,
-                                                           @Nonnull final URI imageData, @Nonnull final Collection<String> roles) {
+                                                           @Nonnull final URI imageData,
+                                                           @Nonnull final Collection<String> roles,
+                                                           @Nullable final String reason) {
         Utils.validateImageUri(imageData);
         final JsonArray rolesArray;
         if(roles.isEmpty()) {
@@ -112,28 +124,50 @@ public class RestEmoji extends RestHandler {
                         new JsonObject()
                                 .put("name", name)
                                 .put("image", imageData.toString())
-                                .put("roles", rolesArray)
+                                .put("roles", rolesArray),
+                        reason
                 ))
                 .thenApply(ResponsePayload::object);
     }
     
     @Nonnull
     public CompletionStage<CustomEmoji> createGuildEmoji(@Nonnull final String guildId, @Nonnull final String name,
-                                                         @Nonnull final byte[] image, @Nonnull final Collection<String> roles) {
+                                                         @Nonnull final byte[] image,
+                                                         @Nonnull final Collection<String> roles) {
         return createGuildEmoji(guildId, name, Utils.asImageDataUri(image), roles);
     }
     
     @Nonnull
+    public CompletionStage<CustomEmoji> createGuildEmoji(@Nonnull final String guildId, @Nonnull final String name,
+                                                         @Nonnull final byte[] image,
+                                                         @Nonnull final Collection<String> roles,
+                                                         @Nullable final String reason) {
+        return createGuildEmoji(guildId, name, Utils.asImageDataUri(image), roles, reason);
+    }
+    
+    @Nonnull
     public CompletionStage<CustomEmoji> modifyGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId,
-                                                         @Nonnull final String name, @Nonnull final Collection<String> roles) {
-        return modifyGuildEmojiRaw(guildId, emojiId, name, roles)
+                                                         @Nonnull final String name,
+                                                         @Nonnull final Collection<String> roles,
+                                                         @Nullable final String reason) {
+        return modifyGuildEmojiRaw(guildId, emojiId, name, roles, reason)
                 .thenApply(e -> entityBuilder().createEmoji(guildId, e))
                 .thenApply(CustomEmoji.class::cast);
     }
     
     @Nonnull
+    public CompletionStage<CustomEmoji> modifyGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId,
+                                                         @Nonnull final String name,
+                                                         @Nonnull final Collection<String> roles) {
+        return modifyGuildEmoji(guildId, emojiId, name, roles, null);
+    }
+    
+    @Nonnull
     public CompletionStage<JsonObject> modifyGuildEmojiRaw(@Nonnull final String guildId, @Nonnull final String emojiId,
-                                                           @Nonnull final String name, @Nonnull final Collection<String> roles) {
+                                                           @Nonnull final String name,
+                                                           @Nonnull final Collection<String> roles,
+                                                           @Nullable final String reason
+                                                           ) {
         final JsonArray rolesArray;
         if(roles.isEmpty()) {
             rolesArray = null;
@@ -147,17 +181,24 @@ public class RestEmoji extends RestHandler {
                         ImmutableMap.of("emojis.id", emojiId),
                         new JsonObject()
                                 .put("name", name)
-                                .put("roles", rolesArray)
+                                .put("roles", rolesArray),
+                        reason
                 ))
                 .thenApply(ResponsePayload::object);
     }
     
     @Nonnull
-    public CompletionStage<Void> deleteGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId) {
+    public CompletionStage<Void> deleteGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId,
+                                                  @Nullable final String reason) {
         return catnip().requester().queue(
                 new OutboundRequest(
                         Routes.DELETE_GUILD_EMOJI.withMajorParam(guildId),
-                        ImmutableMap.of("emojis.id", emojiId)))
+                        ImmutableMap.of("emojis.id", emojiId)).reason(reason))
                 .thenApply(__ -> null);
+    }
+    
+    @Nonnull
+    public CompletionStage<Void> deleteGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId) {
+        return deleteGuildEmoji(guildId, emojiId, null);
     }
 }

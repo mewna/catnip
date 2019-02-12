@@ -37,6 +37,7 @@ import com.mewna.catnip.rest.Routes.Route;
 import com.mewna.catnip.rest.ratelimit.RateLimiter;
 import com.mewna.catnip.util.CatnipMeta;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
+import com.mewna.catnip.util.Utils;
 import io.vertx.core.Context;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
@@ -183,6 +184,9 @@ public abstract class AbstractRequester implements Requester {
                 .header("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')');
         if(request.request().needsToken()) {
             requestBuilder.header("Authorization", "Bot " + catnip.token());
+        }
+        if(request.request().reason() != null) {
+            requestBuilder.addHeader(Requester.REASON_HEADER, Utils.encodeUTF8(request.request().reason()));
         }
         // Update request start time as soon as possible
         // See QueuedRequest docs for why we do this

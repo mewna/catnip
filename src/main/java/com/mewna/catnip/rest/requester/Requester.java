@@ -48,6 +48,7 @@ public interface Requester {
     String API_HOST = "https://discordapp.com";
     int API_VERSION = 6;
     String API_BASE = "/api/v" + API_VERSION;
+    String REASON_HEADER = "X-Audit-Log-Reason";
     
     void catnip(@Nonnull Catnip catnip);
     
@@ -67,6 +68,8 @@ public interface Requester {
         private JsonArray array;
         @Setter
         private boolean needsToken = true;
+        @Setter
+        private String reason;
         
         @Setter
         private List<ImmutablePair<String, Buffer>> buffers;
@@ -83,16 +86,25 @@ public interface Requester {
             this(route, params);
             this.object = object;
         }
+        public OutboundRequest(final Route route, final Map<String, String> params, final JsonObject object, final String reason) {
+            this(route, params, object);
+            this.reason = reason;
+        }
         
         public OutboundRequest(final Route route, final Map<String, String> params, final JsonArray array) {
             this(route, params);
             this.array = array;
         }
         
+        public OutboundRequest(final Route route, final Map<String, String> params, final JsonArray array, final String reason) {
+            this(route, params, array);
+            this.reason = reason;
+        }
+        
         @Override
         public String toString() {
-            return String.format("OutboundRequest (%s, %s, object=%s, array=%s, buffers=%s)",
-                    route, params, object != null, array != null, buffers != null && !buffers.isEmpty());
+            return String.format("OutboundRequest (%s, %s, object=%s, array=%s, buffers=%s, reason=%s)",
+                    route, params, object != null, array != null, buffers != null && !buffers.isEmpty(), reason);
         }
     }
 }

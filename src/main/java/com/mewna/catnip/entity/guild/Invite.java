@@ -96,13 +96,25 @@ public interface Invite extends Entity {
     /**
      * Deletes the invite.
      *
+     * @param reason The reason that will be displayed in audit log
+     *
+     * @return A CompletionStage that completes when the invite is deleted.
+     */
+    @Nonnull
+    default CompletionStage<Invite> delete(@Nullable final String reason) {
+        PermissionUtil.checkPermissions(catnip(), guild().id(), channel().id(),
+                Permission.MANAGE_CHANNELS);
+        return catnip().rest().invite().deleteInvite(code(), reason);
+    }
+    
+    /**
+     * Deletes the invite.
+     *
      * @return A CompletionStage that completes when the invite is deleted.
      */
     @Nonnull
     default CompletionStage<Invite> delete() {
-        PermissionUtil.checkPermissions(catnip(), guild().id(), channel().id(),
-                Permission.MANAGE_CHANNELS);
-        return catnip().rest().invite().deleteInvite(code());
+        return delete(null);
     }
     
     @JsonDeserialize(as = InviteImpl.InviterImpl.class)

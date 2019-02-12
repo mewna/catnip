@@ -38,6 +38,7 @@ import com.mewna.catnip.util.pagination.MessagePaginator;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -185,13 +186,27 @@ public interface MessageChannel extends Channel {
      * Delete the message with the given id in this channel.
      *
      * @param messageId The id of the message to delete.
+     * @param reason The reason that will be displayed in audit log
+     *
+     * @return A CompletionStage that completes when the message is deleted.
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> deleteMessage(@Nonnull final String messageId, @Nullable final String reason) {
+        return catnip().rest().channel().deleteMessage(id(), messageId, reason);
+    }
+    
+    /**
+     * Delete the message with the given id in this channel.
+     *
+     * @param messageId The id of the message to delete.
      *
      * @return A CompletionStage that completes when the message is deleted.
      */
     @Nonnull
     @JsonIgnore
     default CompletionStage<Void> deleteMessage(@Nonnull final String messageId) {
-        return catnip().rest().channel().deleteMessage(id(), messageId);
+        return deleteMessage(messageId, null);
     }
     
     /**
