@@ -337,13 +337,19 @@ public interface Message extends Snowflake {
     
     @Nonnull
     @JsonIgnore
-    default CompletionStage<Void> delete() {
+    default CompletionStage<Void> delete(@Nullable final String reason) {
         final User self = catnip().selfUser();
         if(self != null && !author().id().equals(self.id())) {
             PermissionUtil.checkPermissions(catnip(), guildId(), channelId(),
                     Permission.MANAGE_MESSAGES);
         }
-        return catnip().rest().channel().deleteMessage(channelId(), id());
+        return catnip().rest().channel().deleteMessage(channelId(), id(), reason);
+    }
+    
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> delete() {
+        return delete(null);
     }
     
     @Nonnull

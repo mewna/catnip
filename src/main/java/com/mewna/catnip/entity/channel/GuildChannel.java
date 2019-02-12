@@ -128,6 +128,23 @@ public interface GuildChannel extends GuildEntity, Channel {
      * Creates a new invite to this channel.
      *
      * @param options The options to set on the invite.
+     * @param reason The reason that will be visible in audit log
+     *
+     * @return A CompletionStage that completes when the invite is created.
+     */
+    @Nonnull
+    @JsonIgnore
+    @CheckReturnValue
+    default CompletionStage<CreatedInvite> createInvite(@Nullable final InviteCreateOptions options,
+                                                        @Nullable final String reason) {
+        PermissionUtil.checkPermissions(catnip(), guildId(), id(), Permission.CREATE_INSTANT_INVITE);
+        return catnip().rest().channel().createInvite(id(), options, reason);
+    }
+    
+    /**
+     * Creates a new invite to this channel.
+     *
+     * @param options The options to set on the invite.
      *
      * @return A CompletionStage that completes when the invite is created.
      */
@@ -135,8 +152,7 @@ public interface GuildChannel extends GuildEntity, Channel {
     @JsonIgnore
     @CheckReturnValue
     default CompletionStage<CreatedInvite> createInvite(@Nullable final InviteCreateOptions options) {
-        PermissionUtil.checkPermissions(catnip(), guildId(), id(), Permission.CREATE_INSTANT_INVITE);
-        return catnip().rest().channel().createInvite(id(), options);
+      return createInvite(options, null);
     }
     
     /**
@@ -238,11 +254,19 @@ public interface GuildChannel extends GuildEntity, Channel {
         }
         
         @Nonnull
+        public CompletionStage<GuildChannel> submit(@Nullable final String reason) {
+            if(channel == null) {
+                throw new IllegalStateException("Cannot submit edit without a channel object! Please use RestChannel directly instead");
+            }
+            return channel.catnip().rest().channel().modifyChannel(channel.id(), this, reason);
+        }
+    
+        @Nonnull
         public CompletionStage<GuildChannel> submit() {
             if(channel == null) {
                 throw new IllegalStateException("Cannot submit edit without a channel object! Please use RestChannel directly instead");
             }
-            return channel.catnip().rest().channel().modifyChannel(channel.id(), this);
+            return channel.catnip().rest().channel().modifyChannel(channel.id(), this, null);
         }
         
         @Nonnull
