@@ -41,6 +41,7 @@ import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.guild.*;
 import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
 import com.mewna.catnip.util.QueryStringBuilder;
+import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.pagination.AuditLogPaginator;
 import com.mewna.catnip.util.pagination.MemberPaginator;
 import io.vertx.core.json.JsonArray;
@@ -434,6 +435,9 @@ public class RestGuild extends RestHandler {
                                                 @Nullable final String reason,
                                                 @Nonnegative final int deleteMessageDays) {
         final QueryStringBuilder builder = new QueryStringBuilder();
+        if(reason != null) {
+            builder.append("reason", Utils.encodeUTF8(reason));
+        }
         if(deleteMessageDays <= 7) {
             builder.append("delete-message-days" + deleteMessageDays);
         }
