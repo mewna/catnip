@@ -115,25 +115,40 @@ public class RestWebhook extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<Webhook> modifyWebhook(@Nonnull final String webhookId, @Nonnull final WebhookEditFields fields) {
-        return modifyWebhookRaw(webhookId, fields).thenApply(entityBuilder()::createWebhook);
+    public CompletionStage<Webhook> modifyWebhook(@Nonnull final String webhookId, @Nonnull final WebhookEditFields fields,
+                                                  @Nullable final String reason) {
+        return modifyWebhookRaw(webhookId, fields, reason).thenApply(entityBuilder()::createWebhook);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonObject> modifyWebhookRaw(@Nonnull final String webhookId, @Nonnull final WebhookEditFields fields) {
+    public CompletionStage<Webhook> modifyWebhook(@Nonnull final String webhookId, @Nonnull final WebhookEditFields fields) {
+        return modifyWebhook(webhookId, fields, null);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<JsonObject> modifyWebhookRaw(@Nonnull final String webhookId,
+                                                        @Nonnull final WebhookEditFields fields,
+                                                        @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.MODIFY_WEBHOOK.withMajorParam(webhookId),
-                ImmutableMap.of(), fields.payload()))
+                ImmutableMap.of(), fields.payload(), reason))
                 .thenApply(ResponsePayload::object);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<Void> deleteWebhook(@Nonnull final String webhookId) {
+    public CompletionStage<Void> deleteWebhook(@Nonnull final String webhookId, @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.DELETE_WEBHOOK.withMajorParam(webhookId),
-                ImmutableMap.of()))
+                ImmutableMap.of()).reason(reason))
                 .thenApply(__ -> null);
     }
+    @Nonnull
+    @CheckReturnValue
+    public CompletionStage<Void> deleteWebhook(@Nonnull final String webhookId) {
+        return deleteWebhook(webhookId, null);
+    }
+    
     
     @Nonnull
     @CheckReturnValue
