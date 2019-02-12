@@ -35,9 +35,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -174,5 +176,16 @@ public final class Utils {
         final String id = matcher.group(1);
         final String token = matcher.group(2);
         return ImmutablePair.of(id, token);
+    }
+    
+    // Copied from JDA:
+    // https://github.com/DV8FromTheWorld/JDA/blob/9e593c5d5e1abf0967998ac5fcc0d915495e0758/src/main/java/net/dv8tion/jda/core/utils/MiscUtil.java#L179-L198
+    // Thank JDA devs! <3
+    public static String encodeUTF8(final String chars) {
+        try {
+            return URLEncoder.encode(chars, "UTF-8");
+        } catch(final UnsupportedEncodingException e) {
+            throw new AssertionError(e); // thanks JDK 1.4
+        }
     }
 }
