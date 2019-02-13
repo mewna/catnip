@@ -28,6 +28,7 @@
 package com.mewna.catnip.entity.message;
 
 import com.google.common.collect.ImmutableList;
+import com.mewna.catnip.entity.impl.MessageImpl;
 import io.vertx.core.buffer.Buffer;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -41,6 +42,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -53,7 +55,6 @@ import java.util.List;
 @Setter
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
 @Accessors(fluent = true)
 @SuppressWarnings("unused")
 public class MessageOptions {
@@ -62,6 +63,20 @@ public class MessageOptions {
     
     @Setter(AccessLevel.NONE)
     private List<ImmutablePair<String, Buffer>> files;
+    
+    public MessageOptions(@Nonnull final MessageOptions options) {
+        content = options.content;
+        embed = options.embed;
+        files = options.files;
+    }
+    
+    public MessageOptions(@Nonnull final Message message) {
+        content = message.content();
+        final List<Embed> embeds = message.embeds();
+        if (!embeds.isEmpty()) {
+            embed = embeds.get(0);
+        }
+    }
     
     @CheckReturnValue
     @Nonnull
@@ -112,7 +127,7 @@ public class MessageOptions {
     @SuppressWarnings("WeakerAccess")
     public MessageOptions addFile(@Nonnull final String name, @Nonnull final byte[] data) {
         if(files == null) {
-            files = new ArrayList<>();
+            files = new ArrayList<>(10);
         }
         if(files.size() == 10) {
             throw new UnsupportedOperationException("maximum limit of 10 attachments!");
@@ -126,7 +141,22 @@ public class MessageOptions {
         return files != null; // because checking via getter creates a new list each time.
     }
     
+    @CheckReturnValue
+    @Nonnull
     public List<ImmutablePair<String, Buffer>> files() {
         return hasFiles() ? ImmutableList.copyOf(files) : ImmutableList.of();
+    }
+    
+    @CheckReturnValue
+    @Nonnull
+    public Message buildMessage() {
+        final MessageImpl impl = new MessageImpl();
+        impl.content(content);
+        if (embed != null) {
+            impl.embeds(Collections.singletonList(embed));
+        } else {
+            impl.embeds(Collections.emptyList());
+        }
+        return impl;
     }
 }
