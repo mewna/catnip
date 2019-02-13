@@ -17,10 +17,11 @@ com.mewna.catnip.extension.hook
 com.mewna.catnip.extension.manager
 com.mewna.catnip.internal
 com.mewna.catnip.rest
-com.mewna.catnip.rest.bucket
 com.mewna.catnip.rest.guild
 com.mewna.catnip.rest.handler
 com.mewna.catnip.rest.invite
+com.mewna.catnip.rest.ratelimit
+com.mewna.catnip.rest.requester
 com.mewna.catnip.shard
 com.mewna.catnip.shard.buffer
 com.mewna.catnip.shard.event
@@ -30,3 +31,4 @@ com.mewna.catnip.shard.session
 com.mewna.catnip.util
 com.mewna.catnip.util.logging
 com.mewna.catnip.util.pagination
+com.mewna.catnip.util.task
