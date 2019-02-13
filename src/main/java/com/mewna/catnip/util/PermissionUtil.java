@@ -155,6 +155,7 @@ public final class PermissionUtil {
     }
     
     public static void checkHierarchy(@Nonnull final Member target, @Nonnull final Guild guild) {
+        System.out.println(target);
         if(!guild.selfMember().canInteract(target)) {
             throw new HierarchyException(guild.selfMember(), target);
         }
@@ -175,7 +176,10 @@ public final class PermissionUtil {
      * @return Whether the actor can interact with the target or not
      */
     public static boolean canInteract(@Nonnull final Member actor, @Nonnull final Member target) {
-        return canInteract(actor.orderedRoles().get(0), target);
+        if(actor.roles().isEmpty()) {
+            return actor.isOwner();
+        }
+        return canInteract(actor.roles().iterator().next(), target);
     }
     
     /**
@@ -192,7 +196,10 @@ public final class PermissionUtil {
         if(target.isOwner()) {
             return false;
         }
-        return canInteract(actor, target.orderedRoles().get(0));
+        if(target.roles().isEmpty()) {
+            return true;
+        }
+        return canInteract(actor, target.roles().iterator().next());
     }
     
     /**
@@ -209,8 +216,11 @@ public final class PermissionUtil {
         if(actor.isOwner()) {
             return true;
         }
+        if(actor.roles().isEmpty()) {
+            return actor.isOwner();
+        }
         // Check if the highest role of the actor is higher than the role of the target
-        return canInteract(actor.orderedRoles().get(0), target);
+        return canInteract(actor.roles().iterator().next(), target);
     }
     
     /**
@@ -223,6 +233,10 @@ public final class PermissionUtil {
      */
     public static boolean canInteract(@Nonnull final Role actor, @Nonnull final Role target) {
         checkGuildEquality(actor, target);
+        System.out.println(actor);
+        System.out.println(target);
+        System.out.println(actor.position());
+        System.out.println(target.position());
         return actor.position() > target.position();
     }
     

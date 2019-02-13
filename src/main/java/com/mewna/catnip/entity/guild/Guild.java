@@ -993,7 +993,7 @@ public interface Guild extends Snowflake {
     @JsonIgnore
     default CompletionStage<Void> addRoleToMember(@Nonnull final Role role, @Nonnull final Member member, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_ROLES);
-        PermissionUtil.canInteract(selfMember(), role);
+        PermissionUtil.checkHierarchy(role, this);
         return catnip().rest().guild().addGuildMemberRole(id(), member.id(), role.id(), reason);
     }
     
