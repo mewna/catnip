@@ -31,10 +31,7 @@ package com.mewna.catnip.util;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.channel.GuildChannel;
-import com.mewna.catnip.entity.guild.Guild;
-import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.entity.guild.PermissionOverride;
-import com.mewna.catnip.entity.guild.Role;
+import com.mewna.catnip.entity.guild.*;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 
@@ -46,15 +43,17 @@ public final class PermissionUtil {
     private PermissionUtil() {
     }
     
-    private static long basePermissions(final Catnip catnip, final Member member) {
-        final Guild guild = catnip.cache().guild(member.guildId());
-        final Role publicRole = catnip.cache().role(member.guildId(), member.guildId());
-        if(guild == null || publicRole == null || guild.ownerId().equals(member.id())) {
+    private static long basePermissions(final Catnip catnip, final PermissionHolder holder) {
+        final Guild guild = catnip.cache().guild(holder.guildId());
+        final Role publicRole = catnip.cache().role(holder.guildId(), holder.guildId());
+        if(guild == null || publicRole == null || guild.ownerId().equals(holder.id())) {
             return Permission.ALL;
         }
         long permissions = publicRole.permissionsRaw();
-        for(final Role role : member.roles()) {
-            permissions |= role.permissionsRaw();
+        if(holder instanceof Member) {
+            for(final Role role : ((Member) holder).roles()) {
+                permissions |= role.permissionsRaw();
+            }
         }
         if(Permission.ADMINISTRATOR.isPresent(permissions)) {
             return Permission.ALL;
@@ -62,29 +61,31 @@ public final class PermissionUtil {
         return permissions;
     }
     
-    private static long overridePermissions(final long base, final Member member, final GuildChannel channel) {
+    private static long overridePermissions(final long base, final PermissionHolder holder, final GuildChannel channel) {
         if(Permission.ADMINISTRATOR.isPresent(base)) {
             return Permission.ALL;
         }
         long permissions = base;
         final Collection<PermissionOverride> list = channel.overrides();
-        final PermissionOverride everyoneOverride = find(list, member.guildId());
+        final PermissionOverride everyoneOverride = find(list, holder.guildId());
         if(everyoneOverride != null) {
             permissions &= ~everyoneOverride.denyRaw();
             permissions |= everyoneOverride.allowRaw();
         }
         long deny = Permission.NONE;
         long allow = Permission.NONE;
-        for(final String role : member.roleIds()) {
-            final PermissionOverride override = find(list, role);
-            if(override != null) {
-                allow |= override.allowRaw();
-                deny |= override.denyRaw();
+        if(holder instanceof Member) {
+            for(final String role : ((Member) holder).roleIds()) {
+                final PermissionOverride override = find(list, role);
+                if(override != null) {
+                    allow |= override.allowRaw();
+                    deny |= override.denyRaw();
+                }
             }
         }
         permissions &= ~deny;
         permissions |= allow;
-        final PermissionOverride memberOverride = find(list, member.id());
+        final PermissionOverride memberOverride = find(list, holder.id());
         if(memberOverride != null) {
             permissions &= ~memberOverride.denyRaw();
             permissions |= memberOverride.allowRaw();
@@ -101,11 +102,11 @@ public final class PermissionUtil {
         return null;
     }
     
-    public static long effectivePermissions(@Nonnull final Catnip catnip, @Nonnull final Member member) {
+    public static long effectivePermissions(@Nonnull final Catnip catnip, @Nonnull final PermissionHolder member) {
         return basePermissions(catnip, member);
     }
     
-    public static long effectivePermissions(@Nonnull final Catnip catnip, @Nonnull final Member member,
+    public static long effectivePermissions(@Nonnull final Catnip catnip, @Nonnull final PermissionHolder member,
                                             @Nonnull final GuildChannel channel) {
         return overridePermissions(basePermissions(catnip, member), member, channel);
     }
@@ -150,6 +151,98 @@ public final class PermissionUtil {
         if((actual & needed) != needed) {
             final long missing = needed & ~actual;
             throw new MissingPermissionException(Permission.toSet(missing));
+        }
+    }
+    
+    public static void checkHierarchy(@Nonnull final Member target, @Nonnull final Guild guild) {
+        System.out.println(target);
+        if(!guild.selfMember().canInteract(target)) {
+            throw new HierarchyException(guild.selfMember(), target);
+        }
+    }
+    
+    public static void checkHierarchy(@Nonnull final Role target, @Nonnull final Guild guild) {
+        if(!guild.selfMember().canInteract(target)) {
+            throw new HierarchyException(guild.selfMember(), target);
+        }
+    }
+    
+    /**
+     * Checks whether a member has the permission to interact with another member
+     *
+     * @param actor The member that want to perform the action
+     * @param target The member that the action is performed on
+     * @throws IllegalStateException If the actor is not on the same guild as the target
+     * @return Whether the actor can interact with the target or not
+     */
+    public static boolean canInteract(@Nonnull final Member actor, @Nonnull final Member target) {
+        if(actor.roles().isEmpty()) {
+            return actor.isOwner();
+        }
+        return canInteract(actor.roles().iterator().next(), target);
+    }
+    
+    /**
+     * Checks whether a role has the permission to interact with a member
+     *
+     * @param actor The role that want to perform the action
+     * @param target The member that the action is performed on
+     * @throws IllegalStateException If the actor is not on the same guild as the target
+     * @return Whether the actor can interact with the target or not
+     */
+    public static boolean canInteract(@Nonnull final Role actor, @Nonnull final Member target) {
+        checkGuildEquality(actor, target);
+        // Nobody can interact with the owner
+        if(target.isOwner()) {
+            return false;
+        }
+        if(target.roles().isEmpty()) {
+            return true;
+        }
+        return canInteract(actor, target.roles().iterator().next());
+    }
+    
+    /**
+     * Checks whether a member has the permission to interact with a role
+     *
+     * @param actor The member that want to perform the action
+     * @param target The role that the action is performed on
+     * @throws IllegalStateException If the actor is not on the same guild as the target
+     * @return Whether the actor can interact with the target or not
+     */
+    public static boolean canInteract(@Nonnull final Member actor, @Nonnull final Role target) {
+        checkGuildEquality(actor, target);
+        // Owner has any permission event if he has not a single role
+        if(actor.isOwner()) {
+            return true;
+        }
+        if(actor.roles().isEmpty()) {
+            return actor.isOwner();
+        }
+        // Check if the highest role of the actor is higher than the role of the target
+        return canInteract(actor.roles().iterator().next(), target);
+    }
+    
+    /**
+     * Checks whether a role has the permission to interact with another role
+     *
+     * @param actor The role that want to perform the action
+     * @param target The role that the action is performed on
+     * @throws IllegalStateException If the actor is not on the same guild as the target
+     * @return Whether the actor can interact with the target or not
+     */
+    public static boolean canInteract(@Nonnull final Role actor, @Nonnull final Role target) {
+        checkGuildEquality(actor, target);
+        System.out.println(actor);
+        System.out.println(target);
+        System.out.println(actor.position());
+        System.out.println(target.position());
+        return actor.position() > target.position();
+    }
+    
+    private static void checkGuildEquality(final GuildEntity actor, final GuildEntity target) {
+        if(!actor.guild().equals(target.guild())) {
+            throw new IllegalStateException("Actor and target mus be on the same guild!");
         }
     }
 }

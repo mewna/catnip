@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.rest.requester;
 
+import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
@@ -272,10 +273,17 @@ public abstract class AbstractRequester implements Requester {
                 final Map<String, List<String>> failures = new HashMap<>();
                 final JsonObject errors = payload.object();
                 errors.forEach(e -> {
-                    final JsonArray arr = (JsonArray) e.getValue();
-                    final List<String> errorStrings = new ArrayList<>();
-                    arr.stream().map(element -> (String) element).forEach(errorStrings::add);
-                    failures.put(e.getKey(), errorStrings);
+                    if(e.getValue() instanceof JsonArray) {
+                        final JsonArray arr = (JsonArray) e.getValue();
+                        final List<String> errorStrings = new ArrayList<>();
+                        arr.stream().map(element -> (String) element).forEach(errorStrings::add);
+                        failures.put(e.getKey(), errorStrings);
+                    } else if(e.getValue() instanceof Integer) {
+                        failures.put(e.getKey(), ImmutableList.of("" + e.getValue()));
+                    } else {
+                        catnip.logAdapter().warn("Got unknown error response type: {}", e.getValue().getClass().getName());
+                        failures.put(e.getKey(), ImmutableList.of(String.valueOf(e.getValue())));
+                    }
                 });
                 request.future().completeExceptionally(new RestPayloadException(failures));
             } else if(statusCode > 400) {

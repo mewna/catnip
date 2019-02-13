@@ -27,9 +27,12 @@
 package com.mewna.catnip.entity.guild;
 
 import com.mewna.catnip.entity.Entity;
+import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.PermissionUtil;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Objects;
 
 /**

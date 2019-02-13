@@ -31,11 +31,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Mentionable;
 import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.impl.RoleImpl;
 import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.PermissionUtil;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -46,7 +49,7 @@ import java.util.Set;
  */
 @SuppressWarnings("unused")
 @JsonDeserialize(as = RoleImpl.class)
-public interface Role extends GuildEntity, Snowflake, Mentionable, Comparable<Role> {
+public interface Role extends Mentionable, Comparable<Role>, PermissionHolder {
     /**
      * The name of the role. Not unique
      *
@@ -130,6 +133,28 @@ public interface Role extends GuildEntity, Snowflake, Mentionable, Comparable<Ro
     @CheckReturnValue
     default String asMention() {
         return "<@&" + id() + '>';
+    }
+    
+    @Override
+    default boolean hasPermissions(@Nonnull final Collection<Permission> permissions) {
+        final long needed = Permission.from(permissions);
+        final long actual = Permission.from(permissions());
+        return (actual & needed) == needed;
+    }
+    
+    @Override
+    default boolean hasPermissions(@Nonnull final GuildChannel channel, @Nonnull final Collection<Permission> permissions) {
+        throw new UnsupportedOperationException("Roles does not support this method");
+    }
+    
+    @Override
+    default boolean canInteract(@Nonnull final Role role) {
+        return PermissionUtil.canInteract(this, role);
+    }
+    
+    @Override
+    default boolean canInteract(@Nonnull final Member member) {
+        return PermissionUtil.canInteract(this, member);
     }
     
     @Override
