@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("unused")
 @JsonDeserialize(as = MemberImpl.class)
-public interface Member extends GuildEntity, Snowflake, Mentionable {
+public interface Member extends Mentionable, PermissionHolder {
     /**
      * The user equivalent to this member.
      */
@@ -206,24 +206,36 @@ public interface Member extends GuildEntity, Snowflake, Mentionable {
         return Permission.toSet(PermissionUtil.effectivePermissions(catnip(), this, channel));
     }
     
-    default boolean hasPermissions(@Nonnull final Permission... permissions) {
-        return hasPermissions(Arrays.asList(permissions));
-    }
-    
+    @Override
     default boolean hasPermissions(@Nonnull final Collection<Permission> permissions) {
         final long needed = Permission.from(permissions);
         final long actual = PermissionUtil.effectivePermissions(catnip(), this);
         return (actual & needed) == needed;
     }
     
-    default boolean hasPermissions(@Nonnull final GuildChannel channel, @Nonnull final Permission... permissions) {
-        return hasPermissions(channel, Arrays.asList(permissions));
-    }
-    
+    @Override
     default boolean hasPermissions(@Nonnull final GuildChannel channel, @Nonnull final Collection<Permission> permissions) {
         final long needed = Permission.from(permissions);
         final long actual = PermissionUtil.effectivePermissions(catnip(), this, channel);
         return (actual & needed) == needed;
+    }
+    
+    @Override
+    default boolean canInteract(@Nonnull final Role role) {
+        return PermissionUtil.canInteract(this, role);
+    }
+    
+    @Override
+    default boolean canInteract(@Nonnull final Member member) {
+        return PermissionUtil.canInteract(this, member);
+    }
+    
+    /**
+     * Checks if the member is the owner of the guild.
+     * @return Whether the member owns the guild or not
+     */
+    default boolean isOwner() {
+        return guild().owner().equals(this);
     }
     
     /**

@@ -466,7 +466,7 @@ public class RestGuild extends RestHandler {
         return removeGuildBan(guildId, userId, null);
     }
     
-                                                @Nonnull
+    @Nonnull
     public CompletionStage<String> modifyCurrentUsersNick(@Nonnull final String guildId, @Nullable final String nick,
                                                           @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.MODIFY_CURRENT_USERS_NICK.withQueryString(guildId),

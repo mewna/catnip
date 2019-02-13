@@ -86,6 +86,6 @@ public class MemberImpl implements Member, RequiresCatnip, Timestamped {
     
     @Override
     public String toString() {
-        return String.format("Member (%s, %s)", idAsLong, nick);
+        return String.format("Member (%s, %s)", idAsLong, effectiveName());
     }
 }
