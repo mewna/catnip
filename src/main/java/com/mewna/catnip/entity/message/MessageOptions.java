@@ -53,7 +53,6 @@ import java.util.List;
  */
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @Accessors(fluent = true)
 @SuppressWarnings("unused")
