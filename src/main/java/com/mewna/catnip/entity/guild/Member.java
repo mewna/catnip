@@ -234,6 +234,7 @@ public interface Member extends Mentionable, PermissionHolder {
      * Checks if the member is the owner of the guild.
      * @return Whether the member owns the guild or not
      */
+    @JsonIgnore
     default boolean isOwner() {
         return guild().owner().equals(this);
     }
