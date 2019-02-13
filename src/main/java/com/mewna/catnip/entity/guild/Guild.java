@@ -37,6 +37,7 @@ import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.impl.GuildImpl;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
+import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
@@ -69,6 +70,9 @@ import java.util.concurrent.CompletionStage;
 @SuppressWarnings("unused")
 @JsonDeserialize(as = GuildImpl.class)
 public interface Guild extends Snowflake {
+    
+    int NICKNAME_MAX_LENGTH = 32;
+    
     /**
      * @return The guild's name.
      */
@@ -495,6 +499,24 @@ public interface Guild extends Snowflake {
     /**
      * Create a new emoji on the guild.
      *
+     * @param name   The new emoji's name.
+     * @param image  The image for the new emoji.
+     * @param roles  The roles that can use the new emoji.
+     * @param reason The reason that will be displayed in audit log.
+     *
+     * @return A CompletionStage that completes when the emoji is created.
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final byte[] image,
+                                                     @Nonnull final Collection<String> roles, @Nullable final String reason) {
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJI);
+        return catnip().rest().emoji().createGuildEmoji(id(), name, image, roles, reason);
+    }
+    
+    /**
+     * Create a new emoji on the guild.
+     *
      * @param name  The new emoji's name.
      * @param image The image for the new emoji.
      * @param roles The roles that can use the new emoji.
@@ -505,8 +527,25 @@ public interface Guild extends Snowflake {
     @JsonIgnore
     default CompletionStage<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final byte[] image,
                                                      @Nonnull final Collection<String> roles) {
+        return createEmoji(name, image, roles, null);
+    }
+    
+    /**
+     * Create a new emoji on the guild.
+     *
+     * @param name      The new emoji's name.
+     * @param imageData The image for the new emoji.
+     * @param roles     The roles that can use the new emoji.
+     * @param reason    The reason that will be displayed in audit log.
+     *
+     * @return A CompletionStage that completes when the emoji is created.
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final URI imageData,
+                                                     @Nonnull final Collection<String> roles, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJI);
-        return catnip().rest().emoji().createGuildEmoji(id(), name, image, roles);
+        return catnip().rest().emoji().createGuildEmoji(id(), name, imageData, roles, reason);
     }
     
     /**
@@ -522,8 +561,26 @@ public interface Guild extends Snowflake {
     @JsonIgnore
     default CompletionStage<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final URI imageData,
                                                      @Nonnull final Collection<String> roles) {
+        return createEmoji(name, imageData, roles, null);
+    }
+    
+    /**
+     * Modify the given emoji.
+     *
+     * @param emojiId The id of the emoji to modify.
+     * @param name    The name of the emoji. To not change it, pass the old name.
+     * @param roles   The roles that can use the emoji. To not change it, pass
+     *                the old roles.
+     * @param reason  The reason that will be displayed in audit log.
+     *
+     * @return A CompletionStage that completes when the emoji is modified.
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<CustomEmoji> modifyEmoji(@Nonnull final String emojiId, @Nonnull final String name,
+                                                     @Nonnull final Collection<String> roles, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJI);
-        return catnip().rest().emoji().createGuildEmoji(id(), name, imageData, roles);
+        return catnip().rest().emoji().modifyGuildEmoji(id(), emojiId, name, roles, reason);
     }
     
     /**
@@ -540,8 +597,22 @@ public interface Guild extends Snowflake {
     @JsonIgnore
     default CompletionStage<CustomEmoji> modifyEmoji(@Nonnull final String emojiId, @Nonnull final String name,
                                                      @Nonnull final Collection<String> roles) {
+        return modifyEmoji(emojiId, name, roles, null);
+    }
+    
+    /**
+     * Delete the given emoji from the guild.
+     *
+     * @param emojiId The id of the emoji to delete.
+     * @param reason  The reason that will be displayed in audit log.
+     *
+     * @return A CompletionStage that completes when the emoji is deleted.
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> deleteEmoji(@Nonnull final String emojiId, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJI);
-        return catnip().rest().emoji().modifyGuildEmoji(id(), emojiId, name, roles);
+        return catnip().rest().emoji().deleteGuildEmoji(id(), emojiId, reason);
     }
     
     /**
@@ -554,8 +625,7 @@ public interface Guild extends Snowflake {
     @Nonnull
     @JsonIgnore
     default CompletionStage<Void> deleteEmoji(@Nonnull final String emojiId) {
-        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJI);
-        return catnip().rest().emoji().deleteGuildEmoji(id(), emojiId);
+        return deleteEmoji(emojiId, null);
     }
     
     /**
@@ -602,6 +672,381 @@ public interface Guild extends Snowflake {
     default GuildEditFields edit() {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_GUILD);
         return new GuildEditFields(this);
+    }
+    
+    /**
+     * Bans a user from a guild.
+     * Needs {@link Permission#BAN_MEMBERS} and permission to interact with the target
+     * {@link PermissionUtil#canInteract(Member, Member)}
+     *
+     * @param userId            The id of the user to ban.
+     * @param reason            The reason of the ban.
+     * @param deleteMessageDays The history of messages, in days, that will be deleted
+     *
+     * @return A CompletionStage that completes when the member got banned
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> ban(@Nonnull final String userId,
+                                      @Nullable final String reason,
+                                      @Nonnegative final int deleteMessageDays) {
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.BAN_MEMBERS);
+        PermissionUtil.checkHierarchy(Objects.requireNonNull(catnip().cache().member(id(), userId)), this);
+        return catnip().rest().guild().createGuildBan(id(), userId, reason, deleteMessageDays);
+    }
+    
+    /**
+     * Bans a user from a guild.
+     * Needs {@link Permission#BAN_MEMBERS} and permission to interact with the target
+     * {@link PermissionUtil#canInteract(Member, Member)}
+     *
+     * @param userId            The id of the user to ban.
+     * @param reason            The reason of the ban.
+     * @param deleteMessageDays The history of messages, in days, that will be deleted
+     *
+     * @return A CompletionStage that completes when the member got banned
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> ban(final long userId,
+                                      @Nullable final String reason,
+                                      @Nonnegative final int deleteMessageDays) {
+        return ban(Long.toUnsignedString(userId), reason, deleteMessageDays);
+    }
+    
+    /**
+     * Bans a user from a guild.
+     * Needs {@link Permission#BAN_MEMBERS} and permission to interact with the target
+     * {@link PermissionUtil#canInteract(Member, Member)}
+     *
+     * @param userId            The id of the user to ban.
+     * @param deleteMessageDays The history of messages, in days, that will be deleted
+     *
+     * @return A CompletionStage that completes when the member got banned
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> ban(final long userId,
+                                      @Nonnegative final int deleteMessageDays) {
+        return ban(userId, null, deleteMessageDays);
+    }
+    
+    /**
+     * Bans a user from a guild.
+     * Needs {@link Permission#BAN_MEMBERS} and permission to interact with the target
+     * {@link PermissionUtil#canInteract(Member, Member)}
+     *
+     * @param member            The member to ban.
+     * @param reason            The reason of the ban.
+     * @param deleteMessageDays The history of messages, in days, that will be deleted
+     *
+     * @return A CompletionStage that completes when the member got banned
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> ban(@Nonnull final Member member,
+                                      @Nullable final String reason,
+                                      @Nonnegative final int deleteMessageDays) {
+        return ban(member.id(), reason, deleteMessageDays);
+    }
+    
+    /**
+     * Removes a users ban from the Guild
+     * Needs {@link Permission#BAN_MEMBERS} and permission to interact with the target
+     * {@link PermissionUtil#canInteract(Member, Member)}
+     *
+     * @param userId The id of the user to unban
+     * @param reason The reason for the unban
+     *
+     * @return A CompletionStage that completes when the ban got removed
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> unban(@Nonnull final String userId, @Nullable final String reason) {
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.BAN_MEMBERS);
+        return catnip().rest().guild().removeGuildBan(id(), userId, reason);
+    }
+    
+    /**
+     * Removes a users ban from the Guild
+     * Needs {@link Permission#BAN_MEMBERS} and permission to interact with the target
+     * {@link PermissionUtil#canInteract(Member, Member)}
+     *
+     * @param userId The id of the user to unban
+     *
+     * @return A CompletionStage that completes when the ban got removed
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> unban(@Nonnull final String userId) {
+        return unban(userId, null);
+    }
+    
+    /**
+     * Removes a users ban from the Guild
+     * Needs {@link Permission#BAN_MEMBERS} and permission to interact with the target
+     * {@link PermissionUtil#canInteract(Member, Member)}
+     *
+     * @param userId The id of the user to unban
+     * @param reason The reason for the unban
+     *
+     * @return A CompletionStage that completes when the ban got removed
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> unban(final long userId, @Nullable final String reason) {
+        return unban(Long.toUnsignedString(userId), reason);
+    }
+    
+    /**
+     * Removes a users ban from the Guild
+     * Needs {@link Permission#BAN_MEMBERS} and permission to interact with the target
+     * {@link PermissionUtil#canInteract(Member, Member)}
+     *
+     * @param userId The id of the user to unban
+     *
+     * @return A CompletionStage that completes when the ban got removed
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> unban(final long userId) {
+        return unban(userId, null);
+    }
+    
+    /**
+     * Removes a users ban from the Guild
+     * Needs {@link Permission#BAN_MEMBERS} and permission to interact with the target
+     * {@link PermissionUtil#canInteract(Member, Member)}
+     *
+     * @param user   The the user to unban
+     * @param reason The that will be displayed in audit log
+     *
+     * @return A CompletionStage that completes when the ban got removed
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> unban(@Nonnull final User user, @Nullable final String reason) {
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.BAN_MEMBERS);
+        return catnip().rest().guild().removeGuildBan(id(), user.id(), reason);
+    }
+    
+    /**
+     * Removes a users ban from the Guild
+     * Needs {@link Permission#BAN_MEMBERS} and permission to interact with the target
+     * {@link PermissionUtil#canInteract(Member, Member)}
+     *
+     * @param user The the user to unban
+     *
+     * @return A CompletionStage that completes when the ban got removed
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> unban(@Nonnull final User user) {
+        return unban(user, null);
+    }
+    
+    /**
+     * Kicks a member from the Guild.
+     * Needs {@link Permission#KICK_MEMBERS} and permission to interact with the target
+     * {@link PermissionUtil#canInteract(Member, Member)}
+     *
+     * @param userId The id of the user to kick
+     * @param reason The reason for the kick
+     *
+     * @return A CompletionStage that is finished when the user got kicked
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> kick(@Nonnull final String userId, @Nullable final String reason) {
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.KICK_MEMBERS);
+        PermissionUtil.checkHierarchy(Objects.requireNonNull(catnip().cache().member(id(), userId)), this);
+        return catnip().rest().guild().removeGuildMember(id(), userId, reason);
+    }
+    
+    /**
+     * Kicks a member from the Guild.
+     * Needs {@link Permission#KICK_MEMBERS} and permission to interact with the target
+     * {@link PermissionUtil#canInteract(Member, Member)}
+     *
+     * @param userId The id of the user to kick
+     *
+     * @return A CompletionStage that is finished when the user got kicked
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> kick(@Nonnull final String userId) {
+        return kick(userId, null);
+    }
+    
+    /**
+     * Kicks a member from the Guild.
+     * Needs {@link Permission#KICK_MEMBERS} and permission to interact with the target
+     * {@link PermissionUtil#canInteract(Member, Member)}
+     *
+     * @param userId The id of the user to kick
+     * @param reason The reason for the kick
+     *
+     * @return A CompletionStage that is finished when the user got kicked
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> kick(final long userId, @Nullable final String reason) {
+        return kick(Long.toUnsignedString(userId), reason);
+    }
+    
+    /**
+     * Kicks a member from the Guild.
+     * Needs {@link Permission#KICK_MEMBERS} and permission to interact with the target
+     * {@link PermissionUtil#canInteract(Member, Member)}
+     *
+     * @param userId The id of the user to kick
+     *
+     * @return A CompletionStage that is finished when the user got kicked
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> kick(final long userId) {
+        return kick(userId, null);
+    }
+    
+    /**
+     * Kicks a member from the Guild.
+     * Needs {@link Permission#KICK_MEMBERS} and permission to interact with the target
+     * {@link PermissionUtil#canInteract(Member, Member)}
+     *
+     * @param member The member to kick
+     * @param reason The reason for the kick
+     *
+     * @return A CompletionStage that is finished when the user got kicked
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> kick(final Member member, @Nullable final String reason) {
+        return kick(member.id(), reason);
+    }
+    
+    /**
+     * Kicks a member from the Guild.
+     * Needs {@link Permission#KICK_MEMBERS} and permission to interact with the target
+     * {@link PermissionUtil#canInteract(Member, Member)}
+     *
+     * @param member The member to kick
+     *
+     * @return A CompletionStage that is finished when the user got kicked
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> kick(final Member member) {
+        return kick(member.id(), null);
+    }
+    
+    /**
+     * Changes the nick of the bots user on the guild
+     * Needs {@link Permission#CHANGE_NICKNAME}
+     *
+     * @param nickname The new nickname
+     * @param reason   The reason of the nickname change
+     *
+     * @return A CompletionStage containing the new nickname
+     *
+     * @throws IllegalArgumentException If the nickname is longer than {@link Guild#NICKNAME_MAX_LENGTH}
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<String> changeNickName(@Nonnull final String nickname, @Nullable final String reason) {
+        if(nickname.length() > NICKNAME_MAX_LENGTH) {
+            throw new IllegalArgumentException("Nickname must not be longer than" + NICKNAME_MAX_LENGTH);
+        }
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.CHANGE_NICKNAME);
+        return catnip().rest().guild().modifyCurrentUsersNick(id(), nickname, reason);
+    }
+    
+    /**
+     * Changes the nick of the bots user on the guild
+     * Needs {@link Permission#CHANGE_NICKNAME}
+     *
+     * @param nickname The new nickname
+     *
+     * @return A CompletionStage containing the new nickname
+     *
+     * @throws IllegalArgumentException If the nickname is longer than {@link Guild#NICKNAME_MAX_LENGTH}
+     */
+    @Nonnull
+    @JsonIgnore
+    @CheckReturnValue
+    default CompletionStage<String> changeNickName(@Nonnull final String nickname) {
+        return changeNickName(nickname, null);
+    }
+    
+    /**
+     * Adds a role to a member.
+     * Needs {@link Permission#MANAGE_ROLES} and permission to interact with the role
+     * {@link PermissionUtil#canInteract(Member, Role)}
+     *
+     * @param role   The role to assign
+     * @param member The member to assign the role to
+     * @param reason The reason that will be displayed in audit log
+     *
+     * @return A CompletionStage that completes when the role got added
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> addRoleToMember(@Nonnull final Role role, @Nonnull final Member member, @Nullable final String reason) {
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_ROLES);
+        PermissionUtil.canInteract(selfMember(), role);
+        return catnip().rest().guild().addGuildMemberRole(id(), member.id(), role.id(), reason);
+    }
+    
+    /**
+     * Adds a role to a member.
+     * Needs {@link Permission#MANAGE_ROLES} and permission to interact with the role
+     * {@link PermissionUtil#canInteract(Member, Role)}
+     *
+     * @param role   The role to assign
+     * @param member The member to assign the role to
+     *
+     * @return A CompletionStage that completes when the role got added
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> addRoleToMember(@Nonnull final Role role, @Nonnull final Member member) {
+        return addRoleToMember(role, member, null);
+    }
+    
+    /**
+     * Removes a role from a member.
+     * Needs {@link Permission#MANAGE_ROLES} and permission to interact with the role
+     * {@link PermissionUtil#canInteract(Member, Role)}
+     *
+     * @param role   The role to remove
+     * @param member The member to remove the role from
+     * @param reason The reason that will be displayed in audit log
+     *
+     * @return A CompletionStage that completes when the role got removed
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> removeRoleFromMember(@Nonnull final Role role, @Nonnull final Member member,
+                                                       @Nullable final String reason) {
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_ROLES);
+        PermissionUtil.checkHierarchy(role, this);
+        return catnip().rest().guild().removeGuildMemberRole(id(), member.id(), role.id(), reason);
+    }
+    
+    /**
+     * Removes a role from a member.
+     * Needs {@link Permission#MANAGE_ROLES} and permission to interact with the role
+     * {@link PermissionUtil#canInteract(Member, Role)}
+     *
+     * @param role   The role to remove
+     * @param member The member to remove the role from
+     *
+     * @return A CompletionStage that completes when the role got removed
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> removeRoleFromMember(@Nonnull final Role role, @Nonnull final Member member) {
+        return removeRoleFromMember(role, member, null);
     }
     
     /**
