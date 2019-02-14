@@ -36,6 +36,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -51,8 +52,8 @@ import java.util.List;
  * @author SamOphis
  * @since 10/10/2018
  */
-@Getter
-@Setter
+@Getter(onMethod_ = {@CheckReturnValue, @Nullable})
+@Setter(onParam_ = @Nonnull, onMethod_ = @Nonnull)
 @NoArgsConstructor
 @Accessors(fluent = true)
 @SuppressWarnings("unused")
@@ -77,12 +78,29 @@ public class MessageOptions {
         }
     }
     
+    /**
+     * Adds a file, used when sending messages. Files are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * <br><p>The name of the file/attachment is taken from {@link File#getName()}.</p>
+     *
+     * @param file A <b>non-null, existing, readable</b> {@link File File} instance.
+     * @return Itself.
+     * @see #addFile(String, File)
+     */
     @CheckReturnValue
     @Nonnull
     public MessageOptions addFile(@Nonnull final File file) {
         return addFile(file.getName(), file);
     }
     
+    /**
+     * Adds a file, used when sending messages. Files are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * <br><p>This allows you to specify a custom name for the file, unlike {@link #addFile(File)}.</p>
+     * @param name A <b>not-null</b> name for the file.
+     * @param file A <b>not-null, existing, readable</b> {@link File File} instance.
+     * @return Itself.
+     * @see #addFile(File)
+     * @see #addFile(String, InputStream)
+     */
     @CheckReturnValue
     @Nonnull
     @SuppressWarnings("WeakerAccess")
@@ -100,6 +118,15 @@ public class MessageOptions {
         }
     }
     
+    /**
+     * Adds an input stream/file, used when sending messages. Files are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * <br><p>This allows you to specify a custom name for the input stream data, unlike {@link #addFile(File)}.</p>
+     * @param name A <b>not-null</b> name for the file.
+     * @param stream A <b>not-null, readable</b> {@link InputStream InputStream}.
+     * @return Itself.
+     * @see #addFile(String, File)
+     * @see #addFile(String, byte[])
+     */
     @CheckReturnValue
     @Nonnull
     public MessageOptions addFile(@Nonnull final String name, @Nonnull final InputStream stream) {
@@ -121,6 +148,15 @@ public class MessageOptions {
         }
     }
     
+    /**
+     * Adds raw data/a file, used when sending messages. Files are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * <br><p>This allows you to specify a custom name for the raw data, unlike {@link #addFile(File)}.</p>
+     * @param name A <b>not-null</b> name for the file.
+     * @param data A <b>not-null</b> byte array containing the raw data for the file.
+     * @return Itself.
+     * @see #addFile(String, File)
+     * @see #addFile(String, InputStream)
+     */
     @CheckReturnValue
     @Nonnull
     @SuppressWarnings("WeakerAccess")
@@ -135,17 +171,35 @@ public class MessageOptions {
         return this;
     }
     
+    /**
+     * Checks to see whether or not this MessageOptions instance has any files attached.
+     * <br><p>This should be used over {@code !files().isEmpty()} because it doesn't construct a new list for each read.</p>
+     * @return True or false.
+     */
     @CheckReturnValue
     public boolean hasFiles() {
         return files != null; // because checking via getter creates a new list each time.
     }
     
+    /**
+     * Constructs a new immutable list containing all of the raw file data. Each immutable pair contains the name and the data buffer.
+     * <br><p>This method is <b>expensive!</b> It constructs a new list each time and should be used sparingly.</p>
+     * @return A copy of the raw file list.
+     */
     @CheckReturnValue
     @Nonnull
     public List<ImmutablePair<String, Buffer>> files() {
         return hasFiles() ? ImmutableList.copyOf(files) : ImmutableList.of();
     }
     
+    /**
+     * Constructs a new {@link Message Message} from the content and {@link Embed Embed} this MessageOptions class stores.
+     * <br><p>Creating messages this way does <b>NOT</b> include the added files, only the content and the embed.
+     * Try to pass the actual options class instead of a {@link Message Message} when sending messages, as otherwise you'll be
+     * performing unnecessary operations.
+     *
+     * @return A new {@link Message Message} instance with the content and {@link Embed Embed} set in this class.
+     */
     @CheckReturnValue
     @Nonnull
     public Message buildMessage() {
