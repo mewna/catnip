@@ -53,7 +53,7 @@ import java.util.List;
  * @since 10/10/2018
  */
 @Getter(onMethod_ = {@CheckReturnValue, @Nullable})
-@Setter(onParam_ = @Nonnull, onMethod_ = @Nonnull)
+@Setter(onParam_ = @Nullable, onMethod_ = @Nonnull)
 @NoArgsConstructor
 @Accessors(fluent = true)
 @SuppressWarnings("unused")
@@ -193,6 +193,19 @@ public class MessageOptions {
     }
     
     /**
+     * Resets this MessageOptions class back to its initial state where there is no content, no embeds or no files.
+     * @return Itself (but with a clean state).
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions clear() {
+        content = null;
+        embed = null;
+        files = null;
+        return this;
+    }
+    
+    /**
      * Constructs a new {@link Message Message} from the content and {@link Embed Embed} this MessageOptions class stores.
      * <br><p>Creating messages this way does <b>NOT</b> include the added files, only the content and the embed.
      * Try to pass the actual options class instead of a {@link Message Message} when sending messages, as otherwise you'll be
@@ -203,6 +216,9 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public Message buildMessage() {
+        if (embed == null && content == null) {
+            throw new IllegalStateException("messages must have an embed or text content!");
+        }
         final MessageImpl impl = new MessageImpl();
         impl.content(content);
         if (embed != null) {
