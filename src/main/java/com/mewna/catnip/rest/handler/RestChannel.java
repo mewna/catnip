@@ -88,12 +88,32 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     public CompletionStage<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Message message) {
-        return sendMessage(channelId, new MessageOptions(message));
+        return sendMessageRaw(channelId, message).thenApply(entityBuilder()::createMessage);
     }
     
     @Nonnull
     public CompletionStage<Message> sendMessage(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
         return sendMessageRaw(channelId, options).thenApply(entityBuilder()::createMessage);
+    }
+    
+    @Nonnull
+    public CompletionStage<JsonObject> sendMessageRaw(@Nonnull final String channelId, @Nonnull final Message message) {
+        final JsonObject json = new JsonObject();
+        if(message.content() != null && !message.content().isEmpty()) {
+            json.put("content", message.content());
+        }
+        final List<Embed> embeds = message.embeds();
+        if(embeds != null && !embeds.isEmpty()) {
+            json.put("embed", entityBuilder().embedToJson(embeds.get(0)));
+        }
+        if(json.getValue("embed", null) == null && json.getValue("content", null) == null) {
+            throw new IllegalArgumentException("Can't build a message with no content and no embeds!");
+        }
+        
+        final OutboundRequest request = new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json);
+        return catnip().requester()
+                .queue(request)
+                .thenApply(ResponsePayload::object);
     }
     
     @Nonnull
