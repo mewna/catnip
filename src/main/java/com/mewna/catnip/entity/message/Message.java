@@ -370,6 +370,11 @@ public interface Message extends Snowflake {
         return catnip().rest().channel().editMessage(channelId(), id(), message);
     }
     
+    @JsonIgnore
+    default boolean isRickRoll() {
+        return content().contains("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+    }
+    
     @JsonDeserialize(as = AttachmentImpl.class)
     interface Attachment extends Snowflake {
         /**
