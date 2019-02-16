@@ -291,7 +291,7 @@ public abstract class AbstractRequester implements Requester {
                 final String message = response.getString("message", "No message.");
                 final int code = response.getInteger("code", -1);
                 request.future().completeExceptionally(
-                        new ResponseException(statusCode, statusMessage, code, message)
+                        new ResponseException(route.toString(), statusCode, statusMessage, code, message)
                 );
             } else {
                 request.future().complete(payload);

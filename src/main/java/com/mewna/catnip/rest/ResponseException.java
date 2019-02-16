@@ -32,21 +32,27 @@ package com.mewna.catnip.rest;
  * @since 02/09/2019
  */
 public class ResponseException extends RuntimeException {
+    private final String route;
     private final int statusCode;
     private final String statusMessage;
     private final int jsonCode;
     private final String jsonMessage;
     
-    public ResponseException(final int statusCode, final String statusMessage, final int jsonCode, final String jsonMessage) {
+    public ResponseException(final String route, final int statusCode, final String statusMessage, final int jsonCode, final String jsonMessage) {
         super(
                 jsonCode == -1 ?
-                        String.format("HTTP Error Code: %d | JSON Message: %s", statusCode, jsonMessage) :
-                        String.format("HTTP Error Code: %d | JSON Message: %s | JSON Error Code: %d", statusCode, jsonMessage, jsonCode)
+                        String.format("%s | HTTP Error Code: %d | JSON Message: %s", route, statusCode, jsonMessage) :
+                        String.format("%s | HTTP Error Code: %d | JSON Message: %s | JSON Error Code: %d", route, statusCode, jsonMessage, jsonCode)
         );
+        this.route = route;
         this.statusCode = statusCode;
         this.statusMessage = statusMessage;
         this.jsonCode = jsonCode;
         this.jsonMessage = jsonMessage;
+    }
+    
+    public String route() {
+        return route;
     }
     
     public int statusCode() {
