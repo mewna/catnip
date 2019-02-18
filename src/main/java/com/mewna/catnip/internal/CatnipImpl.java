@@ -98,7 +98,7 @@ public class CatnipImpl implements Catnip {
     private final ExtensionManager extensionManager = new DefaultExtensionManager(this);
     private final Set<String> unavailableGuilds = ConcurrentHashMap.newKeySet();
     private final AtomicReference<GatewayInfo> gatewayInfo = new AtomicReference<>(null);
-    private final AtomicReference<Long> clientIdAsLong = new AtomicReference<>(null);
+    private long clientIdAsLong;
     
     private DispatchManager dispatchManager;
     private Requester requester;
@@ -217,7 +217,7 @@ public class CatnipImpl implements Catnip {
     
     @Override
     public long clientIdAsLong() {
-        return clientIdAsLong.get();
+        return clientIdAsLong;
     }
     
     @Override
@@ -470,7 +470,7 @@ public class CatnipImpl implements Catnip {
         // the first part is the client id.
         final String clientIdBase64 = token.split("\\.")[0];
         final String clientId = new String(Base64.getDecoder().decode(clientIdBase64));
-        clientIdAsLong.set(Long.parseUnsignedLong(clientId));
+        clientIdAsLong = Long.parseUnsignedLong(clientId);
     }
     
     @Nullable
