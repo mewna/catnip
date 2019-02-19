@@ -390,6 +390,20 @@ public interface Catnip {
     User selfUser();
     
     /**
+     * The ID of this client
+     *
+     * @return The ID of this client.
+     */
+    String clientId();
+    
+    /**
+     * The ID of this client, as a long.
+     *
+     * @return The ID of the client, as a long.
+     */
+    long clientIdAsLong();
+    
+    /**
      * @return The initial presence to set when logging in via the gateway.
      * Will be null if not set via {@link CatnipOptions}.
      */
