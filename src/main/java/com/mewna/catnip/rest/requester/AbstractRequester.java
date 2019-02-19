@@ -279,7 +279,7 @@ public abstract class AbstractRequester implements Requester {
                         arr.stream().map(element -> (String) element).forEach(errorStrings::add);
                         failures.put(e.getKey(), errorStrings);
                     } else if(e.getValue() instanceof Integer) {
-                        failures.put(e.getKey(), ImmutableList.of("" + e.getValue()));
+                        failures.put(e.getKey(), ImmutableList.of("" + e.getValue())); // TODO: How to handle this right?
                     } else {
                         catnip.logAdapter().warn("Got unknown error response type: {}", e.getValue().getClass().getName());
                         failures.put(e.getKey(), ImmutableList.of(String.valueOf(e.getValue())));
@@ -291,7 +291,7 @@ public abstract class AbstractRequester implements Requester {
                 final String message = response.getString("message", "No message.");
                 final int code = response.getInteger("code", -1);
                 request.future().completeExceptionally(
-                        new ResponseException(statusCode, statusMessage, code, message)
+                        new ResponseException(route.toString(), statusCode, statusMessage, code, message)
                 );
             } else {
                 request.future().complete(payload);

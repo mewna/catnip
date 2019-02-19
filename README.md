@@ -25,7 +25,7 @@ No. Use a real build tool like [Maven](https://maven.apache.org/) or [Gradle](ht
 
 ### Javadocs?
 
-[Get them here.](https://mewna.github.io/catnip/)
+[Get them here.](https://mewna.github.io/catnip/docs)
 
 ## Features
 
@@ -125,7 +125,8 @@ where `JsonPojoCodec` is `com.mewna.catnip.util.JsonPojoCodec` and is safe to us
 - JDA is very nice, but doesn't allow for as much freedom with customizing the internals;
   it's more / less "do it this way or use another lib" in my experience.
 - Discord4J is built on [Project Reactor](https://projectreactor.io/); I wanted to be able 
-  to choose a reactive:tm: implementation to use with the lib and not be stuck with just one.
+  to choose a reactive:tm: implementation (callbacks vs. coroutines vs. reactive-streams vs.
+  rx vs. ...) to use with the lib and not be stuck with just one.
 - I didn't want ten billion events for every possible case. catnip maps more/less 1:1 with the
   Discord API, and any "extra" events on top of that need to be user-provided via extensions or
   other means. I guess really I just didn't want my lib to be as "high-level" as other libs are.
@@ -134,16 +135,21 @@ where `JsonPojoCodec` is `com.mewna.catnip.util.JsonPojoCodec` and is safe to us
   ... are incredibly useful.
 - I like everything returning `CompletionStage`s instead of custom classes. I do get why other libs
   have them, I just wanted to not.
+- I wanted modular usage to be exactly the same more / less no matter what; everything
+  should be doable through the catnip instance that you create.
 - I wanted to make a lib built on vert.x.
 - To take over the world and convert all Java bots. :^)
 
 ### Why vert.x?
 
 - vert.x is nice and reactive and async. :tm:
-- You can use callbacks (like we do), but vert.x also provides support for reactive streams, Rx, and kotlin coroutines.
-- There's a *lot* of [vert.x libraries and documentation](https://vertx.io/docs/) for just about anything you want.
+- You can use callbacks (like we do), but vert.x also provides support for reactive streams, Rx,
+  and kotlin coroutines.
+- There's a *lot* of [vert.x libraries and documentation](https://vertx.io/docs/) for just about
+  anything you want.
 - The reactive, event-loop-driven model fits well for a Discord bot use-case.
 
 ## Real-world numbers?
 
-With a bot in ~35k guilds, catnip used ~1.5GB of RAM and <10% CPU on a 2c/4gb VM. Sorry, I lost the screenshots :<
+With a bot in ~35k guilds, catnip used ~1.5GB of RAM and <10% CPU on a 2c/4gb VM.
+Sorry, I lost the screenshots :<

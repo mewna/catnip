@@ -28,7 +28,6 @@
 package com.mewna.catnip.rest.handler;
 
 import com.google.common.collect.ImmutableMap;
-import com.mewna.catnip.entity.builder.MessageBuilder;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.channel.GuildChannel.ChannelEditFields;
@@ -50,8 +49,10 @@ import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
 import com.mewna.catnip.util.QueryStringBuilder;
 import com.mewna.catnip.util.pagination.MessagePaginator;
 import com.mewna.catnip.util.pagination.ReactionPaginator;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -77,12 +78,12 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     public CompletionStage<Message> sendMessage(@Nonnull final String channelId, @Nonnull final String content) {
-        return sendMessage(channelId, new MessageBuilder().content(content).build());
+        return sendMessage(channelId, new MessageOptions().content(content));
     }
     
     @Nonnull
     public CompletionStage<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Embed embed) {
-        return sendMessage(channelId, new MessageBuilder().embed(embed).build());
+        return sendMessage(channelId, new MessageOptions().embed(embed));
     }
     
     @Nonnull
@@ -91,46 +92,50 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
+    public CompletionStage<Message> sendMessage(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
+        return sendMessageRaw(channelId, options).thenApply(entityBuilder()::createMessage);
+    }
+    
+    @Nonnull
     public CompletionStage<JsonObject> sendMessageRaw(@Nonnull final String channelId, @Nonnull final Message message) {
         final JsonObject json = new JsonObject();
         if(message.content() != null && !message.content().isEmpty()) {
             json.put("content", message.content());
         }
-        if(message.embeds() != null && !message.embeds().isEmpty()) {
-            json.put("embed", entityBuilder().embedToJson(message.embeds().get(0)));
+        final List<Embed> embeds = message.embeds();
+        if(embeds != null && !embeds.isEmpty()) {
+            json.put("embed", entityBuilder().embedToJson(embeds.get(0)));
         }
         if(json.getValue("embed", null) == null && json.getValue("content", null) == null) {
             throw new IllegalArgumentException("Can't build a message with no content and no embeds!");
         }
         
-        return catnip().requester().
-                queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json))
+        final OutboundRequest request = new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json);
+        return catnip().requester()
+                .queue(request)
                 .thenApply(ResponsePayload::object);
     }
     
     @Nonnull
-    public final CompletionStage<Message> sendMessage(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
-        return sendMessageRaw(channelId, options).thenApply(entityBuilder()::createMessage);
-    }
-    
-    @Nonnull
-    public final CompletionStage<JsonObject> sendMessageRaw(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
+    public CompletionStage<JsonObject> sendMessageRaw(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
         final JsonObject json = new JsonObject();
-        
         if(options.content() != null && !options.content().isEmpty()) {
             json.put("content", options.content());
         }
-        
         if(options.embed() != null) {
             json.put("embed", entityBuilder().embedToJson(options.embed()));
         }
-        
-        if(json.getValue("embed", null) == null && json.getValue("content", null) == null && !options.hasFiles()) {
-            throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
+        if(json.getValue("embed", null) == null && json.getValue("content", null) == null) {
+            throw new IllegalArgumentException("Can't build a message with no content and no embeds!");
         }
-        
-        return catnip().requester().
-                queue(new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json).buffers(options.files()))
+    
+        final OutboundRequest request = new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json);
+        final List<ImmutablePair<String, Buffer>> buffers = options.files();
+        if(buffers != null && !buffers.isEmpty()) {
+            request.buffers(buffers);
+        }
+        return catnip().requester()
+                .queue(request)
                 .thenApply(ResponsePayload::object);
     }
     
@@ -152,13 +157,13 @@ public class RestChannel extends RestHandler {
     @Nonnull
     public CompletionStage<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
                                                 @Nonnull final String content) {
-        return editMessage(channelId, messageId, new MessageBuilder().content(content).build());
+        return editMessage(channelId, messageId, new MessageOptions().content(content).buildMessage());
     }
     
     @Nonnull
     public CompletionStage<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
                                                 @Nonnull final Embed embed) {
-        return editMessage(channelId, messageId, new MessageBuilder().embed(embed).build());
+        return editMessage(channelId, messageId, new MessageOptions().embed(embed).buildMessage());
     }
     
     @Nonnull
