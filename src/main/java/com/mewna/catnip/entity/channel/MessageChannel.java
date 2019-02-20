@@ -28,6 +28,7 @@
 package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mewna.catnip.entity.impl.MessageImpl;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageOptions;
@@ -63,7 +64,12 @@ public interface MessageChannel extends Channel {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.SEND_MESSAGES);
         }
-        return catnip().rest().channel().sendMessage(id(), content);
+        final CompletionStage<Message> future =  catnip().rest().channel().sendMessage(id(), content);
+        // Inject guild manually because Discord does not send it in response
+        if(isGuild()) {
+            return future.thenApply(msg -> ((MessageImpl) msg).guildIdAsLong(asGuildChannel().guildIdAsLong()));
+        }
+        return future;
     }
     
     /**
