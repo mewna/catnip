@@ -335,6 +335,8 @@ public interface Message extends Snowflake {
         return catnip().rest().channel().addReaction(channelId(), id(), emoji);
     }
     
+//    default CompletionStage<Void> removeReaction()
+    
     @Nonnull
     @JsonIgnore
     default CompletionStage<Void> delete(@Nullable final String reason) {

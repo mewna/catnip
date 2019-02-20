@@ -314,6 +314,22 @@ public interface MessageChannel extends Channel {
     }
     
     /**
+     * Delete all reactions on the given message
+     *
+     * @param messageId The id of the message to remove all reactions from.
+     * @return A CompletionStage that completes when the reaction is removed.
+     */
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Void> bulkRemoveReaction(@Nonnull final String messageId) {
+        if(isGuild()) {
+            PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
+                    Permission.MANAGE_MESSAGES);
+        }
+        return catnip().rest().channel().deleteAllReactions(id(), messageId);
+    }
+    
+    /**
      * Trigger the "[user] is typing..." indicator for yourself in this
      * channel.
      *

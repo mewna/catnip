@@ -662,6 +662,23 @@ class CodecTest {
     }
     
     @Test
+    void channel() {
+        final Catnip mockNip = mockNip();
+        final Channel channel = VoiceChannelImpl.builder()
+                .catnip(mockNip)
+                .idAsLong(randomPositiveLong())
+                .name("This is a voice channel")
+                .guildIdAsLong(randomPositiveLong())
+                .position(1)
+                .parentIdAsLong(randomPositiveLong())
+                .overrides(Arrays.asList(permissionOverride(mockNip), permissionOverride(mockNip)))
+                .bitrate(64)
+                .userLimit(20)
+                .build();
+        test(channel);
+    }
+    
+    @Test
     void voiceChannel() {
         final Catnip mockNip = mockNip();
         final VoiceChannel voiceChannel = VoiceChannelImpl.builder()
