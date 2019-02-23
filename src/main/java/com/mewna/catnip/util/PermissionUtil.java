@@ -155,7 +155,6 @@ public final class PermissionUtil {
     }
     
     public static void checkHierarchy(@Nonnull final Member target, @Nonnull final Guild guild) {
-        System.out.println(target);
         if(!guild.selfMember().canInteract(target)) {
             throw new HierarchyException(guild.selfMember(), target);
         }
@@ -176,6 +175,12 @@ public final class PermissionUtil {
      * @return Whether the actor can interact with the target or not
      */
     public static boolean canInteract(@Nonnull final Member actor, @Nonnull final Member target) {
+        if(actor.isOwner()) {
+            return true;
+        }
+        if(target.isOwner()) {
+            return false;
+        }
         if(actor.roles().isEmpty()) {
             return actor.isOwner();
         }
@@ -233,10 +238,6 @@ public final class PermissionUtil {
      */
     public static boolean canInteract(@Nonnull final Role actor, @Nonnull final Role target) {
         checkGuildEquality(actor, target);
-        System.out.println(actor);
-        System.out.println(target);
-        System.out.println(actor.position());
-        System.out.println(target.position());
         return actor.position() > target.position();
     }
     
