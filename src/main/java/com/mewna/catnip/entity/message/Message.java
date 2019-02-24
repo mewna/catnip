@@ -335,6 +335,8 @@ public interface Message extends Snowflake {
         return catnip().rest().channel().addReaction(channelId(), id(), emoji);
     }
     
+//    default CompletionStage<Void> removeReaction()
+    
     @Nonnull
     @JsonIgnore
     default CompletionStage<Void> delete(@Nullable final String reason) {
@@ -368,6 +370,11 @@ public interface Message extends Snowflake {
     @JsonIgnore
     default CompletionStage<Message> edit(@Nonnull final Message message) {
         return catnip().rest().channel().editMessage(channelId(), id(), message);
+    }
+    
+    @JsonIgnore
+    default boolean isRickRoll() {
+        return content().contains("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
     }
     
     @JsonDeserialize(as = AttachmentImpl.class)

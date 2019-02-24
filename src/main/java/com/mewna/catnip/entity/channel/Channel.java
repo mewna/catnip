@@ -48,7 +48,7 @@ import java.util.concurrent.CompletionStage;
  * @since 9/12/18
  */
 @SuppressWarnings({"ClassReferencesSubclass", "unused"})
-@JsonTypeInfo(use = Id.MINIMAL_CLASS)
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public interface Channel extends Snowflake {
     /**
      * @return The type of this channel.

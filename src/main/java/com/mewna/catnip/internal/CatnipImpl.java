@@ -72,10 +72,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
@@ -101,6 +98,7 @@ public class CatnipImpl implements Catnip {
     private final ExtensionManager extensionManager = new DefaultExtensionManager(this);
     private final Set<String> unavailableGuilds = ConcurrentHashMap.newKeySet();
     private final AtomicReference<GatewayInfo> gatewayInfo = new AtomicReference<>(null);
+    private long clientIdAsLong;
     
     private DispatchManager dispatchManager;
     private Requester requester;
@@ -210,6 +208,16 @@ public class CatnipImpl implements Catnip {
     @Override
     public User selfUser() {
         return cache().selfUser();
+    }
+    
+    @Override
+    public String clientId() {
+        return Long.toUnsignedString(clientIdAsLong());
+    }
+    
+    @Override
+    public long clientIdAsLong() {
+        return clientIdAsLong;
     }
     
     @Override
@@ -333,6 +341,8 @@ public class CatnipImpl implements Catnip {
                     .thenApply(gateway -> {
                         logAdapter.info("Token validated!");
                         
+                        parseClientId();
+                        
                         //this is actually needed because generics are dumb
                         return (Catnip) this;
                     }).exceptionally(e -> {
@@ -341,6 +351,15 @@ public class CatnipImpl implements Catnip {
                     })
                     .toCompletableFuture();
         } else {
+            try {
+                parseClientId();
+            } catch(IllegalArgumentException e) {
+                Exception wrapped = new RuntimeException("The provided token was invalid!", e);
+                // I would use SafeVertxCompletableFuture.failedFuture but that was added in Java 9+
+                // and catnip uses Java 8
+                return SafeVertxCompletableFuture.from(this, Future.failedFuture(wrapped));
+            }
+            
             return SafeVertxCompletableFuture.completedFuture(this);
         }
     }
@@ -444,6 +463,14 @@ public class CatnipImpl implements Catnip {
     private int shardIdFor(@Nonnull final String guildId) {
         final long idLong = Long.parseUnsignedLong(guildId);
         return (int) ((idLong >>> 22) % shardManager.shardCount());
+    }
+    
+    private void parseClientId() {
+        // bot tokens are comprised of 3 parts, each encoded in base 64 and joined by periods.
+        // the first part is the client id.
+        final String clientIdBase64 = token.split("\\.")[0];
+        final String clientId = new String(Base64.getDecoder().decode(clientIdBase64));
+        clientIdAsLong = Long.parseUnsignedLong(clientId);
     }
     
     @Nullable

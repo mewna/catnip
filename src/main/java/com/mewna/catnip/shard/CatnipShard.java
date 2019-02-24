@@ -100,7 +100,17 @@ public class CatnipShard extends AbstractVerticle {
     // This is an AtomicLong instead of a volatile long because IntelliJ got
     // A N G E R Y because I guess longs don't get written atomically.
     private final AtomicLong heartbeatTask = new AtomicLong(-1L);
-    
+    private final Buffer readBuffer = Buffer.buffer();
+    private final Buffer decompressBuffer = Buffer.buffer();
+    private final byte[] decompress = new byte[1024];
+    // aka memory golfing
+    private final String control;
+    private final String websocketQueue;
+    private final String websocketSend;
+    private final String presenceUpdateRequest;
+    private final String voiceStateUpdateQueue;
+    private final GatewayTask<JsonObject> sendTask;
+    private final GatewayTask<PresenceImpl> presenceTask;
     private volatile Presence currentPresence;
     private volatile boolean heartbeatAcked = true;
     private volatile long lastHeartbeat = -1; //use System.nanoTime() as that is monotonic
@@ -111,24 +121,10 @@ public class CatnipShard extends AbstractVerticle {
     private volatile boolean connected;
     private volatile boolean socketOpen;
     private volatile boolean closedByClient;
-    
     private WebSocket socket;
     private Inflater inflater;
-    private final Buffer readBuffer = Buffer.buffer();
-    private final Buffer decompressBuffer = Buffer.buffer();
-    private final byte[] decompress = new byte[1024];
     private int readBufferPosition;
     private Message<ShardControlMessage> message;
-    
-    // aka memory golfing
-    private final String control;
-    private final String websocketQueue;
-    private final String websocketSend;
-    private final String presenceUpdateRequest;
-    private final String voiceStateUpdateQueue;
-    
-    private final GatewayTask<JsonObject> sendTask;
-    private final GatewayTask<PresenceImpl> presenceTask;
     
     public CatnipShard(@Nonnull final Catnip catnip, @Nonnegative final int id, @Nonnegative final int limit,
                        @Nullable final Presence presence) {
@@ -147,9 +143,8 @@ public class CatnipShard extends AbstractVerticle {
         presenceUpdateRequest = computeAddress(PRESENCE_UPDATE_REQUEST, id);
         voiceStateUpdateQueue = computeAddress(VOICE_STATE_UPDATE_QUEUE, id);
         
-        sendTask = GatewayTask.gatewaySendTask(catnip, "catnip:gateway:" + id + ":outgoing-send", object -> {
-            catnip.eventBus().publish(websocketSend, object);
-        });
+        sendTask = GatewayTask.gatewaySendTask(catnip, "catnip:gateway:" + id + ":outgoing-send",
+                object -> catnip.eventBus().publish(websocketSend, object));
         presenceTask = GatewayTask.gatewayPresenceTask(catnip, presenceUpdateRequest, update -> {
             catnip.eventBus().publish(websocketSend,
                     basePayload(GatewayOp.STATUS_UPDATE, update.asJson()));
@@ -192,11 +187,9 @@ public class CatnipShard extends AbstractVerticle {
         
         if(socket != null) {
             closedByClient = true;
-            
             if(socketOpen) {
                 socket.close((short) 4000);
             }
-            
             socketOpen = false;
         }
         heartbeatAcked = true;
@@ -273,10 +266,10 @@ public class CatnipShard extends AbstractVerticle {
                     socket.frameHandler(this::handleSocketFrame)
                             .closeHandler(this::handleSocketClose)
                             .exceptionHandler(t -> {
-                                this.socketOpen = false;
+                                socketOpen = false;
                                 catnip.logAdapter().error("Shard {}/{}: Exception in Websocket", id, limit, t);
                             })
-                            .endHandler(end -> this.socketOpen = false);
+                            .endHandler(end -> socketOpen = false);
                 },
                 failure -> {
                     socket = null;
@@ -305,10 +298,10 @@ public class CatnipShard extends AbstractVerticle {
                     final int length = Math.max(readBufferPosition, binary.length());
                     int r = 0;
                     while(r < length) {
-                        //how many bytes we can read
+                        // How many bytes we can read
                         final int read = Math.min(decompress.length, length - r);
                         dataToDecompress.getBytes(r, r + read, decompress);
-                        //decompress
+                        // Decompress
                         ios.write(decompress, 0, read);
                         r += read;
                     }
@@ -445,7 +438,7 @@ public class CatnipShard extends AbstractVerticle {
                     closedByClient = true;
                     try {
                         socket.close();
-                    } catch(IllegalStateException e) {
+                    } catch(final IllegalStateException e) {
                         // we need to just ignore the exception, vert.x is really retarded
                     }
                     return;
@@ -526,10 +519,10 @@ public class CatnipShard extends AbstractVerticle {
             catnip.cacheWorker().invalidateShard(id);
             catnip.sessionManager().clearSession(id);
             catnip.sessionManager().clearSeqnum(id);
-
+            
             closedByClient = true;
         }
-    
+        
         if(socket != null && socketOpen) {
             socket.close();
         }
