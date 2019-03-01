@@ -46,9 +46,7 @@ import com.mewna.catnip.extension.manager.DefaultExtensionManager;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.requester.Requester;
-import com.mewna.catnip.shard.ShardConnectState;
-import com.mewna.catnip.shard.ShardControlMessage;
-import com.mewna.catnip.shard.ShardInfo;
+import com.mewna.catnip.shard.*;
 import com.mewna.catnip.shard.buffer.EventBuffer;
 import com.mewna.catnip.shard.event.DispatchManager;
 import com.mewna.catnip.shard.manager.ShardManager;
@@ -283,10 +281,11 @@ public class CatnipImpl implements Catnip {
     @Override
     public void chunkMembers(@Nonnull final String guildId, @Nonnull final String query, @Nonnegative final int limit) {
         eventBus().send(computeAddress(WEBSOCKET_QUEUE, shardIdFor(guildId)),
-                new JsonObject()
-                        .put("guild_id", guildId)
-                        .put("query", query)
-                        .put("limit", limit));
+                CatnipShard.basePayload(GatewayOp.REQUEST_GUILD_MEMBERS,
+                        new JsonObject()
+                                .put("guild_id", guildId)
+                                .put("query", query)
+                                .put("limit", limit)));
     }
     
     @Override
