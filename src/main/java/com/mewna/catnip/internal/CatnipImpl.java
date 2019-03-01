@@ -363,8 +363,8 @@ public class CatnipImpl implements Catnip {
         } else {
             try {
                 parseClientId();
-            } catch(IllegalArgumentException e) {
-                Exception wrapped = new RuntimeException("The provided token was invalid!", e);
+            } catch(final IllegalArgumentException e) {
+                final Exception wrapped = new RuntimeException("The provided token was invalid!", e);
                 // I would use SafeVertxCompletableFuture.failedFuture but that was added in Java 9+
                 // and catnip uses Java 8
                 return SafeVertxCompletableFuture.from(this, Future.failedFuture(wrapped));

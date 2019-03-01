@@ -262,10 +262,9 @@ public abstract class AbstractRequester implements Requester {
             rateLimiter.requestExecution(route)
                     .thenRun(() -> executeRequest(request))
                     .exceptionally(e -> {
-                        final Throwable throwable = new Throwable(e);
+                        final Throwable throwable = new RuntimeException("REST error context");
                         throwable.setStackTrace(request.stacktrace());
-                        
-                        request.future().completeExceptionally(throwable);
+                        request.future().completeExceptionally(e.initCause(throwable));
                         return null;
                     });
         } else {
@@ -300,16 +299,16 @@ public abstract class AbstractRequester implements Requester {
                             failures.put(e.getKey(), ImmutableList.of(String.valueOf(e.getValue())));
                         }
                     });
-                    final Throwable throwable = new Throwable(new RestPayloadException(failures));
+                    final Throwable throwable = new RuntimeException("REST error context");
                     throwable.setStackTrace(request.stacktrace());
-                    request.future().completeExceptionally(throwable);
+                    request.future().completeExceptionally(new RestPayloadException(failures).initCause(throwable));
                 } else {
                     final String message = response.getString("message", "No message.");
                     final int code = response.getInteger("code", -1);
-                    final Throwable throwable = new Throwable(new ResponseException(route.toString(), statusCode,
-                            statusMessage, code, message));
+                    final Throwable throwable = new RuntimeException("REST error context");
                     throwable.setStackTrace(request.stacktrace());
-                    request.future().completeExceptionally(throwable);
+                    request.future().completeExceptionally(new ResponseException(route.toString(), statusCode,
+                            statusMessage, code, message).initCause(throwable));
                 }
             } else {
                 request.future().complete(payload);
