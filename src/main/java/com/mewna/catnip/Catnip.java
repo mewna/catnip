@@ -188,7 +188,7 @@ public interface Catnip {
     /**
      * Fetches the gateway info and updates the cache. Calls made to {@link #gatewayInfo()}
      * after this stage completes successfully are guaranteed to return a non null value.
-     *
+     * <p>
      * Updates the cached gateway info.
      *
      * @return The gateway info fetched from discord.
@@ -338,6 +338,7 @@ public interface Catnip {
     /**
      * @return Whether or not this catnip instance will capture stacktraces
      * before sending REST requests. This is useful for debugging.
+     *
      * @see CatnipOptions#captureRestStacktraces
      */
     boolean captureRestStacktraces();
@@ -464,6 +465,84 @@ public interface Catnip {
      * @param guildId Guild to disconnect.
      */
     void closeVoiceConnection(long guildId);
+    
+    /**
+     * Request all guild members for the given guild.
+     *
+     * @param guildId Guild to request for.
+     */
+    default void chunkMembers(final long guildId) {
+        chunkMembers(Long.toString(guildId));
+    }
+    
+    /**
+     * Request all guild members for the given guild.
+     *
+     * @param guildId Guild to request for.
+     */
+    default void chunkMembers(@Nonnull final String guildId) {
+        chunkMembers(guildId, "", 0);
+    }
+    
+    /**
+     * Request guild members for the given guild.
+     *
+     * @param guildId Guild to request for.
+     * @param query   Member names must start with this.
+     */
+    default void chunkMembers(final long guildId, @Nonnull final String query) {
+        chunkMembers(Long.toString(guildId), query);
+    }
+    
+    /**
+     * Request guild members for the given guild.
+     *
+     * @param guildId Guild to request for.
+     * @param query   Member names must start with this.
+     */
+    default void chunkMembers(@Nonnull final String guildId, @Nonnull final String query) {
+        chunkMembers(guildId, query, 0);
+    }
+    
+    /**
+     * Request guild members for the given guild.
+     *
+     * @param guildId Guild to request for.
+     * @param limit   Maximum number of members to return. 0 for no limit.
+     */
+    default void chunkMembers(final long guildId, @Nonnegative final int limit) {
+        chunkMembers(Long.toString(guildId), "", limit);
+    }
+    
+    /**
+     * Request guild members for the given guild.
+     *
+     * @param guildId Guild to request for.
+     * @param limit   Maximum number of members to return. 0 for no limit.
+     */
+    default void chunkMembers(@Nonnull final String guildId, @Nonnegative final int limit) {
+        chunkMembers(guildId, "", limit);
+    }
+    
+    /**
+     * Request guild members for the given guild.
+     *
+     * @param guildId Guild to request for.
+     * @param query   Members returned must have a username starting with this.
+     * @param limit   Maximum number of members to return. 0 for no limit.
+     */
+    default void chunkMembers(final long guildId, @Nonnull final String query, @Nonnegative final int limit) {
+        chunkMembers(Long.toString(guildId), query, limit);
+    }
+    
+    /**
+     * Request guild members for the given guild.
+     *
+     * @param guildId Guild to request for.
+     * @param query   Members returned must have a username starting with this.
+     * @param limit   Maximum number of members to return. 0 for no limit.
+     */
+    void chunkMembers(@Nonnull String guildId, @Nonnull String query, @Nonnegative int limit);
     
     /**
      * Get the presence for the specified shard.

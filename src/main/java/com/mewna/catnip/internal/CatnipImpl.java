@@ -281,6 +281,15 @@ public class CatnipImpl implements Catnip {
     }
     
     @Override
+    public void chunkMembers(@Nonnull final String guildId, @Nonnull final String query, @Nonnegative final int limit) {
+        eventBus().send(computeAddress(WEBSOCKET_QUEUE, shardIdFor(guildId)),
+                new JsonObject()
+                        .put("guild_id", guildId)
+                        .put("query", query)
+                        .put("limit", limit));
+    }
+    
+    @Override
     public CompletionStage<Presence> presence(@Nonnegative final int shardId) {
         final Future<Presence> future = Future.future();
         eventBus().send(
