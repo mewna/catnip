@@ -94,7 +94,14 @@ public abstract class AbstractRequester implements Requester {
     public CompletionStage<ResponsePayload> queue(@Nonnull final OutboundRequest r) {
         final CompletableFuture<ResponsePayload> future = new SafeVertxCompletableFuture<>(catnip);
         final Bucket bucket = getBucket(r.route());
-        bucket.queueRequest(new QueuedRequest(r, r.route(), future, bucket));
+        // Capture stacktrace if possible
+        final StackTraceElement[] stacktrace;
+        if(catnip.captureRestStacktraces()) {
+            stacktrace = Thread.currentThread().getStackTrace();
+        } else {
+            stacktrace = new StackTraceElement[0];
+        }
+        bucket.queueRequest(new QueuedRequest(r, r.route(), future, bucket, stacktrace));
         return future;
     }
     
@@ -255,7 +262,10 @@ public abstract class AbstractRequester implements Requester {
             rateLimiter.requestExecution(route)
                     .thenRun(() -> executeRequest(request))
                     .exceptionally(e -> {
-                        request.future().completeExceptionally(e);
+                        final Throwable throwable = new Throwable(e);
+                        throwable.setStackTrace(request.stacktrace());
+                        
+                        request.future().completeExceptionally(throwable);
                         return null;
                     });
         } else {
@@ -290,13 +300,16 @@ public abstract class AbstractRequester implements Requester {
                             failures.put(e.getKey(), ImmutableList.of(String.valueOf(e.getValue())));
                         }
                     });
-                    request.future().completeExceptionally(new RestPayloadException(failures));
+                    final Throwable throwable = new Throwable(new RestPayloadException(failures));
+                    throwable.setStackTrace(request.stacktrace());
+                    request.future().completeExceptionally(throwable);
                 } else {
                     final String message = response.getString("message", "No message.");
                     final int code = response.getInteger("code", -1);
-                    request.future().completeExceptionally(
-                            new ResponseException(route.toString(), statusCode, statusMessage, code, message)
-                    );
+                    final Throwable throwable = new Throwable(new ResponseException(route.toString(), statusCode,
+                            statusMessage, code, message));
+                    throwable.setStackTrace(request.stacktrace());
+                    request.future().completeExceptionally(throwable);
                 }
             } else {
                 request.future().complete(payload);
@@ -366,14 +379,15 @@ public abstract class AbstractRequester implements Requester {
         }
     }
     
-    @RequiredArgsConstructor
     @Getter
     @Accessors(fluent = true)
+    @RequiredArgsConstructor
     protected static class QueuedRequest {
         protected final OutboundRequest request;
         protected final Route route;
         protected final CompletableFuture<ResponsePayload> future;
         protected final Bucket bucket;
+        protected final StackTraceElement[] stacktrace;
         protected int failedAttempts;
         private long start;
         

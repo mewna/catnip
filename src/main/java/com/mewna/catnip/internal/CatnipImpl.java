@@ -112,6 +112,7 @@ public class CatnipImpl implements Catnip {
     private boolean chunkMembers;
     private boolean emitEventObjects;
     private boolean enforcePermissions;
+    private boolean captureRestStacktraces;
     private Presence initialPresence;
     private Set<String> disabledEvents;
     private CatnipOptions options;
@@ -141,6 +142,7 @@ public class CatnipImpl implements Catnip {
         chunkMembers = options.chunkMembers();
         emitEventObjects = options.emitEventObjects();
         enforcePermissions = options.enforcePermissions();
+        captureRestStacktraces = options.captureRestStacktraces();
         initialPresence = options.presence();
         disabledEvents = ImmutableSet.copyOf(options.disabledEvents());
         

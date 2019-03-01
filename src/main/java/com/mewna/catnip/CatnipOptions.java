@@ -174,6 +174,23 @@ public final class CatnipOptions implements Cloneable {
      * May not be overridden by extensions.
      */
     private boolean validateToken = true;
+    /**
+     * Whether or not catnip should capture REST stacktraces before running
+     * REST requests.
+     * <p>
+     * catnip runs REST requests asynchronously. Because of this, we lose the
+     * caller's stacktrace, and exceptions thrown from REST calls are lost to
+     * the ether basically. If this option is enabled, catnip will capture a
+     * stacktrace before REST requests, and make it available to any exceptions
+     * thrown by the REST handler.
+     * <p>
+     * NOTE: Capturing stacktraces is <strong>s l o w</strong>. If you have
+     * performance problems around REST requests, you can disable this, at the
+     * cost of losing debugability.
+     * <p>
+     * TODO: When we move off of Java 8, use the stack walking API for this
+     */
+    private boolean captureRestStacktraces = true;
     
     @Override
     public Object clone() {

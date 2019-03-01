@@ -336,6 +336,13 @@ public interface Catnip {
     boolean enforcePermissions();
     
     /**
+     * @return Whether or not this catnip instance will capture stacktraces
+     * before sending REST requests. This is useful for debugging.
+     * @see CatnipOptions#captureRestStacktraces
+     */
+    boolean captureRestStacktraces();
+    
+    /**
      * @return A set of all ids of unavailable guilds.
      */
     @Nonnull
