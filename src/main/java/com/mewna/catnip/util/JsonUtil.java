@@ -58,6 +58,20 @@ public final class JsonUtil {
     
     @Nonnull
     @CheckReturnValue
+    public static <T> List<T> toListFromCache(@Nullable final JsonArray array, @Nonnull final Function<String, T> mapper) {
+        if(array == null) {
+            return Collections.emptyList();
+        }
+        final List<T> ret = new ArrayList<>(array.size());
+        for(final Object object : array) {
+            final String s = (String) object;
+            ret.add(mapper.apply(s));
+        }
+        return Collections.unmodifiableList(ret);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public static <T> Set<T> toSet(@Nullable final JsonArray array, @Nonnull final Function<JsonObject, T> mapper) {
         if(array == null) {
             return Collections.emptySet();

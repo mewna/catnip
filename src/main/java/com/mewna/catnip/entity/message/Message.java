@@ -34,6 +34,7 @@ import com.mewna.catnip.entity.channel.MessageChannel;
 import com.mewna.catnip.entity.channel.TextChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
+import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.impl.MessageImpl;
 import com.mewna.catnip.entity.impl.MessageImpl.AttachmentImpl;
 import com.mewna.catnip.entity.impl.MessageImpl.ReactionImpl;
@@ -132,7 +133,7 @@ public interface Message extends Snowflake {
      */
     @Nonnull
     @CheckReturnValue
-    List<String> mentionedRoles();
+    List<Role> mentionedRoles();
     
     /**
      * The author of the message, as a member of the guild.

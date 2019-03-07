@@ -803,7 +803,7 @@ public final class EntityBuilder {
                 .tts(data.getBoolean("tts", false))
                 .mentionsEveryone(data.getBoolean("mention_everyone", false))
                 .mentionedUsers(toList(data.getJsonArray("mentions"), this::createUser))
-                .mentionedRoles(toStringList(data.getJsonArray("mention_roles")))
+                .mentionedRoles(toListFromCache(data.getJsonArray("mention_roles"), e -> catnip.cache().role(guildId, e)))
                 .attachments(toList(data.getJsonArray("attachments"), this::createAttachment))
                 .embeds(toList(data.getJsonArray("embeds"), this::createEmbed))
                 .reactions(toList(data.getJsonArray("reactions"), e -> createReaction(data.getString("guild_id"), e)))
