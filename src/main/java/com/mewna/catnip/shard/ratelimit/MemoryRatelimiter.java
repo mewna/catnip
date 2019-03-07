@@ -46,7 +46,11 @@ public final class MemoryRatelimiter implements Ratelimiter {
         if(buckets.containsKey(id)) {
             final Bucket bucket = buckets.get(id);
             if(bucket.resetAt < now) { // handle reset
-                bucket.remaining = bucket.limit; //TODO(shred): assert bucket.limit == limit for safety/sanity?
+                if(bucket.limit != limit) {
+                    throw new IllegalArgumentException("Bucket " + id + " has limit of " + bucket.limit +
+                            ", but is ratelimit-checked with a limit of " + limit);
+                }
+                bucket.remaining = bucket.limit;
                 bucket.resetAt = now + period;
             } else if(bucket.remaining <= 0) { //no permits available
                 return ImmutablePair.of(true, 0L);

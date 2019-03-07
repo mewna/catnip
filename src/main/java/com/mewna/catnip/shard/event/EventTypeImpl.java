@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2019 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,7 +25,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.shard;
+package com.mewna.catnip.shard.event;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -44,15 +44,15 @@ import javax.annotation.Nonnull;
 @Getter
 @Accessors(fluent = true)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-class EventTypeImpl<T> implements EventType<T> {
+public class EventTypeImpl<T> implements EventType<T> {
     private final String key;
     private final Class<T> payloadClass;
     
-    static <T> EventType<T> event(@Nonnull final String key, @Nonnull final Class<T> payloadClass) {
+    public static <T> EventType<T> event(@Nonnull final String key, @Nonnull final Class<T> payloadClass) {
         return new EventTypeImpl<>(key, payloadClass);
     }
     
-    static EventType<Void> notFired(@Nonnull final String key) {
+    public static EventType<Void> notFired(@Nonnull final String key) {
         return new EventTypeImpl<Void>(key, Void.class) {
             @Nonnull
             @CheckReturnValue

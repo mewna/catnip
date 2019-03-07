@@ -34,13 +34,13 @@ import com.mewna.catnip.entity.guild.*;
 import com.mewna.catnip.entity.message.*;
 import com.mewna.catnip.entity.misc.Ready;
 import com.mewna.catnip.entity.misc.Resumed;
-import com.mewna.catnip.entity.user.PresenceUpdate;
-import com.mewna.catnip.entity.user.TypingUser;
-import com.mewna.catnip.entity.user.User;
-import com.mewna.catnip.entity.user.VoiceState;
+import com.mewna.catnip.entity.user.*;
 import com.mewna.catnip.entity.voice.VoiceServerUpdate;
+import com.mewna.catnip.shard.event.DoubleEventType;
+import com.mewna.catnip.shard.event.EventType;
 
-import static com.mewna.catnip.shard.EventTypeImpl.event;
+import static com.mewna.catnip.shard.event.DoubleEventTypeImpl.doubleEvent;
+import static com.mewna.catnip.shard.event.EventTypeImpl.event;
 
 /**
  * See the Discord docs for more information about each kind of event.
@@ -51,41 +51,41 @@ import static com.mewna.catnip.shard.EventTypeImpl.event;
 @SuppressWarnings({"unused", "OverlyCoupledClass"})
 public interface DiscordEvent {
     // @formatter:off
-    EventType<Channel>              CHANNEL_CREATE              = event(Raw.CHANNEL_CREATE, Channel.class);
-    EventType<Channel>              CHANNEL_UPDATE              = event(Raw.CHANNEL_UPDATE, Channel.class);
-    EventType<Channel>              CHANNEL_DELETE              = event(Raw.CHANNEL_DELETE, Channel.class);
-    EventType<ChannelPinsUpdate>    CHANNEL_PINS_UPDATE         = event(Raw.CHANNEL_PINS_UPDATE, ChannelPinsUpdate.class);
-    EventType<WebhooksUpdate>       WEBHOOKS_UPDATE             = event(Raw.WEBHOOKS_UPDATE, WebhooksUpdate.class);
-    EventType<Guild>                GUILD_CREATE                = event(Raw.GUILD_CREATE, Guild.class);
-    EventType<Guild>                GUILD_AVAILABLE             = event(Raw.GUILD_AVAILABLE, Guild.class);
-    EventType<Guild>                GUILD_DELETE                = event(Raw.GUILD_DELETE, Guild.class);
-    EventType<UnavailableGuild>     GUILD_UNAVAILABLE           = event(Raw.GUILD_UNAVAILABLE, UnavailableGuild.class);
-    EventType<Guild>                GUILD_UPDATE                = event(Raw.GUILD_UPDATE, Guild.class);
-    EventType<EmojiUpdate>          GUILD_EMOJIS_UPDATE         = event(Raw.GUILD_EMOJIS_UPDATE, EmojiUpdate.class);
-    EventType<Member>               GUILD_MEMBER_ADD            = event(Raw.GUILD_MEMBER_ADD, Member.class);
-    EventType<Member>               GUILD_MEMBER_REMOVE         = event(Raw.GUILD_MEMBER_REMOVE, Member.class);
-    EventType<PartialMember>        GUILD_MEMBER_UPDATE         = event(Raw.GUILD_MEMBER_UPDATE, PartialMember.class);
-    EventType<Role>                 GUILD_ROLE_CREATE           = event(Raw.GUILD_ROLE_CREATE, Role.class);
-    EventType<Role>                 GUILD_ROLE_UPDATE           = event(Raw.GUILD_ROLE_UPDATE, Role.class);
-    EventType<PartialRole>          GUILD_ROLE_DELETE           = event(Raw.GUILD_ROLE_DELETE, PartialRole.class);
-    EventType<User>                 USER_UPDATE                 = event(Raw.USER_UPDATE, User.class);
-    EventType<VoiceServerUpdate>    VOICE_SERVER_UPDATE         = event(Raw.VOICE_SERVER_UPDATE, VoiceServerUpdate.class);
-    EventType<Message>              MESSAGE_CREATE              = event(Raw.MESSAGE_CREATE, Message.class);
-    EventType<Message>              MESSAGE_UPDATE              = event(Raw.MESSAGE_UPDATE, Message.class);
-    EventType<MessageEmbedUpdate>   MESSAGE_EMBEDS_UPDATE       = event(Raw.MESSAGE_EMBEDS_UPDATE, MessageEmbedUpdate.class);
-    EventType<DeletedMessage>       MESSAGE_DELETE              = event(Raw.MESSAGE_DELETE, DeletedMessage.class);
-    EventType<BulkDeletedMessages>  MESSAGE_DELETE_BULK         = event(Raw.MESSAGE_DELETE_BULK, BulkDeletedMessages.class);
-    EventType<String>               GUILD_INTEGRATIONS_UPDATE   = event(Raw.GUILD_INTEGRATIONS_UPDATE, String.class);
-    EventType<GatewayGuildBan>      GUILD_BAN_ADD               = event(Raw.GUILD_BAN_ADD, GatewayGuildBan.class);
-    EventType<GatewayGuildBan>      GUILD_BAN_REMOVE            = event(Raw.GUILD_BAN_REMOVE, GatewayGuildBan.class);
-    EventType<ReactionUpdate>       MESSAGE_REACTION_ADD        = event(Raw.MESSAGE_REACTION_ADD, ReactionUpdate.class);
-    EventType<ReactionUpdate>       MESSAGE_REACTION_REMOVE     = event(Raw.MESSAGE_REACTION_REMOVE, ReactionUpdate.class);
-    EventType<BulkRemovedReactions> MESSAGE_REACTION_REMOVE_ALL = event(Raw.MESSAGE_REACTION_REMOVE_ALL, BulkRemovedReactions.class);
-    EventType<PresenceUpdate>       PRESENCE_UPDATE             = event(Raw.PRESENCE_UPDATE, PresenceUpdate.class);
-    EventType<Ready>                READY                       = event(Raw.READY, Ready.class);
-    EventType<Resumed>              RESUMED                     = event(Raw.RESUMED, Resumed.class);
-    EventType<TypingUser>           TYPING_START                = event(Raw.TYPING_START, TypingUser.class);
-    EventType<VoiceState>           VOICE_STATE_UPDATE          = event(Raw.VOICE_STATE_UPDATE, VoiceState.class);
+    EventType<Channel>                        CHANNEL_CREATE              = event(Raw.CHANNEL_CREATE, Channel.class);
+    EventType<Channel>                        CHANNEL_UPDATE              = event(Raw.CHANNEL_UPDATE, Channel.class);
+    EventType<Channel>                        CHANNEL_DELETE              = event(Raw.CHANNEL_DELETE, Channel.class);
+    EventType<ChannelPinsUpdate>              CHANNEL_PINS_UPDATE         = event(Raw.CHANNEL_PINS_UPDATE, ChannelPinsUpdate.class);
+    EventType<WebhooksUpdate>                 WEBHOOKS_UPDATE             = event(Raw.WEBHOOKS_UPDATE, WebhooksUpdate.class);
+    EventType<Guild>                          GUILD_CREATE                = event(Raw.GUILD_CREATE, Guild.class);
+    EventType<Guild>                          GUILD_AVAILABLE             = event(Raw.GUILD_AVAILABLE, Guild.class);
+    EventType<Guild>                          GUILD_DELETE                = event(Raw.GUILD_DELETE, Guild.class);
+    EventType<UnavailableGuild>               GUILD_UNAVAILABLE           = event(Raw.GUILD_UNAVAILABLE, UnavailableGuild.class);
+    DoubleEventType<Guild, Guild>             GUILD_UPDATE                = doubleEvent(Raw.GUILD_UPDATE, Guild.class, Guild.class);
+    EventType<EmojiUpdate>                    GUILD_EMOJIS_UPDATE         = event(Raw.GUILD_EMOJIS_UPDATE, EmojiUpdate.class);
+    EventType<Member>                         GUILD_MEMBER_ADD            = event(Raw.GUILD_MEMBER_ADD, Member.class);
+    EventType<Member>                         GUILD_MEMBER_REMOVE         = event(Raw.GUILD_MEMBER_REMOVE, Member.class);
+    DoubleEventType<Member, PartialMember>    GUILD_MEMBER_UPDATE         = doubleEvent(Raw.GUILD_MEMBER_UPDATE, Member.class, PartialMember.class);
+    EventType<Role>                           GUILD_ROLE_CREATE           = event(Raw.GUILD_ROLE_CREATE, Role.class);
+    DoubleEventType<Role, Role>               GUILD_ROLE_UPDATE           = doubleEvent(Raw.GUILD_ROLE_UPDATE, Role.class, Role.class);
+    EventType<PartialRole>                    GUILD_ROLE_DELETE           = event(Raw.GUILD_ROLE_DELETE, PartialRole.class);
+    DoubleEventType<User, User>               USER_UPDATE                 = doubleEvent(Raw.USER_UPDATE, User.class, User.class);
+    EventType<VoiceServerUpdate>              VOICE_SERVER_UPDATE         = event(Raw.VOICE_SERVER_UPDATE, VoiceServerUpdate.class);
+    EventType<Message>                        MESSAGE_CREATE              = event(Raw.MESSAGE_CREATE, Message.class);
+    EventType<Message>                        MESSAGE_UPDATE              = event(Raw.MESSAGE_UPDATE, Message.class);
+    EventType<MessageEmbedUpdate>             MESSAGE_EMBEDS_UPDATE       = event(Raw.MESSAGE_EMBEDS_UPDATE, MessageEmbedUpdate.class);
+    EventType<DeletedMessage>                 MESSAGE_DELETE              = event(Raw.MESSAGE_DELETE, DeletedMessage.class);
+    EventType<BulkDeletedMessages>            MESSAGE_DELETE_BULK         = event(Raw.MESSAGE_DELETE_BULK, BulkDeletedMessages.class);
+    EventType<String>                         GUILD_INTEGRATIONS_UPDATE   = event(Raw.GUILD_INTEGRATIONS_UPDATE, String.class);
+    EventType<GatewayGuildBan>                GUILD_BAN_ADD               = event(Raw.GUILD_BAN_ADD, GatewayGuildBan.class);
+    EventType<GatewayGuildBan>                GUILD_BAN_REMOVE            = event(Raw.GUILD_BAN_REMOVE, GatewayGuildBan.class);
+    EventType<ReactionUpdate>                 MESSAGE_REACTION_ADD        = event(Raw.MESSAGE_REACTION_ADD, ReactionUpdate.class);
+    EventType<ReactionUpdate>                 MESSAGE_REACTION_REMOVE     = event(Raw.MESSAGE_REACTION_REMOVE, ReactionUpdate.class);
+    EventType<BulkRemovedReactions>           MESSAGE_REACTION_REMOVE_ALL = event(Raw.MESSAGE_REACTION_REMOVE_ALL, BulkRemovedReactions.class);
+    DoubleEventType<Presence, PresenceUpdate> PRESENCE_UPDATE             = doubleEvent(Raw.PRESENCE_UPDATE, Presence.class, PresenceUpdate.class);
+    EventType<Ready>                          READY                       = event(Raw.READY, Ready.class);
+    EventType<Resumed>                        RESUMED                     = event(Raw.RESUMED, Resumed.class);
+    EventType<TypingUser>                     TYPING_START                = event(Raw.TYPING_START, TypingUser.class);
+    EventType<VoiceState>                     VOICE_STATE_UPDATE          = event(Raw.VOICE_STATE_UPDATE, VoiceState.class);
     // @formatter:on
     
     /**

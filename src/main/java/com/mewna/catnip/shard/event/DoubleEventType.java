@@ -25,51 +25,49 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.rest;
+package com.mewna.catnip.shard.event;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
 
 /**
- * @author SamOphis
- * @since 02/09/2019
+ * @author amy
+ * @since 3/7/19.
  */
-public class ResponseException extends RuntimeException {
-    private final String route;
-    private final int statusCode;
-    private final String statusMessage;
-    private final int jsonCode;
-    private final String jsonMessage;
+public interface DoubleEventType<T, E> {
+    /**
+     * Key used in the event bus.
+     *
+     * @return Key where this event is fired in the bus.
+     */
+    @Nonnull
+    @CheckReturnValue
+    String key();
     
-    public ResponseException(final String route, final int statusCode, final String statusMessage, final int jsonCode,
-                             final String jsonMessage) {
-        super(
-                jsonCode == -1 ?
-                        String.format("%s | HTTP Error Code: %d | JSON Message: %s", route, statusCode, jsonMessage) :
-                        String.format("%s | HTTP Error Code: %d | JSON Message: %s | JSON Error Code: %d",
-                                route, statusCode, jsonMessage, jsonCode)
-        );
-        this.route = route;
-        this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
-        this.jsonCode = jsonCode;
-        this.jsonMessage = jsonMessage;
-    }
+    /**
+     * @return The "left side" of this event. Is the first event that the
+     * consumer must handle.
+     */
+    @Nonnull
+    @CheckReturnValue
+    Class<T> left();
     
-    public String route() {
-        return route;
-    }
+    /**
+     * @return The "right side" of this event. Is the second event that the
+     * consumer must handle.
+     */
+    @Nonnull
+    @CheckReturnValue
+    Class<E> right();
     
-    public int statusCode() {
-        return statusCode;
-    }
-    
-    public String statusMessage() {
-        return statusMessage;
-    }
-    
-    public int jsonCode() {
-        return jsonCode;
-    }
-    
-    public String jsonMessage() {
-        return jsonMessage;
-    }
+    /**
+     * Classes sent in the event payload.
+     *
+     * @return A {@link Pair} of the classes that this event fires, in order.
+     */
+    @Nonnull
+    @CheckReturnValue
+    Pair<Class<T>, Class<E>> payloadClasses();
 }

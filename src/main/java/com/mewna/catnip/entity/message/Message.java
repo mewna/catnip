@@ -34,6 +34,7 @@ import com.mewna.catnip.entity.channel.MessageChannel;
 import com.mewna.catnip.entity.channel.TextChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
+import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.impl.MessageImpl;
 import com.mewna.catnip.entity.impl.MessageImpl.AttachmentImpl;
 import com.mewna.catnip.entity.impl.MessageImpl.ReactionImpl;
@@ -126,13 +127,12 @@ public interface Message extends Snowflake {
     /**
      * List of roles @mentioned by this message.
      * <br>All users with these roles will also be mentioned
-     * //TODO: Check if users are included in mentionedUsers() and include that.
      *
      * @return List of Roles. Never null.
      */
     @Nonnull
     @CheckReturnValue
-    List<String> mentionedRoles();
+    List<Role> mentionedRoles();
     
     /**
      * The author of the message, as a member of the guild.
@@ -165,8 +165,7 @@ public interface Message extends Snowflake {
     OffsetDateTime editedTimestamp();
     
     /**
-     * The message's content.
-     * //TODO: Check if embed-only messages return null.
+     * The message's content. Is just an empty string for embed-only messages.
      *
      * @return String containing the message body. Never null.
      */
@@ -205,8 +204,7 @@ public interface Message extends Snowflake {
         if(guild != 0) {
             return (TextChannel) catnip().cache().channel(guild, channelIdAsLong());
         } else {
-            //TODO: should we change cache to store by private channel id instead?
-            return catnip().cache().dmChannel(author().idAsLong());
+            return catnip().cache().dmChannel(channelIdAsLong());
         }
     }
     
@@ -335,6 +333,8 @@ public interface Message extends Snowflake {
         return catnip().rest().channel().addReaction(channelId(), id(), emoji);
     }
     
+//    default CompletionStage<Void> removeReaction()
+    
     @Nonnull
     @JsonIgnore
     default CompletionStage<Void> delete(@Nullable final String reason) {
@@ -368,6 +368,11 @@ public interface Message extends Snowflake {
     @JsonIgnore
     default CompletionStage<Message> edit(@Nonnull final Message message) {
         return catnip().rest().channel().editMessage(channelId(), id(), message);
+    }
+    
+    @JsonIgnore
+    default boolean isRickRoll() {
+        return content().contains("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
     }
     
     @JsonDeserialize(as = AttachmentImpl.class)

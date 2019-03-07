@@ -46,9 +46,7 @@ import com.mewna.catnip.extension.manager.DefaultExtensionManager;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.requester.Requester;
-import com.mewna.catnip.shard.ShardConnectState;
-import com.mewna.catnip.shard.ShardControlMessage;
-import com.mewna.catnip.shard.ShardInfo;
+import com.mewna.catnip.shard.*;
 import com.mewna.catnip.shard.buffer.EventBuffer;
 import com.mewna.catnip.shard.event.DispatchManager;
 import com.mewna.catnip.shard.manager.ShardManager;
@@ -72,10 +70,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
@@ -101,6 +96,7 @@ public class CatnipImpl implements Catnip {
     private final ExtensionManager extensionManager = new DefaultExtensionManager(this);
     private final Set<String> unavailableGuilds = ConcurrentHashMap.newKeySet();
     private final AtomicReference<GatewayInfo> gatewayInfo = new AtomicReference<>(null);
+    private long clientIdAsLong;
     
     private DispatchManager dispatchManager;
     private Requester requester;
@@ -114,6 +110,7 @@ public class CatnipImpl implements Catnip {
     private boolean chunkMembers;
     private boolean emitEventObjects;
     private boolean enforcePermissions;
+    private boolean captureRestStacktraces;
     private Presence initialPresence;
     private Set<String> disabledEvents;
     private CatnipOptions options;
@@ -143,6 +140,7 @@ public class CatnipImpl implements Catnip {
         chunkMembers = options.chunkMembers();
         emitEventObjects = options.emitEventObjects();
         enforcePermissions = options.enforcePermissions();
+        captureRestStacktraces = options.captureRestStacktraces();
         initialPresence = options.presence();
         disabledEvents = ImmutableSet.copyOf(options.disabledEvents());
         
@@ -213,6 +211,16 @@ public class CatnipImpl implements Catnip {
     }
     
     @Override
+    public String clientId() {
+        return Long.toUnsignedString(clientIdAsLong());
+    }
+    
+    @Override
+    public long clientIdAsLong() {
+        return clientIdAsLong;
+    }
+    
+    @Override
     public void shutdown(final boolean vertx) {
         shardManager.shutdown();
         if(vertx) {
@@ -240,19 +248,15 @@ public class CatnipImpl implements Catnip {
     }
     
     @Override
-    public void openVoiceConnection(@Nonnull final String guildId, @Nonnull final String channelId) {
+    public void openVoiceConnection(@Nonnull final String guildId, @Nonnull final String channelId, final boolean selfMute,
+                                    final boolean selfDeaf) {
         PermissionUtil.checkPermissions(this, guildId, channelId, Permission.CONNECT);
         eventBus().send(computeAddress(VOICE_STATE_UPDATE_QUEUE, shardIdFor(guildId)),
                 new JsonObject()
                         .put("guild_id", guildId)
                         .put("channel_id", channelId)
-                        .put("self_mute", false)
-                        .put("self_deaf", false));
-    }
-    
-    @Override
-    public void openVoiceConnection(final long guildId, final long channelId) {
-        openVoiceConnection(String.valueOf(guildId), String.valueOf(channelId));
+                        .put("self_mute", selfMute)
+                        .put("self_deaf", selfDeaf));
     }
     
     @Override
@@ -268,6 +272,16 @@ public class CatnipImpl implements Catnip {
     @Override
     public void closeVoiceConnection(final long guildId) {
         closeVoiceConnection(String.valueOf(guildId));
+    }
+    
+    @Override
+    public void chunkMembers(@Nonnull final String guildId, @Nonnull final String query, @Nonnegative final int limit) {
+        eventBus().send(computeAddress(WEBSOCKET_QUEUE, shardIdFor(guildId)),
+                CatnipShard.basePayload(GatewayOp.REQUEST_GUILD_MEMBERS,
+                        new JsonObject()
+                                .put("guild_id", guildId)
+                                .put("query", query)
+                                .put("limit", limit)));
     }
     
     @Override
@@ -333,6 +347,8 @@ public class CatnipImpl implements Catnip {
                     .thenApply(gateway -> {
                         logAdapter.info("Token validated!");
                         
+                        parseClientId();
+                        
                         //this is actually needed because generics are dumb
                         return (Catnip) this;
                     }).exceptionally(e -> {
@@ -341,6 +357,15 @@ public class CatnipImpl implements Catnip {
                     })
                     .toCompletableFuture();
         } else {
+            try {
+                parseClientId();
+            } catch(final IllegalArgumentException e) {
+                final Exception wrapped = new RuntimeException("The provided token was invalid!", e);
+                // I would use SafeVertxCompletableFuture.failedFuture but that was added in Java 9+
+                // and catnip uses Java 8
+                return SafeVertxCompletableFuture.from(this, Future.failedFuture(wrapped));
+            }
+            
             return SafeVertxCompletableFuture.completedFuture(this);
         }
     }
@@ -369,6 +394,9 @@ public class CatnipImpl implements Catnip {
             // Lifecycle
             codec(ReadyImpl.class);
             codec(ResumedImpl.class);
+            
+            // DoubleEvents use ImmutablePair
+            codec(ImmutablePair.class);
             
             // Messages
             codec(MessageImpl.class);
@@ -444,6 +472,14 @@ public class CatnipImpl implements Catnip {
     private int shardIdFor(@Nonnull final String guildId) {
         final long idLong = Long.parseUnsignedLong(guildId);
         return (int) ((idLong >>> 22) % shardManager.shardCount());
+    }
+    
+    private void parseClientId() {
+        // bot tokens are comprised of 3 parts, each encoded in base 64 and joined by periods.
+        // the first part is the client id.
+        final String clientIdBase64 = token.split("\\.")[0];
+        final String clientId = new String(Base64.getDecoder().decode(clientIdBase64));
+        clientIdAsLong = Long.parseUnsignedLong(clientId);
     }
     
     @Nullable

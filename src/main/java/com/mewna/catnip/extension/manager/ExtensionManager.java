@@ -92,7 +92,7 @@ public interface ExtensionManager {
     /**
      * Return a single extension by class. If multiple extensions are loaded
      * from the same class, there is no guarantee which extension instance will
-     * be returned, in which case you should be using {@link #matchingExtensions(Class)} )}.
+     * be returned, in which case you should be using {@link #matchingExtensions(Class)}.
      *
      * @param extensionClass The extension class to find instances of
      * @param <T>            Type of the extension.

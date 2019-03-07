@@ -25,51 +25,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.rest;
+package com.mewna.catnip.shard.event;
+
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
 
 /**
- * @author SamOphis
- * @since 02/09/2019
+ * Marker for statically validating event types on handlers.
+ *
+ * @param <T> Type of the event fired.
+ *
+ * @author natanbc
+ * @since 10/6/18.
  */
-public class ResponseException extends RuntimeException {
-    private final String route;
-    private final int statusCode;
-    private final String statusMessage;
-    private final int jsonCode;
-    private final String jsonMessage;
+public interface EventType<T> {
+    /**
+     * Key used in the event bus.
+     *
+     * @return Key where this event is fired in the bus.
+     */
+    @Nonnull
+    @CheckReturnValue
+    String key();
     
-    public ResponseException(final String route, final int statusCode, final String statusMessage, final int jsonCode,
-                             final String jsonMessage) {
-        super(
-                jsonCode == -1 ?
-                        String.format("%s | HTTP Error Code: %d | JSON Message: %s", route, statusCode, jsonMessage) :
-                        String.format("%s | HTTP Error Code: %d | JSON Message: %s | JSON Error Code: %d",
-                                route, statusCode, jsonMessage, jsonCode)
-        );
-        this.route = route;
-        this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
-        this.jsonCode = jsonCode;
-        this.jsonMessage = jsonMessage;
-    }
-    
-    public String route() {
-        return route;
-    }
-    
-    public int statusCode() {
-        return statusCode;
-    }
-    
-    public String statusMessage() {
-        return statusMessage;
-    }
-    
-    public int jsonCode() {
-        return jsonCode;
-    }
-    
-    public String jsonMessage() {
-        return jsonMessage;
-    }
+    /**
+     * Class of the event payload.
+     *
+     * @return Class of the payload fired for this event.
+     */
+    @Nonnull
+    @CheckReturnValue
+    Class<T> payloadClass();
 }

@@ -40,9 +40,10 @@ import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.Rest;
-import com.mewna.catnip.shard.EventType;
 import com.mewna.catnip.shard.buffer.EventBuffer;
 import com.mewna.catnip.shard.event.DispatchManager;
+import com.mewna.catnip.shard.event.DoubleEventType;
+import com.mewna.catnip.shard.event.EventType;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.SessionManager;
@@ -60,6 +61,7 @@ import javax.annotation.Nullable;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -188,7 +190,7 @@ public interface Catnip {
     /**
      * Fetches the gateway info and updates the cache. Calls made to {@link #gatewayInfo()}
      * after this stage completes successfully are guaranteed to return a non null value.
-     *
+     * <p>
      * Updates the cached gateway info.
      *
      * @return The gateway info fetched from discord.
@@ -336,6 +338,14 @@ public interface Catnip {
     boolean enforcePermissions();
     
     /**
+     * @return Whether or not this catnip instance will capture stacktraces
+     * before sending REST requests. This is useful for debugging.
+     *
+     * @see CatnipOptions#captureRestStacktraces
+     */
+    boolean captureRestStacktraces();
+    
+    /**
      * @return A set of all ids of unavailable guilds.
      */
     @Nonnull
@@ -366,6 +376,21 @@ public interface Catnip {
     Catnip loadExtension(@Nonnull Extension extension);
     
     /**
+     * Return a single extension by class. If multiple extensions are loaded
+     * from the same class, there is no guarantee which extension instance will
+     * be returned, in which case you should be using {@link ExtensionManager#matchingExtensions(Class)}.
+     *
+     * @param extensionClass The extension class to find instances of
+     * @param <T>            Type of the extension.
+     *
+     * @return A possibly-{@code null} instance of the passed extension class.
+     */
+    @Nullable
+    default <T extends Extension> T  extension(@Nonnull final Class<T> extensionClass) {
+        return extensionManager().extension(extensionClass);
+    }
+    
+    /**
      * Inject options into this catnip instance from the given extension. This
      * allows extensions to do things like automatically register a new cache
      * worker without having to tell the end-user to specify options. By
@@ -388,6 +413,20 @@ public interface Catnip {
      */
     @Nullable
     User selfUser();
+    
+    /**
+     * The ID of this client
+     *
+     * @return The ID of this client.
+     */
+    String clientId();
+    
+    /**
+     * The ID of this client, as a long.
+     *
+     * @return The ID of the client, as a long.
+     */
+    long clientIdAsLong();
     
     /**
      * @return The initial presence to set when logging in via the gateway.
@@ -414,8 +453,23 @@ public interface Catnip {
      * @param guildId   Guild to connect.
      * @param channelId Channel to connect.
      */
-    //TODO self mute/self deaf?
-    void openVoiceConnection(@Nonnull String guildId, @Nonnull String channelId);
+    default void openVoiceConnection(@Nonnull final String guildId, @Nonnull final String channelId) {
+        openVoiceConnection(guildId, channelId, false, false);
+    }
+    
+    /**
+     * Opens a voice connection to the provided guild and channel. The connection is
+     * opened asynchronously, with
+     * {@link com.mewna.catnip.shard.DiscordEvent#VOICE_STATE_UPDATE VOICE_STATE_UPDATE} and
+     * {@link com.mewna.catnip.shard.DiscordEvent#VOICE_SERVER_UPDATE VOICE_SERVER_UPDATE}
+     * events being fired when the connection is opened.
+     *
+     * @param guildId   Guild to connect.
+     * @param channelId Channel to connect.
+     * @param selfMute  Whether or not to connect as muted.
+     * @param selfDeaf  Whether or not to connect as deafened.
+     */
+    void openVoiceConnection(@Nonnull String guildId, @Nonnull String channelId, boolean selfMute, boolean selfDeaf);
     
     /**
      * Opens a voice connection to the provided guild and channel. The connection is
@@ -427,8 +481,26 @@ public interface Catnip {
      * @param guildId   Guild to connect.
      * @param channelId Channel to connect.
      */
-    //TODO self mute/self deaf?
-    void openVoiceConnection(long guildId, long channelId);
+    default void openVoiceConnection(final long guildId, final long channelId) {
+        openVoiceConnection(guildId, channelId, false, false);
+    }
+    
+    /**
+     * Opens a voice connection to the provided guild and channel. The connection is
+     * opened asynchronously, with
+     * {@link com.mewna.catnip.shard.DiscordEvent#VOICE_STATE_UPDATE VOICE_STATE_UPDATE} and
+     * {@link com.mewna.catnip.shard.DiscordEvent#VOICE_SERVER_UPDATE VOICE_SERVER_UPDATE}
+     * events being fired when the connection is opened.
+     *
+     * @param guildId   Guild to connect.
+     * @param channelId Channel to connect.
+     * @param selfMute  Whether or not to connect as muted.
+     * @param selfDeaf  Whether or not to connect as deafened.
+     */
+    default void openVoiceConnection(final long guildId, final long channelId, final boolean selfMute,
+                                     final boolean selfDeaf) {
+        openVoiceConnection(String.valueOf(guildId), String.valueOf(channelId), selfMute, selfDeaf);
+    }
     
     /**
      * Closes the voice connection on the specified guild.
@@ -443,6 +515,84 @@ public interface Catnip {
      * @param guildId Guild to disconnect.
      */
     void closeVoiceConnection(long guildId);
+    
+    /**
+     * Request all guild members for the given guild.
+     *
+     * @param guildId Guild to request for.
+     */
+    default void chunkMembers(final long guildId) {
+        chunkMembers(Long.toString(guildId));
+    }
+    
+    /**
+     * Request all guild members for the given guild.
+     *
+     * @param guildId Guild to request for.
+     */
+    default void chunkMembers(@Nonnull final String guildId) {
+        chunkMembers(guildId, "", 0);
+    }
+    
+    /**
+     * Request guild members for the given guild.
+     *
+     * @param guildId Guild to request for.
+     * @param query   Member names must start with this.
+     */
+    default void chunkMembers(final long guildId, @Nonnull final String query) {
+        chunkMembers(Long.toString(guildId), query);
+    }
+    
+    /**
+     * Request guild members for the given guild.
+     *
+     * @param guildId Guild to request for.
+     * @param query   Member names must start with this.
+     */
+    default void chunkMembers(@Nonnull final String guildId, @Nonnull final String query) {
+        chunkMembers(guildId, query, 0);
+    }
+    
+    /**
+     * Request guild members for the given guild.
+     *
+     * @param guildId Guild to request for.
+     * @param limit   Maximum number of members to return. 0 for no limit.
+     */
+    default void chunkMembers(final long guildId, @Nonnegative final int limit) {
+        chunkMembers(Long.toString(guildId), "", limit);
+    }
+    
+    /**
+     * Request guild members for the given guild.
+     *
+     * @param guildId Guild to request for.
+     * @param limit   Maximum number of members to return. 0 for no limit.
+     */
+    default void chunkMembers(@Nonnull final String guildId, @Nonnegative final int limit) {
+        chunkMembers(guildId, "", limit);
+    }
+    
+    /**
+     * Request guild members for the given guild.
+     *
+     * @param guildId Guild to request for.
+     * @param query   Members returned must have a username starting with this.
+     * @param limit   Maximum number of members to return. 0 for no limit.
+     */
+    default void chunkMembers(final long guildId, @Nonnull final String query, @Nonnegative final int limit) {
+        chunkMembers(Long.toString(guildId), query, limit);
+    }
+    
+    /**
+     * Request guild members for the given guild.
+     *
+     * @param guildId Guild to request for.
+     * @param query   Members returned must have a username starting with this.
+     * @param limit   Maximum number of members to return. 0 for no limit.
+     */
+    void chunkMembers(@Nonnull String guildId, @Nonnull String query, @Nonnegative int limit);
     
     /**
      * Get the presence for the specified shard.
@@ -526,6 +676,36 @@ public interface Catnip {
      */
     default <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler) {
         return on(type).handler(m -> handler.accept(m.body()));
+    }
+    
+    /**
+     * Add a consumer for the specified event type with the given handler
+     * callback.
+     *
+     * @param type The type of event to listen on.
+     * @param <T>  The first object type of event being listened on.
+     * @param <E>  The second object type of event being listened on.
+     *
+     * @return The vert.x message consumer.
+     */
+    default <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type) {
+        return dispatchManager().createConsumer(type.key());
+    }
+    
+    /**
+     * Add a consumer for the specified event type with the given handler
+     * callback.
+     *
+     * @param type    The type of event to listen on.
+     * @param handler The handler for the event object.
+     * @param <T>     The first object type of event being listened on.
+     * @param <E>     The second object type of event being listened on.
+     *
+     * @return The vert.x message consumer.
+     */
+    default <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
+                                                  @Nonnull final BiConsumer<T, E> handler) {
+        return on(type).handler(m -> handler.accept(m.body().getLeft(), m.body().getRight()));
     }
     
     /**

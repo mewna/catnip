@@ -29,6 +29,7 @@ package com.mewna.catnip.shard.manager;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.shard.ShardControlMessage;
+import com.mewna.catnip.shard.LifecycleState;
 import com.mewna.catnip.util.JsonUtil;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import io.vertx.core.json.JsonArray;
@@ -106,6 +107,22 @@ public abstract class AbstractShardManager implements ShardManager {
     public CompletionStage<Boolean> isConnected(@Nonnegative final int id) {
         final CompletableFuture<Boolean> future = new SafeVertxCompletableFuture<>(catnip);
         catnip.eventBus().<Boolean>send(computeAddress(CONTROL, id), ShardControlMessage.CONNECTED,
+                reply -> {
+                    if(reply.succeeded()) {
+                        future.complete(reply.result().body());
+                    } else {
+                        future.completeExceptionally(reply.cause());
+                    }
+                });
+        return future;
+    }
+    
+    @Nonnull
+    @Override
+    @CheckReturnValue
+    public CompletionStage<LifecycleState> shardState(@Nonnegative final int id) {
+        final CompletableFuture<LifecycleState> future = new SafeVertxCompletableFuture<>(catnip);
+        catnip.eventBus().<LifecycleState>send(computeAddress(CONTROL, id), ShardControlMessage.LIFECYCLE_STATE,
                 reply -> {
                     if(reply.succeeded()) {
                         future.complete(reply.result().body());
