@@ -51,6 +51,7 @@ import com.mewna.catnip.entity.impl.MessageImpl.ReactionImpl;
 import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
 import com.mewna.catnip.entity.message.*;
 import com.mewna.catnip.entity.message.Embed.EmbedType;
+import com.mewna.catnip.entity.message.Embed.Field;
 import com.mewna.catnip.entity.message.Message.Attachment;
 import com.mewna.catnip.entity.message.Message.Reaction;
 import com.mewna.catnip.entity.misc.*;
@@ -83,8 +84,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <p>
  * Note: We can't use {@link Object#equals} of most entities because many of them only check the ids for being equal.
  */
+@SuppressWarnings("OverlyCoupledClass")
 class CodecTest {
-    
     private <T> void test(final T entity) {
         final Catnip thisCatnip = mockNip();
         @SuppressWarnings("unchecked")
@@ -297,7 +298,7 @@ class CodecTest {
         final GroupDMChannel groupDMChannel = GroupDMChannelImpl.builder()
                 .catnip(mocknip)
                 .idAsLong(randomPositiveLong())
-                .recipients(Arrays.asList(user(mocknip)))
+                .recipients(Collections.singletonList(user(mocknip)))
                 .icon(imageUrl())
                 .ownerIdAsLong(randomPositiveLong())
                 .applicationIdAsLong(randomPositiveLong())
@@ -420,6 +421,7 @@ class CodecTest {
     @Test
     void message() {
         final Catnip mockNip = mockNip();
+        
         final Message message = MessageImpl.builder()
                 .catnip(mockNip)
                 .idAsLong(randomPositiveLong())
@@ -431,7 +433,7 @@ class CodecTest {
                 .tts(ThreadLocalRandom.current().nextBoolean())
                 .mentionsEveryone(ThreadLocalRandom.current().nextBoolean())
                 .mentionedUsers(Arrays.asList(user(mockNip), user(mockNip)))
-                .mentionedRoles(Arrays.asList(randomPositiveLongAsString(), randomPositiveLongAsString()))
+                .mentionedRoles(Arrays.asList(role(mockNip), role(mockNip)))
                 .attachments(Arrays.asList(attachment(mockNip), attachment(mockNip)))
                 .embeds(Arrays.asList(embed(mockNip), embed(mockNip)))
                 .reactions(Arrays.asList(reaction(mockNip), reaction(mockNip)))
@@ -511,7 +513,7 @@ class CodecTest {
                 .mobileStatus(random(OnlineStatus.values()))
                 .webStatus(random(OnlineStatus.values()))
                 .build();
-    
+        
         test(presence);
     }
     
@@ -630,7 +632,7 @@ class CodecTest {
                 .idAsLong(randomPositiveLong())
                 .unavailable(ThreadLocalRandom.current().nextBoolean())
                 .build();
-    
+        
         test(unavailableGuild);
     }
     
@@ -880,7 +882,7 @@ class CodecTest {
                 .build();
     }
     
-    private Embed.Field field(final Catnip catnip) {
+    private Field field(final Catnip catnip) {
         return FieldImpl.builder()
                 .name("This is a field name")
                 .value("This is a field value")
@@ -966,6 +968,21 @@ class CodecTest {
                 .discriminator("0007")
                 .idAsLong(randomPositiveLong())
                 .username("SAMUEL L. IPSUM")
+                .build();
+    }
+    
+    private Role role(final Catnip catnip) {
+        return RoleImpl.builder()
+                .catnip(catnip)
+                .idAsLong(randomPositiveLong())
+                .guildIdAsLong(randomPositiveLong())
+                .name("test")
+                .color(0)
+                .hoist(false)
+                .position(0)
+                .permissionsRaw(0)
+                .managed(false)
+                .mentionable(false)
                 .build();
     }
     
