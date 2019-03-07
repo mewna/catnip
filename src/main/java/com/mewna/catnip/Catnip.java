@@ -376,6 +376,21 @@ public interface Catnip {
     Catnip loadExtension(@Nonnull Extension extension);
     
     /**
+     * Return a single extension by class. If multiple extensions are loaded
+     * from the same class, there is no guarantee which extension instance will
+     * be returned, in which case you should be using {@link ExtensionManager#matchingExtensions(Class)}.
+     *
+     * @param extensionClass The extension class to find instances of
+     * @param <T>            Type of the extension.
+     *
+     * @return A possibly-{@code null} instance of the passed extension class.
+     */
+    @Nullable
+    default <T extends Extension> T  extension(@Nonnull final Class<T> extensionClass) {
+        return extensionManager().extension(extensionClass);
+    }
+    
+    /**
      * Inject options into this catnip instance from the given extension. This
      * allows extensions to do things like automatically register a new cache
      * worker without having to tell the end-user to specify options. By
