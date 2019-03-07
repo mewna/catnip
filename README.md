@@ -32,11 +32,12 @@ No. Use a real build tool like [Maven](https://maven.apache.org/) or [Gradle](ht
 - Automatic sharding
 - Very customizable - you can write [extensions](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/extension/Extension.java)
   for the library, as well as [options](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/CatnipOptions.java)
-  for most anything you could want to change. See EXTENSIONS.md for more.
-- Modular - REST / shards can be used independently. See MODULAR_USAGE.md for more.
+  for most anything you could want to change. See `EXTENSIONS.md` for more.
+- Modular - REST / shards can be used independently. See `MODULAR_USAGE.md` for more.
 - Customizable caching - Can run with [no cache](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/cache/NoopEntityCache.java),
   [partial caching](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/cache/CacheFlag.java),
   or [write your own cache handler](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/cache/EntityCacheWorker.java).
+  See `CACHING.md` for more.
 - Asynchronous cache accesses.
 - You can disable individual events.
 - You can disable all events, and handle gateway events directly.
