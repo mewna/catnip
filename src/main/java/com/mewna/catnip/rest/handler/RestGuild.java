@@ -53,6 +53,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import static com.mewna.catnip.util.JsonUtil.mapObjectContents;
@@ -434,13 +435,15 @@ public class RestGuild extends RestHandler {
     public CompletionStage<Void> createGuildBan(@Nonnull final String guildId, @Nonnull final String userId,
                                                 @Nullable final String reason,
                                                 @Nonnegative final int deleteMessageDays) {
+        if(deleteMessageDays > 7) {
+            CompletableFuture<Void> future = new CompletableFuture<>();
+            future.completeExceptionally(new IllegalArgumentException("deleteMessageDays can't be above 7"));
+            return future;
+        }
+        
         final QueryStringBuilder builder = new QueryStringBuilder();
-        if(reason != null) {
-            builder.append("reason", Utils.encodeUTF8(reason));
-        }
-        if(deleteMessageDays <= 7) {
-            builder.append("delete-message-days" + deleteMessageDays);
-        }
+        builder.append("reason", Utils.encodeUTF8(reason == null ? "" : reason));
+        builder.append("delete-message-days", String.valueOf(deleteMessageDays));
         final String query = builder.build();
         return catnip().requester().queue(new OutboundRequest(Routes.CREATE_GUILD_BAN.withMajorParam(guildId).withQueryString(query),
                 ImmutableMap.of("user.id", userId)).reason(reason))
