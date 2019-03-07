@@ -30,14 +30,17 @@ package com.mewna.catnip.extension;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.extension.hook.CatnipHook;
+import com.mewna.catnip.shard.event.DoubleEventType;
 import com.mewna.catnip.shard.event.EventType;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Verticle;
 import io.vertx.core.eventbus.MessageConsumer;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -141,7 +144,7 @@ public interface Extension extends Verticle {
      * or {@code logExtensionOverrides} from this.
      *
      * @param optionsPatcher A function that makes changes to the provided
-     *                        default options object.
+     *                       default options object.
      *
      * @return The extension instance.
      */
@@ -152,7 +155,7 @@ public interface Extension extends Verticle {
     
     /**
      * Add a consumer for the specified event type.
-     *
+     * <p>
      * This method behaves similarly to {@link Catnip#on(EventType)},
      * but the event listeners are unregistered when the extension unloads
      *
@@ -166,7 +169,7 @@ public interface Extension extends Verticle {
     /**
      * Add a consumer for the specified event type with the given handler
      * callback.
-     *
+     * <p>
      * This method behaves similarly to {@link Catnip#on(EventType, Consumer)},
      * but the event listeners are unregistered when the extension unloads
      *
@@ -177,6 +180,35 @@ public interface Extension extends Verticle {
      * @return The vert.x message consumer.
      */
     <T> MessageConsumer<T> on(@Nonnull EventType<T> type, @Nonnull Consumer<T> handler);
+    
+    /**
+     * Add a consumer for the specified event type.
+     * <p>
+     * This method behaves similarly to {@link Catnip#on(DoubleEventType)},
+     * but the event listeners are unregistered when the extension unloads
+     *
+     * @param type The type of event to listen on.
+     * @param <T>  The first type of event being listened on.
+     * @param <E>  The second type of event being listened on.
+     *
+     * @return The vert.x message consumer.
+     */
+    <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull DoubleEventType<T, E> type);
+    
+    /**
+     * Add a consumer for the specified event type.
+     * <p>
+     * This method behaves similarly to {@link Catnip#on(DoubleEventType)},
+     * but the event listeners are unregistered when the extension unloads
+     *
+     * @param type    The type of event to listen on.
+     * @param handler The handler for the event objects.
+     * @param <T>     The first type of event object being listened on.
+     * @param <E>     The second type of event object being listened on.
+     *
+     * @return The vert.x message consumer.
+     */
+    <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull DoubleEventType<T, E> type, @Nonnull BiConsumer<T, E> handler);
     
     String deploymentID();
 }
