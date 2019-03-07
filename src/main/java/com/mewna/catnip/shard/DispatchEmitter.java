@@ -79,7 +79,6 @@ public final class DispatchEmitter {
         final String type = payload.getString("t");
         final JsonObject data = payload.getJsonObject("d");
         
-        // TODO: Convert all cache accesses for `DoubleEvent`s in here to properly be async(?)
         switch(type) {
             // Lifecycle
             case Raw.READY: {
@@ -177,7 +176,13 @@ public final class DispatchEmitter {
             }
             case Raw.GUILD_UPDATE: {
                 final Guild guild = entityBuilder.createGuild(data);
-                catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(catnip.cache().guild(guild.id()), guild));
+                catnip.cache().guildAsync(guild.idAsLong())
+                        .thenAccept(old -> catnip.dispatchManager()
+                        .dispatchEvent(type, ImmutablePair.of(old, guild)))
+                        .exceptionally(e -> {
+                            cacheErrorLog(type, e);
+                            return null;
+                        });
                 break;
             }
             case Raw.GUILD_DELETE: {
@@ -211,8 +216,13 @@ public final class DispatchEmitter {
             }
             case Raw.GUILD_ROLE_UPDATE: {
                 final Role role = entityBuilder.createRole(data.getString("guild_id"), data.getJsonObject("role"));
-                catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(catnip.cache()
-                        .role(role.guildId(), role.id()), role));
+                catnip.cache().roleAsync(role.guildIdAsLong(), role.idAsLong())
+                        .thenAccept(old -> catnip.dispatchManager()
+                        .dispatchEvent(type, ImmutablePair.of(old, role)))
+                        .exceptionally(e -> {
+                            cacheErrorLog(type, e);
+                            return null;
+                        });
                 break;
             }
             case Raw.GUILD_ROLE_DELETE: {
@@ -239,15 +249,26 @@ public final class DispatchEmitter {
             case Raw.GUILD_MEMBER_UPDATE: {
                 final String guild = data.getString("guild_id");
                 final PartialMember partialMember = entityBuilder.createPartialMember(guild, data);
-                catnip.dispatchManager().dispatchEvent(type,
-                        ImmutablePair.of(catnip.cache().member(guild, partialMember.id()),partialMember));
+                catnip.cache().memberAsync(partialMember.guildIdAsLong(), partialMember.idAsLong())
+                        .thenAccept(old -> catnip.dispatchManager()
+                                .dispatchEvent(type, ImmutablePair.of(old, partialMember)))
+                        .exceptionally(e -> {
+                            cacheErrorLog(type, e);
+                            return null;
+                        });
                 break;
             }
             
             // Users
             case Raw.USER_UPDATE: {
                 final User user = entityBuilder.createUser(data);
-                catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(catnip.cache().selfUser(), user));
+                catnip.cache().selfUserAsync()
+                        .thenAccept(old -> catnip.dispatchManager()
+                                .dispatchEvent(type, ImmutablePair.of(old, user)))
+                        .exceptionally(e -> {
+                            cacheErrorLog(type, e);
+                            return null;
+                        });
                 break;
             }
             case Raw.PRESENCE_UPDATE: {
@@ -259,7 +280,13 @@ public final class DispatchEmitter {
                             "but we should never get this. If you report this to Discord, include the following " +
                             "JSON in your report:\n{}", clone.encodePrettily());
                 }
-                catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(catnip.cache().presence(presence.id()), presence));
+                catnip.cache().presenceAsync(presence.idAsLong())
+                        .thenAccept(old -> catnip.dispatchManager()
+                        .dispatchEvent(type, ImmutablePair.of(old, presence)))
+                        .exceptionally(e -> {
+                            cacheErrorLog(type, e);
+                            return null;
+                        });
                 break;
             }
             
@@ -291,5 +318,9 @@ public final class DispatchEmitter {
                 break;
             }
         }
+    }
+    
+    private void cacheErrorLog(final String eventType, final Throwable e) {
+        catnip.logAdapter().error("Couldn't fetch previous entity from cache for update event {}:", eventType, e);
     }
 }
