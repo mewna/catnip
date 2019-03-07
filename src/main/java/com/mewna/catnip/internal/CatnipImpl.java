@@ -248,19 +248,15 @@ public class CatnipImpl implements Catnip {
     }
     
     @Override
-    public void openVoiceConnection(@Nonnull final String guildId, @Nonnull final String channelId) {
+    public void openVoiceConnection(@Nonnull final String guildId, @Nonnull final String channelId, final boolean selfMute,
+                                    final boolean selfDeaf) {
         PermissionUtil.checkPermissions(this, guildId, channelId, Permission.CONNECT);
         eventBus().send(computeAddress(VOICE_STATE_UPDATE_QUEUE, shardIdFor(guildId)),
                 new JsonObject()
                         .put("guild_id", guildId)
                         .put("channel_id", channelId)
-                        .put("self_mute", false)
-                        .put("self_deaf", false));
-    }
-    
-    @Override
-    public void openVoiceConnection(final long guildId, final long channelId) {
-        openVoiceConnection(String.valueOf(guildId), String.valueOf(channelId));
+                        .put("self_mute", selfMute)
+                        .put("self_deaf", selfDeaf));
     }
     
     @Override

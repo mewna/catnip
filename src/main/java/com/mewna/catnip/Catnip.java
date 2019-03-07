@@ -40,10 +40,10 @@ import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.Rest;
-import com.mewna.catnip.shard.event.DoubleEventType;
-import com.mewna.catnip.shard.event.EventType;
 import com.mewna.catnip.shard.buffer.EventBuffer;
 import com.mewna.catnip.shard.event.DispatchManager;
+import com.mewna.catnip.shard.event.DoubleEventType;
+import com.mewna.catnip.shard.event.EventType;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.SessionManager;
@@ -438,8 +438,23 @@ public interface Catnip {
      * @param guildId   Guild to connect.
      * @param channelId Channel to connect.
      */
-    //TODO self mute/self deaf?
-    void openVoiceConnection(@Nonnull String guildId, @Nonnull String channelId);
+    default void openVoiceConnection(@Nonnull final String guildId, @Nonnull final String channelId) {
+        openVoiceConnection(guildId, channelId, false, false);
+    }
+    
+    /**
+     * Opens a voice connection to the provided guild and channel. The connection is
+     * opened asynchronously, with
+     * {@link com.mewna.catnip.shard.DiscordEvent#VOICE_STATE_UPDATE VOICE_STATE_UPDATE} and
+     * {@link com.mewna.catnip.shard.DiscordEvent#VOICE_SERVER_UPDATE VOICE_SERVER_UPDATE}
+     * events being fired when the connection is opened.
+     *
+     * @param guildId   Guild to connect.
+     * @param channelId Channel to connect.
+     * @param selfMute  Whether or not to connect as muted.
+     * @param selfDeaf  Whether or not to connect as deafened.
+     */
+    void openVoiceConnection(@Nonnull String guildId, @Nonnull String channelId, boolean selfMute, boolean selfDeaf);
     
     /**
      * Opens a voice connection to the provided guild and channel. The connection is
@@ -451,8 +466,26 @@ public interface Catnip {
      * @param guildId   Guild to connect.
      * @param channelId Channel to connect.
      */
-    //TODO self mute/self deaf?
-    void openVoiceConnection(long guildId, long channelId);
+    default void openVoiceConnection(final long guildId, final long channelId) {
+        openVoiceConnection(guildId, channelId, false, false);
+    }
+    
+    /**
+     * Opens a voice connection to the provided guild and channel. The connection is
+     * opened asynchronously, with
+     * {@link com.mewna.catnip.shard.DiscordEvent#VOICE_STATE_UPDATE VOICE_STATE_UPDATE} and
+     * {@link com.mewna.catnip.shard.DiscordEvent#VOICE_SERVER_UPDATE VOICE_SERVER_UPDATE}
+     * events being fired when the connection is opened.
+     *
+     * @param guildId   Guild to connect.
+     * @param channelId Channel to connect.
+     * @param selfMute  Whether or not to connect as muted.
+     * @param selfDeaf  Whether or not to connect as deafened.
+     */
+    default void openVoiceConnection(final long guildId, final long channelId, final boolean selfMute,
+                                     final boolean selfDeaf) {
+        openVoiceConnection(String.valueOf(guildId), String.valueOf(channelId), selfMute, selfDeaf);
+    }
     
     /**
      * Closes the voice connection on the specified guild.
@@ -634,9 +667,9 @@ public interface Catnip {
      * Add a consumer for the specified event type with the given handler
      * callback.
      *
-     * @param type    The type of event to listen on.
-     * @param <T>     The first object type of event being listened on.
-     * @param <E>     The second object type of event being listened on.
+     * @param type The type of event to listen on.
+     * @param <T>  The first object type of event being listened on.
+     * @param <E>  The second object type of event being listened on.
      *
      * @return The vert.x message consumer.
      */

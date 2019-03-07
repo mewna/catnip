@@ -160,7 +160,7 @@ public class CachingBuffer extends AbstractBuffer {
                 // Actually send the chunking request
                 catnip().chunkMembers(guild);
             } else {
-                // TODO: #255 - need to properly defer the emit until we recv. the optionally-created role
+                // TODO(#255) - need to properly defer the emit until we recv. the optionally-created role
                 emitter().emit(event);
                 bufferState.receiveGuild(guild);
                 bufferState.replayGuild(guild);
