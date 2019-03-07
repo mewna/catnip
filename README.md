@@ -37,6 +37,7 @@ No. Use a real build tool like [Maven](https://maven.apache.org/) or [Gradle](ht
 - Customizable caching - Can run with [no cache](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/cache/NoopEntityCache.java),
   [partial caching](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/cache/CacheFlag.java),
   or [write your own cache handler](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/cache/EntityCacheWorker.java).
+- Asynchronous cache accesses.
 - You can disable individual events.
 - You can disable all events, and handle gateway events directly.
 - Customizable ratelimit/session data handling - wanna store your 
