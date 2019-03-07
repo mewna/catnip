@@ -399,6 +399,9 @@ public class CatnipImpl implements Catnip {
             codec(ReadyImpl.class);
             codec(ResumedImpl.class);
             
+            // DoubleEvents use ImmutablePair
+            codec(ImmutablePair.class);
+            
             // Messages
             codec(MessageImpl.class);
             codec(DeletedMessageImpl.class);

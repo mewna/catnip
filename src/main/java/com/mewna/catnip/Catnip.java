@@ -40,6 +40,7 @@ import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.Rest;
+import com.mewna.catnip.shard.DoubleEventType;
 import com.mewna.catnip.shard.EventType;
 import com.mewna.catnip.shard.buffer.EventBuffer;
 import com.mewna.catnip.shard.event.DispatchManager;
@@ -60,6 +61,7 @@ import javax.annotation.Nullable;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -626,6 +628,36 @@ public interface Catnip {
      */
     default <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler) {
         return on(type).handler(m -> handler.accept(m.body()));
+    }
+    
+    /**
+     * Add a consumer for the specified event type with the given handler
+     * callback.
+     *
+     * @param type    The type of event to listen on.
+     * @param <T>     The first object type of event being listened on.
+     * @param <E>     The second object type of event being listened on.
+     *
+     * @return The vert.x message consumer.
+     */
+    default <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type) {
+        return dispatchManager().createConsumer(type.key());
+    }
+    
+    /**
+     * Add a consumer for the specified event type with the given handler
+     * callback.
+     *
+     * @param type    The type of event to listen on.
+     * @param handler The handler for the event object.
+     * @param <T>     The first object type of event being listened on.
+     * @param <E>     The second object type of event being listened on.
+     *
+     * @return The vert.x message consumer.
+     */
+    default <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
+                                                  @Nonnull final BiConsumer<T, E> handler) {
+        return on(type).handler(m -> handler.accept(m.body().getLeft(), m.body().getRight()));
     }
     
     /**

@@ -191,7 +191,7 @@ public class CachingBuffer extends AbstractBuffer {
         
         if(catnip().chunkMembers()) {
             final String guild = payloadData.getString("guild_id");
-            cacheAndDispatch(eventType, payloadData, bufferState.id(), event);
+            cacheAndDispatch(eventType, bufferState.id(), event);
             bufferState.acceptChunk(guild);
             if(bufferState.doneChunking(guild)) {
                 emitter().emit(bufferState.guildCreate(guild));
@@ -221,27 +221,22 @@ public class CachingBuffer extends AbstractBuffer {
                 // If we're not awaiting the guild, it means that we're done
                 // buffering events for the guild - ie. all member chunks have
                 // been received - and so we can emit
-                cacheAndDispatch(eventType, payloadData, id, event);
+                cacheAndDispatch(eventType, id, event);
             }
         } else {
             // Emit if the payload has no guild id
-            cacheAndDispatch(eventType, payloadData, id, event);
+            cacheAndDispatch(eventType, id, event);
         }
     }
     
-    // Yeah just lazy af here I know, but no need to fetch data a second time
-    private void cacheAndDispatch(final String type, final JsonObject d, final int id, final JsonObject event) {
-        if(DELETE_EVENTS.contains(type)) {
-            // We want to update cache AFTER we dispatch the event to
-            // subconsumers, to avoid a race around cache accesses.
-            // When explicitly only using the internal event bus, handlers are
-            // just invoked in a synchronous loop (see EventBusImpl in v.x),
-            // which means that this is safe:tm: to do here.
-            emitter().emit(event);
-            maybeCache(type, id, d);
-        } else {
-            maybeCache(type, id, d).setHandler(_res -> emitter().emit(event));
-        }
+    private void cacheAndDispatch(final String type, final int id, final JsonObject event) {
+        // We *always* emit the event BEFORE updating the cache, so that you
+        // can ex. compare with the old cache first
+        // TODO: Cache updates are async - this is likely a race condition
+        // Is there any reasonable way to fix this?
+        final JsonObject d = event.getJsonObject("d");
+        emitter().emit(event);
+        maybeCache(type, id, d);
     }
     
     private Future<Void> maybeCache(final String eventType, final int shardId, final JsonObject data) {

@@ -30,6 +30,8 @@ package com.mewna.catnip.shard;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.guild.Guild;
+import com.mewna.catnip.entity.guild.PartialMember;
+import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.misc.Ready;
 import com.mewna.catnip.entity.misc.Resumed;
@@ -39,6 +41,7 @@ import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.internal.CatnipImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.Nonnull;
 
@@ -76,6 +79,7 @@ public final class DispatchEmitter {
         final String type = payload.getString("t");
         final JsonObject data = payload.getJsonObject("d");
         
+        // TODO: Convert all cache accesses for `DoubleEvent`s in here to properly be async(?)
         switch(type) {
             // Lifecycle
             case Raw.READY: {
@@ -105,7 +109,8 @@ public final class DispatchEmitter {
             case Raw.MESSAGE_UPDATE: {
                 if(data.getJsonObject("author", null) == null) {
                     // Embeds update, emit the special case
-                    catnip.dispatchManager().dispatchEvent(Raw.MESSAGE_EMBEDS_UPDATE, entityBuilder.createMessageEmbedUpdate(data));
+                    catnip.dispatchManager().dispatchEvent(Raw.MESSAGE_EMBEDS_UPDATE,
+                            entityBuilder.createMessageEmbedUpdate(data));
                 } else {
                     catnip.dispatchManager().dispatchEvent(type, entityBuilder.createMessage(data));
                 }
@@ -171,7 +176,8 @@ public final class DispatchEmitter {
                 break;
             }
             case Raw.GUILD_UPDATE: {
-                catnip.dispatchManager().dispatchEvent(type, entityBuilder.createGuild(data));
+                final Guild guild = entityBuilder.createGuild(data);
+                catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(catnip.cache().guild(guild.id()), guild));
                 break;
             }
             case Raw.GUILD_DELETE: {
@@ -199,15 +205,19 @@ public final class DispatchEmitter {
             
             // Roles
             case Raw.GUILD_ROLE_CREATE: {
-                catnip.dispatchManager().dispatchEvent(type, entityBuilder.createRole(data.getString("guild_id"), data.getJsonObject("role")));
+                catnip.dispatchManager().dispatchEvent(type, entityBuilder.createRole(data.getString("guild_id"),
+                        data.getJsonObject("role")));
                 break;
             }
             case Raw.GUILD_ROLE_UPDATE: {
-                catnip.dispatchManager().dispatchEvent(type, entityBuilder.createRole(data.getString("guild_id"), data.getJsonObject("role")));
+                final Role role = entityBuilder.createRole(data.getString("guild_id"), data.getJsonObject("role"));
+                catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(catnip.cache()
+                        .role(role.guildId(), role.id()), role));
                 break;
             }
             case Raw.GUILD_ROLE_DELETE: {
-                catnip.dispatchManager().dispatchEvent(type, entityBuilder.createPartialRole(data.getString("guild_id"), data.getString("role_id")));
+                catnip.dispatchManager().dispatchEvent(type, entityBuilder.createPartialRole(data.getString("guild_id"),
+                        data.getString("role_id")));
                 break;
             }
             
@@ -228,14 +238,16 @@ public final class DispatchEmitter {
             }
             case Raw.GUILD_MEMBER_UPDATE: {
                 final String guild = data.getString("guild_id");
-                catnip.dispatchManager().dispatchEvent(type, entityBuilder.createPartialMember(guild, data));
+                final PartialMember partialMember = entityBuilder.createPartialMember(guild, data);
+                catnip.dispatchManager().dispatchEvent(type,
+                        ImmutablePair.of(catnip.cache().member(guild, partialMember.id()),partialMember));
                 break;
             }
             
             // Users
             case Raw.USER_UPDATE: {
                 final User user = entityBuilder.createUser(data);
-                catnip.dispatchManager().dispatchEvent(type, user);
+                catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(catnip.cache().selfUser(), user));
                 break;
             }
             case Raw.PRESENCE_UPDATE: {
@@ -247,7 +259,7 @@ public final class DispatchEmitter {
                             "but we should never get this. If you report this to Discord, include the following " +
                             "JSON in your report:\n{}", clone.encodePrettily());
                 }
-                catnip.dispatchManager().dispatchEvent(type, presence);
+                catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(catnip.cache().presence(presence.id()), presence));
                 break;
             }
             
