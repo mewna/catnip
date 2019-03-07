@@ -30,7 +30,7 @@ package com.mewna.catnip.extension;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.extension.hook.CatnipHook;
-import com.mewna.catnip.shard.EventType;
+import com.mewna.catnip.shard.event.EventType;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Verticle;

@@ -27,7 +27,9 @@
 
 package com.mewna.catnip.shard;
 
-import static com.mewna.catnip.shard.EventTypeImpl.event;
+import com.mewna.catnip.shard.event.EventType;
+
+import static com.mewna.catnip.shard.event.EventTypeImpl.event;
 
 /**
  * @author amy

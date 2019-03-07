@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2019 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,20 +25,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.shard;
+package com.mewna.catnip.shard.event;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
 /**
- * Marker for statically validating event types on handlers.
- *
- * @param <T> Type of the event fired.
- *
- * @author natanbc
- * @since 10/6/18.
+ * @author amy
+ * @since 3/7/19.
  */
-public interface EventType<T> {
+public interface DoubleEventType<T, E> {
     /**
      * Key used in the event bus.
      *
@@ -49,11 +47,27 @@ public interface EventType<T> {
     String key();
     
     /**
-     * Class of the event payload.
-     *
-     * @return Class of the payload fired for this event.
+     * @return The "left side" of this event. Is the first event that the
+     * consumer must handle.
      */
     @Nonnull
     @CheckReturnValue
-    Class<T> payloadClass();
+    Class<T> left();
+    
+    /**
+     * @return The "right side" of this event. Is the second event that the
+     * consumer must handle.
+     */
+    @Nonnull
+    @CheckReturnValue
+    Class<E> right();
+    
+    /**
+     * Classes sent in the event payload.
+     *
+     * @return A {@link Pair} of the classes that this event fires, in order.
+     */
+    @Nonnull
+    @CheckReturnValue
+    Pair<Class<T>, Class<E>> payloadClasses();
 }

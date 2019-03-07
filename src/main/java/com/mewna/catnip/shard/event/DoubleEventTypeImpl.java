@@ -25,8 +25,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.shard;
+package com.mewna.catnip.shard.event;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.CheckReturnValue;
@@ -36,38 +40,33 @@ import javax.annotation.Nonnull;
  * @author amy
  * @since 3/7/19.
  */
-public interface DoubleEventType<T, E> {
-    /**
-     * Key used in the event bus.
-     *
-     * @return Key where this event is fired in the bus.
-     */
-    @Nonnull
-    @CheckReturnValue
-    String key();
+@Getter
+@Accessors(fluent = true)
+@RequiredArgsConstructor
+public class DoubleEventTypeImpl<T, E> implements DoubleEventType<T, E> {
+    private final String key;
+    private final Class<T> left;
+    private final Class<E> right;
     
-    /**
-     * @return The "left side" of this event. Is the first event that the
-     * consumer must handle.
-     */
     @Nonnull
-    @CheckReturnValue
-    Class<T> left();
+    @Override
+    public Pair<Class<T>, Class<E>> payloadClasses() {
+        return ImmutablePair.of(left, right);
+    }
     
-    /**
-     * @return The "right side" of this event. Is the second event that the
-     * consumer must handle.
-     */
-    @Nonnull
-    @CheckReturnValue
-    Class<E> right();
+    public static <T, E> DoubleEventType<T, E> doubleEvent(@Nonnull final String key, @Nonnull final Class<T> left,
+                                              @Nonnull final Class<E> right) {
+        return new DoubleEventTypeImpl<>(key, left, right);
+    }
     
-    /**
-     * Classes sent in the event payload.
-     *
-     * @return A {@link Pair} of the classes that this event fires, in order.
-     */
-    @Nonnull
-    @CheckReturnValue
-    Pair<Class<T>, Class<E>> payloadClasses();
+    public static DoubleEventType<Void, Void> doubleNotFired(@Nonnull final String key) {
+        return new DoubleEventTypeImpl<Void, Void>(key, Void.class, Void.class) {
+            @Nonnull
+            @CheckReturnValue
+            @Override
+            public String key() {
+                throw new UnsupportedOperationException("Event " + key + " is not implemented");
+            }
+        };
+    }
 }

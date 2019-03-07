@@ -36,9 +36,11 @@ import com.mewna.catnip.entity.misc.Ready;
 import com.mewna.catnip.entity.misc.Resumed;
 import com.mewna.catnip.entity.user.*;
 import com.mewna.catnip.entity.voice.VoiceServerUpdate;
+import com.mewna.catnip.shard.event.DoubleEventType;
+import com.mewna.catnip.shard.event.EventType;
 
-import static com.mewna.catnip.shard.DoubleEventTypeImpl.doubleEvent;
-import static com.mewna.catnip.shard.EventTypeImpl.event;
+import static com.mewna.catnip.shard.event.DoubleEventTypeImpl.doubleEvent;
+import static com.mewna.catnip.shard.event.EventTypeImpl.event;
 
 /**
  * See the Discord docs for more information about each kind of event.
