@@ -165,8 +165,7 @@ public interface Message extends Snowflake {
     OffsetDateTime editedTimestamp();
     
     /**
-     * The message's content.
-     * //TODO: Check if embed-only messages return null.
+     * The message's content. Is just an empty string for embed-only messages.
      *
      * @return String containing the message body. Never null.
      */
@@ -205,8 +204,7 @@ public interface Message extends Snowflake {
         if(guild != 0) {
             return (TextChannel) catnip().cache().channel(guild, channelIdAsLong());
         } else {
-            //TODO: should we change cache to store by private channel id instead?
-            return catnip().cache().dmChannel(author().idAsLong());
+            return catnip().cache().dmChannel(channelIdAsLong());
         }
     }
     

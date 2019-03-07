@@ -431,7 +431,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                     channelCache(gc.guildIdAsLong(), false).put(gc.idAsLong(), gc);
                 } else if(channel.isUserDM()) {
                     final UserDMChannel dm = (UserDMChannel) channel;
-                    dmChannelCache(shardId).put(dm.userIdAsLong(), dm);
+                    dmChannelCache(shardId).put(dm.idAsLong(), dm);
                 } else {
                     catnip.logAdapter().warn("I don't know how to cache channel {}: isCategory={}, isDM={}, isGroupDM={}," +
                                     "isGuild={}, isText={}, isUserDM={}, isVoice={}",
