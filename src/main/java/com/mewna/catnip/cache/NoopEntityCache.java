@@ -57,7 +57,7 @@ import java.util.concurrent.CompletableFuture;
  */
 @Accessors(fluent = true, chain = true)
 @SuppressWarnings("unused")
-public class NoopEntityCache implements EntityCacheWorker {
+public final class NoopEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
     public Future<Void> updateCache(@Nonnull final String eventType, @Nonnegative final int shardId, @Nonnull final JsonObject payload) {
