@@ -283,7 +283,6 @@ public abstract class AbstractRequester implements Requester {
                 if(statusCode == 400 && response.getInteger("code", -1) > 1000) {
                     // 1000 was just the easiest number to check to skip over http error codes
                     // Discord error codes are all >=10000 afaik, so this should be safe?
-                    // TODO: Is there a better way to do this?
                     
                     final Map<String, List<String>> failures = new HashMap<>();
                     response.forEach(e -> {
