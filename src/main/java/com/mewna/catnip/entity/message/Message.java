@@ -127,7 +127,6 @@ public interface Message extends Snowflake {
     /**
      * List of roles @mentioned by this message.
      * <br>All users with these roles will also be mentioned
-     * //TODO: Check if users are included in mentionedUsers() and include that.
      *
      * @return List of Roles. Never null.
      */
