@@ -144,24 +144,13 @@ public class CachingBuffer extends AbstractBuffer {
         // Make sure to cache guild
         // This will always succeed unless something goes horribly wrong
         maybeCache(Raw.GUILD_CREATE, shardId, payloadData).setHandler(_res -> {
-            // Trigger member chunking
-            final Integer memberCount = payloadData.getInteger("member_count");
-            if(catnip().chunkMembers() //only send the request if needed
-                    && memberCount > LARGE_THRESHOLD) {
-                // Chunk members
-                catnip().eventBus().publish(computeAddress(WEBSOCKET_QUEUE, shardId),
-                        CatnipShard.basePayload(GatewayOp.REQUEST_GUILD_MEMBERS,
-                                new JsonObject()
-                                        .put("guild_id", guild)
-                                        .put("query", "")
-                                        .put("limit", 0)
-                        ));
-            }
             // Add the guild to be awaited so that we can buffer members
             bufferState.awaitGuild(guild);
             
             // Remove READY guild if necessary, otherwise buffer
             if(bufferState.awaitedGuilds().contains(guild)) {
+                // Trigger member chunking
+                final Integer memberCount = payloadData.getInteger("member_count");
                 if(catnip().chunkMembers() && memberCount > LARGE_THRESHOLD) {
                     // If we're chunking members, calculate how many chunks we have to await
                     int chunks = memberCount / 1000;
@@ -170,7 +159,16 @@ public class CachingBuffer extends AbstractBuffer {
                         chunks += 1;
                     }
                     bufferState.initialGuildChunkCount(guild, chunks, event);
+                    // Actually send the chunking request
+                    catnip().eventBus().publish(computeAddress(WEBSOCKET_QUEUE, shardId),
+                            CatnipShard.basePayload(GatewayOp.REQUEST_GUILD_MEMBERS,
+                                    new JsonObject()
+                                            .put("guild_id", guild)
+                                            .put("query", "")
+                                            .put("limit", 0)
+                            ));
                 } else {
+                    // TODO: #255 - need to properly defer the emit until we recv. the optionally-created role
                     emitter().emit(event);
                     bufferState.receiveGuild(guild);
                     bufferState.replayGuild(guild);
