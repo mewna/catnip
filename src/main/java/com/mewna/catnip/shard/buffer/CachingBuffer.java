@@ -147,38 +147,27 @@ public class CachingBuffer extends AbstractBuffer {
             // Add the guild to be awaited so that we can buffer members
             bufferState.awaitGuild(guild);
             
-            // Remove READY guild if necessary, otherwise buffer
-            if(bufferState.awaitedGuilds().contains(guild)) {
-                // Trigger member chunking
-                final Integer memberCount = payloadData.getInteger("member_count");
-                if(catnip().chunkMembers() && memberCount > LARGE_THRESHOLD) {
-                    // If we're chunking members, calculate how many chunks we have to await
-                    int chunks = memberCount / 1000;
-                    if(memberCount % 1000 != 0) {
-                        // Not a perfect 1k, add a chunk to make up for how math works
-                        chunks += 1;
-                    }
-                    bufferState.initialGuildChunkCount(guild, chunks, event);
-                    // Actually send the chunking request
-                    catnip().eventBus().publish(computeAddress(WEBSOCKET_QUEUE, shardId),
-                            CatnipShard.basePayload(GatewayOp.REQUEST_GUILD_MEMBERS,
-                                    new JsonObject()
-                                            .put("guild_id", guild)
-                                            .put("query", "")
-                                            .put("limit", 0)
-                            ));
-                } else {
-                    // TODO: #255 - need to properly defer the emit until we recv. the optionally-created role
-                    emitter().emit(event);
-                    bufferState.receiveGuild(guild);
-                    bufferState.replayGuild(guild);
-                    // Replay all buffered events once we run out
-                    if(bufferState.awaitedGuilds().isEmpty()) {
-                        bufferState.replay();
-                    }
+            // Trigger member chunking if needed
+            final Integer memberCount = payloadData.getInteger("member_count");
+            if(catnip().chunkMembers() && memberCount > LARGE_THRESHOLD) {
+                // If we're chunking members, calculate how many chunks we have to await
+                int chunks = memberCount / 1000;
+                if(memberCount % 1000 != 0) {
+                    // Not a perfect 1k, add a chunk to make up for how math works
+                    chunks += 1;
                 }
+                bufferState.initialGuildChunkCount(guild, chunks, event);
+                // Actually send the chunking request
+                catnip().chunkMembers(guild);
             } else {
-                bufferState.buffer(event);
+                // TODO: #255 - need to properly defer the emit until we recv. the optionally-created role
+                emitter().emit(event);
+                bufferState.receiveGuild(guild);
+                bufferState.replayGuild(guild);
+                // Replay all buffered events once we run out
+                if(bufferState.awaitedGuilds().isEmpty()) {
+                    bufferState.replay();
+                }
             }
         });
     }
