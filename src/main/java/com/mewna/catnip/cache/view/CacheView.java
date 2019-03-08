@@ -49,11 +49,22 @@ import java.util.stream.StreamSupport;
 public interface CacheView<T> extends Iterable<T> {
     /**
      * @return An always empty cache view. Cannot be modified.
+     *
+     * @deprecated Use {@link #noop()} instead.
+     */
+    @Nonnull
+    @Deprecated
+    static <T> NamedCacheView<T> empty() {
+        return noop();
+    }
+    
+    /**
+     * @return A noop cache view. All mutation methods are noop. Always empty.
      */
     @Nonnull
     @SuppressWarnings("unchecked")
-    static <T> CacheView<T> empty() {
-        return (CacheView<T>) EmptyCacheView.INSTANCE;
+    static <T> MutableNamedCacheView<T> noop() {
+        return (MutableNamedCacheView<T>) NoopCacheView.INSTANCE;
     }
     
     /**
@@ -179,6 +190,7 @@ public interface CacheView<T> extends Iterable<T> {
      * @implNote Implementations should attempt to perform this operation without
      *           copying the elements of this view whenever possible.
      */
+    @Nonnull
     <R> R collect(@Nonnull Supplier<R> supplier, @Nonnull BiConsumer<R, ? super T> accumulator, @Nonnull BiConsumer<R, R> combiner);
     
     /**
@@ -202,6 +214,7 @@ public interface CacheView<T> extends Iterable<T> {
      * @implNote Implementations should attempt to perform this operation without
      *           copying the elements of this view whenever possible.
      */
+    @Nonnull
     <U> U reduce(U identity, @Nonnull BiFunction<U, ? super T, U> accumulator, @Nonnull BinaryOperator<U> combiner);
     
     /**
@@ -241,7 +254,8 @@ public interface CacheView<T> extends Iterable<T> {
      * @implNote Implementations should attempt to perform this operation without
      *           copying the elements of this view whenever possible.
      */
-    T reduce(T identity, @Nonnull BinaryOperator<T> accumulator);
+    @Nonnull
+    T reduce(@Nonnull T identity, @Nonnull BinaryOperator<T> accumulator);
     
     /**
      * Returns whether any elements of this cache match the provided

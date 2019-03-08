@@ -700,7 +700,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     @Override
     public NamedCacheView<Member> members(final long guildId) {
         final MutableNamedCacheView<Member> cache = memberCache(guildId, true);
-        return cache == null ? NamedCacheView.empty() : cache;
+        return cache == null ? CacheView.noop() : cache;
     }
     
     @Nonnull
@@ -720,7 +720,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     @Override
     public NamedCacheView<Role> roles(final long guildId) {
         final MutableNamedCacheView<Role> cache = roleCache(guildId, true);
-        return cache == null ? NamedCacheView.empty() : cache;
+        return cache == null ? CacheView.noop() : cache;
     }
     
     @Nonnull
@@ -740,7 +740,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     @Override
     public NamedCacheView<GuildChannel> channels(final long guildId) {
         final MutableNamedCacheView<GuildChannel> cache = channelCache(guildId, true);
-        return cache == null ? NamedCacheView.empty() : cache;
+        return cache == null ? CacheView.noop() : cache;
     }
     
     @Nonnull
@@ -760,7 +760,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     @Override
     public NamedCacheView<CustomEmoji> emojis(final long guildId) {
         final MutableNamedCacheView<CustomEmoji> cache = emojiCache(guildId, true);
-        return cache == null ? NamedCacheView.empty() : cache;
+        return cache == null ? CacheView.noop() : cache;
     }
     
     @Nonnull
@@ -780,7 +780,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     @Override
     public CacheView<VoiceState> voiceStates(final long guildId) {
         final MutableCacheView<VoiceState> cache = voiceStateCache(guildId, true);
-        return cache == null ? CacheView.empty() : cache;
+        return cache == null ? CacheView.noop() : cache;
     }
     
     @Nonnull

@@ -128,6 +128,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
         return collector.finisher().apply(a);
     }
     
+    @Nonnull
     @Override
     public <R> R collect(@Nonnull final Supplier<R> supplier, @Nonnull final BiConsumer<R, ? super T> accumulator, @Nonnull final BiConsumer<R, R> combiner) {
         final R result = supplier.get();
@@ -135,8 +136,9 @@ public class CompositeCacheView<T> implements CacheView<T> {
         return result;
     }
     
+    @Nonnull
     @Override
-    public <U> U reduce(final U identity, @Nonnull final BiFunction<U, ? super T, U> accumulator, @Nonnull final BinaryOperator<U> combiner) {
+    public <U> U reduce(@Nonnull final U identity, @Nonnull final BiFunction<U, ? super T, U> accumulator, @Nonnull final BinaryOperator<U> combiner) {
         U result = identity;
         for(final CacheView<T> view : sources) {
             result = view.reduce(result, accumulator, combiner);
@@ -162,12 +164,12 @@ public class CompositeCacheView<T> implements CacheView<T> {
         //this could be Optional.ofNullable, but this method will ensure equal
         //behaviour to the equivalent method in DefaultCacheView, which would also
         //throw if the accumulator resulted in a null value
-        //noinspection ConstantConditions
         return Optional.of(result);
     }
     
+    @Nonnull
     @Override
-    public T reduce(final T identity, @Nonnull final BinaryOperator<T> accumulator) {
+    public T reduce(@Nonnull final T identity, @Nonnull final BinaryOperator<T> accumulator) {
         T result = identity;
         for(final CacheView<T> view : sources) {
             result = view.reduce(result, accumulator);
