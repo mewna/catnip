@@ -309,7 +309,7 @@ public abstract class AbstractRequester implements Requester {
                     final Throwable throwable = new RuntimeException("REST error context");
                     throwable.setStackTrace(request.stacktrace());
                     request.future().completeExceptionally(new ResponseException(route.toString(), statusCode,
-                            statusMessage, code, message).initCause(throwable));
+                            statusMessage, code, message, response).initCause(throwable));
                 }
             } else {
                 request.future().complete(payload);

@@ -27,6 +27,8 @@
 
 package com.mewna.catnip.rest;
 
+import io.vertx.core.json.JsonObject;
+
 /**
  * @author SamOphis
  * @since 02/09/2019
@@ -37,9 +39,10 @@ public class ResponseException extends RuntimeException {
     private final String statusMessage;
     private final int jsonCode;
     private final String jsonMessage;
+    private final JsonObject rawJson;
     
     public ResponseException(final String route, final int statusCode, final String statusMessage, final int jsonCode,
-                             final String jsonMessage) {
+                             final String jsonMessage, final JsonObject rawJson) {
         super(
                 jsonCode == -1 ?
                         String.format("%s | HTTP Error Code: %d | JSON Message: %s", route, statusCode, jsonMessage) :
@@ -51,6 +54,7 @@ public class ResponseException extends RuntimeException {
         this.statusMessage = statusMessage;
         this.jsonCode = jsonCode;
         this.jsonMessage = jsonMessage;
+        this.rawJson = rawJson;
     }
     
     public String route() {
@@ -71,5 +75,9 @@ public class ResponseException extends RuntimeException {
     
     public String jsonMessage() {
         return jsonMessage;
+    }
+    
+    public JsonObject rawJson() {
+        return rawJson;
     }
 }
