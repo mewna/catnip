@@ -372,7 +372,7 @@ public interface Message extends Snowflake {
     
     @JsonIgnore
     default boolean isRickRoll() {
-        return content().contains("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+        return content().contains("https://www.youtube.com/watch?v=dQw4w9WgXcQ") || content().contains("https://youtu.be/dQw4w9WgXcQ");
     }
     
     @JsonDeserialize(as = AttachmentImpl.class)
