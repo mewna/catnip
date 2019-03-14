@@ -48,7 +48,7 @@ import java.util.concurrent.CompletionStage;
  * @since 9/12/18
  */
 @SuppressWarnings({"ClassReferencesSubclass", "unused"})
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+@JsonTypeInfo(use = Id.CLASS)
 public interface Channel extends Snowflake {
     /**
      * @return The type of this channel.
@@ -148,6 +148,25 @@ public interface Channel extends Snowflake {
     @CheckReturnValue
     default boolean isDM() {
         return !type().isGuild();
+    }
+    
+    /**
+     * Whether or not this channel is a news channel. See discordapp/discord-api-docs#881.
+     */
+    @JsonIgnore
+    @CheckReturnValue
+    default boolean isNews() {
+        return type() == ChannelType.NEWS;
+    }
+    
+    /**
+     * Whether or not this channel is a store channel. See discordapp/discord-api-docs#881
+     * and discordapp/discord-api-docs#889.
+     */
+    @JsonIgnore
+    @CheckReturnValue
+    default boolean isStore() {
+        return type() == ChannelType.STORE;
     }
     
     /**
@@ -264,7 +283,17 @@ public interface Channel extends Snowflake {
         /**
          * A guild channel category with zero or more child channels.
          */
-        CATEGORY(4, true);
+        CATEGORY(4, true),
+        /**
+         * A news channel in a guild. See discordapp/discord-api-docs#881
+         */
+        NEWS(5, true),
+        /**
+         * A store channel in a guild. Used for literally what it sounds like.
+         * Requires an application with a valid SKU. Not officially announced,
+         * but there is some discussion about it in discordapp/discord-api-docs#881.
+         */
+        STORE(6, true);
         
         @Getter
         private final int key;

@@ -269,6 +269,39 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public NewsChannel createNewsChannel(@Nonnull final String guildId, @Nonnull final JsonObject data) {
+        final String parentId = data.getString("parent_id");
+        return NewsChannelImpl.builder()
+                .catnip(catnip)
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .name(data.getString("name"))
+                .guildIdAsLong(Long.parseUnsignedLong(guildId))
+                .position(data.getInteger("position", -1))
+                .parentIdAsLong(parentId == null ? 0 : Long.parseUnsignedLong(parentId))
+                .overrides(toList(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
+                .topic(data.getString("topic"))
+                .nsfw(data.getBoolean("nsfw", false))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public StoreChannel createStoreChannel(@Nonnull final String guildId, @Nonnull final JsonObject data) {
+        final String parentId = data.getString("parent_id");
+        return StoreChannelImpl.builder()
+                .catnip(catnip)
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .name(data.getString("name"))
+                .guildIdAsLong(Long.parseUnsignedLong(guildId))
+                .position(data.getInteger("position", -1))
+                .parentIdAsLong(parentId == null ? 0 : Long.parseUnsignedLong(parentId))
+                .overrides(toList(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
+                .nsfw(data.getBoolean("nsfw", false))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public VoiceChannel createVoiceChannel(@Nonnull final String guildId, @Nonnull final JsonObject data) {
         final String parentId = data.getString("parent_id");
         return VoiceChannelImpl.builder()
@@ -331,14 +364,24 @@ public final class EntityBuilder {
     public GuildChannel createGuildChannel(@Nonnull final String guildId, @Nonnull final JsonObject data) {
         final ChannelType type = ChannelType.byKey(data.getInteger("type"));
         switch(type) {
-            case TEXT:
+            case TEXT: {
                 return createTextChannel(guildId, data);
-            case VOICE:
+            }
+            case VOICE: {
                 return createVoiceChannel(guildId, data);
-            case CATEGORY:
+            }
+            case CATEGORY: {
                 return createCategory(guildId, data);
-            default:
+            }
+            case NEWS: {
+                return createNewsChannel(guildId, data);
+            }
+            case STORE: {
+                return createStoreChannel(guildId, data);
+            }
+            default: {
                 throw new UnsupportedOperationException("Unsupported channel type " + type);
+            }
         }
     }
     
@@ -793,7 +836,7 @@ public final class EntityBuilder {
         if(guildId != null) {
             mentionedMembers.addAll(toList(data.getJsonArray("mentions"), o -> createPartialMemberMention(guildId, o)));
         }
-    
+        
         //noinspection ConstantConditions
         return MessageImpl.builder()
                 .catnip(catnip)
