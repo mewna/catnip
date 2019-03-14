@@ -32,8 +32,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.cache.view.NamedCacheView;
 import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.entity.channel.GuildChannel;
-import com.mewna.catnip.entity.channel.Webhook;
+import com.mewna.catnip.entity.channel.*;
 import com.mewna.catnip.entity.impl.GuildImpl;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
@@ -418,6 +417,228 @@ public interface Guild extends Snowflake {
         return catnip().cache().voiceStates(id());
     }
     
+    // Convenience methods
+    
+    /**
+     * @param id The id of the member to get.
+     *
+     * @return The member object for the user with the given id. May be
+     * {@code null} if the user is not a member of the guild.
+     */
+    @Nullable
+    @CheckReturnValue
+    default Member member(final String id) {
+        return catnip().cache().member(id(), id);
+    }
+    
+    /**
+     * @param id The id of the member to get.
+     *
+     * @return The member object for the user with the given id. May be
+     * {@code null} if the user is not a member of the guild.
+     */
+    @Nullable
+    @CheckReturnValue
+    default Member member(final long id) {
+        return catnip().cache().member(idAsLong(), id);
+    }
+    
+    /**
+     * @param id The id of the role to get.
+     *
+     * @return The role object with the given id, or {@code null} if no such
+     * role exists.
+     */
+    @Nullable
+    @CheckReturnValue
+    default Role role(final String id) {
+        return catnip().cache().role(id(), id);
+    }
+    
+    /**
+     * @param id The id of the role to get.
+     *
+     * @return The role object with the given id, or {@code null} if no such
+     * role exists.
+     */
+    @Nullable
+    @CheckReturnValue
+    default Role role(final long id) {
+        return catnip().cache().role(idAsLong(), id);
+    }
+    
+    /**
+     * @param id The id of the channel to get.
+     *
+     * @return The channel, or {@code null} if it isn't present.
+     */
+    @Nullable
+    @CheckReturnValue
+    default GuildChannel channel(final String id) {
+        return channels().getById(id);
+    }
+    
+    /**
+     * @param id The id of the channel to get.
+     *
+     * @return The channel, or {@code null} if it isn't present.
+     */
+    @Nullable
+    @CheckReturnValue
+    default GuildChannel channel(final long id) {
+        return channels().getById(id);
+    }
+    
+    /**
+     * @param id The id of the channel to get.
+     *
+     * @return The channel, or {@code null} if it isn't present.
+     *
+     * @throws IllegalArgumentException If the channel is not a text channel.
+     */
+    @Nullable
+    @CheckReturnValue
+    default TextChannel textChannel(final String id) {
+        final GuildChannel channel = channels().getById(id);
+        if(channel == null) {
+            return null;
+        } else if(channel.isText()) {
+            return channel.asTextChannel();
+        } else {
+            throw new IllegalArgumentException(id + " is not a text channel");
+        }
+    }
+    
+    /**
+     * @param id The id of the channel to get.
+     *
+     * @return The channel, or {@code null} if it isn't present.
+     *
+     * @throws IllegalArgumentException If the channel is not a text channel.
+     */
+    @Nullable
+    @CheckReturnValue
+    default TextChannel textChannel(final long id) {
+        final GuildChannel channel = channels().getById(id);
+        if(channel == null) {
+            return null;
+        } else if(channel.isText()) {
+            return channel.asTextChannel();
+        } else {
+            throw new IllegalArgumentException(id + " is not a text channel");
+        }
+    }
+    
+    /**
+     * @param id The id of the channel to get.
+     *
+     * @return The channel, or {@code null} if it isn't present.
+     *
+     * @throws IllegalArgumentException If the channel is not a voicecategory.
+     */
+    @Nullable
+    @CheckReturnValue
+    default VoiceChannel voiceChannel(final String id) {
+        final GuildChannel channel = channels().getById(id);
+        if(channel == null) {
+            return null;
+        } else if(channel.isVoice()) {
+            return channel.asVoiceChannel();
+        } else {
+            throw new IllegalArgumentException(id + " is not a voice channel");
+        }
+    }
+    
+    /**
+     * @param id The id of the channel to get.
+     *
+     * @return The channel, or {@code null} if it isn't present.
+     *
+     * @throws IllegalArgumentException If the channel is not a voicecategory.
+     */
+    @Nullable
+    @CheckReturnValue
+    default VoiceChannel voiceChannel(final long id) {
+        final GuildChannel channel = channels().getById(id);
+        if(channel == null) {
+            return null;
+        } else if(channel.isVoice()) {
+            return channel.asVoiceChannel();
+        } else {
+            throw new IllegalArgumentException(id + " is not a voice channel");
+        }
+    }
+    
+    /**
+     * @param id The id of the channel to get.
+     *
+     * @return The channel, or {@code null} if it isn't present.
+     *
+     * @throws IllegalArgumentException If the channel is not a category.
+     */
+    @Nullable
+    @CheckReturnValue
+    default Category category(final String id) {
+        final GuildChannel channel = channels().getById(id);
+        if(channel == null) {
+            return null;
+        } else if(channel.isCategory()) {
+            return channel.asCategory();
+        } else {
+            throw new IllegalArgumentException(id + " is not a category");
+        }
+    }
+    
+    /**
+     * @param id The id of the channel to get.
+     *
+     * @return The channel, or {@code null} if it isn't present.
+     *
+     * @throws IllegalArgumentException If the channel is not a category.
+     */
+    @Nullable
+    @CheckReturnValue
+    default Category category(final long id) {
+        final GuildChannel channel = channels().getById(id);
+        if(channel == null) {
+            return null;
+        } else if(channel.isCategory()) {
+            return channel.asCategory();
+        } else {
+            throw new IllegalArgumentException(id + " is not a category");
+        }
+    }
+    
+    /**
+     * @param id The id of the emoji to fetch.
+     * @return The emoji, or {@code null} if it isn't present.
+     */
+    @Nullable
+    @CheckReturnValue
+    default CustomEmoji emoji(final String id) {
+        return emojis().getById(id);
+    }
+    
+    /**
+     * @param id The id of the emoji to fetch.
+     * @return The emoji, or {@code null} if it isn't present.
+     */
+    @Nullable
+    @CheckReturnValue
+    default CustomEmoji emoji(final long id) {
+        return emojis().getById(id);
+    }
+    
+    /**
+     * @param name The name of the emoji to fetch
+     * @return A possibly-empty collection of all emojis with matching names.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Collection<CustomEmoji> emojiByName(final String name) {
+        return emojis().findByName(name);
+    }
+
     // REST methods
     
     /**
