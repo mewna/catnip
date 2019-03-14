@@ -70,10 +70,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.mewna.catnip.util.JsonUtil.*;
 
@@ -592,7 +589,7 @@ public final class EntityBuilder {
         final long guild = Long.parseUnsignedLong(guildId);
         if(userData != null) {
             catnip.cacheWorker().bulkCacheUsers(
-                    (int)((guild >> 22) % catnip.shardManager().shardCount()),
+                    (int) ((guild >> 22) % catnip.shardManager().shardCount()),
                     Collections.singletonList(createUser(userData)));
         }
         final String joinedAt;
@@ -792,6 +789,12 @@ public final class EntityBuilder {
         final String guildId = data.getString("guild_id");
         final String webhookId = data.getString("webhook_id");
         
+        final List<Member> mentionedMembers = new ArrayList<>();
+        if(guildId != null) {
+            mentionedMembers.addAll(toList(data.getJsonArray("mentions"), o -> createPartialMemberMention(guildId, o)));
+        }
+    
+        //noinspection ConstantConditions
         return MessageImpl.builder()
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
@@ -803,6 +806,7 @@ public final class EntityBuilder {
                 .tts(data.getBoolean("tts", false))
                 .mentionsEveryone(data.getBoolean("mention_everyone", false))
                 .mentionedUsers(toList(data.getJsonArray("mentions"), this::createUser))
+                .mentionedMembers(mentionedMembers)
                 .mentionedRoles(toListFromCache(data.getJsonArray("mention_roles"), e -> catnip.cache().role(guildId, e)))
                 .attachments(toList(data.getJsonArray("attachments"), this::createAttachment))
                 .embeds(toList(data.getJsonArray("embeds"), this::createEmbed))
@@ -814,6 +818,16 @@ public final class EntityBuilder {
                 .guildIdAsLong(guildId == null ? 0 : Long.parseUnsignedLong(guildId))
                 .webhookIdAsLong(webhookId == null ? 0 : Long.parseUnsignedLong(webhookId))
                 .build();
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    private Member createPartialMemberMention(final String guildId, final JsonObject data) {
+        if(data.containsKey("member")) {
+            return createMember(guildId, data.getString("id"), data.getJsonObject("member"));
+        } else {
+            return null;
+        }
     }
     
     @Nonnull
