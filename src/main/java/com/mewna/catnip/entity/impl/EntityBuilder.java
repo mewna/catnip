@@ -364,16 +364,24 @@ public final class EntityBuilder {
     public GuildChannel createGuildChannel(@Nonnull final String guildId, @Nonnull final JsonObject data) {
         final ChannelType type = ChannelType.byKey(data.getInteger("type"));
         switch(type) {
-            case TEXT:
+            case TEXT: {
                 return createTextChannel(guildId, data);
-            case VOICE:
+            }
+            case VOICE: {
                 return createVoiceChannel(guildId, data);
-            case CATEGORY:
+            }
+            case CATEGORY: {
                 return createCategory(guildId, data);
-            case NEWS:
+            }
+            case NEWS: {
                 return createNewsChannel(guildId, data);
-            default:
+            }
+            case STORE: {
+                return createStoreChannel(guildId, data);
+            }
+            default: {
                 throw new UnsupportedOperationException("Unsupported channel type " + type);
+            }
         }
     }
     
@@ -828,7 +836,7 @@ public final class EntityBuilder {
         if(guildId != null) {
             mentionedMembers.addAll(toList(data.getJsonArray("mentions"), o -> createPartialMemberMention(guildId, o)));
         }
-    
+        
         //noinspection ConstantConditions
         return MessageImpl.builder()
                 .catnip(catnip)
