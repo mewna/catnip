@@ -125,6 +125,16 @@ public interface Message extends Snowflake {
     List<User> mentionedUsers();
     
     /**
+     * A list of members mentioned by this message. Will contain the same users
+     * as {@link #mentionedUsers()}. Will always be empty for DMs.
+     *
+     * @return List of members. Never null.
+     */
+    @Nonnull
+    @CheckReturnValue
+    List<Member> mentionedMembers();
+    
+    /**
      * List of roles @mentioned by this message.
      * <br>All users with these roles will also be mentioned
      *
@@ -332,7 +342,7 @@ public interface Message extends Snowflake {
                 Permission.ADD_REACTIONS, Permission.READ_MESSAGE_HISTORY);
         return catnip().rest().channel().addReaction(channelId(), id(), emoji);
     }
-    
+
 //    default CompletionStage<Void> removeReaction()
     
     @Nonnull
@@ -372,7 +382,7 @@ public interface Message extends Snowflake {
     
     @JsonIgnore
     default boolean isRickRoll() {
-        return content().contains("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+        return content().contains("https://www.youtube.com/watch?v=dQw4w9WgXcQ") || content().contains("https://youtu.be/dQw4w9WgXcQ");
     }
     
     @JsonDeserialize(as = AttachmentImpl.class)
