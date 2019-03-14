@@ -25,66 +25,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.impl;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.channel.NewsChannel;
-import com.mewna.catnip.entity.channel.TextChannel;
-import com.mewna.catnip.entity.guild.PermissionOverride;
-import lombok.*;
-import lombok.experimental.Accessors;
+package com.mewna.catnip.entity.channel;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 
 /**
- * TODO: Should this just extend {@link TextChannelImpl} instead?
- *
  * @author amy
- * @since 3/10/19.
+ * @since 3/14/19.
  */
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
-@Builder
-@Accessors(fluent = true)
-@NoArgsConstructor
-@AllArgsConstructor
-public class NewsChannelImpl implements NewsChannel, RequiresCatnip {
-    private transient Catnip catnip;
-    
-    private long idAsLong;
-    private String name;
-    private long guildIdAsLong;
-    private int position;
-    private long parentIdAsLong;
-    private List<PermissionOverride> overrides;
-    private String topic;
-    private boolean nsfw;
-    
+public interface StoreChannel extends GuildChannel {
+    @Nonnull
     @Override
-    public void catnip(@Nonnull final Catnip catnip) {
-        this.catnip = catnip;
-        for(final PermissionOverride override : overrides) {
-            if(override instanceof RequiresCatnip) {
-                ((RequiresCatnip) override).catnip(catnip);
-            }
-        }
+    default ChannelType type() {
+        return ChannelType.STORE;
     }
     
-    @Override
-    public int hashCode() {
-        return Long.hashCode(idAsLong);
-    }
-    
-    @Override
-    public boolean equals(final Object obj) {
-        return obj instanceof TextChannel && ((TextChannel) obj).idAsLong() == idAsLong;
-    }
-    
-    @Override
-    public String toString() {
-        return String.format("NewsChannel (%s)", name);
-    }
+    boolean nsfw();
 }

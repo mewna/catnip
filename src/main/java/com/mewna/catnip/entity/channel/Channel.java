@@ -29,6 +29,7 @@ package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
@@ -47,7 +48,7 @@ import java.util.concurrent.CompletionStage;
  * @since 9/12/18
  */
 @SuppressWarnings({"ClassReferencesSubclass", "unused"})
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+@JsonTypeInfo(use = Id.CLASS)
 public interface Channel extends Snowflake {
     /**
      * @return The type of this channel.
@@ -149,10 +150,23 @@ public interface Channel extends Snowflake {
         return !type().isGuild();
     }
     
+    /**
+     * Whether or not this channel is a news channel. See discordapp/discord-api-docs#881.
+     */
     @JsonIgnore
     @CheckReturnValue
     default boolean isNews() {
         return type() == ChannelType.NEWS;
+    }
+    
+    /**
+     * Whether or not this channel is a store channel. See discordapp/discord-api-docs#881
+     * and discordapp/discord-api-docs#889.
+     */
+    @JsonIgnore
+    @CheckReturnValue
+    default boolean isStore() {
+        return type() == ChannelType.STORE;
     }
     
     /**
