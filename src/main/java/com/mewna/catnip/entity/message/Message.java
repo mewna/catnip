@@ -48,8 +48,10 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
+import java.util.stream.Collectors;
 
 /**
  * A single message in Discord.
@@ -133,6 +135,15 @@ public interface Message extends Snowflake {
     @Nonnull
     @CheckReturnValue
     List<Role> mentionedRoles();
+    
+    @Nonnull
+    @CheckReturnValue
+    default List<Member> mentionedMembers() {
+        return mentionedUsers().isEmpty() ? Collections.emptyList() :
+                mentionedUsers().stream()
+                        .map(u -> catnip().cache().member(guildIdAsLong(), u.idAsLong()))
+                        .collect(Collectors.toList());
+    }
     
     /**
      * The author of the message, as a member of the guild.
@@ -332,7 +343,7 @@ public interface Message extends Snowflake {
                 Permission.ADD_REACTIONS, Permission.READ_MESSAGE_HISTORY);
         return catnip().rest().channel().addReaction(channelId(), id(), emoji);
     }
-    
+
 //    default CompletionStage<Void> removeReaction()
     
     @Nonnull
