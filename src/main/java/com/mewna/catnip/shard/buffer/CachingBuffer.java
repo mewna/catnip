@@ -28,8 +28,6 @@
 package com.mewna.catnip.shard.buffer;
 
 import com.google.common.collect.ImmutableSet;
-import com.mewna.catnip.shard.CatnipShard;
-import com.mewna.catnip.shard.GatewayOp;
 import com.mewna.catnip.util.JsonUtil;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
@@ -46,8 +44,6 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 import static com.mewna.catnip.shard.CatnipShard.LARGE_THRESHOLD;
 import static com.mewna.catnip.shard.DiscordEvent.Raw;
-import static com.mewna.catnip.shard.ShardAddress.WEBSOCKET_QUEUE;
-import static com.mewna.catnip.shard.ShardAddress.computeAddress;
 
 /**
  * An implementation of {@link EventBuffer} used for the case of caching all
