@@ -205,6 +205,7 @@ public class CatnipShard extends AbstractVerticle {
     
     private void handleVoiceStateUpdateQueue(final Message<JsonObject> message) {
         sendTask.offer(basePayload(GatewayOp.VOICE_STATE_UPDATE, message.body()));
+        sendTask.run();
     }
     
     private void handlePresenceUpdate(final Message<PresenceImpl> message) {
@@ -214,6 +215,7 @@ public class CatnipShard extends AbstractVerticle {
             return;
         }
         presenceTask.offer(impl);
+        presenceTask.run();
     }
     
     private void handleControlMessage(final Message<ShardControlMessage> msg) {
