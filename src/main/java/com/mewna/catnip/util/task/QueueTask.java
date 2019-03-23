@@ -60,7 +60,6 @@ public abstract class QueueTask<T> {
             queue.add(item);
             inserted = true;
         }
-        run();
         return inserted;
     }
 }
