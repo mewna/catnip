@@ -236,10 +236,13 @@ public abstract class AbstractRequester implements Requester {
         final long timeDifference;
         if(dateHeader == null) {
             timeDifference = requestDuration;
+            catnip.logAdapter().trace("No date header, time difference = request duration = {}", timeDifference);
         } else {
             final long now = System.currentTimeMillis();
             final long date = OffsetDateTime.parse(dateHeader, DateTimeFormatter.RFC_1123_DATE_TIME).toInstant().toEpochMilli();
             timeDifference = now - date + requestDuration;
+            catnip.logAdapter().trace("Have date header, time difference = now - date + request duration = {}",
+                    timeDifference);
         }
         if(statusCode == 429) {
             catnip.logAdapter().error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
@@ -317,8 +320,8 @@ public abstract class AbstractRequester implements Requester {
         }
     }
     
-    protected void updateBucket(@Nonnull final Route route, @Nonnull final Headers headers,
-                                final long retryAfter, final long timeDifference) {
+    protected void updateBucket(@Nonnull final Route route, @Nonnull final Headers headers, final long retryAfter,
+                                final long timeDifference) {
         final String rateLimitReset = headers.get("X-RateLimit-Reset");
         final String rateLimitRemaining = headers.get("X-RateLimit-Remaining");
         final String rateLimitLimit = headers.get("X-RateLimit-Limit");
