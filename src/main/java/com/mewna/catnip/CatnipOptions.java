@@ -191,6 +191,11 @@ public final class CatnipOptions implements Cloneable {
      * TODO: When we move off of Java 8, use the stack walking API for this
      */
     private boolean captureRestStacktraces = true;
+    /**
+     * Whether or not to log "Received presence for uncached user XXX" when
+     * catnip is not chunking members. Basically, this avoids a ton of logspam.
+     */
+    private boolean logUncachedPresenceWhenNotChunking = true;
     
     @Override
     public Object clone() {

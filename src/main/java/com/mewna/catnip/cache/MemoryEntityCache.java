@@ -582,7 +582,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                 final JsonObject user = payload.getJsonObject("user");
                 final String id = user.getString("id");
                 final User old = user(id);
-                if(old == null && !catnip.chunkMembers()) {
+                if(old == null && !catnip.chunkMembers() && catnip.logUncachedPresenceWhenNotChunking()) {
                     catnip.logAdapter().warn("Received PRESENCE_UPDATE for uncached user {}!?", id);
                 } else if(old != null) {
                     // This could potentially update:

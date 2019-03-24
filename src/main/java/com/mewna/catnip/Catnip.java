@@ -341,7 +341,7 @@ public interface Catnip {
      * @return Whether or not this catnip instance will capture stacktraces
      * before sending REST requests. This is useful for debugging.
      *
-     * @see CatnipOptions#captureRestStacktraces
+     * @see CatnipOptions#captureRestStacktraces()
      */
     boolean captureRestStacktraces();
     
@@ -442,6 +442,11 @@ public interface Catnip {
     @Nonnull
     @CheckReturnValue
     Set<String> disabledEvents();
+    
+    /**
+     * @return Whether or not to log "uncached presence" warning 
+     */
+    boolean logUncachedPresenceWhenNotChunking();
     
     /**
      * Opens a voice connection to the provided guild and channel. The connection is
