@@ -912,7 +912,10 @@ public interface Guild extends Snowflake {
                                       @Nullable final String reason,
                                       @Nonnegative final int deleteMessageDays) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.BAN_MEMBERS);
-        PermissionUtil.checkHierarchy(Objects.requireNonNull(catnip().cache().member(id(), userId)), this);
+        final Member member = catnip().cache().member(id(), userId);
+        if (member != null) {
+            PermissionUtil.checkHierarchy(member, this);
+        }
         return catnip().rest().guild().createGuildBan(id(), userId, reason, deleteMessageDays);
     }
     
