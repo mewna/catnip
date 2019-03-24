@@ -234,15 +234,25 @@ public abstract class AbstractRequester implements Requester {
         final String dateHeader = headers.get("Date");
         final long requestDuration = TimeUnit.NANOSECONDS.toMillis(requestEnd - request.start);
         final long timeDifference;
-        if(dateHeader == null) {
+        //noinspection UnnecessaryParentheses
+        if(dateHeader == null || (route.method() == PUT && route.baseRoute().contains("/reactions/"))) {
             timeDifference = requestDuration;
             catnip.logAdapter().trace("No date header, time difference = request duration = {}", timeDifference);
         } else {
             final long now = System.currentTimeMillis();
+            // Parsing the date header like this will only be accurate to the
+            // second, meaning that reaction routes will be significantly
+            // inaccurate using this method, as those routes have ratelimits
+            // with millisecond precision. This leads to ex. very slow reaction
+            // menus. To solve this, we use the request duration to measure
+            // latency instead.
+            // TODO: Is there a more accurate way to do this that still
+            //  respects the ms-precision ratelimits?
             final long date = OffsetDateTime.parse(dateHeader, DateTimeFormatter.RFC_1123_DATE_TIME).toInstant().toEpochMilli();
             timeDifference = now - date + requestDuration;
-            catnip.logAdapter().trace("Have date header, time difference = now - date + request duration = {}",
-                    timeDifference);
+            catnip.logAdapter().trace("Have date header, time difference = now - date + request duration = " +
+                            "{} - {} + {} = {}",
+                    now, date, requestDuration, timeDifference);
         }
         if(statusCode == 429) {
             catnip.logAdapter().error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
@@ -296,6 +306,8 @@ public abstract class AbstractRequester implements Requester {
                             failures.put(e.getKey(), errorStrings);
                         } else if(e.getValue() instanceof Integer) {
                             failures.put(e.getKey(), ImmutableList.of(String.valueOf(e.getValue())));
+                        } else if(e.getValue() instanceof String) {
+                            failures.put(e.getKey(), ImmutableList.of((String) e.getValue()));
                         } else {
                             // If we don't know what it is, just stringify it and log a warning so that people can tell us
                             catnip.logAdapter().warn("Got unknown error response type: {} (Please report this!)",
