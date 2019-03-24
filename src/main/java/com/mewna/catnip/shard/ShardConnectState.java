@@ -4,4 +4,6 @@ public enum ShardConnectState {
     FAILED,
     READY,
     RESUMED,
+    INVALID,
+    CANCEL,
 }
