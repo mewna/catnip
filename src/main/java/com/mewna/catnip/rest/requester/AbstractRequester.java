@@ -234,8 +234,10 @@ public abstract class AbstractRequester implements Requester {
         final String dateHeader = headers.get("Date");
         final long requestDuration = TimeUnit.NANOSECONDS.toMillis(requestEnd - request.start);
         final long timeDifference;
-        //noinspection UnnecessaryParentheses
-        if(dateHeader == null || (route.method() == PUT && route.baseRoute().contains("/reactions/"))) {
+        if(route.method() == PUT && route.baseRoute().contains("/reactions/")) {
+            timeDifference = requestDuration;
+            catnip.logAdapter().trace("Reaction route, using time difference = request duration = {}", timeDifference);
+        } else if(dateHeader == null) {
             timeDifference = requestDuration;
             catnip.logAdapter().trace("No date header, time difference = request duration = {}", timeDifference);
         } else {
