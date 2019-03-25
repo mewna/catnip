@@ -106,8 +106,8 @@ public class RestChannel extends RestHandler {
         if(embeds != null && !embeds.isEmpty()) {
             json.put("embed", entityBuilder().embedToJson(embeds.get(0)));
         }
-        if(json.getValue("embed", null) == null && json.getValue("content", null) == null) {
-            throw new IllegalArgumentException("Can't build a message with no content and no embeds!");
+        if(json.getValue("embed", null) == null && json.getValue("content", null) == null && !message.attachments().isEmpty()) {
+            throw new IllegalArgumentException("Can't build a message with no content, no embeds and no attachments!");
         }
         
         final OutboundRequest request = new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json);
@@ -126,7 +126,7 @@ public class RestChannel extends RestHandler {
             json.put("embed", entityBuilder().embedToJson(options.embed()));
         }
         if(json.getValue("embed", null) == null && json.getValue("content", null) == null && !options.hasFiles()) {
-            throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
+            throw new IllegalArgumentException("Can't build a message with no content, no embeds and no attachments!");
         }
     
         final OutboundRequest request = new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json);
