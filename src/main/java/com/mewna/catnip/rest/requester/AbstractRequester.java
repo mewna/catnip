@@ -187,7 +187,7 @@ public abstract class AbstractRequester implements Requester {
             builder = HttpRequest.newBuilder(URI.create(API_HOST + API_BASE + route.baseRoute())).GET();
         } else {
             builder = HttpRequest.newBuilder(URI.create(API_HOST + API_BASE + route.baseRoute()))
-                    .setHeader("Content-Type", "application/json")
+                    .setHeader("Content-Type", mediaType)
                     .method(route.method().name(), body);
         }
     

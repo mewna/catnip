@@ -105,6 +105,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
     private final AtomicLong heartbeatTask = new AtomicLong(-1L);
     private final Buffer readBuffer = Buffer.buffer();
     private final Buffer decompressBuffer = Buffer.buffer();
+    private final StringBuffer socketInputBuffer = new StringBuffer(); //Using a StringBuffer instead of a StringBuilder due to async-friendly synchronizations.
     private final byte[] decompress = new byte[1024];
     // aka memory golfing
     private final String control;
@@ -383,7 +384,15 @@ public class CatnipShard extends AbstractVerticle implements Listener {
         //This assertion should only trip if the same 'CatnipShard' instance is bound to two sockets, which should *never* happen under normal conditions.
         //If this does become an issue, we can add logic to ensure one of the sockets die, and persist the other.
         assert webSocket == socket : id + " expected " + socket + "; got" + webSocket;
-        handleSocketData(new JsonObject(data.toString()));
+        if(last) {
+            try {
+                handleSocketData(new JsonObject(socketInputBuffer.length() > 0 ? socketInputBuffer.append(data).toString() : data.toString()));
+            } finally {
+                socketInputBuffer.setLength(0);
+            }
+        } else {
+            socketInputBuffer.append(data);
+        }
         webSocket.request(1L);
         return null;
     }
@@ -398,7 +407,8 @@ public class CatnipShard extends AbstractVerticle implements Listener {
         //This assertion should only trip if the same 'CatnipShard' instance is bound to two sockets, which should *never* happen under normal conditions.
         //If this does become an issue, we can add logic to ensure one of the sockets die, and persist the other.
         assert webSocket == socket : id + " expected " + socket + "; got" + webSocket;
-        
+    
+        //This may need revising, due to the tendency of the socket splitting frames. Although, the method does have a built in handler, so :shrug:
         handleBinaryData(Buffer.buffer(data.array()));
         webSocket.request(1L);
         return null;

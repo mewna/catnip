@@ -42,7 +42,7 @@ public class MultipartBodyPublisher {
     //Using Vert.x's buffer. Reflects message's usage of Buffers.
     @ParametersAreNonnullByDefault
     public MultipartBodyPublisher addPart(final String name, final String filename, final Buffer value) {
-        partsSpecificationList.add(new PartsSpecification(Type.FILE, name).value(value));
+        partsSpecificationList.add(new PartsSpecification(Type.FILE, name).filename(filename).value(value));
         return this;
     }
     
@@ -142,9 +142,8 @@ public class MultipartBodyPublisher {
                         buf = new byte[8192];
                         currentFileInput.getBytes(index, index += 8192, buf);
                     } else {
-                        final int size = 8192 - remain;
-                        buf = new byte[size];
-                        currentFileInput.getBytes(index, index += size, buf);
+                        buf = new byte[remain];
+                        currentFileInput.getBytes(index, index += remain, buf);
                     }
                     return buf;
                 } else {
