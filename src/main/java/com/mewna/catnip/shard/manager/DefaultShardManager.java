@@ -141,10 +141,9 @@ public class DefaultShardManager extends AbstractShardManager {
             }
             
             if(expectedShardCount > gatewayInfo.remainingSessions()) {
-                catnip().logAdapter().error("Refusing to start: {} shards requested, but only {} sessions available. Reset after {}, now is {}.",
+                catnip().logAdapter().warn("{} shards requested, but only {} sessions available. Reset after {}, now is {}.",
                         expectedShardCount, gatewayInfo.remainingSessions(), gatewayInfo.resetAfter(), System.currentTimeMillis());
-                catnip().logAdapter().error("Please reset your token!");
-                throw new IllegalStateException("Unable to successfully start bot: Not enough login sessions remaining.");
+                catnip().logAdapter().warn("Token reset incoming!");
             }
             
             // Actually start shards
