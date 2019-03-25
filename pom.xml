@@ -68,11 +68,12 @@
         :sob:
         someday we can remove this :(
         -->
-        <dependency>
+        <!--dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>3.9.1</version>
-        </dependency>
+        </dependency-->
+        <!--We will be using the built in Java 11 HTTP API instead.-->
 
         <!-- slf4j -->
         <dependency>
@@ -159,8 +160,8 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
                 <version>3.6.1</version>
             </plugin>
@@ -200,6 +201,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>

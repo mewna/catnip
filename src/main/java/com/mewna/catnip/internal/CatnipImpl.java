@@ -346,18 +346,16 @@ public class CatnipImpl implements Catnip {
                         //this is actually needed because generics are dumb
                         return (Catnip) this;
                     }).exceptionally(e -> {
-                        logAdapter.warn("Couldn't validate token!");
+                        logAdapter.warn("Couldn't validate token!", e);
                         throw new RuntimeException(e);
                     })
                     .toCompletableFuture();
         } else {
             try {
                 parseClientId();
-            } catch(IllegalArgumentException e) {
-                Exception wrapped = new RuntimeException("The provided token was invalid!", e);
-                // I would use SafeVertxCompletableFuture.failedFuture but that was added in Java 9+
-                // and catnip uses Java 8
-                return SafeVertxCompletableFuture.from(this, Future.failedFuture(wrapped));
+            } catch(final IllegalArgumentException e) {
+                final Exception wrapped = new RuntimeException("The provided token was invalid!", e);
+                return SafeVertxCompletableFuture.failedFuture(wrapped);
             }
             
             return SafeVertxCompletableFuture.completedFuture(this);

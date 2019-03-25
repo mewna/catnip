@@ -55,10 +55,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import okhttp3.OkHttpClient.Builder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.net.http.HttpClient;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -159,7 +159,7 @@ public final class CatnipOptions implements Cloneable {
     @Nonnull
     private Set<String> disabledEvents = ImmutableSet.of();
     @Nonnull
-    private Requester requester = new SerialRequester(new DefaultRateLimiter(), new Builder());
+    private Requester requester = new SerialRequester(new DefaultRateLimiter(), HttpClient.newBuilder());
     /**
      * Whether or not extensions overriding options should be logged. Defaults
      * to {@code true}.
