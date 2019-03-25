@@ -86,7 +86,14 @@ public interface TextChannel extends GuildChannel, MessageChannel, Mentionable {
     @JsonIgnore
     @CheckReturnValue
     default boolean isText() {
-        return true;
+        return type() == ChannelType.TEXT;
+    }
+    
+    @Override
+    @JsonIgnore
+    @CheckReturnValue
+    default boolean isNews() {
+        return type() == ChannelType.NEWS;
     }
     
     @Override

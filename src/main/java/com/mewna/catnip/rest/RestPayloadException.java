@@ -40,7 +40,7 @@ public class RestPayloadException extends Exception {
     private final Map<String, List<String>> failures;
     
     public RestPayloadException(final Map<String, List<String>> failures) {
-        super(null, null, false, false);
+        super((String) null);
         this.failures = ImmutableMap.copyOf(failures);
     }
     

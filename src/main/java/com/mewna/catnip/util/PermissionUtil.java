@@ -51,7 +51,7 @@ public final class PermissionUtil {
         }
         long permissions = publicRole.permissionsRaw();
         if(holder instanceof Member) {
-            for(final Role role : ((Member) holder).roles()) {
+            for(final Role role : ((Member) holder).orderedRoles()) {
                 permissions |= role.permissionsRaw();
             }
         }
@@ -181,10 +181,10 @@ public final class PermissionUtil {
         if(target.isOwner()) {
             return false;
         }
-        if(actor.roles().isEmpty()) {
+        if(actor.orderedRoles().isEmpty()) {
             return actor.isOwner();
         }
-        return canInteract(actor.roles().iterator().next(), target);
+        return canInteract(actor.orderedRoles().iterator().next(), target);
     }
     
     /**
@@ -201,10 +201,10 @@ public final class PermissionUtil {
         if(target.isOwner()) {
             return false;
         }
-        if(target.roles().isEmpty()) {
+        if(target.orderedRoles().isEmpty()) {
             return true;
         }
-        return canInteract(actor, target.roles().iterator().next());
+        return canInteract(actor, target.orderedRoles().iterator().next());
     }
     
     /**
@@ -221,11 +221,11 @@ public final class PermissionUtil {
         if(actor.isOwner()) {
             return true;
         }
-        if(actor.roles().isEmpty()) {
+        if(actor.orderedRoles().isEmpty()) {
             return actor.isOwner();
         }
         // Check if the highest role of the actor is higher than the role of the target
-        return canInteract(actor.roles().iterator().next(), target);
+        return canInteract(actor.orderedRoles().iterator().next(), target);
     }
     
     /**

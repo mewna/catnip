@@ -30,7 +30,8 @@ package com.mewna.catnip.extension;
 import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.extension.hook.CatnipHook;
-import com.mewna.catnip.shard.EventType;
+import com.mewna.catnip.shard.event.DoubleEventType;
+import com.mewna.catnip.shard.event.EventType;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.impl.ConcurrentHashSet;
@@ -38,10 +39,12 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -86,5 +89,18 @@ public abstract class AbstractExtension extends AbstractVerticle implements Exte
     @Override
     public <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler) {
         return on(type).handler(m -> handler.accept(m.body()));
+    }
+    
+    @Override
+    public <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type) {
+        final MessageConsumer<Pair<T, E>> consumer = catnip().dispatchManager().createConsumer(type.key());
+        context.addCloseHook(consumer::unregister);
+        return consumer;
+    }
+    
+    @Override
+    public <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
+                                                 @Nonnull final BiConsumer<T, E> handler) {
+        return on(type).handler(m -> handler.accept(m.body().getLeft(), m.body().getRight()));
     }
 }

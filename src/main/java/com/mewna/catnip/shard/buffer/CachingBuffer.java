@@ -28,8 +28,6 @@
 package com.mewna.catnip.shard.buffer;
 
 import com.google.common.collect.ImmutableSet;
-import com.mewna.catnip.shard.CatnipShard;
-import com.mewna.catnip.shard.GatewayOp;
 import com.mewna.catnip.util.JsonUtil;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
@@ -46,8 +44,6 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 import static com.mewna.catnip.shard.CatnipShard.LARGE_THRESHOLD;
 import static com.mewna.catnip.shard.DiscordEvent.Raw;
-import static com.mewna.catnip.shard.ShardAddress.WEBSOCKET_QUEUE;
-import static com.mewna.catnip.shard.ShardAddress.computeAddress;
 
 /**
  * An implementation of {@link EventBuffer} used for the case of caching all
@@ -144,43 +140,30 @@ public class CachingBuffer extends AbstractBuffer {
         // Make sure to cache guild
         // This will always succeed unless something goes horribly wrong
         maybeCache(Raw.GUILD_CREATE, shardId, payloadData).setHandler(_res -> {
-            // Trigger member chunking
-            final Integer memberCount = payloadData.getInteger("member_count");
-            if(catnip().chunkMembers() //only send the request if needed
-                    && memberCount > LARGE_THRESHOLD) {
-                // Chunk members
-                catnip().eventBus().publish(computeAddress(WEBSOCKET_QUEUE, shardId),
-                        CatnipShard.basePayload(GatewayOp.REQUEST_GUILD_MEMBERS,
-                                new JsonObject()
-                                        .put("guild_id", guild)
-                                        .put("query", "")
-                                        .put("limit", 0)
-                        ));
-            }
             // Add the guild to be awaited so that we can buffer members
             bufferState.awaitGuild(guild);
             
-            // Remove READY guild if necessary, otherwise buffer
-            if(bufferState.awaitedGuilds().contains(guild)) {
-                if(catnip().chunkMembers() && memberCount > LARGE_THRESHOLD) {
-                    // If we're chunking members, calculate how many chunks we have to await
-                    int chunks = memberCount / 1000;
-                    if(memberCount % 1000 != 0) {
-                        // Not a perfect 1k, add a chunk to make up for how math works
-                        chunks += 1;
-                    }
-                    bufferState.initialGuildChunkCount(guild, chunks, event);
-                } else {
-                    emitter().emit(event);
-                    bufferState.receiveGuild(guild);
-                    bufferState.replayGuild(guild);
-                    // Replay all buffered events once we run out
-                    if(bufferState.awaitedGuilds().isEmpty()) {
-                        bufferState.replay();
-                    }
+            // Trigger member chunking if needed
+            final Integer memberCount = payloadData.getInteger("member_count");
+            if(catnip().chunkMembers() && memberCount > LARGE_THRESHOLD) {
+                // If we're chunking members, calculate how many chunks we have to await
+                int chunks = memberCount / 1000;
+                if(memberCount % 1000 != 0) {
+                    // Not a perfect 1k, add a chunk to make up for how math works
+                    chunks += 1;
                 }
+                bufferState.initialGuildChunkCount(guild, chunks, event);
+                // Actually send the chunking request
+                catnip().chunkMembers(guild);
             } else {
-                bufferState.buffer(event);
+                // TODO(#255) - need to properly defer the emit until we recv. the optionally-created role
+                emitter().emit(event);
+                bufferState.receiveGuild(guild);
+                bufferState.replayGuild(guild);
+                // Replay all buffered events once we run out
+                if(bufferState.awaitedGuilds().isEmpty()) {
+                    bufferState.replay();
+                }
             }
         });
     }
@@ -191,7 +174,7 @@ public class CachingBuffer extends AbstractBuffer {
         
         if(catnip().chunkMembers()) {
             final String guild = payloadData.getString("guild_id");
-            cacheAndDispatch(eventType, payloadData, bufferState.id(), event);
+            cacheAndDispatch(eventType, bufferState.id(), event);
             bufferState.acceptChunk(guild);
             if(bufferState.doneChunking(guild)) {
                 emitter().emit(bufferState.guildCreate(guild));
@@ -221,27 +204,22 @@ public class CachingBuffer extends AbstractBuffer {
                 // If we're not awaiting the guild, it means that we're done
                 // buffering events for the guild - ie. all member chunks have
                 // been received - and so we can emit
-                cacheAndDispatch(eventType, payloadData, id, event);
+                cacheAndDispatch(eventType, id, event);
             }
         } else {
             // Emit if the payload has no guild id
-            cacheAndDispatch(eventType, payloadData, id, event);
+            cacheAndDispatch(eventType, id, event);
         }
     }
     
-    // Yeah just lazy af here I know, but no need to fetch data a second time
-    private void cacheAndDispatch(final String type, final JsonObject d, final int id, final JsonObject event) {
-        if(DELETE_EVENTS.contains(type)) {
-            // We want to update cache AFTER we dispatch the event to
-            // subconsumers, to avoid a race around cache accesses.
-            // When explicitly only using the internal event bus, handlers are
-            // just invoked in a synchronous loop (see EventBusImpl in v.x),
-            // which means that this is safe:tm: to do here.
-            emitter().emit(event);
-            maybeCache(type, id, d);
-        } else {
-            maybeCache(type, id, d).setHandler(_res -> emitter().emit(event));
-        }
+    private void cacheAndDispatch(final String type, final int id, final JsonObject event) {
+        // We *always* emit the event BEFORE updating the cache, so that you
+        // can ex. compare with the old cache first
+        // TODO: Cache updates are async - this is likely a race condition
+        // Is there any reasonable way to fix this?
+        final JsonObject d = event.getJsonObject("d");
+        emitter().emit(event);
+        maybeCache(type, id, d);
     }
     
     private Future<Void> maybeCache(final String eventType, final int shardId, final JsonObject data) {

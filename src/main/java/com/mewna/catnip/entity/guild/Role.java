@@ -30,7 +30,6 @@ package com.mewna.catnip.entity.guild;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Mentionable;
-import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.impl.RoleImpl;
 import com.mewna.catnip.entity.util.Permission;
@@ -61,7 +60,7 @@ public interface Role extends Mentionable, Comparable<Role>, PermissionHolder {
     /**
      * Integer representation of the role color.
      * <br>To use this, you must convert the integer to base-16, hex, format.
-     * //TODO: Test default role color.
+     * The default role color is {@code 0}.
      *
      * @return The integer representation of the role color. Never null.
      */

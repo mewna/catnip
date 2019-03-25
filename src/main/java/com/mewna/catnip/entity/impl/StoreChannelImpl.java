@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2019 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,41 +25,63 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.shard;
+package com.mewna.catnip.entity.impl;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.channel.StoreChannel;
+import com.mewna.catnip.entity.channel.TextChannel;
+import com.mewna.catnip.entity.guild.PermissionOverride;
+import lombok.*;
 import lombok.experimental.Accessors;
 
-import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
- * @param <T> Type of the event.
- *
- * @author natanbc
- * @since 10/6/18.
+ * @author amy
+ * @since 3/14/19.
  */
-@Getter
+@Getter(onMethod_ = @JsonProperty)
+@Setter(onMethod_ = @JsonProperty)
+@Builder
 @Accessors(fluent = true)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-class EventTypeImpl<T> implements EventType<T> {
-    private final String key;
-    private final Class<T> payloadClass;
+@NoArgsConstructor
+@AllArgsConstructor
+public class StoreChannelImpl implements StoreChannel, RequiresCatnip {
+    private transient Catnip catnip;
     
-    static <T> EventType<T> event(@Nonnull final String key, @Nonnull final Class<T> payloadClass) {
-        return new EventTypeImpl<>(key, payloadClass);
+    private long idAsLong;
+    private String name;
+    private long guildIdAsLong;
+    private int position;
+    private long parentIdAsLong;
+    private List<PermissionOverride> overrides;
+    private boolean nsfw;
+    
+    @Override
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
+        for(final PermissionOverride override : overrides) {
+            if(override instanceof RequiresCatnip) {
+                ((RequiresCatnip) override).catnip(catnip);
+            }
+        }
     }
     
-    static EventType<Void> notFired(@Nonnull final String key) {
-        return new EventTypeImpl<Void>(key, Void.class) {
-            @Nonnull
-            @CheckReturnValue
-            @Override
-            public String key() {
-                throw new UnsupportedOperationException("Event " + key + " is not implemented");
-            }
-        };
+    @Override
+    public int hashCode() {
+        return Long.hashCode(idAsLong);
+    }
+    
+    @Override
+    public boolean equals(final Object obj) {
+        return obj instanceof TextChannel && ((TextChannel) obj).idAsLong() == idAsLong;
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("StoreChannel (%s)", name);
     }
 }

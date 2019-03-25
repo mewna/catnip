@@ -6,7 +6,7 @@
 
     <groupId>com.mewna.catnip</groupId>
     <artifactId>catnip</artifactId>
-    <version>0.14.1</version>
+    <version>1.0.1</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -151,7 +151,6 @@
             <version>${javautil.version}</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -186,6 +185,8 @@
                 <configuration>
                     <!-- Force javadoc to ignore issues with lombok being a potato -->
                     <additionalOptions>-Xdoclint:none</additionalOptions>
+                    <!-- Solve it being unable to find $JAVA_HOME for me -->
+                    <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
                 </configuration>
                 <executions>
                     <execution>

@@ -27,149 +27,20 @@
 
 package com.mewna.catnip.cache.view;
 
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
-import java.util.*;
-import java.util.function.*;
-import java.util.stream.Collector;
-
 /**
- * Always empty {@link CacheView cache view}.
+ * Always empty {@link NamedCacheView cache view}.
  *
  * @author natanbc
+ *
  * @see CacheView#empty()
+ * @see NamedCacheView#empty()
+ *
  * @since 12/15/18
+ *
+ * @deprecated Use {@link CacheView#noop()}.
  */
-public class EmptyCacheView<T> implements CacheView<T> {
-    public static final CacheView<?> INSTANCE = new EmptyCacheView<>();
-    
-    @Override
-    public void forEach(final Consumer<? super T> action) {
-        //noop
-    }
-    
-    @Nonnegative
-    @Override
-    public long size() {
-        return 0;
-    }
-    
-    @Override
-    public boolean isEmpty() {
-        return true;
-    }
-    
-    @Override
-    public T getById(final long id) {
-        return null;
-    }
-    
-    @Override
-    public T findAny(@Nonnull final Predicate<? super T> filter) {
-        return null;
-    }
-    
-    @Nonnull
-    @Override
-    public Collection<T> find(@Nonnull final Predicate<? super T> filter) {
-        return Collections.emptyList();
-    }
-    
-    @Nonnull
-    @Override
-    public <C extends Collection<T>> C find(@Nonnull final Predicate<? super T> filter, @Nonnull final Supplier<C> supplier) {
-        return Objects.requireNonNull(supplier.get(), "Provided collection may not be null");
-    }
-    
-    @Nonnull
-    @Override
-    public <A, R> R collect(@Nonnull final Collector<? super T, A, R> collector) {
-        return collector.finisher().apply(collector.supplier().get());
-    }
-    
-    @Nonnull
-    @Override
-    public <R> R collect(@Nonnull final Supplier<R> supplier, @Nonnull final BiConsumer<R, ? super T> accumulator, @Nonnull final BiConsumer<R, R> combiner) {
-        return supplier.get();
-    }
-    
-    @Nonnull
-    @Override
-    public <U> U reduce(final U identity, @Nonnull final BiFunction<U, ? super T, U> accumulator, @Nonnull  final BinaryOperator<U> combiner) {
-        return identity;
-    }
-    
-    @Nonnull
-    @Override
-    public Optional<T> reduce(@Nonnull final BinaryOperator<T> accumulator) {
-        return Optional.empty();
-    }
-    
-    @Override
-    public T reduce(@Nonnull final T identity, @Nonnull final BinaryOperator<T> accumulator) {
-        return identity;
-    }
-    
-    @Override
-    public boolean anyMatch(@Nonnull final Predicate<? super T> predicate) {
-        return false;
-    }
-    
-    @Override
-    public boolean allMatch(@Nonnull final Predicate<? super T> predicate) {
-        return true;
-    }
-    
-    @Override
-    public boolean noneMatch(@Nonnull final Predicate<? super T> predicate) {
-        return true;
-    }
-    
-    @Nonnull
-    @Override
-    public Optional<T> min(@Nonnull final Comparator<? super T> comparator) {
-        return Optional.empty();
-    }
-    
-    @Nonnull
-    @Override
-    public Optional<T> max(@Nonnull final Comparator<? super T> comparator) {
-        return Optional.empty();
-    }
-    
-    @Nonnegative
-    @Override
-    public long count(@Nonnull final Predicate<? super T> filter) {
-        return 0;
-    }
-    
-    @Nonnull
-    @Override
-    public Set<Long> keys() {
-        return Collections.emptySet();
-    }
-    
-    @Nonnull
-    @Override
-    public Collection<T> values() {
-        return Collections.emptyList();
-    }
-    
-    @Nonnull
-    @Override
-    public Collection<T> snapshot() {
-        return Collections.emptyList();
-    }
-    
-    @Nonnull
-    @Override
-    public <C extends Collection<T>> C snapshot(@Nonnull final Supplier<C> supplier) {
-        return Objects.requireNonNull(supplier.get(), "Provided collection may not be null");
-    }
-    
-    @Nonnull
-    @Override
-    public Iterator<T> iterator() {
-        return Collections.emptyIterator();
-    }
+@Deprecated
+public class EmptyCacheView<T> extends NoopCacheView<T> {
+    @Deprecated
+    public static final NamedCacheView<?> INSTANCE = new EmptyCacheView<>();
 }

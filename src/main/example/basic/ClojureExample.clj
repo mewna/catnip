@@ -26,6 +26,8 @@
 ;
 
 ;; TODO: Someone who actually knows clj needs to tell me how I'm dumb and this needs to be fixed
+;; I have literally no idea if this even works
+;; send help ;-;
 (ns basic.ClojureExample (:import (com.mewna.catnip Catnip) (com.mewna.catnip.shard DiscordEvent)))
 
 (defn run []
