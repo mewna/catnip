@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
@@ -14,11 +13,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
- * <a href="https://stackoverflow.com/a/54675316">Original Source</a>
- * <p>
- * Included due to Java 11's HTTP Client's lack of understanding of Named-Multipart.
- * <p>
- * Modified to fit the code standards of this project, to compact it, to remove unnecessary capabilities (file read straight from disc and InputStream suppliers), and add capabilities necessary to add compatibility.
+ * Adapted from https://stackoverflow.com/a/54675316
+ * Modified to fit the code standards of this project, to compact it, to remove unnecessary capabilities (file read straight from disc and InputStream suppliers), and add capabilities necessary to add compatibility (ie. Vert.x buffer support).
+ *
+ * @author kjp12
+ * @since 3/25/2019
  */
 
 public class MultipartBodyPublisher {
@@ -40,16 +39,10 @@ public class MultipartBodyPublisher {
         return this;
     }
     
-    @ParametersAreNonnullByDefault
-    public MultipartBodyPublisher addPart(final String name, final String value, @Nullable final String contentType) {
-        partsSpecificationList.add(new PartsSpecification(Type.STRING, name).value(Buffer.buffer(value)).contentType(contentType));
-        return this;
-    }
-    
     //Using Vert.x's buffer. Reflects message's usage of Buffers.
     @ParametersAreNonnullByDefault
-    public MultipartBodyPublisher addPart(final String name, final String filename, final Buffer value, @Nullable final String contentType) {
-        partsSpecificationList.add(new PartsSpecification(Type.FILE, name).value(value).contentType(contentType));
+    public MultipartBodyPublisher addPart(final String name, final String filename, final Buffer value) {
+        partsSpecificationList.add(new PartsSpecification(Type.FILE, name).value(value));
         return this;
     }
     
@@ -70,16 +63,15 @@ public class MultipartBodyPublisher {
         protected final String name;
         protected Buffer value;
         protected String filename;
-        protected String contentType;
         
         public String toString() {
             if(type == Type.FINAL_BOUNDARY) {
                 return "--" + boundary + "--";
             }
             if(type == Type.FILE) {
-                return "--" + boundary + "\r\nContent-Disposition: file; name=" + name + "; filename=" + filename + ";\r\nContent-Type:" + Objects.requireNonNullElse(contentType, "application/octet-stream") + "\r\n\r\n";
+                return "--" + boundary + "\r\nContent-Disposition: file; name=" + name + "; filename=" + filename + ";\r\nContent-Type:application/octet-stream\r\n\r\n";
             }
-            return "--" + boundary + "\r\nContent-Disposition: form-data; name=" + name + ";\r\nContent-Type:" + Objects.requireNonNullElse(contentType, "text/plain; charset=UTF-8") + "\r\n\r\n";
+            return "--" + boundary + "\r\nContent-Disposition: form-data; name=" + name + ";\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n";
         }
     }
     

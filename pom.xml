@@ -62,19 +62,6 @@
             <artifactId>vertx-core</artifactId>
             <version>${vertx.version}</version>
         </dependency>
-
-        <!--
-        vert.x is retarded for multipart, so we use this instead
-        :sob:
-        someday we can remove this :(
-        -->
-        <!--dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>3.9.1</version>
-        </dependency-->
-        <!--We will be using the built in Java 11 HTTP API instead.-->
-
         <!-- slf4j -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -186,6 +173,8 @@
                 <configuration>
                     <!-- Force javadoc to ignore issues with lombok being a potato -->
                     <additionalOptions>-Xdoclint:none</additionalOptions>
+                    <!-- Solve it being unable to find $JAVA_HOME for me -->
+                    <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
                 </configuration>
                 <executions>
                     <execution>
