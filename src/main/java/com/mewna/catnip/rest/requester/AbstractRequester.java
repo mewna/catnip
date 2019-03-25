@@ -95,7 +95,14 @@ public abstract class AbstractRequester implements Requester {
     public CompletionStage<ResponsePayload> queue(@Nonnull final OutboundRequest r) {
         final CompletableFuture<ResponsePayload> future = new SafeVertxCompletableFuture<>(catnip);
         final Bucket bucket = getBucket(r.route());
-        bucket.queueRequest(new QueuedRequest(r, r.route(), future, bucket));
+        // Capture stacktrace if possible
+        final StackTraceElement[] stacktrace;
+        if(catnip.captureRestStacktraces()) {
+            stacktrace = Thread.currentThread().getStackTrace();
+        } else {
+            stacktrace = new StackTraceElement[0];
+        }
+        bucket.queueRequest(new QueuedRequest(r, r.route(), future, bucket, stacktrace));
         return future;
     }
     
@@ -208,10 +215,13 @@ public abstract class AbstractRequester implements Requester {
         final long timeDifference;
         if(dateHeader.isEmpty()) {
             timeDifference = requestDuration;
+            catnip.logAdapter().trace("No date header, time difference = request duration = {}", timeDifference);
         } else {
             final long now = System.currentTimeMillis();
             final long date = OffsetDateTime.parse(dateHeader.get(), DateTimeFormatter.RFC_1123_DATE_TIME).toInstant().toEpochMilli();
             timeDifference = now - date + requestDuration;
+            catnip.logAdapter().trace("Have date header, time difference = now - date + request duration = {}",
+                    timeDifference);
         }
         if(statusCode == 429) {
             catnip.logAdapter().error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
@@ -234,7 +244,9 @@ public abstract class AbstractRequester implements Requester {
             rateLimiter.requestExecution(route)
                     .thenRun(() -> executeRequest(request))
                     .exceptionally(e -> {
-                        request.future().completeExceptionally(e);
+                        final Throwable throwable = new RuntimeException("REST error context");
+                        throwable.setStackTrace(request.stacktrace());
+                        request.future().completeExceptionally(e.initCause(throwable));
                         return null;
                     });
         } else {
@@ -247,36 +259,44 @@ public abstract class AbstractRequester implements Requester {
                     payload = hook.rawRestReceiveDataHook(route, payload);
                 }
             }
-            // We got a 400, meaning there's errors. Fail the request with this and move on.
-            if(statusCode == 400) {
-                final Map<String, List<String>> failures = new HashMap<>();
-                final JsonObject errors = payload.object();
-                errors.forEach(e -> {
-                    if(e.getValue() instanceof JsonArray) {
-                        final JsonArray arr = (JsonArray) e.getValue();
-                        final List<String> errorStrings = new ArrayList<>();
-                        arr.stream().map(element -> (String) element).forEach(errorStrings::add);
-                        failures.put(e.getKey(), errorStrings);
-                    } else if(e.getValue() instanceof Integer) {
-                        failures.put(e.getKey(), ImmutableList.of("" + e.getValue())); // TODO: How to handle this right?
-                    } else {
-                        catnip.logAdapter().warn("Got unknown error response type: {}", e.getValue().getClass().getName());
-                        failures.put(e.getKey(), ImmutableList.of(String.valueOf(e.getValue())));
-                    }
-                });
-                request.future().completeExceptionally(new RestPayloadException(failures));
-            } else if(statusCode > 400) {
+            // We got a 4xx, meaning there's errors. Fail the request with this and move on.
+            if(statusCode >= 400) {
                 final JsonObject response = payload.object();
-                final String message = response.getString("message", "No message.");
-                final int code = response.getInteger("code", -1);
-                request.future().completeExceptionally(
-                        new ResponseException(route.toString(), statusCode, statusMessage, code, message)
-                );
+                if(statusCode == 400 && response.getInteger("code", -1) > 1000) {
+                    // 1000 was just the easiest number to check to skip over http error codes
+                    // Discord error codes are all >=10000 afaik, so this should be safe?
+                    
+                    final Map<String, List<String>> failures = new HashMap<>();
+                    response.forEach(e -> {
+                        if(e.getValue() instanceof JsonArray) {
+                            final JsonArray arr = (JsonArray) e.getValue();
+                            final List<String> errorStrings = new ArrayList<>();
+                            arr.stream().map(element -> (String) element).forEach(errorStrings::add);
+                            failures.put(e.getKey(), errorStrings);
+                        } else if(e.getValue() instanceof Integer) {
+                            failures.put(e.getKey(), ImmutableList.of(String.valueOf(e.getValue())));
+                        } else {
+                            // If we don't know what it is, just stringify it and log a warning so that people can tell us
+                            catnip.logAdapter().warn("Got unknown error response type: {} (Please report this!)",
+                                    e.getValue().getClass().getName());
+                            failures.put(e.getKey(), ImmutableList.of(String.valueOf(e.getValue())));
+                        }
+                    });
+                    final Throwable throwable = new RuntimeException("REST error context");
+                    throwable.setStackTrace(request.stacktrace());
+                    request.future().completeExceptionally(new RestPayloadException(failures).initCause(throwable));
+                } else {
+                    final String message = response.getString("message", "No message.");
+                    final int code = response.getInteger("code", -1);
+                    final Throwable throwable = new RuntimeException("REST error context");
+                    throwable.setStackTrace(request.stacktrace());
+                    request.future().completeExceptionally(new ResponseException(route.toString(), statusCode,
+                            statusMessage, code, message, response).initCause(throwable));
+                }
             } else {
                 request.future().complete(payload);
             }
         }
-        
     }
     
     protected void updateBucket(@Nonnull final Route route, @Nonnull final HttpHeaders headers,
@@ -289,12 +309,12 @@ public abstract class AbstractRequester implements Requester {
                 "Updating headers for {} ({}): remaining = {}, limit = {}, reset = {}, retryAfter = {}, timeDifference = {}",
                 route, route.ratelimitKey(), rateLimitRemaining, rateLimitLimit, rateLimitReset, retryAfter, timeDifference
         );
-        
+    
         if(retryAfter > 0) {
             rateLimiter.updateRemaining(route, 0);
             rateLimiter.updateReset(route, retryAfter);
         }
-        
+    
         if(route.method() == PUT && route.baseRoute().contains("/reactions/")) {
             rateLimiter.updateLimit(route, 1);
             rateLimiter.updateReset(route, System.currentTimeMillis() + timeDifference + 250);
@@ -302,20 +322,27 @@ public abstract class AbstractRequester implements Requester {
             rateLimitReset.ifPresent(s -> rateLimiter.updateReset(route, Long.parseLong(s) * 1000 + timeDifference));
             rateLimitLimit.ifPresent(s -> rateLimiter.updateLimit(route, Integer.parseInt(s)));
         }
-        
-        rateLimitRemaining.ifPresent(s -> rateLimiter.updateRemaining(route, Integer.parseInt(s)));
     
+        rateLimitRemaining.ifPresent(s -> rateLimiter.updateRemaining(route, Integer.parseInt(s)));
         rateLimiter.updateDone(route);
     }
+    protected interface Bucket {
+        void queueRequest(@Nonnull QueuedRequest request);
+        
+        void failedRequest(@Nonnull QueuedRequest request, @Nonnull Throwable failureCause);
+        
+        void requestDone();
+    }
     
-    @RequiredArgsConstructor
     @Getter
     @Accessors(fluent = true)
+    @RequiredArgsConstructor
     protected static class QueuedRequest {
         protected final OutboundRequest request;
         protected final Route route;
         protected final CompletableFuture<ResponsePayload> future;
         protected final Bucket bucket;
+        protected final StackTraceElement[] stacktrace;
         protected int failedAttempts;
         private long start;
         
@@ -326,13 +353,5 @@ public abstract class AbstractRequester implements Requester {
         protected boolean shouldRetry() {
             return failedAttempts < 3;
         }
-    }
-    
-    protected interface Bucket {
-        void queueRequest(@Nonnull QueuedRequest request);
-        
-        void failedRequest(@Nonnull QueuedRequest request, @Nonnull Throwable failureCause);
-        
-        void requestDone();
     }
 }

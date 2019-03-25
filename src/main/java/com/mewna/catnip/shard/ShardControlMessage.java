@@ -19,6 +19,11 @@ public enum ShardControlMessage {
     CONNECTED,
     
     /**
+     * Get the shard's current lifecycle state.
+     */
+    LIFECYCLE_STATE,
+    
+    /**
      * Get the shard's current heartbeat latency.
      */
     LATENCY,

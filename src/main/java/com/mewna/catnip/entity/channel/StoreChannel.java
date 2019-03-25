@@ -25,59 +25,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.rest;
+package com.mewna.catnip.entity.channel;
 
-import io.vertx.core.json.JsonObject;
+import javax.annotation.Nonnull;
 
 /**
- * @author SamOphis
- * @since 02/09/2019
+ * @author amy
+ * @since 3/14/19.
  */
-public class ResponseException extends RuntimeException {
-    private final String route;
-    private final int statusCode;
-    private final String statusMessage;
-    private final int jsonCode;
-    private final String jsonMessage;
-    private final JsonObject rawJson;
-    
-    public ResponseException(final String route, final int statusCode, final String statusMessage, final int jsonCode,
-                             final String jsonMessage, final JsonObject rawJson) {
-        super(
-                jsonCode == -1 ?
-                        String.format("%s | HTTP Error Code: %d | JSON Message: %s", route, statusCode, jsonMessage) :
-                        String.format("%s | HTTP Error Code: %d | JSON Message: %s | JSON Error Code: %d",
-                                route, statusCode, jsonMessage, jsonCode)
-        );
-        this.route = route;
-        this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
-        this.jsonCode = jsonCode;
-        this.jsonMessage = jsonMessage;
-        this.rawJson = rawJson;
+public interface StoreChannel extends GuildChannel {
+    @Nonnull
+    @Override
+    default ChannelType type() {
+        return ChannelType.STORE;
     }
     
-    public String route() {
-        return route;
-    }
-    
-    public int statusCode() {
-        return statusCode;
-    }
-    
-    public String statusMessage() {
-        return statusMessage;
-    }
-    
-    public int jsonCode() {
-        return jsonCode;
-    }
-    
-    public String jsonMessage() {
-        return jsonMessage;
-    }
-    
-    public JsonObject rawJson() {
-        return rawJson;
-    }
+    boolean nsfw();
 }

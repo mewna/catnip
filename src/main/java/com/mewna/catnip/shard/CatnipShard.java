@@ -66,6 +66,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterOutputStream;
 
+import static com.mewna.catnip.shard.LifecycleState.*;
 import static com.mewna.catnip.shard.ShardAddress.*;
 
 /**
@@ -127,6 +128,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
     private Inflater inflater;
     private int readBufferPosition;
     private Message<ShardControlMessage> message;
+    private LifecycleState lifecycleState;
     
     public CatnipShard(@Nonnull final Catnip catnip, @Nonnegative final int id, @Nonnegative final int limit,
                        @Nullable final Presence presence) {
@@ -150,6 +152,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
                     basePayload(GatewayOp.STATUS_UPDATE, update.asJson()));
             currentPresence = update;
         });
+        lifecycleState = CREATED;
     }
     
     public static JsonObject basePayload(@Nonnull final GatewayOp op) {
@@ -178,10 +181,13 @@ public class CatnipShard extends AbstractVerticle implements Listener {
                 eventBus.consumer(presenceUpdateRequest, this::handlePresenceUpdate),
                 eventBus.consumer(voiceStateUpdateQueue, this::handleVoiceStateUpdateQueue)
         );
+        lifecycleState = DEPLOYED;
     }
     
     @Override
     public void stop() {
+        stateReply(ShardConnectState.CANCEL);
+        lifecycleState = DISCONNECTED;
         consumers.forEach(MessageConsumer::unregister);
         consumers.clear();
         
@@ -199,6 +205,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
     
     private void handleVoiceStateUpdateQueue(final Message<JsonObject> message) {
         sendTask.offer(basePayload(GatewayOp.VOICE_STATE_UPDATE, message.body()));
+        sendTask.run();
     }
     
     private void handlePresenceUpdate(final Message<PresenceImpl> message) {
@@ -208,21 +215,29 @@ public class CatnipShard extends AbstractVerticle implements Listener {
             return;
         }
         presenceTask.offer(impl);
+        presenceTask.run();
     }
     
     private void handleControlMessage(final Message<ShardControlMessage> msg) {
         final ShardControlMessage body = msg.body();
         switch(body) {
-            case TRACE:
+            case TRACE: {
                 msg.reply(new JsonArray(trace));
                 break;
-            case CONNECTED:
+            }
+            case CONNECTED: {
                 msg.reply(socket != null && socketOpen);
                 break;
-            case LATENCY:
+            }
+            case LIFECYCLE_STATE: {
+                msg.reply(lifecycleState);
+                break;
+            }
+            case LATENCY: {
                 msg.reply(lastHeartbeatLatency);
                 break;
-            case CONNECT:
+            }
+            case CONNECT: {
                 if(connected) {
                     msg.fail(1000, "Cannot connect shard twice, redeploy it.");
                     return;
@@ -231,13 +246,16 @@ public class CatnipShard extends AbstractVerticle implements Listener {
                 message = msg;
                 connectSocket();
                 break;
-            default:
+            }
+            default: {
                 catnip.logAdapter().warn("Shard {}/{}: Got unknown control message: {}", id, limit, body.name());
                 break;
+            }
         }
     }
     
     private void connectSocket() {
+        lifecycleState = CONNECTING;
         catnip.eventBus().publish(Raw.CONNECTING, shardInfo());
         
         final GatewayInfo info = catnip.gatewayInfo();
@@ -258,10 +276,12 @@ public class CatnipShard extends AbstractVerticle implements Listener {
     @SuppressWarnings("squid:HiddenFieldCheck")
     private void connectSocket(final String url) {
         client.newWebSocketBuilder().buildAsync(URI.create(url), this).thenAcceptAsync(ws -> {
+            lifecycleState = CONNECTED;
             socket = ws;
             socketOpen = true;
             catnip.eventBus().publish(Raw.CONNECTED, shardInfo());
         }).exceptionally(t -> {
+            lifecycleState = DISCONNECTED;
             socket = null;
             socketOpen = false;
             catnip.logAdapter().error("Shard {}/{}: Couldn't connect socket:", id, limit, t);
@@ -300,6 +320,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
                 handleSocketData(decompressed.toJsonObject());
             } catch(final IOException e) {
                 catnip.logAdapter().error("Shard {}/{}: Error decompressing payload", id, limit, e);
+                stateReply(ShardConnectState.FAILED);
             } finally {
                 readBufferPosition = 0;
             }
@@ -319,26 +340,33 @@ public class CatnipShard extends AbstractVerticle implements Listener {
         // gets passed *entirely* so that we can reply to the shard
         // manager directly.
         switch(op) {
-            case HELLO:
+            case HELLO: {
                 handleHello(payload);
                 break;
-            case DISPATCH:
+            }
+            case DISPATCH: {
                 handleDispatch(payload);
                 break;
-            case HEARTBEAT:
+            }
+            case HEARTBEAT: {
                 handleHeartbeat();
                 break;
-            case HEARTBEAT_ACK:
+            }
+            case HEARTBEAT_ACK: {
                 handleHeartbeatAck();
                 break;
-            case INVALID_SESSION:
+            }
+            case INVALID_SESSION: {
                 handleInvalidSession(payload);
                 break;
-            case RECONNECT:
+            }
+            case RECONNECT: {
                 handleReconnectRequest();
                 break;
-            default:
+            }
+            default: {
                 break;
+            }
         }
     }
     
@@ -408,6 +436,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
             catnip.eventBus().publish(Raw.CLOSED, shardInfo());
         } catch(final Exception e) {
             catnip.logAdapter().error("Shard {}/{}: Failure closing socket:", id, limit, e);
+            stateReply(ShardConnectState.FAILED);
         }
         
         if(closeCode == GatewayCloseCode.INVALID_SEQ.code() || closeCode == GatewayCloseCode.SESSION_TIMEOUT.code()) {
@@ -419,12 +448,11 @@ public class CatnipShard extends AbstractVerticle implements Listener {
             catnip.logAdapter().info("Shard {}/{}: We closed the websocket with code {}", id, limit, closeCode);
         } else {
             if(closeCode >= 4000) {
-                /*final GatewayCloseCode code = GatewayCloseCode.byId(closeCode);
+                final GatewayCloseCode code = GatewayCloseCode.byId(closeCode);
                 if(code != null) {
                     catnip.logAdapter().warn("Shard {}/{}: gateway websocket closed with code {}: {}: {}",
                             id, limit, closeCode, code.name(), code.message());
-                } else */
-                {
+                } else {
                     catnip.logAdapter().warn("Shard {}/{}: gateway websocket closing with code {}: {}",
                             id, limit, closeCode, reason);
                 }
@@ -478,8 +506,10 @@ public class CatnipShard extends AbstractVerticle implements Listener {
         
         // Check if we can RESUME instead
         if(catnip.sessionManager().session(id) != null && catnip.sessionManager().seqnum(id) > 0) {
+            lifecycleState = RESUMING;
             catnip.eventBus().publish(websocketSend, resume());
         } else {
+            lifecycleState = IDENTIFYING;
             catnip.eventBus().publish(websocketSend, identify());
         }
     }
@@ -504,19 +534,24 @@ public class CatnipShard extends AbstractVerticle implements Listener {
         }
         
         switch(type) {
-            case "READY":
+            case "READY": {
+                lifecycleState = LOGGED_IN;
                 catnip.sessionManager().session(id, data.getString("session_id"));
                 // Reply after IDENTIFY ratelimit
                 catnip.eventBus().publish(Raw.IDENTIFIED, shardInfo());
                 stateReply(ShardConnectState.READY);
                 break;
-            case "RESUMED":
+            }
+            case "RESUMED": {
+                lifecycleState = LOGGED_IN;
                 // RESUME is fine, just reply immediately
                 catnip.eventBus().publish(Raw.RESUMED, shardInfo());
                 stateReply(ShardConnectState.RESUMED);
                 break;
-            default:
+            }
+            default: {
                 break;
+            }
         }
         
         // This allows a buffer to know WHERE an event is coming from, so that
@@ -545,6 +580,8 @@ public class CatnipShard extends AbstractVerticle implements Listener {
             
             closedByClient = true;
         }
+    
+        stateReply(ShardConnectState.INVALID);
         
         if(socket != null && socketOpen) {
             socket.sendClose(1000, "Reconnecting...");

@@ -431,7 +431,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                     channelCache(gc.guildIdAsLong(), false).put(gc.idAsLong(), gc);
                 } else if(channel.isUserDM()) {
                     final UserDMChannel dm = (UserDMChannel) channel;
-                    dmChannelCache(shardId).put(dm.userIdAsLong(), dm);
+                    dmChannelCache(shardId).put(dm.idAsLong(), dm);
                 } else {
                     catnip.logAdapter().warn("I don't know how to cache channel {}: isCategory={}, isDM={}, isGroupDM={}," +
                                     "isGuild={}, isText={}, isUserDM={}, isVoice={}",
@@ -582,7 +582,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                 final JsonObject user = payload.getJsonObject("user");
                 final String id = user.getString("id");
                 final User old = user(id);
-                if(old == null && !catnip.chunkMembers()) {
+                if(old == null && !catnip.chunkMembers() && catnip.logUncachedPresenceWhenNotChunking()) {
                     catnip.logAdapter().warn("Received PRESENCE_UPDATE for uncached user {}!?", id);
                 } else if(old != null) {
                     // This could potentially update:
@@ -700,7 +700,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     @Override
     public NamedCacheView<Member> members(final long guildId) {
         final MutableNamedCacheView<Member> cache = memberCache(guildId, true);
-        return cache == null ? NamedCacheView.empty() : cache;
+        return cache == null ? CacheView.noop() : cache;
     }
     
     @Nonnull
@@ -720,7 +720,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     @Override
     public NamedCacheView<Role> roles(final long guildId) {
         final MutableNamedCacheView<Role> cache = roleCache(guildId, true);
-        return cache == null ? NamedCacheView.empty() : cache;
+        return cache == null ? CacheView.noop() : cache;
     }
     
     @Nonnull
@@ -740,7 +740,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     @Override
     public NamedCacheView<GuildChannel> channels(final long guildId) {
         final MutableNamedCacheView<GuildChannel> cache = channelCache(guildId, true);
-        return cache == null ? NamedCacheView.empty() : cache;
+        return cache == null ? CacheView.noop() : cache;
     }
     
     @Nonnull
@@ -760,7 +760,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     @Override
     public NamedCacheView<CustomEmoji> emojis(final long guildId) {
         final MutableNamedCacheView<CustomEmoji> cache = emojiCache(guildId, true);
-        return cache == null ? NamedCacheView.empty() : cache;
+        return cache == null ? CacheView.noop() : cache;
     }
     
     @Nonnull
@@ -780,7 +780,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     @Override
     public CacheView<VoiceState> voiceStates(final long guildId) {
         final MutableCacheView<VoiceState> cache = voiceStateCache(guildId, true);
-        return cache == null ? CacheView.empty() : cache;
+        return cache == null ? CacheView.noop() : cache;
     }
     
     @Nonnull

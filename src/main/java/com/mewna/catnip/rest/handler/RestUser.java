@@ -176,8 +176,8 @@ public class RestUser extends RestHandler {
     
     @Nonnull
     public CompletionStage<Void> leaveGuild(@Nonnull final String guildId) {
-        return catnip().requester().queue(new OutboundRequest(Routes.LEAVE_GUILD.withMajorParam(guildId),
-                ImmutableMap.of()))
+        return catnip().requester().queue(new OutboundRequest(Routes.LEAVE_GUILD,
+                ImmutableMap.of("guild.id", guildId)))
                 .thenApply(__ -> null);
     }
     

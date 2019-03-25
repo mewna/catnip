@@ -41,12 +41,6 @@ import java.util.function.Supplier;
  * @since 12/15/18
  */
 public interface NamedCacheView<T> extends CacheView<T> {
-    @Nonnull
-    @SuppressWarnings("unchecked")
-    static <T> NamedCacheView<T> empty() {
-        return (NamedCacheView<T>) EmptyNamedCacheView.INSTANCE;
-    }
-    
     /**
      * Finds all entities with a name equal to the provided value.
      *

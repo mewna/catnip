@@ -83,10 +83,11 @@ public class SerialRequester extends AbstractRequester {
     
         @Override
         public synchronized void requestDone() {
-            if(!queue.isEmpty()) {
+            final boolean hadItems = !queue.isEmpty();
+            if(hadItems) {
                 submit();
             }
-            executingRequest = !queue.isEmpty();
+            executingRequest = hadItems;
         }
         
         private void submit() {

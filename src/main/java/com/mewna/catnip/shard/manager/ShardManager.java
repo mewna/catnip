@@ -28,6 +28,7 @@
 package com.mewna.catnip.shard.manager;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.shard.LifecycleState;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -124,6 +125,28 @@ public interface ShardManager {
     @Nonnull
     @CheckReturnValue
     CompletionStage<Boolean> isConnected(@Nonnegative int id);
+    
+    /**
+     * Get the lifecycle state for the current shard. This provides more
+     * meaningful info than {@link #isConnected(int)}, because it provides more
+     * granular info about the shard's state. However, it does not
+     * differentiate between "connected" or not per se; it is up to the
+     * end-user to determine whether or not the lifecycle state is actually a
+     * state of being "connected."
+     * <p>
+     * If the shard id does <strong>not</strong> exist (ex. not controlled by
+     * this shard manager instance), then the future will FAIL, and this case
+     * must also be handled.
+     * <p>
+     * This is fetched <em>asynchronously</em>.
+     *
+     * @param id The id of the shard to get the lifecycle state for.
+     *
+     * @return The lifecycle state for the shard with the given id.
+     */
+    @Nonnull
+    @CheckReturnValue
+    CompletionStage<LifecycleState> shardState(@Nonnegative int id);
     
     /**
      * @return The catnip instance this shard manager is for.

@@ -25,59 +25,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.rest;
+package com.mewna.catnip.shard.event;
 
-import io.vertx.core.json.JsonObject;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.experimental.Accessors;
+
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
 
 /**
- * @author SamOphis
- * @since 02/09/2019
+ * @param <T> Type of the event.
+ *
+ * @author natanbc
+ * @since 10/6/18.
  */
-public class ResponseException extends RuntimeException {
-    private final String route;
-    private final int statusCode;
-    private final String statusMessage;
-    private final int jsonCode;
-    private final String jsonMessage;
-    private final JsonObject rawJson;
+@Getter
+@Accessors(fluent = true)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class EventTypeImpl<T> implements EventType<T> {
+    private final String key;
+    private final Class<T> payloadClass;
     
-    public ResponseException(final String route, final int statusCode, final String statusMessage, final int jsonCode,
-                             final String jsonMessage, final JsonObject rawJson) {
-        super(
-                jsonCode == -1 ?
-                        String.format("%s | HTTP Error Code: %d | JSON Message: %s", route, statusCode, jsonMessage) :
-                        String.format("%s | HTTP Error Code: %d | JSON Message: %s | JSON Error Code: %d",
-                                route, statusCode, jsonMessage, jsonCode)
-        );
-        this.route = route;
-        this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
-        this.jsonCode = jsonCode;
-        this.jsonMessage = jsonMessage;
-        this.rawJson = rawJson;
+    public static <T> EventType<T> event(@Nonnull final String key, @Nonnull final Class<T> payloadClass) {
+        return new EventTypeImpl<>(key, payloadClass);
     }
     
-    public String route() {
-        return route;
-    }
-    
-    public int statusCode() {
-        return statusCode;
-    }
-    
-    public String statusMessage() {
-        return statusMessage;
-    }
-    
-    public int jsonCode() {
-        return jsonCode;
-    }
-    
-    public String jsonMessage() {
-        return jsonMessage;
-    }
-    
-    public JsonObject rawJson() {
-        return rawJson;
+    public static EventType<Void> notFired(@Nonnull final String key) {
+        return new EventTypeImpl<Void>(key, Void.class) {
+            @Nonnull
+            @CheckReturnValue
+            @Override
+            public String key() {
+                throw new UnsupportedOperationException("Event " + key + " is not implemented");
+            }
+        };
     }
 }

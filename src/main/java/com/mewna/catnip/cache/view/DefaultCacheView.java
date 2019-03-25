@@ -185,6 +185,7 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
         }
     }
     
+    @Nonnull
     @Override
     public <R> R collect(@Nonnull final Supplier<R> supplier, @Nonnull final BiConsumer<R, ? super T> accumulator, @Nonnull final BiConsumer<R, R> combiner) {
         final R result = supplier.get();
@@ -199,8 +200,9 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
         }
     }
     
+    @Nonnull
     @Override
-    public <U> U reduce(final U identity, @Nonnull final BiFunction<U, ? super T, U> accumulator, @Nonnull final BinaryOperator<U> combiner) {
+    public <U> U reduce(@Nonnull final U identity, @Nonnull final BiFunction<U, ? super T, U> accumulator, @Nonnull final BinaryOperator<U> combiner) {
         lock.readLock().lock();
         try {
             U result = identity;
@@ -233,8 +235,9 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
         }
     }
     
+    @Nonnull
     @Override
-    public T reduce(final T identity, @Nonnull final BinaryOperator<T> accumulator) {
+    public T reduce(@Nonnull final T identity, @Nonnull final BinaryOperator<T> accumulator) {
         lock.readLock().lock();
         try {
             T result = identity;

@@ -293,7 +293,7 @@ public interface GuildChannel extends GuildEntity, Channel {
                 payload.put("permission_overwrites", object);
             }
             if(channel != null) {
-                //TODO: throw if fields set on an unsupported channel type? (eg nsfw on voice channel)
+                // TODO: How to handle categories here?
                 if(channel.isText()) {
                     final TextChannel text = channel.asTextChannel();
                     if(topic != null && !Objects.equals(topic, text.topic())) {
@@ -305,6 +305,12 @@ public interface GuildChannel extends GuildEntity, Channel {
                     if(rateLimitPerUser != null && !Objects.equals(rateLimitPerUser, text.rateLimitPerUser())) {
                         payload.put("rate_limit_per_user", rateLimitPerUser);
                     }
+                    if(bitrate != null) {
+                        throw new IllegalArgumentException("Attempted to set 'bitrate' on a text channel, which doesn't support this!");
+                    }
+                    if(userLimit != null) {
+                        throw new IllegalArgumentException("Attempted to set 'user_limit' on a text channel, which doesn't support this!");
+                    }
                 } else if(channel.isVoice()) {
                     final VoiceChannel voice = channel.asVoiceChannel();
                     if(bitrate != null && !Objects.equals(bitrate, voice.bitrate())) {
@@ -312,6 +318,15 @@ public interface GuildChannel extends GuildEntity, Channel {
                     }
                     if(userLimit != null && !Objects.equals(userLimit, voice.userLimit())) {
                         payload.put("user_limit", userLimit);
+                    }
+                    if(topic != null) {
+                        throw new IllegalArgumentException("Attempted to set 'topic' on a voice channel, which doesn't support this!");
+                    }
+                    if(nsfw != null) {
+                        throw new IllegalArgumentException("Attempted to set 'nsfw' on a voice channel, which doesn't support this!");
+                    }
+                    if(rateLimitPerUser != null) {
+                        throw new IllegalArgumentException("Attempted to set 'rate_limit_per_user' on a voice channel, which doesn't support this!");
                     }
                 }
             } else {

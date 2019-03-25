@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2019 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,21 +25,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.cache.view;
+package com.mewna.catnip.shard.event;
+
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
 
 /**
- * Always empty {@link NamedCacheView named cache view}.
+ * Marker for statically validating event types on handlers.
+ *
+ * @param <T> Type of the event fired.
  *
  * @author natanbc
- *
- * @see NamedCacheView#empty()
- *
- * @since 12/15/18
- *
- * @deprecated Use {@link CacheView#noop()}.
+ * @since 10/6/18.
  */
-@Deprecated
-public class EmptyNamedCacheView<T> extends EmptyCacheView<T> {
-    @Deprecated
-    public static final NamedCacheView<?> INSTANCE = new EmptyNamedCacheView<>();
+public interface EventType<T> {
+    /**
+     * Key used in the event bus.
+     *
+     * @return Key where this event is fired in the bus.
+     */
+    @Nonnull
+    @CheckReturnValue
+    String key();
+    
+    /**
+     * Class of the event payload.
+     *
+     * @return Class of the payload fired for this event.
+     */
+    @Nonnull
+    @CheckReturnValue
+    Class<T> payloadClass();
 }

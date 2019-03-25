@@ -33,6 +33,8 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -64,6 +66,32 @@ public class SafeVertxCompletableFuture<T> extends CompletableFuture<T> {
                 complete(res);
             }
         });
+    }
+    
+    public static <T> SafeVertxCompletableFuture<T> completedFuture(@Nonnull final Catnip catnip,
+                                                                    @Nonnull final Context context,
+                                                                    @Nullable final T value) {
+        final SafeVertxCompletableFuture<T> future = new SafeVertxCompletableFuture<>(catnip, context);
+        future.complete(value);
+        return future;
+    }
+    
+    public static <T> SafeVertxCompletableFuture<T> completedFuture(@Nonnull final Catnip catnip,
+                                                                    @Nullable final T value) {
+        return completedFuture(catnip, catnip.vertx().getOrCreateContext(), value);
+    }
+    
+    public static <T> SafeVertxCompletableFuture<T> failedFuture(@Nonnull final Catnip catnip,
+                                                                 @Nonnull final Context context,
+                                                                 @Nullable final Throwable cause) {
+        final SafeVertxCompletableFuture<T> future = new SafeVertxCompletableFuture<>(catnip, context);
+        future.completeExceptionally(cause);
+        return future;
+    }
+    
+    public static <T> SafeVertxCompletableFuture<T> failedFuture(@Nonnull final Catnip catnip,
+                                                                 @Nullable final Throwable cause) {
+        return failedFuture(catnip, catnip.vertx().getOrCreateContext(), cause);
     }
     
     public static <T> SafeVertxCompletableFuture<T> from(final Catnip catnip, final CompletionStage<T> future) {

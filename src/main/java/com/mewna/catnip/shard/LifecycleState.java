@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2019 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,33 +27,17 @@
 
 package com.mewna.catnip.shard;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
-
 /**
- * Marker for statically validating event types on handlers.
- *
- * @param <T> Type of the event fired.
- *
- * @author natanbc
- * @since 10/6/18.
+ * @author amy
+ * @since 3/7/19.
  */
-public interface EventType<T> {
-    /**
-     * Key used in the event bus.
-     *
-     * @return Key where this event is fired in the bus.
-     */
-    @Nonnull
-    @CheckReturnValue
-    String key();
-    
-    /**
-     * Class of the event payload.
-     *
-     * @return Class of the payload fired for this event.
-     */
-    @Nonnull
-    @CheckReturnValue
-    Class<T> payloadClass();
+public enum LifecycleState {
+    CREATED,
+    DEPLOYED,
+    CONNECTING,
+    CONNECTED,
+    IDENTIFYING,
+    RESUMING,
+    LOGGED_IN,
+    DISCONNECTED,
 }

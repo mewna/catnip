@@ -25,59 +25,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.rest;
-
-import io.vertx.core.json.JsonObject;
+package com.mewna.catnip.entity.channel;
 
 /**
- * @author SamOphis
- * @since 02/09/2019
+ * A news channel in a guild is effectively a reskinned text channel, but with
+ * two important differences:
+ * <ol>
+ * <li>The channel type is {@link ChannelType#NEWS}.</li>
+ * <li>There is no ratelimit.</li>
+ * </ol>
+ *
+ * @author amy
+ * @since 3/10/19.
  */
-public class ResponseException extends RuntimeException {
-    private final String route;
-    private final int statusCode;
-    private final String statusMessage;
-    private final int jsonCode;
-    private final String jsonMessage;
-    private final JsonObject rawJson;
-    
-    public ResponseException(final String route, final int statusCode, final String statusMessage, final int jsonCode,
-                             final String jsonMessage, final JsonObject rawJson) {
-        super(
-                jsonCode == -1 ?
-                        String.format("%s | HTTP Error Code: %d | JSON Message: %s", route, statusCode, jsonMessage) :
-                        String.format("%s | HTTP Error Code: %d | JSON Message: %s | JSON Error Code: %d",
-                                route, statusCode, jsonMessage, jsonCode)
-        );
-        this.route = route;
-        this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
-        this.jsonCode = jsonCode;
-        this.jsonMessage = jsonMessage;
-        this.rawJson = rawJson;
-    }
-    
-    public String route() {
-        return route;
-    }
-    
-    public int statusCode() {
-        return statusCode;
-    }
-    
-    public String statusMessage() {
-        return statusMessage;
-    }
-    
-    public int jsonCode() {
-        return jsonCode;
-    }
-    
-    public String jsonMessage() {
-        return jsonMessage;
-    }
-    
-    public JsonObject rawJson() {
-        return rawJson;
+public interface NewsChannel extends TextChannel {
+    @Override
+    default int rateLimitPerUser() {
+        return 0;
     }
 }
