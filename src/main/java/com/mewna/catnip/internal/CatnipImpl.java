@@ -112,6 +112,7 @@ public class CatnipImpl implements Catnip {
     private boolean enforcePermissions;
     private boolean captureRestStacktraces;
     private boolean logUncachedPresenceWhenNotChunking;
+    private boolean warnOnEntityVersionMismatch;
     private Presence initialPresence;
     private Set<String> disabledEvents;
     private CatnipOptions options;
@@ -126,8 +127,8 @@ public class CatnipImpl implements Catnip {
     
     private void applyOptions(@Nonnull final CatnipOptions options) {
         // TODO: Should probably make this behave like #diff
-        // so that we don't need to update this every single time that the
-        // options change.
+        //  so that we don't need to update this every single time that the
+        //  options change.
         this.options = options;
         dispatchManager = options.dispatchManager();
         requester = options.requester();
@@ -145,6 +146,7 @@ public class CatnipImpl implements Catnip {
         initialPresence = options.presence();
         disabledEvents = ImmutableSet.copyOf(options.disabledEvents());
         logUncachedPresenceWhenNotChunking = options.logUncachedPresenceWhenNotChunking();
+        warnOnEntityVersionMismatch = options.warnOnEntityVersionMismatch();
         
         injectSelf();
     }
