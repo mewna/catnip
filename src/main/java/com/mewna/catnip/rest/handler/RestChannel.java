@@ -106,7 +106,7 @@ public class RestChannel extends RestHandler {
         if(embeds != null && !embeds.isEmpty()) {
             json.put("embed", entityBuilder().embedToJson(embeds.get(0)));
         }
-        if(json.getValue("embed", null) == null && json.getValue("content", null) == null && !message.attachments().isEmpty()) {
+        if(json.getValue("embed", null) == null && json.getValue("content", null) == null && message.attachments().isEmpty()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no attachments!");
         }
         
