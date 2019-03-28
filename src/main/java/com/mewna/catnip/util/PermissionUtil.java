@@ -44,8 +44,9 @@ public final class PermissionUtil {
     }
     
     private static long basePermissions(final PermissionHolder holder) {
-        final Guild guild = holder.guild();
-        final Role publicRole = holder.catnip().cache().role(holder.guildId(), holder.guildId()); //Could be simplified to just Guild.role($.idAsLong()), but custom caches are a thing with nullable guilds.
+        final Catnip catnip = holder.catnip();
+        final Guild guild = catnip.cache().guild(holder.guildId());
+        final Role publicRole = catnip.cache().role(holder.guildId(), holder.guildId()); //Could be simplified to just Guild.role($.idAsLong()), but custom caches are a thing with nullable guilds.
         if(guild == null || publicRole == null || guild.ownerId().equals(holder.id())) {
             return Permission.ALL;
         }
