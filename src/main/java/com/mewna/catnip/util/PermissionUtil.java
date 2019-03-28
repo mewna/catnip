@@ -43,9 +43,9 @@ public final class PermissionUtil {
     private PermissionUtil() {
     }
     
-    private static long basePermissions(final Catnip catnip, final PermissionHolder holder) {
-        final Guild guild = catnip.cache().guild(holder.guildId());
-        final Role publicRole = catnip.cache().role(holder.guildId(), holder.guildId());
+    private static long basePermissions(final PermissionHolder holder) {
+        final Guild guild = holder.guild();
+        final Role publicRole = holder.catnip().cache().role(holder.guildId(), holder.guildId()); //Could be simplified to just Guild.role($.idAsLong()), but custom caches are a thing with nullable guilds.
         if(guild == null || publicRole == null || guild.ownerId().equals(holder.id())) {
             return Permission.ALL;
         }
@@ -102,13 +102,29 @@ public final class PermissionUtil {
         return null;
     }
     
+    /**
+     * @deprecated Use {@link PermissionUtil#effectivePermissions(PermissionHolder)}
+     */
+    @Deprecated
     public static long effectivePermissions(@Nonnull final Catnip catnip, @Nonnull final PermissionHolder member) {
-        return basePermissions(catnip, member);
+        return basePermissions(member);
     }
     
+    public static long effectivePermissions(@Nonnull final PermissionHolder member) {
+        return basePermissions(member);
+    }
+    
+    /**
+     * @deprecated Use {@link PermissionUtil#effectivePermissions(PermissionHolder, GuildChannel)}
+     */
+    @Deprecated
     public static long effectivePermissions(@Nonnull final Catnip catnip, @Nonnull final PermissionHolder member,
                                             @Nonnull final GuildChannel channel) {
-        return overridePermissions(basePermissions(catnip, member), member, channel);
+        return overridePermissions(basePermissions(member), member, channel);
+    }
+    
+    public static long effectivePermissions(@Nonnull final PermissionHolder member, @Nonnull final GuildChannel channel) {
+        return overridePermissions(basePermissions(member), member, channel);
     }
     
     public static void checkPermissions(@Nonnull final Catnip catnip, @Nullable final String guildId,
@@ -125,7 +141,7 @@ public final class PermissionUtil {
             return;
         }
         final long needed = Permission.from(permissions);
-        final long actual = effectivePermissions(catnip, self);
+        final long actual = effectivePermissions(self);
         if((actual & needed) != needed) {
             final long missing = needed & ~actual;
             throw new MissingPermissionException(Permission.toSet(missing));
@@ -147,7 +163,7 @@ public final class PermissionUtil {
             return;
         }
         final long needed = Permission.from(permissions);
-        final long actual = effectivePermissions(catnip, self, channel);
+        final long actual = effectivePermissions(self, channel);
         if((actual & needed) != needed) {
             final long missing = needed & ~actual;
             throw new MissingPermissionException(Permission.toSet(missing));
