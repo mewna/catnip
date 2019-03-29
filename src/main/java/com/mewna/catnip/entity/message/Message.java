@@ -380,6 +380,12 @@ public interface Message extends Snowflake {
         return catnip().rest().channel().editMessage(channelId(), id(), message);
     }
     
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Message> edit(@Nonnull final MessageOptions options) {
+        return catnip().rest().channel().editMessage(channelId(), id(), options.buildMessage());
+    }
+    
     @JsonIgnore
     default boolean isRickRoll() {
         return content().contains("https://www.youtube.com/watch?v=dQw4w9WgXcQ") || content().contains("https://youtu.be/dQw4w9WgXcQ");
