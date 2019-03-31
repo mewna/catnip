@@ -27,9 +27,6 @@
 
 package com.mewna.catnip.entity.util;
 
-import lombok.Getter;
-import lombok.experimental.Accessors;
-
 import javax.annotation.Nonnull;
 import java.util.EnumSet;
 import java.util.Set;
@@ -38,7 +35,6 @@ import java.util.Set;
  * @author Julia Rogers
  * @since 9/2/18
  */
-@Accessors(fluent = true)
 public enum Permission {
     CREATE_INSTANT_INVITE(0x00000001, true, "Create Instant Invite"),
     KICK_MEMBERS(0x00000002, false, "Kick Members"),
@@ -72,11 +68,8 @@ public enum Permission {
     
     public static final long ALL = from(Permission.values());
     public static final long NONE = 0;
-    @Getter
     private final int value;
-    @Getter
     private final boolean channel;
-    @Getter
     private final String permName;
     
     Permission(final int value, final boolean channel, final String permName) {
@@ -117,5 +110,17 @@ public enum Permission {
     
     public boolean isPresent(final long permissions) {
         return (permissions & value) == value;
+    }
+    
+    public int value() {
+        return value;
+    }
+    
+    public boolean channel() {
+        return channel;
+    }
+    
+    public String permName() {
+        return permName;
     }
 }

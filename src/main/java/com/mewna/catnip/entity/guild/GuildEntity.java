@@ -27,12 +27,9 @@
 package com.mewna.catnip.entity.guild;
 
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.util.Permission;
-import com.mewna.catnip.util.PermissionUtil;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 /**
@@ -73,5 +70,4 @@ public interface GuildEntity extends Entity {
         return Objects.requireNonNull(catnip().cache().guild(guildIdAsLong()),
                 "Guild not found. It may have been removed from the cache");
     }
-    
 }

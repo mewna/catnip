@@ -39,17 +39,7 @@ import com.mewna.catnip.entity.guild.Invite.InviteChannel;
 import com.mewna.catnip.entity.guild.Invite.InviteGuild;
 import com.mewna.catnip.entity.guild.Invite.Inviter;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
-import com.mewna.catnip.entity.guild.audit.ActionType;
-import com.mewna.catnip.entity.guild.audit.AuditLogChange;
-import com.mewna.catnip.entity.guild.audit.AuditLogEntry;
-import com.mewna.catnip.entity.guild.audit.OptionalEntryInfo;
-import com.mewna.catnip.entity.impl.EmbedImpl.*;
-import com.mewna.catnip.entity.impl.InviteImpl.InviteChannelImpl;
-import com.mewna.catnip.entity.impl.InviteImpl.InviteGuildImpl;
-import com.mewna.catnip.entity.impl.InviteImpl.InviterImpl;
-import com.mewna.catnip.entity.impl.MessageImpl.AttachmentImpl;
-import com.mewna.catnip.entity.impl.MessageImpl.ReactionImpl;
-import com.mewna.catnip.entity.impl.PresenceImpl.*;
+import com.mewna.catnip.entity.guild.audit.*;
 import com.mewna.catnip.entity.message.*;
 import com.mewna.catnip.entity.message.Embed.*;
 import com.mewna.catnip.entity.message.Message.Attachment;
@@ -61,6 +51,7 @@ import com.mewna.catnip.entity.user.*;
 import com.mewna.catnip.entity.user.Presence.*;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.entity.voice.VoiceServerUpdate;
+import com.mewna.catnip.entity.voice.VoiceServerUpdateImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -237,7 +228,7 @@ public final class EntityBuilder {
                 .type(EmbedType.byKey(data.getString("type")))
                 .description(data.getString("description"))
                 .url(data.getString("url"))
-                .timestamp(data.getString("timestamp"))
+                .timestampString(data.getString("timestamp"))
                 .color(data.getInteger("color", null))
                 .footer(footer)
                 .image(image)
@@ -416,7 +407,7 @@ public final class EntityBuilder {
         return ChannelPinsUpdateImpl.builder()
                 .catnip(catnip)
                 .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
-                .lastPinTimestamp(data.getString("last_pin_timestamp"))
+                .lastPinTimestampString(data.getString("last_pin_timestamp"))
                 .build();
     }
     
@@ -656,7 +647,7 @@ public final class EntityBuilder {
                 .guildIdAsLong(guild)
                 .nick(data.getString("nick"))
                 .roleIds(toStringSet(data.getJsonArray("roles")))
-                .joinedAt(joinedAt)
+                .joinedAtString(joinedAt)
                 // If not present, it's probably(?) safe to assume not
                 .deaf(data.getBoolean("deaf", false))
                 .mute(data.getBoolean("mute", false))
@@ -830,7 +821,7 @@ public final class EntityBuilder {
         final String guildId = data.getString("guild_id");
         final String webhookId = data.getString("webhook_id");
         
-        final List<Member> mentionedMembers = new ArrayList<>();
+        final Collection<Member> mentionedMembers = new ArrayList<>();
         if(guildId != null) {
             mentionedMembers.addAll(toList(data.getJsonArray("mentions"), o -> createPartialMemberMention(guildId, o)));
         }
@@ -842,8 +833,8 @@ public final class EntityBuilder {
                 .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
                 .author(author)
                 .content(data.getString("content"))
-                .timestamp(data.getString("timestamp"))
-                .editedTimestamp(data.getString("edited_timestamp"))
+                .timestampString(data.getString("timestamp"))
+                .editedTimestampString(data.getString("edited_timestamp"))
                 .tts(data.getBoolean("tts", false))
                 .mentionsEveryone(data.getBoolean("mention_everyone", false))
                 .mentionedUsers(toList(data.getJsonArray("mentions"), this::createUser))
@@ -960,9 +951,9 @@ public final class EntityBuilder {
                 .widgetEnabled(data.getBoolean("widget_enabled", false))
                 .widgetChannelIdAsLong(widgetChannelId == null ? 0 : Long.parseUnsignedLong(widgetChannelId))
                 .systemChannelIdAsLong(systemChannelId == null ? 0 : Long.parseUnsignedLong(systemChannelId))
-                .joinedAt(data.getString("joined_at"))
+                .joinedAtString(data.getString("joined_at"))
                 .large(data.getBoolean("large", false))
-                .unavailable(data.getBoolean("unavailable", false))
+                // .unavailable(data.getBoolean("unavailable", false))
                 .maxPresences(maxPresences == null ? 0 : maxPresences)
                 .maxMembers(data.getInteger("max_members", 0))
                 .vanityUrlCode(data.getString("vanity_url_code"))
@@ -1046,7 +1037,7 @@ public final class EntityBuilder {
                 .maxUses(data.getInteger("max_uses"))
                 .maxAge(data.getInteger("max_age"))
                 .temporary(data.getBoolean("temporary", false))
-                .createdAt(data.getString("created_at"))
+                .createdAtString(data.getString("created_at"))
                 .revoked(data.getBoolean("revoked", false))
                 .build();
     }
@@ -1179,8 +1170,8 @@ public final class EntityBuilder {
         return AuditLogChangeImpl.builder()
                 .catnip(catnip)
                 .key(data.getString("key"))
-                .newValue(data.getValue("new_value")) // no npe if null/optional key
-                .oldValue(data.getValue("old_value"))
+                .newValueObject(data.getValue("new_value")) // no npe if null/optional key
+                .oldValueObject(data.getValue("old_value"))
                 .build();
     }
     

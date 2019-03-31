@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.shard.ratelimit;
 
-import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.Map;
@@ -68,11 +67,17 @@ public final class MemoryRatelimiter implements Ratelimiter {
         return checkRatelimitInternal(buckets, id, periodMs, limit);
     }
     
-    @AllArgsConstructor
     @SuppressWarnings("FieldMayBeFinal")
     static final class Bucket {
         private long limit;
         private long remaining;
         private long resetAt;
+    
+        @java.beans.ConstructorProperties({"limit", "remaining", "resetAt"})
+        public Bucket(long limit, long remaining, long resetAt) {
+            this.limit = limit;
+            this.remaining = remaining;
+            this.resetAt = resetAt;
+        }
     }
 }

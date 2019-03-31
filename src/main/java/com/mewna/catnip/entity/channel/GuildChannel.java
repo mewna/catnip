@@ -37,9 +37,6 @@ import com.mewna.catnip.rest.guild.PermissionOverrideData;
 import com.mewna.catnip.rest.invite.InviteCreateOptions;
 import com.mewna.catnip.util.PermissionUtil;
 import io.vertx.core.json.JsonObject;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -128,7 +125,7 @@ public interface GuildChannel extends GuildEntity, Channel {
      * Creates a new invite to this channel.
      *
      * @param options The options to set on the invite.
-     * @param reason The reason that will be visible in audit log
+     * @param reason  The reason that will be visible in audit log
      *
      * @return A CompletionStage that completes when the invite is created.
      */
@@ -152,7 +149,7 @@ public interface GuildChannel extends GuildEntity, Channel {
     @JsonIgnore
     @CheckReturnValue
     default CompletionStage<CreatedInvite> createInvite(@Nullable final InviteCreateOptions options) {
-      return createInvite(options, null);
+        return createInvite(options, null);
     }
     
     /**
@@ -196,9 +193,6 @@ public interface GuildChannel extends GuildEntity, Channel {
     }
     
     @SuppressWarnings({"unused", "WeakerAccess"})
-    @Getter
-    @Setter
-    @Accessors(fluent = true)
     class ChannelEditFields {
         private final GuildChannel channel;
         private String name;
@@ -260,7 +254,7 @@ public interface GuildChannel extends GuildEntity, Channel {
             }
             return channel.catnip().rest().channel().modifyChannel(channel.id(), this, reason);
         }
-    
+        
         @Nonnull
         public CompletionStage<GuildChannel> submit() {
             if(channel == null) {
@@ -347,6 +341,91 @@ public interface GuildChannel extends GuildEntity, Channel {
                 }
             }
             return payload;
+        }
+    
+        public GuildChannel channel() {
+            return channel;
+        }
+    
+        public String name() {
+            return name;
+        }
+    
+        public Integer position() {
+            return position;
+        }
+    
+        public String topic() {
+            return topic;
+        }
+    
+        public Boolean nsfw() {
+            return nsfw;
+        }
+    
+        public Integer bitrate() {
+            return bitrate;
+        }
+    
+        public Integer userLimit() {
+            return userLimit;
+        }
+    
+        public Map<String, PermissionOverrideData> overrides() {
+            return overrides;
+        }
+    
+        public String parentId() {
+            return parentId;
+        }
+    
+        public Integer rateLimitPerUser() {
+            return rateLimitPerUser;
+        }
+    
+        public ChannelEditFields name(final String name) {
+            this.name = name;
+            return this;
+        }
+    
+        public ChannelEditFields position(final Integer position) {
+            this.position = position;
+            return this;
+        }
+    
+        public ChannelEditFields topic(final String topic) {
+            this.topic = topic;
+            return this;
+        }
+    
+        public ChannelEditFields nsfw(final Boolean nsfw) {
+            this.nsfw = nsfw;
+            return this;
+        }
+    
+        public ChannelEditFields bitrate(final Integer bitrate) {
+            this.bitrate = bitrate;
+            return this;
+        }
+    
+        public ChannelEditFields userLimit(final Integer userLimit) {
+            this.userLimit = userLimit;
+            return this;
+        }
+    
+        public ChannelEditFields overrides(final Map<String, PermissionOverrideData> overrides) {
+            this.overrides = overrides;
+            return this;
+        }
+    
+        public ChannelEditFields parentId(final String parentId) {
+            this.parentId = parentId;
+            return this;
+        }
+    
+        public ChannelEditFields rateLimitPerUser(final Integer rateLimitPerUser) {
+            this.rateLimitPerUser = rateLimitPerUser;
+            return this;
         }
     }
 }

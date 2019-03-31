@@ -167,7 +167,7 @@ public class RestEmoji extends RestHandler {
                                                            @Nonnull final String name,
                                                            @Nonnull final Collection<String> roles,
                                                            @Nullable final String reason
-                                                           ) {
+    ) {
         final JsonArray rolesArray;
         if(roles.isEmpty()) {
             rolesArray = null;

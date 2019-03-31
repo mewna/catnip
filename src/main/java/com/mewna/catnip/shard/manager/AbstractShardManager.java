@@ -28,15 +28,11 @@
 package com.mewna.catnip.shard.manager;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.shard.ShardControlMessage;
 import com.mewna.catnip.shard.LifecycleState;
+import com.mewna.catnip.shard.ShardControlMessage;
 import com.mewna.catnip.util.JsonUtil;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import io.vertx.core.json.JsonArray;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -53,16 +49,11 @@ import static com.mewna.catnip.shard.ShardAddress.computeAddress;
  * @author amy
  * @since 11/13/18.
  */
-@Accessors(fluent = true)
 @SuppressWarnings("unused")
-@RequiredArgsConstructor
 public abstract class AbstractShardManager implements ShardManager {
-    @Getter
     private final List<ShardCondition> conditions = new CopyOnWriteArrayList<>();
-    @Getter
-    @Setter
     private Catnip catnip;
-
+    
     @Override
     public ShardManager addCondition(@Nonnull final ShardCondition condition) {
         conditions.add(condition);
@@ -131,5 +122,20 @@ public abstract class AbstractShardManager implements ShardManager {
                     }
                 });
         return future;
+    }
+    
+    public List<ShardCondition> conditions() {
+        return conditions;
+    }
+    
+    @Nonnull
+    public Catnip catnip() {
+        return catnip;
+    }
+    
+    @Nonnull
+    public AbstractShardManager catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
+        return this;
     }
 }

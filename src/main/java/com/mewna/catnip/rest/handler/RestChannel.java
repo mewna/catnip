@@ -128,7 +128,7 @@ public class RestChannel extends RestHandler {
         if(json.getValue("embed", null) == null && json.getValue("content", null) == null && !options.hasFiles()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no attachments!");
         }
-    
+        
         final OutboundRequest request = new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), ImmutableMap.of(), json);
         final List<ImmutablePair<String, Buffer>> buffers = options.files();
         if(buffers != null && !buffers.isEmpty()) {

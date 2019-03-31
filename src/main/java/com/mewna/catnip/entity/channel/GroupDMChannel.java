@@ -29,8 +29,9 @@ package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.GroupDMChannelImpl;
 import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -43,6 +44,8 @@ import java.util.List;
  * @since 9/12/18
  */
 @SuppressWarnings("unused")
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = GroupDMChannelImpl.class)
 public interface GroupDMChannel extends DMChannel {
     @Nonnull
@@ -82,7 +85,7 @@ public interface GroupDMChannel extends DMChannel {
     /**
      * @return The ID of the application that created the group DM.
      * May be {@code null}.
-     *
+     * <p>
      * Bots shouldn't ever have this value being null.
      */
     @CheckReturnValue
@@ -97,7 +100,7 @@ public interface GroupDMChannel extends DMChannel {
     /**
      * @return The ID of the application that created the group DM.
      * A value of {@code 0} means this group wasn't created by an application.
-     *
+     * <p>
      * Bots shouldn't ever have this value being 0.
      */
     @CheckReturnValue

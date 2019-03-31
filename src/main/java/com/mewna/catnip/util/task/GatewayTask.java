@@ -54,6 +54,16 @@ public class GatewayTask<T> extends QueueTask<T> {
         this.limit = limit;
     }
     
+    public static GatewayTask<JsonObject> gatewaySendTask(@Nonnull final Catnip catnip, @Nonnull final String id,
+                                                          @Nonnull final Consumer<JsonObject> action) {
+        return new GatewayTask<>(new ArrayDeque<>(), action, catnip, id, 60_000, 110);
+    }
+    
+    public static GatewayTask<PresenceImpl> gatewayPresenceTask(@Nonnull final Catnip catnip, @Nonnull final String id,
+                                                                @Nonnull final Consumer<PresenceImpl> action) {
+        return new GatewayTask<>(new ArrayDeque<>(), action, catnip, id, 60_000, 5);
+    }
+    
     public synchronized void shutdown() {
         shutdown = true;
         queue.clear();
@@ -74,15 +84,5 @@ public class GatewayTask<T> extends QueueTask<T> {
             }
             action.accept(queue.poll());
         }
-    }
-    
-    public static GatewayTask<JsonObject> gatewaySendTask(@Nonnull final Catnip catnip, @Nonnull final String id,
-                                                          @Nonnull final Consumer<JsonObject> action) {
-        return new GatewayTask<>(new ArrayDeque<>(), action, catnip, id, 60_000, 110);
-    }
-    
-    public static GatewayTask<PresenceImpl> gatewayPresenceTask(@Nonnull final Catnip catnip, @Nonnull final String id,
-                                                                @Nonnull final Consumer<PresenceImpl> action) {
-        return new GatewayTask<>(new ArrayDeque<>(), action, catnip, id, 60_000, 5);
     }
 }

@@ -29,7 +29,8 @@ package com.mewna.catnip.entity.misc;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.entity.impl.ApplicationInfoImpl;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -41,6 +42,8 @@ import java.util.List;
  * @author amy
  * @since 10/17/18.
  */
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = ApplicationInfoImpl.class)
 public interface ApplicationInfo extends Snowflake {
     /**

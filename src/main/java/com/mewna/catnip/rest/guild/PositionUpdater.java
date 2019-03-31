@@ -28,31 +28,30 @@
 package com.mewna.catnip.rest.guild;
 
 import com.google.common.collect.ImmutableSet;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.beans.ConstructorProperties;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-@RequiredArgsConstructor
-@Accessors(fluent = true, chain = true)
-@Getter
 @SuppressWarnings("unused")
 public class PositionUpdater {
     private final String guildId;
     private final boolean reverseOrder;
     
-    @Getter(AccessLevel.NONE)
     private final Map<String, Integer> positions = new HashMap<>(); // autoboxing >:(
     
     private String entityId;
+    
+    @ConstructorProperties({"guildId", "reverseOrder"})
+    public PositionUpdater(final String guildId, final boolean reverseOrder) {
+        this.guildId = guildId;
+        this.reverseOrder = reverseOrder;
+    }
     
     @Nonnull
     @CheckReturnValue
@@ -118,5 +117,17 @@ public class PositionUpdater {
     @CheckReturnValue
     public Collection<Entry<String, Integer>> entries() {
         return ImmutableSet.copyOf(positions.entrySet());
+    }
+    
+    public String guildId() {
+        return guildId;
+    }
+    
+    public boolean reverseOrder() {
+        return reverseOrder;
+    }
+    
+    public String entityId() {
+        return entityId;
     }
 }

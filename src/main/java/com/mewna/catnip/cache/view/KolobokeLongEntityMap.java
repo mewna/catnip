@@ -1,3 +1,4 @@
+// @formatter:off
 /*
  * Copyright (c) 2018 amy, All rights reserved.
  *
@@ -3777,3 +3778,5 @@ final class KolobokeLongEntityMap<T>  implements LongEntityMap<T> {
     
     static final HashConfigWrapper DEFAULT_CONFIG_WRAPPER = new HashConfigWrapper(HashConfig.getDefault());
 }
+
+// @formatter:on

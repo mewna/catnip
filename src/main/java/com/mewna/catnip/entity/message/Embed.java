@@ -28,9 +28,9 @@
 package com.mewna.catnip.entity.message;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.EmbedImpl;
-import com.mewna.catnip.entity.impl.EmbedImpl.*;
-import lombok.Getter;
+import com.mewna.catnip.entity.Timestamped;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -45,8 +45,10 @@ import java.util.List;
  * @since 9/2/18.
  */
 @SuppressWarnings("unused")
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = EmbedImpl.class)
-public interface Embed {
+public interface Embed extends Timestamped {
     /**
      * Embed title.
      *
@@ -90,7 +92,13 @@ public interface Embed {
      */
     @Nullable
     @CheckReturnValue
-    OffsetDateTime timestamp();
+    default OffsetDateTime timestamp() {
+        return parseTimestamp(timestampString());
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    String timestampString();
     
     /**
      * Embed color.
@@ -171,7 +179,6 @@ public interface Embed {
         RICH("rich"),
         UNKNOWN("");
         
-        @Getter
         private final String key;
         
         EmbedType(final String key) {
@@ -188,8 +195,14 @@ public interface Embed {
             }
             return UNKNOWN;
         }
+        
+        public String key() {
+            return key;
+        }
     }
     
+    @Immutable
+    @CatnipImmutable
     @JsonDeserialize(as = AuthorImpl.class)
     interface Author {
         /**
@@ -226,6 +239,8 @@ public interface Embed {
         String proxyIconUrl();
     }
     
+    @Immutable
+    @CatnipImmutable
     @JsonDeserialize(as = FieldImpl.class)
     interface Field {
         /**
@@ -255,6 +270,8 @@ public interface Embed {
         boolean inline();
     }
     
+    @Immutable
+    @CatnipImmutable
     @JsonDeserialize(as = FooterImpl.class)
     interface Footer {
         /**
@@ -283,6 +300,8 @@ public interface Embed {
         String proxyIconUrl();
     }
     
+    @Immutable
+    @CatnipImmutable
     @JsonDeserialize(as = ImageImpl.class)
     interface Image {
         /**
@@ -319,6 +338,8 @@ public interface Embed {
         int width();
     }
     
+    @Immutable
+    @CatnipImmutable
     @JsonDeserialize(as = ProviderImpl.class)
     interface Provider {
         /**
@@ -339,6 +360,8 @@ public interface Embed {
         String url();
     }
     
+    @Immutable
+    @CatnipImmutable
     @JsonDeserialize(as = ThumbnailImpl.class)
     interface Thumbnail {
         /**
@@ -375,6 +398,8 @@ public interface Embed {
         int width();
     }
     
+    @Immutable
+    @CatnipImmutable
     @JsonDeserialize(as = VideoImpl.class)
     interface Video {
         /**

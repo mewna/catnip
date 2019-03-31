@@ -37,7 +37,8 @@ import java.util.*;
 import java.util.function.Function;
 
 public final class JsonUtil {
-    private JsonUtil() {}
+    private JsonUtil() {
+    }
     
     @Nonnull
     @CheckReturnValue
@@ -165,10 +166,10 @@ public final class JsonUtil {
         final List<Long> ret = new ArrayList<>(array.size());
         for(final Object object : array) {
             if(object instanceof Number) {
-                ret.add(((Number)object).longValue());
+                ret.add(((Number) object).longValue());
             } else if(object instanceof String) {
                 try {
-                    ret.add(Long.parseUnsignedLong((String)object));
+                    ret.add(Long.parseUnsignedLong((String) object));
                 } catch(final NumberFormatException e) {
                     throw new IllegalArgumentException("Malformed snowflake '" + object + '\'', e);
                 }

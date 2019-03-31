@@ -44,8 +44,6 @@ import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -67,7 +65,6 @@ import static com.mewna.catnip.util.Utils.removeIf;
  * @author amy
  * @since 9/18/18.
  */
-@Accessors(fluent = true, chain = true)
 @SuppressWarnings({"unused", "MismatchedQueryAndUpdateOfCollection"})
 public abstract class MemoryEntityCache implements EntityCacheWorker {
     @SuppressWarnings("WeakerAccess")
@@ -84,7 +81,6 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     protected final Map<Long, MutableCacheView<VoiceState>> voiceStateCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
     protected final AtomicReference<User> selfUser = new AtomicReference<>(null);
-    @Getter
     private Catnip catnip;
     private EntityBuilder entityBuilder;
     
@@ -92,7 +88,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
      * Function used to map members to their name, for named cache views.
      * Used by the default {@link #createMemberCacheView()} and
      * {@link #members()} implementations.
-     *
+     * <p>
      * Defaults to returning a member's effective name, which is their
      * nickname, if present, or their username.
      *
@@ -277,7 +273,9 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     }
     
     protected abstract MutableNamedCacheView<User> userCache(int shardId);
+    
     protected abstract MutableCacheView<UserDMChannel> dmChannelCache(int shardId);
+    
     protected abstract MutableCacheView<Presence> presenceCache(int shardId);
     
     @SuppressWarnings("WeakerAccess")
@@ -398,7 +396,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     }
     
     protected int shardId(final long entityId) {
-        return (int)((entityId >> 22) % catnip.shardManager().shardCount());
+        return (int) ((entityId >> 22) % catnip.shardManager().shardCount());
     }
     
     private void cacheRole(final Role role) {
@@ -801,5 +799,9 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
         this.catnip = catnip;
         entityBuilder = new EntityBuilder(catnip);
         return this;
+    }
+    
+    public Catnip catnip() {
+        return catnip;
     }
 }

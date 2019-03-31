@@ -64,7 +64,7 @@ public interface MessageChannel extends Channel {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.SEND_MESSAGES);
         }
-        final CompletionStage<Message> future =  catnip().rest().channel().sendMessage(id(), content);
+        final CompletionStage<Message> future = catnip().rest().channel().sendMessage(id(), content);
         // Inject guild manually because Discord does not send it in response
         if(isGuild()) {
             return future.thenApply(msg -> ((MessageImpl) msg).guildIdAsLong(asGuildChannel().guildIdAsLong()));
@@ -192,7 +192,7 @@ public interface MessageChannel extends Channel {
      * Delete the message with the given id in this channel.
      *
      * @param messageId The id of the message to delete.
-     * @param reason The reason that will be displayed in audit log
+     * @param reason    The reason that will be displayed in audit log
      *
      * @return A CompletionStage that completes when the message is deleted.
      */
@@ -323,6 +323,7 @@ public interface MessageChannel extends Channel {
      * Delete all reactions on the given message
      *
      * @param messageId The id of the message to remove all reactions from.
+     *
      * @return A CompletionStage that completes when the reaction is removed.
      */
     @Nonnull

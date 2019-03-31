@@ -31,13 +31,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.entity.Mentionable;
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.Timestamped;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.channel.GuildChannel;
-import com.mewna.catnip.entity.impl.MemberImpl;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.CatnipImmutable;
 import com.mewna.catnip.util.PermissionUtil;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -56,8 +57,10 @@ import java.util.stream.Collectors;
  * @since 9/4/18.
  */
 @SuppressWarnings("unused")
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = MemberImpl.class)
-public interface Member extends Mentionable, PermissionHolder {
+public interface Member extends Mentionable, PermissionHolder, Timestamped {
     /**
      * The user equivalent to this member.
      */
@@ -106,9 +109,9 @@ public interface Member extends Mentionable, PermissionHolder {
     @CheckReturnValue
     default Set<Role> roles() {
         final CacheView<Role> roles = catnip().cache().roles(guildId());
-        return Collections.unmodifiableSet(roleIds().stream()
+        return roleIds().stream()
                 .map(roles::getById)
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toUnmodifiableSet());
     }
     
     /**
@@ -161,7 +164,13 @@ public interface Member extends Mentionable, PermissionHolder {
      */
     @Nullable
     @CheckReturnValue
-    OffsetDateTime joinedAt();
+    default OffsetDateTime joinedAt() {
+        return parseTimestamp(joinedAtString());
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    String joinedAtString();
     
     /**
      * The member's color, as shown in the official Discord Client, or {@code null} if they have no roles with a color.
@@ -176,9 +185,9 @@ public interface Member extends Mentionable, PermissionHolder {
         Role highest = null;
         
         final CacheView<Role> cache = catnip().cache().roles(guildId());
-        for (final String id : roleIds()) {
+        for(final String id : roleIds()) {
             final Role role = cache.getById(id);
-            if (role != null && role.color() != 0) {
+            if(role != null && role.color() != 0) {
                 if(highest == null || role.compareTo(highest) > 0) {
                     highest = role;
                 }
@@ -232,6 +241,7 @@ public interface Member extends Mentionable, PermissionHolder {
     
     /**
      * Checks if the member is the owner of the guild.
+     *
      * @return Whether the member owns the guild or not
      */
     @JsonIgnore

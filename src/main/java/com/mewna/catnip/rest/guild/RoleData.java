@@ -31,9 +31,6 @@ import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.JsonConvertible;
 import io.vertx.core.json.JsonObject;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -42,9 +39,6 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.function.LongUnaryOperator;
 
-@Accessors(fluent = true)
-@Getter
-@Setter
 @SuppressWarnings("WeakerAccess")
 public class RoleData implements JsonConvertible {
     private final int id;
@@ -170,6 +164,59 @@ public class RoleData implements JsonConvertible {
     @Override
     public String toString() {
         return "RoleData(id = " + id + ')';
+    }
+    
+    public int id() {
+        return id;
+    }
+    
+    public boolean publicRole() {
+        return publicRole;
+    }
+    
+    public String name() {
+        return name;
+    }
+    
+    public Integer color() {
+        return color;
+    }
+    
+    public Integer position() {
+        return position;
+    }
+    
+    public Boolean mentionable() {
+        return mentionable;
+    }
+    
+    public Boolean hoisted() {
+        return hoisted;
+    }
+    
+    public RoleData name(final String name) {
+        this.name = name;
+        return this;
+    }
+    
+    public RoleData color(final Integer color) {
+        this.color = color;
+        return this;
+    }
+    
+    public RoleData position(final Integer position) {
+        this.position = position;
+        return this;
+    }
+    
+    public RoleData mentionable(final Boolean mentionable) {
+        this.mentionable = mentionable;
+        return this;
+    }
+    
+    public RoleData hoisted(final Boolean hoisted) {
+        this.hoisted = hoisted;
+        return this;
     }
     
     private static class PublicRoleData extends RoleData {

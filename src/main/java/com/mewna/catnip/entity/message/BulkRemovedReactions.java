@@ -29,7 +29,8 @@ package com.mewna.catnip.entity.message;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.impl.BulkRemovedReactionsImpl;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -40,6 +41,8 @@ import javax.annotation.Nullable;
  * @author amy
  * @since 10/6/18.
  */
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = BulkRemovedReactionsImpl.class)
 public interface BulkRemovedReactions extends Entity {
     /**

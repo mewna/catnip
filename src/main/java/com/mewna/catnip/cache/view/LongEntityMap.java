@@ -34,20 +34,37 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("NullableProblems")
 public interface LongEntityMap<T> extends Map<Long, T> {
+    /*
     @Nonnull
     @CheckReturnValue
     static <T> LongEntityMap<T> create(@Nonnegative final int expectedSize) {
         return new KolobokeLongEntityMap<>(expectedSize);
     }
+    */
+    @Nonnull
+    @CheckReturnValue
+    static <T> Map<Long, T> create(@Nonnegative final int expectedSize) {
+        return new ConcurrentHashMap<>(expectedSize);
+    }
     
+    @Nonnull
+    @CheckReturnValue
+    static <T> Map<Long, T> create() {
+        return create(10);
+    }
+    
+   
+    /*
     @Nonnull
     @CheckReturnValue
     static <T> LongEntityMap<T> create() {
         return create(10);
     }
+    */
     
     @Nonnull
     LongIterator iterator();

@@ -33,10 +33,6 @@ import com.mewna.catnip.entity.guild.Guild.VerificationLevel;
 import com.mewna.catnip.util.JsonConvertible;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -45,16 +41,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-@Accessors(fluent = true, chain = true)
-@Getter
-@Setter
 @SuppressWarnings("WeakerAccess")
 public class GuildData implements JsonConvertible {
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
     private final List<RoleData> roles = new ArrayList<>();
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
     private final List<ChannelData> channels = new ArrayList<>();
     
     private String name;
@@ -220,13 +209,13 @@ public class GuildData implements JsonConvertible {
             object.put("icon", base64Icon);
         }
         if(verificationLevel != null) {
-            object.put("verification_level", verificationLevel.getKey());
+            object.put("verification_level", verificationLevel.key());
         }
         if(defaultNotificationLevel != null) {
-            object.put("default_message_notifications", defaultNotificationLevel.getKey());
+            object.put("default_message_notifications", defaultNotificationLevel.key());
         }
         if(explicitContentFilter != null) {
-            object.put("explicit_content_filter", explicitContentFilter.getKey());
+            object.put("explicit_content_filter", explicitContentFilter.key());
         }
         return object;
     }

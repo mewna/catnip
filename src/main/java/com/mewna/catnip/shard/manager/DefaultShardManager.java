@@ -38,8 +38,6 @@ import com.mewna.catnip.util.task.QueueTask;
 import com.mewna.catnip.util.task.ShardConnectTask;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.MessageConsumer;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -58,14 +56,11 @@ import static com.mewna.catnip.shard.ShardControlMessage.CONNECT;
  * @author amy
  * @since 8/15/18.
  */
-@Accessors(fluent = true)
 public class DefaultShardManager extends AbstractShardManager {
     private final Collection<MessageConsumer> consumers = new HashSet<>();
     private final Map<Integer, String> shards = new ConcurrentHashMap<>();
     private final Collection<Integer> shardIds;
-    @Getter
     private int shardCount;
-    @Getter
     private final QueueTask<Integer> connectQueue = new ShardConnectTask(this::startShard);
     private volatile boolean started;
     
@@ -271,5 +266,13 @@ public class DefaultShardManager extends AbstractShardManager {
         consumers.clear();
         shards.values().forEach(shard -> catnip().vertx().undeploy(shard));
         shards.clear();
+    }
+    
+    public int shardCount() {
+        return shardCount;
+    }
+    
+    public QueueTask<Integer> connectQueue() {
+        return connectQueue;
     }
 }

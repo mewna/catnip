@@ -32,7 +32,8 @@ import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.MessageChannel;
 import com.mewna.catnip.entity.channel.TextChannel;
 import com.mewna.catnip.entity.guild.Guild;
-import com.mewna.catnip.entity.impl.MessageEmbedUpdateImpl;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -47,6 +48,8 @@ import java.util.List;
  * @author amy
  * @since 10/9/18.
  */
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = MessageEmbedUpdateImpl.class)
 public interface MessageEmbedUpdate extends Snowflake {
     @Nullable

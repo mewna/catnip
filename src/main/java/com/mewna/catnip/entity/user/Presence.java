@@ -28,16 +28,16 @@
 package com.mewna.catnip.entity.user;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.PresenceImpl;
-import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.Accessors;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.beans.ConstructorProperties;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -48,8 +48,10 @@ import java.util.Set;
  * @since 9/21/18.
  */
 @SuppressWarnings("unused")
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = PresenceImpl.class)
-public interface Presence {
+public interface Presence extends RequiresCatnip {
     @Nonnull
     @CheckReturnValue
     static Presence of(@Nonnull final OnlineStatus status, @Nullable final Activity activity) {
@@ -83,7 +85,9 @@ public interface Presence {
     @Nullable
     Activity activity();
     
-    @Accessors(fluent = true, chain = true)
+    @Nonnull
+    Catnip catnip();
+    
     enum OnlineStatus {
         ONLINE,
         IDLE,
@@ -111,7 +115,7 @@ public interface Presence {
                     return OFFLINE;
                 }
                 case "invisible": {
-                    return  INVISIBLE;
+                    return INVISIBLE;
                 }
                 default: {
                     throw new IllegalArgumentException("Unknown status: " + status);
@@ -125,16 +129,18 @@ public interface Presence {
         }
     }
     
-    @Accessors(fluent = true, chain = true)
-    @RequiredArgsConstructor
     enum ActivityType {
         PLAYING(0),
         STREAMING(1),
         LISTENING(2),
         WATCHING(3),
         ;
-        @Getter
         private final int id;
+        
+        @ConstructorProperties("id")
+        ActivityType(final int id) {
+            this.id = id;
+        }
         
         @Nonnull
         public static ActivityType byId(@Nonnegative final int id) {
@@ -150,10 +156,12 @@ public interface Presence {
         public String asString() {
             return name().toLowerCase();
         }
+        
+        public int id() {
+            return id;
+        }
     }
     
-    @Accessors(fluent = true, chain = true)
-    @RequiredArgsConstructor
     enum ActivityFlag {
         INSTANCE(1), // 1 << 0
         JOIN(1 << 1),
@@ -164,6 +172,11 @@ public interface Presence {
         ;
         
         private final int bits;
+        
+        @ConstructorProperties("bits")
+        ActivityFlag(final int bits) {
+            this.bits = bits;
+        }
         
         @Nonnull
         public static Set<ActivityFlag> fromInt(final int flags) {
@@ -177,12 +190,16 @@ public interface Presence {
         }
     }
     
+    @Immutable
+    @CatnipImmutable
     interface ActivityTimestamps {
         long start();
         
         long end();
     }
     
+    @Immutable
+    @CatnipImmutable
     interface ActivityParty {
         @Nullable
         String id();
@@ -192,6 +209,8 @@ public interface Presence {
         int maxSize();
     }
     
+    @Immutable
+    @CatnipImmutable
     interface ActivityAssets {
         @Nullable
         String largeImage();
@@ -206,6 +225,8 @@ public interface Presence {
         String smallText();
     }
     
+    @Immutable
+    @CatnipImmutable
     interface ActivitySecrets {
         @Nullable
         String join();
@@ -217,6 +238,8 @@ public interface Presence {
         String match();
     }
     
+    @Immutable
+    @CatnipImmutable
     @JsonDeserialize(as = ActivityImpl.class)
     interface Activity {
         @Nonnull

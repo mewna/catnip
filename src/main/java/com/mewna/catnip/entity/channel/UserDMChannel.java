@@ -29,8 +29,9 @@ package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.UserDMChannelImpl;
 import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -42,6 +43,8 @@ import javax.annotation.Nullable;
  * @author natanbc
  * @since 9/12/18
  */
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = UserDMChannelImpl.class)
 public interface UserDMChannel extends DMChannel {
     @Nonnull

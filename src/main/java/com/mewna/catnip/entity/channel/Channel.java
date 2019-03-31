@@ -33,7 +33,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
-import lombok.Getter;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -295,9 +294,7 @@ public interface Channel extends Snowflake {
          */
         STORE(6, true);
         
-        @Getter
         private final int key;
-        @Getter
         private final boolean guild;
         
         ChannelType(final int key, final boolean guild) {
@@ -313,6 +310,14 @@ public interface Channel extends Snowflake {
                 }
             }
             throw new IllegalArgumentException("No channel type for key " + key);
+        }
+        
+        public int key() {
+            return key;
+        }
+        
+        public boolean isGuild() {
+            return guild;
         }
     }
 }

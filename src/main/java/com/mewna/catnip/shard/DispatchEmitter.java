@@ -178,7 +178,7 @@ public final class DispatchEmitter {
                 final Guild guild = entityBuilder.createGuild(data);
                 catnip.cache().guildAsync(guild.idAsLong())
                         .thenAccept(old -> catnip.dispatchManager()
-                        .dispatchEvent(type, ImmutablePair.of(old, guild)))
+                                .dispatchEvent(type, ImmutablePair.of(old, guild)))
                         .exceptionally(e -> {
                             cacheErrorLog(type, e);
                             return null;
@@ -218,7 +218,7 @@ public final class DispatchEmitter {
                 final Role role = entityBuilder.createRole(data.getString("guild_id"), data.getJsonObject("role"));
                 catnip.cache().roleAsync(role.guildIdAsLong(), role.idAsLong())
                         .thenAccept(old -> catnip.dispatchManager()
-                        .dispatchEvent(type, ImmutablePair.of(old, role)))
+                                .dispatchEvent(type, ImmutablePair.of(old, role)))
                         .exceptionally(e -> {
                             cacheErrorLog(type, e);
                             return null;
@@ -282,7 +282,7 @@ public final class DispatchEmitter {
                 }
                 catnip.cache().presenceAsync(presence.idAsLong())
                         .thenAccept(old -> catnip.dispatchManager()
-                        .dispatchEvent(type, ImmutablePair.of(old, presence)))
+                                .dispatchEvent(type, ImmutablePair.of(old, presence)))
                         .exceptionally(e -> {
                             cacheErrorLog(type, e);
                             return null;

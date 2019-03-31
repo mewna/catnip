@@ -27,12 +27,17 @@
 
 package com.mewna.catnip.entity.guild.audit;
 
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
+
 import javax.annotation.CheckReturnValue;
 
 /**
  * @author SamOphis
  * @since 10/07/18
  */
+@Immutable
+@CatnipImmutable
 @SuppressWarnings("unused")
 public interface MemberPruneInfo extends OptionalEntryInfo {
     @CheckReturnValue

@@ -31,18 +31,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.guild.GuildEntity;
-import com.mewna.catnip.entity.impl.WebhookImpl;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageOptions;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.rest.requester.Requester;
+import com.mewna.catnip.util.CatnipImmutable;
 import com.mewna.catnip.util.PermissionUtil;
 import io.vertx.core.json.JsonObject;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -58,6 +56,8 @@ import java.util.concurrent.CompletionStage;
  * @since 9/15/18
  */
 @SuppressWarnings("unused")
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = WebhookImpl.class)
 public interface Webhook extends GuildEntity, Snowflake {
     /**
@@ -102,8 +102,8 @@ public interface Webhook extends GuildEntity, Snowflake {
     /**
      * Send a message to this channel with the specified content.
      *
-     * @param content The text content to send.
-     * @param username The username to override the webhook, if set.
+     * @param content   The text content to send.
+     * @param username  The username to override the webhook, if set.
      * @param avatarUrl The avatar to override the webhook, if set.
      *
      * @return A CompletionStage that completes when the message is sent.
@@ -118,8 +118,8 @@ public interface Webhook extends GuildEntity, Snowflake {
     /**
      * Send a message to this channel with the specified embed.
      *
-     * @param embed The embed to send.
-     * @param username The username to override the webhook, if set.
+     * @param embed     The embed to send.
+     * @param username  The username to override the webhook, if set.
      * @param avatarUrl The avatar to override the webhook, if set.
      *
      * @return A CompletionStage that completes when the message is sent.
@@ -134,8 +134,8 @@ public interface Webhook extends GuildEntity, Snowflake {
     /**
      * Send a message to this channel with the specified options.
      *
-     * @param options The options for the message being sent.
-     * @param username The username to override the webhook, if set.
+     * @param options   The options for the message being sent.
+     * @param username  The username to override the webhook, if set.
      * @param avatarUrl The avatar to override the webhook, if set.
      *
      * @return A CompletionStage that completes when the message is sent.
@@ -226,9 +226,6 @@ public interface Webhook extends GuildEntity, Snowflake {
     }
     
     @SuppressWarnings("unused")
-    @Getter
-    @Setter
-    @Accessors(fluent = true)
     class WebhookEditFields {
         private final Webhook webhook;
         private String name;
@@ -265,6 +262,37 @@ public interface Webhook extends GuildEntity, Snowflake {
                 payload.put("channel_id", channelId);
             }
             return payload;
+        }
+    
+        public Webhook webhook() {
+            return webhook;
+        }
+    
+        public String name() {
+            return name;
+        }
+    
+        public String avatar() {
+            return avatar;
+        }
+    
+        public String channelId() {
+            return channelId;
+        }
+    
+        public WebhookEditFields name(final String name) {
+            this.name = name;
+            return this;
+        }
+    
+        public WebhookEditFields avatar(final String avatar) {
+            this.avatar = avatar;
+            return this;
+        }
+    
+        public WebhookEditFields channelId(final String channelId) {
+            this.channelId = channelId;
+            return this;
         }
     }
 }

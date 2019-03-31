@@ -28,12 +28,13 @@
 package com.mewna.catnip.entity.misc;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.guild.Guild;
-import com.mewna.catnip.entity.impl.CustomEmojiImpl;
-import com.mewna.catnip.entity.impl.UnicodeEmojiImpl;
 import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -45,7 +46,7 @@ import java.util.List;
  * @author natanbc
  * @since 9/5/18.
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS)
+@JsonTypeInfo(use = Id.MINIMAL_CLASS)
 public interface Emoji extends Snowflake {
     /**
      * ID of this emoji, or null if it has no ID.
@@ -120,7 +121,6 @@ public interface Emoji extends Snowflake {
      *
      * @return True if this emoji is custom, false otherwise.
      */
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     @CheckReturnValue
     boolean custom();
     
@@ -172,6 +172,8 @@ public interface Emoji extends Snowflake {
     @CheckReturnValue
     boolean is(@Nonnull String emoji);
     
+    @Immutable
+    @CatnipImmutable
     @JsonDeserialize(as = CustomEmojiImpl.class)
     interface CustomEmoji extends Emoji {
         @Override
@@ -180,7 +182,7 @@ public interface Emoji extends Snowflake {
         default String id() {
             return Long.toUnsignedString(idAsLong());
         }
-    
+        
         /**
          * Guild that owns this emoji, or {@code null} if it has no guild.
          * <p>
@@ -198,7 +200,7 @@ public interface Emoji extends Snowflake {
             }
             return catnip().cache().guild(guildIdAsLong());
         }
-    
+        
         /**
          * ID of guild that owns this emoji, or {@code null} if it has no guild.
          * <p>
@@ -216,7 +218,7 @@ public interface Emoji extends Snowflake {
             }
             return Long.toUnsignedString(id);
         }
-    
+        
         /**
          * ID of guild that owns this emoji, or {@code 0} if it has no guild.
          * <p>
@@ -255,13 +257,15 @@ public interface Emoji extends Snowflake {
         }
     }
     
+    @Immutable
+    @CatnipImmutable
     @JsonDeserialize(as = UnicodeEmojiImpl.class)
     interface UnicodeEmoji extends Emoji {
         @Override
         default String id() {
             throw new IllegalStateException("Unicode emojis have no IDs!");
         }
-    
+        
         @Override
         default long idAsLong() {
             throw new IllegalStateException("Unicode emojis have no IDs!");

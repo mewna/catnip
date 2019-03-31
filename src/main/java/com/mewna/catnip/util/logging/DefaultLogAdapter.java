@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.util.logging;
 
-import lombok.experimental.Accessors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -36,20 +35,19 @@ import org.slf4j.helpers.MessageFormatter;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.StackWalker.Option;
 
 /**
  * @author amy
  * @since 9/3/18.
  */
-@Accessors(fluent = true)
 public class DefaultLogAdapter implements LogAdapter {
-    @SuppressWarnings("StaticVariableOfConcreteClass")
-    private static final MySecurityManager mySecurityManager = new MySecurityManager();
+    private final StackWalker stackWalker = StackWalker.getInstance(Option.SHOW_REFLECT_FRAMES);
     
     @Override
     public void log(@Nonnull final Level level, @Nonnull final String message, @Nullable final Object... objects) {
         // TODO: Switch this to use StackWalker when eventually moving to J9+
-        final Class<?> caller = mySecurityManager.getCallerClassName(3);
+        final Class<?> caller = stackWalker.getCallerClass();
         final Logger logger = LoggerFactory.getLogger(caller);
         final FormattingTuple tuple = MessageFormatter.arrayFormat(message, objects);
         final String formatted = tuple.getMessage();
@@ -91,18 +89,6 @@ public class DefaultLogAdapter implements LogAdapter {
                     break;
                 }
             }
-        }
-    }
-    
-    /**
-     * A custom security manager that exposes the getClassContext() information.
-     * This is an ugly hack and needs to be replaced with the StackWalker API
-     * when we eventually move to J9+. See this StackOverflow question:
-     * https://stackoverflow.com/a/2924426/
-     */
-    static class MySecurityManager extends SecurityManager {
-        Class<?> getCallerClassName(@SuppressWarnings("SameParameterValue") final int callStackDepth) {
-            return getClassContext()[callStackDepth];
         }
     }
 }

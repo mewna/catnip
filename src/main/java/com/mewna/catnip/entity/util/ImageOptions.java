@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.util;
 
-import lombok.Getter;
-
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -38,8 +36,7 @@ import javax.annotation.Nullable;
  * @author natanbc
  * @since 9/2/18.
  */
-@Getter
-public class ImageOptions {
+public final class ImageOptions {
     private ImageType type = ImageType.PNG;
     private int size = -1;
     
@@ -102,5 +99,13 @@ public class ImageOptions {
     @CheckReturnValue
     public String buildUrl(@Nonnull final String base) {
         return base + '.' + type.getFileExtension() + (size == -1 ? "" : "?size=" + size);
+    }
+    
+    public ImageType getType() {
+        return type;
+    }
+    
+    public int getSize() {
+        return size;
     }
 }

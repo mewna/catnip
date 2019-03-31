@@ -47,13 +47,13 @@ public class RestVoice extends RestHandler {
     public RestVoice(final CatnipImpl catnip) {
         super(catnip);
     }
-
+    
     @Nonnull
     @CheckReturnValue
     public CompletionStage<List<VoiceRegion>> listVoiceRegions() {
         return listVoiceRegionsRaw().thenApply(mapObjectContents(entityBuilder()::createVoiceRegion));
     }
-
+    
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonArray> listVoiceRegionsRaw() {

@@ -116,63 +116,63 @@ public class MultipartBodyPublisher {
         private Supplier<InputStream> stream;
         private String filename;
         private String contentType;
-    
+        
         public TYPE getType() {
             return type;
         }
-    
+        
         public void setType(final TYPE type) {
             this.type = type;
         }
-    
+        
         public String getName() {
             return name;
         }
-    
+        
         public void setName(final String name) {
             this.name = name;
         }
-    
+        
         public String getValue() {
             return value;
         }
-    
+        
         public void setValue(final String value) {
             this.value = value;
         }
-    
+        
         public Path getPath() {
             return path;
         }
-    
+        
         public void setPath(final Path path) {
             this.path = path;
         }
-    
+        
         public Supplier<InputStream> getStream() {
             return stream;
         }
-    
+        
         public void setStream(final Supplier<InputStream> stream) {
             this.stream = stream;
         }
-    
+        
         public String getFilename() {
             return filename;
         }
-    
+        
         public void setFilename(final String filename) {
             this.filename = filename;
         }
-    
+        
         public String getContentType() {
             return contentType;
         }
-    
+        
         public void setContentType(final String contentType) {
             this.contentType = contentType;
         }
-    
+        
         @SuppressWarnings("InnerClassTooDeeplyNested")
         public enum TYPE {
             STRING, FILE, STREAM, FINAL_BOUNDARY

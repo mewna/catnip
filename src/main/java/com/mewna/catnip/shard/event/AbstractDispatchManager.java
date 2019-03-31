@@ -28,16 +28,16 @@
 package com.mewna.catnip.shard.event;
 
 import com.mewna.catnip.Catnip;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 
 public abstract class AbstractDispatchManager implements DispatchManager {
-    @Getter
-    @Accessors(fluent = true)
     private Catnip catnip;
     
     @Override
     public void catnip(final Catnip catnip) {
         this.catnip = catnip;
+    }
+    
+    public Catnip catnip() {
+        return catnip;
     }
 }

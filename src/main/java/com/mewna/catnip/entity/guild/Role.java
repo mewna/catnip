@@ -31,9 +31,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Mentionable;
 import com.mewna.catnip.entity.channel.GuildChannel;
-import com.mewna.catnip.entity.impl.RoleImpl;
 import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.CatnipImmutable;
 import com.mewna.catnip.util.PermissionUtil;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -47,6 +48,8 @@ import java.util.Set;
  * @since 9/4/18.
  */
 @SuppressWarnings("unused")
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = RoleImpl.class)
 public interface Role extends Mentionable, Comparable<Role>, PermissionHolder {
     /**

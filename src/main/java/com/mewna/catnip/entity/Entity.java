@@ -73,7 +73,6 @@ public interface Entity {
         return t;
     }
     
-    
     /**
      * Returns the catnip instance associated with this entity.
      *

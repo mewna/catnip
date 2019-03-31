@@ -37,7 +37,7 @@ public interface DispatchManager {
      * Dispatches an event to the provided address.
      *
      * @param address Address to send the event to.
-     * @param event Event to dispatch.
+     * @param event   Event to dispatch.
      */
     void dispatchEvent(String address, Object event);
     
@@ -45,7 +45,7 @@ public interface DispatchManager {
      * Returns a consumer listening on the provided address.
      *
      * @param address Address to listen on.
-     * @param <T> Type of the event handled by the consumer.
+     * @param <T>     Type of the event handled by the consumer.
      *
      * @return A consumer listening on the provided address.
      */

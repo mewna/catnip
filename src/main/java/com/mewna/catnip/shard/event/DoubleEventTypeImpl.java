@@ -27,40 +27,38 @@
 
 package com.mewna.catnip.shard.event;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import java.beans.ConstructorProperties;
 
 /**
  * @author amy
  * @since 3/7/19.
  */
-@Getter
 @Accessors(fluent = true)
-@RequiredArgsConstructor
 public class DoubleEventTypeImpl<T, E> implements DoubleEventType<T, E> {
     private final String key;
     private final Class<T> left;
     private final Class<E> right;
     
-    @Nonnull
-    @Override
-    public Pair<Class<T>, Class<E>> payloadClasses() {
-        return ImmutablePair.of(left, right);
+    @ConstructorProperties({"key", "left", "right"})
+    public DoubleEventTypeImpl(final String key, final Class<T> left, final Class<E> right) {
+        this.key = key;
+        this.left = left;
+        this.right = right;
     }
     
     public static <T, E> DoubleEventType<T, E> doubleEvent(@Nonnull final String key, @Nonnull final Class<T> left,
-                                              @Nonnull final Class<E> right) {
+                                                           @Nonnull final Class<E> right) {
         return new DoubleEventTypeImpl<>(key, left, right);
     }
     
     public static DoubleEventType<Void, Void> doubleNotFired(@Nonnull final String key) {
-        return new DoubleEventTypeImpl<Void, Void>(key, Void.class, Void.class) {
+        return new DoubleEventTypeImpl<>(key, Void.class, Void.class) {
             @Nonnull
             @CheckReturnValue
             @Override
@@ -68,5 +66,26 @@ public class DoubleEventTypeImpl<T, E> implements DoubleEventType<T, E> {
                 throw new UnsupportedOperationException("Event " + key + " is not implemented");
             }
         };
+    }
+    
+    @Nonnull
+    @Override
+    public Pair<Class<T>, Class<E>> payloadClasses() {
+        return ImmutablePair.of(left, right);
+    }
+    
+    @Nonnull
+    public String key() {
+        return key;
+    }
+    
+    @Nonnull
+    public Class<T> left() {
+        return left;
+    }
+    
+    @Nonnull
+    public Class<E> right() {
+        return right;
     }
 }

@@ -37,4 +37,5 @@ package com.mewna.catnip.cache.view;
  * @author natanbc
  * @since 12/23/18
  */
-public interface MutableNamedCacheView<T> extends MutableCacheView<T>, NamedCacheView<T> {}
+public interface MutableNamedCacheView<T> extends MutableCacheView<T>, NamedCacheView<T> {
+}

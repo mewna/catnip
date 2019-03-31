@@ -29,8 +29,10 @@ package com.mewna.catnip.entity.guild.audit;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.entity.impl.AuditLogEntryImpl;
+import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -42,6 +44,8 @@ import java.util.List;
  * @since 10/07/18
  */
 @SuppressWarnings("unused")
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = AuditLogEntryImpl.class)
 public interface AuditLogEntry extends Snowflake {
     @Nullable
@@ -76,4 +80,8 @@ public interface AuditLogEntry extends Snowflake {
     @Nonnull
     @CheckReturnValue
     List<AuditLogChange> changes();
+    
+    @Nullable
+    @CheckReturnValue
+    Webhook webhook();
 }

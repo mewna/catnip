@@ -27,12 +27,19 @@
 
 package com.mewna.catnip.entity.channel;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
+
 import javax.annotation.Nonnull;
 
 /**
  * @author amy
  * @since 3/14/19.
  */
+@Immutable
+@CatnipImmutable
+@JsonDeserialize(as = StoreChannelImpl.class)
 public interface StoreChannel extends GuildChannel {
     @Nonnull
     @Override

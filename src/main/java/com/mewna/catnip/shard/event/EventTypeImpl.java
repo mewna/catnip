@@ -27,13 +27,9 @@
 
 package com.mewna.catnip.shard.event;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.experimental.Accessors;
-
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import java.beans.ConstructorProperties;
 
 /**
  * @param <T> Type of the event.
@@ -41,19 +37,22 @@ import javax.annotation.Nonnull;
  * @author natanbc
  * @since 10/6/18.
  */
-@Getter
-@Accessors(fluent = true)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class EventTypeImpl<T> implements EventType<T> {
     private final String key;
     private final Class<T> payloadClass;
+    
+    @ConstructorProperties({"key", "payloadClass"})
+    private EventTypeImpl(final String key, final Class<T> payloadClass) {
+        this.key = key;
+        this.payloadClass = payloadClass;
+    }
     
     public static <T> EventType<T> event(@Nonnull final String key, @Nonnull final Class<T> payloadClass) {
         return new EventTypeImpl<>(key, payloadClass);
     }
     
     public static EventType<Void> notFired(@Nonnull final String key) {
-        return new EventTypeImpl<Void>(key, Void.class) {
+        return new EventTypeImpl<>(key, Void.class) {
             @Nonnull
             @CheckReturnValue
             @Override
@@ -61,5 +60,15 @@ public class EventTypeImpl<T> implements EventType<T> {
                 throw new UnsupportedOperationException("Event " + key + " is not implemented");
             }
         };
+    }
+    
+    @Nonnull
+    public String key() {
+        return key;
+    }
+    
+    @Nonnull
+    public Class<T> payloadClass() {
+        return payloadClass;
     }
 }

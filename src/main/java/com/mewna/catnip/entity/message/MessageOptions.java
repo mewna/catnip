@@ -28,15 +28,12 @@
 package com.mewna.catnip.entity.message;
 
 import com.google.common.collect.ImmutableList;
-import com.mewna.catnip.entity.impl.MessageImpl;
 import io.vertx.core.buffer.Buffer;
-import lombok.*;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -52,16 +49,12 @@ import java.util.List;
  * @author SamOphis
  * @since 10/10/2018
  */
-@Getter(onMethod_ = {@CheckReturnValue, @Nullable})
-@Setter(onParam_ = @Nullable, onMethod_ = @Nonnull)
-@NoArgsConstructor
 @Accessors(fluent = true)
 @SuppressWarnings("unused")
 public class MessageOptions {
     private String content;
     private Embed embed;
     
-    @Setter(AccessLevel.NONE)
     private List<ImmutablePair<String, Buffer>> files;
     
     public MessageOptions(@Nonnull final MessageOptions options) {
@@ -73,9 +66,12 @@ public class MessageOptions {
     public MessageOptions(@Nonnull final Message message) {
         content = message.content();
         final List<Embed> embeds = message.embeds();
-        if (!embeds.isEmpty()) {
+        if(!embeds.isEmpty()) {
             embed = embeds.get(0);
         }
+    }
+    
+    public MessageOptions() {
     }
     
     /**
@@ -83,7 +79,9 @@ public class MessageOptions {
      * <br><p>The name of the file/attachment is taken from {@link File#getName()}.</p>
      *
      * @param file A <b>non-null, existing, readable</b> {@link File File} instance.
+     *
      * @return Itself.
+     *
      * @see #addFile(String, File)
      */
     @CheckReturnValue
@@ -95,9 +93,12 @@ public class MessageOptions {
     /**
      * Adds a file, used when sending messages. Files are <b>NOT</b> added to constructed {@link Message Message} instances.
      * <br><p>This allows you to specify a custom name for the file, unlike {@link #addFile(File)}.</p>
+     *
      * @param name A <b>not-null</b> name for the file.
      * @param file A <b>not-null, existing, readable</b> {@link File File} instance.
+     *
      * @return Itself.
+     *
      * @see #addFile(File)
      * @see #addFile(String, InputStream)
      */
@@ -121,9 +122,12 @@ public class MessageOptions {
     /**
      * Adds an input stream/file, used when sending messages. Files are <b>NOT</b> added to constructed {@link Message Message} instances.
      * <br><p>This allows you to specify a custom name for the input stream data, unlike {@link #addFile(File)}.</p>
-     * @param name A <b>not-null</b> name for the file.
+     *
+     * @param name   A <b>not-null</b> name for the file.
      * @param stream A <b>not-null, readable</b> {@link InputStream InputStream}.
+     *
      * @return Itself.
+     *
      * @see #addFile(String, File)
      * @see #addFile(String, byte[])
      */
@@ -151,9 +155,12 @@ public class MessageOptions {
     /**
      * Adds raw data/a file, used when sending messages. Files are <b>NOT</b> added to constructed {@link Message Message} instances.
      * <br><p>This allows you to specify a custom name for the raw data, unlike {@link #addFile(File)}.</p>
+     *
      * @param name A <b>not-null</b> name for the file.
      * @param data A <b>not-null</b> byte array containing the raw data for the file.
+     *
      * @return Itself.
+     *
      * @see #addFile(String, File)
      * @see #addFile(String, InputStream)
      */
@@ -174,6 +181,7 @@ public class MessageOptions {
     /**
      * Checks to see whether or not this MessageOptions instance has any files attached.
      * <br><p>This should be used over {@code !files().isEmpty()} because it doesn't construct a new list for each read.</p>
+     *
      * @return True or false.
      */
     @CheckReturnValue
@@ -184,6 +192,7 @@ public class MessageOptions {
     /**
      * Constructs a new immutable list containing all of the raw file data. Each immutable pair contains the name and the data buffer.
      * <br><p>This method is <b>expensive!</b> It constructs a new list each time and should be used sparingly.</p>
+     *
      * @return A copy of the raw file list.
      */
     @CheckReturnValue
@@ -194,6 +203,7 @@ public class MessageOptions {
     
     /**
      * Resets this MessageOptions class back to its initial state where there is no content, no embeds or no files.
+     *
      * @return Itself (but with a clean state).
      */
     @CheckReturnValue
@@ -216,16 +226,34 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public Message buildMessage() {
-        if (embed == null && content == null) {
+        if(embed == null && content == null) {
             throw new IllegalStateException("messages must have an embed or text content!");
         }
-        final MessageImpl impl = new MessageImpl();
+        final var impl = MessageImpl.builder();
         impl.content(content);
-        if (embed != null) {
+        if(embed != null) {
             impl.embeds(Collections.singletonList(embed));
         } else {
             impl.embeds(Collections.emptyList());
         }
-        return impl;
+        return impl.build();
+    }
+    
+    public String content() {
+        return content;
+    }
+    
+    public Embed embed() {
+        return embed;
+    }
+    
+    public MessageOptions content(final String content) {
+        this.content = content;
+        return this;
+    }
+    
+    public MessageOptions embed(final Embed embed) {
+        this.embed = embed;
+        return this;
     }
 }

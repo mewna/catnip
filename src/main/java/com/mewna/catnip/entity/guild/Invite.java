@@ -32,10 +32,11 @@ import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
 import com.mewna.catnip.entity.guild.Guild.VerificationLevel;
-import com.mewna.catnip.entity.impl.InviteImpl;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.CatnipImmutable;
 import com.mewna.catnip.util.PermissionUtil;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -51,6 +52,8 @@ import java.util.concurrent.CompletionStage;
  * @since 9/14/18
  */
 @SuppressWarnings("unused")
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = InviteImpl.class)
 public interface Invite extends Entity {
     /**
@@ -117,7 +120,9 @@ public interface Invite extends Entity {
         return delete(null);
     }
     
-    @JsonDeserialize(as = InviteImpl.InviterImpl.class)
+    @Immutable
+    @CatnipImmutable
+    @JsonDeserialize(as = InviterImpl.class)
     interface Inviter extends Snowflake {
         @Nonnull
         @CheckReturnValue
@@ -155,7 +160,9 @@ public interface Invite extends Entity {
         String effectiveAvatarUrl();
     }
     
-    @JsonDeserialize(as = InviteImpl.InviteGuildImpl.class)
+    @Immutable
+    @CatnipImmutable
+    @JsonDeserialize(as = InviteGuildImpl.class)
     interface InviteGuild extends Snowflake {
         @Nonnull
         @CheckReturnValue
@@ -198,7 +205,9 @@ public interface Invite extends Entity {
         }
     }
     
-    @JsonDeserialize(as = InviteImpl.InviteChannelImpl.class)
+    @Immutable
+    @CatnipImmutable
+    @JsonDeserialize(as = InviteChannelImpl.class)
     interface InviteChannel extends Snowflake {
         @Nonnull
         @CheckReturnValue

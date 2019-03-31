@@ -29,7 +29,8 @@ package com.mewna.catnip.entity.misc;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.impl.VoiceRegionImpl;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -40,6 +41,8 @@ import javax.annotation.Nonnull;
  * @author natanbc
  * @since 9/14/18
  */
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = VoiceRegionImpl.class)
 public interface VoiceRegion extends Entity {
     /**

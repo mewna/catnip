@@ -29,7 +29,8 @@ package com.mewna.catnip.entity.guild;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.entity.impl.UnavailableGuildImpl;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 
@@ -39,6 +40,8 @@ import javax.annotation.CheckReturnValue;
  * @author amy
  * @since 10/4/18.
  */
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = UnavailableGuildImpl.class)
 public interface UnavailableGuild extends Snowflake {
     /**

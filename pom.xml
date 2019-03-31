@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -11,7 +11,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <lombok.version>1.18.2</lombok.version>
         <vertx.version>3.6.3</vertx.version>
         <vertx-completable-future.version>vertx-completable-future-0.1.2</vertx-completable-future.version>
         <slf4j.version>1.7.25</slf4j.version>
@@ -21,6 +20,8 @@
 
         <koloboke-compile.version>0.5.1</koloboke-compile.version>
         <koloboke-impl.version>1.0.0</koloboke-impl.version>
+
+        <immutables.version>2.7.4</immutables.version>
 
         <junit.version>5.2.0</junit.version>
         <mockito.version>2.23.4</mockito.version>
@@ -48,14 +49,6 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- Lombok -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
         <!-- Vert.x -->
         <dependency>
             <groupId>io.vertx</groupId>
@@ -107,6 +100,14 @@
             <version>${koloboke-impl.version}</version>
         </dependency>
 
+        <!-- immutables.org -->
+        <dependency>
+            <groupId>org.immutables</groupId>
+            <artifactId>value</artifactId>
+            <version>${immutables.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- JUnit Jupiter -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -146,11 +147,22 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.6.1</version>
                 <configuration>
                     <source>11</source>
                     <target>11</target>
+                    <annotationProcessorPaths>
+                        <dependency>
+                            <groupId>org.immutables</groupId>
+                            <artifactId>value</artifactId>
+                            <version>${immutables.version}</version>
+                        </dependency>
+                    </annotationProcessorPaths>
+                    <compilerArgs>
+                        <compilerArg>-XDdev</compilerArg>
+                        <compilerArg>-verbose</compilerArg>
+                    </compilerArgs>
                 </configuration>
-                <version>3.6.1</version>
             </plugin>
 
             <plugin>
@@ -172,8 +184,6 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.0.1</version>
                 <configuration>
-                    <!-- Force javadoc to ignore issues with lombok being a potato -->
-                    <additionalOptions>-Xdoclint:none</additionalOptions>
                     <!-- Solve it being unable to find $JAVA_HOME for me -->
                     <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
                 </configuration>

@@ -29,7 +29,8 @@ package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.VoiceChannelImpl;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -40,6 +41,8 @@ import javax.annotation.Nonnull;
  * @author natanbc
  * @since 9/12/18
  */
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = VoiceChannelImpl.class)
 public interface VoiceChannel extends GuildChannel {
     @Nonnull

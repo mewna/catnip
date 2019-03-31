@@ -28,8 +28,10 @@
 package com.mewna.catnip.entity.misc;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.entity.Timestamped;
 import com.mewna.catnip.entity.guild.Invite;
-import com.mewna.catnip.entity.impl.CreatedInviteImpl;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -39,8 +41,10 @@ import java.time.OffsetDateTime;
  * @author natanbc
  * @since 9/14/18
  */
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = CreatedInviteImpl.class)
-public interface CreatedInvite extends Invite {
+public interface CreatedInvite extends Invite, Timestamped {
     @Nonnegative
     int uses();
     
@@ -52,7 +56,11 @@ public interface CreatedInvite extends Invite {
     boolean temporary();
     
     @Nonnull
-    OffsetDateTime createdAt();
+    default OffsetDateTime createdAt() {
+        return parseTimestamp(createdAtString());
+    }
+    
+    String createdAtString();
     
     boolean revoked();
 }

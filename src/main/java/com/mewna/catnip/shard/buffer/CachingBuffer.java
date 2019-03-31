@@ -31,13 +31,11 @@ import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.util.JsonUtil;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Value;
-import lombok.experimental.Accessors;
 
+import java.beans.ConstructorProperties;
 import java.util.Deque;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -236,15 +234,19 @@ public class CachingBuffer extends AbstractBuffer {
         }
     }
     
-    @Value
-    @Accessors(fluent = true)
     private final class BufferState {
-        private int id;
+        private final int id;
         private final Set<String> awaitedGuilds;
         private final Map<String, Deque<JsonObject>> guildBuffers = new ConcurrentHashMap<>();
         private final Map<String, Counter> guildChunkCount = new ConcurrentHashMap<>();
         private final Deque<JsonObject> buffer = new ConcurrentLinkedDeque<>();
-        
+    
+        @ConstructorProperties({"id", "awaitedGuilds"})
+        private BufferState(final int id, final Set<String> awaitedGuilds) {
+            this.id = id;
+            this.awaitedGuilds = awaitedGuilds;
+        }
+    
         void awaitGuild(final String id) {
             awaitedGuilds.add(id);
         }
@@ -289,18 +291,98 @@ public class CachingBuffer extends AbstractBuffer {
         JsonObject guildCreate(final String guild) {
             return guildChunkCount.get(guild).guildCreate();
         }
+    
+        public int id() {
+            return id;
+        }
+    
+        public Set<String> awaitedGuilds() {
+            return awaitedGuilds;
+        }
+    
+        public Map<String, Deque<JsonObject>> guildBuffers() {
+            return guildBuffers;
+        }
+    
+        public Map<String, Counter> guildChunkCount() {
+            return guildChunkCount;
+        }
+    
+        public Deque<JsonObject> buffer() {
+            return buffer;
+        }
+    
+        public boolean equals(final Object o) {
+            if(o == this) {
+                return true;
+            }
+            if(!(o instanceof BufferState)) {
+                return false;
+            }
+            final BufferState other = (BufferState) o;
+            if(id() != other.id()) {
+                return false;
+            }
+            final Object this$awaitedGuilds = awaitedGuilds();
+            final Object other$awaitedGuilds = other.awaitedGuilds();
+            if(!Objects.equals(this$awaitedGuilds, other$awaitedGuilds)) {
+                return false;
+            }
+            final Object this$guildBuffers = guildBuffers();
+            final Object other$guildBuffers = other.guildBuffers();
+            if(!Objects.equals(this$guildBuffers, other$guildBuffers)) {
+                return false;
+            }
+            final Object this$guildChunkCount = guildChunkCount();
+            final Object other$guildChunkCount = other.guildChunkCount();
+            if(!Objects.equals(this$guildChunkCount, other$guildChunkCount)) {
+                return false;
+            }
+            final Object this$buffer = buffer();
+            final Object other$buffer = other.buffer();
+            return Objects.equals(this$buffer, other$buffer);
+        }
+    
+        public int hashCode() {
+            final int PRIME = 59;
+            int result = 1;
+            result = result * PRIME + id();
+            final Object $awaitedGuilds = awaitedGuilds();
+            result = result * PRIME + ($awaitedGuilds == null ? 43 : $awaitedGuilds.hashCode());
+            final Object $guildBuffers = guildBuffers();
+            result = result * PRIME + ($guildBuffers == null ? 43 : $guildBuffers.hashCode());
+            final Object $guildChunkCount = guildChunkCount();
+            result = result * PRIME + ($guildChunkCount == null ? 43 : $guildChunkCount.hashCode());
+            final Object $buffer = buffer();
+            result = result * PRIME + ($buffer == null ? 43 : $buffer.hashCode());
+            return result;
+        }
+    
+        public String toString() {
+            return "CachingBuffer.BufferState(id=" + id() + ", awaitedGuilds=" + awaitedGuilds() + ", guildBuffers=" + guildBuffers() + ", guildChunkCount=" + guildChunkCount() + ", buffer=" + buffer() + ')';
+        }
     }
     
-    @Accessors(fluent = true)
-    @AllArgsConstructor
     private final class Counter {
-        @Getter
         private final JsonObject guildCreate;
-        @Getter
         private int count;
-        
+    
+        @ConstructorProperties({"guildCreate", "count"})
+        private Counter(final JsonObject guildCreate, final int count) {
+            this.guildCreate = guildCreate;
+            this.count = count;
+        }
+    
         void decrement() {
             --count;
+        }
+    
+        public JsonObject guildCreate() {
+            return guildCreate;
+        }
+    
+        public int count() {
+            return count;
         }
     }
 }

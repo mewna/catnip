@@ -565,7 +565,7 @@ public class CatnipShard extends AbstractVerticle {
             
             closedByClient = true;
         }
-    
+
         stateReply(ShardConnectState.INVALID);
         
         if(socket != null && socketOpen) {

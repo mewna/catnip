@@ -28,7 +28,8 @@
 package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.NewsChannelImpl;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 /**
  * A news channel in a guild is effectively a reskinned text channel, but with
@@ -41,6 +42,8 @@ import com.mewna.catnip.entity.impl.NewsChannelImpl;
  * @author amy
  * @since 3/10/19.
  */
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = NewsChannelImpl.class)
 public interface NewsChannel extends TextChannel {
     @Override

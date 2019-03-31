@@ -155,3 +155,14 @@ where `JsonPojoCodec` is `com.mewna.catnip.util.JsonPojoCodec` and is safe to us
 
 With a bot in ~35k guilds, catnip used ~1.5GB of RAM and <10% CPU on a 2c/4gb VM.
 Sorry, I lost the screenshots :<
+
+
+## TODO
+
+- Figure out why immutables aren't generating correctly for audit log entries
+- Figure out why Guild isn't generated with some methods
+- Switch to following JavaBeans conventions?
+- Fix missing JSR305 annotations in the Presence/Embed Builders
+- I think I accidentally deleted requester from CatnipOptions?
+- Channels need to inject catnip into the override object instances when injecting catnip
+- Use stack walking properly

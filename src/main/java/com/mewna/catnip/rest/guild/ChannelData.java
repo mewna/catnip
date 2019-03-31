@@ -38,9 +38,6 @@ import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.util.JsonConvertible;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -52,9 +49,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 @SuppressWarnings("unused")
-@Accessors(fluent = true, chain = true)
-@Getter
-@Setter
 public abstract class ChannelData implements JsonConvertible {
     private final Map<String, PermissionOverrideData> overrides = new HashMap<>();
     private final int type;
@@ -296,6 +290,77 @@ public abstract class ChannelData implements JsonConvertible {
             object.put("permission_overwrites", array);
         }
         return object;
+    }
+    
+    public Map<String, PermissionOverrideData> overrides() {
+        return overrides;
+    }
+    
+    public int type() {
+        return type;
+    }
+    
+    public String name() {
+        return name;
+    }
+    
+    public Integer position() {
+        return position;
+    }
+    
+    public String topic() {
+        return topic;
+    }
+    
+    public String parentId() {
+        return parentId;
+    }
+    
+    public Boolean nsfw() {
+        return nsfw;
+    }
+    
+    public Integer bitrate() {
+        return bitrate;
+    }
+    
+    public Integer userLimit() {
+        return userLimit;
+    }
+    
+    public ChannelData name(final String name) {
+        this.name = name;
+        return this;
+    }
+    
+    public ChannelData position(final Integer position) {
+        this.position = position;
+        return this;
+    }
+    
+    public ChannelData topic(final String topic) {
+        this.topic = topic;
+        return this;
+    }
+    
+    public ChannelData parentId(final String parentId) {
+        this.parentId = parentId;
+        return this;
+    }
+    
+    public ChannelData nsfw(final Boolean nsfw) {
+        this.nsfw = nsfw;
+        return this;
+    }
+    
+    public ChannelData bitrate(final Integer bitrate) {
+        this.bitrate = bitrate;
+        return this;
+    }
+    
+    public ChannelData userLimit(final Integer userLimit) {
+        this.userLimit = userLimit;
+        return this;
     }
     
     private static class CategoryData extends ChannelData {

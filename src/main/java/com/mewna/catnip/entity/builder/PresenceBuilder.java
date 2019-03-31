@@ -27,26 +27,17 @@
 
 package com.mewna.catnip.entity.builder;
 
-import com.mewna.catnip.entity.impl.PresenceImpl;
-import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
+import com.mewna.catnip.entity.user.ActivityImpl;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.Activity;
 import com.mewna.catnip.entity.user.Presence.ActivityType;
 import com.mewna.catnip.entity.user.Presence.OnlineStatus;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.Accessors;
-
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
+import com.mewna.catnip.entity.user.PresenceImpl;
 
 /**
  * @author SamOphis
  * @since 10/12/2018
  */
-@Setter(onParam_ = @Nonnull, onMethod_ = {@CheckReturnValue, @Nonnull})
-@NoArgsConstructor
-@Accessors(fluent = true, chain = true)
 @SuppressWarnings("unused")
 public class PresenceBuilder {
     private OnlineStatus status;
@@ -64,6 +55,9 @@ public class PresenceBuilder {
         }
     }
     
+    public PresenceBuilder() {
+    }
+    
     public Presence build() {
         final Activity activity = name != null && type != null
                 ? ActivityImpl.builder()
@@ -76,5 +70,25 @@ public class PresenceBuilder {
                 .status(status)
                 .activity(activity)
                 .build();
+    }
+    
+    public PresenceBuilder status(final OnlineStatus status) {
+        this.status = status;
+        return this;
+    }
+    
+    public PresenceBuilder type(final ActivityType type) {
+        this.type = type;
+        return this;
+    }
+    
+    public PresenceBuilder name(final String name) {
+        this.name = name;
+        return this;
+    }
+    
+    public PresenceBuilder url(final String url) {
+        this.url = url;
+        return this;
     }
 }

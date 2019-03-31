@@ -27,6 +27,9 @@
 
 package com.mewna.catnip.entity.guild.audit;
 
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
+
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
@@ -34,6 +37,8 @@ import javax.annotation.Nonnull;
  * @author SamOphis
  * @since 10/07/18
  */
+@Immutable
+@CatnipImmutable
 @SuppressWarnings("unused")
 public interface MessageDeleteInfo extends OptionalEntryInfo {
     @Nonnull

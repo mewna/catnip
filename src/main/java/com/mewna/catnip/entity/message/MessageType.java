@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.message;
 
-import lombok.Getter;
-
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
@@ -46,7 +44,6 @@ public enum MessageType {
     CHANNEL_PINNED_MESSAGE(6),
     GUILD_MEMBER_JOIN(7),
     ;
-    @Getter
     private final int id;
     
     MessageType(final int id) {
@@ -62,5 +59,9 @@ public enum MessageType {
             }
         }
         throw new IllegalArgumentException("No such MessageType: " + id);
+    }
+    
+    public int getId() {
+        return id;
     }
 }

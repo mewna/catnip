@@ -35,13 +35,10 @@ import com.mewna.catnip.shard.event.EventType;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.impl.ConcurrentHashSet;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
+import java.beans.ConstructorProperties;
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -51,16 +48,16 @@ import java.util.function.Consumer;
  * @author amy
  * @since 9/6/18
  */
-@Accessors(fluent = true, chain = true)
 @SuppressWarnings("WeakerAccess")
-@RequiredArgsConstructor
 public abstract class AbstractExtension extends AbstractVerticle implements Extension {
-    @Getter
     private final String name;
     private final Collection<CatnipHook> hooks = new ConcurrentHashSet<>();
-    @Getter
-    @Setter
     private Catnip catnip;
+    
+    @ConstructorProperties("name")
+    public AbstractExtension(final String name) {
+        this.name = name;
+    }
     
     @Override
     public Extension registerHook(@Nonnull final CatnipHook hook) {
@@ -102,5 +99,20 @@ public abstract class AbstractExtension extends AbstractVerticle implements Exte
     public <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
                                                  @Nonnull final BiConsumer<T, E> handler) {
         return on(type).handler(m -> handler.accept(m.body().getLeft(), m.body().getRight()));
+    }
+    
+    @Nonnull
+    public String name() {
+        return name;
+    }
+    
+    @Nonnull
+    public Catnip catnip() {
+        return catnip;
+    }
+    
+    public AbstractExtension catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
+        return this;
     }
 }

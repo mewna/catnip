@@ -54,11 +54,11 @@ public class SerialRequester extends AbstractRequester {
         private final Deque<QueuedRequest> queue = new ArrayDeque<>();
         private final AbstractRequester requester;
         private volatile boolean executingRequest;
-    
+        
         SerialBucket(final AbstractRequester requester) {
             this.requester = requester;
         }
-    
+        
         @Override
         public synchronized void queueRequest(@Nonnull final QueuedRequest request) {
             queue.offer(request);
@@ -67,7 +67,7 @@ public class SerialRequester extends AbstractRequester {
                 submit();
             }
         }
-    
+        
         @Override
         public synchronized void failedRequest(@Nonnull final QueuedRequest request, @Nonnull final Throwable failureCause) {
             request.failed();
@@ -80,7 +80,7 @@ public class SerialRequester extends AbstractRequester {
                 requestDone();
             }
         }
-    
+        
         @Override
         public synchronized void requestDone() {
             final boolean hadItems = !queue.isEmpty();

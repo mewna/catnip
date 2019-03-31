@@ -256,7 +256,6 @@ public class RestGuild extends RestHandler {
         return deleteGuildRole(guildId, roleId, null);
     }
     
-    
     @Nonnull
     @CheckReturnValue
     public CompletionStage<List<Role>> getGuildRoles(@Nonnull final String guildId) {
@@ -516,6 +515,7 @@ public class RestGuild extends RestHandler {
                 ImmutableMap.of("user.id", userId, "role.id", roleId)).reason(reason))
                 .thenApply(e -> null);
     }
+    
     @Nonnull
     public CompletionStage<Void> removeGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
                                                        @Nonnull final String roleId) {
@@ -529,6 +529,7 @@ public class RestGuild extends RestHandler {
                 ImmutableMap.of("user.id", userId, "role.id", roleId)).reason(reason))
                 .thenApply(e -> null);
     }
+    
     @Nonnull
     public CompletionStage<Void> addGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
                                                     @Nonnull final String roleId) {

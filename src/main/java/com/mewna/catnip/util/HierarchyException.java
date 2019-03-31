@@ -1,11 +1,7 @@
 package com.mewna.catnip.util;
 
 import com.mewna.catnip.entity.guild.PermissionHolder;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 
-@Getter
-@Accessors(fluent = true)
 public class HierarchyException extends RuntimeException {
     
     private final PermissionHolder actor;
@@ -21,4 +17,11 @@ public class HierarchyException extends RuntimeException {
         return "Could not interact with " + target;
     }
     
+    public PermissionHolder actor() {
+        return actor;
+    }
+    
+    public PermissionHolder target() {
+        return target;
+    }
 }

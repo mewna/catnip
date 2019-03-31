@@ -32,15 +32,9 @@ import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -50,13 +44,8 @@ import java.util.Set;
  * @since 10/18/2018
  */
 
-@Getter(onMethod_ = {@CheckReturnValue, @Nullable})
-@Setter(onParam_ = @Nonnull, onMethod_ = {@CheckReturnValue, @Nonnull})
-@Accessors(fluent = true, chain = true)
-@NoArgsConstructor
 @SuppressWarnings("unused")
 public class MemberData {
-    @Getter(AccessLevel.NONE)
     private Set<String> roles;
     
     private String nickname;
@@ -142,6 +131,47 @@ public class MemberData {
             object.put("channel_id", channelId);
         }
         return object;
+    }
+    
+    public String nickname() {
+        return nickname;
+    }
+    
+    public String channelId() {
+        return channelId;
+    }
+    
+    public Boolean mute() {
+        return mute;
+    }
+    
+    public Boolean deaf() {
+        return deaf;
+    }
+    
+    public MemberData roles(final Set<String> roles) {
+        this.roles = roles;
+        return this;
+    }
+    
+    public MemberData nickname(final String nickname) {
+        this.nickname = nickname;
+        return this;
+    }
+    
+    public MemberData channelId(final String channelId) {
+        this.channelId = channelId;
+        return this;
+    }
+    
+    public MemberData mute(final Boolean mute) {
+        this.mute = mute;
+        return this;
+    }
+    
+    public MemberData deaf(final Boolean deaf) {
+        this.deaf = deaf;
+        return this;
     }
 }
 

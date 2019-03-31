@@ -29,9 +29,9 @@ package com.mewna.catnip.entity.guild;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.entity.impl.PermissionOverrideImpl;
 import com.mewna.catnip.entity.util.Permission;
-import lombok.Getter;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -41,6 +41,8 @@ import java.util.Set;
  * @author natanbc
  * @since 9/15/18
  */
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = PermissionOverrideImpl.class)
 public interface PermissionOverride extends Snowflake {
     @Nonnull
@@ -68,7 +70,6 @@ public interface PermissionOverride extends Snowflake {
     enum OverrideType {
         ROLE("role"), MEMBER("member");
         
-        @Getter
         private final String key;
         
         OverrideType(final String key) {
@@ -83,6 +84,10 @@ public interface PermissionOverride extends Snowflake {
                 }
             }
             throw new IllegalArgumentException("No override type for key " + key);
+        }
+        
+        public String key() {
+            return key;
         }
     }
 }

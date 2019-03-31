@@ -31,12 +31,9 @@ package com.mewna.catnip.cache.view;
  * Always empty {@link NamedCacheView cache view}.
  *
  * @author natanbc
- *
  * @see CacheView#empty()
  * @see NamedCacheView#empty()
- *
  * @since 12/15/18
- *
  * @deprecated Use {@link CacheView#noop()}.
  */
 @Deprecated

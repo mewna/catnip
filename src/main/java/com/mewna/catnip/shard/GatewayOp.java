@@ -27,9 +27,6 @@
 
 package com.mewna.catnip.shard;
 
-import lombok.Getter;
-import lombok.experimental.Accessors;
-
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -38,7 +35,6 @@ import javax.annotation.Nonnull;
  * @author amy
  * @since 8/15/18.
  */
-@Accessors(fluent = true)
 public enum GatewayOp {
     DISPATCH(0),
     HEARTBEAT(1),
@@ -54,7 +50,6 @@ public enum GatewayOp {
     HEARTBEAT_ACK(11),
     GUILD_SYNC(12),
     ;
-    @Getter
     private final int opcode;
     
     GatewayOp(final int opcode) {
@@ -71,4 +66,7 @@ public enum GatewayOp {
     public String toString() {
         return name();
     }
-}
+    
+    public int opcode() {
+        return opcode;
+    }}

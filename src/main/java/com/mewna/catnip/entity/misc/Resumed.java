@@ -29,7 +29,8 @@ package com.mewna.catnip.entity.misc;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.impl.ResumedImpl;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -40,6 +41,8 @@ import java.util.List;
  * @author amy
  * @since 11/10/18.
  */
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = ResumedImpl.class)
 public interface Resumed extends Entity {
     /**

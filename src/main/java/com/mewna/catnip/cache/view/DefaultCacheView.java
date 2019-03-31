@@ -241,7 +241,7 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
         lock.readLock().lock();
         try {
             T result = identity;
-            for (final T element : map.values()) {
+            for(final T element : map.values()) {
                 result = accumulator.apply(result, element);
             }
             return result;
@@ -363,7 +363,7 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
         lock.readLock().lock();
         try {
             final Collection<T> values = map.values();
-            final Collection<T> r = new ArrayList<>((int)size());
+            final Collection<T> r = new ArrayList<>((int) size());
             //this is actually more efficient than addAll(),
             //as addAll() on ArrayList requires calls Collection#toArray(),
             //while this won't allocate any temporary array due to the

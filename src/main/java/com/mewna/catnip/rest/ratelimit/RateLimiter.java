@@ -42,7 +42,9 @@ public interface RateLimiter {
     CompletionStage<Void> requestExecution(@Nonnull Route route);
     
     void updateRemaining(@Nonnull Route route, int remaining);
+
     void updateLimit(@Nonnull Route route, int limit);
+
     void updateReset(@Nonnull Route route, long resetTimestamp);
     
     //called after above 3 to signal no further updates will be done

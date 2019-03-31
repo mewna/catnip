@@ -29,7 +29,8 @@ package com.mewna.catnip.entity.misc;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.impl.GatewayInfoImpl;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -38,6 +39,8 @@ import javax.annotation.Nonnull;
  * @author amy
  * @since 12/10/18.
  */
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = GatewayInfoImpl.class)
 public interface GatewayInfo extends Entity {
     boolean valid();

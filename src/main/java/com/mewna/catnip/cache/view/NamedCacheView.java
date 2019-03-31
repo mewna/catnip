@@ -50,11 +50,10 @@ public interface NamedCacheView<T> extends CacheView<T> {
      *
      * @return All elements that have a name equal to the provided.
      *
+     * @implNote Implementations should attempt to perform this operation without
+     * copying the elements of this view whenever possible.
      * @see String#equals(Object)
      * @see String#equalsIgnoreCase(String)
-     *
-     * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
      */
     @Nonnull
     Collection<T> findByName(@Nonnull String name, boolean ignoreCase);
@@ -66,10 +65,9 @@ public interface NamedCacheView<T> extends CacheView<T> {
      *
      * @return All elements that have a name equal to the provided.
      *
-     * @see String#equals(Object)
-     *
      * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
+     * copying the elements of this view whenever possible.
+     * @see String#equals(Object)
      */
     @Nonnull
     default Collection<T> findByName(@Nonnull final String name) {
@@ -82,17 +80,16 @@ public interface NamedCacheView<T> extends CacheView<T> {
      * @param name       Name to search for.
      * @param ignoreCase Ignore casing differences between the entity
      *                   names and the provided name.
-     * @param supplier Supplier for the collection to add the elements to. The returned
-     *                 collection <b>must</b> be mutable.
+     * @param supplier   Supplier for the collection to add the elements to. The returned
+     *                   collection <b>must</b> be mutable.
      *
      * @return The collection returned by {@code supplier}, after adding the matching
      * elements. May be empty.
      *
+     * @implNote Implementations should attempt to perform this operation without
+     * copying the elements of this view whenever possible.
      * @see String#equals(Object)
      * @see String#equalsIgnoreCase(String)
-     *
-     * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
      */
     @Nonnull
     <C extends Collection<T>> C findByName(@Nonnull String name, boolean ignoreCase, @Nonnull Supplier<C> supplier);
@@ -100,17 +97,16 @@ public interface NamedCacheView<T> extends CacheView<T> {
     /**
      * Finds all entities with a name equal to the provided value.
      *
-     * @param name       Name to search for.
+     * @param name     Name to search for.
      * @param supplier Supplier for the collection to add the elements to. The returned
      *                 collection <b>must</b> be mutable.
      *
      * @return The collection returned by {@code supplier}, after adding the matching
      * elements. May be empty.
      *
-     * @see String#equals(Object)
-     *
      * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
+     * copying the elements of this view whenever possible.
+     * @see String#equals(Object)
      */
     @Nonnull
     default <C extends Collection<T>> C findByName(@Nonnull final String name, @Nonnull final Supplier<C> supplier) {
@@ -126,11 +122,10 @@ public interface NamedCacheView<T> extends CacheView<T> {
      *
      * @return All elements that have a name containing the provided.
      *
+     * @implNote Implementations should attempt to perform this operation without
+     * copying the elements of this view whenever possible.
      * @see String#contains(CharSequence)
      * @see com.mewna.catnip.util.Utils#containsIgnoreCase(String, String)
-     *
-     * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
      */
     @Nonnull
     Collection<T> findByNameContains(@Nonnull String name, boolean ignoreCase);
@@ -142,10 +137,9 @@ public interface NamedCacheView<T> extends CacheView<T> {
      *
      * @return All elements that have a name containing the provided.
      *
-     * @see String#contains(CharSequence)
-     *
      * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
+     * copying the elements of this view whenever possible.
+     * @see String#contains(CharSequence)
      */
     @Nonnull
     default Collection<T> findByNameContains(@Nonnull final String name) {
@@ -158,17 +152,16 @@ public interface NamedCacheView<T> extends CacheView<T> {
      * @param name       Name to search for.
      * @param ignoreCase Ignore casing differences between the entity
      *                   names and the provided name.
-     * @param supplier Supplier for the collection to add the elements to. The returned
-     *                 collection <b>must</b> be mutable.
+     * @param supplier   Supplier for the collection to add the elements to. The returned
+     *                   collection <b>must</b> be mutable.
      *
      * @return The collection returned by {@code supplier}, after adding the matching
      * elements. May be empty.
      *
+     * @implNote Implementations should attempt to perform this operation without
+     * copying the elements of this view whenever possible.
      * @see String#contains(CharSequence)
      * @see com.mewna.catnip.util.Utils#containsIgnoreCase(String, String)
-     *
-     * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
      */
     @Nonnull
     <C extends Collection<T>> C findByNameContains(@Nonnull String name, boolean ignoreCase, @Nonnull Supplier<C> supplier);
@@ -176,17 +169,16 @@ public interface NamedCacheView<T> extends CacheView<T> {
     /**
      * Finds all entities whose name contains the provided value.
      *
-     * @param name       Name to search for.
+     * @param name     Name to search for.
      * @param supplier Supplier for the collection to add the elements to. The returned
      *                 collection <b>must</b> be mutable.
      *
      * @return The collection returned by {@code supplier}, after adding the matching
      * elements. May be empty.
      *
-     * @see String#contains(CharSequence)
-     *
      * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
+     * copying the elements of this view whenever possible.
+     * @see String#contains(CharSequence)
      */
     @Nonnull
     default <C extends Collection<T>> C findByNameContains(@Nonnull final String name, @Nonnull final Supplier<C> supplier) {
@@ -202,11 +194,10 @@ public interface NamedCacheView<T> extends CacheView<T> {
      *
      * @return All elements that have a name starting with the provided.
      *
+     * @implNote Implementations should attempt to perform this operation without
+     * copying the elements of this view whenever possible.
      * @see String#startsWith(String)
      * @see com.mewna.catnip.util.Utils#startsWithIgnoreCase(String, String)
-     *
-     * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
      */
     @Nonnull
     Collection<T> findByNameStartsWith(@Nonnull String name, boolean ignoreCase);
@@ -218,10 +209,9 @@ public interface NamedCacheView<T> extends CacheView<T> {
      *
      * @return All elements that have a name starting with the provided.
      *
-     * @see String#startsWith(String)
-     *
      * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
+     * copying the elements of this view whenever possible.
+     * @see String#startsWith(String)
      */
     @Nonnull
     default Collection<T> findByNameStartsWith(@Nonnull final String name) {
@@ -234,17 +224,16 @@ public interface NamedCacheView<T> extends CacheView<T> {
      * @param name       Name to search for.
      * @param ignoreCase Ignore casing differences between the entity
      *                   names and the provided name.
-     * @param supplier Supplier for the collection to add the elements to. The returned
-     *                 collection <b>must</b> be mutable.
+     * @param supplier   Supplier for the collection to add the elements to. The returned
+     *                   collection <b>must</b> be mutable.
      *
      * @return The collection returned by {@code supplier}, after adding the matching
      * elements. May be empty.
      *
+     * @implNote Implementations should attempt to perform this operation without
+     * copying the elements of this view whenever possible.
      * @see String#startsWith(String)
      * @see com.mewna.catnip.util.Utils#startsWithIgnoreCase(String, String)
-     *
-     * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
      */
     @Nonnull
     <C extends Collection<T>> C findByNameStartsWith(@Nonnull String name, boolean ignoreCase, @Nonnull Supplier<C> supplier);
@@ -252,17 +241,16 @@ public interface NamedCacheView<T> extends CacheView<T> {
     /**
      * Finds all entities whose name starts with the provided value.
      *
-     * @param name       Name to search for.
+     * @param name     Name to search for.
      * @param supplier Supplier for the collection to add the elements to. The returned
      *                 collection <b>must</b> be mutable.
      *
      * @return The collection returned by {@code supplier}, after adding the matching
      * elements. May be empty.
      *
-     * @see String#startsWith(String)
-     *
      * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
+     * copying the elements of this view whenever possible.
+     * @see String#startsWith(String)
      */
     @Nonnull
     default <C extends Collection<T>> C findByNameStartsWith(@Nonnull final String name, @Nonnull final Supplier<C> supplier) {
@@ -278,11 +266,10 @@ public interface NamedCacheView<T> extends CacheView<T> {
      *
      * @return All elements that have a name ending with the provided.
      *
+     * @implNote Implementations should attempt to perform this operation without
+     * copying the elements of this view whenever possible.
      * @see String#endsWith(String)
      * @see com.mewna.catnip.util.Utils#endsWithIgnoreCase(String, String)
-     *
-     * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
      */
     @Nonnull
     Collection<T> findByNameEndsWith(@Nonnull String name, boolean ignoreCase);
@@ -294,10 +281,9 @@ public interface NamedCacheView<T> extends CacheView<T> {
      *
      * @return All elements that have a name ending with the provided.
      *
-     * @see String#endsWith(String)
-     *
      * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
+     * copying the elements of this view whenever possible.
+     * @see String#endsWith(String)
      */
     @Nonnull
     default Collection<T> findByNameEndsWith(@Nonnull final String name) {
@@ -310,17 +296,16 @@ public interface NamedCacheView<T> extends CacheView<T> {
      * @param name       Name to search for.
      * @param ignoreCase Ignore casing differences between the entity
      *                   names and the provided name.
-     * @param supplier Supplier for the collection to add the elements to. The returned
-     *                 collection <b>must</b> be mutable.
+     * @param supplier   Supplier for the collection to add the elements to. The returned
+     *                   collection <b>must</b> be mutable.
      *
      * @return The collection returned by {@code supplier}, after adding the matching
      * elements. May be empty.
      *
+     * @implNote Implementations should attempt to perform this operation without
+     * copying the elements of this view whenever possible.
      * @see String#endsWith(String)
      * @see com.mewna.catnip.util.Utils#endsWithIgnoreCase(String, String)
-     *
-     * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
      */
     @Nonnull
     <C extends Collection<T>> C findByNameEndsWith(@Nonnull String name, boolean ignoreCase, @Nonnull Supplier<C> supplier);
@@ -328,17 +313,16 @@ public interface NamedCacheView<T> extends CacheView<T> {
     /**
      * Finds all entities whose name ends with the provided value.
      *
-     * @param name       Name to search for.
+     * @param name     Name to search for.
      * @param supplier Supplier for the collection to add the elements to. The returned
      *                 collection <b>must</b> be mutable.
      *
      * @return The collection returned by {@code supplier}, after adding the matching
      * elements. May be empty.
      *
-     * @see String#endsWith(String)
-     *
      * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
+     * copying the elements of this view whenever possible.
+     * @see String#endsWith(String)
      */
     @Nonnull
     default <C extends Collection<T>> C findByNameEndsWith(@Nonnull final String name, @Nonnull final Supplier<C> supplier) {

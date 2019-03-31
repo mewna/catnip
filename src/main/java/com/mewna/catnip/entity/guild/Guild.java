@@ -32,20 +32,19 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.cache.view.NamedCacheView;
 import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.Timestamped;
 import com.mewna.catnip.entity.channel.*;
-import com.mewna.catnip.entity.impl.GuildImpl;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.CatnipImmutable;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.Utils;
 import io.vertx.core.json.JsonObject;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -67,8 +66,10 @@ import java.util.concurrent.CompletionStage;
  * @since 9/6/18
  */
 @SuppressWarnings("unused")
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = GuildImpl.class)
-public interface Guild extends Snowflake {
+public interface Guild extends Snowflake, Timestamped {
     
     int NICKNAME_MAX_LENGTH = 32;
     
@@ -347,7 +348,12 @@ public interface Guild extends Snowflake {
      * @return The date/time that the current user joined the guild at.
      */
     @CheckReturnValue
-    OffsetDateTime joinedAt();
+    default OffsetDateTime joinedAt() {
+        return parseTimestamp(joinedAtString());
+    }
+    
+    @CheckReturnValue
+    String joinedAtString();
     
     /**
      * @return Whether or not this guild is considered "large."
@@ -389,6 +395,7 @@ public interface Guild extends Snowflake {
     
     /**
      * @return The guild's banner hash.
+     *
      * @apiNote See https://discordapp.com/developers/docs/reference#image-formatting "Guild Banner"
      */
     @Nullable
@@ -1329,7 +1336,6 @@ public interface Guild extends Snowflake {
          */
         ONLY_MENTIONS(1);
         
-        @Getter
         private final int key;
         
         NotificationLevel(final int key) {
@@ -1344,6 +1350,10 @@ public interface Guild extends Snowflake {
                 }
             }
             throw new IllegalArgumentException("No verification level for key " + key);
+        }
+        
+        public int key() {
+            return key;
         }
     }
     
@@ -1364,7 +1374,6 @@ public interface Guild extends Snowflake {
          */
         ALL_MEMBERS(2);
         
-        @Getter
         private final int key;
         
         ContentFilterLevel(final int key) {
@@ -1379,6 +1388,10 @@ public interface Guild extends Snowflake {
                 }
             }
             throw new IllegalArgumentException("No content filter level for key " + key);
+        }
+        
+        public int key() {
+            return key;
         }
     }
     
@@ -1395,7 +1408,6 @@ public interface Guild extends Snowflake {
          */
         ELEVATED(1);
         
-        @Getter
         private final int key;
         
         MFALevel(final int key) {
@@ -1410,6 +1422,10 @@ public interface Guild extends Snowflake {
                 }
             }
             throw new IllegalArgumentException("No MFA level for key " + key);
+        }
+        
+        public int key() {
+            return key;
         }
     }
     
@@ -1439,7 +1455,6 @@ public interface Guild extends Snowflake {
          */
         VERY_HIGH(4);
         
-        @Getter
         private final int key;
         
         VerificationLevel(final int key) {
@@ -1455,12 +1470,13 @@ public interface Guild extends Snowflake {
             }
             throw new IllegalArgumentException("No verification level for key " + key);
         }
+        
+        public int key() {
+            return key;
+        }
     }
     
     @SuppressWarnings("unused")
-    @Getter
-    @Setter
-    @Accessors(fluent = true)
     class GuildEditFields {
         private final Guild guild;
         private String name;
@@ -1530,13 +1546,13 @@ public interface Guild extends Snowflake {
                 payload.put("region", region);
             }
             if(verificationLevel != null && (guild == null || verificationLevel != guild.verificationLevel())) {
-                payload.put("verification_level", verificationLevel.getKey());
+                payload.put("verification_level", verificationLevel.key());
             }
             if(defaultMessageNotifications != null && (guild == null || defaultMessageNotifications != guild.defaultMessageNotifications())) {
-                payload.put("default_message_notifications", defaultMessageNotifications.getKey());
+                payload.put("default_message_notifications", defaultMessageNotifications.key());
             }
             if(explicitContentFilter != null && (guild == null || explicitContentFilter != guild.explicitContentFilter())) {
-                payload.put("explicit_content_filter", explicitContentFilter.getKey());
+                payload.put("explicit_content_filter", explicitContentFilter.key());
             }
             if(afkChannelId != null && (guild == null || !Objects.equals(afkChannelId, guild.afkChannelId()))) {
                 payload.put("afk_channel_id", afkChannelId);
@@ -1557,6 +1573,90 @@ public interface Guild extends Snowflake {
                 payload.put("system_channel_id", systemChannelId);
             }
             return payload;
+        }
+        
+        public Guild guild() {
+            return guild;
+        }
+        
+        public String name() {
+            return name;
+        }
+        
+        public void name(final String name) {
+            this.name = name;
+        }
+        
+        public String region() {
+            return region;
+        }
+        
+        public void region(final String region) {
+            this.region = region;
+        }
+        
+        public VerificationLevel verificationLevel() {
+            return verificationLevel;
+        }
+        
+        public void verificationLevel(final VerificationLevel verificationLevel) {
+            this.verificationLevel = verificationLevel;
+        }
+        
+        public NotificationLevel defaultMessageNotifications() {
+            return defaultMessageNotifications;
+        }
+        
+        public void defaultMessageNotifications(final NotificationLevel defaultMessageNotifications) {
+            this.defaultMessageNotifications = defaultMessageNotifications;
+        }
+        
+        public ContentFilterLevel explicitContentFilter() {
+            return explicitContentFilter;
+        }
+        
+        public void explicitContentFilter(final ContentFilterLevel explicitContentFilter) {
+            this.explicitContentFilter = explicitContentFilter;
+        }
+        
+        public String afkChannelId() {
+            return afkChannelId;
+        }
+        
+        public void afkChannelId(final String afkChannelId) {
+            this.afkChannelId = afkChannelId;
+        }
+        
+        public Integer afkTimeout() {
+            return afkTimeout;
+        }
+        
+        public void afkTimeout(final Integer afkTimeout) {
+            this.afkTimeout = afkTimeout;
+        }
+        
+        public URI icon() {
+            return icon;
+        }
+        
+        public String ownerId() {
+            return ownerId;
+        }
+        
+        public void ownerId(final String ownerId) {
+            this.ownerId = ownerId;
+        }
+        
+        public URI splash() {
+            return splash;
+        }
+        
+        public String systemChannelId() {
+            return systemChannelId;
+        }
+        
+        public void systemChannelId(final String systemChannelId) {
+            this.systemChannelId = systemChannelId;
         }
     }
 }

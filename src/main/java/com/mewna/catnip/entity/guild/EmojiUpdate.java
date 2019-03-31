@@ -28,8 +28,9 @@
 package com.mewna.catnip.entity.guild;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.EmojiUpdateImpl;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -41,6 +42,8 @@ import java.util.List;
  * @author amy
  * @since 10/9/18.
  */
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = EmojiUpdateImpl.class)
 public interface EmojiUpdate extends GuildEntity {
     /**

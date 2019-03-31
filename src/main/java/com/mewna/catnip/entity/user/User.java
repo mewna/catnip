@@ -34,8 +34,9 @@ import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.entity.impl.UserImpl;
 import com.mewna.catnip.entity.util.ImageOptions;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -49,6 +50,8 @@ import java.util.concurrent.CompletionStage;
  * @since 9/4/18
  */
 @SuppressWarnings("unused")
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = UserImpl.class)
 public interface User extends Snowflake, Mentionable {
     /**
@@ -142,13 +145,13 @@ public interface User extends Snowflake, Mentionable {
     @CheckReturnValue
     default String effectiveName(@Nonnull final Guild guild) {
         final String username = username();
-    
+        
         final Member member = guild.members().getById(idAsLong());
         
         if(member == null) {
             return username;
         }
-    
+        
         final String nick = member.nick();
         return nick != null ? nick : username;
     }

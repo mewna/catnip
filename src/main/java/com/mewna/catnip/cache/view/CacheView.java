@@ -73,7 +73,7 @@ public interface CacheView<T> extends Iterable<T> {
      * @param action Action to execute on each element.
      *
      * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
+     * copying the elements of this view whenever possible.
      */
     void forEach(Consumer<? super T> action);
     
@@ -113,7 +113,7 @@ public interface CacheView<T> extends Iterable<T> {
      * @return Any element that matches the provided filter, or {@code null} if none match.
      *
      * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
+     * copying the elements of this view whenever possible.
      */
     T findAny(@Nonnull Predicate<? super T> filter);
     
@@ -126,7 +126,7 @@ public interface CacheView<T> extends Iterable<T> {
      * @return A collection with all the matching elements. May be empty.
      *
      * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
+     * copying the elements of this view whenever possible.
      */
     @Nonnull
     Collection<T> find(@Nonnull Predicate<? super T> filter);
@@ -143,7 +143,7 @@ public interface CacheView<T> extends Iterable<T> {
      * elements. May be empty.
      *
      * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
+     * copying the elements of this view whenever possible.
      */
     @Nonnull
     <C extends Collection<T>> C find(@Nonnull Predicate<? super T> filter, @Nonnull Supplier<C> supplier);
@@ -152,18 +152,17 @@ public interface CacheView<T> extends Iterable<T> {
      * Performs a mutable reduction operation on the elements of this cache
      * using a {@code Collector}.
      *
-     * @param <R> The type of the result.
-     * @param <A> The intermediate accumulation type of the {@code Collector}.
+     * @param <R>       The type of the result.
+     * @param <A>       The intermediate accumulation type of the {@code Collector}.
      * @param collector The {@code Collector} describing the reduction.
      *
      * @return The result of the reduction.
      *
+     * @implNote Implementations should attempt to perform this operation without
+     * copying the elements of this view whenever possible.
      * @see Stream#collect(Collector)
      * @see #collect(Supplier, BiConsumer, BiConsumer)
      * @see Collectors
-     *
-     * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
      */
     @Nonnull
     <A, R> R collect(@Nonnull Collector<? super T, A, R> collector);
@@ -171,24 +170,23 @@ public interface CacheView<T> extends Iterable<T> {
     /**
      * Performs a mutable reduction operation on the elements of this cache.
      *
-     * @param <R> The type of the result.
-     * @param supplier A function that creates a new result container. For a
-     *                 parallel execution, this function may be called
-     *                 multiple times and must return a fresh value each time.
+     * @param <R>         The type of the result.
+     * @param supplier    A function that creates a new result container. For a
+     *                    parallel execution, this function may be called
+     *                    multiple times and must return a fresh value each time.
      * @param accumulator An associative, non-interfering, stateless function
      *                    for incorporating an additional element into a result.
-     * @param combiner An associative, non-interfering, stateless function
-     *                 for combining two values, which must be compatible
-     *                 with the accumulator function.
+     * @param combiner    An associative, non-interfering, stateless function
+     *                    for combining two values, which must be compatible
+     *                    with the accumulator function.
      *
      * @return The result of the reduction.
      *
+     * @implNote Implementations should attempt to perform this operation without
+     * copying the elements of this view whenever possible.
      * @see Stream#collect(Supplier, BiConsumer, BiConsumer)
      * @see #collect(Supplier, BiConsumer, BiConsumer)
      * @see Collectors
-     *
-     * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
      */
     @Nonnull
     <R> R collect(@Nonnull Supplier<R> supplier, @Nonnull BiConsumer<R, ? super T> accumulator, @Nonnull BiConsumer<R, R> combiner);
@@ -197,22 +195,21 @@ public interface CacheView<T> extends Iterable<T> {
      * Performs a reduction on the elements of this cache, using the
      * provided identity, accumulation and combining functions.
      *
-     * @param <U> The type of the result.
-     * @param identity The identity value for the combiner function.
+     * @param <U>         The type of the result.
+     * @param identity    The identity value for the combiner function.
      * @param accumulator An associative, non-interfering, stateless function
      *                    for incorporating an additional element into a result.
-     * @param combiner An associative, non-interfering, stateless function
-     *                 for combining two values, which must be compatible
-     *                 with the accumulator function
+     * @param combiner    An associative, non-interfering, stateless function
+     *                    for combining two values, which must be compatible
+     *                    with the accumulator function
      *
      * @return the result of the reduction
      *
+     * @implNote Implementations should attempt to perform this operation without
+     * copying the elements of this view whenever possible.
      * @see Stream#reduce(Object, BiFunction, BinaryOperator)
      * @see #reduce(BinaryOperator)
      * @see #reduce(Object, BinaryOperator)
-     *
-     * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
      */
     @Nonnull
     <U> U reduce(U identity, @Nonnull BiFunction<U, ? super T, U> accumulator, @Nonnull BinaryOperator<U> combiner);
@@ -228,12 +225,10 @@ public interface CacheView<T> extends Iterable<T> {
      * @return An {@link Optional} describing the result of the reduction.
      *
      * @throws NullPointerException If the result of the reduction is null.
-     *
+     * @implNote Implementations should attempt to perform this operation without
+     * copying the elements of this view whenever possible.
      * @see Stream#reduce(BinaryOperator)
      * @see #reduce(Object, BinaryOperator)
-     *
-     * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
      */
     @Nonnull
     Optional<T> reduce(@Nonnull BinaryOperator<T> accumulator);
@@ -243,16 +238,15 @@ public interface CacheView<T> extends Iterable<T> {
      * provided identity value and an associative accumulation function,
      * and returns the reduced value.
      *
-     * @param identity The identity value for the accumulating function.
+     * @param identity    The identity value for the accumulating function.
      * @param accumulator An associative, non-interfering, stateless function
      *                    for combining two values.
      *
      * @return the result of the reduction
      *
-     * @see Stream#reduce(Object, BinaryOperator)
-     *
      * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
+     * copying the elements of this view whenever possible.
+     * @see Stream#reduce(Object, BinaryOperator)
      */
     @Nonnull
     T reduce(@Nonnull T identity, @Nonnull BinaryOperator<T> accumulator);
@@ -267,12 +261,11 @@ public interface CacheView<T> extends Iterable<T> {
      *                  to elements of this cache.
      *
      * @return {@code true} if any elements of the cache match the provided
-     *         predicate, otherwise {@code false}.
-     *
-     * @see Stream#anyMatch(Predicate)
+     * predicate, otherwise {@code false}.
      *
      * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
+     * copying the elements of this view whenever possible.
+     * @see Stream#anyMatch(Predicate)
      */
     boolean anyMatch(@Nonnull Predicate<? super T> predicate);
     
@@ -286,12 +279,11 @@ public interface CacheView<T> extends Iterable<T> {
      *                  to apply to elements of this cache.
      *
      * @return {@code true} if either all elements of the cache match the
-     *         provided predicate or the cache is empty, otherwise {@code false}.
-     *
-     * @see Stream#allMatch(Predicate)
+     * provided predicate or the cache is empty, otherwise {@code false}.
      *
      * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
+     * copying the elements of this view whenever possible.
+     * @see Stream#allMatch(Predicate)
      */
     boolean allMatch(@Nonnull Predicate<? super T> predicate);
     
@@ -305,12 +297,11 @@ public interface CacheView<T> extends Iterable<T> {
      *                  to elements of this cache.
      *
      * @return {@code true} if either no elements of the cache match the
-     *         provided predicate or the cache is empty, otherwise {@code false}.
-     *
-     * @see Stream#noneMatch(Predicate)
+     * provided predicate or the cache is empty, otherwise {@code false}.
      *
      * @implNote Implementations should attempt to perform this operation without
-     *           copying the elements of this view whenever possible.
+     * copying the elements of this view whenever possible.
+     * @see Stream#noneMatch(Predicate)
      */
     boolean noneMatch(@Nonnull Predicate<? super T> predicate);
     
@@ -322,10 +313,9 @@ public interface CacheView<T> extends Iterable<T> {
      *                   to compare elements of this stream.
      *
      * @return An {@code Optional} describing the minimum element of this cache,
-     *         or an empty {@code Optional} if the cache is empty.
+     * or an empty {@code Optional} if the cache is empty.
      *
      * @throws NullPointerException If the minimum element is null.
-     *
      * @see Stream#min(Comparator)
      */
     @Nonnull
@@ -339,10 +329,9 @@ public interface CacheView<T> extends Iterable<T> {
      *                   to compare elements of this stream.
      *
      * @return An {@code Optional} describing the maximum element of this cache,
-     *         or an empty {@code Optional} if the cache is empty.
+     * or an empty {@code Optional} if the cache is empty.
      *
      * @throws NullPointerException If the maximum element is null.
-     *
      * @see Stream#max(Comparator)
      */
     @Nonnull

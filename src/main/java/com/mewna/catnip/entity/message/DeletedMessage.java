@@ -31,7 +31,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.guild.GuildEntity;
-import com.mewna.catnip.entity.impl.DeletedMessageImpl;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -43,6 +44,8 @@ import javax.annotation.Nullable;
  * @author amy
  * @since 10/4/18.
  */
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = DeletedMessageImpl.class)
 public interface DeletedMessage extends GuildEntity, Snowflake {
     /**

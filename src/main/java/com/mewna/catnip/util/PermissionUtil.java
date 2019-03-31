@@ -186,10 +186,12 @@ public final class PermissionUtil {
     /**
      * Checks whether a member has the permission to interact with another member
      *
-     * @param actor The member that want to perform the action
+     * @param actor  The member that want to perform the action
      * @param target The member that the action is performed on
-     * @throws IllegalStateException If the actor is not on the same guild as the target
+     *
      * @return Whether the actor can interact with the target or not
+     *
+     * @throws IllegalStateException If the actor is not on the same guild as the target
      */
     public static boolean canInteract(@Nonnull final Member actor, @Nonnull final Member target) {
         if(actor.isOwner()) {
@@ -207,10 +209,12 @@ public final class PermissionUtil {
     /**
      * Checks whether a role has the permission to interact with a member
      *
-     * @param actor The role that want to perform the action
+     * @param actor  The role that want to perform the action
      * @param target The member that the action is performed on
-     * @throws IllegalStateException If the actor is not on the same guild as the target
+     *
      * @return Whether the actor can interact with the target or not
+     *
+     * @throws IllegalStateException If the actor is not on the same guild as the target
      */
     public static boolean canInteract(@Nonnull final Role actor, @Nonnull final Member target) {
         checkGuildEquality(actor, target);
@@ -227,10 +231,12 @@ public final class PermissionUtil {
     /**
      * Checks whether a member has the permission to interact with a role
      *
-     * @param actor The member that want to perform the action
+     * @param actor  The member that want to perform the action
      * @param target The role that the action is performed on
-     * @throws IllegalStateException If the actor is not on the same guild as the target
+     *
      * @return Whether the actor can interact with the target or not
+     *
+     * @throws IllegalStateException If the actor is not on the same guild as the target
      */
     public static boolean canInteract(@Nonnull final Member actor, @Nonnull final Role target) {
         checkGuildEquality(actor, target);
@@ -248,10 +254,12 @@ public final class PermissionUtil {
     /**
      * Checks whether a role has the permission to interact with another role
      *
-     * @param actor The role that want to perform the action
+     * @param actor  The role that want to perform the action
      * @param target The role that the action is performed on
-     * @throws IllegalStateException If the actor is not on the same guild as the target
+     *
      * @return Whether the actor can interact with the target or not
+     *
+     * @throws IllegalStateException If the actor is not on the same guild as the target
      */
     public static boolean canInteract(@Nonnull final Role actor, @Nonnull final Role target) {
         checkGuildEquality(actor, target);

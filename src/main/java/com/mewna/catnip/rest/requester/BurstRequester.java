@@ -48,11 +48,11 @@ public class BurstRequester extends AbstractRequester {
     
     private static class BurstBucket implements Bucket {
         private final AbstractRequester requester;
-    
+
         BurstBucket(final AbstractRequester requester) {
             this.requester = requester;
         }
-    
+
         @Override
         public void queueRequest(@Nonnull final QueuedRequest request) {
             requester.rateLimiter.requestExecution(request.route())
@@ -62,7 +62,7 @@ public class BurstRequester extends AbstractRequester {
                         return null;
                     });
         }
-    
+
         @Override
         public void failedRequest(@Nonnull final QueuedRequest request, @Nonnull final Throwable failureCause) {
             request.failed();
@@ -74,7 +74,7 @@ public class BurstRequester extends AbstractRequester {
                 requestDone();
             }
         }
-    
+
         @Override
         public void requestDone() {
             //noop

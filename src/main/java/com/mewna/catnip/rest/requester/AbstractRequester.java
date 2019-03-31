@@ -44,14 +44,12 @@ import io.vertx.core.Context;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.beans.ConstructorProperties;
 import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -173,7 +171,7 @@ public abstract class AbstractRequester implements Requester {
             }
             encoded = r.object().encode();
         } else if(r.array() != null) {
-            encoded = r.object().encode();
+            encoded = r.array().encode();
         } else {
             encoded = null;
         }
@@ -400,9 +398,6 @@ public abstract class AbstractRequester implements Requester {
         void requestDone();
     }
     
-    @Getter
-    @Accessors(fluent = true)
-    @RequiredArgsConstructor
     protected static class QueuedRequest {
         protected final OutboundRequest request;
         protected final Route route;
@@ -412,12 +407,51 @@ public abstract class AbstractRequester implements Requester {
         protected int failedAttempts;
         private long start;
         
+        @ConstructorProperties({"request", "route", "future", "bucket", "stacktrace"})
+        public QueuedRequest(final OutboundRequest request, final Route route,
+                             final CompletableFuture<ResponsePayload> future, final Bucket bucket,
+                             final StackTraceElement[] stacktrace) {
+            this.request = request;
+            this.route = route;
+            this.future = future;
+            this.bucket = bucket;
+            this.stacktrace = stacktrace;
+        }
+        
         protected void failed() {
             failedAttempts++;
         }
         
         protected boolean shouldRetry() {
             return failedAttempts < 3;
+        }
+        
+        public OutboundRequest request() {
+            return request;
+        }
+        
+        public Route route() {
+            return route;
+        }
+        
+        public CompletableFuture<ResponsePayload> future() {
+            return future;
+        }
+        
+        public Bucket bucket() {
+            return bucket;
+        }
+        
+        public StackTraceElement[] stacktrace() {
+            return stacktrace;
+        }
+        
+        public int failedAttempts() {
+            return failedAttempts;
+        }
+        
+        public long start() {
+            return start;
         }
     }
 }

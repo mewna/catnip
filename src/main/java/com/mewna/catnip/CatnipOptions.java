@@ -35,9 +35,6 @@ import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.extension.Extension;
-import com.mewna.catnip.rest.ratelimit.DefaultRateLimiter;
-import com.mewna.catnip.rest.requester.Requester;
-import com.mewna.catnip.rest.requester.SerialRequester;
 import com.mewna.catnip.shard.DiscordEvent.Raw;
 import com.mewna.catnip.shard.buffer.CachingBuffer;
 import com.mewna.catnip.shard.buffer.EventBuffer;
@@ -53,14 +50,11 @@ import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.util.logging.DefaultLogAdapter;
 import com.mewna.catnip.util.logging.LogAdapter;
 import io.vertx.core.json.JsonObject;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.Accessors;
-import okhttp3.OkHttpClient.Builder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.beans.ConstructorProperties;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -68,10 +62,7 @@ import java.util.Set;
  * @author amy
  * @since 9/25/18.
  */
-@Getter
-@Setter
 @Accessors(fluent = true, chain = true)
-@RequiredArgsConstructor
 @SuppressWarnings("OverlyCoupledClass")
 public final class CatnipOptions implements Cloneable {
     /**
@@ -160,8 +151,6 @@ public final class CatnipOptions implements Cloneable {
      */
     @Nonnull
     private Set<String> disabledEvents = ImmutableSet.of();
-    @Nonnull
-    private Requester requester = new SerialRequester(new DefaultRateLimiter(), new Builder());
     /**
      * Whether or not extensions overriding options should be logged. Defaults
      * to {@code true}.
@@ -206,6 +195,11 @@ public final class CatnipOptions implements Cloneable {
      */
     private boolean warnOnEntityVersionMismatch = true;
     
+    @ConstructorProperties("token")
+    public CatnipOptions(@Nonnull final String token) {
+        this.token = token;
+    }
+    
     @Override
     public Object clone() {
         try {
@@ -213,5 +207,182 @@ public final class CatnipOptions implements Cloneable {
         } catch(final CloneNotSupportedException e) {
             throw new IllegalStateException("Couldn't clone!", e);
         }
+    }
+    
+    @Nonnull
+    public String token() {
+        return token;
+    }
+    
+    @Nonnull
+    public ShardManager shardManager() {
+        return shardManager;
+    }
+    
+    @Nonnull
+    public SessionManager sessionManager() {
+        return sessionManager;
+    }
+    
+    @Nonnull
+    public Ratelimiter gatewayRatelimiter() {
+        return gatewayRatelimiter;
+    }
+    
+    @Nonnull
+    public LogAdapter logAdapter() {
+        return logAdapter;
+    }
+    
+    @Nonnull
+    public EventBuffer eventBuffer() {
+        return eventBuffer;
+    }
+    
+    @Nonnull
+    public EntityCacheWorker cacheWorker() {
+        return cacheWorker;
+    }
+    
+    @Nonnull
+    public Set<CacheFlag> cacheFlags() {
+        return cacheFlags;
+    }
+    
+    @Nonnull
+    public DispatchManager dispatchManager() {
+        return dispatchManager;
+    }
+    
+    public boolean chunkMembers() {
+        return chunkMembers;
+    }
+    
+    public boolean emitEventObjects() {
+        return emitEventObjects;
+    }
+    
+    public boolean enforcePermissions() {
+        return enforcePermissions;
+    }
+    
+    @Nullable
+    public Presence presence() {
+        return presence;
+    }
+    
+    @Nonnull
+    public Set<String> disabledEvents() {
+        return disabledEvents;
+    }
+    
+    public boolean logExtensionOverrides() {
+        return logExtensionOverrides;
+    }
+    
+    public boolean validateToken() {
+        return validateToken;
+    }
+    
+    public boolean captureRestStacktraces() {
+        return captureRestStacktraces;
+    }
+    
+    public boolean logUncachedPresenceWhenNotChunking() {
+        return logUncachedPresenceWhenNotChunking;
+    }
+    
+    public boolean warnOnEntityVersionMismatch() {
+        return warnOnEntityVersionMismatch;
+    }
+    
+    public CatnipOptions shardManager(@Nonnull final ShardManager shardManager) {
+        this.shardManager = shardManager;
+        return this;
+    }
+    
+    public CatnipOptions sessionManager(@Nonnull final SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
+        return this;
+    }
+    
+    public CatnipOptions gatewayRatelimiter(@Nonnull final Ratelimiter gatewayRatelimiter) {
+        this.gatewayRatelimiter = gatewayRatelimiter;
+        return this;
+    }
+    
+    public CatnipOptions logAdapter(@Nonnull final LogAdapter logAdapter) {
+        this.logAdapter = logAdapter;
+        return this;
+    }
+    
+    public CatnipOptions eventBuffer(@Nonnull final EventBuffer eventBuffer) {
+        this.eventBuffer = eventBuffer;
+        return this;
+    }
+    
+    public CatnipOptions cacheWorker(@Nonnull final EntityCacheWorker cacheWorker) {
+        this.cacheWorker = cacheWorker;
+        return this;
+    }
+    
+    public CatnipOptions cacheFlags(@Nonnull final Set<CacheFlag> cacheFlags) {
+        this.cacheFlags = cacheFlags;
+        return this;
+    }
+    
+    public CatnipOptions dispatchManager(@Nonnull final DispatchManager dispatchManager) {
+        this.dispatchManager = dispatchManager;
+        return this;
+    }
+    
+    public CatnipOptions chunkMembers(final boolean chunkMembers) {
+        this.chunkMembers = chunkMembers;
+        return this;
+    }
+    
+    public CatnipOptions emitEventObjects(final boolean emitEventObjects) {
+        this.emitEventObjects = emitEventObjects;
+        return this;
+    }
+    
+    public CatnipOptions enforcePermissions(final boolean enforcePermissions) {
+        this.enforcePermissions = enforcePermissions;
+        return this;
+    }
+    
+    public CatnipOptions presence(@Nullable final Presence presence) {
+        this.presence = presence;
+        return this;
+    }
+    
+    public CatnipOptions disabledEvents(@Nonnull final Set<String> disabledEvents) {
+        this.disabledEvents = disabledEvents;
+        return this;
+    }
+    
+    public CatnipOptions logExtensionOverrides(final boolean logExtensionOverrides) {
+        this.logExtensionOverrides = logExtensionOverrides;
+        return this;
+    }
+    
+    public CatnipOptions validateToken(final boolean validateToken) {
+        this.validateToken = validateToken;
+        return this;
+    }
+    
+    public CatnipOptions captureRestStacktraces(final boolean captureRestStacktraces) {
+        this.captureRestStacktraces = captureRestStacktraces;
+        return this;
+    }
+    
+    public CatnipOptions logUncachedPresenceWhenNotChunking(final boolean logUncachedPresenceWhenNotChunking) {
+        this.logUncachedPresenceWhenNotChunking = logUncachedPresenceWhenNotChunking;
+        return this;
+    }
+    
+    public CatnipOptions warnOnEntityVersionMismatch(final boolean warnOnEntityVersionMismatch) {
+        this.warnOnEntityVersionMismatch = warnOnEntityVersionMismatch;
+        return this;
     }
 }

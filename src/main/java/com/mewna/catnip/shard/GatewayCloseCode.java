@@ -27,9 +27,6 @@
 
 package com.mewna.catnip.shard;
 
-import lombok.Getter;
-import lombok.experimental.Accessors;
-
 import javax.annotation.Nonnegative;
 
 /**
@@ -43,8 +40,6 @@ import javax.annotation.Nonnegative;
  * @author amy
  * @since 11/19/18.
  */
-@Getter
-@Accessors(fluent = true)
 public enum GatewayCloseCode {
     UNKNOWN_ERROR(4000, "We're not sure what went wrong. Try reconnecting?"),
     UNKNOWN_OPCODE(4001, "You sent an invalid Gateway opcode or an invalid payload for an opcode. Don't do that!"),
@@ -75,4 +70,11 @@ public enum GatewayCloseCode {
         }
         return null;
     }
-}
+    
+    public int code() {
+        return code;
+    }
+    
+    public String message() {
+        return message;
+    }}

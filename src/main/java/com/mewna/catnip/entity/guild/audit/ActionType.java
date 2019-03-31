@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.guild.audit;
 
-import lombok.Getter;
-
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
@@ -65,7 +63,6 @@ public enum ActionType {
     EMOJI_DELETE(62),
     MESSAGE_DELETE(72);
     
-    @Getter
     private final int value;
     
     ActionType(final int value) {
@@ -81,5 +78,9 @@ public enum ActionType {
             }
         }
         throw new IllegalArgumentException("No action type for value: " + value);
+    }
+    
+    public int value() {
+        return value;
     }
 }

@@ -29,7 +29,8 @@ package com.mewna.catnip.entity.voice;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.guild.GuildEntity;
-import com.mewna.catnip.entity.impl.VoiceServerUpdateImpl;
+import com.mewna.catnip.util.CatnipImmutable;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -40,6 +41,8 @@ import javax.annotation.Nonnull;
  * @author amy
  * @since 10/6/18.
  */
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = VoiceServerUpdateImpl.class)
 public interface VoiceServerUpdate extends GuildEntity {
     /**

@@ -31,16 +31,12 @@ package com.mewna.catnip.util;
 
 import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.entity.util.Permission;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
-@Getter
-@Accessors(fluent = true)
 public class MissingPermissionException extends RuntimeException {
     private final Set<Permission> missing;
     
@@ -60,5 +56,9 @@ public class MissingPermissionException extends RuntimeException {
             }
         }
         return sb.toString();
+    }
+    
+    public Set<Permission> missing() {
+        return missing;
     }
 }

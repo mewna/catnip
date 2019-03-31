@@ -33,9 +33,6 @@ import com.mewna.catnip.rest.Routes.Route;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.CheckReturnValue;
@@ -56,25 +53,17 @@ public interface Requester {
     @CheckReturnValue
     CompletionStage<ResponsePayload> queue(@Nonnull OutboundRequest r);
     
-    @Getter
-    @Accessors(fluent = true)
     @SuppressWarnings("unused")
     final class OutboundRequest {
         private final Route route;
         private final Map<String, String> params;
-        @Setter
         private JsonObject object;
-        @Setter
         private JsonArray array;
-        @Setter
         private boolean needsToken = true;
-        @Setter
         private String reason;
         
-        @Setter
         private List<ImmutablePair<String, Buffer>> buffers;
         
-        @Setter
         private boolean emptyBody;
         
         public OutboundRequest(final Route route, final Map<String, String> params) {
@@ -86,6 +75,7 @@ public interface Requester {
             this(route, params);
             this.object = object;
         }
+        
         public OutboundRequest(final Route route, final Map<String, String> params, final JsonObject object, final String reason) {
             this(route, params, object);
             this.reason = reason;
@@ -105,6 +95,68 @@ public interface Requester {
         public String toString() {
             return String.format("OutboundRequest (%s, %s, object=%s, array=%s, buffers=%s, reason=%s)",
                     route, params, object != null, array != null, buffers != null && !buffers.isEmpty(), reason);
+        }
+        
+        public Route route() {
+            return route;
+        }
+        
+        public Map<String, String> params() {
+            return params;
+        }
+        
+        public JsonObject object() {
+            return object;
+        }
+        
+        public JsonArray array() {
+            return array;
+        }
+        
+        public boolean needsToken() {
+            return needsToken;
+        }
+        
+        public String reason() {
+            return reason;
+        }
+        
+        public List<ImmutablePair<String, Buffer>> buffers() {
+            return buffers;
+        }
+        
+        public boolean emptyBody() {
+            return emptyBody;
+        }
+        
+        public OutboundRequest object(final JsonObject object) {
+            this.object = object;
+            return this;
+        }
+        
+        public OutboundRequest array(final JsonArray array) {
+            this.array = array;
+            return this;
+        }
+        
+        public OutboundRequest needsToken(final boolean needsToken) {
+            this.needsToken = needsToken;
+            return this;
+        }
+        
+        public OutboundRequest reason(final String reason) {
+            this.reason = reason;
+            return this;
+        }
+        
+        public OutboundRequest buffers(final List<ImmutablePair<String, Buffer>> buffers) {
+            this.buffers = buffers;
+            return this;
+        }
+        
+        public OutboundRequest emptyBody(final boolean emptyBody) {
+            this.emptyBody = emptyBody;
+            return this;
         }
     }
 }

@@ -28,8 +28,6 @@
 package com.mewna.catnip.rest;
 
 import io.vertx.core.http.HttpMethod;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -128,20 +126,16 @@ public final class Routes {
     public static final Route GET_USER                            = new Route(GET,    "/users/{user.id}");
     public static final Route GET_CURRENT_APPLICATION_INFORMATION = new Route(GET,    "/oauth2/applications/@me");
     public static final Route LIST_VOICE_REGIONS                  = new Route(GET,    "/voice/regions");
-
+    // @formatter:on
+    
     private Routes() {
     }
-
-    @Accessors(fluent = true)
+    
     @SuppressWarnings({"WeakerAccess", "unused"})
     public static final class Route {
-        @Getter
         private HttpMethod method;
-        @Getter
         private String baseRoute;
-        @Getter
         private String majorParam;
-        @Getter
         private String ratelimitKey;
         
         public Route() {
@@ -150,11 +144,11 @@ public final class Routes {
         public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute) {
             this(method, baseRoute, null);
         }
-    
+        
         public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute, @Nullable final String majorParam) {
             this(method, baseRoute, majorParam, baseRoute);
         }
-    
+        
         public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute, @Nullable final String majorParam, @Nonnull final String ratelimitKey) {
             this.method = method;
             this.baseRoute = baseRoute;
@@ -164,7 +158,6 @@ public final class Routes {
         
         @Nonnull
         @CheckReturnValue
-        @SuppressWarnings("TypeMayBeWeakened")
         public Route withMajorParam(@Nonnull final String value) {
             if(majorParam == null) {
                 throw new IllegalStateException("This route takes no major params!");
@@ -176,7 +169,6 @@ public final class Routes {
         
         @Nonnull
         @CheckReturnValue
-        @SuppressWarnings("TypeMayBeWeakened")
         public Route compile(@Nonnull final String param, @Nonnull final String value) {
             if(param.equalsIgnoreCase(majorParam)) {
                 return this;
@@ -193,12 +185,12 @@ public final class Routes {
         public Route withQueryString(final String qs) {
             return new Route(method, baseRoute + qs, majorParam, ratelimitKey);
         }
-    
+        
         @Override
         public int hashCode() {
             return baseRoute.hashCode();
         }
-    
+        
         @Override
         public boolean equals(final Object o) {
             if(!(o instanceof Route)) {
@@ -206,11 +198,26 @@ public final class Routes {
             }
             return baseRoute.equalsIgnoreCase(((Route) o).baseRoute);
         }
-    
+        
         @Override
         public String toString() {
             return method + " " + baseRoute;
         }
+        
+        public HttpMethod method() {
+            return method;
+        }
+        
+        public String baseRoute() {
+            return baseRoute;
+        }
+        
+        public String majorParam() {
+            return majorParam;
+        }
+        
+        public String ratelimitKey() {
+            return ratelimitKey;
+        }
     }
-    // @formatter:on
 }

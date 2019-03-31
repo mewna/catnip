@@ -31,13 +31,10 @@ import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.extension.Extension;
 import io.vertx.core.impl.ConcurrentHashSet;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
+import java.beans.ConstructorProperties;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -46,12 +43,14 @@ import java.util.stream.Collectors;
  * @author amy
  * @since 9/6/18
  */
-@Accessors(fluent = true)
-@RequiredArgsConstructor
 public class DefaultExtensionManager implements ExtensionManager {
-    @Getter
     private final Catnip catnip;
     private final Collection<Extension> loadedExtensions = new ConcurrentHashSet<>();
+    
+    @ConstructorProperties("catnip")
+    public DefaultExtensionManager(final Catnip catnip) {
+        this.catnip = catnip;
+    }
     
     @Override
     public ExtensionManager loadExtension(@Nonnull final Extension extension) {
@@ -77,23 +76,27 @@ public class DefaultExtensionManager implements ExtensionManager {
     public Set<Extension> matchingExtensions(@Nonnull final String regex) {
         //small optimization
         final Pattern pattern = Pattern.compile(regex);
-        return Collections.unmodifiableSet(loadedExtensions.stream()
+        return loadedExtensions.stream()
                 .filter(e -> pattern.matcher(e.name()).matches())
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toUnmodifiableSet());
     }
     
     @Nonnull
     @Override
     public <T extends Extension> Set<? extends T> matchingExtensions(@Nonnull final Class<T> extensionClass) {
-        return Collections.unmodifiableSet(loadedExtensions.stream()
+        return loadedExtensions.stream()
                 .filter(extensionClass::isInstance)
                 .map(extensionClass::cast)
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toUnmodifiableSet());
     }
     
     @Nonnull
     @Override
     public Set<Extension> extensions() {
         return ImmutableSet.copyOf(loadedExtensions);
+    }
+    
+    public Catnip catnip() {
+        return catnip;
     }
 }

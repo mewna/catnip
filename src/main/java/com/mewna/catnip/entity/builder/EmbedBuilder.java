@@ -27,14 +27,9 @@
 
 package com.mewna.catnip.entity.builder;
 
-import com.mewna.catnip.entity.impl.EmbedImpl;
-import com.mewna.catnip.entity.impl.EmbedImpl.*;
-import com.mewna.catnip.entity.message.Embed;
+import com.mewna.catnip.entity.message.*;
 import com.mewna.catnip.entity.message.Embed.Image;
 import com.mewna.catnip.entity.message.Embed.*;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -54,9 +49,6 @@ import java.util.List;
  * @author amy
  * @since 9/4/18.
  */
-@Setter(onParam_ = @Nullable, onMethod_ = {@CheckReturnValue, @Nonnull})
-@NoArgsConstructor
-@Accessors(fluent = true, chain = true)
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class EmbedBuilder {
     private final List<Field> fields = new ArrayList<>(25);
@@ -71,6 +63,9 @@ public class EmbedBuilder {
     private Thumbnail thumbnail;
     private Author author;
     // @formatter:on
+    
+    public EmbedBuilder() {
+    }
     
     public EmbedBuilder(final Embed embed) {
         title = embed.title();
@@ -90,8 +85,10 @@ public class EmbedBuilder {
      * will be converted to one if possible.
      *
      * @param temporal A {@link TemporalAccessor} to set.
-     * @throws DateTimeException If the {@link TemporalAccessor} cannot be converted to an {@link OffsetDateTime}.
+     *
      * @return Itself.
+     *
+     * @throws DateTimeException If the {@link TemporalAccessor} cannot be converted to an {@link OffsetDateTime}.
      */
     @Nonnull
     @CheckReturnValue
@@ -172,7 +169,7 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder footer(@Nullable final String text, @Nullable final String iconUrl) {
-        return footer(new FooterImpl(text, iconUrl, null));
+        return footer(FooterImpl.builder().text(text).iconUrl(iconUrl).proxyIconUrl(null).build());
     }
     
     /**
@@ -185,7 +182,7 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder image(@Nullable final String url) {
-        image = new ImageImpl(url, null, 0, 0);
+        image = ImageImpl.builder().url(url).proxyUrl(null).width(0).height(0).build();
         return this;
     }
     
@@ -199,7 +196,7 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder thumbnail(@Nullable final String url) {
-        thumbnail = new ThumbnailImpl(url, null, 0, 0);
+        thumbnail = ThumbnailImpl.builder().url(url).proxyUrl(null).height(0).width(0).build();
         return this;
     }
     
@@ -242,7 +239,7 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder author(@Nullable final String name, @Nullable final String url, @Nullable final String iconUrl) {
-        return author(new AuthorImpl(name, url, iconUrl, null));
+        return author(AuthorImpl.builder().name(name).url(url).iconUrl(iconUrl).proxyIconUrl(null).build());
     }
     
     /**
@@ -271,7 +268,7 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder field(@Nonnull final String name, @Nonnull final String value, final boolean inline) {
-        return field(new FieldImpl(name, value, inline));
+        return field(FieldImpl.builder().name(name).value(value).inline(inline).build());
     }
     
     /**
@@ -295,33 +292,57 @@ public class EmbedBuilder {
     
     /**
      * Replaces the field associated with a specific index with a new field more efficiently.
-     * @param index The <b>non-negative and under-25</b> index of the field to replace.
-     * @param name The <b>non-null</b> name of the new field.
-     * @param value The <b>non-null</b> value of the new field.
+     *
+     * @param index  The <b>non-negative and under-25</b> index of the field to replace.
+     * @param name   The <b>non-null</b> name of the new field.
+     * @param value  The <b>non-null</b> value of the new field.
      * @param inline Whether or not the field should be inline.
+     *
      * @return Itself.
      */
     @Nonnull
     @CheckReturnValue
-    public EmbedBuilder replaceAtIndex(@Nonnegative final int index, @Nonnull final String name, @Nonnull final String value, final boolean inline) {
-        return replaceAtIndex(index, new FieldImpl(name, value, inline));
+    public EmbedBuilder replaceAtIndex(@Nonnegative final int index, @Nonnull final String name, @Nonnull final String value,
+                                       final boolean inline) {
+        return replaceAtIndex(index, FieldImpl.builder().name(name).value(value).inline(inline).build());
     }
     
     /**
-     * Replaces the field associated with a specific index with a new field more efficiently.
-     * @param index The <b>non-negative and under-25</b> index of the field to replace.
+     * Replaces the field associated with a specific index with a new field
+     * more efficiently.
+     *
+     * @param index The <b>non-negative and under-25</b> index of the field to
+     *              replace.
      * @param field The <b>non-null</b> {@link Field field} instance.
-     * @throws IndexOutOfBoundsException If the field index is smaller than 0, larger than 24 or larger or equal to the amount of fields added.
+     *
      * @return Itself.
+     *
+     * @throws IndexOutOfBoundsException If the field index is smaller than 0,
+     * larger than 24 or larger or equal to the amount of fields added.
      */
     
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder replaceAtIndex(@Nonnegative final int index, @Nonnull final Field field) {
-        if (index < 0 || index > 24 || index >= fields.size()) {
+        if(index < 0 || index > 24 || index >= fields.size()) {
             throw new IndexOutOfBoundsException("Tried to set a field with an out-of-bounds index!");
         }
         fields.set(index, field);
+        return this;
+    }
+    
+    EmbedBuilder footer(final Footer footer) {
+        this.footer = footer;
+        return this;
+    }
+    
+    EmbedBuilder image(final Image image) {
+        this.image = image;
+        return this;
+    }
+    
+    EmbedBuilder thumbnail(final Thumbnail thumbnail) {
+        this.thumbnail = thumbnail;
         return this;
     }
     
@@ -332,7 +353,7 @@ public class EmbedBuilder {
      */
     public Embed build() {
         int len = 0;
-        final EmbedImplBuilder builder = EmbedImpl.builder();
+        final var builder = EmbedImpl.builder();
         if(title != null && !title.isEmpty()) {
             if(title.length() > 256) {
                 throw new IllegalStateException("Title exceeds 256 characters!");
@@ -354,7 +375,7 @@ public class EmbedBuilder {
             builder.color(color);
         }
         if(timestamp != null) {
-            builder.timestamp(timestamp.format(DateTimeFormatter.ISO_INSTANT));
+            builder.timestampString(timestamp.format(DateTimeFormatter.ISO_INSTANT));
         }
         if(footer != null) {
             if(footer.text().length() > 2048) {

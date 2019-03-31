@@ -29,24 +29,16 @@ package com.mewna.catnip.rest.handler;
 
 import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.internal.CatnipImpl;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 
 import javax.annotation.Nullable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 /**
  * @author amy
  * @since 9/3/18.
  */
-@Accessors(fluent = true)
 abstract class RestHandler {
-    @Getter(AccessLevel.PROTECTED)
     private final EntityBuilder entityBuilder;
     
-    @Getter(AccessLevel.PROTECTED)
     private final CatnipImpl catnip;
     
     RestHandler(final CatnipImpl catnip) {
@@ -59,4 +51,11 @@ abstract class RestHandler {
         return (T) object;
     }
     
+    protected EntityBuilder entityBuilder() {
+        return entityBuilder;
+    }
+    
+    protected CatnipImpl catnip() {
+        return catnip;
+    }
 }

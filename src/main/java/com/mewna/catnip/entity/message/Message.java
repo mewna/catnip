@@ -30,19 +30,19 @@ package com.mewna.catnip.entity.message;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.Timestamped;
 import com.mewna.catnip.entity.channel.MessageChannel;
 import com.mewna.catnip.entity.channel.TextChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
-import com.mewna.catnip.entity.impl.MessageImpl;
-import com.mewna.catnip.entity.impl.MessageImpl.AttachmentImpl;
-import com.mewna.catnip.entity.impl.MessageImpl.ReactionImpl;
 import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.CatnipImmutable;
 import com.mewna.catnip.util.PermissionUtil;
 import org.apache.commons.lang3.Validate;
+import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -59,8 +59,10 @@ import java.util.concurrent.CompletionStage;
  * @since 9/4/18.
  */
 @SuppressWarnings("unused")
+@Immutable
+@CatnipImmutable
 @JsonDeserialize(as = MessageImpl.class)
-public interface Message extends Snowflake {
+public interface Message extends Snowflake, Timestamped {
     /**
      * The type of message. Use this to tell normal messages from system messages.
      *
@@ -86,7 +88,13 @@ public interface Message extends Snowflake {
      */
     @Nonnull
     @CheckReturnValue
-    OffsetDateTime timestamp();
+    default OffsetDateTime timestamp() {
+        return parseTimestamp(timestampString());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    String timestampString();
     
     /**
      * Whether the message is pinned.
@@ -173,7 +181,13 @@ public interface Message extends Snowflake {
      */
     @Nullable
     @CheckReturnValue
-    OffsetDateTime editedTimestamp();
+    default OffsetDateTime editedTimestamp() {
+        return parseTimestamp(editedTimestampString());
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    String editedTimestampString();
     
     /**
      * The message's content. Is just an empty string for embed-only messages.
@@ -394,6 +408,8 @@ public interface Message extends Snowflake {
         return content().contains("https://www.youtube.com/watch?v=dQw4w9WgXcQ") || content().contains("https://youtu.be/dQw4w9WgXcQ");
     }
     
+    @Immutable
+    @CatnipImmutable
     @JsonDeserialize(as = AttachmentImpl.class)
     interface Attachment extends Snowflake {
         /**
@@ -459,6 +475,8 @@ public interface Message extends Snowflake {
         }
     }
     
+    @Immutable
+    @CatnipImmutable
     @JsonDeserialize(as = ReactionImpl.class)
     interface Reaction {
         /**

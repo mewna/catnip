@@ -32,15 +32,18 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
-import com.mewna.catnip.entity.impl.*;
-import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
+import com.mewna.catnip.entity.channel.*;
+import com.mewna.catnip.entity.guild.*;
+import com.mewna.catnip.entity.message.*;
 import com.mewna.catnip.entity.misc.GatewayInfo;
-import com.mewna.catnip.entity.user.Presence;
+import com.mewna.catnip.entity.misc.ReadyImpl;
+import com.mewna.catnip.entity.misc.ResumedImpl;
+import com.mewna.catnip.entity.user.*;
 import com.mewna.catnip.entity.user.Presence.Activity;
 import com.mewna.catnip.entity.user.Presence.ActivityType;
 import com.mewna.catnip.entity.user.Presence.OnlineStatus;
-import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.entity.voice.VoiceServerUpdateImpl;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.DefaultExtensionManager;
 import com.mewna.catnip.extension.manager.ExtensionManager;
@@ -60,7 +63,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
-import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -83,7 +85,6 @@ import static com.mewna.catnip.shard.ShardAddress.*;
  * @author amy
  * @since 8/31/18.
  */
-@Getter
 @SuppressWarnings("OverlyCoupledClass")
 @Accessors(fluent = true, chain = true)
 public class CatnipImpl implements Catnip {
@@ -131,7 +132,6 @@ public class CatnipImpl implements Catnip {
         //  options change.
         this.options = options;
         dispatchManager = options.dispatchManager();
-        requester = options.requester();
         shardManager = options.shardManager();
         sessionManager = options.sessionManager();
         gatewayRatelimiter = options.gatewayRatelimiter();
@@ -504,5 +504,114 @@ public class CatnipImpl implements Catnip {
                         throw new RuntimeException("Gateway info not valid! Is your token valid?");
                     }
                 });
+    }
+    
+    @Nonnull
+    public Vertx vertx() {
+        return vertx;
+    }
+    
+    @Nonnull
+    public String token() {
+        return token;
+    }
+    
+    public boolean logExtensionOverrides() {
+        return logExtensionOverrides;
+    }
+    
+    public boolean validateToken() {
+        return validateToken;
+    }
+    
+    @Nonnull
+    public Rest rest() {
+        return rest;
+    }
+    
+    @Nonnull
+    public ExtensionManager extensionManager() {
+        return extensionManager;
+    }
+    
+    @Nonnull
+    public DispatchManager dispatchManager() {
+        return dispatchManager;
+    }
+    
+    public Requester requester() {
+        return requester;
+    }
+    
+    @Nonnull
+    public ShardManager shardManager() {
+        return shardManager;
+    }
+    
+    @Nonnull
+    public SessionManager sessionManager() {
+        return sessionManager;
+    }
+    
+    @Nonnull
+    public Ratelimiter gatewayRatelimiter() {
+        return gatewayRatelimiter;
+    }
+    
+    @Nonnull
+    public LogAdapter logAdapter() {
+        return logAdapter;
+    }
+    
+    @Nonnull
+    public EventBuffer eventBuffer() {
+        return eventBuffer;
+    }
+    
+    @Nonnull
+    public EntityCacheWorker cache() {
+        return cache;
+    }
+    
+    @Nonnull
+    public Set<CacheFlag> cacheFlags() {
+        return cacheFlags;
+    }
+    
+    public boolean chunkMembers() {
+        return chunkMembers;
+    }
+    
+    public boolean emitEventObjects() {
+        return emitEventObjects;
+    }
+    
+    public boolean enforcePermissions() {
+        return enforcePermissions;
+    }
+    
+    public boolean captureRestStacktraces() {
+        return captureRestStacktraces;
+    }
+    
+    public boolean logUncachedPresenceWhenNotChunking() {
+        return logUncachedPresenceWhenNotChunking;
+    }
+    
+    public boolean warnOnEntityVersionMismatch() {
+        return warnOnEntityVersionMismatch;
+    }
+    
+    public Presence initialPresence() {
+        return initialPresence;
+    }
+    
+    @Nonnull
+    public Set<String> disabledEvents() {
+        return disabledEvents;
+    }
+    
+    public CatnipOptions options() {
+        return options;
     }
 }
