@@ -50,10 +50,12 @@ import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.logging.LogAdapter;
+import io.reactivex.Observable;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.reactivex.ObservableHelper;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.CheckReturnValue;
@@ -689,6 +691,18 @@ public interface Catnip {
      */
     default <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler) {
         return on(type).handler(m -> handler.accept(m.body()));
+    }
+    
+    /**
+     * Add a reactive stream handler for events of the given type.
+     *
+     * @param type The type of event to stream.
+     * @param <T>  The object type of the event being streamed.
+     *
+     * @return The observable.
+     */
+    default <T> Observable<T> observe(@Nonnull final EventType<T> type) {
+        return ObservableHelper.toObservable(on(type).bodyStream());
     }
     
     /**
