@@ -28,11 +28,13 @@
 package com.mewna.catnip.entity.guild;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.util.CatnipImmutable;
 import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -45,7 +47,7 @@ import javax.annotation.Nullable;
 @Immutable
 @CatnipImmutable
 @JsonDeserialize(as = GuildEmbedImpl.class)
-public interface GuildEmbed extends RequiresCatnip {
+public interface GuildEmbed {
     /**
      * @return Whether the embed is enabled.
      */
@@ -70,4 +72,8 @@ public interface GuildEmbed extends RequiresCatnip {
      */
     @CheckReturnValue
     long channelIdAsLong();
+    
+    @Nonnull
+    @CheckReturnValue
+    Catnip catnip();
 }

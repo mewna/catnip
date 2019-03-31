@@ -73,13 +73,11 @@ import static io.vertx.core.http.HttpMethod.PUT;
 @SuppressWarnings("WeakerAccess")
 public abstract class AbstractRequester implements Requester {
     protected final RateLimiter rateLimiter;
-    private final HttpClient.Builder clientBuilder;
     protected Catnip catnip;
     private volatile HttpClient client;
     
-    public AbstractRequester(@Nonnull final RateLimiter rateLimiter, @Nonnull final HttpClient.Builder clientBuilder) {
+    public AbstractRequester(@Nonnull final RateLimiter rateLimiter) {
         this.rateLimiter = rateLimiter;
-        this.clientBuilder = clientBuilder;
     }
     
     @Override
@@ -111,10 +109,7 @@ public abstract class AbstractRequester implements Requester {
     @Nonnull
     @CheckReturnValue
     protected synchronized HttpClient client() {
-        if(client != null) {
-            return client;
-        }
-        return client = clientBuilder.build();
+        return client;
     }
     
     protected void executeRequest(@Nonnull final QueuedRequest request) {

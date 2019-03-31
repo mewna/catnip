@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2019 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,51 +25,47 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.guild.audit;
+package com.mewna.catnip.entity;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.util.CatnipImmutable;
+import com.mewna.catnip.entity.util.ImageOptions;
+import com.mewna.catnip.util.CDNFormat;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import static org.immutables.value.Value.Immutable;
-
 /**
- * @author SamOphis
- * @since 10/07/18
+ * @author amy
+ * @since 3/30/19.
  */
-@SuppressWarnings("unused")
-@Immutable
-@CatnipImmutable
-@JsonDeserialize(as = AuditLogChangeImpl.class)
-public interface AuditLogChange extends Entity {
-    // "Method '' cannot have own generic type parameters. Attribute accessors can only use enclosing type's type variables."
-    /*
+public interface HasIcon extends Snowflake {
+    /**
+     * @return The hash of the guild's icon.
+     */
     @Nullable
     @CheckReturnValue
-    default <T> T newValue() {
-        return (T) newValueObject();
+    String icon();
+    
+    /**
+     * Return the guild's icon's CDN URL with the specified options.
+     *
+     * @param options The options to configure the URL returned.
+     *
+     * @return The CDN URL for the guild's icon.
+     */
+    @Nullable
+    @CheckReturnValue
+    default String iconUrl(@Nonnull final ImageOptions options) {
+        return CDNFormat.iconUrl(id(), icon(), options);
     }
     
+    
+    /**
+     * @return The CDN URL for the guild's icon.
+     */
     @Nullable
     @CheckReturnValue
-    default <T> T oldValue() {
-        return (T) oldValueObject();
+    default String iconUrl() {
+        return iconUrl(new ImageOptions());
     }
-    */
-    
-    @Nullable
-    @CheckReturnValue
-    Object newValueObject();
-    
-    @Nullable
-    @CheckReturnValue
-    Object oldValueObject();
-    
-    @Nonnull
-    @CheckReturnValue
-    String key();
 }

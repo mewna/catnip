@@ -41,14 +41,6 @@ import com.mewna.catnip.entity.guild.Invite.InviteGuild;
 import com.mewna.catnip.entity.guild.Invite.Inviter;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
 import com.mewna.catnip.entity.guild.audit.*;
-import com.mewna.catnip.entity.impl.*;
-import com.mewna.catnip.entity.impl.EmbedImpl.*;
-import com.mewna.catnip.entity.impl.InviteImpl.InviteChannelImpl;
-import com.mewna.catnip.entity.impl.InviteImpl.InviteGuildImpl;
-import com.mewna.catnip.entity.impl.InviteImpl.InviterImpl;
-import com.mewna.catnip.entity.impl.MessageImpl.AttachmentImpl;
-import com.mewna.catnip.entity.impl.MessageImpl.ReactionImpl;
-import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
 import com.mewna.catnip.entity.message.*;
 import com.mewna.catnip.entity.message.Embed.EmbedType;
 import com.mewna.catnip.entity.message.Embed.Field;
@@ -63,6 +55,7 @@ import com.mewna.catnip.entity.user.Presence.ActivityType;
 import com.mewna.catnip.entity.user.Presence.OnlineStatus;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.entity.voice.VoiceServerUpdate;
+import com.mewna.catnip.entity.voice.VoiceServerUpdateImpl;
 import com.mewna.catnip.util.JsonPojoCodec;
 import io.vertx.core.buffer.Buffer;
 import org.junit.jupiter.api.Test;
@@ -205,7 +198,7 @@ class CodecTest {
         final ChannelPinsUpdate channelPinsUpdate = ChannelPinsUpdateImpl.builder()
                 .catnip(mockNip())
                 .channelIdAsLong(randomPositiveLong())
-                .lastPinTimestamp(OffsetDateTime.now().toString())
+                .lastPinTimestampString(OffsetDateTime.now().toString())
                 .build();
         
         test(channelPinsUpdate);
@@ -225,7 +218,7 @@ class CodecTest {
                 .uses(12)
                 .maxUses(20)
                 .temporary(ThreadLocalRandom.current().nextBoolean())
-                .createdAt(OffsetDateTime.now().toString())
+                .createdAtString(OffsetDateTime.now().toString())
                 .revoked(ThreadLocalRandom.current().nextBoolean())
                 .build();
         
@@ -355,9 +348,9 @@ class CodecTest {
                 .widgetEnabled(ThreadLocalRandom.current().nextBoolean())
                 .widgetChannelIdAsLong(randomPositiveLong())
                 .systemChannelIdAsLong(randomPositiveLong())
-                .joinedAt(OffsetDateTime.now().toString())
+                .joinedAtString(OffsetDateTime.now().toString())
                 .large(ThreadLocalRandom.current().nextBoolean())
-                .unavailable(ThreadLocalRandom.current().nextBoolean())
+                // .unavailable(ThreadLocalRandom.current().nextBoolean())
                 .maxPresences(100_000)
                 .maxMembers(100_000)
                 .vanityUrlCode(null)
@@ -433,8 +426,8 @@ class CodecTest {
                 .channelIdAsLong(randomPositiveLong())
                 .author(user(mockNip))
                 .content("Woah! easy there.")
-                .timestamp(OffsetDateTime.now().toString())
-                .editedTimestamp(OffsetDateTime.now().toString())
+                .timestampString(OffsetDateTime.now().toString())
+                .editedTimestampString(OffsetDateTime.now().toString())
                 .tts(ThreadLocalRandom.current().nextBoolean())
                 .mentionsEveryone(ThreadLocalRandom.current().nextBoolean())
                 .mentionedUsers(Arrays.asList(user(mockNip), user(mockNip)))
@@ -858,8 +851,8 @@ class CodecTest {
     private AuditLogChange auditLogChange(final Catnip catnip) {
         return AuditLogChangeImpl.builder()
                 .catnip(catnip)
-                .newValue("This is a new value")
-                .oldValue("This is an old value")
+                .newValueObject("This is a new value")
+                .oldValueObject("This is an old value")
                 .key("This is a key")
                 .build();
     }
@@ -884,7 +877,7 @@ class CodecTest {
                 .type(random(EmbedType.values()))
                 .description("This is a description")
                 .url(url())
-                .timestamp(OffsetDateTime.now().toString())
+                .timestampString(OffsetDateTime.now().toString())
                 .color(Color.red.getRGB())
                 .footer(FooterImpl.builder()
                         .text("This is a footer")
@@ -968,7 +961,7 @@ class CodecTest {
                 .guildIdAsLong(randomPositiveLong())
                 .nick("Nik")
                 .roleIds(new HashSet<>(Arrays.asList(randomPositiveLongAsString(), randomPositiveLongAsString())))
-                .joinedAt(OffsetDateTime.now().toString())
+                .joinedAtString(OffsetDateTime.now().toString())
                 .deaf(ThreadLocalRandom.current().nextBoolean())
                 .mute(ThreadLocalRandom.current().nextBoolean())
                 .build();

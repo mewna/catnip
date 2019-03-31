@@ -29,12 +29,13 @@ package com.mewna.catnip.entity.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.entity.HasAvatar;
 import com.mewna.catnip.entity.Mentionable;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.entity.util.ImageOptions;
+import com.mewna.catnip.util.CDNFormat;
 import com.mewna.catnip.util.CatnipImmutable;
 import org.immutables.value.Value.Immutable;
 
@@ -53,80 +54,7 @@ import java.util.concurrent.CompletionStage;
 @Immutable
 @CatnipImmutable
 @JsonDeserialize(as = UserImpl.class)
-public interface User extends Snowflake, Mentionable {
-    /**
-     * Whether the user's avatar is animated.
-     *
-     * @return True if the avatar is animated, false otherwise.
-     */
-    @JsonIgnore
-    @CheckReturnValue
-    boolean animatedAvatar();
-    
-    /**
-     * The URL for the default avatar for this user.
-     *
-     * @return String containing the URL to the default avatar. Never null.
-     */
-    @Nonnull
-    @JsonIgnore
-    @CheckReturnValue
-    String defaultAvatarUrl();
-    
-    /**
-     * The URL for the user's set avatar. Can be null if the user has not set an avatar.
-     *
-     * @param options {@link ImageOptions Image Options}.
-     *
-     * @return String containing the URL to their avatar, options considered. Can be null.
-     *
-     * @see User#defaultAvatarUrl() Getting the user's default fallback avatar
-     * @see User#effectiveAvatarUrl() Getting the user's effective avatar
-     */
-    @Nullable
-    @JsonIgnore
-    @CheckReturnValue
-    String avatarUrl(@Nonnull final ImageOptions options);
-    
-    /**
-     * The URL for the user's set avatar. Can be null if the user has not set an avatar.
-     *
-     * @return String containing the URL to their avatar. Can be null.
-     *
-     * @see User#defaultAvatarUrl() Getting the user's default fallback avatar
-     * @see User#effectiveAvatarUrl() Getting the user's effective avatar
-     */
-    @Nullable
-    @JsonIgnore
-    @CheckReturnValue
-    String avatarUrl();
-    
-    /**
-     * The URL for the user's effective avatar, as displayed in the Discord client.
-     * <br>Convenience method for getting the user's default avatar
-     * when {@link User#avatarUrl()} is null.
-     *
-     * @param options {@link ImageOptions Image Options}.
-     *
-     * @return String containing a URL to their effective avatar, options considered. Never null.
-     */
-    @Nonnull
-    @JsonIgnore
-    @CheckReturnValue
-    String effectiveAvatarUrl(@Nonnull final ImageOptions options);
-    
-    /**
-     * The URL for the user's effective avatar, as displayed in the Discord client.
-     * <br>Convenience method for getting the user's default avatar
-     * when {@link User#avatarUrl()} is null.
-     *
-     * @return String containing a URL to their effective avatar. Never null.
-     */
-    @Nonnull
-    @JsonIgnore
-    @CheckReturnValue
-    String effectiveAvatarUrl();
-    
+public interface User extends Snowflake, Mentionable, HasAvatar {
     /**
      * The username of the user.
      *
@@ -155,15 +83,6 @@ public interface User extends Snowflake, Mentionable {
         final String nick = member.nick();
         return nick != null ? nick : username;
     }
-    
-    /**
-     * Discriminator of the user, used to tell Amy#0001 from Amy#0002.
-     *
-     * @return 4 digit discriminator as a string. Never null.
-     */
-    @Nonnull
-    @CheckReturnValue
-    String discriminator();
     
     /**
      * The DiscordTag of the user, which is the username, an hash, and the discriminator.

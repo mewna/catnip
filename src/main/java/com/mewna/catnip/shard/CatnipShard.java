@@ -28,9 +28,9 @@
 package com.mewna.catnip.shard;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.impl.PresenceImpl;
 import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.Presence;
+import com.mewna.catnip.entity.user.PresenceImpl;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.shard.LifecycleEvent.Raw;
@@ -595,7 +595,7 @@ public class CatnipShard extends AbstractVerticle {
                         .put("$device", "catnip")
                 );
         if(presence != null) {
-            data.put("presence", ((PresenceImpl) presence).asJson());
+            data.put("presence", presence.asJson());
         }
         return basePayload(GatewayOp.IDENTIFY, data);
     }

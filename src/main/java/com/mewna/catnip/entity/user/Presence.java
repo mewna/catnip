@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.util.CatnipImmutable;
+import io.vertx.core.json.JsonObject;
 import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
@@ -51,7 +52,7 @@ import java.util.Set;
 @Immutable
 @CatnipImmutable
 @JsonDeserialize(as = PresenceImpl.class)
-public interface Presence extends RequiresCatnip {
+public interface Presence {
     @Nonnull
     @CheckReturnValue
     static Presence of(@Nonnull final OnlineStatus status, @Nullable final Activity activity) {
@@ -87,6 +88,33 @@ public interface Presence extends RequiresCatnip {
     
     @Nonnull
     Catnip catnip();
+    
+    @Nonnull
+    @CheckReturnValue
+    default JsonObject asJson() {
+        final JsonObject innerData = new JsonObject()
+                .put("status", status().asString());
+        if(status() == OnlineStatus.IDLE) {
+            innerData.put("since", System.currentTimeMillis());
+            innerData.put("afk", true);
+        } else {
+            innerData.putNull("since");
+            innerData.put("afk", false);
+        }
+        if(activity() != null) {
+            final JsonObject game = new JsonObject()
+                    .put("name", activity().name())
+                    .put("type", activity().type().id());
+            if(activity().url() != null) {
+                game.put("url", activity().url());
+            }
+            innerData.put("game", game);
+        } else {
+            innerData.putNull("game");
+        }
+        
+        return innerData;
+    }
     
     enum OnlineStatus {
         ONLINE,

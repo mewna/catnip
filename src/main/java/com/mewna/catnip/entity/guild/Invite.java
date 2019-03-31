@@ -29,11 +29,14 @@ package com.mewna.catnip.entity.guild;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
+import com.mewna.catnip.entity.HasAvatar;
+import com.mewna.catnip.entity.HasIcon;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
 import com.mewna.catnip.entity.guild.Guild.VerificationLevel;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.CDNFormat;
 import com.mewna.catnip.util.CatnipImmutable;
 import com.mewna.catnip.util.PermissionUtil;
 import org.immutables.value.Value.Immutable;
@@ -123,54 +126,19 @@ public interface Invite extends Entity {
     @Immutable
     @CatnipImmutable
     @JsonDeserialize(as = InviterImpl.class)
-    interface Inviter extends Snowflake {
+    interface Inviter extends Snowflake, HasAvatar {
         @Nonnull
         @CheckReturnValue
         String username();
-        
-        @Nonnull
-        @CheckReturnValue
-        String discriminator();
-        
-        @Nonnull
-        @CheckReturnValue
-        String avatar();
-        
-        @CheckReturnValue
-        boolean animatedAvatar();
-        
-        @Nonnull
-        @CheckReturnValue
-        String defaultAvatarUrl();
-        
-        @Nullable
-        @CheckReturnValue
-        String avatarUrl(@Nonnull ImageOptions options);
-        
-        @Nullable
-        @CheckReturnValue
-        String avatarUrl();
-        
-        @Nonnull
-        @CheckReturnValue
-        String effectiveAvatarUrl(@Nonnull ImageOptions options);
-        
-        @Nonnull
-        @CheckReturnValue
-        String effectiveAvatarUrl();
     }
     
     @Immutable
     @CatnipImmutable
     @JsonDeserialize(as = InviteGuildImpl.class)
-    interface InviteGuild extends Snowflake {
+    interface InviteGuild extends Snowflake, HasIcon {
         @Nonnull
         @CheckReturnValue
         String name();
-        
-        @Nullable
-        @CheckReturnValue
-        String icon();
         
         @Nullable
         @CheckReturnValue
@@ -186,17 +154,9 @@ public interface Invite extends Entity {
         
         @Nullable
         @CheckReturnValue
-        String iconUrl(@Nonnull ImageOptions options);
-        
-        @Nullable
-        @CheckReturnValue
-        default String iconUrl() {
-            return iconUrl(new ImageOptions());
+        default String splashUrl(@Nonnull ImageOptions options) {
+            return CDNFormat.splashUrl(id(), splash(), options);
         }
-        
-        @Nullable
-        @CheckReturnValue
-        String splashUrl(@Nonnull ImageOptions options);
         
         @Nullable
         @CheckReturnValue

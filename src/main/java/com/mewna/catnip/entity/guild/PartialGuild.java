@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.CDNFormat;
 import com.mewna.catnip.util.CatnipImmutable;
 import org.immutables.value.Value.Immutable;
 
@@ -59,7 +60,9 @@ public interface PartialGuild extends Snowflake {
     @Nullable
     @JsonIgnore
     @CheckReturnValue
-    String iconUrl(@Nonnull final ImageOptions options);
+    default String iconUrl(@Nonnull final ImageOptions options) {
+        return CDNFormat.iconUrl(id(), icon(), options);
+    }
     
     @Nullable
     @JsonIgnore

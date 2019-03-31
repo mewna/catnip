@@ -28,6 +28,7 @@
 package com.mewna.catnip.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.util.CatnipMeta;
 import io.vertx.core.json.JsonObject;
@@ -40,6 +41,7 @@ import javax.annotation.Nonnull;
  * @author natanbc
  * @since 5/9/18.
  */
+@JsonIgnoreProperties("catnip")
 @SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
 public interface Entity {
     /**

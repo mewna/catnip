@@ -28,7 +28,7 @@
 package com.mewna.catnip.util.task;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.impl.PresenceImpl;
+import com.mewna.catnip.entity.user.PresenceImpl;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;

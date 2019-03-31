@@ -31,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.cache.view.NamedCacheView;
+import com.mewna.catnip.entity.HasIcon;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.Timestamped;
 import com.mewna.catnip.entity.channel.*;
@@ -40,6 +41,7 @@ import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.CDNFormat;
 import com.mewna.catnip.util.CatnipImmutable;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.Utils;
@@ -69,8 +71,7 @@ import java.util.concurrent.CompletionStage;
 @Immutable
 @CatnipImmutable
 @JsonDeserialize(as = GuildImpl.class)
-public interface Guild extends Snowflake, Timestamped {
-    
+public interface Guild extends Snowflake, Timestamped, HasIcon {
     int NICKNAME_MAX_LENGTH = 32;
     
     /**
@@ -79,33 +80,6 @@ public interface Guild extends Snowflake, Timestamped {
     @Nonnull
     @CheckReturnValue
     String name();
-    
-    /**
-     * @return The hash of the guild's icon.
-     */
-    @Nullable
-    @CheckReturnValue
-    String icon();
-    
-    /**
-     * Return the guild's icon's CDN URL with the specified options.
-     *
-     * @param options The options to configure the URL returned.
-     *
-     * @return The CDN URL for the guild's icon.
-     */
-    @Nullable
-    @CheckReturnValue
-    String iconUrl(@Nonnull final ImageOptions options);
-    
-    /**
-     * @return The CDN URL for the guild's icon.
-     */
-    @Nullable
-    @CheckReturnValue
-    default String iconUrl() {
-        return iconUrl(new ImageOptions());
-    }
     
     /**
      * @return The splash image for the guild. May be {@code null}.
@@ -123,7 +97,9 @@ public interface Guild extends Snowflake, Timestamped {
      */
     @Nullable
     @CheckReturnValue
-    String splashUrl(@Nonnull ImageOptions options);
+    default String splashUrl(@Nonnull final ImageOptions options) {
+            return CDNFormat.splashUrl(id(), splash(), options);
+    }
     
     /**
      * @return The CDN URL of the guild's splash image.

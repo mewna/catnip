@@ -151,6 +151,7 @@
                 <configuration>
                     <source>11</source>
                     <target>11</target>
+
                     <annotationProcessorPaths>
                         <dependency>
                             <groupId>org.immutables</groupId>
@@ -158,10 +159,13 @@
                             <version>${immutables.version}</version>
                         </dependency>
                     </annotationProcessorPaths>
+
                     <compilerArgs>
                         <compilerArg>-XDdev</compilerArg>
                         <compilerArg>-verbose</compilerArg>
                     </compilerArgs>
+
+                    <fork>true</fork>
                 </configuration>
             </plugin>
 

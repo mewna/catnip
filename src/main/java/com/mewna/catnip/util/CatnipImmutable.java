@@ -41,6 +41,12 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.PACKAGE, ElementType.TYPE})
 @Retention(RetentionPolicy.CLASS)
-@Style(typeImmutable = "*Impl", visibility = ImplementationVisibility.PUBLIC)
+@Style(
+        typeModifiable = "*Impl",
+        visibility = ImplementationVisibility.PUBLIC,
+        jdkOnly = true,
+        jacksonIntegration = false
+)
 public @interface CatnipImmutable {
+
 }

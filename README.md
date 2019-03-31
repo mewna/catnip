@@ -159,7 +159,7 @@ Sorry, I lost the screenshots :<
 
 ## TODO
 
-- Figure out why immutables aren't generating correctly for audit log entries
+- Audit log entries: "Method '' cannot have own generic type parameters. Attribute accessors can only use enclosing type's type variables."
 - Figure out why Guild isn't generated with some methods
 - Switch to following JavaBeans conventions?
 - Fix missing JSR305 annotations in the Presence/Embed Builders
