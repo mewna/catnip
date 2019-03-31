@@ -63,7 +63,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
-import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -86,7 +85,6 @@ import static com.mewna.catnip.shard.ShardAddress.*;
  * @since 8/31/18.
  */
 @SuppressWarnings("OverlyCoupledClass")
-@Accessors(fluent = true, chain = true)
 public class CatnipImpl implements Catnip {
     private final Vertx vertx;
     private final String token;

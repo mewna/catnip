@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.shard.event;
 
-import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -39,7 +38,6 @@ import java.beans.ConstructorProperties;
  * @author amy
  * @since 3/7/19.
  */
-@Accessors(fluent = true)
 public class DoubleEventTypeImpl<T, E> implements DoubleEventType<T, E> {
     private final String key;
     private final Class<T> left;

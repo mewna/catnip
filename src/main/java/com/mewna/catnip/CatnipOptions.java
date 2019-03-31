@@ -50,7 +50,6 @@ import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.util.logging.DefaultLogAdapter;
 import com.mewna.catnip.util.logging.LogAdapter;
 import io.vertx.core.json.JsonObject;
-import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -62,7 +61,6 @@ import java.util.Set;
  * @author amy
  * @since 9/25/18.
  */
-@Accessors(fluent = true, chain = true)
 @SuppressWarnings("OverlyCoupledClass")
 public final class CatnipOptions implements Cloneable {
     /**

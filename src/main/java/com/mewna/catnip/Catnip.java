@@ -208,8 +208,6 @@ public interface Catnip {
     @CheckReturnValue
     Vertx vertx();
     
-    // Implementations are lombok-generated
-    
     /**
      * @return The event bus used by the vert.x instance that this catnip
      * instance uses.

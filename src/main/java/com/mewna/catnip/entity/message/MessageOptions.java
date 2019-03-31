@@ -29,7 +29,6 @@ package com.mewna.catnip.entity.message;
 
 import com.google.common.collect.ImmutableList;
 import io.vertx.core.buffer.Buffer;
-import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.CheckReturnValue;
@@ -49,7 +48,6 @@ import java.util.List;
  * @author SamOphis
  * @since 10/10/2018
  */
-@Accessors(fluent = true)
 @SuppressWarnings("unused")
 public class MessageOptions {
     private String content;
