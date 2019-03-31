@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2019 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,34 +25,60 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.message;
+package com.mewna.catnip.entity.misc;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.entity.channel.MessageChannel;
-import com.mewna.catnip.entity.channel.TextChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.util.CatnipEntity;
-import org.immutables.value.Value.Modifiable;
+import org.immutables.value.Value;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 
 /**
- * When a message's embeds are updated, Discord sends a {@code MESSAGE_UPDATE}
- * event that only has id/channel_id/guild_id/embeds in the inner payload.
- * Because of this, we can't just use {@link Message} to represent this event.
- *
  * @author amy
- * @since 10/9/18.
+ * @since 3/30/19.
  */
-@Modifiable
+@Value.Modifiable
 @CatnipEntity
-@JsonDeserialize(as = MessageEmbedUpdateImpl.class)
-public interface MessageEmbedUpdate extends Snowflake, RequiresCatnip<MessageEmbedUpdateImpl> {
+@JsonDeserialize(as = CustomEmojiImpl.class)
+public
+interface CustomEmoji extends Emoji, RequiresCatnip<CustomEmojiImpl> {
+    @Override
+    @Nonnull
+    @CheckReturnValue
+    default String id() {
+        return Long.toUnsignedString(idAsLong());
+    }
+    
+    /**
+     * Guild that owns this emoji, or {@code null} if it has no guild.
+     * <p>
+     * NOTE: This may be null in the case of a reaction, because the data
+     * may not be available to get the id for the emoji!
+     *
+     * @return String representing the ID.
+     */
+    @Nullable
+    @CheckReturnValue
+    default Guild guild() {
+        final long id = guildIdAsLong();
+        if(id == 0) {
+            return null;
+        }
+        return catnip().cache().guild(guildIdAsLong());
+    }
+    
+    /**
+     * ID of guild that owns this emoji, or {@code null} if it has no guild.
+     * <p>
+     * NOTE: This may be null in the case of a reaction, because the data
+     * may not be available to get the id for the emoji!
+     *
+     * @return String representing the ID.
+     */
     @Nullable
     @CheckReturnValue
     default String guildId() {
@@ -63,40 +89,40 @@ public interface MessageEmbedUpdate extends Snowflake, RequiresCatnip<MessageEmb
         return Long.toUnsignedString(id);
     }
     
+    /**
+     * ID of guild that owns this emoji, or {@code 0} if it has no guild.
+     * <p>
+     * NOTE: This may be null in the case of a reaction, because the data
+     * may not be available to get the id for the emoji!
+     *
+     * @return Long representing the ID.
+     */
     @CheckReturnValue
     long guildIdAsLong();
     
-    @Nullable
+    @Override
     @CheckReturnValue
-    default Guild guild() {
-        final long id = guildIdAsLong();
-        if(id == 0) {
-            return null;
-        } else {
-            return catnip().cache().guild(id);
-        }
+    default boolean custom() {
+        return true;
     }
     
+    @Override
     @Nonnull
     @CheckReturnValue
-    default String channelId() {
-        return Long.toUnsignedString(channelIdAsLong());
+    default String forMessage() {
+        return String.format("<%s:%s:%s>", animated() ? "a" : "", name(), id());
     }
     
-    @CheckReturnValue
-    long channelIdAsLong();
-    
-    @CheckReturnValue
-    default MessageChannel channel() {
-        final long guild = guildIdAsLong();
-        if(guild != 0) {
-            return (TextChannel) catnip().cache().channel(guild, channelIdAsLong());
-        } else {
-            return catnip().cache().dmChannel(channelIdAsLong());
-        }
-    }
-    
+    @Override
     @Nonnull
     @CheckReturnValue
-    List<Embed> embeds();
+    default String forReaction() {
+        return String.format("%s:%s", name(), id());
+    }
+    
+    @Override
+    @CheckReturnValue
+    default boolean is(@Nonnull final String emoji) {
+        return id().equals(emoji) || forMessage().equals(emoji) || forReaction().equals(emoji);
+    }
 }

@@ -49,7 +49,7 @@ import java.util.concurrent.CompletionStage;
  * @since 9/12/18
  */
 @SuppressWarnings("unused")
-public interface MessageChannel extends Channel {
+public interface MessageChannel extends Channel<MessageChannel> {
     /**
      * Send a message to this channel with the specified content.
      *
@@ -67,7 +67,7 @@ public interface MessageChannel extends Channel {
         final CompletionStage<Message> future = catnip().rest().channel().sendMessage(id(), content);
         // Inject guild manually because Discord does not send it in response
         if(isGuild()) {
-            return future.thenApply(msg -> MessageImpl.copyOf(msg).withGuildIdAsLong(asGuildChannel().guildIdAsLong()));
+            return future.thenApply(msg -> ((MessageImpl) msg).guildIdAsLong(asGuildChannel().guildIdAsLong()));
         }
         return future;
     }

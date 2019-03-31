@@ -76,14 +76,6 @@ public interface Entity {
     }
     
     /**
-     * Returns the catnip instance associated with this entity.
-     *
-     * @return The catnip instance of this entity.
-     */
-    @JsonIgnore
-    Catnip catnip();
-    
-    /**
      * Map this entity instance to a JSON object.
      *
      * @return A JSON object representing this entity.

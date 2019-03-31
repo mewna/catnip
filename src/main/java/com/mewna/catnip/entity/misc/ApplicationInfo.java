@@ -28,9 +28,10 @@
 package com.mewna.catnip.entity.misc;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.util.CatnipImmutable;
-import org.immutables.value.Value.Immutable;
+import com.mewna.catnip.util.CatnipEntity;
+import org.immutables.value.Value.Modifiable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -42,10 +43,10 @@ import java.util.List;
  * @author amy
  * @since 10/17/18.
  */
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = ApplicationInfoImpl.class)
-public interface ApplicationInfo extends Snowflake {
+public interface ApplicationInfo extends Snowflake, RequiresCatnip<ApplicationInfoImpl> {
     /**
      * @return The application's name.
      */

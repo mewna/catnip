@@ -32,21 +32,21 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.cache.view.NamedCacheView;
 import com.mewna.catnip.entity.HasIcon;
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.Timestamped;
 import com.mewna.catnip.entity.channel.*;
 import com.mewna.catnip.entity.misc.CreatedInvite;
-import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
+import com.mewna.catnip.entity.misc.CustomEmoji;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.CDNFormat;
-import com.mewna.catnip.util.CatnipImmutable;
+import com.mewna.catnip.util.CatnipEntity;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.Utils;
 import io.vertx.core.json.JsonObject;
-import org.immutables.value.Value.Immutable;
+import org.immutables.value.Value.Modifiable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -68,10 +68,10 @@ import java.util.concurrent.CompletionStage;
  * @since 9/6/18
  */
 @SuppressWarnings("unused")
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = GuildImpl.class)
-public interface Guild extends Snowflake, Timestamped, HasIcon {
+public interface Guild extends Timestamped, HasIcon, RequiresCatnip<GuildImpl> {
     int NICKNAME_MAX_LENGTH = 32;
     
     /**

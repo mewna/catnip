@@ -1,5 +1,6 @@
 package com.mewna.catnip.entity.guild;
 
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.util.Permission;
@@ -15,7 +16,7 @@ import java.util.Set;
  * @author schlaubi
  * @since 13/2/19.
  */
-public interface PermissionHolder extends GuildEntity, Snowflake {
+public interface PermissionHolder<T extends PermissionHolder<T>> extends GuildEntity<T>, Snowflake {
     
     /**
      * Returns a list of the entity's permissions.

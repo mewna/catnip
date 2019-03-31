@@ -28,10 +28,11 @@
 package com.mewna.catnip.entity.guild;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.user.User;
-import com.mewna.catnip.util.CatnipImmutable;
-import org.immutables.value.Value.Immutable;
+import com.mewna.catnip.util.CatnipEntity;
+import org.immutables.value.Value.Modifiable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -42,10 +43,10 @@ import java.util.Set;
  * @author amy
  * @since 10/4/18.
  */
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = PartialMemberImpl.class)
-public interface PartialMember extends GuildEntity, Snowflake {
+public interface PartialMember extends GuildEntity<PartialMemberImpl>, Snowflake {
     @Override
     @CheckReturnValue
     default long idAsLong() {

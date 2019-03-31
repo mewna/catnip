@@ -113,4 +113,8 @@ public class PermissionOverrideData implements JsonConvertible {
                 .put("allow", Permission.from(allow))
                 .put("deny", Permission.from(deny));
     }
+    
+    public String id() {
+        return targetId;
+    }
 }

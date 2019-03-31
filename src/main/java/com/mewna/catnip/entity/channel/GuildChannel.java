@@ -55,7 +55,7 @@ import java.util.function.Consumer;
  * @since 9/12/18
  */
 @SuppressWarnings("unused")
-public interface GuildChannel extends GuildEntity, Channel {
+public interface GuildChannel<T extends GuildEntity<T>> extends GuildEntity<T>, Channel {
     /**
      * @return The name of the channel.
      */
@@ -194,7 +194,7 @@ public interface GuildChannel extends GuildEntity, Channel {
     
     @SuppressWarnings({"unused", "WeakerAccess"})
     class ChannelEditFields {
-        private final GuildChannel channel;
+        private final GuildChannel<?> channel;
         private String name;
         private Integer position;
         private String topic;
@@ -279,7 +279,8 @@ public interface GuildChannel extends GuildEntity, Channel {
             if(overrides != null && !overrides.isEmpty()) {
                 final Map<String, PermissionOverrideData> finalOverrides = new HashMap<>();
                 if(channel != null) {
-                    channel.overrides().forEach(override -> finalOverrides.put(override.id(), PermissionOverrideData.create(override)));
+                    channel.overrides().forEach(override -> finalOverrides.put(override.id(),
+                            PermissionOverrideData.create((PermissionOverride) override)));
                 }
                 overrides.forEach(finalOverrides::put);
                 final JsonObject object = new JsonObject();

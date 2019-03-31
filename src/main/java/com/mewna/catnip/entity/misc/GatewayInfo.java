@@ -29,8 +29,9 @@ package com.mewna.catnip.entity.misc;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.util.CatnipImmutable;
-import org.immutables.value.Value.Immutable;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.util.CatnipEntity;
+import org.immutables.value.Value.Modifiable;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -39,10 +40,10 @@ import javax.annotation.Nonnull;
  * @author amy
  * @since 12/10/18.
  */
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = GatewayInfoImpl.class)
-public interface GatewayInfo extends Entity {
+public interface GatewayInfo extends Entity, RequiresCatnip<GatewayInfoImpl> {
     boolean valid();
     
     @Nonnull

@@ -30,9 +30,9 @@ package com.mewna.catnip.entity.user;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.util.CatnipImmutable;
+import com.mewna.catnip.util.CatnipEntity;
 import io.vertx.core.json.JsonObject;
-import org.immutables.value.Value.Immutable;
+import org.immutables.value.Value.Modifiable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -49,17 +49,16 @@ import java.util.Set;
  * @since 9/21/18.
  */
 @SuppressWarnings("unused")
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = PresenceImpl.class)
-public interface Presence {
+public interface Presence extends RequiresCatnip<PresenceImpl> {
     @Nonnull
     @CheckReturnValue
     static Presence of(@Nonnull final OnlineStatus status, @Nullable final Activity activity) {
-        return PresenceImpl.builder()
+        return PresenceImpl.create()
                 .status(status)
-                .activity(activity)
-                .build();
+                .activity(activity);
     }
     
     @Nonnull
@@ -85,9 +84,6 @@ public interface Presence {
     
     @Nullable
     Activity activity();
-    
-    @Nonnull
-    Catnip catnip();
     
     @Nonnull
     @CheckReturnValue
@@ -218,16 +214,16 @@ public interface Presence {
         }
     }
     
-    @Immutable
-    @CatnipImmutable
+    @Modifiable
+    @CatnipEntity
     interface ActivityTimestamps {
         long start();
         
         long end();
     }
     
-    @Immutable
-    @CatnipImmutable
+    @Modifiable
+    @CatnipEntity
     interface ActivityParty {
         @Nullable
         String id();
@@ -237,8 +233,8 @@ public interface Presence {
         int maxSize();
     }
     
-    @Immutable
-    @CatnipImmutable
+    @Modifiable
+    @CatnipEntity
     interface ActivityAssets {
         @Nullable
         String largeImage();
@@ -253,8 +249,8 @@ public interface Presence {
         String smallText();
     }
     
-    @Immutable
-    @CatnipImmutable
+    @Modifiable
+    @CatnipEntity
     interface ActivitySecrets {
         @Nullable
         String join();
@@ -266,8 +262,8 @@ public interface Presence {
         String match();
     }
     
-    @Immutable
-    @CatnipImmutable
+    @Modifiable
+    @CatnipEntity
     @JsonDeserialize(as = ActivityImpl.class)
     interface Activity {
         @Nonnull
@@ -279,11 +275,10 @@ public interface Presence {
             if(url != null && type != ActivityType.STREAMING) {
                 throw new IllegalArgumentException("You can only specify an URL when the ActivityType == STREAMING!");
             }
-            return ActivityImpl.builder()
+            return ActivityImpl.create()
                     .name(name)
                     .type(type)
-                    .url(url)
-                    .build();
+                    .url(url);
         }
         
         @Nonnull

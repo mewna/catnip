@@ -28,23 +28,96 @@
 package com.mewna.catnip.entity.misc;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.Timestamped;
 import com.mewna.catnip.entity.guild.Invite;
-import com.mewna.catnip.util.CatnipImmutable;
-import org.immutables.value.Value.Immutable;
+import com.mewna.catnip.entity.guild.Invite.InviteChannel;
+import com.mewna.catnip.entity.guild.Invite.InviteGuild;
+import com.mewna.catnip.entity.guild.Invite.Inviter;
+import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.CatnipEntity;
+import com.mewna.catnip.util.PermissionUtil;
+import org.immutables.value.Value.Modifiable;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
+import java.util.concurrent.CompletionStage;
 
 /**
  * @author natanbc
  * @since 9/14/18
  */
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = CreatedInviteImpl.class)
-public interface CreatedInvite extends Invite, Timestamped {
+public interface CreatedInvite extends Timestamped, RequiresCatnip<CreatedInviteImpl> {
+    /**
+     * @return The code for this invite.
+     */
+    @Nonnull
+    @CheckReturnValue
+    String code();
+    
+    /**
+     * @return The person who created the invite.
+     */
+    @Nonnull
+    @CheckReturnValue
+    Inviter inviter();
+    
+    /**
+     * @return The guild the invite is for.
+     */
+    @Nonnull
+    @CheckReturnValue
+    InviteGuild guild();
+    
+    /**
+     * @return The channel the member is for.
+     */
+    @Nonnull
+    @CheckReturnValue
+    InviteChannel channel();
+    
+    /**
+     * @return The approximate number of people online in the guild.
+     */
+    @Nonnegative
+    int approximatePresenceCount();
+    
+    /**
+     * @return The approximate number of people in the guild.
+     */
+    @Nonnegative
+    int approximateMemberCount();
+    
+    /**
+     * Deletes the invite.
+     *
+     * @param reason The reason that will be displayed in audit log
+     *
+     * @return A CompletionStage that completes when the invite is deleted.
+     */
+    @Nonnull
+    default CompletionStage<Invite> delete(@Nullable final String reason) {
+        PermissionUtil.checkPermissions(catnip(), guild().id(), channel().id(),
+                Permission.MANAGE_CHANNELS);
+        return catnip().rest().invite().deleteInvite(code(), reason);
+    }
+    
+    /**
+     * Deletes the invite.
+     *
+     * @return A CompletionStage that completes when the invite is deleted.
+     */
+    @Nonnull
+    default CompletionStage<Invite> delete() {
+        return delete(null);
+    }
+    
     @Nonnegative
     int uses();
     

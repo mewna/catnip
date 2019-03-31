@@ -165,4 +165,7 @@ Sorry, I lost the screenshots :<
 - Fix missing JSR305 annotations in the Presence/Embed Builders
 - I think I accidentally deleted requester from CatnipOptions?
 - Channels need to inject catnip into the override object instances when injecting catnip
-- Use stack walking properly
+- Some ugly copy/pasting, because annoying stuff with immutables...
+  - `ApplicationOwner`/`User`, `CreatedInvite`/`Invite`
+- `CreatedInvite` is not actually used now, because of compile errors I didn't wanna fix
+- Lots of inner interfaces are hoisted up to their own classes

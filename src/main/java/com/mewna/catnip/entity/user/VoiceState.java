@@ -29,11 +29,12 @@ package com.mewna.catnip.entity.user;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.channel.VoiceChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.util.CatnipImmutable;
-import org.immutables.value.Value.Immutable;
+import com.mewna.catnip.util.CatnipEntity;
+import org.immutables.value.Value.Modifiable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -46,10 +47,10 @@ import java.util.Objects;
  * @author amy
  * @since 9/21/18.
  */
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = VoiceStateImpl.class)
-public interface VoiceState extends Entity {
+public interface VoiceState extends Entity, RequiresCatnip<VoiceStateImpl> {
     /**
      * @return The id of the guild this voice state is for, if applicable.
      */

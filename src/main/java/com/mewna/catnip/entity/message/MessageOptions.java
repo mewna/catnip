@@ -227,14 +227,14 @@ public class MessageOptions {
         if(embed == null && content == null) {
             throw new IllegalStateException("messages must have an embed or text content!");
         }
-        final var impl = MessageImpl.builder();
+        final var impl = MessageImpl.create();
         impl.content(content);
         if(embed != null) {
             impl.embeds(Collections.singletonList(embed));
         } else {
             impl.embeds(Collections.emptyList());
         }
-        return impl.build();
+        return impl;
     }
     
     public String content() {

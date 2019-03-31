@@ -27,6 +27,9 @@
 
 package com.mewna.catnip.util;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.immutables.annotate.InjectAnnotation;
+import org.immutables.annotate.InjectAnnotation.Where;
 import org.immutables.value.Value.Style;
 import org.immutables.value.Value.Style.ImplementationVisibility;
 
@@ -43,10 +46,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 @Style(
         typeModifiable = "*Impl",
+        set = "*",
         visibility = ImplementationVisibility.PUBLIC,
-        jdkOnly = true,
-        jacksonIntegration = false
+        jdkOnly = true
 )
-public @interface CatnipImmutable {
-
+@InjectAnnotation(type = JsonIgnoreProperties.class, code = "(\"initialized\")", target = Where.MODIFIABLE_TYPE)
+public @interface CatnipEntity {
 }

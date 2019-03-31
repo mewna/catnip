@@ -29,9 +29,10 @@ package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.Timestamped;
-import com.mewna.catnip.util.CatnipImmutable;
-import org.immutables.value.Value.Immutable;
+import com.mewna.catnip.util.CatnipEntity;
+import org.immutables.value.Value.Modifiable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -44,10 +45,10 @@ import java.time.OffsetDateTime;
  * @author amy
  * @since 10/9/18.
  */
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = ChannelPinsUpdateImpl.class)
-public interface ChannelPinsUpdate extends Entity, Timestamped {
+public interface ChannelPinsUpdate extends Entity, Timestamped, RequiresCatnip<ChannelPinsUpdateImpl> {
     /**
      * @return The id of the channel that pins were updated in. Will never be
      * {@code null}.

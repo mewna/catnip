@@ -29,23 +29,23 @@ package com.mewna.catnip.entity.guild.audit;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.util.CatnipImmutable;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.util.CatnipEntity;
+import org.immutables.value.Value.Modifiable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import static org.immutables.value.Value.Immutable;
 
 /**
  * @author SamOphis
  * @since 10/07/18
  */
 @SuppressWarnings("unused")
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = AuditLogChangeImpl.class)
-public interface AuditLogChange extends Entity {
+public interface AuditLogChange extends Entity, RequiresCatnip<AuditLogChangeImpl> {
     // "Method '' cannot have own generic type parameters. Attribute accessors can only use enclosing type's type variables."
     /*
     @Nullable

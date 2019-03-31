@@ -34,7 +34,7 @@ import com.mewna.catnip.entity.channel.UserDMChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
-import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
+import com.mewna.catnip.entity.misc.CustomEmoji;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;

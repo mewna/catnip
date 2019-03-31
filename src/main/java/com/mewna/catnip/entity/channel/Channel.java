@@ -30,6 +30,7 @@ package com.mewna.catnip.entity.channel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
@@ -48,7 +49,7 @@ import java.util.concurrent.CompletionStage;
  */
 @SuppressWarnings({"ClassReferencesSubclass", "unused"})
 @JsonTypeInfo(use = Id.CLASS)
-public interface Channel extends Snowflake {
+public interface Channel<T extends Channel<T>> extends Snowflake, RequiresCatnip<T> {
     /**
      * @return The type of this channel.
      */

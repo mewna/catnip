@@ -29,8 +29,8 @@ package com.mewna.catnip.entity.message;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Timestamped;
-import com.mewna.catnip.util.CatnipImmutable;
-import org.immutables.value.Value.Immutable;
+import com.mewna.catnip.util.CatnipEntity;
+import org.immutables.value.Value.Modifiable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -45,8 +45,8 @@ import java.util.List;
  * @since 9/2/18.
  */
 @SuppressWarnings("unused")
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = EmbedImpl.class)
 public interface Embed extends Timestamped {
     /**
@@ -201,8 +201,8 @@ public interface Embed extends Timestamped {
         }
     }
     
-    @Immutable
-    @CatnipImmutable
+    @Modifiable
+    @CatnipEntity
     @JsonDeserialize(as = AuthorImpl.class)
     interface Author {
         /**
@@ -239,8 +239,8 @@ public interface Embed extends Timestamped {
         String proxyIconUrl();
     }
     
-    @Immutable
-    @CatnipImmutable
+    @Modifiable
+    @CatnipEntity
     @JsonDeserialize(as = FieldImpl.class)
     interface Field {
         /**
@@ -270,8 +270,8 @@ public interface Embed extends Timestamped {
         boolean inline();
     }
     
-    @Immutable
-    @CatnipImmutable
+    @Modifiable
+    @CatnipEntity
     @JsonDeserialize(as = FooterImpl.class)
     interface Footer {
         /**
@@ -300,8 +300,8 @@ public interface Embed extends Timestamped {
         String proxyIconUrl();
     }
     
-    @Immutable
-    @CatnipImmutable
+    @Modifiable
+    @CatnipEntity
     @JsonDeserialize(as = ImageImpl.class)
     interface Image {
         /**
@@ -338,8 +338,8 @@ public interface Embed extends Timestamped {
         int width();
     }
     
-    @Immutable
-    @CatnipImmutable
+    @Modifiable
+    @CatnipEntity
     @JsonDeserialize(as = ProviderImpl.class)
     interface Provider {
         /**
@@ -360,8 +360,8 @@ public interface Embed extends Timestamped {
         String url();
     }
     
-    @Immutable
-    @CatnipImmutable
+    @Modifiable
+    @CatnipEntity
     @JsonDeserialize(as = ThumbnailImpl.class)
     interface Thumbnail {
         /**
@@ -398,8 +398,8 @@ public interface Embed extends Timestamped {
         int width();
     }
     
-    @Immutable
-    @CatnipImmutable
+    @Modifiable
+    @CatnipEntity
     @JsonDeserialize(as = VideoImpl.class)
     interface Video {
         /**

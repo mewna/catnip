@@ -30,8 +30,8 @@ package com.mewna.catnip.entity.guild;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.util.CatnipImmutable;
-import org.immutables.value.Value.Immutable;
+import com.mewna.catnip.util.CatnipEntity;
+import org.immutables.value.Value.Modifiable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -44,10 +44,10 @@ import javax.annotation.Nullable;
  * @since 10/18/2018
  */
 @SuppressWarnings("unused")
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = GuildEmbedImpl.class)
-public interface GuildEmbed {
+public interface GuildEmbed extends RequiresCatnip<GuildEmbedImpl> {
     /**
      * @return Whether the embed is enabled.
      */

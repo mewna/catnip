@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2019 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,25 +25,49 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.guild.audit;
+package com.mewna.catnip.entity.message;
 
-import com.mewna.catnip.entity.RequiresCatnip;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.util.CatnipEntity;
-import org.immutables.value.Value.Modifiable;
+import org.immutables.value.Value;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 
 /**
- * @author SamOphis
- * @since 10/07/18
+ * @author amy
+ * @since 3/30/19.
  */
-@Modifiable
+@Value.Modifiable
 @CatnipEntity
-@SuppressWarnings("unused")
-public interface MemberPruneInfo extends OptionalEntryInfo, RequiresCatnip<MemberPruneInfoImpl> {
+@JsonDeserialize(as = ReactionImpl.class)
+public
+interface Reaction {
+    /**
+     * The count of reactions.
+     *
+     * @return Integer representing how many reactions were added.
+     */
+    @Nonnegative
     @CheckReturnValue
-    int deleteMemberDays();
+    int count();
     
+    /**
+     * Whether the current logged in account added this reaction.
+     *
+     * @return True if the current account added this reaction, false otherwise.
+     */
     @CheckReturnValue
-    int removedMembersCount();
+    boolean self();
+    
+    /**
+     * The emojis representing this reaction.
+     *
+     * @return Emoji object of this reaction.
+     */
+    @Nonnull
+    @CheckReturnValue
+    Emoji emoji();
 }

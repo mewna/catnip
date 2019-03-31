@@ -43,7 +43,7 @@ public final class PermissionUtil {
     private PermissionUtil() {
     }
     
-    private static long basePermissions(final PermissionHolder holder) {
+    private static long basePermissions(final PermissionHolder<?> holder) {
         final Catnip catnip = holder.catnip();
         final Guild guild = catnip.cache().guild(holder.guildId());
         final Role publicRole = catnip.cache().role(holder.guildId(), holder.guildId()); //Could be simplified to just Guild.role($.idAsLong()), but custom caches are a thing with nullable guilds.
@@ -62,7 +62,7 @@ public final class PermissionUtil {
         return permissions;
     }
     
-    private static long overridePermissions(final long base, final PermissionHolder holder, final GuildChannel channel) {
+    private static long overridePermissions(final long base, final PermissionHolder<?> holder, final GuildChannel channel) {
         if(Permission.ADMINISTRATOR.isPresent(base)) {
             return Permission.ALL;
         }
@@ -107,11 +107,11 @@ public final class PermissionUtil {
      * @deprecated Use {@link PermissionUtil#effectivePermissions(PermissionHolder)}
      */
     @Deprecated
-    public static long effectivePermissions(@Nonnull final Catnip catnip, @Nonnull final PermissionHolder member) {
+    public static long effectivePermissions(@Nonnull final Catnip catnip, @Nonnull final PermissionHolder<?> member) {
         return basePermissions(member);
     }
     
-    public static long effectivePermissions(@Nonnull final PermissionHolder member) {
+    public static long effectivePermissions(@Nonnull final PermissionHolder<?> member) {
         return basePermissions(member);
     }
     
@@ -119,12 +119,12 @@ public final class PermissionUtil {
      * @deprecated Use {@link PermissionUtil#effectivePermissions(PermissionHolder, GuildChannel)}
      */
     @Deprecated
-    public static long effectivePermissions(@Nonnull final Catnip catnip, @Nonnull final PermissionHolder member,
+    public static long effectivePermissions(@Nonnull final Catnip catnip, @Nonnull final PermissionHolder<?> member,
                                             @Nonnull final GuildChannel channel) {
         return overridePermissions(basePermissions(member), member, channel);
     }
     
-    public static long effectivePermissions(@Nonnull final PermissionHolder member, @Nonnull final GuildChannel channel) {
+    public static long effectivePermissions(@Nonnull final PermissionHolder<?> member, @Nonnull final GuildChannel channel) {
         return overridePermissions(basePermissions(member), member, channel);
     }
     
@@ -266,7 +266,7 @@ public final class PermissionUtil {
         return actor.position() > target.position();
     }
     
-    private static void checkGuildEquality(final GuildEntity actor, final GuildEntity target) {
+    private static void checkGuildEquality(final GuildEntity<?> actor, final GuildEntity<?> target) {
         if(!actor.guild().equals(target.guild())) {
             throw new IllegalStateException("Actor and target mus be on the same guild!");
         }

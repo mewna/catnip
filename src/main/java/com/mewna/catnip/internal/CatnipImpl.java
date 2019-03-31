@@ -327,17 +327,15 @@ public class CatnipImpl implements Catnip {
             }
         }
         final Activity activity = game != null
-                ? ActivityImpl.builder()
+                ? ActivityImpl.create()
                 .name(game)
                 .type(type == null ? ActivityType.PLAYING : type)
                 .url(type == ActivityType.STREAMING ? url : null)
-                .build()
                 : null;
-        presence(PresenceImpl.builder()
+        presence(PresenceImpl.create()
                 .catnip(this)
                 .status(stat)
-                .activity(activity)
-                .build());
+                .activity(activity));
     }
     
     @Nonnull

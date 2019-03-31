@@ -28,10 +28,13 @@
 package com.mewna.catnip.entity.user;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.guild.GuildEntity;
-import com.mewna.catnip.util.CatnipImmutable;
-import org.immutables.value.Value.Immutable;
+import com.mewna.catnip.entity.user.Presence.Activity;
+import com.mewna.catnip.entity.user.Presence.OnlineStatus;
+import com.mewna.catnip.util.CatnipEntity;
+import org.immutables.value.Value.Modifiable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -41,10 +44,16 @@ import java.util.Set;
  * @author natanbc
  * @since 12/14/18
  */
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = PresenceUpdateImpl.class)
-public interface PresenceUpdate extends Presence, GuildEntity, Snowflake {
+public interface PresenceUpdate extends GuildEntity<PresenceUpdateImpl>, Snowflake {
+    @Nonnull
+    OnlineStatus status();
+    
+    @Nullable
+    Activity activity();
+    
     /**
      * @return Roles the user has.
      */

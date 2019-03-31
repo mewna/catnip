@@ -29,6 +29,7 @@ package com.mewna.catnip.entity.message;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.Timestamped;
 import com.mewna.catnip.entity.channel.MessageChannel;
@@ -39,13 +40,12 @@ import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
-import com.mewna.catnip.util.CatnipImmutable;
+import com.mewna.catnip.util.CatnipEntity;
 import com.mewna.catnip.util.PermissionUtil;
 import org.apache.commons.lang3.Validate;
-import org.immutables.value.Value.Immutable;
+import org.immutables.value.Value.Modifiable;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
@@ -59,10 +59,10 @@ import java.util.concurrent.CompletionStage;
  * @since 9/4/18.
  */
 @SuppressWarnings("unused")
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = MessageImpl.class)
-public interface Message extends Snowflake, Timestamped {
+public interface Message extends Snowflake, Timestamped, RequiresCatnip<MessageImpl> {
     /**
      * The type of message. Use this to tell normal messages from system messages.
      *
@@ -406,103 +406,5 @@ public interface Message extends Snowflake, Timestamped {
     @JsonIgnore
     default boolean isRickRoll() {
         return content().contains("https://www.youtube.com/watch?v=dQw4w9WgXcQ") || content().contains("https://youtu.be/dQw4w9WgXcQ");
-    }
-    
-    @Immutable
-    @CatnipImmutable
-    @JsonDeserialize(as = AttachmentImpl.class)
-    interface Attachment extends Snowflake {
-        /**
-         * The name of the file represented by this attachment.
-         *
-         * @return String representing the file name. Never null.
-         */
-        @Nonnull
-        @CheckReturnValue
-        String fileName();
-        
-        /**
-         * The size of the file represented by this attachment, in bytes.
-         *
-         * @return Integer representing the file size. Never negative.
-         */
-        @Nonnegative
-        @CheckReturnValue
-        int size();
-        
-        /**
-         * The source URL for the file.
-         *
-         * @return String representing the source URL. Never null.
-         */
-        @Nonnull
-        @CheckReturnValue
-        String url();
-        
-        /**
-         * The proxied URL for the file.
-         *
-         * @return String representing the proxied URL. Never null.
-         */
-        @Nonnull
-        @CheckReturnValue
-        String proxyUrl();
-        
-        /**
-         * The height of this attachment, if it's an image.
-         *
-         * @return Integer representing the height, or -1 if this attachment is not an image.
-         */
-        @CheckReturnValue
-        int height();
-        
-        /**
-         * The width of this attachment, if it's an image.
-         *
-         * @return Integer representing the width, or -1 if this attachment is not an image.
-         */
-        @CheckReturnValue
-        int width();
-        
-        /**
-         * Whether this attachment is an image.
-         *
-         * @return True if this attachment is an image, false otherwise.
-         */
-        @CheckReturnValue
-        default boolean image() {
-            return height() > 0 && width() > 0;
-        }
-    }
-    
-    @Immutable
-    @CatnipImmutable
-    @JsonDeserialize(as = ReactionImpl.class)
-    interface Reaction {
-        /**
-         * The count of reactions.
-         *
-         * @return Integer representing how many reactions were added.
-         */
-        @Nonnegative
-        @CheckReturnValue
-        int count();
-        
-        /**
-         * Whether the current logged in account added this reaction.
-         *
-         * @return True if the current account added this reaction, false otherwise.
-         */
-        @CheckReturnValue
-        boolean self();
-        
-        /**
-         * The emojis representing this reaction.
-         *
-         * @return Emoji object of this reaction.
-         */
-        @Nonnull
-        @CheckReturnValue
-        Emoji emoji();
     }
 }

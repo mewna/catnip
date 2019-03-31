@@ -169,7 +169,7 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder footer(@Nullable final String text, @Nullable final String iconUrl) {
-        return footer(FooterImpl.builder().text(text).iconUrl(iconUrl).proxyIconUrl(null).build());
+        return footer(FooterImpl.create().text(text).iconUrl(iconUrl).proxyIconUrl(null));
     }
     
     /**
@@ -182,7 +182,7 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder image(@Nullable final String url) {
-        image = ImageImpl.builder().url(url).proxyUrl(null).width(0).height(0).build();
+        image = ImageImpl.create().url(url).proxyUrl(null).width(0).height(0);
         return this;
     }
     
@@ -196,7 +196,7 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder thumbnail(@Nullable final String url) {
-        thumbnail = ThumbnailImpl.builder().url(url).proxyUrl(null).height(0).width(0).build();
+        thumbnail = ThumbnailImpl.create().url(url).proxyUrl(null).height(0).width(0);
         return this;
     }
     
@@ -239,7 +239,7 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder author(@Nullable final String name, @Nullable final String url, @Nullable final String iconUrl) {
-        return author(AuthorImpl.builder().name(name).url(url).iconUrl(iconUrl).proxyIconUrl(null).build());
+        return author(AuthorImpl.create().name(name).url(url).iconUrl(iconUrl).proxyIconUrl(null));
     }
     
     /**
@@ -268,7 +268,7 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder field(@Nonnull final String name, @Nonnull final String value, final boolean inline) {
-        return field(FieldImpl.builder().name(name).value(value).inline(inline).build());
+        return field(FieldImpl.create().name(name).value(value).inline(inline));
     }
     
     /**
@@ -304,7 +304,7 @@ public class EmbedBuilder {
     @CheckReturnValue
     public EmbedBuilder replaceAtIndex(@Nonnegative final int index, @Nonnull final String name, @Nonnull final String value,
                                        final boolean inline) {
-        return replaceAtIndex(index, FieldImpl.builder().name(name).value(value).inline(inline).build());
+        return replaceAtIndex(index, FieldImpl.create().name(name).value(value).inline(inline));
     }
     
     /**
@@ -353,7 +353,7 @@ public class EmbedBuilder {
      */
     public Embed build() {
         int len = 0;
-        final var builder = EmbedImpl.builder();
+        final var builder = EmbedImpl.create();
         if(title != null && !title.isEmpty()) {
             if(title.length() > 256) {
                 throw new IllegalStateException("Title exceeds 256 characters!");
@@ -418,6 +418,6 @@ public class EmbedBuilder {
         if(len > 6000) {
             throw new IllegalStateException("Total embed length exceeds 6000 characters!");
         }
-        return builder.build();
+        return builder;
     }
 }

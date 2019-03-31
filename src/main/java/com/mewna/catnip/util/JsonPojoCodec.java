@@ -28,6 +28,7 @@
 package com.mewna.catnip.util;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.RequiresCatnip;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageCodec;
@@ -46,7 +47,6 @@ public class JsonPojoCodec<T> implements MessageCodec<T, T> {
     private final Catnip catnip;
     private final Class<T> type;
     
-    @SuppressWarnings("unchecked")
     public JsonPojoCodec(final Catnip catnip, final Class<T> type) {
         this.catnip = catnip;
         this.type = type;
@@ -54,9 +54,15 @@ public class JsonPojoCodec<T> implements MessageCodec<T, T> {
     
     @Override
     public void encodeToWire(final Buffer buffer, final T t) {
-        final byte[] data = JsonObject.mapFrom(t).encode().getBytes();
-        buffer.appendInt(data.length);
-        buffer.appendBytes(data);
+        if(t instanceof Entity) {
+            final byte[] data = ((Entity) t).toJson().encode().getBytes();
+            buffer.appendInt(data.length);
+            buffer.appendBytes(data);
+        } else {
+            final byte[] data = JsonObject.mapFrom(t).encode().getBytes();
+            buffer.appendInt(data.length);
+            buffer.appendBytes(data);
+        }
     }
     
     @Override
@@ -65,17 +71,25 @@ public class JsonPojoCodec<T> implements MessageCodec<T, T> {
         final String rawJson = buffer.getString(pos + 4, pos + 4 + length);
         log.trace("Received raw json {}", rawJson);
         final JsonObject data = new JsonObject(rawJson);
-        final T object = data.mapTo(type);
-        if(object instanceof RequiresCatnip) {
-            ((RequiresCatnip) object).catnip(catnip);
+        if(Entity.class.isAssignableFrom(type)) {
+            final T object = Entity.fromJson(catnip, type, data);
+            if(object instanceof RequiresCatnip) {
+                ((RequiresCatnip<?>) object).catnip(catnip);
+            }
+            return object;
+        } else {
+            final T object = data.mapTo(type);
+            if(object instanceof RequiresCatnip) {
+                ((RequiresCatnip<?>) object).catnip(catnip);
+            }
+            return object;
         }
-        return object;
     }
     
     @Override
     public T transform(final T t) {
         if(t instanceof RequiresCatnip) {
-            ((RequiresCatnip) t).catnip(catnip);
+            ((RequiresCatnip<?>) t).catnip(catnip);
         }
         return t;
     }

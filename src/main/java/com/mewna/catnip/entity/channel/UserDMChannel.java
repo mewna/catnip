@@ -29,9 +29,10 @@ package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.user.User;
-import com.mewna.catnip.util.CatnipImmutable;
-import org.immutables.value.Value.Immutable;
+import com.mewna.catnip.util.CatnipEntity;
+import org.immutables.value.Value.Modifiable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -43,10 +44,10 @@ import javax.annotation.Nullable;
  * @author natanbc
  * @since 9/12/18
  */
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = UserDMChannelImpl.class)
-public interface UserDMChannel extends DMChannel {
+public interface UserDMChannel extends DMChannel, RequiresCatnip<UserDMChannelImpl> {
     @Nonnull
     @Override
     default ChannelType type() {

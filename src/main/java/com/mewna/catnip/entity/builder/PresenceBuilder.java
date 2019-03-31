@@ -60,16 +60,14 @@ public class PresenceBuilder {
     
     public Presence build() {
         final Activity activity = name != null && type != null
-                ? ActivityImpl.builder()
+                ? ActivityImpl.create()
                 .name(name)
                 .type(type)
                 .url(url)
-                .build()
                 : null;
-        return PresenceImpl.builder()
+        return PresenceImpl.create()
                 .status(status)
-                .activity(activity)
-                .build();
+                .activity(activity);
     }
     
     public PresenceBuilder status(final OnlineStatus status) {

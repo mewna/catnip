@@ -28,9 +28,11 @@
 package com.mewna.catnip.entity.user;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.entity.Entity;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.util.CatnipImmutable;
-import org.immutables.value.Value.Immutable;
+import com.mewna.catnip.util.CatnipEntity;
+import org.immutables.value.Value.Modifiable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -43,10 +45,10 @@ import javax.annotation.Nullable;
  * @author amy
  * @since 10/6/18.
  */
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = TypingUserImpl.class)
-public interface TypingUser extends Snowflake {
+public interface TypingUser extends Snowflake, RequiresCatnip<TypingUserImpl> {
     /**
      * @return The id of the channel being typed in.
      */

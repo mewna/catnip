@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2019 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,73 +25,86 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.channel;
+package com.mewna.catnip.entity.message;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.util.CatnipEntity;
-import org.immutables.value.Value.Modifiable;
+import org.immutables.value.Value;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 
 /**
- * A voice channel in a guild.
- *
- * @author natanbc
- * @since 9/12/18
+ * @author amy
+ * @since 3/30/19.
  */
-@Modifiable
+@Value.Modifiable
 @CatnipEntity
-@JsonDeserialize(as = VoiceChannelImpl.class)
-public interface VoiceChannel extends GuildChannel<VoiceChannelImpl> {
-    @Nonnull
-    @Override
-    default ChannelType type() {
-        return ChannelType.VOICE;
-    }
-    
+@JsonDeserialize(as = AttachmentImpl.class)
+public
+interface Attachment extends Snowflake, RequiresCatnip<AttachmentImpl> {
     /**
-     * @return The bitrate of this channel. Will be from 8 to 96.
-     */
-    @CheckReturnValue
-    int bitrate();
-    
-    /**
-     * @return The maxmium number of users allowed in this voice channel at
-     * once.
-     */
-    @CheckReturnValue
-    int userLimit();
-    
-    /**
-     * Opens a voice connection to this channel. This method is equivalent to
-     * {@code channel.catnip().{@link com.mewna.catnip.Catnip#openVoiceConnection(String, String) openVoiceConnection}(channel.guildId(), channel.id())}
+     * The name of the file represented by this attachment.
      *
-     * @see com.mewna.catnip.Catnip#openVoiceConnection(String, String)
+     * @return String representing the file name. Never null.
      */
-    default void openVoiceConnection() {
-        catnip().openVoiceConnection(guildId(), id());
-    }
-    
-    @Override
-    @JsonIgnore
+    @Nonnull
     @CheckReturnValue
-    default boolean isText() {
-        return false;
-    }
+    String fileName();
     
-    @Override
-    @JsonIgnore
+    /**
+     * The size of the file represented by this attachment, in bytes.
+     *
+     * @return Integer representing the file size. Never negative.
+     */
+    @Nonnegative
     @CheckReturnValue
-    default boolean isVoice() {
-        return true;
-    }
+    int size();
     
-    @Override
-    @JsonIgnore
+    /**
+     * The source URL for the file.
+     *
+     * @return String representing the source URL. Never null.
+     */
+    @Nonnull
     @CheckReturnValue
-    default boolean isCategory() {
-        return false;
+    String url();
+    
+    /**
+     * The proxied URL for the file.
+     *
+     * @return String representing the proxied URL. Never null.
+     */
+    @Nonnull
+    @CheckReturnValue
+    String proxyUrl();
+    
+    /**
+     * The height of this attachment, if it's an image.
+     *
+     * @return Integer representing the height, or -1 if this attachment is not an image.
+     */
+    @CheckReturnValue
+    int height();
+    
+    /**
+     * The width of this attachment, if it's an image.
+     *
+     * @return Integer representing the width, or -1 if this attachment is not an image.
+     */
+    @CheckReturnValue
+    int width();
+    
+    /**
+     * Whether this attachment is an image.
+     *
+     * @return True if this attachment is an image, false otherwise.
+     */
+    @CheckReturnValue
+    default boolean image() {
+        return height() > 0 && width() > 0;
     }
 }

@@ -29,18 +29,115 @@ package com.mewna.catnip.entity.misc;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.entity.HasAvatar;
+import com.mewna.catnip.entity.Mentionable;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.channel.DMChannel;
+import com.mewna.catnip.entity.guild.Guild;
+import com.mewna.catnip.entity.guild.Member;
+import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
-import com.mewna.catnip.util.CatnipImmutable;
-import org.immutables.value.Value.Immutable;
+import com.mewna.catnip.util.CatnipEntity;
+import org.immutables.value.Value.Modifiable;
+
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.concurrent.CompletionStage;
 
 /**
  * This may be changed if discord changes the format for teams in the returned
  * response.
  */
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = ApplicationOwnerImpl.class)
-public interface ApplicationOwner extends User {
-    @JsonIgnore
+public interface ApplicationOwner extends Mentionable, HasAvatar, RequiresCatnip<ApplicationOwnerImpl> {
     boolean isTeam();
+    
+    /**
+     * The username of the user.
+     *
+     * @return User's name. Never null.
+     */
+    @Nonnull
+    @CheckReturnValue
+    String username();
+    
+    /**
+     * The user's effective name shown in a guild.
+     *
+     * @return User's nickname in the guild, if set, otherwise the username.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default String effectiveName(@Nonnull final Guild guild) {
+        final String username = username();
+        
+        final Member member = guild.members().getById(idAsLong());
+        
+        if(member == null) {
+            return username;
+        }
+        
+        final String nick = member.nick();
+        return nick != null ? nick : username;
+    }
+    
+    /**
+     * The DiscordTag of the user, which is the username, an hash, and the discriminator.
+     *
+     * @return User's DiscordTag. Never null.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default String discordTag() {
+        return username() + '#' + discriminator();
+    }
+    
+    /**
+     * User's avatar hash.
+     * <br><b>This does not return their avatar URL nor image directly.</b>
+     *
+     * @return User's hashed avatar string. Can be null.
+     *
+     * @see User#avatarUrl() Getting the user's avatar
+     */
+    @Nullable
+    @CheckReturnValue
+    String avatar();
+    
+    /**
+     * Whether the user is a bot, or webhook/fake user.
+     *
+     * @return True if the user is a bot, false if the user is a human.
+     */
+    @CheckReturnValue
+    boolean bot();
+    
+    /**
+     * @return The user's presence, or {@code null} if no presence is cached.
+     */
+    @Nullable
+    @CheckReturnValue
+    default Presence presence() {
+        return catnip().cache().presence(id());
+    }
+    
+    /**
+     * Creates a DM channel with this user.
+     *
+     * @return Future with the result of the DM creation.
+     */
+    @JsonIgnore
+    @CheckReturnValue
+    default CompletionStage<DMChannel> createDM() {
+        return catnip().rest().user().createDM(id());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    default String asMention() {
+        return "<@" + id() + '>';
+    }
 }

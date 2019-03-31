@@ -31,13 +31,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.HasAvatar;
 import com.mewna.catnip.entity.Mentionable;
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.util.CDNFormat;
-import com.mewna.catnip.util.CatnipImmutable;
-import org.immutables.value.Value.Immutable;
+import com.mewna.catnip.util.CatnipEntity;
+import org.immutables.value.Value.Modifiable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -51,10 +50,10 @@ import java.util.concurrent.CompletionStage;
  * @since 9/4/18
  */
 @SuppressWarnings("unused")
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = UserImpl.class)
-public interface User extends Snowflake, Mentionable, HasAvatar {
+public interface User extends Mentionable, HasAvatar, RequiresCatnip<UserImpl> {
     /**
      * The username of the user.
      *

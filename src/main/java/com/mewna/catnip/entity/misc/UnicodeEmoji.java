@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2019 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,25 +25,88 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.guild.audit;
+package com.mewna.catnip.entity.misc;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.util.CatnipEntity;
-import org.immutables.value.Value.Modifiable;
+import org.immutables.value.Value;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * @author SamOphis
- * @since 10/07/18
+ * @author amy
+ * @since 3/30/19.
  */
-@Modifiable
+@Value.Modifiable
 @CatnipEntity
-@SuppressWarnings("unused")
-public interface MemberPruneInfo extends OptionalEntryInfo, RequiresCatnip<MemberPruneInfoImpl> {
-    @CheckReturnValue
-    int deleteMemberDays();
+@JsonDeserialize(as = UnicodeEmojiImpl.class)
+public
+interface UnicodeEmoji extends Emoji, RequiresCatnip<UnicodeEmojiImpl> {
+    @Override
+    default String id() {
+        throw new IllegalStateException("Unicode emojis have no IDs!");
+    }
     
+    @Override
+    default long idAsLong() {
+        throw new IllegalStateException("Unicode emojis have no IDs!");
+    }
+    
+    @Override
+    @Nonnull
     @CheckReturnValue
-    int removedMembersCount();
+    default List<String> roles() {
+        return Collections.emptyList();
+    }
+    
+    @Override
+    @Nullable
+    @CheckReturnValue
+    default User user() {
+        return null;
+    }
+    
+    @Override
+    @CheckReturnValue
+    default boolean managed() {
+        return false;
+    }
+    
+    @Override
+    @CheckReturnValue
+    default boolean animated() {
+        return false;
+    }
+    
+    @Override
+    @CheckReturnValue
+    default boolean custom() {
+        return false;
+    }
+    
+    @Override
+    @Nonnull
+    @CheckReturnValue
+    default String forMessage() {
+        return name();
+    }
+    
+    @Override
+    @Nonnull
+    @CheckReturnValue
+    default String forReaction() {
+        return name();
+    }
+    
+    @Override
+    @CheckReturnValue
+    default boolean is(@Nonnull final String emoji) {
+        return name().equals(emoji);
+    }
 }

@@ -29,17 +29,12 @@ package com.mewna.catnip.entity.misc;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.user.User;
-import com.mewna.catnip.util.CatnipImmutable;
-import org.immutables.value.Value.Immutable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -171,156 +166,4 @@ public interface Emoji extends Snowflake {
      */
     @CheckReturnValue
     boolean is(@Nonnull String emoji);
-    
-    @Immutable
-    @CatnipImmutable
-    @JsonDeserialize(as = CustomEmojiImpl.class)
-    interface CustomEmoji extends Emoji {
-        @Override
-        @Nonnull
-        @CheckReturnValue
-        default String id() {
-            return Long.toUnsignedString(idAsLong());
-        }
-        
-        /**
-         * Guild that owns this emoji, or {@code null} if it has no guild.
-         * <p>
-         * NOTE: This may be null in the case of a reaction, because the data
-         * may not be available to get the id for the emoji!
-         *
-         * @return String representing the ID.
-         */
-        @Nullable
-        @CheckReturnValue
-        default Guild guild() {
-            final long id = guildIdAsLong();
-            if(id == 0) {
-                return null;
-            }
-            return catnip().cache().guild(guildIdAsLong());
-        }
-        
-        /**
-         * ID of guild that owns this emoji, or {@code null} if it has no guild.
-         * <p>
-         * NOTE: This may be null in the case of a reaction, because the data
-         * may not be available to get the id for the emoji!
-         *
-         * @return String representing the ID.
-         */
-        @Nullable
-        @CheckReturnValue
-        default String guildId() {
-            final long id = guildIdAsLong();
-            if(id == 0) {
-                return null;
-            }
-            return Long.toUnsignedString(id);
-        }
-        
-        /**
-         * ID of guild that owns this emoji, or {@code 0} if it has no guild.
-         * <p>
-         * NOTE: This may be null in the case of a reaction, because the data
-         * may not be available to get the id for the emoji!
-         *
-         * @return Long representing the ID.
-         */
-        @CheckReturnValue
-        long guildIdAsLong();
-        
-        @Override
-        @CheckReturnValue
-        default boolean custom() {
-            return true;
-        }
-        
-        @Override
-        @Nonnull
-        @CheckReturnValue
-        default String forMessage() {
-            return String.format("<%s:%s:%s>", animated() ? "a" : "", name(), id());
-        }
-        
-        @Override
-        @Nonnull
-        @CheckReturnValue
-        default String forReaction() {
-            return String.format("%s:%s", name(), id());
-        }
-        
-        @Override
-        @CheckReturnValue
-        default boolean is(@Nonnull final String emoji) {
-            return id().equals(emoji) || forMessage().equals(emoji) || forReaction().equals(emoji);
-        }
-    }
-    
-    @Immutable
-    @CatnipImmutable
-    @JsonDeserialize(as = UnicodeEmojiImpl.class)
-    interface UnicodeEmoji extends Emoji {
-        @Override
-        default String id() {
-            throw new IllegalStateException("Unicode emojis have no IDs!");
-        }
-        
-        @Override
-        default long idAsLong() {
-            throw new IllegalStateException("Unicode emojis have no IDs!");
-        }
-        
-        @Override
-        @Nonnull
-        @CheckReturnValue
-        default List<String> roles() {
-            return Collections.emptyList();
-        }
-        
-        @Override
-        @Nullable
-        @CheckReturnValue
-        default User user() {
-            return null;
-        }
-        
-        @Override
-        @CheckReturnValue
-        default boolean managed() {
-            return false;
-        }
-        
-        @Override
-        @CheckReturnValue
-        default boolean animated() {
-            return false;
-        }
-        
-        @Override
-        @CheckReturnValue
-        default boolean custom() {
-            return false;
-        }
-        
-        @Override
-        @Nonnull
-        @CheckReturnValue
-        default String forMessage() {
-            return name();
-        }
-        
-        @Override
-        @Nonnull
-        @CheckReturnValue
-        default String forReaction() {
-            return name();
-        }
-        
-        @Override
-        @CheckReturnValue
-        default boolean is(@Nonnull final String emoji) {
-            return name().equals(emoji);
-        }
-    }
 }

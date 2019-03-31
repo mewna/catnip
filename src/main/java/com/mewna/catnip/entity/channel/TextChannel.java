@@ -31,9 +31,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Mentionable;
 import com.mewna.catnip.entity.util.Permission;
-import com.mewna.catnip.util.CatnipImmutable;
+import com.mewna.catnip.util.CatnipEntity;
 import com.mewna.catnip.util.PermissionUtil;
-import org.immutables.value.Value.Immutable;
+import org.immutables.value.Value.Modifiable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -49,10 +49,10 @@ import java.util.concurrent.CompletionStage;
  * @since 9/12/18
  */
 @SuppressWarnings("unused")
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = TextChannelImpl.class)
-public interface TextChannel extends GuildChannel, MessageChannel, Mentionable {
+public interface TextChannel extends GuildChannel<TextChannelImpl>, MessageChannel, Mentionable {
     @Nonnull
     @Override
     default ChannelType type() {

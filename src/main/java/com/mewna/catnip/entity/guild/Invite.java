@@ -28,18 +28,15 @@
 package com.mewna.catnip.entity.guild;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.HasAvatar;
-import com.mewna.catnip.entity.HasIcon;
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.*;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
 import com.mewna.catnip.entity.guild.Guild.VerificationLevel;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.CDNFormat;
-import com.mewna.catnip.util.CatnipImmutable;
+import com.mewna.catnip.util.CatnipEntity;
 import com.mewna.catnip.util.PermissionUtil;
-import org.immutables.value.Value.Immutable;
+import org.immutables.value.Value.Modifiable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -55,10 +52,10 @@ import java.util.concurrent.CompletionStage;
  * @since 9/14/18
  */
 @SuppressWarnings("unused")
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = InviteImpl.class)
-public interface Invite extends Entity {
+public interface Invite extends Entity, RequiresCatnip<InviteImpl> {
     /**
      * @return The code for this invite.
      */
@@ -123,19 +120,19 @@ public interface Invite extends Entity {
         return delete(null);
     }
     
-    @Immutable
-    @CatnipImmutable
+    @Modifiable
+    @CatnipEntity
     @JsonDeserialize(as = InviterImpl.class)
-    interface Inviter extends Snowflake, HasAvatar {
+    interface Inviter extends HasAvatar, RequiresCatnip<InviterImpl> {
         @Nonnull
         @CheckReturnValue
         String username();
     }
     
-    @Immutable
-    @CatnipImmutable
+    @Modifiable
+    @CatnipEntity
     @JsonDeserialize(as = InviteGuildImpl.class)
-    interface InviteGuild extends Snowflake, HasIcon {
+    interface InviteGuild extends HasIcon, RequiresCatnip<InviteGuildImpl> {
         @Nonnull
         @CheckReturnValue
         String name();
@@ -165,10 +162,10 @@ public interface Invite extends Entity {
         }
     }
     
-    @Immutable
-    @CatnipImmutable
+    @Modifiable
+    @CatnipEntity
     @JsonDeserialize(as = InviteChannelImpl.class)
-    interface InviteChannel extends Snowflake {
+    interface InviteChannel extends Snowflake, RequiresCatnip<InviteChannel> {
         @Nonnull
         @CheckReturnValue
         String name();

@@ -29,12 +29,13 @@ package com.mewna.catnip.entity.guild;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.CDNFormat;
-import com.mewna.catnip.util.CatnipImmutable;
-import org.immutables.value.Value.Immutable;
+import com.mewna.catnip.util.CatnipEntity;
+import org.immutables.value.Value.Modifiable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -45,10 +46,10 @@ import java.util.Set;
  * @author natanbc
  * @since 10/10/18.
  */
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = PartialGuildImpl.class)
-public interface PartialGuild extends Snowflake {
+public interface PartialGuild extends Snowflake, RequiresCatnip<PartialGuildImpl> {
     @Nonnull
     @CheckReturnValue
     String name();

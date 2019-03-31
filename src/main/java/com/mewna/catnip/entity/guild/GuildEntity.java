@@ -27,6 +27,7 @@
 package com.mewna.catnip.entity.guild;
 
 import com.mewna.catnip.entity.Entity;
+import com.mewna.catnip.entity.RequiresCatnip;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -38,7 +39,7 @@ import java.util.Objects;
  * @author AdrianTodt
  * @since 1/19/19.
  */
-public interface GuildEntity extends Entity {
+public interface GuildEntity<T extends GuildEntity<T>> extends Entity, RequiresCatnip<T> {
     
     /**
      * The id of the guild this entity is from.

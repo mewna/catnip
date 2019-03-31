@@ -28,9 +28,10 @@
 package com.mewna.catnip.entity.guild;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.util.CatnipImmutable;
-import org.immutables.value.Value.Immutable;
+import com.mewna.catnip.util.CatnipEntity;
+import org.immutables.value.Value.Modifiable;
 
 import javax.annotation.CheckReturnValue;
 
@@ -40,10 +41,10 @@ import javax.annotation.CheckReturnValue;
  * @author amy
  * @since 10/4/18.
  */
-@Immutable
-@CatnipImmutable
+@Modifiable
+@CatnipEntity
 @JsonDeserialize(as = UnavailableGuildImpl.class)
-public interface UnavailableGuild extends Snowflake {
+public interface UnavailableGuild extends Snowflake, RequiresCatnip<UnavailableGuildImpl> {
     /**
      * @return Whether the guild is unavailable.
      */
