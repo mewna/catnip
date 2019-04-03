@@ -186,6 +186,7 @@ public class CatnipShard extends AbstractVerticle {
     
     @Override
     public void stop() {
+        stateReply(ShardConnectState.CANCEL);
         lifecycleState = DISCONNECTED;
         consumers.forEach(MessageConsumer::unregister);
         consumers.clear();
@@ -204,6 +205,7 @@ public class CatnipShard extends AbstractVerticle {
     
     private void handleVoiceStateUpdateQueue(final Message<JsonObject> message) {
         sendTask.offer(basePayload(GatewayOp.VOICE_STATE_UPDATE, message.body()));
+        sendTask.run();
     }
     
     private void handlePresenceUpdate(final Message<PresenceImpl> message) {
@@ -213,6 +215,7 @@ public class CatnipShard extends AbstractVerticle {
             return;
         }
         presenceTask.offer(impl);
+        presenceTask.run();
     }
     
     private void handleControlMessage(final Message<ShardControlMessage> msg) {
@@ -284,8 +287,12 @@ public class CatnipShard extends AbstractVerticle {
                             .exceptionHandler(t -> {
                                 socketOpen = false;
                                 catnip.logAdapter().error("Shard {}/{}: Exception in Websocket", id, limit, t);
+                                stateReply(ShardConnectState.FAILED);
                             })
-                            .endHandler(end -> socketOpen = false);
+                            .endHandler(end -> {
+                                socketOpen = false;
+                                stateReply(ShardConnectState.FAILED);
+                            });
                 },
                 failure -> {
                     lifecycleState = DISCONNECTED;
@@ -326,6 +333,7 @@ public class CatnipShard extends AbstractVerticle {
                 handleSocketData(decompressed.toJsonObject());
             } catch(final IOException e) {
                 catnip.logAdapter().error("Shard {}/{}: Error decompressing payload", id, limit, e);
+                stateReply(ShardConnectState.FAILED);
             } finally {
                 readBufferPosition = 0;
             }
@@ -345,6 +353,7 @@ public class CatnipShard extends AbstractVerticle {
             }
         } catch(final Exception e) {
             catnip.logAdapter().error("Shard {}/{}: Failed to handle socket frame", id, limit, e);
+            stateReply(ShardConnectState.FAILED);
         }
     }
     
@@ -401,6 +410,7 @@ public class CatnipShard extends AbstractVerticle {
         }
         if(closedByClient) {
             catnip.logAdapter().info("Shard {}/{}: We closed the websocket with code {}", id, limit, closeCode);
+            return;
         } else {
             if(closeCode >= 4000) {
                 final GatewayCloseCode code = GatewayCloseCode.byId(closeCode);
@@ -416,6 +426,7 @@ public class CatnipShard extends AbstractVerticle {
                         id, limit, closeCode, frame.closeReason());
             }
         }
+        stateReply(ShardConnectState.FAILED);
     }
     
     @SuppressWarnings("squid:S1172")
@@ -431,11 +442,13 @@ public class CatnipShard extends AbstractVerticle {
             catnip.eventBus().publish(Raw.CLOSED, shardInfo());
         } catch(final Exception e) {
             catnip.logAdapter().error("Shard {}/{}: Failure closing socket:", id, limit, e);
+            stateReply(ShardConnectState.FAILED);
         }
     }
     
     private void handleSocketQueue(final Message<JsonObject> msg) {
         sendTask.offer(msg.body());
+        sendTask.run();
     }
     
     private void handleSocketSend(final Message<JsonObject> msg) {
@@ -553,6 +566,8 @@ public class CatnipShard extends AbstractVerticle {
             
             closedByClient = true;
         }
+    
+        stateReply(ShardConnectState.INVALID);
         
         if(socket != null && socketOpen) {
             socket.close();

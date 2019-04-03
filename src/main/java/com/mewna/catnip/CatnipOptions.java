@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.SplitMemoryEntityCache;
+import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.extension.Extension;
@@ -51,6 +52,7 @@ import com.mewna.catnip.shard.session.DefaultSessionManager;
 import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.util.logging.DefaultLogAdapter;
 import com.mewna.catnip.util.logging.LogAdapter;
+import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -191,6 +193,18 @@ public final class CatnipOptions implements Cloneable {
      * TODO: When we move off of Java 8, use the stack walking API for this
      */
     private boolean captureRestStacktraces = true;
+    /**
+     * Whether or not to log "Received presence for uncached user XXX" when
+     * catnip is not chunking members. Basically, this avoids a ton of logspam.
+     */
+    private boolean logUncachedPresenceWhenNotChunking = true;
+    /**
+     * Whether or not {@link Entity#fromJson(Catnip, Class, JsonObject)} should
+     * log a warning when deserializing entities with mismatched catnip
+     * versions. Generally, this should only be disabled if you can guarantee
+     * that the version mismatches won't be an issue.
+     */
+    private boolean warnOnEntityVersionMismatch = true;
     
     @Override
     public Object clone() {

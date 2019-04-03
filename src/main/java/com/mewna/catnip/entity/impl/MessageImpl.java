@@ -72,6 +72,7 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
     private boolean tts;
     private boolean mentionsEveryone;
     private List<User> mentionedUsers;
+    private List<Member> mentionedMembers;
     private List<Role> mentionedRoles;
     @JsonProperty
     private List<Attachment> attachments;

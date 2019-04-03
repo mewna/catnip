@@ -70,10 +70,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.mewna.catnip.util.JsonUtil.*;
 
@@ -272,6 +269,39 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public NewsChannel createNewsChannel(@Nonnull final String guildId, @Nonnull final JsonObject data) {
+        final String parentId = data.getString("parent_id");
+        return NewsChannelImpl.builder()
+                .catnip(catnip)
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .name(data.getString("name"))
+                .guildIdAsLong(Long.parseUnsignedLong(guildId))
+                .position(data.getInteger("position", -1))
+                .parentIdAsLong(parentId == null ? 0 : Long.parseUnsignedLong(parentId))
+                .overrides(toList(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
+                .topic(data.getString("topic"))
+                .nsfw(data.getBoolean("nsfw", false))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public StoreChannel createStoreChannel(@Nonnull final String guildId, @Nonnull final JsonObject data) {
+        final String parentId = data.getString("parent_id");
+        return StoreChannelImpl.builder()
+                .catnip(catnip)
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .name(data.getString("name"))
+                .guildIdAsLong(Long.parseUnsignedLong(guildId))
+                .position(data.getInteger("position", -1))
+                .parentIdAsLong(parentId == null ? 0 : Long.parseUnsignedLong(parentId))
+                .overrides(toList(data.getJsonArray("permission_overwrites"), this::createPermissionOverride))
+                .nsfw(data.getBoolean("nsfw", false))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public VoiceChannel createVoiceChannel(@Nonnull final String guildId, @Nonnull final JsonObject data) {
         final String parentId = data.getString("parent_id");
         return VoiceChannelImpl.builder()
@@ -334,14 +364,24 @@ public final class EntityBuilder {
     public GuildChannel createGuildChannel(@Nonnull final String guildId, @Nonnull final JsonObject data) {
         final ChannelType type = ChannelType.byKey(data.getInteger("type"));
         switch(type) {
-            case TEXT:
+            case TEXT: {
                 return createTextChannel(guildId, data);
-            case VOICE:
+            }
+            case VOICE: {
                 return createVoiceChannel(guildId, data);
-            case CATEGORY:
+            }
+            case CATEGORY: {
                 return createCategory(guildId, data);
-            default:
+            }
+            case NEWS: {
+                return createNewsChannel(guildId, data);
+            }
+            case STORE: {
+                return createStoreChannel(guildId, data);
+            }
+            default: {
                 throw new UnsupportedOperationException("Unsupported channel type " + type);
+            }
         }
     }
     
@@ -592,7 +632,7 @@ public final class EntityBuilder {
         final long guild = Long.parseUnsignedLong(guildId);
         if(userData != null) {
             catnip.cacheWorker().bulkCacheUsers(
-                    (int)((guild >> 22) % catnip.shardManager().shardCount()),
+                    (int) ((guild >> 22) % catnip.shardManager().shardCount()),
                     Collections.singletonList(createUser(userData)));
         }
         final String joinedAt;
@@ -714,8 +754,6 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public Emoji createEmoji(@Nullable final String guildId, @Nonnull final JsonObject data) {
-        // If it has an id, then it has a guild attached, so the @Nonnull warning can be ignored
-        //noinspection ConstantConditions
         return data.getValue("id") == null ? createUnicodeEmoji(data) : createCustomEmoji(guildId, data);
     }
     
@@ -792,6 +830,12 @@ public final class EntityBuilder {
         final String guildId = data.getString("guild_id");
         final String webhookId = data.getString("webhook_id");
         
+        final List<Member> mentionedMembers = new ArrayList<>();
+        if(guildId != null) {
+            mentionedMembers.addAll(toList(data.getJsonArray("mentions"), o -> createPartialMemberMention(guildId, o)));
+        }
+        
+        //noinspection ConstantConditions
         return MessageImpl.builder()
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
@@ -803,6 +847,7 @@ public final class EntityBuilder {
                 .tts(data.getBoolean("tts", false))
                 .mentionsEveryone(data.getBoolean("mention_everyone", false))
                 .mentionedUsers(toList(data.getJsonArray("mentions"), this::createUser))
+                .mentionedMembers(mentionedMembers)
                 .mentionedRoles(toListFromCache(data.getJsonArray("mention_roles"), e -> catnip.cache().role(guildId, e)))
                 .attachments(toList(data.getJsonArray("attachments"), this::createAttachment))
                 .embeds(toList(data.getJsonArray("embeds"), this::createEmbed))
@@ -814,6 +859,16 @@ public final class EntityBuilder {
                 .guildIdAsLong(guildId == null ? 0 : Long.parseUnsignedLong(guildId))
                 .webhookIdAsLong(webhookId == null ? 0 : Long.parseUnsignedLong(webhookId))
                 .build();
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    private Member createPartialMemberMention(final String guildId, final JsonObject data) {
+        if(data.containsKey("member")) {
+            return createMember(guildId, data.getString("id"), data.getJsonObject("member"));
+        } else {
+            return null;
+        }
     }
     
     @Nonnull
@@ -881,6 +936,7 @@ public final class EntityBuilder {
         final String applicationId = data.getString("application_id");
         final String widgetChannelId = data.getString("widget_channel_id");
         final String systemChannelId = data.getString("system_channel_id");
+        final Integer maxPresences = data.getInteger("max_presences");
         return GuildImpl.builder()
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
@@ -907,6 +963,11 @@ public final class EntityBuilder {
                 .joinedAt(data.getString("joined_at"))
                 .large(data.getBoolean("large", false))
                 .unavailable(data.getBoolean("unavailable", false))
+                .maxPresences(maxPresences == null ? 0 : maxPresences)
+                .maxMembers(data.getInteger("max_members", 0))
+                .vanityUrlCode(data.getString("vanity_url_code"))
+                .description(data.getString("description"))
+                .banner(data.getString("banner"))
                 .build();
     }
     

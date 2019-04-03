@@ -28,8 +28,6 @@
 package com.mewna.catnip.shard.buffer;
 
 import com.google.common.collect.ImmutableSet;
-import com.mewna.catnip.shard.CatnipShard;
-import com.mewna.catnip.shard.GatewayOp;
 import com.mewna.catnip.util.JsonUtil;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
@@ -46,8 +44,6 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 import static com.mewna.catnip.shard.CatnipShard.LARGE_THRESHOLD;
 import static com.mewna.catnip.shard.DiscordEvent.Raw;
-import static com.mewna.catnip.shard.ShardAddress.WEBSOCKET_QUEUE;
-import static com.mewna.catnip.shard.ShardAddress.computeAddress;
 
 /**
  * An implementation of {@link EventBuffer} used for the case of caching all
@@ -116,7 +112,7 @@ public class CachingBuffer extends AbstractBuffer {
             }
             case Raw.GUILD_MEMBERS_CHUNK: {
                 handleGuildMemberChunk(bufferState, event);
-                // We very explicitly DON'T break here because this is SUPPOSED to fall through to the next case
+                break;
             }
             default: {
                 // Buffer and replay later
@@ -182,8 +178,6 @@ public class CachingBuffer extends AbstractBuffer {
             bufferState.acceptChunk(guild);
             if(bufferState.doneChunking(guild)) {
                 emitter().emit(bufferState.guildCreate(guild));
-                // If we're finished chunking that guild, defer doing everything needed
-                // by a little bit to allow chunk caching to finish
                 bufferState.receiveGuild(guild);
                 bufferState.replayGuild(guild);
                 // Replay all buffered events once we run out

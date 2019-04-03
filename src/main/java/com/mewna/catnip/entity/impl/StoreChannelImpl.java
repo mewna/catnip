@@ -25,59 +25,63 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.rest;
+package com.mewna.catnip.entity.impl;
 
-import io.vertx.core.json.JsonObject;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.channel.StoreChannel;
+import com.mewna.catnip.entity.channel.TextChannel;
+import com.mewna.catnip.entity.guild.PermissionOverride;
+import lombok.*;
+import lombok.experimental.Accessors;
+
+import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
- * @author SamOphis
- * @since 02/09/2019
+ * @author amy
+ * @since 3/14/19.
  */
-public class ResponseException extends RuntimeException {
-    private final String route;
-    private final int statusCode;
-    private final String statusMessage;
-    private final int jsonCode;
-    private final String jsonMessage;
-    private final JsonObject rawJson;
+@Getter(onMethod_ = @JsonProperty)
+@Setter(onMethod_ = @JsonProperty)
+@Builder
+@Accessors(fluent = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class StoreChannelImpl implements StoreChannel, RequiresCatnip {
+    private transient Catnip catnip;
     
-    public ResponseException(final String route, final int statusCode, final String statusMessage, final int jsonCode,
-                             final String jsonMessage, final JsonObject rawJson) {
-        super(
-                jsonCode == -1 ?
-                        String.format("%s | HTTP Error Code: %d | JSON Message: %s", route, statusCode, jsonMessage) :
-                        String.format("%s | HTTP Error Code: %d | JSON Message: %s | JSON Error Code: %d",
-                                route, statusCode, jsonMessage, jsonCode)
-        );
-        this.route = route;
-        this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
-        this.jsonCode = jsonCode;
-        this.jsonMessage = jsonMessage;
-        this.rawJson = rawJson;
+    private long idAsLong;
+    private String name;
+    private long guildIdAsLong;
+    private int position;
+    private long parentIdAsLong;
+    private List<PermissionOverride> overrides;
+    private boolean nsfw;
+    
+    @Override
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
+        for(final PermissionOverride override : overrides) {
+            if(override instanceof RequiresCatnip) {
+                ((RequiresCatnip) override).catnip(catnip);
+            }
+        }
     }
     
-    public String route() {
-        return route;
+    @Override
+    public int hashCode() {
+        return Long.hashCode(idAsLong);
     }
     
-    public int statusCode() {
-        return statusCode;
+    @Override
+    public boolean equals(final Object obj) {
+        return obj instanceof TextChannel && ((TextChannel) obj).idAsLong() == idAsLong;
     }
     
-    public String statusMessage() {
-        return statusMessage;
-    }
-    
-    public int jsonCode() {
-        return jsonCode;
-    }
-    
-    public String jsonMessage() {
-        return jsonMessage;
-    }
-    
-    public JsonObject rawJson() {
-        return rawJson;
+    @Override
+    public String toString() {
+        return String.format("StoreChannel (%s)", name);
     }
 }

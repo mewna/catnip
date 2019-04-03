@@ -194,6 +194,15 @@ public interface User extends Snowflake, Mentionable {
     boolean bot();
     
     /**
+     * @return The user's presence, or {@code null} if no presence is cached.
+     */
+    @Nullable
+    @CheckReturnValue
+    default Presence presence() {
+        return catnip().cache().presence(id());
+    }
+    
+    /**
      * Creates a DM channel with this user.
      *
      * @return Future with the result of the DM creation.

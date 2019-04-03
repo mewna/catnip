@@ -199,24 +199,24 @@ public interface Member extends Mentionable, PermissionHolder {
     }
     
     default Set<Permission> permissions() {
-        return Permission.toSet(PermissionUtil.effectivePermissions(catnip(), this));
+        return Permission.toSet(PermissionUtil.effectivePermissions(this));
     }
     
     default Set<Permission> permissions(@Nonnull final GuildChannel channel) {
-        return Permission.toSet(PermissionUtil.effectivePermissions(catnip(), this, channel));
+        return Permission.toSet(PermissionUtil.effectivePermissions(this, channel));
     }
     
     @Override
     default boolean hasPermissions(@Nonnull final Collection<Permission> permissions) {
         final long needed = Permission.from(permissions);
-        final long actual = PermissionUtil.effectivePermissions(catnip(), this);
+        final long actual = PermissionUtil.effectivePermissions(this);
         return (actual & needed) == needed;
     }
     
     @Override
     default boolean hasPermissions(@Nonnull final GuildChannel channel, @Nonnull final Collection<Permission> permissions) {
         final long needed = Permission.from(permissions);
-        final long actual = PermissionUtil.effectivePermissions(catnip(), this, channel);
+        final long actual = PermissionUtil.effectivePermissions(this, channel);
         return (actual & needed) == needed;
     }
     

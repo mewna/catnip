@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2019 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,28 +27,23 @@
 
 package com.mewna.catnip.entity.impl;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.Timestamped;
-import com.mewna.catnip.entity.guild.Guild;
-import com.mewna.catnip.entity.util.ImageOptions;
-import com.mewna.catnip.entity.util.Permission;
-import com.mewna.catnip.util.CDNFormat;
+import com.mewna.catnip.entity.channel.NewsChannel;
+import com.mewna.catnip.entity.channel.TextChannel;
+import com.mewna.catnip.entity.guild.PermissionOverride;
 import lombok.*;
 import lombok.experimental.Accessors;
 
-import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Set;
 
 /**
- * @author natanbc
- * @since 9/6/18.
+ * TODO: Should this just extend {@link TextChannelImpl} instead?
+ *
+ * @author amy
+ * @since 3/10/19.
  */
 @Getter(onMethod_ = @JsonProperty)
 @Setter(onMethod_ = @JsonProperty)
@@ -56,64 +51,26 @@ import java.util.Set;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class GuildImpl implements Guild, RequiresCatnip, Timestamped {
-    @JsonIgnore
+public class NewsChannelImpl implements NewsChannel, RequiresCatnip {
     private transient Catnip catnip;
     
     private long idAsLong;
     private String name;
-    private String icon;
-    private String splash;
-    private boolean owned;
-    private long ownerIdAsLong;
-    private Set<Permission> permissions;
-    private String region;
-    private long afkChannelIdAsLong;
-    private int afkTimeout;
-    private boolean embedEnabled;
-    private long embedChannelIdAsLong;
-    private VerificationLevel verificationLevel;
-    private NotificationLevel defaultMessageNotifications;
-    private ContentFilterLevel explicitContentFilter;
-    private List<String> features;
-    private MFALevel mfaLevel;
-    private long applicationIdAsLong;
-    private boolean widgetEnabled;
-    private long widgetChannelIdAsLong;
-    private long systemChannelIdAsLong;
-    @JsonProperty
-    private String joinedAt;
-    private boolean large;
-    private boolean unavailable;
-    private int maxPresences;
-    private int maxMembers;
-    private String vanityUrlCode;
-    private String description;
-    private String banner;
+    private long guildIdAsLong;
+    private int position;
+    private long parentIdAsLong;
+    private List<PermissionOverride> overrides;
+    private String topic;
+    private boolean nsfw;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
-    }
-    
-    @Override
-    @Nullable
-    @CheckReturnValue
-    public String iconUrl(@Nonnull final ImageOptions options) {
-        return CDNFormat.iconUrl(id(), icon, options);
-    }
-    
-    @Override
-    @Nullable
-    @CheckReturnValue
-    public String splashUrl(@Nonnull final ImageOptions options) {
-        return CDNFormat.splashUrl(id(), splash, options);
-    }
-    
-    @Nonnull
-    @Override
-    public OffsetDateTime joinedAt() {
-        return parseTimestamp(joinedAt);
+        for(final PermissionOverride override : overrides) {
+            if(override instanceof RequiresCatnip) {
+                ((RequiresCatnip) override).catnip(catnip);
+            }
+        }
     }
     
     @Override
@@ -123,11 +80,11 @@ public class GuildImpl implements Guild, RequiresCatnip, Timestamped {
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Guild && ((Guild)obj).idAsLong() == idAsLong;
+        return obj instanceof TextChannel && ((TextChannel) obj).idAsLong() == idAsLong;
     }
     
     @Override
     public String toString() {
-        return String.format("Guild (%s, %s)", name, idAsLong);
+        return String.format("NewsChannel (%s)", name);
     }
 }

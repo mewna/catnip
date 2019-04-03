@@ -9,7 +9,7 @@ A Discord API wrapper in Java. Fully async / reactive, built on top of
 [vert.x](https://vertx.io). catnip tries to map roughly 1:1 to how the Discord 
 API works, both in terms of events and REST methods available.
 
-Join our [Discord server](https://discord.gg/yeF2HpP)!
+catnip is part of the [amyware Discord server](https://discord.gg/yeF2HpP)
 
 Licensed under the [BSD 3-Clause License](https://tldrlegal.com/license/bsd-3-clause-license-(revised)).
 

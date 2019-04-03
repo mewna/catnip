@@ -42,6 +42,7 @@ import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
+import org.apache.commons.lang3.Validate;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -123,6 +124,16 @@ public interface Message extends Snowflake {
     @Nonnull
     @CheckReturnValue
     List<User> mentionedUsers();
+    
+    /**
+     * A list of members mentioned by this message. Will contain the same users
+     * as {@link #mentionedUsers()}. Will always be empty for DMs.
+     *
+     * @return List of members. Never null.
+     */
+    @Nonnull
+    @CheckReturnValue
+    List<Member> mentionedMembers();
     
     /**
      * List of roles @mentioned by this message.
@@ -332,7 +343,7 @@ public interface Message extends Snowflake {
                 Permission.ADD_REACTIONS, Permission.READ_MESSAGE_HISTORY);
         return catnip().rest().channel().addReaction(channelId(), id(), emoji);
     }
-    
+
 //    default CompletionStage<Void> removeReaction()
     
     @Nonnull
@@ -367,12 +378,20 @@ public interface Message extends Snowflake {
     @Nonnull
     @JsonIgnore
     default CompletionStage<Message> edit(@Nonnull final Message message) {
+        Validate.isTrue(message.attachments().isEmpty(), "attachments cannot be edited into messages");
         return catnip().rest().channel().editMessage(channelId(), id(), message);
+    }
+    
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Message> edit(@Nonnull final MessageOptions options) {
+        Validate.isTrue(options.files().isEmpty(), "attachments cannot be edited into messages");
+        return catnip().rest().channel().editMessage(channelId(), id(), options.buildMessage());
     }
     
     @JsonIgnore
     default boolean isRickRoll() {
-        return content().contains("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+        return content().contains("https://www.youtube.com/watch?v=dQw4w9WgXcQ") || content().contains("https://youtu.be/dQw4w9WgXcQ");
     }
     
     @JsonDeserialize(as = AttachmentImpl.class)
