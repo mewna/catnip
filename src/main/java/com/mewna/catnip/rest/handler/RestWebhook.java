@@ -181,10 +181,10 @@ public class RestWebhook extends RestHandler {
         }
     
         if(options.embed() != null) {
-            body.put("embed", entityBuilder().embedToJson(options.embed()));
+            body.put("embeds", new JsonArray().add(entityBuilder().embedToJson(options.embed())));
         }
     
-        if(body.getValue("embed", null) == null && body.getValue("content", null) == null
+        if(body.getValue("embeds", null) == null && body.getValue("content", null) == null
                 && !options.hasFiles()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
         }
