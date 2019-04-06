@@ -356,6 +356,46 @@ public interface Guild extends Snowflake {
     boolean large();
     
     /**
+     * @return The maximum number of presences the guild can have. Will be
+     * {@code 0} if no value was present.
+     */
+    @Nonnegative
+    @CheckReturnValue
+    int maxPresences();
+    
+    /**
+     * @return The maximum number of members the guild can have. Will be
+     * {@code 0} if no value was present.
+     */
+    @Nonnegative
+    @CheckReturnValue
+    int maxMembers();
+    
+    /**
+     * @return The vanity invite code for this guild, ie.
+     * {@code discord.gg/vanity_code}.
+     */
+    @Nullable
+    @CheckReturnValue
+    String vanityUrlCode();
+    
+    /**
+     * @return The guild's description.
+     */
+    // TODO: What actually is this?
+    @Nullable
+    @CheckReturnValue
+    String description();
+    
+    /**
+     * @return The guild's banner hash.
+     * @apiNote See https://discordapp.com/developers/docs/reference#image-formatting "Guild Banner"
+     */
+    @Nullable
+    @CheckReturnValue
+    String banner();
+    
+    /**
      * @return Whether or not this guild is currently unavailable.
      */
     @CheckReturnValue
@@ -611,6 +651,7 @@ public interface Guild extends Snowflake {
     
     /**
      * @param id The id of the emoji to fetch.
+     *
      * @return The emoji, or {@code null} if it isn't present.
      */
     @Nullable
@@ -621,6 +662,7 @@ public interface Guild extends Snowflake {
     
     /**
      * @param id The id of the emoji to fetch.
+     *
      * @return The emoji, or {@code null} if it isn't present.
      */
     @Nullable
@@ -631,6 +673,7 @@ public interface Guild extends Snowflake {
     
     /**
      * @param name The name of the emoji to fetch
+     *
      * @return A possibly-empty collection of all emojis with matching names.
      */
     @Nonnull
@@ -638,7 +681,7 @@ public interface Guild extends Snowflake {
     default Collection<CustomEmoji> emojiByName(final String name) {
         return emojis().findByName(name);
     }
-
+    
     // REST methods
     
     /**
@@ -913,7 +956,7 @@ public interface Guild extends Snowflake {
                                       @Nonnegative final int deleteMessageDays) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.BAN_MEMBERS);
         final Member member = catnip().cache().member(id(), userId);
-        if (member != null) {
+        if(member != null) {
             PermissionUtil.checkHierarchy(member, this);
         }
         return catnip().rest().guild().createGuildBan(id(), userId, reason, deleteMessageDays);

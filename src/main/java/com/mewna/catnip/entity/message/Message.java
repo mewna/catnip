@@ -42,6 +42,7 @@ import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
+import org.apache.commons.lang3.Validate;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -377,7 +378,15 @@ public interface Message extends Snowflake {
     @Nonnull
     @JsonIgnore
     default CompletionStage<Message> edit(@Nonnull final Message message) {
+        Validate.isTrue(message.attachments().isEmpty(), "attachments cannot be edited into messages");
         return catnip().rest().channel().editMessage(channelId(), id(), message);
+    }
+    
+    @Nonnull
+    @JsonIgnore
+    default CompletionStage<Message> edit(@Nonnull final MessageOptions options) {
+        Validate.isTrue(options.files().isEmpty(), "attachments cannot be edited into messages");
+        return catnip().rest().channel().editMessage(channelId(), id(), options.buildMessage());
     }
     
     @JsonIgnore

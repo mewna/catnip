@@ -358,6 +358,11 @@ class CodecTest {
                 .joinedAt(OffsetDateTime.now().toString())
                 .large(ThreadLocalRandom.current().nextBoolean())
                 .unavailable(ThreadLocalRandom.current().nextBoolean())
+                .maxPresences(100_000)
+                .maxMembers(100_000)
+                .vanityUrlCode(null)
+                .description(null)
+                .banner(null)
                 .build();
         
         test(guild);
@@ -446,6 +451,24 @@ class CodecTest {
                 .build();
         
         test(message);
+    }
+    
+    @Test
+    void newsChannel() {
+        final Catnip mockNip = mockNip();
+        final NewsChannel newsChannel = NewsChannelImpl.builder()
+                .catnip(mockNip)
+                .idAsLong(randomPositiveLong())
+                .name("This is a text channel")
+                .guildIdAsLong(randomPositiveLong())
+                .position(2)
+                .parentIdAsLong(randomPositiveLong())
+                .overrides(Arrays.asList(permissionOverride(mockNip), permissionOverride(mockNip)))
+                .topic("No Anime Allowed")
+                .nsfw(ThreadLocalRandom.current().nextBoolean())
+                .build();
+        
+        test(newsChannel);
     }
     
     @Test
@@ -591,6 +614,23 @@ class CodecTest {
                 .build();
         
         test(role);
+    }
+    
+    @Test
+    void storeChannel() {
+        final Catnip mockNip = mockNip();
+        final StoreChannel storeChannel = StoreChannelImpl.builder()
+                .catnip(mockNip)
+                .idAsLong(randomPositiveLong())
+                .name("This is a store channel")
+                .guildIdAsLong(randomPositiveLong())
+                .nsfw(false)
+                .overrides(Arrays.asList(permissionOverride(mockNip), permissionOverride(mockNip)))
+                .parentIdAsLong(randomPositiveLong())
+                .position(2)
+                .build();
+        
+        test(storeChannel);
     }
     
     @Test

@@ -477,6 +477,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
     
     private void handleSocketQueue(final Message<JsonObject> msg) {
         sendTask.offer(msg.body());
+        sendTask.run();
     }
     
     private void handleSocketSend(final Message<JsonObject> msg) {

@@ -112,7 +112,7 @@ public class CachingBuffer extends AbstractBuffer {
             }
             case Raw.GUILD_MEMBERS_CHUNK: {
                 handleGuildMemberChunk(bufferState, event);
-                // We very explicitly DON'T break here because this is SUPPOSED to fall through to the next case
+                break;
             }
             default: {
                 // Buffer and replay later
@@ -178,8 +178,6 @@ public class CachingBuffer extends AbstractBuffer {
             bufferState.acceptChunk(guild);
             if(bufferState.doneChunking(guild)) {
                 emitter().emit(bufferState.guildCreate(guild));
-                // If we're finished chunking that guild, defer doing everything needed
-                // by a little bit to allow chunk caching to finish
                 bufferState.receiveGuild(guild);
                 bufferState.replayGuild(guild);
                 // Replay all buffered events once we run out
