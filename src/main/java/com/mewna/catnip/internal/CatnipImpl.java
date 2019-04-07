@@ -396,6 +396,7 @@ public class CatnipImpl implements Catnip {
             // Lifecycle
             codec(ReadyImpl.class);
             codec(ResumedImpl.class);
+            codec(LifecycleState.class);
             
             // DoubleEvents use ImmutablePair
             codec(ImmutablePair.class);
