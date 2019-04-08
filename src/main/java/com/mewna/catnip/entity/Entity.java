@@ -59,7 +59,7 @@ public interface Entity {
         final String v = json.getString("v");
         final JsonObject data = json.getJsonObject("d");
         
-        if(!CatnipMeta.VERSION.equals(v)) {
+        if(!CatnipMeta.VERSION.equals(v) && catnip.warnOnEntityVersionMismatch()) {
             catnip.logAdapter().warn("Attempting to deserialize an entity from catnip v{}, but we're on v{}! " +
                     "This may not work, so update your versions!", v, CatnipMeta.VERSION);
         }

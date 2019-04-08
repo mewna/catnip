@@ -754,8 +754,6 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public Emoji createEmoji(@Nullable final String guildId, @Nonnull final JsonObject data) {
-        // If it has an id, then it has a guild attached, so the @Nonnull warning can be ignored
-        //noinspection ConstantConditions
         return data.getValue("id") == null ? createUnicodeEmoji(data) : createCustomEmoji(guildId, data);
     }
     
@@ -938,6 +936,7 @@ public final class EntityBuilder {
         final String applicationId = data.getString("application_id");
         final String widgetChannelId = data.getString("widget_channel_id");
         final String systemChannelId = data.getString("system_channel_id");
+        final Integer maxPresences = data.getInteger("max_presences");
         return GuildImpl.builder()
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
@@ -964,6 +963,11 @@ public final class EntityBuilder {
                 .joinedAt(data.getString("joined_at"))
                 .large(data.getBoolean("large", false))
                 .unavailable(data.getBoolean("unavailable", false))
+                .maxPresences(maxPresences == null ? 0 : maxPresences)
+                .maxMembers(data.getInteger("max_members", 0))
+                .vanityUrlCode(data.getString("vanity_url_code"))
+                .description(data.getString("description"))
+                .banner(data.getString("banner"))
                 .build();
     }
     

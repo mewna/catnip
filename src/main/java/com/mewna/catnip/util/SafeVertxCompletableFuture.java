@@ -85,7 +85,11 @@ public class SafeVertxCompletableFuture<T> extends CompletableFuture<T> {
                                                                  @Nonnull final Context context,
                                                                  @Nullable final Throwable cause) {
         final SafeVertxCompletableFuture<T> future = new SafeVertxCompletableFuture<>(catnip, context);
-        future.completeExceptionally(cause);
+        if(cause == null) {
+            future.completeExceptionally(new Exception("Unknown cause"));
+        } else {
+            future.completeExceptionally(cause);
+        }
         return future;
     }
     

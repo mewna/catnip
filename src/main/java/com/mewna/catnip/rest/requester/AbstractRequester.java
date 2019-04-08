@@ -31,13 +31,13 @@ import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
+import com.mewna.catnip.rest.MultipartBodyPublisher;
 import com.mewna.catnip.rest.ResponseException;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestPayloadException;
 import com.mewna.catnip.rest.Routes.Route;
 import com.mewna.catnip.rest.ratelimit.RateLimiter;
 import com.mewna.catnip.util.CatnipMeta;
-import com.mewna.catnip.util.MultipartBodyPublisher;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.Utils;
 import io.vertx.core.Context;
@@ -52,14 +52,13 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
+import java.net.http.HttpClient.Builder;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
-import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -74,12 +73,14 @@ import static io.vertx.core.http.HttpMethod.PUT;
 
 @SuppressWarnings("WeakerAccess")
 public abstract class AbstractRequester implements Requester {
+    public static final BodyPublisher EMPTY_BODY = BodyPublishers.noBody();
+    
     protected final RateLimiter rateLimiter;
-    private final HttpClient.Builder clientBuilder;
+    protected final Builder clientBuilder;
     protected Catnip catnip;
     private volatile HttpClient client;
     
-    public AbstractRequester(@Nonnull final RateLimiter rateLimiter, @Nonnull final HttpClient.Builder clientBuilder) {
+    public AbstractRequester(@Nonnull final RateLimiter rateLimiter, @Nonnull final Builder clientBuilder) {
         this.rateLimiter = rateLimiter;
         this.clientBuilder = clientBuilder;
     }
@@ -134,12 +135,11 @@ public abstract class AbstractRequester implements Requester {
     
     protected void handleRouteBufferBodySend(@Nonnull final Route finalRoute, @Nonnull final QueuedRequest request) {
         try {
-            
             final MultipartBodyPublisher publisher = new MultipartBodyPublisher();
             final OutboundRequest r = request.request();
             for(int index = 0; index < r.buffers().size(); index++) {
                 final ImmutablePair<String, Buffer> pair = r.buffers().get(index);
-                publisher.addPart("file" + index, () -> new ByteArrayInputStream(pair.right.getBytes()), pair.left);
+                publisher.addPart("file" + index, pair.left, pair.right);
             }
             if(r.object() != null) {
                 for(final Extension extension : catnip.extensionManager().extensions()) {
@@ -151,12 +151,9 @@ public abstract class AbstractRequester implements Requester {
             } else if(r.array() != null) {
                 publisher.addPart("payload_json", r.array().encode());
             } else {
-                publisher.addPart("payload_json", new JsonObject()
-                        .putNull("content")
-                        .putNull("embed").encode());
+                publisher.addPart("payload_json", new JsonObject().putNull("content").putNull("embed").encode());
             }
-            
-            executeHttpRequest(finalRoute, publisher.build(), request);
+            executeHttpRequest(finalRoute, publisher.build(), request, "multipart/form-data;boundary=" + publisher.getBoundary());
         } catch(final Exception e) {
             catnip.logAdapter().error("Failed to send multipart request", e);
         }
@@ -177,33 +174,23 @@ public abstract class AbstractRequester implements Requester {
         } else {
             encoded = null;
         }
-        final BodyPublisher body;
-        if(encoded != null) {
-            body = BodyPublishers.ofString(encoded);
-            // body = RequestBody.create(MediaType.parse("application/json"), encoded);
-        } else if(requiresRequestBody(r.route().method().name().toUpperCase())) {
-            body = BodyPublishers.noBody();
-        } else {
-            body = BodyPublishers.noBody();
-        }
-        executeHttpRequest(finalRoute, body, request);
+        executeHttpRequest(finalRoute, encoded == null ? BodyPublishers.noBody() : BodyPublishers.ofString(encoded), request, "application/json");
     }
     
     protected void executeHttpRequest(@Nonnull final Route route, @Nullable final BodyPublisher body,
-                                      @Nonnull final QueuedRequest request) {
+                                      @Nonnull final QueuedRequest request, @Nonnull final String mediaType) {
         final Context context = catnip.vertx().getOrCreateContext();
-        
-        final Builder builder;
-        
+        final HttpRequest.Builder builder;
+    
         if(route.method() == GET) {
             // No body
             builder = HttpRequest.newBuilder(URI.create(API_HOST + API_BASE + route.baseRoute())).GET();
         } else {
             builder = HttpRequest.newBuilder(URI.create(API_HOST + API_BASE + route.baseRoute()))
-                    .setHeader("Content-Type", "application/json")
+                    .setHeader("Content-Type", mediaType)
                     .method(route.method().name(), body);
         }
-        
+    
         builder.setHeader("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')');
         
         if(request.request().needsToken()) {
@@ -212,7 +199,7 @@ public abstract class AbstractRequester implements Requester {
         if(request.request().reason() != null) {
             builder.header(Requester.REASON_HEADER, Utils.encodeUTF8(request.request().reason()));
         }
-        
+    
         // Update request start time as soon as possible
         // See QueuedRequest docs for why we do this
         request.start = System.nanoTime();
@@ -221,13 +208,13 @@ public abstract class AbstractRequester implements Requester {
                     final int code = res.statusCode();
                     final String message = "Unavailable to due Java's HTTP client.";
                     final long requestEnd = System.nanoTime();
-                    
+                
                     if(res.body() == null) {
                         context.runOnContext(__ ->
                                 handleResponse(route, code, message, requestEnd, null, res.headers(), request));
                     } else {
                         final byte[] bodyBytes = res.body().getBytes();
-                        
+                    
                         context.runOnContext(__ ->
                                 handleResponse(route, code, message, requestEnd, Buffer.buffer(bodyBytes),
                                         res.headers(), request));
@@ -275,6 +262,7 @@ public abstract class AbstractRequester implements Requester {
                     headers.firstValue("X-Ratelimit-Limit").orElse(null),
                     headers.firstValue("X-Ratelimit-Reset").orElse(null)
             );
+    
             String retry = headers.firstValue("Retry-After").orElse(null);
             if(retry == null || retry.isEmpty()) {
                 retry = body.toJsonObject().getValue("retry_after").toString();
@@ -357,12 +345,12 @@ public abstract class AbstractRequester implements Requester {
                 route, route.ratelimitKey(), rateLimitRemaining.orElse(-1L), rateLimitLimit.orElse(-1L),
                 rateLimitReset.orElse(-1L), retryAfter, timeDifference
         );
-        
+    
         if(retryAfter > 0) {
             rateLimiter.updateRemaining(route, 0);
             rateLimiter.updateReset(route, retryAfter);
         }
-        
+    
         if(route.method() == PUT && route.baseRoute().contains("/reactions/")) {
             rateLimiter.updateLimit(route, 1);
             rateLimiter.updateReset(route, System.currentTimeMillis() + timeDifference + 250);
@@ -370,7 +358,7 @@ public abstract class AbstractRequester implements Requester {
             if(rateLimitReset.isPresent()) {
                 rateLimiter.updateReset(route, rateLimitReset.getAsLong() * 1000 + timeDifference);
             }
-            
+    
             if(rateLimitLimit.isPresent()) {
                 rateLimiter.updateLimit(route, Math.toIntExact(rateLimitLimit.getAsLong()));
             }
@@ -379,7 +367,7 @@ public abstract class AbstractRequester implements Requester {
         if(rateLimitRemaining.isPresent()) {
             rateLimiter.updateRemaining(route, Math.toIntExact(rateLimitRemaining.getAsLong()));
         }
-        
+    
         rateLimiter.updateDone(route);
     }
     

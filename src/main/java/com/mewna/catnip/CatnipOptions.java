@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.SplitMemoryEntityCache;
+import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.extension.Extension;
@@ -51,16 +52,18 @@ import com.mewna.catnip.shard.session.DefaultSessionManager;
 import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.util.logging.DefaultLogAdapter;
 import com.mewna.catnip.util.logging.LogAdapter;
+import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import okhttp3.OkHttpClient.Builder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.net.http.HttpClient;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author amy
@@ -159,7 +162,7 @@ public final class CatnipOptions implements Cloneable {
     @Nonnull
     private Set<String> disabledEvents = ImmutableSet.of();
     @Nonnull
-    private Requester requester = new SerialRequester(new DefaultRateLimiter(), new Builder());
+    private Requester requester = new SerialRequester(new DefaultRateLimiter(), HttpClient.newBuilder());
     /**
      * Whether or not extensions overriding options should be logged. Defaults
      * to {@code true}.
@@ -186,7 +189,7 @@ public final class CatnipOptions implements Cloneable {
      * <p>
      * NOTE: Capturing stacktraces is <strong>s l o w</strong>. If you have
      * performance problems around REST requests, you can disable this, at the
-     * cost of losing debugability.
+     * cost of losing debuggability.
      * <p>
      * TODO: When we move off of Java 8, use the stack walking API for this
      */
@@ -196,6 +199,20 @@ public final class CatnipOptions implements Cloneable {
      * catnip is not chunking members. Basically, this avoids a ton of logspam.
      */
     private boolean logUncachedPresenceWhenNotChunking = true;
+    /**
+     * Whether or not {@link Entity#fromJson(Catnip, Class, JsonObject)} should
+     * log a warning when deserializing entities with mismatched catnip
+     * versions. Generally, this should only be disabled if you can guarantee
+     * that the version mismatches won't be an issue.
+     */
+    private boolean warnOnEntityVersionMismatch = true;
+    /**
+     * How long catnip should wait to ensure that all member chunks have been
+     * received, in milliseconds. If all member chunks still haven't been
+     * received after this period, member chunking will be re-requested, to try
+     * to make sure we're not missing any.
+     */
+    private long memberChunkTimeout = TimeUnit.SECONDS.toMillis(10);
     
     @Override
     public Object clone() {

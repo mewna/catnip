@@ -29,9 +29,9 @@ package com.mewna.catnip.rest.requester;
 
 import com.mewna.catnip.rest.Routes.Route;
 import com.mewna.catnip.rest.ratelimit.RateLimiter;
-import okhttp3.OkHttpClient.Builder;
 
 import javax.annotation.Nonnull;
+import java.net.http.HttpClient.Builder;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;

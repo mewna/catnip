@@ -112,6 +112,8 @@ public class CatnipImpl implements Catnip {
     private boolean enforcePermissions;
     private boolean captureRestStacktraces;
     private boolean logUncachedPresenceWhenNotChunking;
+    private boolean warnOnEntityVersionMismatch;
+    private long memberChunkTimeout;
     private Presence initialPresence;
     private Set<String> disabledEvents;
     private CatnipOptions options;
@@ -126,8 +128,8 @@ public class CatnipImpl implements Catnip {
     
     private void applyOptions(@Nonnull final CatnipOptions options) {
         // TODO: Should probably make this behave like #diff
-        // so that we don't need to update this every single time that the
-        // options change.
+        //  so that we don't need to update this every single time that the
+        //  options change.
         this.options = options;
         dispatchManager = options.dispatchManager();
         requester = options.requester();
@@ -143,8 +145,10 @@ public class CatnipImpl implements Catnip {
         enforcePermissions = options.enforcePermissions();
         captureRestStacktraces = options.captureRestStacktraces();
         initialPresence = options.presence();
+        memberChunkTimeout = options.memberChunkTimeout();
         disabledEvents = ImmutableSet.copyOf(options.disabledEvents());
         logUncachedPresenceWhenNotChunking = options.logUncachedPresenceWhenNotChunking();
+        warnOnEntityVersionMismatch = options.warnOnEntityVersionMismatch();
         
         injectSelf();
     }
@@ -155,11 +159,11 @@ public class CatnipImpl implements Catnip {
         if(!extensionManager.matchingExtensions(extension.getClass()).isEmpty()) {
             final Map<String, Pair<Object, Object>> diff = diff(optionsPatcher.apply((CatnipOptions) options.clone()));
             if(!diff.isEmpty()) {
+                applyOptions(options);
                 if(logExtensionOverrides) {
                     diff.forEach((name, patch) -> logAdapter.info("Extension {} updated {} from \"{}\" to \"{}\".",
                             extension.name(), name, patch.getLeft(), patch.getRight()));
                 }
-                applyOptions(options);
             }
         } else {
             throw new IllegalArgumentException("Extension with class " + extension.getClass().getName()
@@ -354,7 +358,7 @@ public class CatnipImpl implements Catnip {
                         //this is actually needed because generics are dumb
                         return (Catnip) this;
                     }).exceptionally(e -> {
-                        logAdapter.warn("Couldn't validate token!");
+                        logAdapter.warn("Couldn't validate token!", e);
                         throw new RuntimeException(e);
                     })
                     .toCompletableFuture();
@@ -363,9 +367,7 @@ public class CatnipImpl implements Catnip {
                 parseClientId();
             } catch(final IllegalArgumentException e) {
                 final Exception wrapped = new RuntimeException("The provided token was invalid!", e);
-                // I would use SafeVertxCompletableFuture.failedFuture but that was added in Java 9+
-                // and catnip uses Java 8
-                return SafeVertxCompletableFuture.from(this, Future.failedFuture(wrapped));
+                return SafeVertxCompletableFuture.failedFuture(wrapped);
             }
             
             return SafeVertxCompletableFuture.completedFuture(this);
@@ -396,6 +398,7 @@ public class CatnipImpl implements Catnip {
             // Lifecycle
             codec(ReadyImpl.class);
             codec(ResumedImpl.class);
+            codec(LifecycleState.class);
             
             // DoubleEvents use ImmutablePair
             codec(ImmutablePair.class);

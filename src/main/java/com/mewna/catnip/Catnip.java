@@ -30,6 +30,7 @@ package com.mewna.catnip;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCache;
 import com.mewna.catnip.cache.EntityCacheWorker;
+import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.Presence;
@@ -52,6 +53,7 @@ import com.mewna.catnip.util.logging.LogAdapter;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.CheckReturnValue;
@@ -386,7 +388,7 @@ public interface Catnip {
      * @return A possibly-{@code null} instance of the passed extension class.
      */
     @Nullable
-    default <T extends Extension> T  extension(@Nonnull final Class<T> extensionClass) {
+    default <T extends Extension> T extension(@Nonnull final Class<T> extensionClass) {
         return extensionManager().extension(extensionClass);
     }
     
@@ -444,9 +446,20 @@ public interface Catnip {
     Set<String> disabledEvents();
     
     /**
-     * @return Whether or not to log "uncached presence" warning 
+     * @return Whether or not to log "uncached presence" warning
      */
     boolean logUncachedPresenceWhenNotChunking();
+    
+    /**
+     * @return Whether or not to log warnings about catnip entity version
+     * mismatches in {@link Entity#fromJson(Catnip, Class, JsonObject)}.
+     */
+    boolean warnOnEntityVersionMismatch();
+    
+    /**
+     * @return How long to wait before re-chunking members, in milliseconds.
+     */
+    long memberChunkTimeout();
     
     /**
      * Opens a voice connection to the provided guild and channel. The connection is
