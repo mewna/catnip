@@ -63,6 +63,7 @@ import javax.annotation.Nullable;
 import java.net.http.HttpClient;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author amy
@@ -188,7 +189,7 @@ public final class CatnipOptions implements Cloneable {
      * <p>
      * NOTE: Capturing stacktraces is <strong>s l o w</strong>. If you have
      * performance problems around REST requests, you can disable this, at the
-     * cost of losing debugability.
+     * cost of losing debuggability.
      * <p>
      * TODO: When we move off of Java 8, use the stack walking API for this
      */
@@ -205,6 +206,13 @@ public final class CatnipOptions implements Cloneable {
      * that the version mismatches won't be an issue.
      */
     private boolean warnOnEntityVersionMismatch = true;
+    /**
+     * How long catnip should wait to ensure that all member chunks have been
+     * received, in milliseconds. If all member chunks still haven't been
+     * received after this period, member chunking will be re-requested, to try
+     * to make sure we're not missing any.
+     */
+    private long memberChunkTimeout = TimeUnit.SECONDS.toMillis(10);
     
     @Override
     public Object clone() {
