@@ -155,8 +155,41 @@ public class CachingBuffer extends AbstractBuffer {
                 bufferState.initialGuildChunkCount(guild, chunks, event);
                 // Actually send the chunking request
                 catnip().chunkMembers(guild);
+                // I hate this
+                final int finalChunks = chunks;
+                catnip().vertx().setTimer(catnip().memberChunkTimeout(), __ -> {
+                    if(bufferState.guildChunkCount().containsKey(guild)) {
+                        final Counter counter = bufferState.guildChunkCount().get(guild);
+                        if(counter != null) {
+                            // Yeah, I know it shouldn't be an issue, but
+                            // honestly at this point I don't really trust this
+                            // class to work right :I
+                            // Rewrite when
+                            if(counter.count != 0) {
+                                catnip().logAdapter()
+                                        .warn("Didn't recv. member chunks for guild {} in time, re-requesting...",
+                                                guild);
+                                // Reset chunk count
+                                bufferState.initialGuildChunkCount(guild, finalChunks, event);
+                                catnip().chunkMembers(guild);
+                                catnip().vertx().setTimer(catnip().memberChunkTimeout(), ___ -> {
+                                    if(bufferState.guildChunkCount().containsKey(guild)) {
+                                        final Counter counterTwo = bufferState.guildChunkCount().get(guild);
+                                        if(counterTwo != null) {
+                                            catnip().logAdapter()
+                                                    .warn("Didn't recv. member chunks for guild {} after {}ms even " +
+                                                            "after retrying (missing {} chunks)! Please report this!",
+                                                            guild, finalChunks - counterTwo.count(),
+                                                            catnip().memberChunkTimeout());
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
             } else {
-                // TODO(#255) - need to properly defer the emit until we recv. the optionally-created role
+                // TODO(#255): need to properly defer the emit until we recv. the optionally-created role
                 emitter().emit(event);
                 bufferState.receiveGuild(guild);
                 bufferState.replayGuild(guild);

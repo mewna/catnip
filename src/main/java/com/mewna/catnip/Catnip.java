@@ -457,6 +457,11 @@ public interface Catnip {
     boolean warnOnEntityVersionMismatch();
     
     /**
+     * @return How long to wait before re-chunking members, in milliseconds.
+     */
+    long memberChunkTimeout();
+    
+    /**
      * Opens a voice connection to the provided guild and channel. The connection is
      * opened asynchronously, with
      * {@link com.mewna.catnip.shard.DiscordEvent#VOICE_STATE_UPDATE VOICE_STATE_UPDATE} and
