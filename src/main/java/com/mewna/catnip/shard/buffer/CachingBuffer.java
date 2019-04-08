@@ -178,7 +178,8 @@ public class CachingBuffer extends AbstractBuffer {
                                         if(counterTwo != null) {
                                             catnip().logAdapter()
                                                     .warn("Didn't recv. member chunks for guild {} after {}ms even " +
-                                                            "after retrying! Please report this!", guild,
+                                                            "after retrying (missing {} chunks)! Please report this!",
+                                                            guild, finalChunks - counterTwo.count(),
                                                             catnip().memberChunkTimeout());
                                         }
                                     }
