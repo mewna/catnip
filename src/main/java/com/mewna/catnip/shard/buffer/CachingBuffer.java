@@ -209,7 +209,6 @@ public class CachingBuffer extends AbstractBuffer {
             cacheAndDispatch(eventType, bufferState.id(), event);
             bufferState.acceptChunk(guild);
             if(bufferState.doneChunking(guild)) {
-                catnip().logAdapter().info("Finished chunking guild: {}", guild);
                 emitter().emit(bufferState.guildCreate(guild));
                 bufferState.replayGuild(guild);
                 // Replay all buffered events once we run out
