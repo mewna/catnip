@@ -189,13 +189,16 @@ public class CachingBuffer extends AbstractBuffer {
                     }
                 });
             } else {
-                // TODO(#255): need to properly defer the emit until we recv. the optionally-created role
-                emitter().emit(event);
-                bufferState.replayGuild(guild);
-                // Replay all buffered events once we run out
-                if(bufferState.awaitedGuilds().isEmpty()) {
-                    bufferState.replay();
-                }
+                // Defer 100ms to try to wait for the guild role create event
+                // that might come
+                catnip().vertx().setTimer(100L, __ -> {
+                    emitter().emit(event);
+                    bufferState.replayGuild(guild);
+                    // Replay all buffered events once we run out
+                    if(bufferState.awaitedGuilds().isEmpty()) {
+                        bufferState.replay();
+                    }
+                });
             }
         });
     }
