@@ -70,4 +70,16 @@ public interface Ready extends Entity {
      */
     @Nonnull
     Set<UnavailableGuild> guilds();
+    
+    /**
+     * @return The id of the shard that received this event.
+     */
+    @Nonnegative
+    int shardId();
+    
+    /**
+     * @return The total number of shards connected.
+     */
+    @Nonnegative
+    int shardCount();
 }

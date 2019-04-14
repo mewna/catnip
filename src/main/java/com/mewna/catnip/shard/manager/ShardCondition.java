@@ -29,6 +29,7 @@ package com.mewna.catnip.shard.manager;
 
 import com.mewna.catnip.shard.ShardConnectState;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.concurrent.CompletableFuture;
 
@@ -49,14 +50,17 @@ public interface ShardCondition {
      * <p>
      * This is run prior to sharding.
      *
+     * @param shardId The id of the shard being connected.
+     *
      * @return The future for this shard condition.
      */
-    CompletableFuture<Boolean> preshard();
+    CompletableFuture<Boolean> preshard(@Nonnegative final int shardId);
     
     /**
      * Run once sharding has finished. This function is called SYNCHRONOUSLY.
      *
-     * @param state The state the shard connected with
+     * @param shardId The id of the shard that was connected.
+     * @param state   The state the shard connected with.
      */
-    void postshard(@Nonnull ShardConnectState state);
+    void postshard(@Nonnegative final int shardId, @Nonnull ShardConnectState state);
 }
