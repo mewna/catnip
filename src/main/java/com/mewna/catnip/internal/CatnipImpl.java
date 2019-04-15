@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.internal;
 
-import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.cache.CacheFlag;
@@ -146,7 +145,7 @@ public class CatnipImpl implements Catnip {
         captureRestStacktraces = options.captureRestStacktraces();
         initialPresence = options.presence();
         memberChunkTimeout = options.memberChunkTimeout();
-        disabledEvents = ImmutableSet.copyOf(options.disabledEvents());
+        disabledEvents = Set.copyOf(options.disabledEvents());
         logUncachedPresenceWhenNotChunking = options.logUncachedPresenceWhenNotChunking();
         warnOnEntityVersionMismatch = options.warnOnEntityVersionMismatch();
         
@@ -237,7 +236,7 @@ public class CatnipImpl implements Catnip {
     @Nonnull
     @Override
     public Set<String> unavailableGuilds() {
-        return ImmutableSet.copyOf(unavailableGuilds);
+        return Set.copyOf(unavailableGuilds);
     }
     
     public void markAvailable(final String id) {

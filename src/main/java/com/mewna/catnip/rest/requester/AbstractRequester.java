@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.rest.requester;
 
-import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
@@ -307,14 +306,14 @@ public abstract class AbstractRequester implements Requester {
                             arr.stream().map(element -> (String) element).forEach(errorStrings::add);
                             failures.put(e.getKey(), errorStrings);
                         } else if(e.getValue() instanceof Integer) {
-                            failures.put(e.getKey(), ImmutableList.of(String.valueOf(e.getValue())));
+                            failures.put(e.getKey(), List.of(String.valueOf(e.getValue())));
                         } else if(e.getValue() instanceof String) {
-                            failures.put(e.getKey(), ImmutableList.of((String) e.getValue()));
+                            failures.put(e.getKey(), List.of((String) e.getValue()));
                         } else {
                             // If we don't know what it is, just stringify it and log a warning so that people can tell us
                             catnip.logAdapter().warn("Got unknown error response type: {} (Please report this!)",
                                     e.getValue().getClass().getName());
-                            failures.put(e.getKey(), ImmutableList.of(String.valueOf(e.getValue())));
+                            failures.put(e.getKey(), List.of(String.valueOf(e.getValue())));
                         }
                     });
                     final Throwable throwable = new RuntimeException("REST error context");

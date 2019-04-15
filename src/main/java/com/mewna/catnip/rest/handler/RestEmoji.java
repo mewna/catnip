@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.rest.handler;
 
-import com.google.common.collect.ImmutableMap;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
@@ -43,6 +42,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletionStage;
 
 import static com.mewna.catnip.util.JsonUtil.mapObjectContents;
@@ -69,7 +69,7 @@ public class RestEmoji extends RestHandler {
         return catnip().requester().queue(
                 new OutboundRequest(
                         Routes.LIST_GUILD_EMOJIS.withMajorParam(guildId),
-                        ImmutableMap.of()))
+                        Map.of()))
                 .thenApply(ResponsePayload::array);
     }
     
@@ -83,7 +83,7 @@ public class RestEmoji extends RestHandler {
         return catnip().requester().queue(
                 new OutboundRequest(
                         Routes.GET_GUILD_EMOJI.withMajorParam(guildId),
-                        ImmutableMap.of("emojis.id", emojiId)))
+                        Map.of("emojis.id", emojiId)))
                 .thenApply(ResponsePayload::object);
     }
     
@@ -120,7 +120,7 @@ public class RestEmoji extends RestHandler {
         return catnip().requester().queue(
                 new OutboundRequest(
                         Routes.CREATE_GUILD_EMOJI.withMajorParam(guildId),
-                        ImmutableMap.of(),
+                        Map.of(),
                         new JsonObject()
                                 .put("name", name)
                                 .put("image", imageData.toString())
@@ -178,7 +178,7 @@ public class RestEmoji extends RestHandler {
         return catnip().requester().queue(
                 new OutboundRequest(
                         Routes.MODIFY_GUILD_EMOJI.withMajorParam(guildId),
-                        ImmutableMap.of("emojis.id", emojiId),
+                        Map.of("emojis.id", emojiId),
                         new JsonObject()
                                 .put("name", name)
                                 .put("roles", rolesArray),
@@ -193,7 +193,7 @@ public class RestEmoji extends RestHandler {
         return catnip().requester().queue(
                 new OutboundRequest(
                         Routes.DELETE_GUILD_EMOJI.withMajorParam(guildId),
-                        ImmutableMap.of("emojis.id", emojiId)).reason(reason))
+                        Map.of("emojis.id", emojiId)).reason(reason))
                 .thenApply(__ -> null);
     }
     

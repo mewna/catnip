@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.entity.message;
 
-import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.entity.impl.MessageImpl;
 import io.vertx.core.buffer.Buffer;
 import lombok.*;
@@ -189,7 +188,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public List<ImmutablePair<String, Buffer>> files() {
-        return hasFiles() ? ImmutableList.copyOf(files) : ImmutableList.of();
+        return hasFiles() ? List.copyOf(files) : List.of();
     }
     
     /**

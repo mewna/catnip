@@ -27,7 +27,6 @@
 
 package com.mewna.catnip;
 
-import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.SplitMemoryEntityCache;
@@ -160,7 +159,7 @@ public final class CatnipOptions implements Cloneable {
      * the event names.
      */
     @Nonnull
-    private Set<String> disabledEvents = ImmutableSet.of();
+    private Set<String> disabledEvents = Set.of();
     @Nonnull
     private Requester requester = new SerialRequester(new DefaultRateLimiter(), HttpClient.newBuilder());
     /**
