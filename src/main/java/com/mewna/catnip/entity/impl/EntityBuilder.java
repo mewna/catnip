@@ -1155,12 +1155,16 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public Ready createReady(@Nonnull final JsonObject data) {
+        // We always send the shard key in IDENTIFY, so this should always be present
+        final JsonArray shard = data.getJsonArray("shard");
         return ReadyImpl.builder()
                 .catnip(catnip)
                 .version(data.getInteger("v"))
                 .user(createUser(data.getJsonObject("user")))
                 .trace(toStringList(data.getJsonArray("_trace")))
                 .guilds(toSet(data.getJsonArray("guilds"), this::createUnavailableGuild))
+                .shardId(shard.getInteger(0))
+                .shardCount(shard.getInteger(1))
                 .build();
     }
     

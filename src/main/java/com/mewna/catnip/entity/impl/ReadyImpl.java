@@ -59,6 +59,8 @@ public class ReadyImpl implements Ready, RequiresCatnip {
     private User user;
     private List<String> trace;
     private Set<UnavailableGuild> guilds;
+    private int shardId;
+    private int shardCount;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {

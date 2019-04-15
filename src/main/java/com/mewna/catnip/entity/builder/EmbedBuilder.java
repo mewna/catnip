@@ -172,7 +172,11 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder footer(@Nullable final String text, @Nullable final String iconUrl) {
-        return footer(new FooterImpl(text, iconUrl, null));
+        if(text == null && iconUrl == null) {
+            return footer(null);
+        } else {
+            return footer(new FooterImpl(text, iconUrl, null));
+        }
     }
     
     /**

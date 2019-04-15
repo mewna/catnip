@@ -62,4 +62,14 @@ public abstract class QueueTask<T> {
         }
         return inserted;
     }
+    
+    @CheckReturnValue
+    public boolean isEmpty() {
+        return queue.isEmpty();
+    }
+    
+    @CheckReturnValue
+    public T peek() {
+        return queue.peek();
+    }
 }

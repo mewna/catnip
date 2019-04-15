@@ -112,7 +112,7 @@ public class CachingBuffer extends AbstractBuffer {
             }
             case Raw.GUILD_MEMBERS_CHUNK: {
                 handleGuildMemberChunk(bufferState, event);
-                // We very explicitly DON'T break here because this is SUPPOSED to fall through to the next case
+                break;
             }
             default: {
                 // Buffer and replay later
@@ -155,15 +155,50 @@ public class CachingBuffer extends AbstractBuffer {
                 bufferState.initialGuildChunkCount(guild, chunks, event);
                 // Actually send the chunking request
                 catnip().chunkMembers(guild);
+                // I hate this
+                final int finalChunks = chunks;
+                catnip().vertx().setTimer(catnip().memberChunkTimeout(), __ -> {
+                    if(bufferState.guildChunkCount().containsKey(guild)) {
+                        final Counter counter = bufferState.guildChunkCount().get(guild);
+                        if(counter != null) {
+                            // Yeah, I know it shouldn't be an issue, but
+                            // honestly at this point I don't really trust this
+                            // class to work right :I
+                            // Rewrite when
+                            if(counter.count != 0) {
+                                catnip().logAdapter()
+                                        .warn("Didn't recv. member chunks for guild {} in time, re-requesting...",
+                                                guild);
+                                // Reset chunk count
+                                bufferState.initialGuildChunkCount(guild, finalChunks, event);
+                                catnip().chunkMembers(guild);
+                                catnip().vertx().setTimer(catnip().memberChunkTimeout(), ___ -> {
+                                    if(bufferState.guildChunkCount().containsKey(guild)) {
+                                        final Counter counterTwo = bufferState.guildChunkCount().get(guild);
+                                        if(counterTwo != null) {
+                                            catnip().logAdapter()
+                                                    .warn("Didn't recv. member chunks for guild {} after {}ms even " +
+                                                                    "after retrying (missing {} chunks)! Please report this!",
+                                                            guild, finalChunks - counterTwo.count(),
+                                                            catnip().memberChunkTimeout());
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
             } else {
-                // TODO(#255) - need to properly defer the emit until we recv. the optionally-created role
-                emitter().emit(event);
-                bufferState.receiveGuild(guild);
-                bufferState.replayGuild(guild);
-                // Replay all buffered events once we run out
-                if(bufferState.awaitedGuilds().isEmpty()) {
-                    bufferState.replay();
-                }
+                // Defer 100ms to try to wait for the guild role create event
+                // that might come
+                catnip().vertx().setTimer(100L, __ -> {
+                    emitter().emit(event);
+                    bufferState.replayGuild(guild);
+                    // Replay all buffered events once we run out
+                    if(bufferState.awaitedGuilds().isEmpty()) {
+                        bufferState.replay();
+                    }
+                });
             }
         });
     }
@@ -178,9 +213,6 @@ public class CachingBuffer extends AbstractBuffer {
             bufferState.acceptChunk(guild);
             if(bufferState.doneChunking(guild)) {
                 emitter().emit(bufferState.guildCreate(guild));
-                // If we're finished chunking that guild, defer doing everything needed
-                // by a little bit to allow chunk caching to finish
-                bufferState.receiveGuild(guild);
                 bufferState.replayGuild(guild);
                 // Replay all buffered events once we run out
                 if(bufferState.awaitedGuilds().isEmpty()) {
@@ -213,10 +245,8 @@ public class CachingBuffer extends AbstractBuffer {
     }
     
     private void cacheAndDispatch(final String type, final int id, final JsonObject event) {
-        // We *always* emit the event BEFORE updating the cache, so that you
-        // can ex. compare with the old cache first
         // TODO: Cache updates are async - this is likely a race condition
-        // Is there any reasonable way to fix this?
+        //  Is there any reasonable way to fix this?
         final JsonObject d = event.getJsonObject("d");
         emitter().emit(event);
         maybeCache(type, id, d);
@@ -249,10 +279,6 @@ public class CachingBuffer extends AbstractBuffer {
             awaitedGuilds.add(id);
         }
         
-        void receiveGuild(final String id) {
-            awaitedGuilds.remove(id);
-        }
-        
         void receiveGuildEvent(final String id, final JsonObject event) {
             final Deque<JsonObject> queue = guildBuffers.computeIfAbsent(id, __ -> new ConcurrentLinkedDeque<>());
             queue.addLast(event);
@@ -263,14 +289,17 @@ public class CachingBuffer extends AbstractBuffer {
         }
         
         void replayGuild(final String id) {
+            awaitedGuilds.remove(id);
+            guildChunkCount.remove(id);
             if(guildBuffers.containsKey(id)) {
                 final Deque<JsonObject> queue = guildBuffers.get(id);
-                queue.forEach(emitter()::emit);
+                queue.forEach(e -> cacheAndDispatch(e.getString("t"), this.id, e));
+                guildBuffers.remove(id);
             }
         }
         
         void replay() {
-            buffer.forEach(emitter()::emit);
+            buffer.forEach(e -> cacheAndDispatch(e.getString("t"), id, e));
         }
         
         void initialGuildChunkCount(final String guild, final int count, final JsonObject guildCreate) {
