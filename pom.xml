@@ -16,7 +16,7 @@
         <vertx.version>3.7.0</vertx.version>
         <vertx-completable-future.version>vertx-completable-future-0.1.2</vertx-completable-future.version>
         <slf4j.version>1.7.26</slf4j.version>
-        <commons.lang.version>3.8.1</commons.lang.version>
+        <commons.lang.version>3.9</commons.lang.version>
         <jsr305.version>3.0.2</jsr305.version>
 
         <koloboke-compile.version>0.5.1</koloboke-compile.version>
@@ -60,6 +60,11 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
+            <version>${vertx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-rx-java2</artifactId>
             <version>${vertx.version}</version>
         </dependency>
 
