@@ -57,7 +57,7 @@ public final class DispatchEmitter {
     
     public DispatchEmitter(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
-        entityBuilder = new EntityBuilder(catnip);
+        entityBuilder = catnip.entityBuilder();
     }
     
     public void emit(@Nonnull final JsonObject payload) {

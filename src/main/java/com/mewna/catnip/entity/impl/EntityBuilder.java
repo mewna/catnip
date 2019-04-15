@@ -79,65 +79,68 @@ import static com.mewna.catnip.util.JsonUtil.*;
  * @since 9/2/18.
  */
 @SuppressWarnings({"WeakerAccess", "unused", "OverlyCoupledClass"})
-public final class EntityBuilder {
-    private static final JsonArray EMPTY_JSON_ARRAY = new JsonArray();
+public class EntityBuilder {
+    protected static final JsonArray EMPTY_JSON_ARRAY = new JsonArray();
     
     @SuppressWarnings("FieldCanBeLocal")
-    private final Catnip catnip;
+    protected Catnip catnip;
     
-    public EntityBuilder(final Catnip catnip) {
-        this.catnip = catnip;
+    public EntityBuilder() {
     }
     
     @CheckReturnValue
-    private static boolean isInvalid(@Nullable final JsonObject object, @Nonnull final String key) {
+    protected static boolean isInvalid(@Nullable final JsonObject object, @Nonnull final String key) {
         return object == null || !object.containsKey(key);
     }
     
     @Nullable
     @CheckReturnValue
-    private static OffsetDateTime parseTimestamp(@Nullable final CharSequence raw) {
+    protected static OffsetDateTime parseTimestamp(@Nullable final CharSequence raw) {
         return raw == null ? null : OffsetDateTime.parse(raw);
     }
     
     @Nonnull
     @CheckReturnValue
-    private static JsonObject embedFooterToJson(final Footer footer) {
+    protected static JsonObject embedFooterToJson(final Footer footer) {
         return new JsonObject().put("icon_url", footer.iconUrl()).put("text", footer.text());
     }
     
     @Nonnull
     @CheckReturnValue
-    private static JsonObject embedImageToJson(final Image image) {
+    protected static JsonObject embedImageToJson(final Image image) {
         return new JsonObject().put("url", image.url());
     }
     
     @Nonnull
     @CheckReturnValue
-    private static JsonObject embedThumbnailToJson(final Thumbnail thumbnail) {
+    protected static JsonObject embedThumbnailToJson(final Thumbnail thumbnail) {
         return new JsonObject().put("url", thumbnail.url());
     }
     
     @Nonnull
     @CheckReturnValue
-    private static JsonObject embedAuthorToJson(final Author author) {
+    protected static JsonObject embedAuthorToJson(final Author author) {
         return new JsonObject().put("name", author.name()).put("url", author.url()).put("icon_url", author.iconUrl());
     }
     
     @Nonnull
     @CheckReturnValue
-    private static JsonObject embedFieldToJson(final Field field) {
+    protected static JsonObject embedFieldToJson(final Field field) {
         return new JsonObject().put("name", field.name()).put("value", field.value()).put("inline", field.inline());
     }
     
     @Nonnull
     @CheckReturnValue
-    private static FieldImpl createField(@Nonnull final JsonObject data) {
+    protected static FieldImpl createField(@Nonnull final JsonObject data) {
         return FieldImpl.builder()
                 .name(data.getString("name"))
                 .value(data.getString("value"))
                 .inline(data.getBoolean("inline", false))
                 .build();
+    }
+    
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
     }
     
     @Nonnull

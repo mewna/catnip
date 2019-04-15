@@ -51,7 +51,7 @@ abstract class RestHandler {
     
     RestHandler(final CatnipImpl catnip) {
         this.catnip = catnip;
-        entityBuilder = new EntityBuilder(catnip);
+        entityBuilder = catnip.entityBuilder();
     }
     
     @SuppressWarnings("unchecked")

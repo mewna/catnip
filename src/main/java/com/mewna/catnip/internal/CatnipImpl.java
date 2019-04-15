@@ -98,6 +98,7 @@ public class CatnipImpl implements Catnip {
     private final AtomicReference<GatewayInfo> gatewayInfo = new AtomicReference<>(null);
     private long clientIdAsLong;
     
+    private EntityBuilder entityBuilder;
     private DispatchManager dispatchManager;
     private Requester requester;
     private ShardManager shardManager;
@@ -131,6 +132,8 @@ public class CatnipImpl implements Catnip {
         //  so that we don't need to update this every single time that the
         //  options change.
         this.options = options;
+        entityBuilder = options.entityBuilder();
+        entityBuilder.catnip(this);
         dispatchManager = options.dispatchManager();
         requester = options.requester();
         shardManager = options.shardManager();
@@ -201,6 +204,12 @@ public class CatnipImpl implements Catnip {
     @CheckReturnValue
     public EventBus eventBus() {
         return vertx.eventBus();
+    }
+    
+    @Nonnull
+    @Override
+    public EntityBuilder entityBuilder() {
+        return entityBuilder;
     }
     
     @Nonnull

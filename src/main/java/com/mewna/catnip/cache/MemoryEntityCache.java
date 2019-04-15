@@ -799,7 +799,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     @Override
     public EntityCache catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
-        entityBuilder = new EntityBuilder(catnip);
+        entityBuilder = catnip.entityBuilder();
         return this;
     }
 }

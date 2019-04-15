@@ -32,6 +32,7 @@ import com.mewna.catnip.cache.EntityCache;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.channel.Webhook;
+import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.ActivityType;
@@ -223,6 +224,13 @@ public interface Catnip {
     @Nonnull
     @CheckReturnValue
     EventBus eventBus();
+    
+    /**
+     * @return The {@link EntityBuilder} that should be used to build entities.
+     */
+    @Nonnull
+    @CheckReturnValue
+    EntityBuilder entityBuilder();
     
     /**
      * Handles dispatching and listening to events.
