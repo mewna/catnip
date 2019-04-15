@@ -50,11 +50,13 @@ import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.logging.LogAdapter;
+import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.reactivex.FlowableHelper;
 import io.vertx.reactivex.ObservableHelper;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -711,6 +713,18 @@ public interface Catnip {
     }
     
     /**
+     * Add a reactive stream handler for events of the given type.
+     *
+     * @param type The type of event to stream.
+     * @param <T>  The object type of the event being streamed.
+     *
+     * @return The flowable.
+     */
+    default <T> Flowable<T> flow(@Nonnull final EventType<T> type) {
+        return FlowableHelper.toFlowable(on(type).bodyStream());
+    }
+    
+    /**
      * Add a consumer for the specified event type with the given handler
      * callback.
      *
@@ -738,6 +752,32 @@ public interface Catnip {
     default <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
                                                   @Nonnull final BiConsumer<T, E> handler) {
         return on(type).handler(m -> handler.accept(m.body().getLeft(), m.body().getRight()));
+    }
+    
+    /**
+     * Add a reactive stream handler for events of the given type.
+     *
+     * @param type The type of event to stream.
+     * @param <T>  The object type of the event being streamed.
+     * @param <E>  The object type of the event being streamed.
+     *
+     * @return The observable.
+     */
+    default <T, E> Observable<Pair<T, E>> observe(@Nonnull final DoubleEventType<T, E> type) {
+        return ObservableHelper.toObservable(on(type).bodyStream());
+    }
+    
+    /**
+     * Add a reactive stream handler for events of the given type.
+     *
+     * @param type The type of event to stream.
+     * @param <T>  The object type of the event being streamed.
+     * @param <E>  The object type of the event being streamed.
+     *
+     * @return The flowable.
+     */
+    default <T, E> Flowable<Pair<T, E>> flow(@Nonnull final DoubleEventType<T, E> type) {
+        return FlowableHelper.toFlowable(on(type).bodyStream());
     }
     
     /**
