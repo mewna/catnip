@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.shard.manager;
 
-import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.LifecycleEvent.Raw;
@@ -106,7 +105,7 @@ public class DefaultShardManager extends AbstractShardManager {
     
     @Override
     public Collection<Integer> shardIds() {
-        return ImmutableList.copyOf(shardIds);
+        return List.copyOf(shardIds);
     }
     
     @Override

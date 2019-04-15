@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.extension.manager;
 
-import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.extension.Extension;
 import io.vertx.core.impl.ConcurrentHashSet;
@@ -94,6 +93,6 @@ public class DefaultExtensionManager implements ExtensionManager {
     @Nonnull
     @Override
     public Set<Extension> extensions() {
-        return ImmutableSet.copyOf(loadedExtensions);
+        return Set.copyOf(loadedExtensions);
     }
 }

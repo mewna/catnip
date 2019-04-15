@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.rest.handler;
 
-import com.google.common.collect.ImmutableMap;
 import com.mewna.catnip.entity.misc.VoiceRegion;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
@@ -38,6 +37,7 @@ import io.vertx.core.json.JsonArray;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletionStage;
 
 import static com.mewna.catnip.util.JsonUtil.mapObjectContents;
@@ -58,7 +58,7 @@ public class RestVoice extends RestHandler {
     @CheckReturnValue
     public CompletionStage<JsonArray> listVoiceRegionsRaw() {
         return catnip().requester().queue(new OutboundRequest(Routes.LIST_VOICE_REGIONS,
-                ImmutableMap.of()))
+                Map.of()))
                 .thenApply(ResponsePayload::array);
     }
 }

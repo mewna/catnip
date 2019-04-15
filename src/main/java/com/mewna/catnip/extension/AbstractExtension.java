@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.extension;
 
-import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.shard.event.DoubleEventType;
@@ -76,7 +75,7 @@ public abstract class AbstractExtension extends AbstractVerticle implements Exte
     
     @Override
     public Set<CatnipHook> hooks() {
-        return ImmutableSet.copyOf(hooks);
+        return Set.copyOf(hooks);
     }
     
     @Override

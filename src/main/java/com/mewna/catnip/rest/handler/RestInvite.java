@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.rest.handler;
 
-import com.google.common.collect.ImmutableMap;
 import com.mewna.catnip.entity.guild.Invite;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
@@ -38,6 +37,7 @@ import io.vertx.core.json.JsonObject;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Map;
 import java.util.concurrent.CompletionStage;
 
 /**
@@ -60,7 +60,7 @@ public class RestInvite extends RestHandler {
     @CheckReturnValue
     public CompletionStage<JsonObject> getInviteRaw(@Nonnull final String code) {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_INVITE,
-                ImmutableMap.of("invite.code", code)))
+                Map.of("invite.code", code)))
                 .thenApply(ResponsePayload::object);
     }
     
@@ -80,7 +80,7 @@ public class RestInvite extends RestHandler {
     @CheckReturnValue
     public CompletionStage<JsonObject> deleteInviteRaw(@Nonnull final String code, @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.DELETE_INVITE,
-                ImmutableMap.of("invite.code", code)).reason(reason))
+                Map.of("invite.code", code)).reason(reason))
                 .thenApply(ResponsePayload::object);
     }
 }
