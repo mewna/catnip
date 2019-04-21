@@ -307,8 +307,10 @@ public class CachingBuffer extends AbstractBuffer {
         }
         
         void acceptChunk(final String guild) {
-            final Counter counter = guildChunkCount.get(guild);
-            counter.decrement();
+            if(guildChunkCount.containsKey(guild)) {
+                final Counter counter = guildChunkCount.get(guild);
+                counter.decrement();
+            }
         }
         
         boolean doneChunking(final String guild) {
