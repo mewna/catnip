@@ -176,11 +176,13 @@ public class CachingBuffer extends AbstractBuffer {
                                     if(bufferState.guildChunkCount().containsKey(guild)) {
                                         final Counter counterTwo = bufferState.guildChunkCount().get(guild);
                                         if(counterTwo != null) {
-                                            catnip().logAdapter()
-                                                    .warn("Didn't recv. member chunks for guild {} after {}ms even " +
-                                                                    "after retrying (missing {} chunks)! Please report this!",
-                                                            guild, finalChunks - counterTwo.count(),
-                                                            catnip().memberChunkTimeout());
+                                            if(finalChunks - counterTwo.count() > 0) {
+                                                catnip().logAdapter()
+                                                        .warn("Didn't recv. member chunks for guild {} after {}ms even " +
+                                                                        "after retrying (missing {} chunks)! Please report this!",
+                                                                guild, catnip().memberChunkTimeout(),
+                                                                finalChunks - counterTwo.count());
+                                            }
                                         }
                                     }
                                 });
