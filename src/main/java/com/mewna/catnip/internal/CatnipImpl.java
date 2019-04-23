@@ -420,6 +420,8 @@ public class CatnipImpl implements Catnip {
             codec(TextChannelImpl.class);
             codec(UserDMChannelImpl.class);
             codec(VoiceChannelImpl.class);
+            codec(NewsChannelImpl.class);
+            codec(StoreChannelImpl.class);
             codec(WebhookImpl.class);
             codec(ChannelPinsUpdateImpl.class);
             codec(WebhooksUpdateImpl.class);
