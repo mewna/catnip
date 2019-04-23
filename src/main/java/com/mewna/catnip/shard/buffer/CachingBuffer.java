@@ -167,7 +167,9 @@ public class CachingBuffer extends AbstractBuffer {
                             // Rewrite when
                             if(counter.count != 0) {
                                 catnip().logAdapter()
-                                        .warn("Didn't recv. member chunks for guild {} in time, re-requesting...",
+                                        .warn("Didn't recv. member chunks for guild {} in time, re-requesting... " +
+                                                        "If you see this a lot, you should probably increase the value of " +
+                                                        "CatnipOptions#memberChunkTimeout.",
                                                 guild);
                                 // Reset chunk count
                                 bufferState.initialGuildChunkCount(guild, finalChunks, event);
@@ -175,14 +177,13 @@ public class CachingBuffer extends AbstractBuffer {
                                 catnip().vertx().setTimer(catnip().memberChunkTimeout(), ___ -> {
                                     if(bufferState.guildChunkCount().containsKey(guild)) {
                                         final Counter counterTwo = bufferState.guildChunkCount().get(guild);
-                                        if(counterTwo != null) {
-                                            if(finalChunks - counterTwo.count() > 0) {
-                                                catnip().logAdapter()
-                                                        .warn("Didn't recv. member chunks for guild {} after {}ms even " +
-                                                                        "after retrying (missing {} chunks)! Please report this!",
-                                                                guild, catnip().memberChunkTimeout(),
-                                                                finalChunks - counterTwo.count());
-                                            }
+                                        if(counterTwo != null && finalChunks - counterTwo.count() > 0) {
+                                            catnip().logAdapter()
+                                                    .warn("Didn't recv. member chunks for guild {} after {}ms even " +
+                                                                    "after retrying (missing {} chunks)! You should really " +
+                                                                    "increase the value of CatnipOptions#memberChunkTimeout!",
+                                                            guild, catnip().memberChunkTimeout(),
+                                                            finalChunks - counterTwo.count());
                                         }
                                     }
                                 });
