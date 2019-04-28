@@ -936,7 +936,7 @@ public final class EntityBuilder {
         final String applicationId = data.getString("application_id");
         final String widgetChannelId = data.getString("widget_channel_id");
         final String systemChannelId = data.getString("system_channel_id");
-        final Integer maxPresences = data.getInteger("max_presences");
+        final Integer maxPresences = data.getInteger("max_presences", 5000);
         return GuildImpl.builder()
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))

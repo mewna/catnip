@@ -31,6 +31,7 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
+import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.impl.*;
 import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
 import com.mewna.catnip.entity.misc.GatewayInfo;
@@ -51,6 +52,7 @@ import com.mewna.catnip.shard.event.DispatchManager;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.SessionManager;
+import com.mewna.catnip.util.JsonEntityCodec;
 import com.mewna.catnip.util.JsonPojoCodec;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
@@ -395,60 +397,62 @@ public class CatnipImpl implements Catnip {
             // not apply any transformations
             
             // Lifecycle
-            codec(ReadyImpl.class);
-            codec(ResumedImpl.class);
-            codec(LifecycleState.class);
+            entityCodec(ReadyImpl.class);
+            entityCodec(ResumedImpl.class);
+            eventCodec(LifecycleState.class);
             
             // DoubleEvents use ImmutablePair
-            codec(ImmutablePair.class);
+            eventCodec(ImmutablePair.class);
             
             // Messages
-            codec(MessageImpl.class);
-            codec(DeletedMessageImpl.class);
-            codec(BulkDeletedMessagesImpl.class);
-            codec(TypingUserImpl.class);
-            codec(ReactionUpdateImpl.class);
-            codec(BulkRemovedReactionsImpl.class);
-            codec(MessageEmbedUpdateImpl.class);
+            entityCodec(MessageImpl.class);
+            entityCodec(DeletedMessageImpl.class);
+            entityCodec(BulkDeletedMessagesImpl.class);
+            entityCodec(TypingUserImpl.class);
+            entityCodec(ReactionUpdateImpl.class);
+            entityCodec(BulkRemovedReactionsImpl.class);
+            entityCodec(MessageEmbedUpdateImpl.class);
             
             // Channels
-            codec(CategoryImpl.class);
-            codec(GroupDMChannelImpl.class);
-            codec(TextChannelImpl.class);
-            codec(UserDMChannelImpl.class);
-            codec(VoiceChannelImpl.class);
-            codec(WebhookImpl.class);
-            codec(ChannelPinsUpdateImpl.class);
-            codec(WebhooksUpdateImpl.class);
+            entityCodec(CategoryImpl.class);
+            entityCodec(GroupDMChannelImpl.class);
+            entityCodec(TextChannelImpl.class);
+            entityCodec(UserDMChannelImpl.class);
+            entityCodec(VoiceChannelImpl.class);
+            entityCodec(NewsChannelImpl.class);
+            entityCodec(StoreChannelImpl.class);
+            entityCodec(WebhookImpl.class);
+            entityCodec(ChannelPinsUpdateImpl.class);
+            entityCodec(WebhooksUpdateImpl.class);
             
             // Guilds
-            codec(GuildImpl.class);
-            codec(GatewayGuildBanImpl.class);
-            codec(EmojiUpdateImpl.class);
-            codec(UnavailableGuildImpl.class);
+            entityCodec(GuildImpl.class);
+            entityCodec(GatewayGuildBanImpl.class);
+            entityCodec(EmojiUpdateImpl.class);
+            entityCodec(UnavailableGuildImpl.class);
             
             // Roles
-            codec(RoleImpl.class);
-            codec(PartialRoleImpl.class);
-            codec(PermissionOverrideImpl.class);
+            entityCodec(RoleImpl.class);
+            entityCodec(PartialRoleImpl.class);
+            entityCodec(PermissionOverrideImpl.class);
             
             // Members
-            codec(MemberImpl.class);
-            codec(PartialMemberImpl.class);
+            entityCodec(MemberImpl.class);
+            entityCodec(PartialMemberImpl.class);
             
             // Users
-            codec(UserImpl.class);
-            codec(PresenceImpl.class);
-            codec(PresenceUpdateImpl.class);
+            entityCodec(UserImpl.class);
+            entityCodec(PresenceImpl.class);
+            entityCodec(PresenceUpdateImpl.class);
             
             // Voice
-            codec(VoiceStateImpl.class);
-            codec(VoiceServerUpdateImpl.class);
+            entityCodec(VoiceStateImpl.class);
+            entityCodec(VoiceServerUpdateImpl.class);
             
             // Shards
-            codec(ShardInfo.class);
-            codec(ShardConnectState.class);
-            codec(ShardControlMessage.class);
+            eventCodec(ShardInfo.class);
+            eventCodec(ShardConnectState.class);
+            eventCodec(ShardControlMessage.class);
         } catch(final IllegalStateException e) {
             //only log once instead of one time per codec
             logAdapter.debug("Couldn't register codecs because they are already registered. " +
@@ -457,7 +461,11 @@ public class CatnipImpl implements Catnip {
         }
     }
     
-    private <T> void codec(@Nonnull final Class<T> cls) {
+    private <T extends Entity> void entityCodec(@Nonnull final Class<T> cls) {
+        eventBus().registerDefaultCodec(cls, new JsonEntityCodec<>(this, cls));
+    }
+    
+    private <T> void eventCodec(@Nonnull final Class<T> cls) {
         eventBus().registerDefaultCodec(cls, new JsonPojoCodec<>(this, cls));
     }
     

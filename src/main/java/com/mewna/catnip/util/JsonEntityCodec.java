@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2019 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,31 +28,26 @@
 package com.mewna.catnip.util;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.Entity;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.eventbus.MessageCodec;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * @author amy
- * @since 9/2/18.
+ * @since 4/27/19.
  */
-public class JsonPojoCodec<T> implements MessageCodec<T, T> {
-    private static final Logger log = LoggerFactory.getLogger(JsonPojoCodec.class);
+public class JsonEntityCodec<T extends Entity> extends JsonPojoCodec<T> {
+    private static final Logger log = LoggerFactory.getLogger(JsonEntityCodec.class);
     
-    protected final Catnip catnip;
-    protected final Class<T> type;
-    
-    public JsonPojoCodec(final Catnip catnip, final Class<T> type) {
-        this.catnip = catnip;
-        this.type = type;
+    public JsonEntityCodec(final Catnip catnip, final Class<T> type) {
+        super(catnip, type);
     }
     
     @Override
     public void encodeToWire(final Buffer buffer, final T t) {
-        final byte[] data = JsonUtil.stringifySnowflakes(JsonObject.mapFrom(t)).encode().getBytes();
+        final byte[] data = t.toJson().encode().getBytes();
         buffer.appendInt(data.length);
         buffer.appendBytes(data);
     }
@@ -62,29 +57,7 @@ public class JsonPojoCodec<T> implements MessageCodec<T, T> {
         final int length = buffer.getInt(pos);
         final String rawJson = buffer.getString(pos + 4, pos + 4 + length);
         log.trace("Received raw json {}", rawJson);
-        final JsonObject data = JsonUtil.destringifySnowflakes(new JsonObject(rawJson));
-        final T object = data.mapTo(type);
-        if(object instanceof RequiresCatnip) {
-            ((RequiresCatnip) object).catnip(catnip);
-        }
-        return object;
-    }
-    
-    @Override
-    public T transform(final T t) {
-        if(t instanceof RequiresCatnip) {
-            ((RequiresCatnip) t).catnip(catnip);
-        }
-        return t;
-    }
-    
-    @Override
-    public String name() {
-        return "JsonPojoCodec-" + type.getName();
-    }
-    
-    @Override
-    public byte systemCodecID() {
-        return -1;
+        final JsonObject data = new JsonObject(rawJson);
+        return Entity.fromJson(catnip, type, data);
     }
 }

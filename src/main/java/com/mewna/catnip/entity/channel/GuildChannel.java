@@ -303,6 +303,9 @@ public interface GuildChannel extends GuildEntity, Channel {
                         payload.put("nsfw", nsfw);
                     }
                     if(rateLimitPerUser != null && !Objects.equals(rateLimitPerUser, text.rateLimitPerUser())) {
+                        if(rateLimitPerUser < 0 || rateLimitPerUser > 21600) {
+                            throw new IllegalArgumentException("Attempted to set 'rate_limit_per_user' to an invalid value (" + rateLimitPerUser + "), must be between 0 and 21600.");
+                        }
                         payload.put("rate_limit_per_user", rateLimitPerUser);
                     }
                     if(bitrate != null) {
@@ -343,6 +346,9 @@ public interface GuildChannel extends GuildEntity, Channel {
                     payload.put("user_limit", userLimit);
                 }
                 if(rateLimitPerUser != null) {
+                    if(rateLimitPerUser < 0 || rateLimitPerUser > 21600) {
+                        throw new IllegalArgumentException("Attempted to set 'rate_limit_per_user' to an invalid value (" + rateLimitPerUser + "), must be between 0 and 21600.");
+                    }
                     payload.put("rate_limit_per_user", rateLimitPerUser);
                 }
             }
