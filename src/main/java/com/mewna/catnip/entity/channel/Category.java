@@ -37,12 +37,6 @@ import javax.annotation.Nonnull;
  * @since 9/12/18
  */
 public interface Category extends GuildChannel {
-    @Nonnull
-    @Override
-    default ChannelType type() {
-        return ChannelType.CATEGORY;
-    }
-    
     @Override
     @CheckReturnValue
     default boolean isText() {

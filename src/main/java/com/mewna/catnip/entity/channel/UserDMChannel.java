@@ -44,12 +44,6 @@ import javax.annotation.Nullable;
  */
 @JsonDeserialize(as = UserDMChannelImpl.class)
 public interface UserDMChannel extends DMChannel {
-    @Nonnull
-    @Override
-    default ChannelType type() {
-        return ChannelType.DM;
-    }
-    
     @Nullable
     @CheckReturnValue
     User recipient();

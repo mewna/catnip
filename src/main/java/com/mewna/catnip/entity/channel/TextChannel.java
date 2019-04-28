@@ -50,12 +50,6 @@ import java.util.concurrent.CompletionStage;
 @SuppressWarnings("unused")
 @JsonDeserialize(as = TextChannelImpl.class)
 public interface TextChannel extends GuildChannel, MessageChannel, Mentionable {
-    @Nonnull
-    @Override
-    default ChannelType type() {
-        return ChannelType.TEXT;
-    }
-    
     /**
      * The channel's topic. Shown at the top of the channel. May be
      * {@code null}.

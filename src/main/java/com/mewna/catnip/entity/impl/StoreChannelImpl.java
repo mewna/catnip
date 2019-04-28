@@ -50,6 +50,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StoreChannelImpl implements StoreChannel, RequiresCatnip {
+    private final ChannelType type = ChannelType.STORE;
+    
     private transient Catnip catnip;
     
     private long idAsLong;
