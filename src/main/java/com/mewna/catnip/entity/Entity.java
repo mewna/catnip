@@ -30,6 +30,7 @@ package com.mewna.catnip.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.util.CatnipMeta;
+import com.mewna.catnip.util.JsonUtil;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
@@ -57,7 +58,7 @@ public interface Entity {
     @SuppressWarnings("ClassReferencesSubclass")
     static <T> T fromJson(@Nonnull final Catnip catnip, @Nonnull final Class<T> type, @Nonnull final JsonObject json) {
         final String v = json.getString("v");
-        final JsonObject data = json.getJsonObject("d");
+        final JsonObject data = JsonUtil.destringifySnowflakes(json.getJsonObject("d"));
         
         if(!CatnipMeta.VERSION.equals(v) && catnip.warnOnEntityVersionMismatch()) {
             catnip.logAdapter().warn("Attempting to deserialize an entity from catnip v{}, but we're on v{}! " +
@@ -72,7 +73,6 @@ public interface Entity {
         }
         return t;
     }
-    
     
     /**
      * Returns the catnip instance associated with this entity.
@@ -90,9 +90,10 @@ public interface Entity {
     @Nonnull
     @JsonIgnore
     default JsonObject toJson() {
-        return new JsonObject()
-                .put("d", JsonObject.mapFrom(this))
-                .put("v", CatnipMeta.VERSION)
-                ;
+        return JsonUtil.stringifySnowflakes(
+                new JsonObject()
+                        .put("d", JsonObject.mapFrom(this))
+                        .put("v", CatnipMeta.VERSION)
+        );
     }
 }

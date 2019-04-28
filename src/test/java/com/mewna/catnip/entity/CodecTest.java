@@ -63,6 +63,7 @@ import com.mewna.catnip.entity.user.Presence.ActivityType;
 import com.mewna.catnip.entity.user.Presence.OnlineStatus;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.entity.voice.VoiceServerUpdate;
+import com.mewna.catnip.util.JsonEntityCodec;
 import com.mewna.catnip.util.JsonPojoCodec;
 import io.vertx.core.buffer.Buffer;
 import org.junit.jupiter.api.Test;
@@ -86,7 +87,32 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @SuppressWarnings("OverlyCoupledClass")
 class CodecTest {
-    private <T> void test(final T entity) {
+    private <T extends Entity> void testEntity(final T entity) {
+        final Catnip thisCatnip = mockNip();
+        @SuppressWarnings("unchecked")
+        final Class<T> entityClass = (Class<T>) entity.getClass();
+        final JsonEntityCodec<T> codec = new JsonEntityCodec<>(thisCatnip, entityClass);
+        final Buffer buffer = Buffer.buffer();
+        codec.encodeToWire(buffer, entity);
+        final T deserialized = codec.decodeFromWire(0, buffer);
+        
+        final Map<Object, Object> deepEqualsOptions = new HashMap<>();
+        deepEqualsOptions.put(DeepEquals.IGNORE_CUSTOM_EQUALS, Collections.emptySet()); //empty set = ignore all
+        // If you end up here with a really bad and undescriptive message of a test failing, I'm sorry.
+        // As of adding this test, none of the usual suspects/proper testing libs that make nice messages upon failure
+        // like JUnit, Hamcrest, AssertJ, Shazamcrest had a proper deep equals feature.
+        assertTrue(DeepEquals.deepEquals(entity, deserialized, deepEqualsOptions));
+        
+        //check equals implementation
+//        assertEquals(entity, deserialized); TODO ideally all entities should have an equals method
+        
+        //check that our catnip has been set on the entity
+        if(deserialized instanceof RequiresCatnip) {
+            assertSame(thisCatnip, deserialized.catnip());
+        } //TODO run same check on nested entities and collections of nested entities
+    }
+    
+    private <T> void testObject(final T entity) {
         final Catnip thisCatnip = mockNip();
         @SuppressWarnings("unchecked")
         final Class<T> entityClass = (Class<T>) entity.getClass();
@@ -126,17 +152,17 @@ class CodecTest {
                 .owner(applicationOwner(mocknip))
                 .build();
         
-        test(applicationInfo);
+        testEntity(applicationInfo);
     }
     
     @Test
     void applicationOwner() {
-        test(applicationOwner(mockNip()));
+        testEntity(applicationOwner(mockNip()));
     }
     
     @Test
     void auditLogChange() {
-        test(auditLogChange(mockNip()));
+        testEntity(auditLogChange(mockNip()));
     }
     
     @Test
@@ -154,7 +180,7 @@ class CodecTest {
                 .webhook(webhook(mocknip))
                 .build();
         
-        test(auditLogEntry);
+        testEntity(auditLogEntry);
     }
     
     @Test
@@ -169,7 +195,7 @@ class CodecTest {
                 .guildIdAsLong(randomPositiveLong())
                 .build();
         
-        test(bulkDeletedMessages);
+        testEntity(bulkDeletedMessages);
     }
     
     @Test
@@ -181,7 +207,7 @@ class CodecTest {
                 .guildId(randomPositiveLongAsString())
                 .build();
         
-        test(bulkRemovedReactions);
+        testEntity(bulkRemovedReactions);
     }
     
     @Test
@@ -197,7 +223,7 @@ class CodecTest {
                 .overrides(Arrays.asList(permissionOverride(mockNip), permissionOverride(mockNip)))
                 .build();
         
-        test(category);
+        testEntity(category);
     }
     
     @Test
@@ -208,7 +234,7 @@ class CodecTest {
                 .lastPinTimestamp(OffsetDateTime.now().toString())
                 .build();
         
-        test(channelPinsUpdate);
+        testEntity(channelPinsUpdate);
     }
     
     @Test
@@ -229,12 +255,12 @@ class CodecTest {
                 .revoked(ThreadLocalRandom.current().nextBoolean())
                 .build();
         
-        test(createdInvite);
+        testEntity(createdInvite);
     }
     
     @Test
     void customEmoji() {
-        test(customEmoji(mockNip()));
+        testEntity(customEmoji(mockNip()));
     }
     
     @Test
@@ -245,12 +271,12 @@ class CodecTest {
                 .channelIdAsLong(randomPositiveLong())
                 .guildIdAsLong(randomPositiveLong())
                 .build();
-        test(deletedMessage);
+        testEntity(deletedMessage);
     }
     
     @Test
     void embed() {
-        test(embed(mockNip()));
+        testObject(embed(mockNip()));
     }
     
     @Test
@@ -262,7 +288,7 @@ class CodecTest {
                 .emojis(Arrays.asList(customEmoji(mockNip), customEmoji(mockNip)))
                 .build();
         
-        test(emojiUpdate);
+        testEntity(emojiUpdate);
     }
     
     @Test
@@ -274,7 +300,7 @@ class CodecTest {
                 .user(user(mockNip))
                 .build();
         
-        test(gatewayGuildBan);
+        testEntity(gatewayGuildBan);
     }
     
     @Test
@@ -289,7 +315,7 @@ class CodecTest {
                 .valid(ThreadLocalRandom.current().nextBoolean())
                 .build();
         
-        test(gatewayInfo);
+        testEntity(gatewayInfo);
     }
     
     @Test
@@ -304,7 +330,7 @@ class CodecTest {
                 .applicationIdAsLong(randomPositiveLong())
                 .build();
         
-        test(groupDMChannel);
+        testEntity(groupDMChannel);
     }
     
     @Test
@@ -316,7 +342,7 @@ class CodecTest {
                 .user(user(mockNip))
                 .build();
         
-        test(guildBan);
+        testEntity(guildBan);
     }
     
     @Test
@@ -327,7 +353,7 @@ class CodecTest {
                 .enabled(ThreadLocalRandom.current().nextBoolean())
                 .build();
         
-        test(guildEmbed);
+        testEntity(guildEmbed);
     }
     
     @Test
@@ -365,7 +391,7 @@ class CodecTest {
                 .banner(null)
                 .build();
         
-        test(guild);
+        testEntity(guild);
     }
     
     @Test
@@ -384,7 +410,7 @@ class CodecTest {
     
     @Test
     void member() {
-        test(member(mockNip()));
+        testEntity(member(mockNip()));
     }
     
     @Test
@@ -395,7 +421,7 @@ class CodecTest {
                 .removedMembersCount(1024)
                 .build();
         
-        test(memberPruneInfo);
+        testEntity(memberPruneInfo);
     }
     
     @Test
@@ -406,7 +432,7 @@ class CodecTest {
                 .deletedMessagesCount(2048)
                 .build();
         
-        test(messageDeleteInfo);
+        testEntity(messageDeleteInfo);
     }
     
     @Test
@@ -420,7 +446,7 @@ class CodecTest {
                 .embeds(Arrays.asList(embed(mockNip), embed(mockNip)))
                 .build();
         
-        test(messageEmbedUpdate);
+        testEntity(messageEmbedUpdate);
     }
     
     @Test
@@ -450,7 +476,7 @@ class CodecTest {
                 .guildIdAsLong(randomPositiveLong())
                 .build();
         
-        test(message);
+        testEntity(message);
     }
     
     @Test
@@ -468,7 +494,7 @@ class CodecTest {
                 .nsfw(ThreadLocalRandom.current().nextBoolean())
                 .build();
         
-        test(newsChannel);
+        testEntity(newsChannel);
     }
     
     @Test
@@ -479,7 +505,7 @@ class CodecTest {
                 .overriddenEntityIdAsLong(randomPositiveLong())
                 .build();
         
-        test(overrideUpdateInfo);
+        testEntity(overrideUpdateInfo);
     }
     
     @Test
@@ -493,7 +519,7 @@ class CodecTest {
                 .permissions(EnumSet.allOf(Permission.class))
                 .build();
         
-        test(partialGuild);
+        testEntity(partialGuild);
     }
     
     @Test
@@ -507,7 +533,7 @@ class CodecTest {
                 .nick("Nik")
                 .build();
         
-        test(partialMember);
+        testEntity(partialMember);
     }
     
     @Test
@@ -518,12 +544,12 @@ class CodecTest {
                 .guildIdAsLong(randomPositiveLong())
                 .build();
         
-        test(partialRole);
+        testEntity(partialRole);
     }
     
     @Test
     void permissionOverride() {
-        test(permissionOverride(mockNip()));
+        testEntity(permissionOverride(mockNip()));
     }
     
     @Test
@@ -537,7 +563,7 @@ class CodecTest {
                 .webStatus(random(OnlineStatus.values()))
                 .build();
         
-        test(presence);
+        testObject(presence);
     }
     
     @Test
@@ -556,7 +582,7 @@ class CodecTest {
                 .desktopStatus(random(OnlineStatus.values()))
                 .build();
         
-        test(presenceUpdate);
+        testEntity(presenceUpdate);
     }
     
     @Test
@@ -571,7 +597,7 @@ class CodecTest {
                 .emoji(customEmoji(mocknip))
                 .build();
         
-        test(reactionUpdate);
+        testEntity(reactionUpdate);
     }
     
     @Test
@@ -585,7 +611,7 @@ class CodecTest {
                 .guilds(new HashSet<>(Arrays.asList(unavailableGuild(mockNip), unavailableGuild(mockNip))))
                 .build();
         
-        test(ready);
+        testEntity(ready);
     }
     
     @Test
@@ -595,7 +621,7 @@ class CodecTest {
                 .trace(Arrays.asList(randomPositiveLongAsString(), randomPositiveLongAsString()))
                 .build();
         
-        test(resumed);
+        testEntity(resumed);
     }
     
     @Test
@@ -613,7 +639,7 @@ class CodecTest {
                 .mentionable(ThreadLocalRandom.current().nextBoolean())
                 .build();
         
-        test(role);
+        testEntity(role);
     }
     
     @Test
@@ -630,7 +656,7 @@ class CodecTest {
                 .position(2)
                 .build();
         
-        test(storeChannel);
+        testEntity(storeChannel);
     }
     
     @Test
@@ -649,7 +675,7 @@ class CodecTest {
                 .rateLimitPerUser(40)
                 .build();
         
-        test(textChannel);
+        testEntity(textChannel);
     }
     
     @Test
@@ -662,7 +688,7 @@ class CodecTest {
                 .timestamp(System.currentTimeMillis())
                 .build();
         
-        test(typingUser);
+        testEntity(typingUser);
     }
     
     @Test
@@ -673,7 +699,7 @@ class CodecTest {
                 .unavailable(ThreadLocalRandom.current().nextBoolean())
                 .build();
         
-        test(unavailableGuild);
+        testEntity(unavailableGuild);
     }
     
     @Test
@@ -684,7 +710,7 @@ class CodecTest {
                 .requiresColons(ThreadLocalRandom.current().nextBoolean())
                 .build();
         
-        test(unicodeEmoji);
+        testEntity(unicodeEmoji);
     }
     
     @Test
@@ -695,12 +721,12 @@ class CodecTest {
                 .userIdAsLong(randomPositiveLong())
                 .build();
         
-        test(userDMChannel);
+        testEntity(userDMChannel);
     }
     
     @Test
     void user() {
-        test(user(mockNip()));
+        testEntity(user(mockNip()));
     }
     
     @Test
@@ -717,7 +743,7 @@ class CodecTest {
                 .bitrate(64)
                 .userLimit(20)
                 .build();
-        test(channel);
+        testEntity(channel);
     }
     
     @Test
@@ -735,7 +761,7 @@ class CodecTest {
                 .userLimit(20)
                 .build();
         
-        test(voiceChannel);
+        testEntity(voiceChannel);
     }
     
     @Test
@@ -750,7 +776,7 @@ class CodecTest {
                 .custom(ThreadLocalRandom.current().nextBoolean())
                 .build();
         
-        test(voiceRegion);
+        testEntity(voiceRegion);
     }
     
     @Test
@@ -762,7 +788,7 @@ class CodecTest {
                 .endpoint(url())
                 .build();
         
-        test(voiceServerUpdate);
+        testEntity(voiceServerUpdate);
     }
     
     @Test
@@ -780,12 +806,12 @@ class CodecTest {
                 .suppress(ThreadLocalRandom.current().nextBoolean())
                 .build();
         
-        test(voiceState);
+        testEntity(voiceState);
     }
     
     @Test
     void webhook() {
-        test(webhook(mockNip()));
+        testEntity(webhook(mockNip()));
     }
     
     @Test
@@ -796,7 +822,7 @@ class CodecTest {
                 .guildIdAsLong(randomPositiveLong())
                 .build();
         
-        test(webhooksUpdate);
+        testEntity(webhooksUpdate);
     }
     // below are methods helpful for generating entities in this test file
     
