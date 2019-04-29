@@ -159,9 +159,10 @@ public class CatnipImpl implements Catnip {
     @Override
     public Catnip injectOptions(@Nonnull final Extension extension, @Nonnull final Function<CatnipOptions, CatnipOptions> optionsPatcher) {
         if(!extensionManager.matchingExtensions(extension.getClass()).isEmpty()) {
-            final Map<String, Pair<Object, Object>> diff = diff(optionsPatcher.apply((CatnipOptions) options.clone()));
+            final CatnipOptions patchedOptions = optionsPatcher.apply((CatnipOptions) options.clone());
+            final Map<String, Pair<Object, Object>> diff = diff(patchedOptions);
             if(!diff.isEmpty()) {
-                applyOptions(options);
+                applyOptions(patchedOptions);
                 if(logExtensionOverrides) {
                     diff.forEach((name, patch) -> logAdapter.info("Extension {} updated {} from \"{}\" to \"{}\".",
                             extension.name(), name, patch.getLeft(), patch.getRight()));
