@@ -50,6 +50,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CategoryImpl implements Category, RequiresCatnip {
+    private final ChannelType type = ChannelType.CATEGORY;
+    
     @JsonIgnore
     private transient Catnip catnip;
     
