@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.entity.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
@@ -52,6 +53,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NewsChannelImpl implements NewsChannel, RequiresCatnip {
+    private final ChannelType type = ChannelType.NEWS;
+    
+    @JsonIgnore
     private transient Catnip catnip;
     
     private long idAsLong;

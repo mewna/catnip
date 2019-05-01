@@ -138,9 +138,7 @@ public class MemberData {
         if(deaf != null) {
             object.put("deaf", deaf);
         }
-        if(channelId != null) {
-            object.put("channel_id", channelId);
-        }
+        object.put("channel_id", channelId);
         return object;
     }
 }

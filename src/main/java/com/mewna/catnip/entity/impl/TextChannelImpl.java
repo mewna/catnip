@@ -49,6 +49,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TextChannelImpl implements TextChannel, RequiresCatnip {
+    private final ChannelType type = ChannelType.TEXT;
+    
     private transient Catnip catnip;
     
     private long idAsLong;

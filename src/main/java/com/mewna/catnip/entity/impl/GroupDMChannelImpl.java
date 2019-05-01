@@ -50,6 +50,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GroupDMChannelImpl implements GroupDMChannel, RequiresCatnip {
+    private final ChannelType type = ChannelType.GROUP_DM;
+    
     @JsonIgnore
     private transient Catnip catnip;
     
