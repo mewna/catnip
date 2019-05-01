@@ -37,7 +37,88 @@ import java.util.*;
 import java.util.function.Function;
 
 public final class JsonUtil {
-    private JsonUtil() {}
+    public static final long MAX_SAFE_INTEGER = 9007199254740991L;
+    
+    private JsonUtil() {
+    }
+    
+    /**
+     * Converts all snowflakes in the passed-in {@link JsonObject} to strings.
+     * This method will recursively traverse a {@code JsonObject}, looking for
+     * any {@code idAsLong} keys, and will replace them with stringified
+     * versions.
+     * <p/>
+     * <strong>This method changes the JSON object that is passed in.</strong>
+     *
+     * @param json The JSON object to stringify snowflakes in.
+     *
+     * @return The JSON object, with snowflakes longs replaced with strings.
+     */
+    @Nonnull
+    public static JsonObject stringifySnowflakes(@Nonnull final JsonObject json) {
+        final Set<String> keys = json.getMap().keySet();
+        keys.forEach(key -> {
+            // TODO: More efficient way to do this?
+            if(key.toLowerCase().contains("idaslong")) {
+                json.put(key, Long.toString(json.getLong(key)));
+            } else {
+                final Object value = json.getValue(key);
+                if(value instanceof JsonObject) {
+                    json.put(key, stringifySnowflakes((JsonObject) value));
+                } else if(value instanceof JsonArray) {
+                    final List<Object> array = new ArrayList<>();
+                    ((JsonArray) value).forEach(array::add);
+                    for(int i = 0; i < array.size(); i++) {
+                        final Object arrayMember = array.get(i);
+                        if(arrayMember instanceof JsonObject) {
+                            array.set(i, stringifySnowflakes((JsonObject) arrayMember));
+                        }
+                    }
+                    json.put(key, new JsonArray(array));
+                }
+            }
+        });
+        return json;
+    }
+    
+    /**
+     * Converts all snowflakes in the passed-in {@link JsonObject} from strings
+     * to longs. This method will recursively traverse a {@code JsonObject},
+     * looking for any {@code idAsLong} keys, and will replace them with
+     * destringified versions.
+     * <p/>
+     * <strong>This method changes the JSON object that is passed in.</strong>
+     *
+     * @param json The JSON object to destringify snowflakes in.
+     *
+     * @return The JSON object, with snowflakes strings replaced with longs.
+     */
+    @Nonnull
+    public static JsonObject destringifySnowflakes(@Nonnull final JsonObject json) {
+        final Set<String> keys = json.getMap().keySet();
+        keys.forEach(key -> {
+            // TODO: More efficient way to do this?
+            if(key.toLowerCase().contains("idaslong")) {
+                json.put(key, Long.parseLong(json.getString(key)));
+            } else {
+                final Object value = json.getValue(key);
+                if(value instanceof JsonObject) {
+                    json.put(key, destringifySnowflakes((JsonObject) value));
+                } else if(value instanceof JsonArray) {
+                    final List<Object> array = new ArrayList<>();
+                    ((JsonArray) value).forEach(array::add);
+                    for(int i = 0; i < array.size(); i++) {
+                        final Object arrayMember = array.get(i);
+                        if(arrayMember instanceof JsonObject) {
+                            array.set(i, destringifySnowflakes((JsonObject) arrayMember));
+                        }
+                    }
+                    json.put(key, new JsonArray(array));
+                }
+            }
+        });
+        return json;
+    }
     
     @Nonnull
     @CheckReturnValue
@@ -165,10 +246,10 @@ public final class JsonUtil {
         final List<Long> ret = new ArrayList<>(array.size());
         for(final Object object : array) {
             if(object instanceof Number) {
-                ret.add(((Number)object).longValue());
+                ret.add(((Number) object).longValue());
             } else if(object instanceof String) {
                 try {
-                    ret.add(Long.parseUnsignedLong((String)object));
+                    ret.add(Long.parseUnsignedLong((String) object));
                 } catch(final NumberFormatException e) {
                     throw new IllegalArgumentException("Malformed snowflake '" + object + '\'', e);
                 }

@@ -50,6 +50,8 @@ import javax.annotation.Nullable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDMChannelImpl implements UserDMChannel, RequiresCatnip {
+    private final ChannelType type = ChannelType.DM;
+    
     @JsonIgnore
     private transient Catnip catnip;
     

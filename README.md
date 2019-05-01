@@ -43,7 +43,7 @@ No. Use a real build tool like [Maven](https://maven.apache.org/) or [Gradle](ht
 - You can disable all events, and handle gateway events directly.
 - Customizable ratelimit/session data handling - wanna store your 
   [sessions/seqnums](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/shard/session/SessionManager.java) 
-  and [REST ratelimit data](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/rest/bucket/BucketBackend.java)
+  and [REST ratelimit data](https://github.com/mewna/catnip/tree/master/src/main/java/com/mewna/catnip/rest/ratelimit)
   in Redis, but [gateway ratelimits](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/shard/ratelimit/Ratelimiter.java)
   in memory? You can do that!
 - [Customizable shard management](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/shard/manager/ShardManager.java)
@@ -119,16 +119,11 @@ where `JsonPojoCodec` is `com.mewna.catnip.util.JsonPojoCodec` and is safe to us
   https://github.com/natanbc/catnip-voice
 - `catnip-utilities` - Some extensions for typesafe commands, event waiters, reaction menus, 
   and more. https://github.com/queer/catnip-utilities 
-- `catnip-rxjava2` - RxJava 2 Observable support for catnip. 
-  https://github.com/queer/catnip-rxjava2
 
 ## Why write a fourth Java lib?
 
 - JDA is very nice, but doesn't allow for as much freedom with customizing the internals;
   it's more / less "do it this way or use another lib" in my experience.
-- Discord4J is built on [Project Reactor](https://projectreactor.io/); I wanted to be able 
-  to choose a reactive:tm: implementation (callbacks vs. coroutines vs. reactive-streams vs.
-  rx vs. ...) to use with the lib and not be stuck with just one.
 - I didn't want ten billion events for every possible case. catnip maps more/less 1:1 with the
   Discord API, and any "extra" events on top of that need to be user-provided via extensions or
   other means. I guess really I just didn't want my lib to be as "high-level" as other libs are.
@@ -145,13 +140,8 @@ where `JsonPojoCodec` is `com.mewna.catnip.util.JsonPojoCodec` and is safe to us
 ### Why vert.x?
 
 - vert.x is nice and reactive and async. :tm:
-- You can use callbacks (like we do), but vert.x also provides support for reactive streams, Rx,
+- You can use callbacks or Rx (like we do), but vert.x also provides support for reactive streams
   and kotlin coroutines.
 - There's a *lot* of [vert.x libraries and documentation](https://vertx.io/docs/) for just about
   anything you want.
 - The reactive, event-loop-driven model fits well for a Discord bot use-case.
-
-## Real-world numbers?
-
-With a bot in ~35k guilds, catnip used ~1.5GB of RAM and <10% CPU on a 2c/4gb VM.
-Sorry, I lost the screenshots :<

@@ -42,12 +42,6 @@ import javax.annotation.Nonnull;
  */
 @JsonDeserialize(as = VoiceChannelImpl.class)
 public interface VoiceChannel extends GuildChannel {
-    @Nonnull
-    @Override
-    default ChannelType type() {
-        return ChannelType.VOICE;
-    }
-    
     /**
      * @return The bitrate of this channel. Will be from 8 to 96.
      */

@@ -50,6 +50,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VoiceChannelImpl implements VoiceChannel, RequiresCatnip {
+    private final ChannelType type = ChannelType.VOICE;
+    
+    
     @JsonIgnore
     private transient Catnip catnip;
     
