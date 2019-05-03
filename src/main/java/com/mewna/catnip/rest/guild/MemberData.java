@@ -74,12 +74,13 @@ public class MemberData {
     @Nonnull
     @CheckReturnValue
     public static MemberData of(@Nonnull final Member member) {
+        final String voiceChannel = voiceChannel(member);
         return new MemberData()
                 .roles(member.roleIds())
-                .deaf(member.deaf())
-                .mute(member.mute())
+                .deaf(voiceChannel != null ? member.deaf() : null)
+                .mute(voiceChannel != null ? member.mute() : null)
                 .nickname(member.nick())
-                .channelId(voiceChannel(member))
+                .channelId(voiceChannel)
                 ;
     }
     
