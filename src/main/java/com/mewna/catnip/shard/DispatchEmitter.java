@@ -75,6 +75,7 @@ public final class DispatchEmitter {
         }
     }
     
+    @SuppressWarnings("DuplicateBranchesInSwitch")
     private void emit0(@Nonnull final JsonObject payload) {
         final String type = payload.getString("t");
         final JsonObject data = payload.getJsonObject("d");
