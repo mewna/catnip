@@ -28,6 +28,8 @@
 package com.mewna.catnip.shard.buffer;
 
 import com.google.common.collect.ImmutableSet;
+import com.mewna.catnip.entity.impl.ChunkingDoneImpl;
+import com.mewna.catnip.shard.LifecycleEvent;
 import com.mewna.catnip.util.JsonUtil;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
@@ -302,7 +304,15 @@ public class CachingBuffer extends AbstractBuffer {
         }
         
         void replay() {
-            buffer.forEach(e -> cacheAndDispatch(e.getString("t"), id, e));
+            while(!buffer.isEmpty()) {
+                // Properly empty the event buffer
+                final JsonObject e = buffer.pop();
+                cacheAndDispatch(e.getString("t"), id, e);
+            }
+            if(buffers.values().stream().allMatch(e -> e.buffer.isEmpty())) {
+                // If all buffers are empty, emit an event saying as much
+                emitter().emit(LifecycleEvent.Raw.CHUNKING_DONE, ChunkingDoneImpl.builder().catnip(catnip()).build());
+            }
         }
         
         void initialGuildChunkCount(final String guild, final int count, final JsonObject guildCreate) {
