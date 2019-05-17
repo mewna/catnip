@@ -58,6 +58,7 @@ import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.logging.LogAdapter;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
@@ -73,7 +74,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -293,12 +293,12 @@ public class CatnipImpl implements Catnip {
     }
     
     @Override
-    public CompletionStage<Presence> presence(@Nonnegative final int shardId) {
+    public Single<Presence> presence(@Nonnegative final int shardId) {
         final Future<Presence> future = Future.future();
         eventBus().send(
                 computeAddress(PRESENCE_UPDATE_REQUEST, shardId), null,
                 result -> future.complete((Presence) result.result().body()));
-        return SafeVertxCompletableFuture.from(this, future);
+        return Single.fromFuture(SafeVertxCompletableFuture.from(this, future));
     }
     
     @Override

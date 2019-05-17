@@ -29,13 +29,13 @@ package com.mewna.catnip.shard.manager;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.shard.LifecycleState;
+import io.reactivex.Single;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletionStage;
 
 /**
  * Manages the lifecycle of shards - starting, stopping, resuming, etc.
@@ -92,7 +92,7 @@ public interface ShardManager {
      * @return The shard's trace.
      */
     @Nonnull
-    CompletionStage<List<String>> trace(@Nonnegative int shard);
+    Single<List<String>> trace(@Nonnegative int shard);
     
     /**
      * Return the shard's computed gateway latency, ie. the time it takes for
@@ -103,7 +103,7 @@ public interface ShardManager {
      * @return The shard's computed gateway latency.
      */
     @Nonnull
-    CompletionStage<Long> latency(@Nonnegative int shard);
+    Single<Long> latency(@Nonnegative int shard);
     
     /**
      * Checks whether or not the shard with the given ID is currently connected
@@ -124,7 +124,7 @@ public interface ShardManager {
      */
     @Nonnull
     @CheckReturnValue
-    CompletionStage<Boolean> isConnected(@Nonnegative int id);
+    Single<Boolean> isConnected(@Nonnegative int id);
     
     /**
      * Get the lifecycle state for the current shard. This provides more
@@ -146,7 +146,7 @@ public interface ShardManager {
      */
     @Nonnull
     @CheckReturnValue
-    CompletionStage<LifecycleState> shardState(@Nonnegative int id);
+    Single<LifecycleState> shardState(@Nonnegative int id);
     
     /**
      * @return The catnip instance this shard manager is for.

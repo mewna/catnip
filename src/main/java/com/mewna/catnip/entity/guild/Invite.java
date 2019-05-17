@@ -101,7 +101,7 @@ public interface Invite extends Entity {
      *
      * @param reason The reason that will be displayed in audit log
      *
-     * @return A CompletionStage that completes when the invite is deleted.
+     * @return A Observable that completes when the invite is deleted.
      */
     @Nonnull
     default Observable<Invite> delete(@Nullable final String reason) {
@@ -113,7 +113,7 @@ public interface Invite extends Entity {
     /**
      * Deletes the invite.
      *
-     * @return A CompletionStage that completes when the invite is deleted.
+     * @return A Observable that completes when the invite is deleted.
      */
     @Nonnull
     default Observable<Invite> delete() {

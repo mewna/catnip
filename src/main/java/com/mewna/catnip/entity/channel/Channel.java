@@ -39,7 +39,6 @@ import lombok.Getter;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.concurrent.CompletionStage;
 
 /**
  * A Discord channel. A channel may not be attached to a guild (ex. in the case
@@ -63,7 +62,7 @@ public interface Channel extends Snowflake {
      *
      * @param reason The reason that will be displayed in audit log
      *
-     * @return A {@link CompletionStage} that is completed when the channel is
+     * @return A {@link Observable} that is completed when the channel is
      * deleted.
      */
     @Nonnull
@@ -78,7 +77,7 @@ public interface Channel extends Snowflake {
     /**
      * Deletes the channel. This operation cannot be undone.
      *
-     * @return A {@link CompletionStage} that is completed when the channel is
+     * @return A {@link Observable} that is completed when the channel is
      * deleted.
      */
     @Nonnull

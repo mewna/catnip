@@ -53,6 +53,7 @@ import com.mewna.catnip.util.logging.LogAdapter;
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
+import io.reactivex.Single;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
@@ -67,7 +68,6 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
-import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -622,8 +622,9 @@ public interface Catnip {
      * Get the presence for the specified shard.
      *
      * @param shardId The shard id to get presence for.
+     * @return
      */
-    CompletionStage<Presence> presence(@Nonnegative final int shardId);
+    Single<Presence> presence(@Nonnegative final int shardId);
     
     /**
      * Update the presence for all shards.
