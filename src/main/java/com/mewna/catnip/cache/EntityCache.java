@@ -38,7 +38,7 @@ import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -74,7 +74,7 @@ public interface EntityCache {
      */
     @Nullable
     default Guild guild(final long id) {
-        return guildAsync(id).blockingSingle();
+        return guildAsync(id).blockingGet();
     }
     
     /**
@@ -86,7 +86,7 @@ public interface EntityCache {
      */
     @Nonnull
     @CheckReturnValue
-    Observable<Guild> guildAsync(final long id);
+    Single<Guild> guildAsync(final long id);
     
     /**
      * @return A view of the current guild cache. Updates to the cache will update this view.
@@ -115,7 +115,7 @@ public interface EntityCache {
      */
     @Nullable
     default User user(final long id) {
-        return userAsync(id).blockingSingle();
+        return userAsync(id).blockingGet();
     }
     
     /**
@@ -127,7 +127,7 @@ public interface EntityCache {
      */
     @Nonnull
     @CheckReturnValue
-    Observable<User> userAsync(final long id);
+    Single<User> userAsync(final long id);
     
     /**
      * @return A view of the current user cache. Updates to the cache will update this view.
@@ -158,7 +158,7 @@ public interface EntityCache {
      */
     @Nullable
     default Presence presence(final long id) {
-        return presenceAsync(id).blockingSingle();
+        return presenceAsync(id).blockingGet();
     }
     
     /**
@@ -170,7 +170,7 @@ public interface EntityCache {
      */
     @Nonnull
     @CheckReturnValue
-    Observable<Presence> presenceAsync(long id);
+    Single<Presence> presenceAsync(long id);
     
     /**
      * @return A view of the current presence cache. Updates to the cache will update this view.
@@ -203,7 +203,7 @@ public interface EntityCache {
      */
     @Nullable
     default Member member(final long guildId, final long id) {
-        return memberAsync(guildId, id).blockingSingle();
+        return memberAsync(guildId, id).blockingGet();
     }
     
     /**
@@ -216,7 +216,7 @@ public interface EntityCache {
      */
     @Nonnull
     @CheckReturnValue
-    Observable<Member> memberAsync(long guildId, long id);
+    Single<Member> memberAsync(long guildId, long id);
     
     /**
      * Get all members for the guild with the given ID.
@@ -274,7 +274,7 @@ public interface EntityCache {
      */
     @Nullable
     default Role role(final long guildId, final long id) {
-        return roleAsync(guildId, id).blockingSingle();
+        return roleAsync(guildId, id).blockingGet();
     }
     
     /**
@@ -287,7 +287,7 @@ public interface EntityCache {
      */
     @Nonnull
     @CheckReturnValue
-    Observable<Role> roleAsync(long guildId, long id);
+    Single<Role> roleAsync(long guildId, long id);
     
     /**
      * Get all roles for the guild with the given ID.
@@ -345,7 +345,7 @@ public interface EntityCache {
      */
     @Nullable
     default GuildChannel channel(final long guildId, final long id) {
-        return channelAsync(guildId, id).blockingSingle();
+        return channelAsync(guildId, id).blockingGet();
     }
     
     /**
@@ -358,7 +358,7 @@ public interface EntityCache {
      */
     @Nonnull
     @CheckReturnValue
-    Observable<GuildChannel> channelAsync(long guildId, long id);
+    Single<GuildChannel> channelAsync(long guildId, long id);
     
     /**
      * Get all channels for the guild with the given ID.
@@ -412,7 +412,7 @@ public interface EntityCache {
      */
     @Nullable
     default UserDMChannel dmChannel(final long id) {
-        return dmChannelAsync(id).blockingSingle();
+        return dmChannelAsync(id).blockingGet();
     }
     
     /**
@@ -424,7 +424,7 @@ public interface EntityCache {
      */
     @Nonnull
     @CheckReturnValue
-    Observable<UserDMChannel> dmChannelAsync(long id);
+    Single<UserDMChannel> dmChannelAsync(long id);
     
     /**
      * Get all DM channels cached in this entity cache.
@@ -460,7 +460,7 @@ public interface EntityCache {
      */
     @Nullable
     default CustomEmoji emoji(final long guildId, final long id) {
-        return emojiAsync(guildId, id).blockingSingle();
+        return emojiAsync(guildId, id).blockingGet();
     }
     
     /**
@@ -474,7 +474,7 @@ public interface EntityCache {
      */
     @Nonnull
     @CheckReturnValue
-    Observable<CustomEmoji> emojiAsync(long guildId, long id);
+    Single<CustomEmoji> emojiAsync(long guildId, long id);
     
     /**
      * Get all custom emojis for the guild with the given ID.
@@ -518,7 +518,7 @@ public interface EntityCache {
      */
     @Nullable
     default VoiceState voiceState(final long guildId, final long id) {
-        return voiceStateAsync(guildId, id).blockingSingle();
+        return voiceStateAsync(guildId, id).blockingGet();
     }
     
     /**
@@ -531,7 +531,7 @@ public interface EntityCache {
      */
     @Nonnull
     @CheckReturnValue
-    Observable<VoiceState> voiceStateAsync(long guildId, long id);
+    Single<VoiceState> voiceStateAsync(long guildId, long id);
     
     /**
      * Get the voice state for the user with the given ID, possibly in the
@@ -586,7 +586,7 @@ public interface EntityCache {
      */
     @Nullable
     default User selfUser() {
-        return selfUserAsync().blockingSingle();
+        return selfUserAsync().blockingGet();
     }
     
     /**
@@ -597,5 +597,5 @@ public interface EntityCache {
      */
     @Nonnull
     @CheckReturnValue
-    Observable<User> selfUserAsync();
+    Single<User> selfUserAsync();
 }

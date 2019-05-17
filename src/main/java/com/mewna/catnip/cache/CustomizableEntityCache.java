@@ -40,7 +40,7 @@ import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 
@@ -118,8 +118,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Observable<Guild> guildAsync(final long id) {
-        return Observable.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
+    public Single<Guild> guildAsync(final long id) {
+        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
     }
     
     @Nonnull
@@ -130,8 +130,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Observable<User> userAsync(final long id) {
-        return Observable.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
+    public Single<User> userAsync(final long id) {
+        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
     }
     
     @Nonnull
@@ -142,8 +142,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Observable<Presence> presenceAsync(final long id) {
-        return Observable.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
+    public Single<Presence> presenceAsync(final long id) {
+        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
     }
     
     @Nonnull
@@ -154,8 +154,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Observable<Member> memberAsync(final long guildId, final long id) {
-        return Observable.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
+    public Single<Member> memberAsync(final long guildId, final long id) {
+        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
     }
     
     @Nonnull
@@ -172,8 +172,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Observable<Role> roleAsync(final long guildId, final long id) {
-        return Observable.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
+    public Single<Role> roleAsync(final long guildId, final long id) {
+        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
     }
     
     @Nonnull
@@ -190,8 +190,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Observable<GuildChannel> channelAsync(final long guildId, final long id) {
-        return Observable.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
+    public Single<GuildChannel> channelAsync(final long guildId, final long id) {
+        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
     }
     
     @Nonnull
@@ -208,8 +208,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Observable<UserDMChannel> dmChannelAsync(final long id) {
-        return Observable.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
+    public Single<UserDMChannel> dmChannelAsync(final long id) {
+        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
     }
     
     @Nonnull
@@ -220,8 +220,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Observable<CustomEmoji> emojiAsync(final long guildId, final long id) {
-        return Observable.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
+    public Single<CustomEmoji> emojiAsync(final long guildId, final long id) {
+        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
     }
     
     @Nonnull
@@ -238,8 +238,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Observable<VoiceState> voiceStateAsync(final long guildId, final long id) {
-        return Observable.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
+    public Single<VoiceState> voiceStateAsync(final long guildId, final long id) {
+        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
     }
     
     @Nonnull
@@ -256,7 +256,7 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Observable<User> selfUserAsync() {
-        return Observable.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
+    public Single<User> selfUserAsync() {
+        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
     }
 }
