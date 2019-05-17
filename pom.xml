@@ -17,7 +17,6 @@
         <vertx-completable-future.version>vertx-completable-future-0.1.2</vertx-completable-future.version>
         <slf4j.version>1.7.26</slf4j.version>
         <commons.lang.version>3.9</commons.lang.version>
-        <guava.version>27.1-jre</guava.version>
         <jsr305.version>3.0.2</jsr305.version>
 
         <koloboke-compile.version>0.5.1</koloboke-compile.version>
@@ -69,17 +68,6 @@
             <version>${vertx.version}</version>
         </dependency>
 
-        <!--
-        vert.x is retarded for multipart, so we use this instead
-        :sob:
-        someday we can remove this :(
-        -->
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>3.14.1</version>
-        </dependency>
-
         <!-- slf4j -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -92,13 +80,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons.lang.version}</version>
-        </dependency>
-
-        <!-- Guava -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
         </dependency>
 
         <!-- JSR 305 -->
@@ -164,8 +145,8 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
                 <version>3.8.1</version>
             </plugin>
@@ -252,6 +233,8 @@
                     and "no @param for <C>"
                     -->
                     <additionalOptions>-Xdoclint:none</additionalOptions>
+                    <!-- Solve it being unable to find $JAVA_HOME for me -->
+                    <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
                 </configuration>
                 <executions>
                     <execution>
@@ -266,6 +249,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>

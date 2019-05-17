@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.rest.handler;
 
-import com.google.common.collect.ImmutableMap;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.guild.PartialGuild;
 import com.mewna.catnip.entity.misc.ApplicationInfo;
@@ -49,6 +48,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletionStage;
 
 import static com.mewna.catnip.util.JsonUtil.mapObjectContents;
@@ -73,7 +73,7 @@ public class RestUser extends RestHandler {
     @CheckReturnValue
     public CompletionStage<JsonObject> getCurrentUserRaw() {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_CURRENT_USER,
-                ImmutableMap.of()))
+                Map.of()))
                 .thenApply(ResponsePayload::object);
     }
     
@@ -87,7 +87,7 @@ public class RestUser extends RestHandler {
     @CheckReturnValue
     public CompletionStage<JsonObject> getUserRaw(@Nonnull final String userId) {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_USER,
-                ImmutableMap.of("user.id", userId)))
+                Map.of("user.id", userId)))
                 .thenApply(ResponsePayload::object);
     }
     
@@ -106,7 +106,7 @@ public class RestUser extends RestHandler {
         body.put("username", username);
         
         return catnip().requester().queue(new OutboundRequest(Routes.MODIFY_CURRENT_USER,
-                ImmutableMap.of(), body))
+                Map.of(), body))
                 .thenApply(ResponsePayload::object);
     }
     
@@ -155,7 +155,7 @@ public class RestUser extends RestHandler {
         final String query = builder.build();
         
         return catnip().requester().queue(new OutboundRequest(Routes.GET_CURRENT_USER_GUILDS.withQueryString(query),
-                ImmutableMap.of()))
+                Map.of()))
                 .thenApply(ResponsePayload::array);
     }
     
@@ -169,7 +169,7 @@ public class RestUser extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonObject> createDMRaw(@Nonnull final String recipientId) {
-        return catnip().requester().queue(new OutboundRequest(Routes.CREATE_DM, ImmutableMap.of(),
+        return catnip().requester().queue(new OutboundRequest(Routes.CREATE_DM, Map.of(),
                 new JsonObject().put("recipient_id", recipientId)))
                 .thenApply(ResponsePayload::object);
     }
@@ -177,7 +177,7 @@ public class RestUser extends RestHandler {
     @Nonnull
     public CompletionStage<Void> leaveGuild(@Nonnull final String guildId) {
         return catnip().requester().queue(new OutboundRequest(Routes.LEAVE_GUILD,
-                ImmutableMap.of("guild.id", guildId)))
+                Map.of("guild.id", guildId)))
                 .thenApply(__ -> null);
     }
     
@@ -191,7 +191,7 @@ public class RestUser extends RestHandler {
     @CheckReturnValue
     public CompletionStage<JsonObject> getCurrentApplicationInformationRaw() {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_CURRENT_APPLICATION_INFORMATION,
-                ImmutableMap.of()))
+                Map.of()))
                 .thenApply(ResponsePayload::object);
     }
     
@@ -204,7 +204,7 @@ public class RestUser extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public CompletionStage<JsonObject> getGatewayBotRaw() {
-        return catnip().requester().queue(new OutboundRequest(Routes.GET_GATEWAY_BOT, ImmutableMap.of()))
+        return catnip().requester().queue(new OutboundRequest(Routes.GET_GATEWAY_BOT, Map.of()))
                 .thenApply(ResponsePayload::object);
     }
 }

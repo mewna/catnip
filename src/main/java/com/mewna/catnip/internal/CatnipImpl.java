@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.internal;
 
-import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.cache.CacheFlag;
@@ -149,7 +148,7 @@ public class CatnipImpl implements Catnip {
         captureRestStacktraces = options.captureRestStacktraces();
         initialPresence = options.presence();
         memberChunkTimeout = options.memberChunkTimeout();
-        disabledEvents = ImmutableSet.copyOf(options.disabledEvents());
+        disabledEvents = Set.copyOf(options.disabledEvents());
         logUncachedPresenceWhenNotChunking = options.logUncachedPresenceWhenNotChunking();
         warnOnEntityVersionMismatch = options.warnOnEntityVersionMismatch();
         
@@ -241,7 +240,7 @@ public class CatnipImpl implements Catnip {
     @Nonnull
     @Override
     public Set<String> unavailableGuilds() {
-        return ImmutableSet.copyOf(unavailableGuilds);
+        return Set.copyOf(unavailableGuilds);
     }
     
     public void markAvailable(final String id) {
@@ -362,7 +361,7 @@ public class CatnipImpl implements Catnip {
                         //this is actually needed because generics are dumb
                         return (Catnip) this;
                     }).exceptionally(e -> {
-                        logAdapter.warn("Couldn't validate token!");
+                        logAdapter.warn("Couldn't validate token!", e);
                         throw new RuntimeException(e);
                     })
                     .toCompletableFuture();
@@ -371,9 +370,7 @@ public class CatnipImpl implements Catnip {
                 parseClientId();
             } catch(final IllegalArgumentException e) {
                 final Exception wrapped = new RuntimeException("The provided token was invalid!", e);
-                // I would use SafeVertxCompletableFuture.failedFuture but that was added in Java 9+
-                // and catnip uses Java 8
-                return SafeVertxCompletableFuture.from(this, Future.failedFuture(wrapped));
+                return SafeVertxCompletableFuture.failedFuture(wrapped);
             }
             
             return SafeVertxCompletableFuture.completedFuture(this);

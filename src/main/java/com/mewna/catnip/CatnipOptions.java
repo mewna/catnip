@@ -27,7 +27,6 @@
 
 package com.mewna.catnip;
 
-import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.SplitMemoryEntityCache;
@@ -57,10 +56,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import okhttp3.OkHttpClient.Builder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.net.http.HttpClient;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -160,9 +159,9 @@ public final class CatnipOptions implements Cloneable {
      * the event names.
      */
     @Nonnull
-    private Set<String> disabledEvents = ImmutableSet.of();
+    private Set<String> disabledEvents = Set.of();
     @Nonnull
-    private Requester requester = new SerialRequester(new DefaultRateLimiter(), new Builder());
+    private Requester requester = new SerialRequester(new DefaultRateLimiter(), HttpClient.newBuilder());
     /**
      * Whether or not extensions overriding options should be logged. Defaults
      * to {@code true}.

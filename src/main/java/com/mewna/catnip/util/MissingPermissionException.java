@@ -29,7 +29,6 @@
 
 package com.mewna.catnip.util;
 
-import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.entity.util.Permission;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -46,7 +45,7 @@ public class MissingPermissionException extends RuntimeException {
     
     public MissingPermissionException(@Nonnull final Collection<Permission> missing) {
         super(message(missing));
-        this.missing = ImmutableSet.copyOf(missing);
+        this.missing = Set.copyOf(missing);
     }
     
     private static String message(@Nonnull final Collection<Permission> permissions) {

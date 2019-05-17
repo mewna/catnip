@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.rest.handler;
 
-import com.google.common.collect.ImmutableMap;
 import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.channel.Webhook.WebhookEditFields;
 import com.mewna.catnip.entity.message.Message;
@@ -43,6 +42,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletionStage;
 
 import static com.mewna.catnip.util.JsonUtil.mapObjectContents;
@@ -67,7 +67,7 @@ public class RestWebhook extends RestHandler {
     @CheckReturnValue
     public CompletionStage<JsonObject> getWebhookRaw(@Nonnull final String webhookId) {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_WEBHOOK.withMajorParam(webhookId),
-                ImmutableMap.of()))
+                Map.of()))
                 .thenApply(ResponsePayload::object);
     }
     
@@ -81,7 +81,7 @@ public class RestWebhook extends RestHandler {
     @CheckReturnValue
     public CompletionStage<JsonObject> getWebhookTokenRaw(@Nonnull final String webhookId, @Nonnull final String token) {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_WEBHOOK_TOKEN.withMajorParam(webhookId),
-                ImmutableMap.of("webhook.token", token)))
+                Map.of("webhook.token", token)))
                 .thenApply(ResponsePayload::object);
     }
     
@@ -95,7 +95,7 @@ public class RestWebhook extends RestHandler {
     @CheckReturnValue
     public CompletionStage<JsonArray> getGuildWebhooksRaw(@Nonnull final String guildId) {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_WEBHOOKS.withMajorParam(guildId),
-                ImmutableMap.of()))
+                Map.of()))
                 .thenApply(ResponsePayload::array);
     }
     
@@ -109,7 +109,7 @@ public class RestWebhook extends RestHandler {
     @CheckReturnValue
     public CompletionStage<JsonArray> getChannelWebhooksRaw(@Nonnull final String channelId) {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_CHANNEL_WEBHOOKS.withMajorParam(channelId),
-                ImmutableMap.of()))
+                Map.of()))
                 .thenApply(ResponsePayload::array);
     }
     
@@ -132,7 +132,7 @@ public class RestWebhook extends RestHandler {
                                                         @Nonnull final WebhookEditFields fields,
                                                         @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.MODIFY_WEBHOOK.withMajorParam(webhookId),
-                ImmutableMap.of(), fields.payload(), reason))
+                Map.of(), fields.payload(), reason))
                 .thenApply(ResponsePayload::object);
     }
     
@@ -140,7 +140,7 @@ public class RestWebhook extends RestHandler {
     @CheckReturnValue
     public CompletionStage<Void> deleteWebhook(@Nonnull final String webhookId, @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.DELETE_WEBHOOK.withMajorParam(webhookId),
-                ImmutableMap.of()).reason(reason))
+                Map.of()).reason(reason))
                 .thenApply(__ -> null);
     }
     @Nonnull
@@ -198,7 +198,7 @@ public class RestWebhook extends RestHandler {
         
         return catnip().requester().
                 queue(new OutboundRequest(Routes.EXECUTE_WEBHOOK.withMajorParam(webhookId),
-                        ImmutableMap.of("webhook.token", webhookToken), body).needsToken(false)
+                        Map.of("webhook.token", webhookToken), body).needsToken(false)
                         .buffers(options.files()))
                 .thenApply(ResponsePayload::object);
     }

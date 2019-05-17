@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.shard.buffer;
 
-import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.entity.impl.ChunkingDoneImpl;
 import com.mewna.catnip.shard.LifecycleEvent;
 import com.mewna.catnip.util.JsonUtil;
@@ -57,7 +56,7 @@ import static com.mewna.catnip.shard.DiscordEvent.Raw;
  */
 @SuppressWarnings("unused")
 public class CachingBuffer extends AbstractBuffer {
-    private static final Set<String> CACHE_EVENTS = ImmutableSet.of(
+    private static final Set<String> CACHE_EVENTS = Set.of(
             // Lifecycle
             Raw.READY,
             // Channels
@@ -78,7 +77,7 @@ public class CachingBuffer extends AbstractBuffer {
             Raw.VOICE_STATE_UPDATE
     );
     
-    private static final Set<String> DELETE_EVENTS = ImmutableSet.of(
+    private static final Set<String> DELETE_EVENTS = Set.of(
             // Channels
             Raw.CHANNEL_DELETE,
             // Guilds
