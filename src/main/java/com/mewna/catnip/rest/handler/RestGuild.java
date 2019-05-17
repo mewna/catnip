@@ -41,7 +41,6 @@ import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.guild.*;
 import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
 import com.mewna.catnip.util.QueryStringBuilder;
-import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.pagination.AuditLogPaginator;
 import com.mewna.catnip.util.pagination.MemberPaginator;
 import io.vertx.core.json.JsonArray;
@@ -129,7 +128,6 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    @SuppressWarnings("TypeMayBeWeakened")
     public CompletionStage<GuildChannel> createGuildChannel(@Nonnull final String guildId, @Nonnull final ChannelData data,
                                                             @Nullable final String reason) {
         return createGuildChannelRaw(guildId, data, reason).thenApply(entityBuilder()::createGuildChannel);
@@ -137,7 +135,6 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    @SuppressWarnings("TypeMayBeWeakened")
     public CompletionStage<GuildChannel> createGuildChannel(@Nonnull final String guildId, @Nonnull final ChannelData data) {
         return createGuildChannel(guildId, data, null);
     }
@@ -193,7 +190,6 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    @SuppressWarnings("TypeMayBeWeakened")
     public CompletionStage<Role> createGuildRole(@Nonnull final String guildId, @Nonnull final RoleData roleData,
                                                  @Nullable final String reason) {
         return createGuildRoleRaw(guildId, roleData, reason).thenApply(obj -> entityBuilder().createRole(guildId, obj));
@@ -201,7 +197,6 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    @SuppressWarnings("TypeMayBeWeakened")
     public CompletionStage<Role> createGuildRole(@Nonnull final String guildId, @Nonnull final RoleData roleData) {
         return createGuildRole(guildId, roleData, null);
     }
@@ -218,7 +213,6 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    @SuppressWarnings("TypeMayBeWeakened")
     public CompletionStage<Role> modifyGuildRole(@Nonnull final String guildId, @Nonnull final String roleId,
                                                  @Nonnull final RoleData roleData, @Nullable final String reason) {
         return modifyGuildRoleRaw(guildId, roleId, roleData, reason)
@@ -255,7 +249,6 @@ public class RestGuild extends RestHandler {
     public CompletionStage<Void> deleteGuildRole(@Nonnull final String guildId, @Nonnull final String roleId) {
         return deleteGuildRole(guildId, roleId, null);
     }
-    
     
     @Nonnull
     @CheckReturnValue
@@ -436,13 +429,13 @@ public class RestGuild extends RestHandler {
                                                 @Nullable final String reason,
                                                 @Nonnegative final int deleteMessageDays) {
         if(deleteMessageDays > 7) {
-            CompletableFuture<Void> future = new CompletableFuture<>();
+            final CompletableFuture<Void> future = new CompletableFuture<>();
             future.completeExceptionally(new IllegalArgumentException("deleteMessageDays can't be above 7"));
             return future;
         }
         
         final QueryStringBuilder builder = new QueryStringBuilder();
-        builder.append("reason", Utils.encodeUTF8(reason == null ? "" : reason));
+        builder.append("reason", reason == null ? "" : reason);
         builder.append("delete-message-days", String.valueOf(deleteMessageDays));
         final String query = builder.build();
         return catnip().requester().queue(new OutboundRequest(Routes.CREATE_GUILD_BAN.withMajorParam(guildId).withQueryString(query),
@@ -516,6 +509,7 @@ public class RestGuild extends RestHandler {
                 ImmutableMap.of("user.id", userId, "role.id", roleId)).reason(reason))
                 .thenApply(e -> null);
     }
+    
     @Nonnull
     public CompletionStage<Void> removeGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
                                                        @Nonnull final String roleId) {
@@ -529,6 +523,7 @@ public class RestGuild extends RestHandler {
                 ImmutableMap.of("user.id", userId, "role.id", roleId)).reason(reason))
                 .thenApply(e -> null);
     }
+    
     @Nonnull
     public CompletionStage<Void> addGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
                                                     @Nonnull final String roleId) {
