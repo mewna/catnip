@@ -52,12 +52,14 @@ import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.logging.LogAdapter;
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.FlowableHelper;
 import io.vertx.reactivex.ObservableHelper;
+import io.vertx.reactivex.RxHelper;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.CheckReturnValue;
@@ -684,7 +686,10 @@ public interface Catnip {
     }
     
     /**
-     * Add a reactive stream handler for events of the given type.
+     * Add a reactive stream handler for events of the given type. Can be
+     * disposed of with {@link Observable#unsubscribeOn(Scheduler)}. The
+     * {@code scheduler} argument can be created with
+     * {@link RxHelper#scheduler(Vertx)}.
      *
      * @param type The type of event to stream.
      * @param <T>  The object type of the event being streamed.
@@ -696,7 +701,10 @@ public interface Catnip {
     }
     
     /**
-     * Add a reactive stream handler for events of the given type.
+     * Add a reactive stream handler for events of the given type.  Can be
+     * disposed of with {@link Flowable#unsubscribeOn(Scheduler)}. The
+     * {@code scheduler} argument can be created with
+     * {@link RxHelper#scheduler(Vertx)}.
      *
      * @param type The type of event to stream.
      * @param <T>  The object type of the event being streamed.
@@ -717,7 +725,7 @@ public interface Catnip {
      *
      * @return The vert.x message consumer.
      */
-    default <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type) {
+    private <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type) {
         return dispatchManager().createConsumer(type.key());
     }
     
@@ -732,13 +740,16 @@ public interface Catnip {
      *
      * @return The vert.x message consumer.
      */
-    default <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
+    private <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
                                                   @Nonnull final BiConsumer<T, E> handler) {
         return on(type).handler(m -> handler.accept(m.body().getLeft(), m.body().getRight()));
     }
     
     /**
-     * Add a reactive stream handler for events of the given type.
+     * Add a reactive stream handler for events of the given type. Can be
+     * disposed of with {@link Observable#unsubscribeOn(Scheduler)}. The
+     * {@code scheduler} argument can be created with
+     * {@link RxHelper#scheduler(Vertx)}.
      *
      * @param type The type of event to stream.
      * @param <T>  The object type of the event being streamed.
@@ -751,7 +762,10 @@ public interface Catnip {
     }
     
     /**
-     * Add a reactive stream handler for events of the given type.
+     * Add a reactive stream handler for events of the given type. Can be
+     * disposed of with {@link Flowable#unsubscribeOn(Scheduler)}. The
+     * {@code scheduler} argument can be created with
+     * {@link RxHelper#scheduler(Vertx)}.
      *
      * @param type The type of event to stream.
      * @param <T>  The object type of the event being streamed.
