@@ -32,13 +32,13 @@ import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
+import io.reactivex.Observable;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
-import java.util.concurrent.CompletionStage;
 
 /**
  * @author natanbc
@@ -52,35 +52,35 @@ public class RestInvite extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<Invite> getInvite(@Nonnull final String code) {
-        return getInviteRaw(code).thenApply(entityBuilder()::createInvite);
+    public Observable<Invite> getInvite(@Nonnull final String code) {
+        return getInviteRaw(code).map(entityBuilder()::createInvite);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonObject> getInviteRaw(@Nonnull final String code) {
+    public Observable<JsonObject> getInviteRaw(@Nonnull final String code) {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_INVITE,
                 Map.of("invite.code", code)))
-                .thenApply(ResponsePayload::object);
+                .map(ResponsePayload::object);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<Invite> deleteInvite(@Nonnull final String code, @Nullable final String reason) {
-        return deleteInviteRaw(code, reason).thenApply(entityBuilder()::createInvite);
+    public Observable<Invite> deleteInvite(@Nonnull final String code, @Nullable final String reason) {
+        return deleteInviteRaw(code, reason).map(entityBuilder()::createInvite);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<Invite> deleteInvite(@Nonnull final String code) {
+    public Observable<Invite> deleteInvite(@Nonnull final String code) {
         return deleteInvite(code, null);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonObject> deleteInviteRaw(@Nonnull final String code, @Nullable final String reason) {
+    public Observable<JsonObject> deleteInviteRaw(@Nonnull final String code, @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.DELETE_INVITE,
                 Map.of("invite.code", code)).reason(reason))
-                .thenApply(ResponsePayload::object);
+                .map(ResponsePayload::object);
     }
 }

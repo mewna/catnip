@@ -36,11 +36,11 @@ import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.pagination.MessagePaginator;
+import io.reactivex.Observable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.concurrent.CompletionStage;
 
 /**
  * A channel that can have messages sent in it.
@@ -55,19 +55,19 @@ public interface MessageChannel extends Channel {
      *
      * @param content The text content to send.
      *
-     * @return A CompletionStage that completes when the message is sent.
+     * @return A Observable that completes when the message is sent.
      */
     @Nonnull
     @JsonIgnore
-    default CompletionStage<Message> sendMessage(@Nonnull final String content) {
+    default Observable<Message> sendMessage(@Nonnull final String content) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.SEND_MESSAGES);
         }
-        final CompletionStage<Message> future =  catnip().rest().channel().sendMessage(id(), content);
+        final Observable<Message> future = catnip().rest().channel().sendMessage(id(), content);
         // Inject guild manually because Discord does not send it in response
         if(isGuild()) {
-            return future.thenApply(msg -> ((MessageImpl) msg).guildIdAsLong(asGuildChannel().guildIdAsLong()));
+            return future.map(msg -> ((MessageImpl) msg).guildIdAsLong(asGuildChannel().guildIdAsLong()));
         }
         return future;
     }
@@ -77,11 +77,11 @@ public interface MessageChannel extends Channel {
      *
      * @param embed The embed to send
      *
-     * @return A CompletionStage that completes when the message is sent.
+     * @return A Observable that completes when the message is sent.
      */
     @Nonnull
     @JsonIgnore
-    default CompletionStage<Message> sendMessage(@Nonnull final Embed embed) {
+    default Observable<Message> sendMessage(@Nonnull final Embed embed) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.SEND_MESSAGES, Permission.EMBED_LINKS);
@@ -94,11 +94,11 @@ public interface MessageChannel extends Channel {
      *
      * @param message The message to send.
      *
-     * @return A CompletionStage that completes when the message is sent.
+     * @return A Observable that completes when the message is sent.
      */
     @Nonnull
     @JsonIgnore
-    default CompletionStage<Message> sendMessage(@Nonnull final Message message) {
+    default Observable<Message> sendMessage(@Nonnull final Message message) {
         if(isGuild()) {
             if(!message.embeds().isEmpty()) {
                 PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
@@ -116,11 +116,11 @@ public interface MessageChannel extends Channel {
      *
      * @param options The options for the message being sent.
      *
-     * @return A CompletionStage that completes when the message is sent.
+     * @return A Observable that completes when the message is sent.
      */
     @Nonnull
     @JsonIgnore
-    default CompletionStage<Message> sendMessage(@Nonnull final MessageOptions options) {
+    default Observable<Message> sendMessage(@Nonnull final MessageOptions options) {
         if(isGuild()) {
             if(options.hasFiles()) {
                 if(options.embed() != null) {
@@ -150,11 +150,11 @@ public interface MessageChannel extends Channel {
      * @param messageId The id of the message to edit.
      * @param content   The new content to set on the message.
      *
-     * @return A CompletionStage that completes when the message is edited.
+     * @return A Observable that completes when the message is edited.
      */
     @Nonnull
     @JsonIgnore
-    default CompletionStage<Message> editMessage(@Nonnull final String messageId, @Nonnull final String content) {
+    default Observable<Message> editMessage(@Nonnull final String messageId, @Nonnull final String content) {
         return catnip().rest().channel().editMessage(id(), messageId, content);
     }
     
@@ -165,11 +165,11 @@ public interface MessageChannel extends Channel {
      * @param messageId The id of the message to edit.
      * @param embed     The new embed to be set on the message.
      *
-     * @return A CompletionStage that completes when the message is edited.
+     * @return A Observable that completes when the message is edited.
      */
     @Nonnull
     @JsonIgnore
-    default CompletionStage<Message> editMessage(@Nonnull final String messageId, @Nonnull final Embed embed) {
+    default Observable<Message> editMessage(@Nonnull final String messageId, @Nonnull final Embed embed) {
         return catnip().rest().channel().editMessage(id(), messageId, embed);
     }
     
@@ -180,11 +180,11 @@ public interface MessageChannel extends Channel {
      * @param messageId The id of the message to edit.
      * @param message   The message to set as the new message.
      *
-     * @return A CompletionStage that completes when the message is edited.
+     * @return A Observable that completes when the message is edited.
      */
     @Nonnull
     @JsonIgnore
-    default CompletionStage<Message> editMessage(@Nonnull final String messageId, @Nonnull final Message message) {
+    default Observable<Message> editMessage(@Nonnull final String messageId, @Nonnull final Message message) {
         return catnip().rest().channel().editMessage(id(), messageId, message);
     }
     
@@ -192,13 +192,13 @@ public interface MessageChannel extends Channel {
      * Delete the message with the given id in this channel.
      *
      * @param messageId The id of the message to delete.
-     * @param reason The reason that will be displayed in audit log
+     * @param reason    The reason that will be displayed in audit log
      *
-     * @return A CompletionStage that completes when the message is deleted.
+     * @return A Observable that completes when the message is deleted.
      */
     @Nonnull
     @JsonIgnore
-    default CompletionStage<Void> deleteMessage(@Nonnull final String messageId, @Nullable final String reason) {
+    default Observable<Void> deleteMessage(@Nonnull final String messageId, @Nullable final String reason) {
         return catnip().rest().channel().deleteMessage(id(), messageId, reason);
     }
     
@@ -207,11 +207,11 @@ public interface MessageChannel extends Channel {
      *
      * @param messageId The id of the message to delete.
      *
-     * @return A CompletionStage that completes when the message is deleted.
+     * @return A Observable that completes when the message is deleted.
      */
     @Nonnull
     @JsonIgnore
-    default CompletionStage<Void> deleteMessage(@Nonnull final String messageId) {
+    default Observable<Void> deleteMessage(@Nonnull final String messageId) {
         return deleteMessage(messageId, null);
     }
     
@@ -221,11 +221,11 @@ public interface MessageChannel extends Channel {
      * @param messageId The id of the message to add a reaction to.
      * @param emoji     The reaction to add.
      *
-     * @return A CompletionStage that completes when the reaction is added.
+     * @return A Observable that completes when the reaction is added.
      */
     @Nonnull
     @JsonIgnore
-    default CompletionStage<Void> addReaction(@Nonnull final String messageId, @Nonnull final String emoji) {
+    default Observable<Void> addReaction(@Nonnull final String messageId, @Nonnull final String emoji) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.ADD_REACTIONS, Permission.READ_MESSAGE_HISTORY);
@@ -239,11 +239,11 @@ public interface MessageChannel extends Channel {
      * @param messageId The id of the message to add a reaction to.
      * @param emoji     The reaction to add.
      *
-     * @return A CompletionStage that completes when the reaction is added.
+     * @return A Observable that completes when the reaction is added.
      */
     @Nonnull
     @JsonIgnore
-    default CompletionStage<Void> addReaction(@Nonnull final String messageId, @Nonnull final Emoji emoji) {
+    default Observable<Void> addReaction(@Nonnull final String messageId, @Nonnull final Emoji emoji) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.ADD_REACTIONS, Permission.READ_MESSAGE_HISTORY);
@@ -257,11 +257,11 @@ public interface MessageChannel extends Channel {
      * @param messageId The id of the message to remove a reaction from.
      * @param emoji     The reaction to remove.
      *
-     * @return A CompletionStage that completes when the reaction is removed.
+     * @return A Observable that completes when the reaction is removed.
      */
     @Nonnull
     @JsonIgnore
-    default CompletionStage<Void> deleteOwnReaction(@Nonnull final String messageId, @Nonnull final String emoji) {
+    default Observable<Void> deleteOwnReaction(@Nonnull final String messageId, @Nonnull final String emoji) {
         return catnip().rest().channel().deleteOwnReaction(id(), messageId, emoji);
     }
     
@@ -271,11 +271,11 @@ public interface MessageChannel extends Channel {
      * @param messageId The id of the message to remove a reaction from.
      * @param emoji     The reaction to remove.
      *
-     * @return A CompletionStage that completes when the reaction is removed.
+     * @return A Observable that completes when the reaction is removed.
      */
     @Nonnull
     @JsonIgnore
-    default CompletionStage<Void> deleteOwnReaction(@Nonnull final String messageId, @Nonnull final Emoji emoji) {
+    default Observable<Void> deleteOwnReaction(@Nonnull final String messageId, @Nonnull final Emoji emoji) {
         return catnip().rest().channel().deleteOwnReaction(id(), messageId, emoji);
     }
     
@@ -286,12 +286,12 @@ public interface MessageChannel extends Channel {
      * @param userId    The id of the user whose reaction is to be removed.
      * @param emoji     The reaction to remove.
      *
-     * @return A CompletionStage that completes when the reaction is removed.
+     * @return A Observable that completes when the reaction is removed.
      */
     @Nonnull
     @JsonIgnore
-    default CompletionStage<Void> deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId,
-                                                     @Nonnull final String emoji) {
+    default Observable<Void> deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId,
+                                                @Nonnull final String emoji) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.MANAGE_MESSAGES);
@@ -306,12 +306,12 @@ public interface MessageChannel extends Channel {
      * @param userId    The id of the user whose reaction is to be removed.
      * @param emoji     The reaction to remove.
      *
-     * @return A CompletionStage that completes when the reaction is removed.
+     * @return A Observable that completes when the reaction is removed.
      */
     @Nonnull
     @JsonIgnore
-    default CompletionStage<Void> deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId,
-                                                     @Nonnull final Emoji emoji) {
+    default Observable<Void> deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId,
+                                                @Nonnull final Emoji emoji) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.MANAGE_MESSAGES);
@@ -323,11 +323,12 @@ public interface MessageChannel extends Channel {
      * Delete all reactions on the given message
      *
      * @param messageId The id of the message to remove all reactions from.
-     * @return A CompletionStage that completes when the reaction is removed.
+     *
+     * @return A Observable that completes when the reaction is removed.
      */
     @Nonnull
     @JsonIgnore
-    default CompletionStage<Void> bulkRemoveReaction(@Nonnull final String messageId) {
+    default Observable<Void> bulkRemoveReaction(@Nonnull final String messageId) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.MANAGE_MESSAGES);
@@ -339,12 +340,12 @@ public interface MessageChannel extends Channel {
      * Trigger the "[user] is typing..." indicator for yourself in this
      * channel.
      *
-     * @return A CompletionStage that completes when the typing indicator is
+     * @return A Observable that completes when the typing indicator is
      * triggered.
      */
     @Nonnull
     @JsonIgnore
-    default CompletionStage<Void> triggerTypingIndicator() {
+    default Observable<Void> triggerTypingIndicator() {
         return catnip().rest().channel().triggerTypingIndicator(id());
     }
     
@@ -353,12 +354,12 @@ public interface MessageChannel extends Channel {
      *
      * @param messageId The id of the message to fetch.
      *
-     * @return A CompletionStage that completes when the message is fetched.
+     * @return A Observable that completes when the message is fetched.
      */
     @Nonnull
     @JsonIgnore
     @CheckReturnValue
-    default CompletionStage<Message> fetchMessage(@Nonnull final String messageId) {
+    default Observable<Message> fetchMessage(@Nonnull final String messageId) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.READ_MESSAGE_HISTORY);

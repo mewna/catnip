@@ -30,6 +30,7 @@ package com.mewna.catnip.rest.requester;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes.Route;
+import io.reactivex.Observable;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -42,7 +43,6 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletionStage;
 
 public interface Requester {
     String API_HOST = "https://discordapp.com";
@@ -54,7 +54,7 @@ public interface Requester {
     
     @Nonnull
     @CheckReturnValue
-    CompletionStage<ResponsePayload> queue(@Nonnull OutboundRequest r);
+    Observable<ResponsePayload> queue(@Nonnull OutboundRequest r);
     
     @Getter
     @Accessors(fluent = true)
@@ -86,6 +86,7 @@ public interface Requester {
             this(route, params);
             this.object = object;
         }
+        
         public OutboundRequest(final Route route, final Map<String, String> params, final JsonObject object, final String reason) {
             this(route, params, object);
             this.reason = reason;

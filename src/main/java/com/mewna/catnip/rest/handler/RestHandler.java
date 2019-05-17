@@ -34,8 +34,6 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nullable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 /**
  * @author amy
@@ -58,5 +56,4 @@ abstract class RestHandler {
     static <T> T uncheckedCast(@Nullable final Object object) {
         return (T) object;
     }
-    
 }

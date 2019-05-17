@@ -39,6 +39,7 @@ import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
 import com.mewna.catnip.util.QueryStringBuilder;
 import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.pagination.GuildPaginator;
+import io.reactivex.Observable;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -47,9 +48,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletionStage;
 
 import static com.mewna.catnip.util.JsonUtil.mapObjectContents;
 
@@ -65,39 +64,38 @@ public class RestUser extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<User> getCurrentUser() {
-        return getCurrentUserRaw().thenApply(entityBuilder()::createUser);
+    public Observable<User> getCurrentUser() {
+        return getCurrentUserRaw().map(entityBuilder()::createUser);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonObject> getCurrentUserRaw() {
-        return catnip().requester().queue(new OutboundRequest(Routes.GET_CURRENT_USER,
-                Map.of()))
-                .thenApply(ResponsePayload::object);
+    public Observable<JsonObject> getCurrentUserRaw() {
+        return catnip().requester().queue(new OutboundRequest(Routes.GET_CURRENT_USER, Map.of()))
+                .map(ResponsePayload::object);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<User> getUser(@Nonnull final String userId) {
-        return getUserRaw(userId).thenApply(entityBuilder()::createUser);
+    public Observable<User> getUser(@Nonnull final String userId) {
+        return getUserRaw(userId).map(entityBuilder()::createUser);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonObject> getUserRaw(@Nonnull final String userId) {
+    public Observable<JsonObject> getUserRaw(@Nonnull final String userId) {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_USER,
                 Map.of("user.id", userId)))
-                .thenApply(ResponsePayload::object);
+                .map(ResponsePayload::object);
     }
     
     @Nonnull
-    public CompletionStage<User> modifyCurrentUser(@Nullable final String username, @Nullable final URI avatarData) {
-        return modifyCurrentUserRaw(username, avatarData).thenApply(entityBuilder()::createUser);
+    public Observable<User> modifyCurrentUser(@Nullable final String username, @Nullable final URI avatarData) {
+        return modifyCurrentUserRaw(username, avatarData).map(entityBuilder()::createUser);
     }
     
     @Nonnull
-    public CompletionStage<JsonObject> modifyCurrentUserRaw(@Nullable final String username, @Nullable final URI avatarData) {
+    public Observable<JsonObject> modifyCurrentUserRaw(@Nullable final String username, @Nullable final URI avatarData) {
         final JsonObject body = new JsonObject();
         if(avatarData != null) {
             Utils.validateImageUri(avatarData);
@@ -107,11 +105,11 @@ public class RestUser extends RestHandler {
         
         return catnip().requester().queue(new OutboundRequest(Routes.MODIFY_CURRENT_USER,
                 Map.of(), body))
-                .thenApply(ResponsePayload::object);
+                .map(ResponsePayload::object);
     }
     
     @Nonnull
-    public CompletionStage<User> modifyCurrentUser(@Nullable final String username, @Nullable final byte[] avatar) {
+    public Observable<User> modifyCurrentUser(@Nullable final String username, @Nullable final byte[] avatar) {
         return modifyCurrentUser(username, avatar == null ? null : Utils.asImageDataUri(avatar));
     }
     
@@ -121,7 +119,7 @@ public class RestUser extends RestHandler {
         return new GuildPaginator(entityBuilder()) {
             @Nonnull
             @Override
-            protected CompletionStage<JsonArray> fetchNext(@Nonnull final RequestState<PartialGuild> state, @Nullable final String lastId, final int requestSize) {
+            protected Observable<JsonArray> fetchNext(@Nonnull final RequestState<PartialGuild> state, @Nullable final String lastId, final int requestSize) {
                 return getCurrentUserGuildsRaw(null, lastId, state.entitiesToFetch());
             }
         };
@@ -129,16 +127,17 @@ public class RestUser extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<List<PartialGuild>> getCurrentUserGuilds(@Nullable final String before, @Nullable final String after,
-                                                                    @Nonnegative final int limit) {
+    public Observable<PartialGuild> getCurrentUserGuilds(@Nullable final String before, @Nullable final String after,
+                                                         @Nonnegative final int limit) {
         return getCurrentUserGuildsRaw(before, after, limit)
-                .thenApply(mapObjectContents(entityBuilder()::createPartialGuild));
+                .map(e -> mapObjectContents(entityBuilder()::createPartialGuild).apply(e))
+                .flatMapIterable(e -> e);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonArray> getCurrentUserGuildsRaw(@Nullable final String before, @Nullable final String after,
-                                                              @Nonnegative final int limit) {
+    public Observable<JsonArray> getCurrentUserGuildsRaw(@Nullable final String before, @Nullable final String after,
+                                                         @Nonnegative final int limit) {
         final QueryStringBuilder builder = new QueryStringBuilder();
         
         if(before != null) {
@@ -156,55 +155,55 @@ public class RestUser extends RestHandler {
         
         return catnip().requester().queue(new OutboundRequest(Routes.GET_CURRENT_USER_GUILDS.withQueryString(query),
                 Map.of()))
-                .thenApply(ResponsePayload::array);
+                .map(ResponsePayload::array);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<DMChannel> createDM(@Nonnull final String recipientId) {
+    public Observable<DMChannel> createDM(@Nonnull final String recipientId) {
         return createDMRaw(recipientId)
-                .thenApply(entityBuilder()::createUserDM);
+                .map(entityBuilder()::createUserDM);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonObject> createDMRaw(@Nonnull final String recipientId) {
+    public Observable<JsonObject> createDMRaw(@Nonnull final String recipientId) {
         return catnip().requester().queue(new OutboundRequest(Routes.CREATE_DM, Map.of(),
                 new JsonObject().put("recipient_id", recipientId)))
-                .thenApply(ResponsePayload::object);
+                .map(ResponsePayload::object);
     }
     
     @Nonnull
-    public CompletionStage<Void> leaveGuild(@Nonnull final String guildId) {
+    public Observable<Void> leaveGuild(@Nonnull final String guildId) {
         return catnip().requester().queue(new OutboundRequest(Routes.LEAVE_GUILD,
                 Map.of("guild.id", guildId)))
-                .thenApply(__ -> null);
+                .map(__ -> null);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<ApplicationInfo> getCurrentApplicationInformation() {
-        return getCurrentApplicationInformationRaw().thenApply(entityBuilder()::createApplicationInfo);
+    public Observable<ApplicationInfo> getCurrentApplicationInformation() {
+        return getCurrentApplicationInformationRaw().map(entityBuilder()::createApplicationInfo);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonObject> getCurrentApplicationInformationRaw() {
+    public Observable<JsonObject> getCurrentApplicationInformationRaw() {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_CURRENT_APPLICATION_INFORMATION,
                 Map.of()))
-                .thenApply(ResponsePayload::object);
+                .map(ResponsePayload::object);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<GatewayInfo> getGatewayBot() {
-        return getGatewayBotRaw().thenApply(e -> entityBuilder().createGatewayInfo(e));
+    public Observable<GatewayInfo> getGatewayBot() {
+        return getGatewayBotRaw().map(e -> entityBuilder().createGatewayInfo(e));
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonObject> getGatewayBotRaw() {
+    public Observable<JsonObject> getGatewayBotRaw() {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_GATEWAY_BOT, Map.of()))
-                .thenApply(ResponsePayload::object);
+                .map(ResponsePayload::object);
     }
 }

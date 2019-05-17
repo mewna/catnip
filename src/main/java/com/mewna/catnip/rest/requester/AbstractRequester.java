@@ -39,6 +39,7 @@ import com.mewna.catnip.rest.ratelimit.RateLimiter;
 import com.mewna.catnip.util.CatnipMeta;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.Utils;
+import io.reactivex.Observable;
 import io.vertx.core.Context;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
@@ -64,7 +65,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 
 import static io.vertx.core.http.HttpMethod.GET;
@@ -92,7 +92,7 @@ public abstract class AbstractRequester implements Requester {
     
     @Nonnull
     @Override
-    public CompletionStage<ResponsePayload> queue(@Nonnull final OutboundRequest r) {
+    public Observable<ResponsePayload> queue(@Nonnull final OutboundRequest r) {
         final CompletableFuture<ResponsePayload> future = new SafeVertxCompletableFuture<>(catnip);
         final Bucket bucket = getBucket(r.route());
         // Capture stacktrace if possible
@@ -103,7 +103,7 @@ public abstract class AbstractRequester implements Requester {
             stacktrace = new StackTraceElement[0];
         }
         bucket.queueRequest(new QueuedRequest(r, r.route(), future, bucket, stacktrace));
-        return future;
+        return Observable.fromFuture(future);
     }
     
     @Nonnull
@@ -180,7 +180,7 @@ public abstract class AbstractRequester implements Requester {
                                       @Nonnull final QueuedRequest request, @Nonnull final String mediaType) {
         final Context context = catnip.vertx().getOrCreateContext();
         final HttpRequest.Builder builder;
-    
+        
         if(route.method() == GET) {
             // No body
             builder = HttpRequest.newBuilder(URI.create(API_HOST + API_BASE + route.baseRoute())).GET();
@@ -189,7 +189,7 @@ public abstract class AbstractRequester implements Requester {
                     .setHeader("Content-Type", mediaType)
                     .method(route.method().name(), body);
         }
-    
+        
         builder.setHeader("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')');
         
         if(request.request().needsToken()) {
@@ -198,7 +198,7 @@ public abstract class AbstractRequester implements Requester {
         if(request.request().reason() != null) {
             builder.header(Requester.REASON_HEADER, Utils.encodeUTF8(request.request().reason()));
         }
-    
+        
         // Update request start time as soon as possible
         // See QueuedRequest docs for why we do this
         request.start = System.nanoTime();
@@ -207,13 +207,13 @@ public abstract class AbstractRequester implements Requester {
                     final int code = res.statusCode();
                     final String message = "Unavailable to due Java's HTTP client.";
                     final long requestEnd = System.nanoTime();
-                
+                    
                     if(res.body() == null) {
                         context.runOnContext(__ ->
                                 handleResponse(route, code, message, requestEnd, null, res.headers(), request));
                     } else {
                         final byte[] bodyBytes = res.body().getBytes();
-                    
+                        
                         context.runOnContext(__ ->
                                 handleResponse(route, code, message, requestEnd, Buffer.buffer(bodyBytes),
                                         res.headers(), request));
@@ -261,7 +261,7 @@ public abstract class AbstractRequester implements Requester {
                     headers.firstValue("X-Ratelimit-Limit").orElse(null),
                     headers.firstValue("X-Ratelimit-Reset").orElse(null)
             );
-    
+            
             String retry = headers.firstValue("Retry-After").orElse(null);
             if(retry == null || retry.isEmpty()) {
                 retry = body.toJsonObject().getValue("retry_after").toString();
@@ -344,12 +344,12 @@ public abstract class AbstractRequester implements Requester {
                 route, route.ratelimitKey(), rateLimitRemaining.orElse(-1L), rateLimitLimit.orElse(-1L),
                 rateLimitReset.orElse(-1L), retryAfter, timeDifference
         );
-    
+        
         if(retryAfter > 0) {
             rateLimiter.updateRemaining(route, 0);
             rateLimiter.updateReset(route, retryAfter);
         }
-    
+        
         if(route.method() == PUT && route.baseRoute().contains("/reactions/")) {
             rateLimiter.updateLimit(route, 1);
             rateLimiter.updateReset(route, System.currentTimeMillis() + timeDifference + 250);
@@ -357,7 +357,7 @@ public abstract class AbstractRequester implements Requester {
             if(rateLimitReset.isPresent()) {
                 rateLimiter.updateReset(route, rateLimitReset.getAsLong() * 1000 + timeDifference);
             }
-    
+            
             if(rateLimitLimit.isPresent()) {
                 rateLimiter.updateLimit(route, Math.toIntExact(rateLimitLimit.getAsLong()));
             }
@@ -366,7 +366,7 @@ public abstract class AbstractRequester implements Requester {
         if(rateLimitRemaining.isPresent()) {
             rateLimiter.updateRemaining(route, Math.toIntExact(rateLimitRemaining.getAsLong()));
         }
-    
+        
         rateLimiter.updateDone(route);
     }
     

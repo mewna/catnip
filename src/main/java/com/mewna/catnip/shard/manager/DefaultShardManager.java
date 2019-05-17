@@ -35,6 +35,7 @@ import com.mewna.catnip.shard.ShardInfo;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.task.QueueTask;
 import com.mewna.catnip.util.task.ShardConnectTask;
+import io.reactivex.Observable;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.MessageConsumer;
 import lombok.Getter;
@@ -44,7 +45,6 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -108,6 +108,7 @@ public class DefaultShardManager extends AbstractShardManager {
         return List.copyOf(shardIds);
     }
     
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
     public void start() {
         if(started) {
@@ -121,16 +122,16 @@ public class DefaultShardManager extends AbstractShardManager {
             addToConnectQueue(closeHandler.body().getId());
         }));
         
-        final CompletionStage<GatewayInfo> gatewayInfoCompletableFuture;
+        final Observable<GatewayInfo> gatewayInfoCompletableFuture;
         if(catnip().gatewayInfo() != null) {
             // If we already have gateway info, eg. from validating the token,
             // then don't bother fetching it a second time
-            gatewayInfoCompletableFuture = SafeVertxCompletableFuture.completedFuture(catnip().gatewayInfo());
+            gatewayInfoCompletableFuture = Observable.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip().gatewayInfo()));
         } else {
             gatewayInfoCompletableFuture = catnip().rest().user().getGatewayBot();
         }
         
-        gatewayInfoCompletableFuture.thenAccept(gatewayInfo -> {
+        gatewayInfoCompletableFuture.firstElement().doOnSuccess(gatewayInfo -> {
             // Do some sanity checks
             final int expectedShardCount;
             if(shardCount == 0) {
@@ -155,7 +156,7 @@ public class DefaultShardManager extends AbstractShardManager {
             } else {
                 loadShards();
             }
-        }).exceptionally(e -> {
+        }).doOnError(e -> {
             throw new IllegalStateException("Couldn't load gateway info!", e);
         });
     }

@@ -67,7 +67,6 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -89,7 +88,7 @@ public interface Catnip {
      * @return A new catnip instance.
      */
     static Catnip catnip(@Nonnull final String token) {
-        return catnipAsync(token).join();
+        return catnipAsync(token).blockingSingle();
     }
     
     /**
@@ -101,7 +100,7 @@ public interface Catnip {
      *
      * @return A new catnip instance.
      */
-    static CompletableFuture<Catnip> catnipAsync(@Nonnull final String token) {
+    static Observable<Catnip> catnipAsync(@Nonnull final String token) {
         return catnipAsync(token, Vertx.vertx());
     }
     
@@ -115,7 +114,7 @@ public interface Catnip {
      * @return A new catnip instance.
      */
     static Catnip catnip(@Nonnull final CatnipOptions options) {
-        return catnipAsync(options).join();
+        return catnipAsync(options).blockingSingle();
     }
     
     /**
@@ -127,7 +126,7 @@ public interface Catnip {
      *
      * @return A new catnip instance.
      */
-    static CompletableFuture<Catnip> catnipAsync(@Nonnull final CatnipOptions options) {
+    static Observable<Catnip> catnipAsync(@Nonnull final CatnipOptions options) {
         return catnipAsync(options, Vertx.vertx());
     }
     
@@ -142,7 +141,7 @@ public interface Catnip {
      * @return A new catnip instance.
      */
     static Catnip catnip(@Nonnull final String token, @Nonnull final Vertx vertx) {
-        return catnipAsync(token, vertx).join();
+        return catnipAsync(token, vertx).blockingSingle();
     }
     
     /**
@@ -155,7 +154,7 @@ public interface Catnip {
      *
      * @return A new catnip instance.
      */
-    static CompletableFuture<Catnip> catnipAsync(@Nonnull final String token, @Nonnull final Vertx vertx) {
+    static Observable<Catnip> catnipAsync(@Nonnull final String token, @Nonnull final Vertx vertx) {
         return catnipAsync(new CatnipOptions(token), vertx);
     }
     
@@ -170,7 +169,7 @@ public interface Catnip {
      * @return A new catnip instance.
      */
     static Catnip catnip(@Nonnull final CatnipOptions options, @Nonnull final Vertx vertx) {
-        return catnipAsync(options, vertx).join();
+        return catnipAsync(options, vertx).blockingSingle();
     }
     
     /**
@@ -183,7 +182,7 @@ public interface Catnip {
      *
      * @return A new catnip instance.
      */
-    static CompletableFuture<Catnip> catnipAsync(@Nonnull final CatnipOptions options, @Nonnull final Vertx vertx) {
+    static Observable<Catnip> catnipAsync(@Nonnull final CatnipOptions options, @Nonnull final Vertx vertx) {
         return new CatnipImpl(vertx, options).setup();
     }
     
@@ -205,7 +204,7 @@ public interface Catnip {
      */
     @Nonnull
     @CheckReturnValue
-    CompletionStage<GatewayInfo> fetchGatewayInfo();
+    Observable<GatewayInfo> fetchGatewayInfo();
     
     /**
      * @return The vert.x instance being used by this catnip instance.
@@ -801,7 +800,7 @@ public interface Catnip {
      *
      * @return A stage that completes when the webhook is validated.
      */
-    default CompletionStage<Webhook> parseWebhook(final String webhookUrl) {
+    default Observable<Webhook> parseWebhook(final String webhookUrl) {
         final Pair<String, String> parse = Utils.parseWebhook(webhookUrl);
         return parseWebhook(parse.getLeft(), parse.getRight());
     }
@@ -815,7 +814,7 @@ public interface Catnip {
      *
      * @return A stage that completes when the webhook is validated.
      */
-    default CompletionStage<Webhook> parseWebhook(final String id, final String token) {
+    default Observable<Webhook> parseWebhook(final String id, final String token) {
         return rest().webhook().getWebhookToken(id, token);
     }
 }

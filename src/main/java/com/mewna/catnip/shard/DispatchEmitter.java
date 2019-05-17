@@ -193,12 +193,8 @@ public final class DispatchEmitter {
             case Raw.GUILD_UPDATE: {
                 final Guild guild = entityBuilder.createGuild(data);
                 catnip.cache().guildAsync(guild.idAsLong())
-                        .thenAccept(old -> catnip.dispatchManager()
-                        .dispatchEvent(type, ImmutablePair.of(old, guild)))
-                        .exceptionally(e -> {
-                            cacheErrorLog(type, e);
-                            return null;
-                        });
+                        .doOnError(e -> cacheErrorLog(type, e))
+                        .forEach(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, guild)));
                 break;
             }
             case Raw.GUILD_DELETE: {
@@ -233,12 +229,8 @@ public final class DispatchEmitter {
             case Raw.GUILD_ROLE_UPDATE: {
                 final Role role = entityBuilder.createRole(data.getString("guild_id"), data.getJsonObject("role"));
                 catnip.cache().roleAsync(role.guildIdAsLong(), role.idAsLong())
-                        .thenAccept(old -> catnip.dispatchManager()
-                        .dispatchEvent(type, ImmutablePair.of(old, role)))
-                        .exceptionally(e -> {
-                            cacheErrorLog(type, e);
-                            return null;
-                        });
+                        .doOnError(e -> cacheErrorLog(type, e))
+                        .forEach(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, role)));
                 break;
             }
             case Raw.GUILD_ROLE_DELETE: {
@@ -266,12 +258,8 @@ public final class DispatchEmitter {
                 final String guild = data.getString("guild_id");
                 final PartialMember partialMember = entityBuilder.createPartialMember(guild, data);
                 catnip.cache().memberAsync(partialMember.guildIdAsLong(), partialMember.idAsLong())
-                        .thenAccept(old -> catnip.dispatchManager()
-                                .dispatchEvent(type, ImmutablePair.of(old, partialMember)))
-                        .exceptionally(e -> {
-                            cacheErrorLog(type, e);
-                            return null;
-                        });
+                        .doOnError(e -> cacheErrorLog(type, e))
+                        .forEach(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, partialMember)));
                 break;
             }
             
@@ -279,12 +267,8 @@ public final class DispatchEmitter {
             case Raw.USER_UPDATE: {
                 final User user = entityBuilder.createUser(data);
                 catnip.cache().selfUserAsync()
-                        .thenAccept(old -> catnip.dispatchManager()
-                                .dispatchEvent(type, ImmutablePair.of(old, user)))
-                        .exceptionally(e -> {
-                            cacheErrorLog(type, e);
-                            return null;
-                        });
+                        .doOnError(e -> cacheErrorLog(type, e))
+                        .forEach(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, user)));
                 break;
             }
             case Raw.PRESENCE_UPDATE: {
@@ -297,12 +281,8 @@ public final class DispatchEmitter {
                             "JSON in your report:\n{}", clone.encodePrettily());
                 }
                 catnip.cache().presenceAsync(presence.idAsLong())
-                        .thenAccept(old -> catnip.dispatchManager()
-                        .dispatchEvent(type, ImmutablePair.of(old, presence)))
-                        .exceptionally(e -> {
-                            cacheErrorLog(type, e);
-                            return null;
-                        });
+                        .doOnError(e -> cacheErrorLog(type, e))
+                        .forEach(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, presence)));
                 break;
             }
             

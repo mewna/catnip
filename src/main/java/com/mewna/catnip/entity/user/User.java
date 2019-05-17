@@ -36,11 +36,11 @@ import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.impl.UserImpl;
 import com.mewna.catnip.entity.util.ImageOptions;
+import io.reactivex.Observable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.concurrent.CompletionStage;
 
 /**
  * A single Discord user.
@@ -142,13 +142,13 @@ public interface User extends Snowflake, Mentionable {
     @CheckReturnValue
     default String effectiveName(@Nonnull final Guild guild) {
         final String username = username();
-    
+        
         final Member member = guild.members().getById(idAsLong());
         
         if(member == null) {
             return username;
         }
-    
+        
         final String nick = member.nick();
         return nick != null ? nick : username;
     }
@@ -209,7 +209,7 @@ public interface User extends Snowflake, Mentionable {
      */
     @JsonIgnore
     @CheckReturnValue
-    default CompletionStage<DMChannel> createDM() {
+    default Observable<DMChannel> createDM() {
         return catnip().rest().user().createDM(id());
     }
     

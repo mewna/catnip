@@ -32,13 +32,12 @@ import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
+import io.reactivex.Observable;
 import io.vertx.core.json.JsonArray;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletionStage;
 
 import static com.mewna.catnip.util.JsonUtil.mapObjectContents;
 
@@ -47,18 +46,20 @@ public class RestVoice extends RestHandler {
     public RestVoice(final CatnipImpl catnip) {
         super(catnip);
     }
-
+    
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<List<VoiceRegion>> listVoiceRegions() {
-        return listVoiceRegionsRaw().thenApply(mapObjectContents(entityBuilder()::createVoiceRegion));
+    public Observable<VoiceRegion> listVoiceRegions() {
+        return listVoiceRegionsRaw()
+                .map(e -> mapObjectContents(entityBuilder()::createVoiceRegion).apply(e))
+                .flatMapIterable(e -> e);
     }
-
+    
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonArray> listVoiceRegionsRaw() {
+    public Observable<JsonArray> listVoiceRegionsRaw() {
         return catnip().requester().queue(new OutboundRequest(Routes.LIST_VOICE_REGIONS,
                 Map.of()))
-                .thenApply(ResponsePayload::array);
+                .map(ResponsePayload::array);
     }
 }

@@ -33,6 +33,7 @@ import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
 import com.mewna.catnip.util.Utils;
+import io.reactivex.Observable;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -40,10 +41,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletionStage;
 
 import static com.mewna.catnip.util.JsonUtil.mapObjectContents;
 
@@ -58,57 +56,57 @@ public class RestEmoji extends RestHandler {
     }
     
     @Nonnull
-    public CompletionStage<List<CustomEmoji>> listGuildEmojis(@Nonnull final String guildId) {
+    public Observable<CustomEmoji> listGuildEmojis(@Nonnull final String guildId) {
         return listGuildEmojisRaw(guildId)
-                .thenApply(mapObjectContents(e -> entityBuilder().createCustomEmoji(guildId, e)))
-                .thenApply(Collections::unmodifiableList);
+                .map(f -> mapObjectContents(e -> entityBuilder().createCustomEmoji(guildId, e)).apply(f))
+                .flatMapIterable(e -> e);
     }
     
     @Nonnull
-    public CompletionStage<JsonArray> listGuildEmojisRaw(@Nonnull final String guildId) {
+    public Observable<JsonArray> listGuildEmojisRaw(@Nonnull final String guildId) {
         return catnip().requester().queue(
                 new OutboundRequest(
                         Routes.LIST_GUILD_EMOJIS.withMajorParam(guildId),
                         Map.of()))
-                .thenApply(ResponsePayload::array);
+                .map(ResponsePayload::array);
     }
     
     @Nonnull
-    public CompletionStage<CustomEmoji> getGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId) {
-        return getGuildEmojiRaw(guildId, emojiId).thenApply(e -> entityBuilder().createCustomEmoji(guildId, e));
+    public Observable<CustomEmoji> getGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId) {
+        return getGuildEmojiRaw(guildId, emojiId).map(e -> entityBuilder().createCustomEmoji(guildId, e));
     }
     
     @Nonnull
-    public CompletionStage<JsonObject> getGuildEmojiRaw(@Nonnull final String guildId, @Nonnull final String emojiId) {
+    public Observable<JsonObject> getGuildEmojiRaw(@Nonnull final String guildId, @Nonnull final String emojiId) {
         return catnip().requester().queue(
                 new OutboundRequest(
                         Routes.GET_GUILD_EMOJI.withMajorParam(guildId),
                         Map.of("emojis.id", emojiId)))
-                .thenApply(ResponsePayload::object);
+                .map(ResponsePayload::object);
     }
     
     @Nonnull
-    public CompletionStage<CustomEmoji> createGuildEmoji(@Nonnull final String guildId, @Nonnull final String name,
-                                                         @Nonnull final URI imageData,
-                                                         @Nonnull final Collection<String> roles,
-                                                         @Nullable final String reason) {
+    public Observable<CustomEmoji> createGuildEmoji(@Nonnull final String guildId, @Nonnull final String name,
+                                                    @Nonnull final URI imageData,
+                                                    @Nonnull final Collection<String> roles,
+                                                    @Nullable final String reason) {
         return createGuildEmojiRaw(guildId, name, imageData, roles, reason)
-                .thenApply(e -> entityBuilder().createEmoji(guildId, e))
-                .thenApply(CustomEmoji.class::cast);
+                .map(e -> entityBuilder().createEmoji(guildId, e))
+                .map(CustomEmoji.class::cast);
     }
     
     @Nonnull
-    public CompletionStage<CustomEmoji> createGuildEmoji(@Nonnull final String guildId, @Nonnull final String name,
-                                                         @Nonnull final URI imageData,
-                                                         @Nonnull final Collection<String> roles) {
+    public Observable<CustomEmoji> createGuildEmoji(@Nonnull final String guildId, @Nonnull final String name,
+                                                    @Nonnull final URI imageData,
+                                                    @Nonnull final Collection<String> roles) {
         return createGuildEmoji(guildId, name, imageData, roles, null);
     }
     
     @Nonnull
-    public CompletionStage<JsonObject> createGuildEmojiRaw(@Nonnull final String guildId, @Nonnull final String name,
-                                                           @Nonnull final URI imageData,
-                                                           @Nonnull final Collection<String> roles,
-                                                           @Nullable final String reason) {
+    public Observable<JsonObject> createGuildEmojiRaw(@Nonnull final String guildId, @Nonnull final String name,
+                                                      @Nonnull final URI imageData,
+                                                      @Nonnull final Collection<String> roles,
+                                                      @Nullable final String reason) {
         Utils.validateImageUri(imageData);
         final JsonArray rolesArray;
         if(roles.isEmpty()) {
@@ -127,47 +125,47 @@ public class RestEmoji extends RestHandler {
                                 .put("roles", rolesArray),
                         reason
                 ))
-                .thenApply(ResponsePayload::object);
+                .map(ResponsePayload::object);
     }
     
     @Nonnull
-    public CompletionStage<CustomEmoji> createGuildEmoji(@Nonnull final String guildId, @Nonnull final String name,
-                                                         @Nonnull final byte[] image,
-                                                         @Nonnull final Collection<String> roles) {
+    public Observable<CustomEmoji> createGuildEmoji(@Nonnull final String guildId, @Nonnull final String name,
+                                                    @Nonnull final byte[] image,
+                                                    @Nonnull final Collection<String> roles) {
         return createGuildEmoji(guildId, name, Utils.asImageDataUri(image), roles);
     }
     
     @Nonnull
-    public CompletionStage<CustomEmoji> createGuildEmoji(@Nonnull final String guildId, @Nonnull final String name,
-                                                         @Nonnull final byte[] image,
-                                                         @Nonnull final Collection<String> roles,
-                                                         @Nullable final String reason) {
+    public Observable<CustomEmoji> createGuildEmoji(@Nonnull final String guildId, @Nonnull final String name,
+                                                    @Nonnull final byte[] image,
+                                                    @Nonnull final Collection<String> roles,
+                                                    @Nullable final String reason) {
         return createGuildEmoji(guildId, name, Utils.asImageDataUri(image), roles, reason);
     }
     
     @Nonnull
-    public CompletionStage<CustomEmoji> modifyGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId,
-                                                         @Nonnull final String name,
-                                                         @Nonnull final Collection<String> roles,
-                                                         @Nullable final String reason) {
+    public Observable<CustomEmoji> modifyGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId,
+                                                    @Nonnull final String name,
+                                                    @Nonnull final Collection<String> roles,
+                                                    @Nullable final String reason) {
         return modifyGuildEmojiRaw(guildId, emojiId, name, roles, reason)
-                .thenApply(e -> entityBuilder().createEmoji(guildId, e))
-                .thenApply(CustomEmoji.class::cast);
+                .map(e -> entityBuilder().createEmoji(guildId, e))
+                .map(CustomEmoji.class::cast);
     }
     
     @Nonnull
-    public CompletionStage<CustomEmoji> modifyGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId,
-                                                         @Nonnull final String name,
-                                                         @Nonnull final Collection<String> roles) {
+    public Observable<CustomEmoji> modifyGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId,
+                                                    @Nonnull final String name,
+                                                    @Nonnull final Collection<String> roles) {
         return modifyGuildEmoji(guildId, emojiId, name, roles, null);
     }
     
     @Nonnull
-    public CompletionStage<JsonObject> modifyGuildEmojiRaw(@Nonnull final String guildId, @Nonnull final String emojiId,
-                                                           @Nonnull final String name,
-                                                           @Nonnull final Collection<String> roles,
-                                                           @Nullable final String reason
-                                                           ) {
+    public Observable<JsonObject> modifyGuildEmojiRaw(@Nonnull final String guildId, @Nonnull final String emojiId,
+                                                      @Nonnull final String name,
+                                                      @Nonnull final Collection<String> roles,
+                                                      @Nullable final String reason
+    ) {
         final JsonArray rolesArray;
         if(roles.isEmpty()) {
             rolesArray = null;
@@ -184,21 +182,21 @@ public class RestEmoji extends RestHandler {
                                 .put("roles", rolesArray),
                         reason
                 ))
-                .thenApply(ResponsePayload::object);
+                .map(ResponsePayload::object);
     }
     
     @Nonnull
-    public CompletionStage<Void> deleteGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId,
-                                                  @Nullable final String reason) {
+    public Observable<Void> deleteGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId,
+                                             @Nullable final String reason) {
         return catnip().requester().queue(
                 new OutboundRequest(
                         Routes.DELETE_GUILD_EMOJI.withMajorParam(guildId),
                         Map.of("emojis.id", emojiId)).reason(reason))
-                .thenApply(__ -> null);
+                .map(__ -> null);
     }
     
     @Nonnull
-    public CompletionStage<Void> deleteGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId) {
+    public Observable<Void> deleteGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId) {
         return deleteGuildEmoji(guildId, emojiId, null);
     }
 }

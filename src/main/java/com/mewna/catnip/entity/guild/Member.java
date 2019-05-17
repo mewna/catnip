@@ -31,13 +31,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.entity.Mentionable;
-import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.impl.MemberImpl;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
+import io.reactivex.Observable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -46,7 +46,6 @@ import java.awt.*;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.*;
-import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 /**
@@ -106,9 +105,9 @@ public interface Member extends Mentionable, PermissionHolder {
     @CheckReturnValue
     default Set<Role> roles() {
         final CacheView<Role> roles = catnip().cache().roles(guildId());
-        return Collections.unmodifiableSet(roleIds().stream()
+        return roleIds().stream()
                 .map(roles::getById)
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toUnmodifiableSet());
     }
     
     /**
@@ -176,9 +175,9 @@ public interface Member extends Mentionable, PermissionHolder {
         Role highest = null;
         
         final CacheView<Role> cache = catnip().cache().roles(guildId());
-        for (final String id : roleIds()) {
+        for(final String id : roleIds()) {
             final Role role = cache.getById(id);
-            if (role != null && role.color() != 0) {
+            if(role != null && role.color() != 0) {
                 if(highest == null || role.compareTo(highest) > 0) {
                     highest = role;
                 }
@@ -194,7 +193,7 @@ public interface Member extends Mentionable, PermissionHolder {
      */
     @JsonIgnore
     @CheckReturnValue
-    default CompletionStage<DMChannel> createDM() {
+    default Observable<DMChannel> createDM() {
         return catnip().rest().user().createDM(id());
     }
     
@@ -232,6 +231,7 @@ public interface Member extends Mentionable, PermissionHolder {
     
     /**
      * Checks if the member is the owner of the guild.
+     *
      * @return Whether the member owns the guild or not
      */
     @JsonIgnore

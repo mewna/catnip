@@ -255,6 +255,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
         }
     }
     
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void connectSocket() {
         lifecycleState = CONNECTING;
         catnip.eventBus().publish(Raw.CONNECTING, shardInfo());
@@ -263,7 +264,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
         if(info != null) {
             connectSocket(info.url());
         } else {
-            catnip.fetchGatewayInfo().thenAccept(i -> connectSocket(i.url()));
+            catnip.fetchGatewayInfo().forEach(i -> connectSocket(i.url()));
         }
     }
     

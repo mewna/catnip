@@ -33,13 +33,12 @@ import com.mewna.catnip.entity.Mentionable;
 import com.mewna.catnip.entity.impl.TextChannelImpl;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
+import io.reactivex.Observable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
-import java.util.concurrent.CompletionStage;
 
 /**
  * A channel in a guild that can have text messages sent in it.
@@ -113,7 +112,7 @@ public interface TextChannel extends GuildChannel, MessageChannel, Mentionable {
     @Nonnull
     @JsonIgnore
     @CheckReturnValue
-    default CompletionStage<List<Webhook>> fetchWebhooks() {
+    default Observable<Webhook> fetchWebhooks() {
         PermissionUtil.checkPermissions(catnip(), guildId(), id(), Permission.MANAGE_WEBHOOKS);
         return catnip().rest().webhook().getChannelWebhooks(id());
     }

@@ -33,16 +33,19 @@ import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
 import com.mewna.catnip.entity.guild.Guild.VerificationLevel;
 import com.mewna.catnip.entity.impl.InviteImpl;
+import com.mewna.catnip.entity.impl.InviteImpl.InviteChannelImpl;
+import com.mewna.catnip.entity.impl.InviteImpl.InviteGuildImpl;
+import com.mewna.catnip.entity.impl.InviteImpl.InviterImpl;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
+import io.reactivex.Observable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.concurrent.CompletionStage;
 
 /**
  * An invite to a guild.
@@ -101,7 +104,7 @@ public interface Invite extends Entity {
      * @return A CompletionStage that completes when the invite is deleted.
      */
     @Nonnull
-    default CompletionStage<Invite> delete(@Nullable final String reason) {
+    default Observable<Invite> delete(@Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), guild().id(), channel().id(),
                 Permission.MANAGE_CHANNELS);
         return catnip().rest().invite().deleteInvite(code(), reason);
@@ -113,11 +116,11 @@ public interface Invite extends Entity {
      * @return A CompletionStage that completes when the invite is deleted.
      */
     @Nonnull
-    default CompletionStage<Invite> delete() {
+    default Observable<Invite> delete() {
         return delete(null);
     }
     
-    @JsonDeserialize(as = InviteImpl.InviterImpl.class)
+    @JsonDeserialize(as = InviterImpl.class)
     interface Inviter extends Snowflake {
         @Nonnull
         @CheckReturnValue
@@ -155,7 +158,7 @@ public interface Invite extends Entity {
         String effectiveAvatarUrl();
     }
     
-    @JsonDeserialize(as = InviteImpl.InviteGuildImpl.class)
+    @JsonDeserialize(as = InviteGuildImpl.class)
     interface InviteGuild extends Snowflake {
         @Nonnull
         @CheckReturnValue
@@ -198,7 +201,7 @@ public interface Invite extends Entity {
         }
     }
     
-    @JsonDeserialize(as = InviteImpl.InviteChannelImpl.class)
+    @JsonDeserialize(as = InviteChannelImpl.class)
     interface InviteChannel extends Snowflake {
         @Nonnull
         @CheckReturnValue

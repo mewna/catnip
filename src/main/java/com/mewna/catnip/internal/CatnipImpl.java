@@ -34,7 +34,6 @@ import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.impl.*;
 import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
-import com.mewna.catnip.entity.misc.ChunkingDone;
 import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.Activity;
@@ -58,6 +57,7 @@ import com.mewna.catnip.util.JsonPojoCodec;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.logging.LogAdapter;
+import io.reactivex.Observable;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
@@ -73,7 +73,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -348,32 +347,31 @@ public class CatnipImpl implements Catnip {
     }
     
     @Nonnull
-    public CompletableFuture<Catnip> setup() {
+    public Observable<Catnip> setup() {
         codecs();
         
         if(validateToken) {
             return fetchGatewayInfo()
-                    .thenApply(gateway -> {
+                    .map(gateway -> {
                         logAdapter.info("Token validated!");
                         
                         parseClientId();
                         
                         //this is actually needed because generics are dumb
                         return (Catnip) this;
-                    }).exceptionally(e -> {
+                    }).doOnError(e -> {
                         logAdapter.warn("Couldn't validate token!", e);
                         throw new RuntimeException(e);
-                    })
-                    .toCompletableFuture();
+                    });
         } else {
             try {
                 parseClientId();
             } catch(final IllegalArgumentException e) {
                 final Exception wrapped = new RuntimeException("The provided token was invalid!", e);
-                return SafeVertxCompletableFuture.failedFuture(wrapped);
+                return Observable.fromFuture(SafeVertxCompletableFuture.failedFuture(wrapped));
             }
             
-            return SafeVertxCompletableFuture.completedFuture(this);
+            return Observable.fromFuture(SafeVertxCompletableFuture.completedFuture(this));
         }
     }
     
@@ -505,9 +503,9 @@ public class CatnipImpl implements Catnip {
     
     @Nonnull
     @Override
-    public CompletionStage<GatewayInfo> fetchGatewayInfo() {
+    public Observable<GatewayInfo> fetchGatewayInfo() {
         return rest.user().getGatewayBot()
-                .thenApply(g -> {
+                .map(g -> {
                     if(g.valid()) {
                         gatewayInfo.set(g);
                         return g;
