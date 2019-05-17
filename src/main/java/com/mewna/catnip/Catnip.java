@@ -329,6 +329,7 @@ public interface Catnip {
      * it receives events from the gateway. You should only disable this if you
      * want to do something special with the raw event objects via hooks.
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean emitEventObjects();
     
     /**
@@ -674,29 +675,11 @@ public interface Catnip {
         presence(null, game, type, url);
     }
     
-    /**
-     * Add a consumer for the specified event type.
-     *
-     * @param type The type of event to listen on.
-     * @param <T>  The object type of event being listened on.
-     *
-     * @return The vert.x message consumer.
-     */
-    default <T> MessageConsumer<T> on(@Nonnull final EventType<T> type) {
+    private <T> MessageConsumer<T> on(@Nonnull final EventType<T> type) {
         return dispatchManager().createConsumer(type.key());
     }
     
-    /**
-     * Add a consumer for the specified event type with the given handler
-     * callback.
-     *
-     * @param type    The type of event to listen on.
-     * @param handler The handler for the event object.
-     * @param <T>     The object type of event being listened on.
-     *
-     * @return The vert.x message consumer.
-     */
-    default <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler) {
+    private <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler) {
         return on(type).handler(m -> handler.accept(m.body()));
     }
     
@@ -708,7 +691,7 @@ public interface Catnip {
      *
      * @return The observable.
      */
-    default <T> Observable<T> observe(@Nonnull final EventType<T> type) {
+    default <T> Observable<T> observable(@Nonnull final EventType<T> type) {
         return ObservableHelper.toObservable(on(type).bodyStream());
     }
     
@@ -720,7 +703,7 @@ public interface Catnip {
      *
      * @return The flowable.
      */
-    default <T> Flowable<T> flow(@Nonnull final EventType<T> type) {
+    default <T> Flowable<T> flowable(@Nonnull final EventType<T> type) {
         return FlowableHelper.toFlowable(on(type).bodyStream());
     }
     
@@ -763,7 +746,7 @@ public interface Catnip {
      *
      * @return The observable.
      */
-    default <T, E> Observable<Pair<T, E>> observe(@Nonnull final DoubleEventType<T, E> type) {
+    default <T, E> Observable<Pair<T, E>> observable(@Nonnull final DoubleEventType<T, E> type) {
         return ObservableHelper.toObservable(on(type).bodyStream());
     }
     
@@ -776,7 +759,7 @@ public interface Catnip {
      *
      * @return The flowable.
      */
-    default <T, E> Flowable<Pair<T, E>> flow(@Nonnull final DoubleEventType<T, E> type) {
+    default <T, E> Flowable<Pair<T, E>> flowable(@Nonnull final DoubleEventType<T, E> type) {
         return FlowableHelper.toFlowable(on(type).bodyStream());
     }
     
