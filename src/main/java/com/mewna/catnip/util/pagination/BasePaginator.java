@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.util.pagination;
 
+import com.mewna.catnip.util.RxHelpers;
 import io.reactivex.Observable;
 
 import javax.annotation.CheckReturnValue;
@@ -176,7 +177,7 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
             update(state, data.blockingFirst());
             final T last = state.last();
             if(state.done() || remaining - fetchCount != state.remaining() || last == null) {
-                return Observable.fromFuture(CompletableFuture.completedFuture(null));
+                return RxHelpers.futureToObservable(CompletableFuture.completedFuture(null));
             }
             return fetch(idOf.apply(last), state);
         });
