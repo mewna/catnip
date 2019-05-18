@@ -57,14 +57,12 @@ import com.mewna.catnip.util.JsonPojoCodec;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.logging.LogAdapter;
-import com.mewna.catnip.util.rx.RxHelpers;
 import io.reactivex.Scheduler;
 import io.reactivex.Single;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
-import io.vertx.reactivex.RxHelper;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -119,9 +117,8 @@ public class CatnipImpl implements Catnip {
     private long memberChunkTimeout;
     private Presence initialPresence;
     private Set<String> disabledEvents;
+    private Scheduler scheduler;
     private CatnipOptions options;
-    
-    private final Scheduler scheduler = RxHelpers.forkJoinScheduler();
     
     public CatnipImpl(@Nonnull final Vertx vertx, @Nonnull final CatnipOptions options) {
         this.vertx = vertx;
@@ -154,6 +151,7 @@ public class CatnipImpl implements Catnip {
         disabledEvents = Set.copyOf(options.disabledEvents());
         logUncachedPresenceWhenNotChunking = options.logUncachedPresenceWhenNotChunking();
         warnOnEntityVersionMismatch = options.warnOnEntityVersionMismatch();
+        scheduler = options.scheduler();
         
         injectSelf();
     }

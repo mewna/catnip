@@ -51,6 +51,8 @@ import com.mewna.catnip.shard.session.DefaultSessionManager;
 import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.util.logging.DefaultLogAdapter;
 import com.mewna.catnip.util.logging.LogAdapter;
+import com.mewna.catnip.util.rx.RxHelpers;
+import io.reactivex.Scheduler;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -212,6 +214,11 @@ public final class CatnipOptions implements Cloneable {
      * to make sure we're not missing any.
      */
     private long memberChunkTimeout = TimeUnit.SECONDS.toMillis(10);
+    /**
+     * The RxJava scheduler that catnip should use for scheduling things like
+     * stream subscriptions. Defaults to {@link RxHelpers#forkJoinScheduler()}.
+     */
+    private Scheduler scheduler = RxHelpers.forkJoinScheduler();
     
     @Override
     public Object clone() {
