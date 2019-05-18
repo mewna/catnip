@@ -39,6 +39,7 @@ import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
 import com.mewna.catnip.util.QueryStringBuilder;
 import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.pagination.GuildPaginator;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -174,10 +175,10 @@ public class RestUser extends RestHandler {
     }
     
     @Nonnull
-    public Observable<Void> leaveGuild(@Nonnull final String guildId) {
-        return catnip().requester().queue(new OutboundRequest(Routes.LEAVE_GUILD,
-                Map.of("guild.id", guildId)))
-                .map(__ -> null);
+    public Completable leaveGuild(@Nonnull final String guildId) {
+        return Completable.fromObservable(catnip().requester()
+                .queue(new OutboundRequest(Routes.LEAVE_GUILD,
+                Map.of("guild.id", guildId))));
     }
     
     @Nonnull

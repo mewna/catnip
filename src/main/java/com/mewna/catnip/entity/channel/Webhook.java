@@ -39,6 +39,7 @@ import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.rest.requester.Requester;
 import com.mewna.catnip.util.PermissionUtil;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
@@ -207,9 +208,9 @@ public interface Webhook extends GuildEntity, Snowflake {
     @Nonnull
     @JsonIgnore
     @CheckReturnValue
-    default Observable<Void> delete() {
+    default Completable delete() {
         PermissionUtil.checkPermissions(catnip(), guildId(), channelId(), Permission.MANAGE_WEBHOOKS);
-        return catnip().rest().webhook().deleteWebhook(id());
+        return  catnip().rest().webhook().deleteWebhook(id());
     }
     
     /**

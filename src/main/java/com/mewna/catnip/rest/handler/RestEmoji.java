@@ -33,6 +33,7 @@ import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
 import com.mewna.catnip.util.Utils;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -186,17 +187,16 @@ public class RestEmoji extends RestHandler {
     }
     
     @Nonnull
-    public Observable<Void> deleteGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId,
-                                             @Nullable final String reason) {
-        return catnip().requester().queue(
+    public Completable deleteGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId,
+                                        @Nullable final String reason) {
+        return Completable.fromObservable(catnip().requester().queue(
                 new OutboundRequest(
                         Routes.DELETE_GUILD_EMOJI.withMajorParam(guildId),
-                        Map.of("emojis.id", emojiId)).reason(reason))
-                .map(__ -> null);
+                        Map.of("emojis.id", emojiId)).reason(reason)));
     }
     
     @Nonnull
-    public Observable<Void> deleteGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId) {
+    public Completable deleteGuildEmoji(@Nonnull final String guildId, @Nonnull final String emojiId) {
         return deleteGuildEmoji(guildId, emojiId, null);
     }
 }

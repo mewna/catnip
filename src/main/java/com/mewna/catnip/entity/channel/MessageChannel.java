@@ -36,6 +36,7 @@ import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.pagination.MessagePaginator;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 
 import javax.annotation.CheckReturnValue;
@@ -198,7 +199,7 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> deleteMessage(@Nonnull final String messageId, @Nullable final String reason) {
+    default Completable deleteMessage(@Nonnull final String messageId, @Nullable final String reason) {
         return catnip().rest().channel().deleteMessage(id(), messageId, reason);
     }
     
@@ -211,7 +212,7 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> deleteMessage(@Nonnull final String messageId) {
+    default Completable deleteMessage(@Nonnull final String messageId) {
         return deleteMessage(messageId, null);
     }
     
@@ -225,7 +226,7 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> addReaction(@Nonnull final String messageId, @Nonnull final String emoji) {
+    default Completable addReaction(@Nonnull final String messageId, @Nonnull final String emoji) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.ADD_REACTIONS, Permission.READ_MESSAGE_HISTORY);
@@ -243,7 +244,7 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> addReaction(@Nonnull final String messageId, @Nonnull final Emoji emoji) {
+    default Completable addReaction(@Nonnull final String messageId, @Nonnull final Emoji emoji) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.ADD_REACTIONS, Permission.READ_MESSAGE_HISTORY);
@@ -261,7 +262,7 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> deleteOwnReaction(@Nonnull final String messageId, @Nonnull final String emoji) {
+    default Completable deleteOwnReaction(@Nonnull final String messageId, @Nonnull final String emoji) {
         return catnip().rest().channel().deleteOwnReaction(id(), messageId, emoji);
     }
     
@@ -275,7 +276,7 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> deleteOwnReaction(@Nonnull final String messageId, @Nonnull final Emoji emoji) {
+    default Completable deleteOwnReaction(@Nonnull final String messageId, @Nonnull final Emoji emoji) {
         return catnip().rest().channel().deleteOwnReaction(id(), messageId, emoji);
     }
     
@@ -290,7 +291,7 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId,
+    default Completable deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId,
                                                 @Nonnull final String emoji) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
@@ -310,7 +311,7 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId,
+    default Completable deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId,
                                                 @Nonnull final Emoji emoji) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
@@ -328,7 +329,7 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> bulkRemoveReaction(@Nonnull final String messageId) {
+    default Completable bulkRemoveReaction(@Nonnull final String messageId) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.MANAGE_MESSAGES);
@@ -345,7 +346,7 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> triggerTypingIndicator() {
+    default Completable triggerTypingIndicator() {
         return catnip().rest().channel().triggerTypingIndicator(id());
     }
     

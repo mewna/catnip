@@ -42,6 +42,7 @@ import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
 import com.mewna.catnip.util.QueryStringBuilder;
 import com.mewna.catnip.util.pagination.AuditLogPaginator;
 import com.mewna.catnip.util.pagination.MemberPaginator;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -67,60 +68,57 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Void> modifyGuildMember(@Nonnull final String guildId, @Nonnull final String memberId,
-                                              @Nonnull final MemberData data, @Nullable final String reason) {
-        return catnip().requester()
+    public Completable modifyGuildMember(@Nonnull final String guildId, @Nonnull final String memberId,
+                                         @Nonnull final MemberData data, @Nullable final String reason) {
+        return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.MODIFY_GUILD_MEMBER.withMajorParam(guildId),
-                        Map.of("user.id", memberId), data.toJson(), reason))
-                .map(__ -> null);
+                        Map.of("user.id", memberId), data.toJson(), reason)));
     }
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Void> modifyGuildMember(@Nonnull final String guildId, @Nonnull final String memberId,
-                                              @Nonnull final MemberData data) {
+    public Completable modifyGuildMember(@Nonnull final String guildId, @Nonnull final String memberId,
+                                         @Nonnull final MemberData data) {
         return modifyGuildMember(guildId, memberId, data, null);
     }
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Void> modifyGuildChannelPositions(@Nonnull final PositionUpdater updater,
-                                                        @Nullable final String reason) {
+    public Completable modifyGuildChannelPositions(@Nonnull final PositionUpdater updater,
+                                                   @Nullable final String reason) {
         final JsonArray array = new JsonArray();
         updater.entries()
                 .stream()
                 .map(x -> new JsonObject().put("id", x.getKey()).put("position", x.getValue()))
                 .forEach(array::add);
-        return catnip().requester()
+        return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.MODIFY_GUILD_CHANNEL_POSITIONS.withMajorParam(updater.guildId()),
-                        Map.of(), array, reason))
-                .map(__ -> null);
+                        Map.of(), array, reason)));
     }
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Void> modifyGuildChannelPositions(@Nonnull final PositionUpdater updater) {
+    public Completable modifyGuildChannelPositions(@Nonnull final PositionUpdater updater) {
         return modifyGuildChannelPositions(updater, null);
     }
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Void> modifyGuildRolePositions(@Nonnull final PositionUpdater updater,
-                                                     @Nullable final String reason) {
+    public Completable modifyGuildRolePositions(@Nonnull final PositionUpdater updater,
+                                                @Nullable final String reason) {
         final JsonArray array = new JsonArray();
         updater.entries()
                 .stream()
                 .map(x -> new JsonObject().put("id", x.getKey()).put("position", x.getValue()))
                 .forEach(array::add);
-        return catnip().requester()
+        return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.MODIFY_GUILD_ROLE_POSITIONS.withMajorParam(updater.guildId()),
-                        Map.of(), array, reason))
-                .map(__ -> null);
+                        Map.of(), array, reason)));
     }
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Void> modifyGuildRolePositions(@Nonnull final PositionUpdater updater) {
+    public Completable modifyGuildRolePositions(@Nonnull final PositionUpdater updater) {
         return modifyGuildRolePositions(updater, null);
     }
     
@@ -234,17 +232,16 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Void> deleteGuildRole(@Nonnull final String guildId, @Nonnull final String roleId,
-                                            @Nullable final String reason) {
-        return catnip().requester()
+    public Completable deleteGuildRole(@Nonnull final String guildId, @Nonnull final String roleId,
+                                       @Nullable final String reason) {
+        return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.DELETE_GUILD_ROLE.withMajorParam(guildId),
-                        Map.of("role.id", roleId)).reason(reason))
-                .map(__ -> null);
+                        Map.of("role.id", roleId)).reason(reason)));
     }
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Void> deleteGuildRole(@Nonnull final String guildId, @Nonnull final String roleId) {
+    public Completable deleteGuildRole(@Nonnull final String guildId, @Nonnull final String roleId) {
         return deleteGuildRole(guildId, roleId, null);
     }
     
@@ -296,11 +293,10 @@ public class RestGuild extends RestHandler {
     }
     
     @Nonnull
-    public Observable<Void> deleteGuild(@Nonnull final String guildId) {
-        return catnip().requester()
+    public Completable deleteGuild(@Nonnull final String guildId) {
+        return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.DELETE_GUILD.withMajorParam(guildId),
-                        Map.of()))
-                .map(__ -> null);
+                        Map.of())));
     }
     
     @Nonnull
@@ -429,40 +425,40 @@ public class RestGuild extends RestHandler {
     }
     
     @Nonnull
-    public Observable<Void> createGuildBan(@Nonnull final String guildId, @Nonnull final String userId,
-                                           @Nullable final String reason,
-                                           @Nonnegative final int deleteMessageDays) {
+    public Completable createGuildBan(@Nonnull final String guildId, @Nonnull final String userId,
+                                      @Nullable final String reason,
+                                      @Nonnegative final int deleteMessageDays) {
         if(deleteMessageDays > 7) {
             final CompletableFuture<Void> future = new CompletableFuture<>();
             future.completeExceptionally(new IllegalArgumentException("deleteMessageDays can't be above 7"));
-            return Observable.fromFuture(future);
+            return Completable.fromFuture(future);
         }
         
         final QueryStringBuilder builder = new QueryStringBuilder();
         builder.append("reason", reason == null ? "" : reason);
         builder.append("delete-message-days", String.valueOf(deleteMessageDays));
         final String query = builder.build();
-        return catnip().requester().queue(new OutboundRequest(Routes.CREATE_GUILD_BAN.withMajorParam(guildId).withQueryString(query),
-                Map.of("user.id", userId)).reason(reason))
-                .map(e -> null);
+        return Completable.fromObservable(catnip().requester()
+                .queue(new OutboundRequest(Routes.CREATE_GUILD_BAN.withMajorParam(guildId).withQueryString(query),
+                        Map.of("user.id", userId)).reason(reason)));
     }
     
     @Nonnull
-    public Observable<Void> createGuildBan(@Nonnull final String guildId, @Nonnull final String userId,
-                                           @Nonnegative final int deleteMessageDays) {
+    public Completable createGuildBan(@Nonnull final String guildId, @Nonnull final String userId,
+                                      @Nonnegative final int deleteMessageDays) {
         return createGuildBan(guildId, userId, null, deleteMessageDays);
     }
     
     @Nonnull
-    public Observable<Void> removeGuildBan(@Nonnull final String guildId, @Nonnull final String userId,
-                                           @Nullable final String reason) {
-        return catnip().requester().queue(new OutboundRequest(Routes.REMOVE_GUILD_BAN.withMajorParam(guildId),
-                Map.of("user.id", userId)).reason(reason))
-                .map(e -> null);
+    public Completable removeGuildBan(@Nonnull final String guildId, @Nonnull final String userId,
+                                      @Nullable final String reason) {
+        return Completable.fromObservable(catnip().requester()
+                .queue(new OutboundRequest(Routes.REMOVE_GUILD_BAN.withMajorParam(guildId),
+                        Map.of("user.id", userId)).reason(reason)));
     }
     
     @Nonnull
-    public Observable<Void> removeGuildBan(@Nonnull final String guildId, @Nonnull final String userId) {
+    public Completable removeGuildBan(@Nonnull final String guildId, @Nonnull final String userId) {
         return removeGuildBan(guildId, userId, null);
     }
     
@@ -480,15 +476,15 @@ public class RestGuild extends RestHandler {
     }
     
     @Nonnull
-    public Observable<Void> removeGuildMember(@Nonnull final String guildId, @Nonnull final String userId,
-                                              @Nullable final String reason) {
-        return catnip().requester().queue(new OutboundRequest(Routes.REMOVE_GUILD_MEMBER.withMajorParam(guildId),
-                Map.of("user.id", userId)).reason(reason))
-                .map(e -> null);
+    public Completable removeGuildMember(@Nonnull final String guildId, @Nonnull final String userId,
+                                         @Nullable final String reason) {
+        return Completable.fromObservable(catnip().requester()
+                .queue(new OutboundRequest(Routes.REMOVE_GUILD_MEMBER.withMajorParam(guildId),
+                        Map.of("user.id", userId)).reason(reason)));
     }
     
     @Nonnull
-    public Observable<Void> removeGuildMember(@Nonnull final String guildId, @Nonnull final String userId) {
+    public Completable removeGuildMember(@Nonnull final String guildId, @Nonnull final String userId) {
         return removeGuildMember(guildId, userId, null);
     }
     
@@ -507,30 +503,30 @@ public class RestGuild extends RestHandler {
     }
     
     @Nonnull
-    public Observable<Void> removeGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
-                                                  @Nonnull final String roleId, @Nullable final String reason) {
-        return catnip().requester().queue(new OutboundRequest(Routes.REMOVE_GUILD_MEMBER_ROLE.withMajorParam(guildId),
-                Map.of("user.id", userId, "role.id", roleId)).reason(reason))
-                .map(e -> null);
+    public Completable removeGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
+                                             @Nonnull final String roleId, @Nullable final String reason) {
+        return Completable.fromObservable(catnip().requester()
+                .queue(new OutboundRequest(Routes.REMOVE_GUILD_MEMBER_ROLE.withMajorParam(guildId),
+                        Map.of("user.id", userId, "role.id", roleId)).reason(reason)));
     }
     
     @Nonnull
-    public Observable<Void> removeGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
-                                                  @Nonnull final String roleId) {
+    public Completable removeGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
+                                             @Nonnull final String roleId) {
         return removeGuildMemberRole(guildId, userId, roleId, null);
     }
     
     @Nonnull
-    public Observable<Void> addGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
-                                               @Nonnull final String roleId, @Nullable final String reason) {
-        return catnip().requester().queue(new OutboundRequest(Routes.ADD_GUILD_MEMBER_ROLE.withMajorParam(guildId),
-                Map.of("user.id", userId, "role.id", roleId)).reason(reason))
-                .map(e -> null);
+    public Completable addGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
+                                          @Nonnull final String roleId, @Nullable final String reason) {
+        return Completable.fromObservable(catnip().requester()
+                .queue(new OutboundRequest(Routes.ADD_GUILD_MEMBER_ROLE.withMajorParam(guildId),
+                        Map.of("user.id", userId, "role.id", roleId)).reason(reason)));
     }
     
     @Nonnull
-    public Observable<Void> addGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
-                                               @Nonnull final String roleId) {
+    public Completable addGuildMemberRole(@Nonnull final String guildId, @Nonnull final String userId,
+                                          @Nonnull final String roleId) {
         return addGuildMemberRole(guildId, userId, roleId, null);
     }
     

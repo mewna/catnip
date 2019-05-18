@@ -48,6 +48,7 @@ import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
 import com.mewna.catnip.util.QueryStringBuilder;
 import com.mewna.catnip.util.pagination.MessagePaginator;
 import com.mewna.catnip.util.pagination.ReactionPaginator;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
@@ -192,78 +193,79 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public Observable<Void> deleteMessage(@Nonnull final String channelId, @Nonnull final String messageId,
-                                          @Nullable final String reason) {
+    public Completable deleteMessage(@Nonnull final String channelId, @Nonnull final String messageId,
+                                     @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.DELETE_MESSAGE.withMajorParam(channelId),
-                Map.of("message.id", messageId)).reason(reason)).map(__ -> null);
+                Map.of("message.id", messageId)).reason(reason))
+                .ignoreElements();
     }
     
     @Nonnull
-    public Observable<Void> deleteMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
+    public Completable deleteMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
         return deleteMessage(channelId, messageId, null);
     }
     
     @Nonnull
-    public Observable<Void> deleteMessages(@Nonnull final String channelId, @Nonnull final List<String> messageIds,
-                                           @Nullable final String reason) {
+    public Completable deleteMessages(@Nonnull final String channelId, @Nonnull final List<String> messageIds,
+                                      @Nullable final String reason) {
         return catnip().requester()
                 .queue(new OutboundRequest(Routes.BULK_DELETE_MESSAGES.withMajorParam(channelId),
                         Map.of(), new JsonObject().put("messages", new JsonArray(messageIds)), reason))
-                .map(__ -> null);
+                .ignoreElements();
     }
     
     @Nonnull
-    public Observable<Void> deleteMessages(@Nonnull final String channelId, @Nonnull final List<String> messageIds) {
+    public Completable deleteMessages(@Nonnull final String channelId, @Nonnull final List<String> messageIds) {
         return deleteMessages(channelId, messageIds, null);
     }
     
     @Nonnull
-    public Observable<Void> addReaction(@Nonnull final String channelId, @Nonnull final String messageId,
-                                        @Nonnull final String emoji) {
+    public Completable addReaction(@Nonnull final String channelId, @Nonnull final String messageId,
+                                   @Nonnull final String emoji) {
         return catnip().requester().queue(new OutboundRequest(Routes.CREATE_REACTION.withMajorParam(channelId),
                 Map.of("message.id", messageId, "emojis", encodeUTF8(emoji)), new JsonObject()))
-                .map(__ -> null);
+                .ignoreElements();
     }
     
     @Nonnull
-    public Observable<Void> addReaction(@Nonnull final String channelId, @Nonnull final String messageId,
-                                        @Nonnull final Emoji emoji) {
+    public Completable addReaction(@Nonnull final String channelId, @Nonnull final String messageId,
+                                   @Nonnull final Emoji emoji) {
         return addReaction(channelId, messageId, emoji.forReaction());
     }
     
     @Nonnull
-    public Observable<Void> deleteOwnReaction(@Nonnull final String channelId, @Nonnull final String messageId,
-                                              @Nonnull final String emoji) {
-        return catnip().requester().queue(new OutboundRequest(Routes.DELETE_OWN_REACTION.withMajorParam(channelId),
-                Map.of("message.id", messageId, "emojis", encodeUTF8(emoji))))
-                .map(__ -> null);
+    public Completable deleteOwnReaction(@Nonnull final String channelId, @Nonnull final String messageId,
+                                         @Nonnull final String emoji) {
+        return Completable.fromObservable(catnip().requester()
+                .queue(new OutboundRequest(Routes.DELETE_OWN_REACTION.withMajorParam(channelId),
+                        Map.of("message.id", messageId, "emojis", encodeUTF8(emoji)))));
     }
     
     @Nonnull
-    public Observable<Void> deleteOwnReaction(@Nonnull final String channelId, @Nonnull final String messageId,
-                                              @Nonnull final Emoji emoji) {
+    public Completable deleteOwnReaction(@Nonnull final String channelId, @Nonnull final String messageId,
+                                         @Nonnull final Emoji emoji) {
         return deleteOwnReaction(channelId, messageId, emoji.forReaction());
     }
     
     @Nonnull
-    public Observable<Void> deleteUserReaction(@Nonnull final String channelId, @Nonnull final String messageId,
-                                               @Nonnull final String userId, @Nonnull final String emoji) {
-        return catnip().requester().queue(new OutboundRequest(Routes.DELETE_USER_REACTION.withMajorParam(channelId),
-                Map.of("message.id", messageId, "emojis", encodeUTF8(emoji), "user.id", userId)))
-                .map(__ -> null);
+    public Completable deleteUserReaction(@Nonnull final String channelId, @Nonnull final String messageId,
+                                          @Nonnull final String userId, @Nonnull final String emoji) {
+        return Completable.fromObservable(catnip().requester()
+                .queue(new OutboundRequest(Routes.DELETE_USER_REACTION.withMajorParam(channelId),
+                        Map.of("message.id", messageId, "emojis", encodeUTF8(emoji), "user.id", userId))));
     }
     
     @Nonnull
-    public Observable<Void> deleteUserReaction(@Nonnull final String channelId, @Nonnull final String messageId,
-                                               @Nonnull final String userId, @Nonnull final Emoji emoji) {
+    public Completable deleteUserReaction(@Nonnull final String channelId, @Nonnull final String messageId,
+                                          @Nonnull final String userId, @Nonnull final Emoji emoji) {
         return deleteUserReaction(channelId, messageId, userId, emoji.forReaction());
     }
     
     @Nonnull
-    public Observable<Void> deleteAllReactions(@Nonnull final String channelId, @Nonnull final String messageId) {
-        return catnip().requester().queue(new OutboundRequest(Routes.DELETE_ALL_REACTIONS.withMajorParam(channelId),
-                Map.of("message.id", messageId)))
-                .map(__ -> null);
+    public Completable deleteAllReactions(@Nonnull final String channelId, @Nonnull final String messageId) {
+        return Completable.fromObservable(catnip().requester()
+                .queue(new OutboundRequest(Routes.DELETE_ALL_REACTIONS.withMajorParam(channelId),
+                        Map.of("message.id", messageId))));
     }
     
     @Nonnull
@@ -383,10 +385,10 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public Observable<Void> triggerTypingIndicator(@Nonnull final String channelId) {
-        return catnip().requester().queue(new OutboundRequest(Routes.TRIGGER_TYPING_INDICATOR.withMajorParam(channelId),
-                Map.of(), new JsonObject()))
-                .map(__ -> null);
+    public Completable triggerTypingIndicator(@Nonnull final String channelId) {
+        return Completable.fromObservable(catnip().requester()
+                .queue(new OutboundRequest(Routes.TRIGGER_TYPING_INDICATOR.withMajorParam(channelId),
+                        Map.of(), new JsonObject())));
     }
     
     @Nonnull
@@ -485,54 +487,54 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public Observable<Void> deletePermissionOverride(@Nonnull final String channelId,
-                                                     @Nonnull final String overwriteId, @Nullable final String reason) {
-        return catnip().requester().queue(new OutboundRequest(Routes.DELETE_CHANNEL_PERMISSION.withMajorParam(channelId),
-                Map.of("overwrite.id", overwriteId)).reason(reason))
-                .map(__ -> null);
+    public Completable deletePermissionOverride(@Nonnull final String channelId,
+                                                @Nonnull final String overwriteId, @Nullable final String reason) {
+        return Completable.fromObservable(catnip().requester()
+                .queue(new OutboundRequest(Routes.DELETE_CHANNEL_PERMISSION.withMajorParam(channelId),
+                        Map.of("overwrite.id", overwriteId)).reason(reason)));
     }
     
     @Nonnull
-    public Observable<Void> deletePermissionOverride(@Nonnull final String channelId,
-                                                     @Nonnull final PermissionOverride overwrite,
-                                                     @Nullable final String reason) {
+    public Completable deletePermissionOverride(@Nonnull final String channelId,
+                                                @Nonnull final PermissionOverride overwrite,
+                                                @Nullable final String reason) {
         return deletePermissionOverride(channelId, overwrite.id(), reason);
     }
     
     @Nonnull
-    public Observable<Void> deletePermissionOverride(@Nonnull final String channelId,
-                                                     @Nonnull final PermissionOverride overwrite) {
+    public Completable deletePermissionOverride(@Nonnull final String channelId,
+                                                @Nonnull final PermissionOverride overwrite) {
         return deletePermissionOverride(channelId, overwrite, null);
     }
     
     @Nonnull
-    public Observable<Void> editPermissionOverride(@Nonnull final String channelId, @Nonnull final String overwriteId,
-                                                   @Nonnull final Collection<Permission> allowed,
-                                                   @Nonnull final Collection<Permission> denied,
-                                                   final boolean isMember, @Nullable final String reason) {
-        return catnip().requester().queue(new OutboundRequest(Routes.EDIT_CHANNEL_PERMISSIONS.withMajorParam(channelId),
-                Map.of("overwrite.id", overwriteId), new JsonObject()
-                .put("allow", Permission.from(allowed))
-                .put("deny", Permission.from(denied))
-                .put("type", isMember ? "member" : "role"),
-                reason
-        ))
-                .map(__ -> null);
+    public Completable editPermissionOverride(@Nonnull final String channelId, @Nonnull final String overwriteId,
+                                              @Nonnull final Collection<Permission> allowed,
+                                              @Nonnull final Collection<Permission> denied,
+                                              final boolean isMember, @Nullable final String reason) {
+        return Completable.fromObservable(catnip().requester()
+                .queue(new OutboundRequest(Routes.EDIT_CHANNEL_PERMISSIONS.withMajorParam(channelId),
+                        Map.of("overwrite.id", overwriteId), new JsonObject()
+                        .put("allow", Permission.from(allowed))
+                        .put("deny", Permission.from(denied))
+                        .put("type", isMember ? "member" : "role"),
+                        reason
+                )));
     }
     
     @Nonnull
-    public Observable<Void> editPermissionOverride(@Nonnull final String channelId, @Nonnull final String overwriteId,
-                                                   @Nonnull final Collection<Permission> allowed,
-                                                   @Nonnull final Collection<Permission> denied,
-                                                   final boolean isMember) {
+    public Completable editPermissionOverride(@Nonnull final String channelId, @Nonnull final String overwriteId,
+                                              @Nonnull final Collection<Permission> allowed,
+                                              @Nonnull final Collection<Permission> denied,
+                                              final boolean isMember) {
         return editPermissionOverride(channelId, overwriteId, allowed, denied, isMember, null);
     }
     
     @Nonnull
-    public Observable<Void> editPermissionOverride(@Nonnull final String channelId, @Nonnull final PermissionOverride overwrite,
-                                                   @Nonnull final Collection<Permission> allowed,
-                                                   @Nonnull final Collection<Permission> denied,
-                                                   @Nullable final String reason) {
+    public Completable editPermissionOverride(@Nonnull final String channelId, @Nonnull final PermissionOverride overwrite,
+                                              @Nonnull final Collection<Permission> allowed,
+                                              @Nonnull final Collection<Permission> denied,
+                                              @Nullable final String reason) {
         return editPermissionOverride(channelId,
                 overwrite.id(),
                 allowed,
@@ -543,9 +545,9 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public Observable<Void> editPermissionOverride(@Nonnull final String channelId, @Nonnull final PermissionOverride overwrite,
-                                                   @Nonnull final Collection<Permission> allowed,
-                                                   @Nonnull final Collection<Permission> denied) {
+    public Completable editPermissionOverride(@Nonnull final String channelId, @Nonnull final PermissionOverride overwrite,
+                                              @Nonnull final Collection<Permission> allowed,
+                                              @Nonnull final Collection<Permission> denied) {
         return editPermissionOverride(channelId, overwrite, allowed, denied, null);
     }
     
@@ -564,26 +566,26 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public Observable<Void> deletePinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
-        return catnip().requester().queue(new OutboundRequest(Routes.DELETE_PINNED_CHANNEL_MESSAGE.withMajorParam(channelId),
-                Map.of("message.id", messageId)))
-                .map(__ -> null);
+    public Completable deletePinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
+        return Completable.fromObservable(catnip().requester()
+                .queue(new OutboundRequest(Routes.DELETE_PINNED_CHANNEL_MESSAGE.withMajorParam(channelId),
+                        Map.of("message.id", messageId))));
     }
     
     @Nonnull
-    public Observable<Void> deletePinnedMessage(@Nonnull final Message message) {
+    public Completable deletePinnedMessage(@Nonnull final Message message) {
         return deletePinnedMessage(message.channelId(), message.id());
     }
     
     @Nonnull
-    public Observable<Void> addPinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
+    public Completable addPinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
         return catnip().requester().queue(new OutboundRequest(Routes.ADD_PINNED_CHANNEL_MESSAGE.withMajorParam(channelId),
                 Map.of("message.id", messageId), new JsonObject()))
-                .map(__ -> null);
+                .ignoreElements();
     }
     
     @Nonnull
-    public Observable<Void> addPinnedMessage(@Nonnull final Message message) {
+    public Completable addPinnedMessage(@Nonnull final Message message) {
         return addPinnedMessage(message.channelId(), message.id());
     }
     

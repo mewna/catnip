@@ -42,6 +42,7 @@ import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import org.apache.commons.lang3.Validate;
 
@@ -322,7 +323,7 @@ public interface Message extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> react(@Nonnull final Emoji emoji) {
+    default Completable react(@Nonnull final Emoji emoji) {
         PermissionUtil.checkPermissions(catnip(), guildId(), channelId(),
                 Permission.ADD_REACTIONS, Permission.READ_MESSAGE_HISTORY);
         return catnip().rest().channel().addReaction(channelId(), id(), emoji);
@@ -338,17 +339,17 @@ public interface Message extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> react(@Nonnull final String emoji) {
+    default Completable react(@Nonnull final String emoji) {
         PermissionUtil.checkPermissions(catnip(), guildId(), channelId(),
                 Permission.ADD_REACTIONS, Permission.READ_MESSAGE_HISTORY);
         return catnip().rest().channel().addReaction(channelId(), id(), emoji);
     }
 
-//    default Observable<Void> removeReaction()
+//    default Completable removeReaction()
     
     @Nonnull
     @JsonIgnore
-    default Observable<Void> delete(@Nullable final String reason) {
+    default Completable delete(@Nullable final String reason) {
         final User self = catnip().selfUser();
         if(self != null && !author().id().equals(self.id())) {
             PermissionUtil.checkPermissions(catnip(), guildId(), channelId(),
@@ -359,7 +360,7 @@ public interface Message extends Snowflake {
     
     @Nonnull
     @JsonIgnore
-    default Observable<Void> delete() {
+    default Completable delete() {
         return delete(null);
     }
     

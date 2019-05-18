@@ -96,11 +96,8 @@ public class SerialRequester extends AbstractRequester {
                 throw new AssertionError("this should never happen");
             }
             requester.rateLimiter.requestExecution(request.route())
-                    .thenRun(() -> requester.executeRequest(request))
-                    .exceptionally(e -> {
-                        request.future.completeExceptionally(e);
-                        return null;
-                    });
+                    .doOnSuccess(__ -> requester.executeRequest(request))
+                    .doOnError(request.future::completeExceptionally);
         }
     }
 }

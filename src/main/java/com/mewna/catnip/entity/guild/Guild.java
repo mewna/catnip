@@ -42,6 +42,7 @@ import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.Utils;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
@@ -875,7 +876,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> deleteEmoji(@Nonnull final String emojiId, @Nullable final String reason) {
+    default Completable deleteEmoji(@Nonnull final String emojiId, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJI);
         return catnip().rest().emoji().deleteGuildEmoji(id(), emojiId, reason);
     }
@@ -889,7 +890,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> deleteEmoji(@Nonnull final String emojiId) {
+    default Completable deleteEmoji(@Nonnull final String emojiId) {
         return deleteEmoji(emojiId, null);
     }
     
@@ -900,7 +901,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> leave() {
+    default Completable leave() {
         return catnip().rest().user().leaveGuild(id());
     }
     
@@ -911,7 +912,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> delete() {
+    default Completable delete() {
         return catnip().rest().guild().deleteGuild(id());
     }
     
@@ -952,7 +953,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> ban(@Nonnull final String userId,
+    default Completable ban(@Nonnull final String userId,
                                  @Nullable final String reason,
                                  @Nonnegative final int deleteMessageDays) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.BAN_MEMBERS);
@@ -976,7 +977,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> ban(final long userId,
+    default Completable ban(final long userId,
                                  @Nullable final String reason,
                                  @Nonnegative final int deleteMessageDays) {
         return ban(Long.toUnsignedString(userId), reason, deleteMessageDays);
@@ -994,7 +995,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> ban(final long userId,
+    default Completable ban(final long userId,
                                  @Nonnegative final int deleteMessageDays) {
         return ban(userId, null, deleteMessageDays);
     }
@@ -1012,7 +1013,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> ban(@Nonnull final Member member,
+    default Completable ban(@Nonnull final Member member,
                                  @Nullable final String reason,
                                  @Nonnegative final int deleteMessageDays) {
         return ban(member.id(), reason, deleteMessageDays);
@@ -1030,7 +1031,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> unban(@Nonnull final String userId, @Nullable final String reason) {
+    default Completable unban(@Nonnull final String userId, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.BAN_MEMBERS);
         return catnip().rest().guild().removeGuildBan(id(), userId, reason);
     }
@@ -1046,7 +1047,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> unban(@Nonnull final String userId) {
+    default Completable unban(@Nonnull final String userId) {
         return unban(userId, null);
     }
     
@@ -1062,7 +1063,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> unban(final long userId, @Nullable final String reason) {
+    default Completable unban(final long userId, @Nullable final String reason) {
         return unban(Long.toUnsignedString(userId), reason);
     }
     
@@ -1077,7 +1078,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> unban(final long userId) {
+    default Completable unban(final long userId) {
         return unban(userId, null);
     }
     
@@ -1093,7 +1094,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> unban(@Nonnull final User user, @Nullable final String reason) {
+    default Completable unban(@Nonnull final User user, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.BAN_MEMBERS);
         return catnip().rest().guild().removeGuildBan(id(), user.id(), reason);
     }
@@ -1109,7 +1110,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> unban(@Nonnull final User user) {
+    default Completable unban(@Nonnull final User user) {
         return unban(user, null);
     }
     
@@ -1125,7 +1126,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> kick(@Nonnull final String userId, @Nullable final String reason) {
+    default Completable kick(@Nonnull final String userId, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.KICK_MEMBERS);
         PermissionUtil.checkHierarchy(Objects.requireNonNull(catnip().cache().member(id(), userId)), this);
         return catnip().rest().guild().removeGuildMember(id(), userId, reason);
@@ -1142,7 +1143,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> kick(@Nonnull final String userId) {
+    default Completable kick(@Nonnull final String userId) {
         return kick(userId, null);
     }
     
@@ -1158,7 +1159,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> kick(final long userId, @Nullable final String reason) {
+    default Completable kick(final long userId, @Nullable final String reason) {
         return kick(Long.toUnsignedString(userId), reason);
     }
     
@@ -1173,7 +1174,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> kick(final long userId) {
+    default Completable kick(final long userId) {
         return kick(userId, null);
     }
     
@@ -1189,7 +1190,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> kick(final Member member, @Nullable final String reason) {
+    default Completable kick(final Member member, @Nullable final String reason) {
         return kick(member.id(), reason);
     }
     
@@ -1204,7 +1205,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> kick(final Member member) {
+    default Completable kick(final Member member) {
         return kick(member.id(), null);
     }
     
@@ -1259,7 +1260,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> addRoleToMember(@Nonnull final Role role, @Nonnull final Member member, @Nullable final String reason) {
+    default Completable addRoleToMember(@Nonnull final Role role, @Nonnull final Member member, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_ROLES);
         PermissionUtil.checkHierarchy(role, this);
         return catnip().rest().guild().addGuildMemberRole(id(), member.id(), role.id(), reason);
@@ -1277,7 +1278,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> addRoleToMember(@Nonnull final Role role, @Nonnull final Member member) {
+    default Completable addRoleToMember(@Nonnull final Role role, @Nonnull final Member member) {
         return addRoleToMember(role, member, null);
     }
     
@@ -1294,8 +1295,8 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> removeRoleFromMember(@Nonnull final Role role, @Nonnull final Member member,
-                                                  @Nullable final String reason) {
+    default Completable removeRoleFromMember(@Nonnull final Role role, @Nonnull final Member member,
+                                             @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_ROLES);
         PermissionUtil.checkHierarchy(role, this);
         return catnip().rest().guild().removeGuildMemberRole(id(), member.id(), role.id(), reason);
@@ -1313,7 +1314,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Void> removeRoleFromMember(@Nonnull final Role role, @Nonnull final Member member) {
+    default Completable removeRoleFromMember(@Nonnull final Role role, @Nonnull final Member member) {
         return removeRoleFromMember(role, member, null);
     }
     

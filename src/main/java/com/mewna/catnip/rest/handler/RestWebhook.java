@@ -35,6 +35,7 @@ import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -141,15 +142,15 @@ public class RestWebhook extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Void> deleteWebhook(@Nonnull final String webhookId, @Nullable final String reason) {
-        return catnip().requester().queue(new OutboundRequest(Routes.DELETE_WEBHOOK.withMajorParam(webhookId),
-                Map.of()).reason(reason))
-                .map(__ -> null);
+    public Completable deleteWebhook(@Nonnull final String webhookId, @Nullable final String reason) {
+        return Completable.fromObservable(catnip().requester()
+                .queue(new OutboundRequest(Routes.DELETE_WEBHOOK.withMajorParam(webhookId),
+                        Map.of()).reason(reason)));
     }
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Void> deleteWebhook(@Nonnull final String webhookId) {
+    public Completable deleteWebhook(@Nonnull final String webhookId) {
         return deleteWebhook(webhookId, null);
     }
     
