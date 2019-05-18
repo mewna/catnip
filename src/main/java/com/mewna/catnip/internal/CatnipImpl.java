@@ -511,6 +511,9 @@ public class CatnipImpl implements Catnip {
                     } else {
                         throw new RuntimeException("Gateway info not valid! Is your token valid?");
                     }
+                })
+                .doOnError(e -> {
+                    throw new RuntimeException(e);
                 });
     }
 }

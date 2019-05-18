@@ -29,7 +29,7 @@ package com.mewna.catnip.rest.ratelimit;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.rest.Routes.Route;
-import io.reactivex.Single;
+import com.mewna.catnip.util.SafeVertxCompletableFuture;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
@@ -39,7 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class DefaultRateLimiter implements RateLimiter {
-    private static final Single<Void> EXECUTE_NOW = Single.fromCallable(() -> null);
+    private static final CompletableFuture<Void> EXECUTE_NOW = SafeVertxCompletableFuture.completedFuture(null);
     private final Map<String, BucketContainer> buckets = new ConcurrentHashMap<>();
     private volatile long globalRateLimitReset;
     private Catnip catnip;
@@ -51,7 +51,7 @@ public class DefaultRateLimiter implements RateLimiter {
     
     @Nonnull
     @Override
-    public Single<Void> requestExecution(@Nonnull final Route route) {
+    public CompletableFuture<Void> requestExecution(@Nonnull final Route route) {
         catnip.logAdapter().trace("Requested execution for route {} (ratelimit key = {})", route, route.ratelimitKey());
         final BucketContainer container = buckets.computeIfAbsent(route.ratelimitKey(), __ -> new BucketContainer());
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
@@ -64,7 +64,7 @@ public class DefaultRateLimiter implements RateLimiter {
             final CompletableFuture<Void> future = new CompletableFuture<>();
             container.queue.offer(future);
             queueExecution(container);
-            return Single.fromFuture(future);
+            return future;
         }
     }
     

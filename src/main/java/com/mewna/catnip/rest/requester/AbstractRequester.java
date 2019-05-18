@@ -274,11 +274,12 @@ public abstract class AbstractRequester implements Requester {
                         System.currentTimeMillis() + timeDifference + retryAfter, timeDifference);
             }
             rateLimiter.requestExecution(route)
-                    .doOnSuccess(__ -> executeRequest(request))
-                    .doOnError(e -> {
+                    .thenAccept(__ -> executeRequest(request))
+                    .exceptionally(e -> {
                         final Throwable throwable = new RuntimeException("REST error context");
                         throwable.setStackTrace(request.stacktrace());
                         request.future().completeExceptionally(e.initCause(throwable));
+                        return null;
                     });
         } else {
             updateBucket(route, headers, -1, timeDifference);

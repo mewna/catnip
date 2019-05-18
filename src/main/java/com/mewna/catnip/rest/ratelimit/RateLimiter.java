@@ -29,17 +29,17 @@ package com.mewna.catnip.rest.ratelimit;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.rest.Routes.Route;
-import io.reactivex.Single;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import java.util.concurrent.CompletableFuture;
 
 public interface RateLimiter {
     void catnip(@Nonnull Catnip catnip);
     
     @Nonnull
     @CheckReturnValue
-    Single<Void> requestExecution(@Nonnull Route route);
+    CompletableFuture<Void> requestExecution(@Nonnull Route route);
     
     void updateRemaining(@Nonnull Route route, int remaining);
     

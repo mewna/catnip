@@ -37,6 +37,7 @@ import org.slf4j.helpers.MessageFormatter;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.StackWalker.Option;
+import java.util.Set;
 
 /**
  * @author amy
@@ -44,11 +45,12 @@ import java.lang.StackWalker.Option;
  */
 @Accessors(fluent = true)
 public class DefaultLogAdapter implements LogAdapter {
-    private final StackWalker stackWalker = StackWalker.getInstance(Option.SHOW_REFLECT_FRAMES);
+    private final StackWalker stackWalker = StackWalker.getInstance(Set.of(Option.SHOW_REFLECT_FRAMES,
+            Option.RETAIN_CLASS_REFERENCE));
     
     @Override
     public void log(@Nonnull final Level level, @Nonnull final String message, @Nullable final Object... objects) {
-        final Class<?> caller = stackWalker.getCallerClass();
+        final Class<?> caller = stackWalker.walk(s -> s.skip(2).findFirst()).get().getDeclaringClass();
         final Logger logger = LoggerFactory.getLogger(caller);
         final FormattingTuple tuple = MessageFormatter.arrayFormat(message, objects);
         final String formatted = tuple.getMessage();
