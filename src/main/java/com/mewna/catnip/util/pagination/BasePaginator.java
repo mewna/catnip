@@ -27,7 +27,7 @@
 
 package com.mewna.catnip.util.pagination;
 
-import com.mewna.catnip.util.RxHelpers;
+import com.mewna.catnip.util.rx.RxHelpers;
 import io.reactivex.Observable;
 
 import javax.annotation.CheckReturnValue;

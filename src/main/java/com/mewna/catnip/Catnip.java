@@ -60,7 +60,6 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.FlowableHelper;
 import io.vertx.reactivex.ObservableHelper;
-import io.vertx.reactivex.RxHelper;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.CheckReturnValue;
@@ -185,6 +184,10 @@ public interface Catnip {
     static Single<Catnip> catnipAsync(@Nonnull final CatnipOptions options, @Nonnull final Vertx vertx) {
         return new CatnipImpl(vertx, options).setup();
     }
+    
+    @Nonnull
+    @CheckReturnValue
+    Scheduler scheduler();
     
     /**
      * @return The cached gateway info. May be null if it hasn't been fetched
@@ -690,7 +693,7 @@ public interface Catnip {
      * Add a reactive stream handler for events of the given type. Can be
      * disposed of with {@link Observable#unsubscribeOn(Scheduler)}. The
      * {@code scheduler} argument can be created with
-     * {@link RxHelper#scheduler(Vertx)}.
+     * {@link #scheduler()}.
      *
      * @param type The type of event to stream.
      * @param <T>  The object type of the event being streamed.
@@ -698,14 +701,14 @@ public interface Catnip {
      * @return The observable.
      */
     default <T> Observable<T> observable(@Nonnull final EventType<T> type) {
-        return ObservableHelper.toObservable(on(type).bodyStream());
+        return ObservableHelper.toObservable(on(type).bodyStream()).subscribeOn(scheduler()).observeOn(scheduler());
     }
     
     /**
      * Add a reactive stream handler for events of the given type.  Can be
      * disposed of with {@link Flowable#unsubscribeOn(Scheduler)}. The
      * {@code scheduler} argument can be created with
-     * {@link RxHelper#scheduler(Vertx)}.
+     * {@link #scheduler()}.
      *
      * @param type The type of event to stream.
      * @param <T>  The object type of the event being streamed.
@@ -713,7 +716,7 @@ public interface Catnip {
      * @return The flowable.
      */
     default <T> Flowable<T> flowable(@Nonnull final EventType<T> type) {
-        return FlowableHelper.toFlowable(on(type).bodyStream());
+        return FlowableHelper.toFlowable(on(type).bodyStream()).subscribeOn(scheduler()).observeOn(scheduler());
     }
     
     /**
@@ -750,7 +753,7 @@ public interface Catnip {
      * Add a reactive stream handler for events of the given type. Can be
      * disposed of with {@link Observable#unsubscribeOn(Scheduler)}. The
      * {@code scheduler} argument can be created with
-     * {@link RxHelper#scheduler(Vertx)}.
+     * {@link #scheduler()}.
      *
      * @param type The type of event to stream.
      * @param <T>  The object type of the event being streamed.
@@ -759,14 +762,14 @@ public interface Catnip {
      * @return The observable.
      */
     default <T, E> Observable<Pair<T, E>> observable(@Nonnull final DoubleEventType<T, E> type) {
-        return ObservableHelper.toObservable(on(type).bodyStream());
+        return ObservableHelper.toObservable(on(type).bodyStream()).subscribeOn(scheduler()).observeOn(scheduler());
     }
     
     /**
      * Add a reactive stream handler for events of the given type. Can be
      * disposed of with {@link Flowable#unsubscribeOn(Scheduler)}. The
      * {@code scheduler} argument can be created with
-     * {@link RxHelper#scheduler(Vertx)}.
+     * {@link #scheduler()}.
      *
      * @param type The type of event to stream.
      * @param <T>  The object type of the event being streamed.
@@ -775,7 +778,7 @@ public interface Catnip {
      * @return The flowable.
      */
     default <T, E> Flowable<Pair<T, E>> flowable(@Nonnull final DoubleEventType<T, E> type) {
-        return FlowableHelper.toFlowable(on(type).bodyStream());
+        return FlowableHelper.toFlowable(on(type).bodyStream()).subscribeOn(scheduler()).observeOn(scheduler());
     }
     
     /**

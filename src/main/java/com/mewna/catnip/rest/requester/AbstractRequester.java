@@ -37,7 +37,7 @@ import com.mewna.catnip.rest.RestPayloadException;
 import com.mewna.catnip.rest.Routes.Route;
 import com.mewna.catnip.rest.ratelimit.RateLimiter;
 import com.mewna.catnip.util.CatnipMeta;
-import com.mewna.catnip.util.RxHelpers;
+import com.mewna.catnip.util.rx.RxHelpers;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.Utils;
 import io.reactivex.Observable;
@@ -104,7 +104,9 @@ public abstract class AbstractRequester implements Requester {
             stacktrace = new StackTraceElement[0];
         }
         bucket.queueRequest(new QueuedRequest(r, r.route(), future, bucket, stacktrace));
-        return RxHelpers.futureToObservable(future);
+        return RxHelpers.futureToObservable(future)
+                .subscribeOn(catnip.scheduler())
+                .observeOn(catnip.scheduler());
     }
     
     @Nonnull

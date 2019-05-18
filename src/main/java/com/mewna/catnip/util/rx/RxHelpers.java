@@ -25,11 +25,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.util;
+package com.mewna.catnip.util.rx;
 
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
+import io.reactivex.schedulers.Schedulers;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 
 /**
  * A collection of utility methods to help make using Rx not quite so potato
@@ -40,6 +43,11 @@ import java.util.concurrent.CompletableFuture;
  */
 public final class RxHelpers {
     private RxHelpers() {
+    }
+    
+    public static Scheduler forkJoinScheduler() {
+        // TODO: Allow configuring the size of the pool
+        return Schedulers.from(Executors.newWorkStealingPool());
     }
     
     public static <T> Observable<T> futureToObservable(final CompletableFuture<T> future) {
