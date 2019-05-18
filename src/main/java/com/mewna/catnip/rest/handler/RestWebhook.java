@@ -37,6 +37,7 @@ import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -59,8 +60,8 @@ public class RestWebhook extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Webhook> getWebhook(@Nonnull final String webhookId) {
-        return getWebhookRaw(webhookId).map(entityBuilder()::createWebhook);
+    public Single<Webhook> getWebhook(@Nonnull final String webhookId) {
+        return Single.fromObservable(getWebhookRaw(webhookId).map(entityBuilder()::createWebhook));
     }
     
     @Nonnull
@@ -73,8 +74,8 @@ public class RestWebhook extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Webhook> getWebhookToken(@Nonnull final String webhookId, @Nonnull final String token) {
-        return getWebhookTokenRaw(webhookId, token).map(entityBuilder()::createWebhook);
+    public Single<Webhook> getWebhookToken(@Nonnull final String webhookId, @Nonnull final String token) {
+        return Single.fromObservable(getWebhookTokenRaw(webhookId, token).map(entityBuilder()::createWebhook));
     }
     
     @Nonnull
@@ -119,14 +120,14 @@ public class RestWebhook extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Webhook> modifyWebhook(@Nonnull final String webhookId, @Nonnull final WebhookEditFields fields,
-                                             @Nullable final String reason) {
-        return modifyWebhookRaw(webhookId, fields, reason).map(entityBuilder()::createWebhook);
+    public Single<Webhook> modifyWebhook(@Nonnull final String webhookId, @Nonnull final WebhookEditFields fields,
+                                         @Nullable final String reason) {
+        return Single.fromObservable(modifyWebhookRaw(webhookId, fields, reason).map(entityBuilder()::createWebhook));
     }
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Webhook> modifyWebhook(@Nonnull final String webhookId, @Nonnull final WebhookEditFields fields) {
+    public Single<Webhook> modifyWebhook(@Nonnull final String webhookId, @Nonnull final WebhookEditFields fields) {
         return modifyWebhook(webhookId, fields, null);
     }
     
@@ -157,19 +158,19 @@ public class RestWebhook extends RestHandler {
     @Nonnull
     @CheckReturnValue
     @SuppressWarnings("unused")
-    public Observable<Message> executeWebhook(@Nonnull final String webhookId, @Nonnull final String webhookToken,
-                                              @Nonnull final MessageOptions options) {
+    public Single<Message> executeWebhook(@Nonnull final String webhookId, @Nonnull final String webhookToken,
+                                          @Nonnull final MessageOptions options) {
         return executeWebhook(webhookId, webhookToken, null, null, options);
     }
     
     @Nonnull
     @CheckReturnValue
     @SuppressWarnings("WeakerAccess")
-    public Observable<Message> executeWebhook(@Nonnull final String webhookId, @Nonnull final String webhookToken,
-                                              @Nullable final String username, @Nullable final String avatarUrl,
-                                              @Nonnull final MessageOptions options) {
-        return executeWebhookRaw(webhookId, webhookToken, username, avatarUrl, options)
-                .map(entityBuilder()::createMessage);
+    public Single<Message> executeWebhook(@Nonnull final String webhookId, @Nonnull final String webhookToken,
+                                          @Nullable final String username, @Nullable final String avatarUrl,
+                                          @Nonnull final MessageOptions options) {
+        return Single.fromObservable(executeWebhookRaw(webhookId, webhookToken, username, avatarUrl, options)
+                .map(entityBuilder()::createMessage));
     }
     
     @Nonnull

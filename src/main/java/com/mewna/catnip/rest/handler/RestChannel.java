@@ -50,6 +50,7 @@ import com.mewna.catnip.util.pagination.MessagePaginator;
 import com.mewna.catnip.util.pagination.ReactionPaginator;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -77,23 +78,23 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public Observable<Message> sendMessage(@Nonnull final String channelId, @Nonnull final String content) {
+    public Single<Message> sendMessage(@Nonnull final String channelId, @Nonnull final String content) {
         return sendMessage(channelId, new MessageOptions().content(content));
     }
     
     @Nonnull
-    public Observable<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Embed embed) {
+    public Single<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Embed embed) {
         return sendMessage(channelId, new MessageOptions().embed(embed));
     }
     
     @Nonnull
-    public Observable<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Message message) {
-        return sendMessageRaw(channelId, message).map(entityBuilder()::createMessage);
+    public Single<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Message message) {
+        return Single.fromObservable(sendMessageRaw(channelId, message).map(entityBuilder()::createMessage));
     }
     
     @Nonnull
-    public Observable<Message> sendMessage(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
-        return sendMessageRaw(channelId, options).map(entityBuilder()::createMessage);
+    public Single<Message> sendMessage(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
+        return Single.fromObservable(sendMessageRaw(channelId, options).map(entityBuilder()::createMessage));
     }
     
     @Nonnull
@@ -141,8 +142,8 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Message> getMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
-        return getMessageRaw(channelId, messageId).map(entityBuilder()::createMessage);
+    public Single<Message> getMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
+        return Single.fromObservable(getMessageRaw(channelId, messageId).map(entityBuilder()::createMessage));
     }
     
     @Nonnull
@@ -155,21 +156,21 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public Observable<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
-                                           @Nonnull final String content) {
+    public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
+                                       @Nonnull final String content) {
         return editMessage(channelId, messageId, new MessageOptions().content(content).buildMessage());
     }
     
     @Nonnull
-    public Observable<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
-                                           @Nonnull final Embed embed) {
+    public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
+                                       @Nonnull final Embed embed) {
         return editMessage(channelId, messageId, new MessageOptions().embed(embed).buildMessage());
     }
     
     @Nonnull
-    public Observable<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
-                                           @Nonnull final Message message) {
-        return editMessageRaw(channelId, messageId, message).map(entityBuilder()::createMessage);
+    public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
+                                       @Nonnull final Message message) {
+        return Single.fromObservable(editMessageRaw(channelId, messageId, message).map(entityBuilder()::createMessage));
     }
     
     @Nonnull
@@ -393,8 +394,8 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Channel> getChannelById(@Nonnull final String channelId) {
-        return getChannelByIdRaw(channelId).map(entityBuilder()::createChannel);
+    public Single<Channel> getChannelById(@Nonnull final String channelId) {
+        return Single.fromObservable(getChannelByIdRaw(channelId).map(entityBuilder()::createChannel));
     }
     
     @Nonnull
@@ -407,13 +408,13 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Channel> deleteChannel(@Nonnull final String channelId, @Nullable final String reason) {
-        return deleteChannelRaw(channelId, reason).map(entityBuilder()::createChannel);
+    public Single<Channel> deleteChannel(@Nonnull final String channelId, @Nullable final String reason) {
+        return Single.fromObservable(deleteChannelRaw(channelId, reason).map(entityBuilder()::createChannel));
     }
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Channel> deleteChannel(@Nonnull final String channelId) {
+    public Single<Channel> deleteChannel(@Nonnull final String channelId) {
         return deleteChannel(channelId, null);
     }
     
@@ -427,16 +428,16 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<CreatedInvite> createInvite(@Nonnull final String channelId,
-                                                  @Nullable final InviteCreateOptions options,
-                                                  @Nullable final String reason) {
-        return createInviteRaw(channelId, options, reason).map(entityBuilder()::createCreatedInvite);
+    public Single<CreatedInvite> createInvite(@Nonnull final String channelId,
+                                              @Nullable final InviteCreateOptions options,
+                                              @Nullable final String reason) {
+        return Single.fromObservable(createInviteRaw(channelId, options, reason).map(entityBuilder()::createCreatedInvite));
     }
     
     @Nonnull
     @CheckReturnValue
-    public Observable<CreatedInvite> createInvite(@Nonnull final String channelId,
-                                                  @Nullable final InviteCreateOptions options) {
+    public Single<CreatedInvite> createInvite(@Nonnull final String channelId,
+                                              @Nullable final InviteCreateOptions options) {
         return createInvite(channelId, options, null);
     }
     
@@ -452,8 +453,10 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<List<CreatedInvite>> getChannelInvites(@Nonnull final String channelId) {
-        return getChannelInvitesRaw(channelId).map(e -> mapObjectContents(entityBuilder()::createCreatedInvite).apply(e));
+    public Observable<CreatedInvite> getChannelInvites(@Nonnull final String channelId) {
+        return getChannelInvitesRaw(channelId)
+                .map(e -> mapObjectContents(entityBuilder()::createCreatedInvite).apply(e))
+                .flatMapIterable(e -> e);
     }
     
     @Nonnull
@@ -465,15 +468,15 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public Observable<GuildChannel> modifyChannel(@Nonnull final String channelId,
-                                                  @Nonnull final ChannelEditFields fields,
-                                                  @Nullable final String reason) {
-        return modifyChannelRaw(channelId, fields, reason).map(entityBuilder()::createGuildChannel);
+    public Single<GuildChannel> modifyChannel(@Nonnull final String channelId,
+                                              @Nonnull final ChannelEditFields fields,
+                                              @Nullable final String reason) {
+        return Single.fromObservable(modifyChannelRaw(channelId, fields, reason).map(entityBuilder()::createGuildChannel));
     }
     
     @Nonnull
-    public Observable<GuildChannel> modifyChannel(@Nonnull final String channelId,
-                                                  @Nonnull final ChannelEditFields fields) {
+    public Single<GuildChannel> modifyChannel(@Nonnull final String channelId,
+                                              @Nonnull final ChannelEditFields fields) {
         return modifyChannel(channelId, fields, null);
     }
     
@@ -553,8 +556,10 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<List<Message>> getPinnedMessages(@Nonnull final String channelId) {
-        return getChannelInvitesRaw(channelId).map(e -> mapObjectContents(entityBuilder()::createMessage).apply(e));
+    public Observable<Message> getPinnedMessages(@Nonnull final String channelId) {
+        return getChannelInvitesRaw(channelId)
+                .map(e -> mapObjectContents(entityBuilder()::createMessage).apply(e))
+                .flatMapIterable(e -> e);
     }
     
     @Nonnull
@@ -590,14 +595,15 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public Observable<Webhook> createWebhook(@Nonnull final String channelId, @Nonnull final String name,
-                                             @Nullable final String avatar, @Nullable final String reason) {
-        return createWebhookRaw(channelId, name, avatar, reason).map(entityBuilder()::createWebhook);
+    public Single<Webhook> createWebhook(@Nonnull final String channelId, @Nonnull final String name,
+                                         @Nullable final String avatar, @Nullable final String reason) {
+        return Single.fromObservable(createWebhookRaw(channelId, name, avatar, reason)
+                .map(entityBuilder()::createWebhook));
     }
     
     @Nonnull
-    public Observable<Webhook> createWebhook(@Nonnull final String channelId, @Nonnull final String name,
-                                             @Nullable final String avatar) {
+    public Single<Webhook> createWebhook(@Nonnull final String channelId, @Nonnull final String name,
+                                         @Nullable final String avatar) {
         return createWebhook(channelId, name, avatar, null);
     }
     

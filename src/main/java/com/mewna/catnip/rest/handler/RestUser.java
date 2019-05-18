@@ -41,6 +41,7 @@ import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.pagination.GuildPaginator;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -65,8 +66,8 @@ public class RestUser extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<User> getCurrentUser() {
-        return getCurrentUserRaw().map(entityBuilder()::createUser);
+    public Single<User> getCurrentUser() {
+        return Single.fromObservable(getCurrentUserRaw().map(entityBuilder()::createUser));
     }
     
     @Nonnull
@@ -78,8 +79,8 @@ public class RestUser extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<User> getUser(@Nonnull final String userId) {
-        return getUserRaw(userId).map(entityBuilder()::createUser);
+    public Single<User> getUser(@Nonnull final String userId) {
+        return Single.fromObservable(getUserRaw(userId).map(entityBuilder()::createUser));
     }
     
     @Nonnull
@@ -91,8 +92,8 @@ public class RestUser extends RestHandler {
     }
     
     @Nonnull
-    public Observable<User> modifyCurrentUser(@Nullable final String username, @Nullable final URI avatarData) {
-        return modifyCurrentUserRaw(username, avatarData).map(entityBuilder()::createUser);
+    public Single<User> modifyCurrentUser(@Nullable final String username, @Nullable final URI avatarData) {
+        return Single.fromObservable(modifyCurrentUserRaw(username, avatarData).map(entityBuilder()::createUser));
     }
     
     @Nonnull
@@ -110,7 +111,7 @@ public class RestUser extends RestHandler {
     }
     
     @Nonnull
-    public Observable<User> modifyCurrentUser(@Nullable final String username, @Nullable final byte[] avatar) {
+    public Single<User> modifyCurrentUser(@Nullable final String username, @Nullable final byte[] avatar) {
         return modifyCurrentUser(username, avatar == null ? null : Utils.asImageDataUri(avatar));
     }
     
@@ -161,9 +162,9 @@ public class RestUser extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<DMChannel> createDM(@Nonnull final String recipientId) {
-        return createDMRaw(recipientId)
-                .map(entityBuilder()::createUserDM);
+    public Single<DMChannel> createDM(@Nonnull final String recipientId) {
+        return Single.fromObservable(createDMRaw(recipientId)
+                .map(entityBuilder()::createUserDM));
     }
     
     @Nonnull
@@ -178,13 +179,13 @@ public class RestUser extends RestHandler {
     public Completable leaveGuild(@Nonnull final String guildId) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.LEAVE_GUILD,
-                Map.of("guild.id", guildId))));
+                        Map.of("guild.id", guildId))));
     }
     
     @Nonnull
     @CheckReturnValue
-    public Observable<ApplicationInfo> getCurrentApplicationInformation() {
-        return getCurrentApplicationInformationRaw().map(entityBuilder()::createApplicationInfo);
+    public Single<ApplicationInfo> getCurrentApplicationInformation() {
+        return Single.fromObservable(getCurrentApplicationInformationRaw().map(entityBuilder()::createApplicationInfo));
     }
     
     @Nonnull
@@ -197,8 +198,8 @@ public class RestUser extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<GatewayInfo> getGatewayBot() {
-        return getGatewayBotRaw().map(e -> entityBuilder().createGatewayInfo(e));
+    public Single<GatewayInfo> getGatewayBot() {
+        return Single.fromObservable(getGatewayBotRaw().map(e -> entityBuilder().createGatewayInfo(e)));
     }
     
     @Nonnull

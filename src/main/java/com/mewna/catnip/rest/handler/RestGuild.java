@@ -44,6 +44,7 @@ import com.mewna.catnip.util.pagination.AuditLogPaginator;
 import com.mewna.catnip.util.pagination.MemberPaginator;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -124,14 +125,15 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<GuildChannel> createGuildChannel(@Nonnull final String guildId, @Nonnull final ChannelData data,
-                                                       @Nullable final String reason) {
-        return createGuildChannelRaw(guildId, data, reason).map(entityBuilder()::createGuildChannel);
+    public Single<GuildChannel> createGuildChannel(@Nonnull final String guildId, @Nonnull final ChannelData data,
+                                                   @Nullable final String reason) {
+        return Single.fromObservable(createGuildChannelRaw(guildId, data, reason)
+                .map(entityBuilder()::createGuildChannel));
     }
     
     @Nonnull
     @CheckReturnValue
-    public Observable<GuildChannel> createGuildChannel(@Nonnull final String guildId, @Nonnull final ChannelData data) {
+    public Single<GuildChannel> createGuildChannel(@Nonnull final String guildId, @Nonnull final ChannelData data) {
         return createGuildChannel(guildId, data, null);
     }
     
@@ -147,8 +149,8 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<GuildEmbed> getGuildEmbed(@Nonnull final String guildId) {
-        return getGuildEmbedRaw(guildId).map(entityBuilder()::createGuildEmbed);
+    public Single<GuildEmbed> getGuildEmbed(@Nonnull final String guildId) {
+        return Single.fromObservable(getGuildEmbedRaw(guildId).map(entityBuilder()::createGuildEmbed));
     }
     
     @Nonnull
@@ -162,15 +164,16 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<GuildEmbed> modifyGuildEmbed(@Nonnull final String guildId, @Nullable final String channelId,
-                                                   final boolean enabled, @Nullable final String reason) {
-        return modifyGuildEmbedRaw(guildId, channelId, enabled, reason).map(entityBuilder()::createGuildEmbed);
+    public Single<GuildEmbed> modifyGuildEmbed(@Nonnull final String guildId, @Nullable final String channelId,
+                                               final boolean enabled, @Nullable final String reason) {
+        return Single.fromObservable(modifyGuildEmbedRaw(guildId, channelId, enabled, reason)
+                .map(entityBuilder()::createGuildEmbed));
     }
     
     @Nonnull
     @CheckReturnValue
-    public Observable<GuildEmbed> modifyGuildEmbed(@Nonnull final String guildId, @Nullable final String channelId,
-                                                   final boolean enabled) {
+    public Single<GuildEmbed> modifyGuildEmbed(@Nonnull final String guildId, @Nullable final String channelId,
+                                               final boolean enabled) {
         return modifyGuildEmbed(guildId, channelId, enabled, null);
     }
     
@@ -186,14 +189,15 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Role> createGuildRole(@Nonnull final String guildId, @Nonnull final RoleData roleData,
-                                            @Nullable final String reason) {
-        return createGuildRoleRaw(guildId, roleData, reason).map(obj -> entityBuilder().createRole(guildId, obj));
+    public Single<Role> createGuildRole(@Nonnull final String guildId, @Nonnull final RoleData roleData,
+                                        @Nullable final String reason) {
+        return Single.fromObservable(createGuildRoleRaw(guildId, roleData, reason)
+                .map(obj -> entityBuilder().createRole(guildId, obj)));
     }
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Role> createGuildRole(@Nonnull final String guildId, @Nonnull final RoleData roleData) {
+    public Single<Role> createGuildRole(@Nonnull final String guildId, @Nonnull final RoleData roleData) {
         return createGuildRole(guildId, roleData, null);
     }
     
@@ -209,14 +213,14 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Role> modifyGuildRole(@Nonnull final String guildId, @Nonnull final String roleId,
-                                            @Nonnull final RoleData roleData, @Nullable final String reason) {
-        return modifyGuildRoleRaw(guildId, roleId, roleData, reason)
-                .map(obj -> entityBuilder().createRole(guildId, obj));
+    public Single<Role> modifyGuildRole(@Nonnull final String guildId, @Nonnull final String roleId,
+                                        @Nonnull final RoleData roleData, @Nullable final String reason) {
+        return Single.fromObservable(modifyGuildRoleRaw(guildId, roleId, roleData, reason)
+                .map(obj -> entityBuilder().createRole(guildId, obj)));
     }
     
-    public Observable<Role> modifyGuildRole(@Nonnull final String guildId, @Nonnull final String roleId,
-                                            @Nonnull final RoleData roleData) {
+    public Single<Role> modifyGuildRole(@Nonnull final String guildId, @Nonnull final String roleId,
+                                        @Nonnull final RoleData roleData) {
         return modifyGuildRole(guildId, roleId, roleData, null);
     }
     
@@ -264,8 +268,8 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Guild> getGuild(@Nonnull final String guildId) {
-        return getGuildRaw(guildId).map(entityBuilder()::createGuild);
+    public Single<Guild> getGuild(@Nonnull final String guildId) {
+        return Single.fromObservable(getGuildRaw(guildId).map(entityBuilder()::createGuild));
     }
     
     @Nonnull
@@ -279,8 +283,8 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Guild> createGuild(@Nonnull final GuildData guild) {
-        return createGuildRaw(guild).map(entityBuilder()::createGuild);
+    public Single<Guild> createGuild(@Nonnull final GuildData guild) {
+        return Single.fromObservable(createGuildRaw(guild).map(entityBuilder()::createGuild));
     }
     
     @Nonnull
@@ -336,11 +340,11 @@ public class RestGuild extends RestHandler {
     }
     
     @Nonnull
-    public Observable<Guild> modifyGuild(@Nonnull final String guildId, @Nonnull final GuildEditFields fields, @Nullable final String reason) {
-        return modifyGuildRaw(guildId, fields, reason).map(entityBuilder()::createGuild);
+    public Single<Guild> modifyGuild(@Nonnull final String guildId, @Nonnull final GuildEditFields fields, @Nullable final String reason) {
+        return Single.fromObservable(modifyGuildRaw(guildId, fields, reason).map(entityBuilder()::createGuild));
     }
     
-    public Observable<Guild> modifyGuild(@Nonnull final String guildId, @Nonnull final GuildEditFields fields) {
+    public Single<Guild> modifyGuild(@Nonnull final String guildId, @Nonnull final GuildEditFields fields) {
         return modifyGuild(guildId, fields, null);
     }
     
@@ -412,8 +416,8 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<GuildBan> getGuildBan(@Nonnull final String guildId, @Nonnull final String userId) {
-        return getGuildBanRaw(guildId, userId).map(entityBuilder()::createGuildBan);
+    public Single<GuildBan> getGuildBan(@Nonnull final String guildId, @Nonnull final String userId) {
+        return Single.fromObservable(getGuildBanRaw(guildId, userId).map(entityBuilder()::createGuildBan));
     }
     
     @Nonnull
@@ -463,15 +467,16 @@ public class RestGuild extends RestHandler {
     }
     
     @Nonnull
-    public Observable<String> modifyCurrentUsersNick(@Nonnull final String guildId, @Nullable final String nick,
-                                                     @Nullable final String reason) {
-        return catnip().requester().queue(new OutboundRequest(Routes.MODIFY_CURRENT_USERS_NICK.withQueryString(guildId),
-                Map.of(), new JsonObject().put("nick", nick), reason))
-                .map(ResponsePayload::string);
+    public Single<String> modifyCurrentUsersNick(@Nonnull final String guildId, @Nullable final String nick,
+                                                 @Nullable final String reason) {
+        return Single.fromObservable(catnip().requester()
+                .queue(new OutboundRequest(Routes.MODIFY_CURRENT_USERS_NICK.withQueryString(guildId),
+                        Map.of(), new JsonObject().put("nick", nick), reason))
+                .map(ResponsePayload::string));
     }
     
     @Nonnull
-    public Observable<String> modifyCurrentUsersNick(@Nonnull final String guildId, @Nullable final String nick) {
+    public Single<String> modifyCurrentUsersNick(@Nonnull final String guildId, @Nullable final String nick) {
         return modifyCurrentUsersNick(guildId, nick, null);
     }
     
@@ -490,8 +495,9 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Member> getGuildMember(@Nonnull final String guildId, @Nonnull final String userId) {
-        return getGuildMemberRaw(guildId, userId).map(e -> entityBuilder().createMember(guildId, e));
+    public Single<Member> getGuildMember(@Nonnull final String guildId, @Nonnull final String userId) {
+        return Single.fromObservable(getGuildMemberRaw(guildId, userId)
+                .map(e -> entityBuilder().createMember(guildId, e)));
     }
     
     @Nonnull
@@ -532,8 +538,8 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Integer> getGuildPruneCount(@Nonnull final String guildId, @Nonnegative final int days) {
-        return getGuildPruneCountRaw(guildId, days).map(e -> e.getInteger("pruned"));
+    public Single<Integer> getGuildPruneCount(@Nonnull final String guildId, @Nonnegative final int days) {
+        return Single.fromObservable(getGuildPruneCountRaw(guildId, days).map(e -> e.getInteger("pruned")));
     }
     
     @Nonnull
@@ -547,8 +553,8 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Integer> beginGuildPrune(@Nonnull final String guildId, @Nonnegative final int days) {
-        return beginGuildPruneRaw(guildId, days).map(e -> e.getInteger("pruned"));
+    public Single<Integer> beginGuildPrune(@Nonnull final String guildId, @Nonnegative final int days) {
+        return Single.fromObservable(beginGuildPruneRaw(guildId, days).map(e -> e.getInteger("pruned")));
     }
     
     @Nonnull

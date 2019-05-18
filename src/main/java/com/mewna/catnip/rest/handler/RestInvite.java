@@ -33,6 +33,7 @@ import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
@@ -52,8 +53,8 @@ public class RestInvite extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Invite> getInvite(@Nonnull final String code) {
-        return getInviteRaw(code).map(entityBuilder()::createInvite);
+    public Single<Invite> getInvite(@Nonnull final String code) {
+        return Single.fromObservable(getInviteRaw(code).map(entityBuilder()::createInvite));
     }
     
     @Nonnull
@@ -66,13 +67,13 @@ public class RestInvite extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Invite> deleteInvite(@Nonnull final String code, @Nullable final String reason) {
-        return deleteInviteRaw(code, reason).map(entityBuilder()::createInvite);
+    public Single<Invite> deleteInvite(@Nonnull final String code, @Nullable final String reason) {
+        return Single.fromObservable(deleteInviteRaw(code, reason).map(entityBuilder()::createInvite));
     }
     
     @Nonnull
     @CheckReturnValue
-    public Observable<Invite> deleteInvite(@Nonnull final String code) {
+    public Single<Invite> deleteInvite(@Nonnull final String code) {
         return deleteInvite(code, null);
     }
     
