@@ -37,6 +37,7 @@ import com.mewna.catnip.rest.guild.PermissionOverrideData;
 import com.mewna.catnip.rest.invite.InviteCreateOptions;
 import com.mewna.catnip.util.PermissionUtil;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
@@ -135,7 +136,7 @@ public interface GuildChannel extends GuildEntity, Channel {
     @Nonnull
     @JsonIgnore
     @CheckReturnValue
-    default Observable<CreatedInvite> createInvite(@Nullable final InviteCreateOptions options,
+    default Single<CreatedInvite> createInvite(@Nullable final InviteCreateOptions options,
                                                    @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), guildId(), id(), Permission.CREATE_INSTANT_INVITE);
         return catnip().rest().channel().createInvite(id(), options, reason);
@@ -151,7 +152,7 @@ public interface GuildChannel extends GuildEntity, Channel {
     @Nonnull
     @JsonIgnore
     @CheckReturnValue
-    default Observable<CreatedInvite> createInvite(@Nullable final InviteCreateOptions options) {
+    default Single<CreatedInvite> createInvite(@Nullable final InviteCreateOptions options) {
         return createInvite(options, null);
     }
     
@@ -163,7 +164,7 @@ public interface GuildChannel extends GuildEntity, Channel {
     @Nonnull
     @JsonIgnore
     @CheckReturnValue
-    default Observable<CreatedInvite> createInvite() {
+    default Single<CreatedInvite> createInvite() {
         PermissionUtil.checkPermissions(catnip(), guildId(), id(), Permission.CREATE_INSTANT_INVITE);
         return createInvite(null);
     }
@@ -177,7 +178,7 @@ public interface GuildChannel extends GuildEntity, Channel {
     @Nonnull
     @JsonIgnore
     @CheckReturnValue
-    default Observable<List<CreatedInvite>> fetchInvites() {
+    default Observable<CreatedInvite> fetchInvites() {
         PermissionUtil.checkPermissions(catnip(), guildId(), id(), Permission.MANAGE_CHANNELS);
         return catnip().rest().channel().getChannelInvites(id());
     }
@@ -254,7 +255,7 @@ public interface GuildChannel extends GuildEntity, Channel {
         }
         
         @Nonnull
-        public Observable<GuildChannel> submit(@Nullable final String reason) {
+        public Single<GuildChannel> submit(@Nullable final String reason) {
             if(channel == null) {
                 throw new IllegalStateException("Cannot submit edit without a channel object! Please use RestChannel directly instead");
             }
@@ -262,7 +263,7 @@ public interface GuildChannel extends GuildEntity, Channel {
         }
         
         @Nonnull
-        public Observable<GuildChannel> submit() {
+        public Single<GuildChannel> submit() {
             if(channel == null) {
                 throw new IllegalStateException("Cannot submit edit without a channel object! Please use RestChannel directly instead");
             }

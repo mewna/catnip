@@ -43,7 +43,7 @@ import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
 import io.reactivex.Completable;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.CheckReturnValue;
@@ -366,26 +366,26 @@ public interface Message extends Snowflake {
     
     @Nonnull
     @JsonIgnore
-    default Observable<Message> edit(@Nonnull final String content) {
+    default Single<Message> edit(@Nonnull final String content) {
         return catnip().rest().channel().editMessage(channelId(), id(), content);
     }
     
     @Nonnull
     @JsonIgnore
-    default Observable<Message> edit(@Nonnull final Embed embed) {
+    default Single<Message> edit(@Nonnull final Embed embed) {
         return catnip().rest().channel().editMessage(channelId(), id(), embed);
     }
     
     @Nonnull
     @JsonIgnore
-    default Observable<Message> edit(@Nonnull final Message message) {
+    default Single<Message> edit(@Nonnull final Message message) {
         Validate.isTrue(message.attachments().isEmpty(), "attachments cannot be edited into messages");
         return catnip().rest().channel().editMessage(channelId(), id(), message);
     }
     
     @Nonnull
     @JsonIgnore
-    default Observable<Message> edit(@Nonnull final MessageOptions options) {
+    default Single<Message> edit(@Nonnull final MessageOptions options) {
         Validate.isTrue(options.files().isEmpty(), "attachments cannot be edited into messages");
         return catnip().rest().channel().editMessage(channelId(), id(), options.buildMessage());
     }

@@ -40,7 +40,7 @@ import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.rest.requester.Requester;
 import com.mewna.catnip.util.PermissionUtil;
 import io.reactivex.Completable;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
@@ -66,11 +66,11 @@ public interface Webhook extends GuildEntity, Snowflake {
      *
      * @param content The text content to send.
      *
-     * @return A Observable that completes when the message is sent.
+     * @return A Single that completes when the message is sent.
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Message> executeWebhook(@Nonnull final String content) {
+    default Single<Message> executeWebhook(@Nonnull final String content) {
         return executeWebhook(content, null, null);
     }
     
@@ -79,11 +79,11 @@ public interface Webhook extends GuildEntity, Snowflake {
      *
      * @param embed The embed to send.
      *
-     * @return A Observable that completes when the message is sent.
+     * @return A Single that completes when the message is sent.
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Message> executeWebhook(@Nonnull final Embed embed) {
+    default Single<Message> executeWebhook(@Nonnull final Embed embed) {
         return executeWebhook(embed, null, null);
     }
     
@@ -92,11 +92,11 @@ public interface Webhook extends GuildEntity, Snowflake {
      *
      * @param options The options for the message being sent.
      *
-     * @return A Observable that completes when the message is sent.
+     * @return A Single that completes when the message is sent.
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Message> executeWebhook(@Nonnull final MessageOptions options) {
+    default Single<Message> executeWebhook(@Nonnull final MessageOptions options) {
         return executeWebhook(options, null, null);
     }
     
@@ -107,12 +107,12 @@ public interface Webhook extends GuildEntity, Snowflake {
      * @param username  The username to override the webhook, if set.
      * @param avatarUrl The avatar to override the webhook, if set.
      *
-     * @return A Observable that completes when the message is sent.
+     * @return A Single that completes when the message is sent.
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Message> executeWebhook(@Nonnull final String content,
-                                               @Nullable final String username, @Nullable final String avatarUrl) {
+    default Single<Message> executeWebhook(@Nonnull final String content,
+                                           @Nullable final String username, @Nullable final String avatarUrl) {
         return executeWebhook(new MessageOptions().content(content), username, avatarUrl);
     }
     
@@ -123,12 +123,12 @@ public interface Webhook extends GuildEntity, Snowflake {
      * @param username  The username to override the webhook, if set.
      * @param avatarUrl The avatar to override the webhook, if set.
      *
-     * @return A Observable that completes when the message is sent.
+     * @return A Single that completes when the message is sent.
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Message> executeWebhook(@Nonnull final Embed embed,
-                                               @Nullable final String username, @Nullable final String avatarUrl) {
+    default Single<Message> executeWebhook(@Nonnull final Embed embed,
+                                           @Nullable final String username, @Nullable final String avatarUrl) {
         return executeWebhook(new MessageOptions().embed(embed), username, avatarUrl);
     }
     
@@ -139,12 +139,12 @@ public interface Webhook extends GuildEntity, Snowflake {
      * @param username  The username to override the webhook, if set.
      * @param avatarUrl The avatar to override the webhook, if set.
      *
-     * @return A Observable that completes when the message is sent.
+     * @return A Single that completes when the message is sent.
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Message> executeWebhook(@Nonnull final MessageOptions options,
-                                               @Nullable final String username, @Nullable final String avatarUrl) {
+    default Single<Message> executeWebhook(@Nonnull final MessageOptions options,
+                                           @Nullable final String username, @Nullable final String avatarUrl) {
         return catnip().rest().webhook().executeWebhook(id(), token(), username, avatarUrl, options);
     }
     
@@ -203,14 +203,14 @@ public interface Webhook extends GuildEntity, Snowflake {
     /**
      * Deletes the webhook.
      *
-     * @return A Observable that completes when the webhook is deleted.
+     * @return A Single that completes when the webhook is deleted.
      */
     @Nonnull
     @JsonIgnore
     @CheckReturnValue
     default Completable delete() {
         PermissionUtil.checkPermissions(catnip(), guildId(), channelId(), Permission.MANAGE_WEBHOOKS);
-        return  catnip().rest().webhook().deleteWebhook(id());
+        return catnip().rest().webhook().deleteWebhook(id());
     }
     
     /**
@@ -245,7 +245,7 @@ public interface Webhook extends GuildEntity, Snowflake {
         }
         
         @Nonnull
-        public Observable<Webhook> submit() {
+        public Single<Webhook> submit() {
             if(webhook == null) {
                 throw new IllegalStateException("Cannot submit edit without a webhook object! Please use RestWebhook directly instead");
             }

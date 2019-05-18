@@ -57,7 +57,6 @@ import com.mewna.catnip.util.JsonPojoCodec;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.logging.LogAdapter;
-import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -347,7 +346,7 @@ public class CatnipImpl implements Catnip {
     }
     
     @Nonnull
-    public Observable<Catnip> setup() {
+    public Single<Catnip> setup() {
         codecs();
         
         if(validateToken) {
@@ -368,10 +367,10 @@ public class CatnipImpl implements Catnip {
                 parseClientId();
             } catch(final IllegalArgumentException e) {
                 final Exception wrapped = new RuntimeException("The provided token was invalid!", e);
-                return Observable.fromFuture(SafeVertxCompletableFuture.failedFuture(wrapped));
+                return Single.fromFuture(SafeVertxCompletableFuture.failedFuture(wrapped));
             }
             
-            return Observable.fromFuture(SafeVertxCompletableFuture.completedFuture(this));
+            return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(this));
         }
     }
     
@@ -503,7 +502,7 @@ public class CatnipImpl implements Catnip {
     
     @Nonnull
     @Override
-    public Observable<GatewayInfo> fetchGatewayInfo() {
+    public Single<GatewayInfo> fetchGatewayInfo() {
         return rest.user().getGatewayBot()
                 .map(g -> {
                     if(g.valid()) {

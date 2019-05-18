@@ -38,6 +38,7 @@ import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -193,7 +194,7 @@ public interface Member extends Mentionable, PermissionHolder {
      */
     @JsonIgnore
     @CheckReturnValue
-    default Observable<DMChannel> createDM() {
+    default Single<DMChannel> createDM() {
         return catnip().rest().user().createDM(id());
     }
     

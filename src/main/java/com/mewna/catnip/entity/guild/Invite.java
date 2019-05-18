@@ -39,7 +39,7 @@ import com.mewna.catnip.entity.impl.InviteImpl.InviterImpl;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -101,10 +101,10 @@ public interface Invite extends Entity {
      *
      * @param reason The reason that will be displayed in audit log
      *
-     * @return A Observable that completes when the invite is deleted.
+     * @return A Single that completes when the invite is deleted.
      */
     @Nonnull
-    default Observable<Invite> delete(@Nullable final String reason) {
+    default Single<Invite> delete(@Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), guild().id(), channel().id(),
                 Permission.MANAGE_CHANNELS);
         return catnip().rest().invite().deleteInvite(code(), reason);
@@ -113,10 +113,10 @@ public interface Invite extends Entity {
     /**
      * Deletes the invite.
      *
-     * @return A Observable that completes when the invite is deleted.
+     * @return A Single that completes when the invite is deleted.
      */
     @Nonnull
-    default Observable<Invite> delete() {
+    default Single<Invite> delete() {
         return delete(null);
     }
     

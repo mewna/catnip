@@ -264,7 +264,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
         if(info != null) {
             connectSocket(info.url());
         } else {
-            catnip.fetchGatewayInfo().forEach(i -> connectSocket(i.url()));
+            catnip.fetchGatewayInfo().doOnSuccess(i -> connectSocket(i.url()));
         }
     }
     

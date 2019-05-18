@@ -35,7 +35,7 @@ import com.mewna.catnip.shard.ShardInfo;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.task.QueueTask;
 import com.mewna.catnip.util.task.ShardConnectTask;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.MessageConsumer;
 import lombok.Getter;
@@ -122,16 +122,16 @@ public class DefaultShardManager extends AbstractShardManager {
             addToConnectQueue(closeHandler.body().getId());
         }));
         
-        final Observable<GatewayInfo> gatewayInfoCompletableFuture;
+        final Single<GatewayInfo> gatewayInfoCompletableFuture;
         if(catnip().gatewayInfo() != null) {
             // If we already have gateway info, eg. from validating the token,
             // then don't bother fetching it a second time
-            gatewayInfoCompletableFuture = Observable.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip().gatewayInfo()));
+            gatewayInfoCompletableFuture = Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip().gatewayInfo()));
         } else {
             gatewayInfoCompletableFuture = catnip().rest().user().getGatewayBot();
         }
         
-        gatewayInfoCompletableFuture.firstElement().doOnSuccess(gatewayInfo -> {
+        gatewayInfoCompletableFuture.doOnSuccess(gatewayInfo -> {
             // Do some sanity checks
             final int expectedShardCount;
             if(shardCount == 0) {

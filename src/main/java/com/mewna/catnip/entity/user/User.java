@@ -36,7 +36,7 @@ import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.impl.UserImpl;
 import com.mewna.catnip.entity.util.ImageOptions;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -209,7 +209,7 @@ public interface User extends Snowflake, Mentionable {
      */
     @JsonIgnore
     @CheckReturnValue
-    default Observable<DMChannel> createDM() {
+    default Single<DMChannel> createDM() {
         return catnip().rest().user().createDM(id());
     }
     

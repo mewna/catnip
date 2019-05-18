@@ -37,7 +37,7 @@ import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.pagination.MessagePaginator;
 import io.reactivex.Completable;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -60,12 +60,12 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Message> sendMessage(@Nonnull final String content) {
+    default Single<Message> sendMessage(@Nonnull final String content) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.SEND_MESSAGES);
         }
-        final Observable<Message> future = catnip().rest().channel().sendMessage(id(), content);
+        final Single<Message> future = catnip().rest().channel().sendMessage(id(), content);
         // Inject guild manually because Discord does not send it in response
         if(isGuild()) {
             return future.map(msg -> ((MessageImpl) msg).guildIdAsLong(asGuildChannel().guildIdAsLong()));
@@ -82,7 +82,7 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Message> sendMessage(@Nonnull final Embed embed) {
+    default Single<Message> sendMessage(@Nonnull final Embed embed) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.SEND_MESSAGES, Permission.EMBED_LINKS);
@@ -99,7 +99,7 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Message> sendMessage(@Nonnull final Message message) {
+    default Single<Message> sendMessage(@Nonnull final Message message) {
         if(isGuild()) {
             if(!message.embeds().isEmpty()) {
                 PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
@@ -121,7 +121,7 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Message> sendMessage(@Nonnull final MessageOptions options) {
+    default Single<Message> sendMessage(@Nonnull final MessageOptions options) {
         if(isGuild()) {
             if(options.hasFiles()) {
                 if(options.embed() != null) {
@@ -155,7 +155,7 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Message> editMessage(@Nonnull final String messageId, @Nonnull final String content) {
+    default Single<Message> editMessage(@Nonnull final String messageId, @Nonnull final String content) {
         return catnip().rest().channel().editMessage(id(), messageId, content);
     }
     
@@ -170,7 +170,7 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Message> editMessage(@Nonnull final String messageId, @Nonnull final Embed embed) {
+    default Single<Message> editMessage(@Nonnull final String messageId, @Nonnull final Embed embed) {
         return catnip().rest().channel().editMessage(id(), messageId, embed);
     }
     
@@ -185,7 +185,7 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<Message> editMessage(@Nonnull final String messageId, @Nonnull final Message message) {
+    default Single<Message> editMessage(@Nonnull final String messageId, @Nonnull final Message message) {
         return catnip().rest().channel().editMessage(id(), messageId, message);
     }
     
@@ -292,7 +292,7 @@ public interface MessageChannel extends Channel {
     @Nonnull
     @JsonIgnore
     default Completable deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId,
-                                                @Nonnull final String emoji) {
+                                           @Nonnull final String emoji) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.MANAGE_MESSAGES);
@@ -312,7 +312,7 @@ public interface MessageChannel extends Channel {
     @Nonnull
     @JsonIgnore
     default Completable deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId,
-                                                @Nonnull final Emoji emoji) {
+                                           @Nonnull final Emoji emoji) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.MANAGE_MESSAGES);
@@ -360,7 +360,7 @@ public interface MessageChannel extends Channel {
     @Nonnull
     @JsonIgnore
     @CheckReturnValue
-    default Observable<Message> fetchMessage(@Nonnull final String messageId) {
+    default Single<Message> fetchMessage(@Nonnull final String messageId) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.READ_MESSAGE_HISTORY);

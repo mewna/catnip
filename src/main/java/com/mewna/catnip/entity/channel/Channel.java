@@ -34,6 +34,7 @@ import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import lombok.Getter;
 
 import javax.annotation.CheckReturnValue;
@@ -66,7 +67,7 @@ public interface Channel extends Snowflake {
      * deleted.
      */
     @Nonnull
-    default Observable<Channel> delete(@Nullable final String reason) {
+    default Single<Channel> delete(@Nullable final String reason) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.MANAGE_CHANNELS);
@@ -81,7 +82,7 @@ public interface Channel extends Snowflake {
      * deleted.
      */
     @Nonnull
-    default Observable<Channel> delete() {
+    default Single<Channel> delete() {
         return delete(null);
     }
     

@@ -44,6 +44,7 @@ import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.Utils;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
@@ -758,7 +759,7 @@ public interface Guild extends Snowflake {
     @Nonnull
     @JsonIgnore
     @CheckReturnValue
-    default Observable<CustomEmoji> fetchEmoji(@Nonnull final String emojiId) {
+    default Single<CustomEmoji> fetchEmoji(@Nonnull final String emojiId) {
         return catnip().rest().emoji().getGuildEmoji(id(), emojiId);
     }
     
@@ -774,8 +775,8 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final byte[] image,
-                                                @Nonnull final Collection<String> roles, @Nullable final String reason) {
+    default Single<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final byte[] image,
+                                            @Nonnull final Collection<String> roles, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJI);
         return catnip().rest().emoji().createGuildEmoji(id(), name, image, roles, reason);
     }
@@ -791,7 +792,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final byte[] image,
+    default Single<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final byte[] image,
                                                 @Nonnull final Collection<String> roles) {
         return createEmoji(name, image, roles, null);
     }
@@ -808,7 +809,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final URI imageData,
+    default Single<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final URI imageData,
                                                 @Nonnull final Collection<String> roles, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJI);
         return catnip().rest().emoji().createGuildEmoji(id(), name, imageData, roles, reason);
@@ -825,7 +826,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final URI imageData,
+    default Single<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final URI imageData,
                                                 @Nonnull final Collection<String> roles) {
         return createEmoji(name, imageData, roles, null);
     }
@@ -843,7 +844,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<CustomEmoji> modifyEmoji(@Nonnull final String emojiId, @Nonnull final String name,
+    default Single<CustomEmoji> modifyEmoji(@Nonnull final String emojiId, @Nonnull final String name,
                                                 @Nonnull final Collection<String> roles, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJI);
         return catnip().rest().emoji().modifyGuildEmoji(id(), emojiId, name, roles, reason);
@@ -861,7 +862,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<CustomEmoji> modifyEmoji(@Nonnull final String emojiId, @Nonnull final String name,
+    default Single<CustomEmoji> modifyEmoji(@Nonnull final String emojiId, @Nonnull final String name,
                                                 @Nonnull final Collection<String> roles) {
         return modifyEmoji(emojiId, name, roles, null);
     }
@@ -1222,7 +1223,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @JsonIgnore
-    default Observable<String> changeNickName(@Nonnull final String nickname, @Nullable final String reason) {
+    default Single<String> changeNickName(@Nonnull final String nickname, @Nullable final String reason) {
         if(nickname.length() > NICKNAME_MAX_LENGTH) {
             throw new IllegalArgumentException("Nickname must not be longer than" + NICKNAME_MAX_LENGTH);
         }
@@ -1243,7 +1244,7 @@ public interface Guild extends Snowflake {
     @Nonnull
     @JsonIgnore
     @CheckReturnValue
-    default Observable<String> changeNickName(@Nonnull final String nickname) {
+    default Single<String> changeNickName(@Nonnull final String nickname) {
         return changeNickName(nickname, null);
     }
     
@@ -1514,7 +1515,7 @@ public interface Guild extends Snowflake {
         }
         
         @Nonnull
-        public Observable<Guild> submit() {
+        public Single<Guild> submit() {
             if(guild == null) {
                 throw new IllegalStateException("Cannot submit edit without a guild object! Please use RestGuild directly instead");
             }

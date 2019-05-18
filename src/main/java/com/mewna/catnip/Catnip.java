@@ -88,7 +88,7 @@ public interface Catnip {
      * @return A new catnip instance.
      */
     static Catnip catnip(@Nonnull final String token) {
-        return catnipAsync(token).blockingSingle();
+        return catnipAsync(token).blockingGet();
     }
     
     /**
@@ -100,7 +100,7 @@ public interface Catnip {
      *
      * @return A new catnip instance.
      */
-    static Observable<Catnip> catnipAsync(@Nonnull final String token) {
+    static Single<Catnip> catnipAsync(@Nonnull final String token) {
         return catnipAsync(token, Vertx.vertx());
     }
     
@@ -114,7 +114,7 @@ public interface Catnip {
      * @return A new catnip instance.
      */
     static Catnip catnip(@Nonnull final CatnipOptions options) {
-        return catnipAsync(options).blockingSingle();
+        return catnipAsync(options).blockingGet();
     }
     
     /**
@@ -126,7 +126,7 @@ public interface Catnip {
      *
      * @return A new catnip instance.
      */
-    static Observable<Catnip> catnipAsync(@Nonnull final CatnipOptions options) {
+    static Single<Catnip> catnipAsync(@Nonnull final CatnipOptions options) {
         return catnipAsync(options, Vertx.vertx());
     }
     
@@ -141,7 +141,7 @@ public interface Catnip {
      * @return A new catnip instance.
      */
     static Catnip catnip(@Nonnull final String token, @Nonnull final Vertx vertx) {
-        return catnipAsync(token, vertx).blockingSingle();
+        return catnipAsync(token, vertx).blockingGet();
     }
     
     /**
@@ -154,7 +154,7 @@ public interface Catnip {
      *
      * @return A new catnip instance.
      */
-    static Observable<Catnip> catnipAsync(@Nonnull final String token, @Nonnull final Vertx vertx) {
+    static Single<Catnip> catnipAsync(@Nonnull final String token, @Nonnull final Vertx vertx) {
         return catnipAsync(new CatnipOptions(token), vertx);
     }
     
@@ -169,7 +169,7 @@ public interface Catnip {
      * @return A new catnip instance.
      */
     static Catnip catnip(@Nonnull final CatnipOptions options, @Nonnull final Vertx vertx) {
-        return catnipAsync(options, vertx).blockingSingle();
+        return catnipAsync(options, vertx).blockingGet();
     }
     
     /**
@@ -182,7 +182,7 @@ public interface Catnip {
      *
      * @return A new catnip instance.
      */
-    static Observable<Catnip> catnipAsync(@Nonnull final CatnipOptions options, @Nonnull final Vertx vertx) {
+    static Single<Catnip> catnipAsync(@Nonnull final CatnipOptions options, @Nonnull final Vertx vertx) {
         return new CatnipImpl(vertx, options).setup();
     }
     
@@ -204,7 +204,7 @@ public interface Catnip {
      */
     @Nonnull
     @CheckReturnValue
-    Observable<GatewayInfo> fetchGatewayInfo();
+    Single<GatewayInfo> fetchGatewayInfo();
     
     /**
      * @return The vert.x instance being used by this catnip instance.
@@ -622,7 +622,8 @@ public interface Catnip {
      * Get the presence for the specified shard.
      *
      * @param shardId The shard id to get presence for.
-     * @return
+     *
+     * @return A Single that completes with the shard's presence.
      */
     Single<Presence> presence(@Nonnegative final int shardId);
     
@@ -801,7 +802,7 @@ public interface Catnip {
      *
      * @return A stage that completes when the webhook is validated.
      */
-    default Observable<Webhook> parseWebhook(final String webhookUrl) {
+    default Single<Webhook> parseWebhook(final String webhookUrl) {
         final Pair<String, String> parse = Utils.parseWebhook(webhookUrl);
         return parseWebhook(parse.getLeft(), parse.getRight());
     }
@@ -815,7 +816,7 @@ public interface Catnip {
      *
      * @return A stage that completes when the webhook is validated.
      */
-    default Observable<Webhook> parseWebhook(final String id, final String token) {
+    default Single<Webhook> parseWebhook(final String id, final String token) {
         return rest().webhook().getWebhookToken(id, token);
     }
 }
