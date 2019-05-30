@@ -38,7 +38,6 @@ import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -57,7 +56,6 @@ public class ReadyImpl implements Ready, RequiresCatnip {
     
     private int version;
     private User user;
-    private List<String> trace;
     private Set<UnavailableGuild> guilds;
     private int shardId;
     private int shardCount;

@@ -607,7 +607,6 @@ class CodecTest {
                 .catnip(mockNip)
                 .version(3)
                 .user(user(mockNip))
-                .trace(Arrays.asList(randomPositiveLongAsString(), randomPositiveLongAsString()))
                 .guilds(new HashSet<>(Arrays.asList(unavailableGuild(mockNip), unavailableGuild(mockNip))))
                 .build();
         

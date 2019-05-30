@@ -1161,7 +1161,6 @@ public final class EntityBuilder {
                 .catnip(catnip)
                 .version(data.getInteger("v"))
                 .user(createUser(data.getJsonObject("user")))
-                .trace(toStringList(data.getJsonArray("_trace")))
                 .guilds(toSet(data.getJsonArray("guilds"), this::createUnavailableGuild))
                 .shardId(shard.getInteger(0))
                 .shardCount(shard.getInteger(1))
@@ -1173,7 +1172,6 @@ public final class EntityBuilder {
     public Resumed createResumed(@Nonnull final JsonObject data) {
         return ResumedImpl.builder()
                 .catnip(catnip)
-                .trace(toStringList(data.getJsonArray("_trace")))
                 .build();
     }
     

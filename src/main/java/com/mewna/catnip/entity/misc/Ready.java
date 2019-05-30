@@ -35,7 +35,6 @@ import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -57,12 +56,6 @@ public interface Ready extends Entity {
      */
     @Nonnull
     User user();
-    
-    /**
-     * @return Debugging trace.
-     */
-    @Nonnull
-    List<String> trace();
     
     /**
      * @return The list of guild snowflakes for the guidls that this shard is
