@@ -31,10 +31,7 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.channel.*;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
 import com.mewna.catnip.entity.guild.*;
-import com.mewna.catnip.entity.guild.Guild.ContentFilterLevel;
-import com.mewna.catnip.entity.guild.Guild.MFALevel;
-import com.mewna.catnip.entity.guild.Guild.NotificationLevel;
-import com.mewna.catnip.entity.guild.Guild.VerificationLevel;
+import com.mewna.catnip.entity.guild.Guild.*;
 import com.mewna.catnip.entity.guild.Invite.InviteChannel;
 import com.mewna.catnip.entity.guild.Invite.InviteGuild;
 import com.mewna.catnip.entity.guild.Invite.Inviter;
@@ -657,6 +654,7 @@ public final class EntityBuilder {
                 .nick(data.getString("nick"))
                 .roleIds(toStringSet(data.getJsonArray("roles")))
                 .joinedAt(joinedAt)
+                .premiumSince(data.getString("premium_since", null))
                 // If not present, it's probably(?) safe to assume not
                 .deaf(data.getBoolean("deaf", false))
                 .mute(data.getBoolean("mute", false))
@@ -968,6 +966,8 @@ public final class EntityBuilder {
                 .vanityUrlCode(data.getString("vanity_url_code"))
                 .description(data.getString("description"))
                 .banner(data.getString("banner"))
+                .premiumTier(PremiumTier.byKey(data.getInteger("premium_tier", 0)))
+                .premiumSubscriptionCount(data.getInteger("premium_subscription_count", 0))
                 .build();
     }
     

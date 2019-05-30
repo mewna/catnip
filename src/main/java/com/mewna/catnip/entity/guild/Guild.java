@@ -389,11 +389,30 @@ public interface Guild extends Snowflake {
     
     /**
      * @return The guild's banner hash.
+     *
      * @apiNote See https://discordapp.com/developers/docs/reference#image-formatting "Guild Banner"
      */
     @Nullable
     @CheckReturnValue
     String banner();
+    
+    /**
+     * @return The guild's Nitro Boost tier.
+     *
+     * @apiNote See https://support.discordapp.com/hc/en-us/articles/360028038352-Server-Boosting-
+     */
+    @Nonnull
+    @CheckReturnValue
+    PremiumTier premiumTier();
+    
+    /**
+     * @return The number of members providing Nitro Boosts to this guild.
+     *
+     * @apiNote See https://support.discordapp.com/hc/en-us/articles/360028038352-Server-Boosting-
+     */
+    @Nonnegative
+    @CheckReturnValue
+    int premiumSubscriptionCount();
     
     /**
      * @return Whether or not this guild is currently unavailable.
@@ -1454,6 +1473,34 @@ public interface Guild extends Snowflake {
                 }
             }
             throw new IllegalArgumentException("No verification level for key " + key);
+        }
+    }
+    
+    /**
+     * The Nitro Boost level of a guild.
+     */
+    enum PremiumTier {
+        NONE(0),
+        TIER_1(1),
+        TIER_2(2),
+        TIER_3(3),
+        ;
+        
+        @Getter
+        private final int key;
+        
+        PremiumTier(final int key) {
+            this.key = key;
+        }
+        
+        @Nonnull
+        public static PremiumTier byKey(final int key) {
+            for(final PremiumTier tier : values()) {
+                if(tier.key == key) {
+                    return tier;
+                }
+            }
+            throw new IllegalArgumentException("No premium tier for key " + key);
         }
     }
     

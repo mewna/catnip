@@ -31,7 +31,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.entity.Mentionable;
-import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.impl.MemberImpl;
@@ -164,6 +163,19 @@ public interface Member extends Mentionable, PermissionHolder {
     OffsetDateTime joinedAt();
     
     /**
+     * When the user last used their Nitro Boost on this guild.
+     * <br>Members who have un-boosted a guild then re-boosted it will only
+     * have the most recent boost exposed.
+     * <br>This will be null if the user is not currently boosting the guild.
+     *
+     * @return The {@link OffsetDateTime date and time} when the member boosted
+     * the guild.
+     */
+    @Nullable
+    @CheckReturnValue
+    OffsetDateTime premiumSince();
+    
+    /**
      * The member's color, as shown in the official Discord Client, or {@code null} if they have no roles with a color.
      * <br>This will iterate over all the roles this member has, so try to avoid calling this method multiple times
      * if you only need the value once.
@@ -176,9 +188,9 @@ public interface Member extends Mentionable, PermissionHolder {
         Role highest = null;
         
         final CacheView<Role> cache = catnip().cache().roles(guildId());
-        for (final String id : roleIds()) {
+        for(final String id : roleIds()) {
             final Role role = cache.getById(id);
-            if (role != null && role.color() != 0) {
+            if(role != null && role.color() != 0) {
                 if(highest == null || role.compareTo(highest) > 0) {
                     highest = role;
                 }
@@ -232,6 +244,7 @@ public interface Member extends Mentionable, PermissionHolder {
     
     /**
      * Checks if the member is the owner of the guild.
+     *
      * @return Whether the member owns the guild or not
      */
     @JsonIgnore
