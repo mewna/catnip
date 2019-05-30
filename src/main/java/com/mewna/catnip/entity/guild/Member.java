@@ -164,6 +164,19 @@ public interface Member extends Mentionable, PermissionHolder {
     OffsetDateTime joinedAt();
     
     /**
+     * When the user last used their Nitro Boost on this guild.
+     * <br>Members who have un-boosted a guild then re-boosted it will only
+     * have the most recent boost exposed.
+     * <br>This will be null if the user is not currently boosting the guild.
+     *
+     * @return The {@link OffsetDateTime date and time} when the member boosted
+     * the guild.
+     */
+    @Nullable
+    @CheckReturnValue
+    OffsetDateTime premiumSince();
+    
+    /**
      * The member's color, as shown in the official Discord Client, or {@code null} if they have no roles with a color.
      * <br>This will iterate over all the roles this member has, so try to avoid calling this method multiple times
      * if you only need the value once.

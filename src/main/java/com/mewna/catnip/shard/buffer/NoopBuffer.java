@@ -27,6 +27,8 @@
 
 package com.mewna.catnip.shard.buffer;
 
+import com.mewna.catnip.entity.impl.ChunkingDoneImpl;
+import com.mewna.catnip.shard.LifecycleEvent.Raw;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -39,8 +41,14 @@ import io.vertx.core.json.JsonObject;
  * @since 9/9/18.
  */
 public class NoopBuffer extends AbstractBuffer {
+    private boolean chunkingDoneEmitted;
+    
     @Override
     public void buffer(final JsonObject event) {
+        if(!chunkingDoneEmitted) {
+            chunkingDoneEmitted = true;
+            emitter().emit(Raw.CHUNKING_DONE, ChunkingDoneImpl.builder().catnip(catnip()).build());
+        }
         emitter().emit(event);
     }
 }

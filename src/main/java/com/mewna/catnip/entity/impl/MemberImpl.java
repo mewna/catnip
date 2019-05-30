@@ -60,6 +60,8 @@ public class MemberImpl implements Member, RequiresCatnip, Timestamped {
     private Set<String> roleIds;
     @JsonProperty
     private String joinedAt;
+    @JsonProperty
+    private String premiumSince;
     private boolean deaf;
     private boolean mute;
     
@@ -67,6 +69,12 @@ public class MemberImpl implements Member, RequiresCatnip, Timestamped {
     @Override
     public OffsetDateTime joinedAt() {
         return parseTimestamp(joinedAt);
+    }
+    
+    @Nonnull
+    @Override
+    public OffsetDateTime premiumSince() {
+        return parseTimestamp(premiumSince);
     }
     
     @Override
