@@ -173,6 +173,9 @@ public final class Utils {
     @CheckReturnValue
     public static Pair<String, String> parseWebhook(@Nonnull final String url) {
         final Matcher matcher = WEBHOOK_PATTERN.matcher(url);
+        if(!matcher.find()) {
+            throw new IllegalArgumentException("The url " + url + " is not a valid Discord webhook.");
+        }
         final String id = matcher.group(1);
         final String token = matcher.group(2);
         return ImmutablePair.of(id, token);

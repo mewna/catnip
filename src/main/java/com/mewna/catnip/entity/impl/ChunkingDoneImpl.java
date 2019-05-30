@@ -25,30 +25,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.shard.buffer;
+package com.mewna.catnip.entity.impl;
 
-import com.mewna.catnip.entity.impl.ChunkingDoneImpl;
-import com.mewna.catnip.shard.LifecycleEvent.Raw;
-import io.vertx.core.json.JsonObject;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.misc.ChunkingDone;
+import lombok.*;
+import lombok.experimental.Accessors;
+
+import javax.annotation.Nonnull;
 
 /**
- * A no-op implementation of {@link EventBuffer}. The no-op buffer simply
- * passes all incoming events to the event bus, without any processing or
- * buffering (eg. for caching). This is mainly useful for the case of writing a
- * "stateless" (ie. cacheless) bot.
- *
  * @author amy
- * @since 9/9/18.
+ * @since 5/16/19.
  */
-public class NoopBuffer extends AbstractBuffer {
-    private boolean chunkingDoneEmitted;
+@Getter(onMethod_ = @JsonProperty)
+@Setter(onMethod_ = @JsonProperty)
+@Builder
+@Accessors(fluent = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class ChunkingDoneImpl implements ChunkingDone, RequiresCatnip {
+    @JsonIgnore
+    private transient Catnip catnip;
     
     @Override
-    public void buffer(final JsonObject event) {
-        if(!chunkingDoneEmitted) {
-            chunkingDoneEmitted = true;
-            emitter().emit(Raw.CHUNKING_DONE, ChunkingDoneImpl.builder().catnip(catnip()).build());
-        }
-        emitter().emit(event);
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
     }
 }

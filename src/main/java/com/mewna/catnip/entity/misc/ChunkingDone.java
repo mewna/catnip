@@ -25,30 +25,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.shard.buffer;
+package com.mewna.catnip.entity.misc;
 
-import com.mewna.catnip.entity.impl.ChunkingDoneImpl;
-import com.mewna.catnip.shard.LifecycleEvent.Raw;
-import io.vertx.core.json.JsonObject;
+import com.mewna.catnip.entity.Entity;
+import com.mewna.catnip.shard.buffer.NoopBuffer;
 
 /**
- * A no-op implementation of {@link EventBuffer}. The no-op buffer simply
- * passes all incoming events to the event bus, without any processing or
- * buffering (eg. for caching). This is mainly useful for the case of writing a
- * "stateless" (ie. cacheless) bot.
+ * Fired when all guilds are finished chunking. For a no-op event buffer (such
+ * as {@link NoopBuffer}), this event should just be fired immediately.
  *
  * @author amy
- * @since 9/9/18.
+ * @since 5/16/19.
  */
-public class NoopBuffer extends AbstractBuffer {
-    private boolean chunkingDoneEmitted;
-    
-    @Override
-    public void buffer(final JsonObject event) {
-        if(!chunkingDoneEmitted) {
-            chunkingDoneEmitted = true;
-            emitter().emit(Raw.CHUNKING_DONE, ChunkingDoneImpl.builder().catnip(catnip()).build());
-        }
-        emitter().emit(event);
-    }
+@SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
+public interface ChunkingDone extends Entity {
 }

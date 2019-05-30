@@ -92,7 +92,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
      * Function used to map members to their name, for named cache views.
      * Used by the default {@link #createMemberCacheView()} and
      * {@link #members()} implementations.
-     *
+     * <p>
      * Defaults to returning a member's effective name, which is their
      * nickname, if present, or their username.
      *
@@ -277,7 +277,9 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     }
     
     protected abstract MutableNamedCacheView<User> userCache(int shardId);
+    
     protected abstract MutableCacheView<UserDMChannel> dmChannelCache(int shardId);
+    
     protected abstract MutableCacheView<Presence> presenceCache(int shardId);
     
     @SuppressWarnings("WeakerAccess")
@@ -398,7 +400,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     }
     
     protected int shardId(final long entityId) {
-        return (int)((entityId >> 22) % catnip.shardManager().shardCount());
+        return (int) ((entityId >> 22) % catnip.shardManager().shardCount());
     }
     
     private void cacheRole(final Role role) {
@@ -413,6 +415,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
         emojiCache(emoji.guildIdAsLong(), false).put(emoji.idAsLong(), emoji);
     }
     
+    @SuppressWarnings("DuplicateBranchesInSwitch")
     @Nonnull
     @Override
     public Future<Void> updateCache(@Nonnull final String eventType, @Nonnegative final int shardId, @Nonnull final JsonObject payload) {
@@ -603,7 +606,9 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                         presenceCache(shardId).put(updated.idAsLong(), presence);
                     }
                 } else if(catnip.chunkMembers()) {
-                    catnip.logAdapter().warn("Received PRESENCE_UPDATE for unknown user {}!? (member chunking enabled)", id);
+                    final String guildId = user.getString("guild_id", "No guild");
+                    catnip.logAdapter().warn("Received PRESENCE_UPDATE for unknown user {} (guild: {})!? (member chunking enabled)",
+                            id, guildId);
                 }
                 break;
             }

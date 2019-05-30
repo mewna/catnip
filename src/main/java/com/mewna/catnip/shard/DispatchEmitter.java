@@ -28,6 +28,7 @@
 package com.mewna.catnip.shard;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.PartialMember;
@@ -60,6 +61,20 @@ public final class DispatchEmitter {
         entityBuilder = new EntityBuilder(catnip);
     }
     
+    public void emit(@Nonnull final String type, @Nonnull final Entity payload) {
+        if(!catnip.emitEventObjects()) {
+            return;
+        }
+        if(catnip.disabledEvents().contains(type)) {
+            return;
+        }
+        try {
+            catnip.dispatchManager().dispatchEvent(type, payload);
+        } catch(final Exception e) {
+            catnip.logAdapter().error("Error emitting event with payload {}", payload, e);
+        }
+    }
+    
     public void emit(@Nonnull final JsonObject payload) {
         if(!catnip.emitEventObjects()) {
             return;
@@ -75,6 +90,7 @@ public final class DispatchEmitter {
         }
     }
     
+    @SuppressWarnings("DuplicateBranchesInSwitch")
     private void emit0(@Nonnull final JsonObject payload) {
         final String type = payload.getString("t");
         final JsonObject data = payload.getJsonObject("d");

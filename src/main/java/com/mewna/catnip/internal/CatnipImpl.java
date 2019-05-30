@@ -35,6 +35,7 @@ import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.impl.*;
 import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
+import com.mewna.catnip.entity.misc.ChunkingDone;
 import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.Activity;
@@ -404,6 +405,7 @@ public class CatnipImpl implements Catnip {
             entityCodec(ReadyImpl.class);
             entityCodec(ResumedImpl.class);
             eventCodec(LifecycleState.class);
+            eventCodec(ChunkingDoneImpl.class);
             
             // DoubleEvents use ImmutablePair
             eventCodec(ImmutablePair.class);

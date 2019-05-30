@@ -30,6 +30,7 @@ package com.mewna.catnip.rest.guild;
 import com.google.common.collect.ImmutableList;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
+import com.mewna.catnip.entity.user.VoiceState;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.AccessLevel;
@@ -43,6 +44,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -64,14 +66,22 @@ public class MemberData {
     private Boolean mute;
     private Boolean deaf;
     
+    private static String voiceChannel(@Nonnull final Member member) {
+        return Optional.ofNullable(member.catnip().cache().voiceState(member.guildId(), member.id()))
+                .map(VoiceState::channelId).orElse(null);
+    }
+    
     @Nonnull
     @CheckReturnValue
     public static MemberData of(@Nonnull final Member member) {
+        final String voiceChannel = voiceChannel(member);
         return new MemberData()
                 .roles(member.roleIds())
-                .deaf(member.deaf())
-                .mute(member.mute())
-                .nickname(member.nick());
+                .deaf(voiceChannel != null ? member.deaf() : null)
+                .mute(voiceChannel != null ? member.mute() : null)
+                .nickname(member.nick())
+                .channelId(voiceChannel)
+                ;
     }
     
     @Nonnull
