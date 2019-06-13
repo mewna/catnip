@@ -518,6 +518,16 @@ public class CatnipShard extends AbstractVerticle implements Listener {
         
         // Check if we can RESUME instead
         if(catnip.sessionManager().session(id) != null && catnip.sessionManager().seqnum(id) > 0) {
+            // Some useful notes on how RESUME works, based off of some
+            // commentary from Jake in DAPI.
+            // tldr, RESUME works as long as you're not trying to RESUME too
+            // late. According to Jake, there's a 3-minute window in which you
+            // can RESUME; after this, your session goes poof. Beyond that,
+            // there is ALSO an internal buffer of events that gets held onto
+            // while you're disconnected, which is what gets replayed to you on
+            // RESUME. If this buffer fills up in less than that 3-minute
+            // window, your session is no longer resumable.
+            // See: https://discordapp.com/channels/81384788765712384/381887113391505410/584900930525200386
             lifecycleState = RESUMING;
             catnip.eventBus().publish(websocketSend, resume());
         } else {
