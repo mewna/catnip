@@ -132,6 +132,7 @@ public interface Presence {
         STREAMING(1),
         LISTENING(2),
         WATCHING(3),
+        CUSTOM_STATUS(4),
         ;
         @Getter
         private final int id;
