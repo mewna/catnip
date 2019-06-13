@@ -935,6 +935,7 @@ public final class EntityBuilder {
         final String widgetChannelId = data.getString("widget_channel_id");
         final String systemChannelId = data.getString("system_channel_id");
         final Integer maxPresences = data.getInteger("max_presences", 5000);
+        final Integer premiumSubscriptionCount = data.getInteger("premium_subscription_count", 0);
         return GuildImpl.builder()
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
@@ -967,7 +968,7 @@ public final class EntityBuilder {
                 .description(data.getString("description"))
                 .banner(data.getString("banner"))
                 .premiumTier(PremiumTier.byKey(data.getInteger("premium_tier", 0)))
-                .premiumSubscriptionCount(data.getInteger("premium_subscription_count", 0))
+                .premiumSubscriptionCount(premiumSubscriptionCount == null ? 0 : premiumSubscriptionCount)
                 .build();
     }
     
