@@ -327,7 +327,7 @@ public class CachingBuffer extends AbstractBuffer {
         }
         
         boolean doneChunking(final String guild) {
-            return guildChunkCount.get(guild).count() == 0;
+            return !guildChunkCount.containsKey(guild) || guildChunkCount.get(guild).count() == 0;
         }
         
         JsonObject guildCreate(final String guild) {
