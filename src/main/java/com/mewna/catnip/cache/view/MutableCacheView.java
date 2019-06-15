@@ -47,18 +47,6 @@ public interface MutableCacheView<T> extends CacheView<T> {
     @Nullable
     T put(long key, @Nonnull T value);
     
-    @Deprecated
-    @Nullable
-    default T put(@Nonnull final String key, @Nonnull final T value) {
-        return put(Long.parseUnsignedLong(key), value);
-    }
-    
     @Nullable
     T remove(final long key);
-    
-    @Deprecated
-    @Nullable
-    default T remove(@Nonnull final String key) {
-        return remove(Long.parseUnsignedLong(key));
-    }
 }
