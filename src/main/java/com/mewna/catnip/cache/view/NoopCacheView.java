@@ -155,11 +155,13 @@ public class NoopCacheView<T> implements MutableNamedCacheView<T> {
         return collector.finisher().apply(collector.supplier().get());
     }
     
+    @Nonnull
     @Override
     public <R> R collect(@Nonnull final Supplier<R> supplier, @Nonnull final BiConsumer<R, ? super T> accumulator, @Nonnull final BiConsumer<R, R> combiner) {
         return supplier.get();
     }
     
+    @Nonnull
     @Override
     public <U> U reduce(final U identity, @Nonnull final BiFunction<U, ? super T, U> accumulator, @Nonnull final BinaryOperator<U> combiner) {
         return identity;
@@ -171,8 +173,9 @@ public class NoopCacheView<T> implements MutableNamedCacheView<T> {
         return Optional.empty();
     }
     
+    @Nonnull
     @Override
-    public T reduce(final T identity, @Nonnull final BinaryOperator<T> accumulator) {
+    public T reduce(@Nonnull final T identity, @Nonnull final BinaryOperator<T> accumulator) {
         return identity;
     }
     
