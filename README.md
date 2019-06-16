@@ -6,7 +6,7 @@
 
 
 A Discord API wrapper in Java. Fully async / reactive, built on top of
-[vert.x](https://vertx.io). catnip tries to map roughly 1:1 to how the Discord 
+[RxJava](http://reactivex.io). catnip tries to map roughly 1:1 to how the Discord 
 API works, both in terms of events and REST methods available.
 
 catnip is part of the [amyware Discord server](https://discord.gg/yeF2HpP)
@@ -54,11 +54,11 @@ This is the simplest possible bot you can make right now:
 
 ```Java
 final Catnip catnip = Catnip.catnip("your token goes here");
-catnip.on(DiscordEvent.MESSAGE_CREATE, msg -> {
-    if(msg.content().startsWith("!ping")) {
+catnip.observable(DiscordEvent.MESSAGE_CREATE)
+    .filter(msg -> msg.content().equals("!ping"))
+    .forEach(msg -> {
         msg.channel().sendMessage("pong!");
-    }
-});
+    });
 catnip.connect();
 ```
 
@@ -68,28 +68,28 @@ message:
 
 ```Java
 final Catnip catnip = Catnip.catnip("your token goes here");
-catnip.on(DiscordEvent.MESSAGE_CREATE, msg -> {
-    if(msg.content().equalsIgnoreCase("!ping")) {
-        final long start = System.currentTimeMillis();
-        msg.channel().sendMessage("pong!")
-                .thenAccept(ping -> {
-                    final long end = System.currentTimeMillis();
-                    ping.edit("pong! (took " + (end - start) + "ms)");
-                });
-    }
-});
+catnip.observable(DiscordEvent.MESSAGE_CREATE)
+        .filter(msg -> msg.content().equals("!ping"))
+        .forEach(msg -> {
+            long start = System.currentTimeMillis();
+            msg.channel().sendMessage("pong!")
+                    .subscribe(ping -> {
+                        long end = System.currentTimeMillis();
+                        ping.edit("pong! (took " + (end - start) + "ms).");
+                    });
+        });
 catnip.connect();
 ```
 
 You can also create a catnip instance asynchronously:
 
 ```Java
-Catnip.catnipAsync("your token here").thenAccept(catnip -> {
-    catnip.on(DiscordEvent.MESSAGE_CREATE, msg -> {
-        if(msg.content().startsWith("!ping")) {
+Catnip.catnipAsync("your token here").subscribe(catnip -> {
+    catnip.observable(DiscordEvent.MESSAGE_CREATE)
+        .filter(msg -> msg.content().equals("!ping"))
+        .forEach(msg -> {
             msg.channel().sendMessage("pong!");
-        }
-    });
+        });
     catnip.connect();
 });
 ```
@@ -103,15 +103,13 @@ is that using it like this is **exactly the same** as using it normally. The onl
 that to use catnip in REST-only mode, you don't call `catnip.connect()` and use 
 `catnip.rest().whatever()` instead. 
 
-### Custom event bus events
+### RxJava schedulers
 
-Because vert.x is intended to be used in clustered mode as well as in a single-node configuration,
-emitting events over the built-in event bus requires registering a codec for the events that you
-want to fire. If you have an event class `MyEvent`, you can just do something to the effect of
-```Java
-eventBus().registerDefaultCodec(MyEvent.class, new JsonPojoCodec<>(this, MyEvent.class));
-```
-where `JsonPojoCodec` is `com.mewna.catnip.util.JsonPojoCodec` and is safe to use.
+By default, RxJava's `Observable#subscribe()` and related methods will not operate on any
+particular scheduler by default. That is, they will run on the calling thread. catnip will
+automatically subscribe RxJava objects onto a scheduler provided by catnip, that defaults
+to being a ForkJoinPool-based scheduler. You can customize the scheduler used with the
+corresponding option in `CatnipOptions`.
 
 ## Useful extensions
 

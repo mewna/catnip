@@ -24,7 +24,9 @@
  *  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+// We disable the formatter on this class so that it doesn't get hecked up.
+// Autoformatter has no idea how to handle this class correctly.
+// @formatter:off
 
 
 package com.mewna.catnip.cache.view;

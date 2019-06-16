@@ -37,11 +37,11 @@ import com.mewna.catnip.shard.DiscordEvent
  */
 
 fun main(args: Array<String>) {
-    val catnip = Catnip.catnip("your token here")
-    catnip.on<Message>(DiscordEvent.MESSAGE_CREATE) { msg ->
-        if (msg.content() == "!ping") {
-            msg.channel().sendMessage("pong!")
-        }
-    }
+    val catnip: com.mewna.catnip.Catnip = Catnip.catnip("your token here")
+    catnip.observable<Message>(DiscordEvent.MessageCreate)
+            .filter({ msg -> msg.content() == "!ping" })
+            .forEach({ msg ->
+                msg.channel().sendMessage("pong!")
+            })
     catnip.connect()
 }

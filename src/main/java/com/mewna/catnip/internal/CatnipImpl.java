@@ -59,6 +59,7 @@ import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.logging.LogAdapter;
 import io.reactivex.Scheduler;
 import io.reactivex.Single;
+import io.reactivex.plugins.RxJavaPlugins;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;

@@ -694,6 +694,8 @@ public interface Catnip {
      * disposed of with {@link Observable#unsubscribeOn(Scheduler)}. The
      * {@code scheduler} argument can be created with
      * {@link #scheduler()}.
+     * <p>
+     * This method automatically subscribes on {@link #scheduler()}.
      *
      * @param type The type of event to stream.
      * @param <T>  The object type of the event being streamed.
@@ -709,6 +711,8 @@ public interface Catnip {
      * disposed of with {@link Flowable#unsubscribeOn(Scheduler)}. The
      * {@code scheduler} argument can be created with
      * {@link #scheduler()}.
+     * <p>
+     * This method automatically subscribes on {@link #scheduler()}.
      *
      * @param type The type of event to stream.
      * @param <T>  The object type of the event being streamed.
@@ -754,6 +758,8 @@ public interface Catnip {
      * disposed of with {@link Observable#unsubscribeOn(Scheduler)}. The
      * {@code scheduler} argument can be created with
      * {@link #scheduler()}.
+     * <p>
+     * This method automatically subscribes on {@link #scheduler()}.
      *
      * @param type The type of event to stream.
      * @param <T>  The object type of the event being streamed.
@@ -770,6 +776,8 @@ public interface Catnip {
      * disposed of with {@link Flowable#unsubscribeOn(Scheduler)}. The
      * {@code scheduler} argument can be created with
      * {@link #scheduler()}.
+     * <p>
+     * This method automatically subscribes on {@link #scheduler()}.
      *
      * @param type The type of event to stream.
      * @param <T>  The object type of the event being streamed.

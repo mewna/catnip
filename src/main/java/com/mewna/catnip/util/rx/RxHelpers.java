@@ -46,7 +46,6 @@ public final class RxHelpers {
     }
     
     public static Scheduler forkJoinScheduler() {
-        // TODO: Allow configuring the size of the pool
         return Schedulers.from(Executors.newWorkStealingPool());
     }
     
