@@ -58,6 +58,7 @@ public class MemberData {
     private Set<String> roles;
     
     private String nickname;
+    @Setter(onParam_ = @Nullable, onMethod_ = {@CheckReturnValue, @Nonnull})
     private String channelId;
     private Boolean mute;
     private Boolean deaf;
