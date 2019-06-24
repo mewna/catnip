@@ -84,4 +84,10 @@ public interface ApplicationInfo extends Snowflake {
      */
     @Nonnull
     ApplicationOwner owner();
+    
+    /**
+     * @return The team that owns the application. Can be null.
+     */
+    @Nullable
+    Team team();
 }

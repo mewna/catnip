@@ -31,9 +31,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.misc.ApplicationInfo;
-import com.mewna.catnip.entity.misc.ApplicationOwner;
-import com.mewna.catnip.entity.misc.Team;
+import com.mewna.catnip.entity.misc.TeamMember;
+import com.mewna.catnip.entity.user.User;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -41,8 +40,8 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
- * @author amy
- * @since 10/17/18.
+ * @author Bowser65
+ * @since 06/24/19.
  */
 @Getter(onMethod_ = @JsonProperty)
 @Setter(onMethod_ = @JsonProperty)
@@ -50,25 +49,37 @@ import java.util.List;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApplicationInfoImpl implements ApplicationInfo, RequiresCatnip {
+@SuppressWarnings({"WeakerAccess", "unused"})
+public class TeamMemberImpl implements TeamMember, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
-    private long idAsLong;
-    private String icon;
-    private String name;
-    private String description;
-    private List<String> rpcOrigins;
-    private boolean publicBot;
-    private boolean requiresCodeGrant;
-    private ApplicationOwner owner;
-    private Team team;
+    private long teamIdAsLong;
+    private int membershipState;
+    private User user;
+    private List<String> permissions;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
-        if(owner instanceof RequiresCatnip) {
-            ((RequiresCatnip) owner).catnip(catnip);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Long.hashCode(user.idAsLong());
+    }
+    
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj instanceof TeamMember) {
+            final TeamMember member = (TeamMember) obj;
+            return member.teamIdAsLong() == teamIdAsLong && member.user().idAsLong() == user.idAsLong();
         }
+        return false;
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("Team Member (%s#%s, %s)", user.username(), user.discriminator(), teamIdAsLong);
     }
 }
