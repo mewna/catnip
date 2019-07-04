@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2019 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,18 +25,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.shard;
+package com.mewna.catnip.entity.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.misc.MemberChunkRerequest;
+import com.mewna.catnip.shard.ShardInfo;
+import lombok.*;
+import lombok.experimental.Accessors;
+
+import javax.annotation.Nonnull;
 
 /**
  * @author amy
- * @since 10/17/18.
+ * @since 7/4/19.
  */
-@Getter
+@Getter(onMethod_ = @JsonProperty)
+@Setter(onMethod_ = @JsonProperty)
+@Builder
+@Accessors(fluent = true)
+@NoArgsConstructor
 @AllArgsConstructor
-public class ShardInfo {
-    private final int id;
-    private final int limit;
+public class MemberChunkRerequestImpl implements MemberChunkRerequest, RequiresCatnip {
+    @JsonIgnore
+    private transient Catnip catnip;
+    
+    private ShardInfo shardInfo;
+    private String guildId;
+    
+    @Override
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
+    }
+    
+    @Override
+    public int hashCode() {
+        return guildId.hashCode();
+    }
 }

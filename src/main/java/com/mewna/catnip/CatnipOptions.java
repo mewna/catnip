@@ -219,6 +219,20 @@ public final class CatnipOptions implements Cloneable {
      * stream subscriptions. Defaults to {@link RxHelpers#forkJoinScheduler()}.
      */
     private Scheduler scheduler = RxHelpers.forkJoinScheduler();
+    /**
+     * If this option is enabled, a lot of built-in logging -- things like
+     * shard connects / disconnects, 429 HTTP responses, ... -- will be emitted
+     * as events over the event bus rather than directly logging messages via
+     * the configured {@link #logAdapter}.
+     */
+    private boolean logsAsLifecycleEvents;
+    /**
+     * TODO: Add this class link
+     * If this option is enabled, emit a {@link null} over the event bus when a
+     * shard needs to re-request member chunks for a guild, instead of
+     * automatically re-requesting them.
+     */
+    private boolean manualChunkRerequesting;
     
     @Override
     public Object clone() {

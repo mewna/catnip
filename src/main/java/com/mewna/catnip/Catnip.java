@@ -33,6 +33,7 @@ import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.misc.GatewayInfo;
+import com.mewna.catnip.entity.misc.MemberChunkRerequest;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.ActivityType;
 import com.mewna.catnip.entity.user.Presence.OnlineStatus;
@@ -355,6 +356,24 @@ public interface Catnip {
      * @see CatnipOptions#captureRestStacktraces()
      */
     boolean captureRestStacktraces();
+    
+    /**
+     * @return Whether or not this catnip instance will emit events instead of
+     * certain log messages.
+     *
+     * @see CatnipOptions#logsAsLifecycleEvents()
+     */
+    boolean logsAsLifecycleEvents();
+    
+    /**
+     * @return Whether or not this catnip instance will emit a
+     * {@link MemberChunkRerequest} event to allow for manual chunk
+     * re-requesting instead of automatically re-requesting chunks.
+     *
+     * @see CatnipOptions#manualChunkRerequesting()
+     * @see CatnipOptions#memberChunkTimeout()
+     */
+    boolean manualChunkRerequesting();
     
     /**
      * @return A set of all ids of unavailable guilds.

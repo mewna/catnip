@@ -28,6 +28,7 @@
 package com.mewna.catnip.shard;
 
 import com.mewna.catnip.entity.misc.ChunkingDone;
+import com.mewna.catnip.entity.misc.MemberChunkRerequest;
 import com.mewna.catnip.shard.event.EventType;
 
 import static com.mewna.catnip.shard.event.EventTypeImpl.event;
@@ -74,6 +75,11 @@ public interface LifecycleEvent {
      * Fired when all guild chunking has been completed.
      */
     EventType<ChunkingDone> CHUNKING_DONE = event(Raw.CHUNKING_DONE, ChunkingDone.class);
+    
+    /**
+     * Fired if manual member chunk re-requesting is enabled.
+     */
+    EventType<MemberChunkRerequest> MEMBER_CHUNK_REREQUEST = event(Raw.MEMBER_CHUNK_REREQUEST, MemberChunkRerequest.class);
     // @formatter:on
     
     interface Raw {
@@ -86,6 +92,8 @@ public interface LifecycleEvent {
         String CLOSED        = "CLOSED";
         
         String CHUNKING_DONE = "CHUNKING_DONE";
+        
+        String MEMBER_CHUNK_REREQUEST = "MEMBER_CHUNK_REREQUEST";
         // @formatter:on
     }
 }

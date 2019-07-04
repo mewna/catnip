@@ -28,7 +28,9 @@
 package com.mewna.catnip.shard.buffer;
 
 import com.mewna.catnip.entity.impl.ChunkingDoneImpl;
+import com.mewna.catnip.entity.impl.MemberChunkRerequestImpl;
 import com.mewna.catnip.shard.LifecycleEvent;
+import com.mewna.catnip.shard.ShardInfo;
 import com.mewna.catnip.util.JsonUtil;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
@@ -174,20 +176,29 @@ public class CachingBuffer extends AbstractBuffer {
                                                 guild);
                                 // Reset chunk count
                                 bufferState.initialGuildChunkCount(guild, finalChunks, event);
-                                catnip().chunkMembers(guild);
-                                catnip().vertx().setTimer(catnip().memberChunkTimeout(), ___ -> {
-                                    if(bufferState.guildChunkCount().containsKey(guild)) {
-                                        final Counter counterTwo = bufferState.guildChunkCount().get(guild);
-                                        if(counterTwo != null && finalChunks - counterTwo.count() > 0) {
-                                            catnip().logAdapter()
-                                                    .warn("Didn't recv. member chunks for guild {} after {}ms even " +
-                                                                    "after retrying (missing {} chunks)! You should probably " +
-                                                                    "increase the value of CatnipOptions#memberChunkTimeout!",
-                                                            guild, catnip().memberChunkTimeout(),
-                                                            finalChunks - counterTwo.count());
+                                if(catnip().manualChunkRerequesting()) {
+                                    emitter().emit(LifecycleEvent.Raw.MEMBER_CHUNK_REREQUEST,
+                                            MemberChunkRerequestImpl.builder()
+                                                    .catnip(catnip())
+                                                    .guildId(guild)
+                                                    .shardInfo(new ShardInfo(shardId, catnip().shardManager().shardCount()))
+                                                    .build());
+                                } else {
+                                    catnip().chunkMembers(guild);
+                                    catnip().vertx().setTimer(catnip().memberChunkTimeout(), ___ -> {
+                                        if(bufferState.guildChunkCount().containsKey(guild)) {
+                                            final Counter counterTwo = bufferState.guildChunkCount().get(guild);
+                                            if(counterTwo != null && finalChunks - counterTwo.count() > 0) {
+                                                catnip().logAdapter()
+                                                        .warn("Didn't recv. member chunks for guild {} after {}ms even " +
+                                                                        "after retrying (missing {} chunks)! You should probably " +
+                                                                        "increase the value of CatnipOptions#memberChunkTimeout!",
+                                                                guild, catnip().memberChunkTimeout(),
+                                                                finalChunks - counterTwo.count());
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                                }
                             }
                         }
                     }

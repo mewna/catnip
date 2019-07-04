@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2019 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,18 +25,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.shard;
+package com.mewna.catnip.entity.misc;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import com.mewna.catnip.entity.Entity;
+import com.mewna.catnip.shard.ShardInfo;
 
 /**
+ * Fired when a guild needs its member chunks re-requested, if and only if
+ * {@link com.mewna.catnip.CatnipOptions#manualChunkRerequesting()} is
+ * {@code true}.
+ *
  * @author amy
- * @since 10/17/18.
+ * @since 7/4/19.
  */
-@Getter
-@AllArgsConstructor
-public class ShardInfo {
-    private final int id;
-    private final int limit;
+public interface MemberChunkRerequest extends Entity {
+    ShardInfo shardInfo();
+    
+    String guildId();
 }

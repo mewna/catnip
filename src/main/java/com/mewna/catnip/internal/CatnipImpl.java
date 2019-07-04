@@ -119,6 +119,8 @@ public class CatnipImpl implements Catnip {
     private Presence initialPresence;
     private Set<String> disabledEvents;
     private Scheduler scheduler;
+    private boolean logsAsLifecycleEvents;
+    private boolean manualChunkRerequesting;
     private CatnipOptions options;
     
     public CatnipImpl(@Nonnull final Vertx vertx, @Nonnull final CatnipOptions options) {
@@ -153,6 +155,8 @@ public class CatnipImpl implements Catnip {
         logUncachedPresenceWhenNotChunking = options.logUncachedPresenceWhenNotChunking();
         warnOnEntityVersionMismatch = options.warnOnEntityVersionMismatch();
         scheduler = options.scheduler();
+        logsAsLifecycleEvents = options.logsAsLifecycleEvents();
+        manualChunkRerequesting = options.manualChunkRerequesting();
         
         injectSelf();
     }
@@ -404,6 +408,7 @@ public class CatnipImpl implements Catnip {
             entityCodec(ResumedImpl.class);
             eventCodec(LifecycleState.class);
             eventCodec(ChunkingDoneImpl.class);
+            eventCodec(MemberChunkRerequestImpl.class);
             
             // DoubleEvents use ImmutablePair
             eventCodec(ImmutablePair.class);
