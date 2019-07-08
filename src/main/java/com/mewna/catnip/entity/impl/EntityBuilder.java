@@ -1250,6 +1250,7 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public ApplicationInfo createApplicationInfo(@Nonnull final JsonObject data) {
+        final JsonObject team = data.getJsonObject("team");
         return ApplicationInfoImpl.builder()
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
@@ -1260,6 +1261,7 @@ public final class EntityBuilder {
                 .publicBot(data.getBoolean("bot_public"))
                 .requiresCodeGrant(data.getBoolean("bot_require_code_grant"))
                 .owner(createApplicationOwner(data.getJsonObject("owner")))
+                .team(team == null ? null : createTeam(team))
                 .build();
     }
     
@@ -1273,6 +1275,31 @@ public final class EntityBuilder {
                 .discriminator(data.getString("discriminator"))
                 .avatar(data.getString("avatar", null))
                 .bot(data.getBoolean("bot", false))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Team createTeam(@Nonnull final JsonObject data) {
+        return TeamImpl.builder()
+                .catnip(catnip)
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .ownerIdAsLong(Long.parseUnsignedLong(data.getString("owner_user_id")))
+                .name(data.getString("name"))
+                .icon(data.getString("icon"))
+                .members(toList(data.getJsonArray("members"), this::createTeamMember))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public TeamMember createTeamMember(@Nonnull final JsonObject data) {
+        return TeamMemberImpl.builder()
+                .catnip(catnip)
+                .teamIdAsLong(Long.parseUnsignedLong(data.getString("team_id")))
+                .membershipState(data.getInteger("membership_state"))
+                .permissions(toStringList(data.getJsonArray("permissions")))
+                .user(createUser(data.getJsonObject("user")))
                 .build();
     }
     

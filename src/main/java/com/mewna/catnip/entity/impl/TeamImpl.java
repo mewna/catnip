@@ -31,18 +31,21 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.misc.ApplicationInfo;
-import com.mewna.catnip.entity.misc.ApplicationOwner;
 import com.mewna.catnip.entity.misc.Team;
+import com.mewna.catnip.entity.misc.TeamMember;
+import com.mewna.catnip.entity.util.ImageOptions;
+import com.mewna.catnip.util.CDNFormat;
 import lombok.*;
 import lombok.experimental.Accessors;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
- * @author amy
- * @since 10/17/18.
+ * @author Bowser65
+ * @since 06/24/19.
  */
 @Getter(onMethod_ = @JsonProperty)
 @Setter(onMethod_ = @JsonProperty)
@@ -50,25 +53,48 @@ import java.util.List;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApplicationInfoImpl implements ApplicationInfo, RequiresCatnip {
+@SuppressWarnings({"WeakerAccess", "unused"})
+public class TeamImpl implements Team, RequiresCatnip {
     @JsonIgnore
     private transient Catnip catnip;
     
     private long idAsLong;
-    private String icon;
+    private long ownerIdAsLong;
     private String name;
-    private String description;
-    private List<String> rpcOrigins;
-    private boolean publicBot;
-    private boolean requiresCodeGrant;
-    private ApplicationOwner owner;
-    private Team team;
+    private String icon;
+    private List<TeamMember> members;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
-        if(owner instanceof RequiresCatnip) {
-            ((RequiresCatnip) owner).catnip(catnip);
-        }
+    }
+    
+    @Nullable
+    @Override
+    @CheckReturnValue
+    public String iconUrl(@Nonnull final ImageOptions options) {
+        return CDNFormat.teamIconUrl(id(), icon, options);
+    }
+    
+    @Nullable
+    @Override
+    @CheckReturnValue
+    public String iconUrl() {
+        return iconUrl(new ImageOptions().type(null));
+    }
+    
+    @Override
+    public int hashCode() {
+        return Long.hashCode(idAsLong);
+    }
+    
+    @Override
+    public boolean equals(final Object obj) {
+        return obj instanceof Team && ((Team) obj).idAsLong() == idAsLong;
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("Team (%s)", name);
     }
 }

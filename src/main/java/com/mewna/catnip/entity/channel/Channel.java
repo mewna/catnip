@@ -169,6 +169,15 @@ public interface Channel extends Snowflake {
     default boolean isStore() {
         return type() == ChannelType.STORE;
     }
+
+    /**
+     * @return Whether or not this channel is part of a guild and can contain messages.
+     */
+    @JsonIgnore
+    @CheckReturnValue
+    default boolean isGuildMessageChannel() {
+        return isText() || isNews();
+    }
     
     /**
      * @return This channel instance as a {@link GuildChannel}.

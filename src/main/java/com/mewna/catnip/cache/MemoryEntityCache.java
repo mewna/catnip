@@ -606,7 +606,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                         presenceCache(shardId).put(updated.idAsLong(), presence);
                     }
                 } else if(catnip.chunkMembers()) {
-                    final String guildId = user.getString("guild_id", "No guild");
+                    final String guildId = payload.getString("guild_id", "No guild");
                     catnip.logAdapter().warn("Received PRESENCE_UPDATE for unknown user {} (guild: {})!? (member chunking enabled)",
                             id, guildId);
                 }

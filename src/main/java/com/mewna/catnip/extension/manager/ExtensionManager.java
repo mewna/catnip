@@ -105,7 +105,6 @@ public interface ExtensionManager {
         if(extensions.isEmpty()) {
             return null;
         } else {
-            //noinspection unchecked
             return extensions.iterator().next();
         }
     }

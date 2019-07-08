@@ -56,8 +56,8 @@ public class DefaultExtensionManager implements ExtensionManager {
     public ExtensionManager loadExtension(@Nonnull final Extension extension) {
         if(!loadedExtensions.contains(extension)) {
             extension.catnip(catnip);
-            catnip.vertx().deployVerticle(extension);
             loadedExtensions.add(extension);
+            catnip.vertx().deployVerticle(extension);
         }
         return this;
     }
