@@ -32,6 +32,7 @@ import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.SplitMemoryEntityCache;
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.guild.Guild;
+import com.mewna.catnip.entity.misc.MemberChunkRerequest;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.rest.ratelimit.DefaultRateLimiter;
@@ -227,10 +228,9 @@ public final class CatnipOptions implements Cloneable {
      */
     private boolean logsAsLifecycleEvents;
     /**
-     * TODO: Add this class link
-     * If this option is enabled, emit a {@link null} over the event bus when a
-     * shard needs to re-request member chunks for a guild, instead of
-     * automatically re-requesting them.
+     * If this option is enabled, emit a {@link MemberChunkRerequest} over the
+     * event bus when a shard needs to re-request member chunks for a guild,
+     * instead of automatically re-requesting them.
      */
     private boolean manualChunkRerequesting;
     
