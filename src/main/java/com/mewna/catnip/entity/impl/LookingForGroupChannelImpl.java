@@ -30,7 +30,7 @@ package com.mewna.catnip.entity.impl;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.channel.LookingForGameChannel;
+import com.mewna.catnip.entity.channel.LookingForGroupChannel;
 import com.mewna.catnip.entity.channel.TextChannel;
 import com.mewna.catnip.entity.guild.PermissionOverride;
 import lombok.*;
@@ -49,8 +49,8 @@ import java.util.List;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class LookingForGameChannelImpl implements LookingForGameChannel, RequiresCatnip {
-    private final ChannelType type = ChannelType.LOOKING_FOR_GAME;
+public class LookingForGroupChannelImpl implements LookingForGroupChannel, RequiresCatnip {
+    private final ChannelType type = ChannelType.LOOKING_FOR_GROUP;
 
     private transient Catnip catnip;
 
@@ -84,6 +84,6 @@ public class LookingForGameChannelImpl implements LookingForGameChannel, Require
 
     @Override
     public String toString() {
-        return String.format("LookingForGameChannel (%s)", name);
+        return String.format("LookingForGroupChannel (%s)", name);
     }
 }

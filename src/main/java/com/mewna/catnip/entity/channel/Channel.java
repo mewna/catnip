@@ -170,12 +170,12 @@ public interface Channel extends Snowflake {
     }
 
     /**
-     * Whether or not this channel is a "looking for game" channel.
+     * Whether or not this channel is a "looking for group" channel.
      */
     @JsonIgnore
     @CheckReturnValue
-    default boolean isLookingForGame() {
-        return type() == ChannelType.LOOKING_FOR_GAME;
+    default boolean isLookingForGroup() {
+        return type() == ChannelType.LOOKING_FOR_GROUP;
     }
 
     /**
@@ -313,9 +313,9 @@ public interface Channel extends Snowflake {
          */
         STORE(6, true),
         /**
-         * Looking for game channel, not implemented/released yet.
+         * A "Looking for group" channel, not implemented/released yet.
          */
-        LOOKING_FOR_GAME(7, true);
+        LOOKING_FOR_GROUP(7, true);
         
         @Getter
         private final int key;
