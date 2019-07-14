@@ -194,9 +194,9 @@ public class CatnipShard extends AbstractVerticle {
         if(socket != null) {
             closedByClient = true;
             if(socketOpen) {
+                socketOpen = false;
                 socket.close((short) 4000);
             }
-            socketOpen = false;
         }
         heartbeatAcked = true;
         
@@ -473,6 +473,7 @@ public class CatnipShard extends AbstractVerticle {
                     // Zombie
                     catnip.logAdapter().warn("Shard {}/{}: Heartbeat zombie, queueing reconnect!", id, limit);
                     closedByClient = true;
+                    socketOpen = false;
                     try {
                         socket.close();
                     } catch(final IllegalStateException e) {
@@ -570,6 +571,7 @@ public class CatnipShard extends AbstractVerticle {
         stateReply(ShardConnectState.INVALID);
         
         if(socket != null && socketOpen) {
+            socketOpen = false;
             socket.close();
         }
     }
@@ -579,6 +581,7 @@ public class CatnipShard extends AbstractVerticle {
         if(socket != null) {
             closedByClient = true;
             if(socketOpen) {
+                socketOpen = false;
                 socket.close();
             }
         }
