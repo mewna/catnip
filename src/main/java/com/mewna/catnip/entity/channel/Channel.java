@@ -170,6 +170,15 @@ public interface Channel extends Snowflake {
     }
 
     /**
+     * Whether or not this channel is a "looking for game" channel.
+     */
+    @JsonIgnore
+    @CheckReturnValue
+    default boolean isLookingForGame() {
+        return type() == ChannelType.LOOKING_FOR_GAME;
+    }
+
+    /**
      * @return Whether or not this channel is part of a guild and can contain messages.
      */
     @JsonIgnore
@@ -177,7 +186,7 @@ public interface Channel extends Snowflake {
     default boolean isGuildMessageChannel() {
         return isText() || isNews();
     }
-    
+
     /**
      * @return This channel instance as a {@link GuildChannel}.
      */
@@ -302,7 +311,11 @@ public interface Channel extends Snowflake {
          * Requires an application with a valid SKU. Not officially announced,
          * but there is some discussion about it in discordapp/discord-api-docs#881.
          */
-        STORE(6, true);
+        STORE(6, true),
+        /**
+         * Looking for game channel, not implemented/released yet.
+         */
+        LOOKING_FOR_GAME(7, true);
         
         @Getter
         private final int key;
