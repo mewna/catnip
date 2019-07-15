@@ -200,8 +200,9 @@ public final class CatnipOptions implements Cloneable {
      */
     private boolean logUncachedPresenceWhenNotChunking = true;
     /**
-     * If true, enables guild subscriptions flag in IDENTIFY payload which allows
-     * to receive typing and presence events.
+     * Whether or not Discord should subscribe to guild worker and provide stuff
+     * such as presence updates, typing events, member updates and other stuff,
+     * see discord-api-docs$1016 for more information.
      */
     private boolean enableGuildSubscriptions = true;
     /**
