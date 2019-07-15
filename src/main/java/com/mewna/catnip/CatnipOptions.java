@@ -203,7 +203,7 @@ public final class CatnipOptions implements Cloneable {
      * If true, enables guild subscriptions flag in IDENTIFY payload which allows
      * to receive typing and presence events.
      */
-    private boolean enableGuildSubscriptions = false;
+    private boolean enableGuildSubscriptions = true;
     /**
      * Whether or not {@link Entity#fromJson(Catnip, Class, JsonObject)} should
      * log a warning when deserializing entities with mismatched catnip
