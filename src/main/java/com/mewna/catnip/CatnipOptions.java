@@ -200,6 +200,11 @@ public final class CatnipOptions implements Cloneable {
      */
     private boolean logUncachedPresenceWhenNotChunking = true;
     /**
+     * If true, enables guild subscriptions flag in IDENTIFY payload which allows
+     * to receive typing and presence events.
+     */
+    private boolean enableGuildSubscriptions = false;
+    /**
      * Whether or not {@link Entity#fromJson(Catnip, Class, JsonObject)} should
      * log a warning when deserializing entities with mismatched catnip
      * versions. Generally, this should only be disabled if you can guarantee
