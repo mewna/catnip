@@ -33,6 +33,7 @@ import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
+import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.shard.LifecycleEvent.Raw;
 import com.mewna.catnip.shard.manager.AbstractShardManager;
 import com.mewna.catnip.shard.manager.DefaultShardManager;
@@ -197,7 +198,6 @@ public class CatnipShard extends AbstractVerticle implements Listener {
             if(socketOpen) {
                 socket.sendClose(4000, "Shutdown");
             }
-            socketOpen = false;
         }
         heartbeatAcked = true;
         
@@ -624,6 +624,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
         final JsonObject data = new JsonObject()
                 .put("token", catnip.token())
                 .put("compress", false)
+                .put("guild_subscriptions", ((CatnipImpl) catnip).options().enableGuildSubscriptions())
                 .put("large_threshold", LARGE_THRESHOLD)
                 .put("shard", new JsonArray().add(id).add(limit))
                 .put("properties", new JsonObject()
