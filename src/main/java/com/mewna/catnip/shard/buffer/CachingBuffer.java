@@ -160,6 +160,7 @@ public class CachingBuffer extends AbstractBuffer {
                 catnip().chunkMembers(guild);
                 // I hate this
                 final int finalChunks = chunks;
+                // TODO: Cancel this task when the shard closes
                 catnip().vertx().setTimer(catnip().memberChunkTimeout(), __ -> {
                     if(bufferState.guildChunkCount().containsKey(guild)) {
                         final Counter counter = bufferState.guildChunkCount().get(guild);
