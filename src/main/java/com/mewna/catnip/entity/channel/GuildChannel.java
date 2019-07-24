@@ -38,6 +38,7 @@ import com.mewna.catnip.rest.invite.InviteCreateOptions;
 import com.mewna.catnip.util.PermissionUtil;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
@@ -289,9 +290,9 @@ public interface GuildChannel extends GuildEntity, Channel {
                     channel.overrides().forEach(override -> finalOverrides.put(override.id(), PermissionOverrideData.create(override)));
                 }
                 overrides.forEach(finalOverrides::put);
-                final JsonObject object = new JsonObject();
-                finalOverrides.forEach((k, v) -> object.put(k, v.toJson()));
-                payload.put("permission_overwrites", object);
+                final JsonArray array = new JsonArray();
+                finalOverrides.forEach((__, v) -> array.add(v.toJson()));
+                payload.put("permission_overwrites", array);
             }
             if(channel != null) {
                 // TODO: How to handle categories here?

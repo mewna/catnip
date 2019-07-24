@@ -13,7 +13,7 @@
         <delombok.output>${project.basedir}/delombok</delombok.output>
 
         <lombok.version>1.18.6</lombok.version>
-        <vertx.version>3.7.1</vertx.version>
+        <vertx.version>3.8.0</vertx.version>
         <vertx-completable-future.version>vertx-completable-future-0.1.2</vertx-completable-future.version>
         <slf4j.version>1.7.26</slf4j.version>
         <commons.lang.version>3.9</commons.lang.version>
@@ -22,7 +22,7 @@
         <koloboke-compile.version>0.5.1</koloboke-compile.version>
         <koloboke-impl.version>1.0.0</koloboke-impl.version>
 
-        <junit.version>5.5.0</junit.version>
+        <junit.version>5.5.1</junit.version>
         <mockito.version>3.0.0</mockito.version>
         <logback.version>1.2.3</logback.version>
         <javautil.version>1.34.0</javautil.version>
