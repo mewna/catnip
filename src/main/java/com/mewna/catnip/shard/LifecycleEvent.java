@@ -27,8 +27,7 @@
 
 package com.mewna.catnip.shard;
 
-import com.mewna.catnip.entity.misc.ChunkingDone;
-import com.mewna.catnip.entity.misc.MemberChunkRerequest;
+import com.mewna.catnip.entity.lifecycle.*;
 import com.mewna.catnip.shard.event.EventType;
 
 import static com.mewna.catnip.shard.event.EventTypeImpl.event;
@@ -38,38 +37,38 @@ import static com.mewna.catnip.shard.event.EventTypeImpl.event;
  * @since 10/17/18.
  */
 public interface LifecycleEvent {
-    // @formatter:off
     /**
      * Fired when the shard is created and is about to connect to the websocket
      * gateway. The payload is a shard id / total pair.
      */
-    EventType<ShardInfo>    CONNECTING    = event(Raw.CONNECTING, ShardInfo.class);
+    EventType<ShardInfo> CONNECTING = event(Raw.CONNECTING_TO_GATEWAY, ShardInfo.class);
     /**
      * Fired when the shard has connected to the websocket gateway, but has not
      * yet sent an IDENTIFY payload. The payload is a shard id / total pair.
      */
-    EventType<ShardInfo>    CONNECTED     = event(Raw.CONNECTED, ShardInfo.class);
+    EventType<ShardInfo> CONNECTED = event(Raw.CONNECTED_TO_GATEWAY, ShardInfo.class);
     /**
      * Fired when the shard has disconnected from the websocket gateway, and
      * will (hopefully) be reconnecting. The payload is a shard id / total
      * pair.
      */
-    EventType<ShardInfo>    DISCONNECTED  = event(Raw.DISCONNECTED, ShardInfo.class);
+    EventType<ShardInfo> DISCONNECTED = event(Raw.DISCONNECTED_FROM_GATEWAY, ShardInfo.class);
     /**
      * Fired when the shard has successfully IDENTIFYd with the websocket
      * gateway. This is effectively the same as listening on
      * {@link DiscordEvent#READY}. The payload is a shard id / total pair.
      */
-    EventType<ShardInfo>    IDENTIFIED    = event(Raw.IDENTIFIED, ShardInfo.class);
+    EventType<ShardInfo> IDENTIFIED = event(Raw.IDENTIFIED, ShardInfo.class);
     /**
      * Fired when the shard has successfully RESUMEd with the websocket
      * gateway. The payload is a shard id / total pair.
      */
-    EventType<ShardInfo>    RESUMED       = event(Raw.RESUMED, ShardInfo.class);
+    EventType<ShardInfo> RESUMED = event(Raw.RESUMED, ShardInfo.class);
     /**
-     * Fired when the shard has closed the gateway websocket.
+     * Fired when the shard's session is invalidated, be it from an OP 9 or
+     * other cause.
      */
-    EventType<ShardInfo>    CLOSED        = event(Raw.CLOSED, ShardInfo.class);
+    EventType<ShardInfo> SESSION_INVALIDATED = event(Raw.SESSION_INVALIDATED, ShardInfo.class);
     
     /**
      * Fired when all guild chunking has been completed.
@@ -80,20 +79,37 @@ public interface LifecycleEvent {
      * Fired if manual member chunk re-requesting is enabled.
      */
     EventType<MemberChunkRerequest> MEMBER_CHUNK_REREQUEST = event(Raw.MEMBER_CHUNK_REREQUEST, MemberChunkRerequest.class);
-    // @formatter:on
+    
+    /**
+     * Fired when a shard's gateway websocket closes.
+     */
+    EventType<GatewayWebsocketClosed> WEBSOCKET_CLOSED = event(Raw.GATEWAY_WEBSOCKET_CLOSED, GatewayWebsocketClosed.class);
+    /**
+     * Fired when a shard fails to connect to Discord's websocket gateway.
+     */
+    EventType<GatewayWebsocketConnectionFailed> WEBSOCKET_CONNECTION_FAILED
+            = event(Raw.GATEWAY_WEBSOCKET_CONNECTION_FAILED, GatewayWebsocketConnectionFailed.class);
+    
+    /**
+     * Fired whenever a REST route hits a ratelimit (HTTP 429).
+     */
+    EventType<RestRatelimitHit> REST_RATELIMIT_HIT = event(Raw.REST_RATELIMIT_HIT, RestRatelimitHit.class);
     
     interface Raw {
         // @formatter:off
-        String CONNECTING    = "CONNECTING";
-        String CONNECTED     = "CONNECTED";
-        String DISCONNECTED  = "DISCONNECTED";
-        String IDENTIFIED    = "IDENTIFIED";
-        String RESUMED       = "RESUMED";
-        String CLOSED        = "CLOSED";
+        String CONNECTING_TO_GATEWAY     = "CONNECTING";
+        String CONNECTED_TO_GATEWAY      = "CONNECTED";
+        String DISCONNECTED_FROM_GATEWAY = "DISCONNECTED";
+        String IDENTIFIED                = "IDENTIFIED";
+        String RESUMED                   = "RESUMED";
+        String SESSION_INVALIDATED       = "SESSION_INVALIDATED";
         
-        String CHUNKING_DONE = "CHUNKING_DONE";
-        
+        String CHUNKING_DONE          = "CHUNKING_DONE";
         String MEMBER_CHUNK_REREQUEST = "MEMBER_CHUNK_REREQUEST";
+        
+        String GATEWAY_WEBSOCKET_CLOSED            = "GATEWAY_WEBSOCKET_CLOSED";
+        String GATEWAY_WEBSOCKET_CONNECTION_FAILED = "GATEWAY_WEBSOCKET_CONNECTION_FAILED";
+        String REST_RATELIMIT_HIT                  = "REST_RATELIMIT_HIT";
         // @formatter:on
     }
 }

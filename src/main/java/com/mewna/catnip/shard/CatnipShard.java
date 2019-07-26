@@ -28,6 +28,8 @@
 package com.mewna.catnip.shard;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.impl.GatewayWebsocketClosedImpl;
+import com.mewna.catnip.entity.impl.GatewayWebsocketConnectionFailedImpl;
 import com.mewna.catnip.entity.impl.PresenceImpl;
 import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.Presence;
@@ -138,7 +140,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
         this.id = id;
         this.limit = limit;
         this.presence = presence;
-    
+        
         client = HttpClient.newHttpClient();
         
         control = computeAddress(CONTROL, id);
@@ -258,7 +260,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private void connectSocket() {
         lifecycleState = CONNECTING;
-        catnip.eventBus().publish(Raw.CONNECTING, shardInfo());
+        catnip.eventBus().publish(Raw.CONNECTING_TO_GATEWAY, shardInfo());
         
         final GatewayInfo info = catnip.gatewayInfo();
         if(info != null) {
@@ -281,13 +283,16 @@ public class CatnipShard extends AbstractVerticle implements Listener {
             lifecycleState = CONNECTED;
             socket = ws;
             socketOpen = true;
-            catnip.eventBus().publish(Raw.CONNECTED, shardInfo());
+            catnip.eventBus().publish(Raw.CONNECTED_TO_GATEWAY, shardInfo());
         }).exceptionally(t -> {
             lifecycleState = DISCONNECTED;
             socket = null;
             socketOpen = false;
-            catnip.logAdapter().error("Shard {}/{}: Couldn't connect socket:", id, limit, t);
-            catnip.eventBus().publish(Raw.CLOSED, shardInfo());
+            if(catnip.logLifecycleEvents()) {
+                catnip.logAdapter().error("Shard {}/{}: Couldn't connect socket:", id, limit, t);
+            }
+            catnip.dispatchManager().dispatchEvent(Raw.GATEWAY_WEBSOCKET_CONNECTION_FAILED,
+                    new GatewayWebsocketConnectionFailedImpl(shardInfo(), t, catnip));
             stateReply(ShardConnectState.FAILED);
             return null;
         });
@@ -337,10 +342,6 @@ public class CatnipShard extends AbstractVerticle implements Listener {
         }
         
         final GatewayOp op = GatewayOp.byId(payload.getInteger("op"));
-        // We pass `msg` for consistency (and for the off-chance it's
-        // needed), but REALLY you don't wanna do anything with it. It
-        // gets passed *entirely* so that we can reply to the shard
-        // manager directly.
         switch(op) {
             case HELLO: {
                 handleHello(payload);
@@ -378,12 +379,15 @@ public class CatnipShard extends AbstractVerticle implements Listener {
     @Override
     public CompletionStage<?> onText(final WebSocket webSocket, final CharSequence data, final boolean last) {
         if(socket == null) {
-            //Socket is too quick!
+            // Socket is too quick!
             socket = webSocket;
             socketOpen = true;
         }
-        //This assertion should only trip if the same 'CatnipShard' instance is bound to two sockets, which should *never* happen under normal conditions.
-        //If this does become an issue, we can add logic to ensure one of the sockets die, and persist the other.
+        // This assertion should only trip if the same 'CatnipShard' instance
+        // is bound to two sockets, which should *never* happen under normal
+        // conditions.
+        // If this does become an issue, we can add logic to ensure one of the
+        // sockets die, and persist the other.
         assert webSocket == socket : id + " expected " + socket + "; got" + webSocket;
         if(last) {
             try {
@@ -401,15 +405,20 @@ public class CatnipShard extends AbstractVerticle implements Listener {
     @Override
     public CompletionStage<?> onBinary(final WebSocket webSocket, final ByteBuffer data, final boolean last) {
         if(socket == null) {
-            //Socket is too quick!
+            // Socket is too quick!
             socket = webSocket;
             socketOpen = true;
         }
-        //This assertion should only trip if the same 'CatnipShard' instance is bound to two sockets, which should *never* happen under normal conditions.
-        //If this does become an issue, we can add logic to ensure one of the sockets die, and persist the other.
+        // This assertion should only trip if the same 'CatnipShard' instance
+        // is bound to two sockets, which should *never* happen under normal
+        // conditions.
+        // If this does become an issue, we can add logic to ensure one of the
+        // sockets die, and persist the other.
         assert webSocket == socket : id + " expected " + socket + "; got" + webSocket;
-    
-        //This may need revising, due to the tendency of the socket splitting frames. Although, the method does have a built in handler, so :shrug:
+        
+        // This may need revising, due to the tendency of the socket splitting
+        // frames. Although, the method does have a built in handler, so
+        // :shrug:
         handleBinaryData(Buffer.buffer(data.array()));
         webSocket.request(1L);
         return null;
@@ -417,34 +426,46 @@ public class CatnipShard extends AbstractVerticle implements Listener {
     
     @Override
     public void onError(final WebSocket webSocket, final Throwable error) {
-        //This assertion should only trip if the same 'CatnipShard' instance is bound to two sockets, which should *never* happen under normal conditions.
-        //If this does become an issue, we can add logic to ensure one of the sockets die, and persist the other.
+        // This assertion should only trip if the same 'CatnipShard' instance
+        // is bound to two sockets, which should *never* happen under normal
+        // conditions.
+        // If this does become an issue, we can add logic to ensure one of the
+        // sockets die, and persist the other.
         assert webSocket == socket : id + " expected " + socket + "; got" + webSocket;
         
         socket = null;
         socketOpen = false;
-        catnip.logAdapter().error("Shard {}/{}: Couldn't connect socket:", id, limit, error);
-        catnip.eventBus().publish(Raw.CLOSED, shardInfo());
+        if(catnip.logLifecycleEvents()) {
+            catnip.logAdapter().error("Shard {}/{}: Couldn't connect socket:", id, limit, error);
+        }
+        catnip.dispatchManager().dispatchEvent(Raw.GATEWAY_WEBSOCKET_CONNECTION_FAILED,
+                new GatewayWebsocketConnectionFailedImpl(shardInfo(), error, catnip));
         stateReply(ShardConnectState.FAILED);
     }
     
     //@SuppressWarnings("squid:S1172")
     @Override
     public CompletionStage<?> onClose(final WebSocket webSocket, final int closeCode, final String reason) {
-        //This assertion should only trip if the same 'CatnipShard' instance is bound to two sockets, which should *never* happen under normal conditions.
-        //If this does become an issue, we can add logic to ensure one of the sockets die, and persist the other.
+        // This assertion should only trip if the same 'CatnipShard' instance
+        // is bound to two sockets, which should *never* happen under normal
+        // conditions.
+        // If this does become an issue, we can add logic to ensure one of the
+        // sockets die, and persist the other.
         assert webSocket == socket : id + " expected " + socket + "; got" + webSocket;
         
-        //Since the socket closed, lets cancel the timer.
+        // Since the socket closed, lets cancel the timer.
         final boolean cancel = vertx.cancelTimer(heartbeatTask.get());
         catnip.logAdapter().debug("Canceled timer task from socket close: {}", cancel);
-        catnip.eventBus().publish(Raw.DISCONNECTED, shardInfo());
-        catnip.logAdapter().warn("Shard {}/{}: Socket closing! {} - {}", id, limit, closeCode, reason);
+        catnip.eventBus().publish(Raw.DISCONNECTED_FROM_GATEWAY, shardInfo());
+        if(catnip.logLifecycleEvents()) {
+            catnip.logAdapter().warn("Shard {}/{}: Socket closing! {} - {}", id, limit, closeCode, reason);
+        }
         try {
             socket = null;
             socketOpen = false;
             closedByClient = false;
-            catnip.eventBus().publish(Raw.CLOSED, shardInfo());
+            catnip.dispatchManager().dispatchEvent(Raw.GATEWAY_WEBSOCKET_CLOSED,
+                    new GatewayWebsocketClosedImpl(shardInfo(), closeCode, reason, catnip));
         } catch(final Exception e) {
             catnip.logAdapter().error("Shard {}/{}: Failure closing socket:", id, limit, e);
             stateReply(ShardConnectState.FAILED);
@@ -454,22 +475,31 @@ public class CatnipShard extends AbstractVerticle implements Listener {
             // These two close codes invalidate your session (and afaik do not send an OP9).
             catnip.sessionManager().clearSeqnum(id);
             catnip.sessionManager().clearSession(id);
+            catnip.dispatchManager().dispatchEvent(Raw.SESSION_INVALIDATED, shardInfo());
         }
         if(closedByClient) {
-            catnip.logAdapter().info("Shard {}/{}: We closed the websocket with code {}", id, limit, closeCode);
+            if(catnip.logLifecycleEvents()) {
+                catnip.logAdapter().info("Shard {}/{}: We closed the websocket with code {}", id, limit, closeCode);
+            }
         } else {
             if(closeCode >= 4000) {
                 final GatewayCloseCode code = GatewayCloseCode.byId(closeCode);
                 if(code != null) {
-                    catnip.logAdapter().warn("Shard {}/{}: gateway websocket closed with code {}: {}: {}",
-                            id, limit, closeCode, code.name(), code.message());
+                    if(catnip.logLifecycleEvents()) {
+                        catnip.logAdapter().warn("Shard {}/{}: gateway websocket closed with code {}: {}: {}",
+                                id, limit, closeCode, code.name(), code.message());
+                    }
                 } else {
+                    if(catnip.logLifecycleEvents()) {
+                        catnip.logAdapter().warn("Shard {}/{}: gateway websocket closing with code {}: {}",
+                                id, limit, closeCode, reason);
+                    }
+                }
+            } else {
+                if(catnip.logLifecycleEvents()) {
                     catnip.logAdapter().warn("Shard {}/{}: gateway websocket closing with code {}: {}",
                             id, limit, closeCode, reason);
                 }
-            } else {
-                catnip.logAdapter().warn("Shard {}/{}: gateway websocket closing with code {}: {}",
-                        id, limit, closeCode, reason);
             }
         }
         webSocket.request(1L);
@@ -594,15 +624,18 @@ public class CatnipShard extends AbstractVerticle implements Listener {
     
     private void handleInvalidSession(final JsonObject event) {
         if(!event.getBoolean("d")) {
-            catnip.logAdapter().info("Session invalidated (OP 9), clearing shard data and reconnecting");
+            if(catnip.logLifecycleEvents()) {
+                catnip.logAdapter().info("Session invalidated (OP 9), clearing shard data and reconnecting");
+            }
             
             catnip.cacheWorker().invalidateShard(id);
             catnip.sessionManager().clearSession(id);
             catnip.sessionManager().clearSeqnum(id);
+            catnip.dispatchManager().dispatchEvent(Raw.SESSION_INVALIDATED, shardInfo());
             
             closedByClient = true;
         }
-    
+        
         stateReply(ShardConnectState.INVALID);
         
         if(socket != null && socketOpen) {

@@ -25,18 +25,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.misc;
+package com.mewna.catnip.entity.impl;
 
-import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.shard.buffer.NoopBuffer;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.lifecycle.GatewayWebsocketConnectionFailed;
+import com.mewna.catnip.shard.ShardInfo;
+import lombok.*;
+import lombok.experimental.Accessors;
+
+import javax.annotation.Nonnull;
 
 /**
- * Fired when all guilds are finished chunking. For a no-op event buffer (such
- * as {@link NoopBuffer}), this event should just be fired immediately.
- *
  * @author amy
- * @since 5/16/19.
+ * @since 7/26/19.
  */
-@SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
-public interface ChunkingDone extends Entity {
+@Getter(onMethod_ = @JsonProperty)
+@Setter(onMethod_ = @JsonProperty)
+@Builder
+@Accessors(fluent = true)
+@NoArgsConstructor
+@AllArgsConstructor
+// God these class names are getting ridiculous
+public class GatewayWebsocketConnectionFailedImpl implements GatewayWebsocketConnectionFailed, RequiresCatnip {
+    private ShardInfo shardInfo;
+    private Throwable error;
+    
+    @JsonIgnore
+    private transient Catnip catnip;
+    
+    @Override
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
+    }
 }

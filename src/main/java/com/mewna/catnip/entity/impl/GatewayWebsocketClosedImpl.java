@@ -31,7 +31,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.lifecycle.ChunkingDone;
+import com.mewna.catnip.entity.lifecycle.GatewayWebsocketClosed;
+import com.mewna.catnip.shard.ShardInfo;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -39,7 +40,7 @@ import javax.annotation.Nonnull;
 
 /**
  * @author amy
- * @since 5/16/19.
+ * @since 7/26/19.
  */
 @Getter(onMethod_ = @JsonProperty)
 @Setter(onMethod_ = @JsonProperty)
@@ -47,7 +48,11 @@ import javax.annotation.Nonnull;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChunkingDoneImpl implements ChunkingDone, RequiresCatnip {
+public class GatewayWebsocketClosedImpl implements GatewayWebsocketClosed, RequiresCatnip {
+    private ShardInfo shardInfo;
+    private int code;
+    private String reason;
+    
     @JsonIgnore
     private transient Catnip catnip;
     

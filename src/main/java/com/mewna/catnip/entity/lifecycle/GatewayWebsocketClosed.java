@@ -25,34 +25,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.impl;
+package com.mewna.catnip.entity.lifecycle;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.lifecycle.ChunkingDone;
-import lombok.*;
-import lombok.experimental.Accessors;
+import com.mewna.catnip.entity.Entity;
+import com.mewna.catnip.shard.ShardInfo;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
+ * Fired when the gateway websocket is closed.
+ *
  * @author amy
- * @since 5/16/19.
+ * @since 7/26/19.
  */
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
-@Builder
-@Accessors(fluent = true)
-@NoArgsConstructor
-@AllArgsConstructor
-public class ChunkingDoneImpl implements ChunkingDone, RequiresCatnip {
-    @JsonIgnore
-    private transient Catnip catnip;
+public interface GatewayWebsocketClosed extends Entity {
+    /**
+     * @return Information about the shard whose gateway websocket closed.
+     */
+    @Nonnull
+    ShardInfo shardInfo();
     
-    @Override
-    public void catnip(@Nonnull final Catnip catnip) {
-        this.catnip = catnip;
-    }
+    /**
+     * @return The websocket close code.
+     */
+    @Nonnegative
+    int code();
+    
+    /**
+     * @return The websocket close reason, if present.
+     */
+    @Nullable
+    String reason();
 }

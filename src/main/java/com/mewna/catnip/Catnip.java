@@ -33,7 +33,7 @@ import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.misc.GatewayInfo;
-import com.mewna.catnip.entity.misc.MemberChunkRerequest;
+import com.mewna.catnip.entity.lifecycle.MemberChunkRerequest;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.ActivityType;
 import com.mewna.catnip.entity.user.Presence.OnlineStatus;
@@ -361,9 +361,9 @@ public interface Catnip {
      * @return Whether or not this catnip instance will emit events instead of
      * certain log messages.
      *
-     * @see CatnipOptions#logsAsLifecycleEvents()
+     * @see CatnipOptions#logLifecycleEvents()
      */
-    boolean logsAsLifecycleEvents();
+    boolean logLifecycleEvents();
     
     /**
      * @return Whether or not this catnip instance will emit a

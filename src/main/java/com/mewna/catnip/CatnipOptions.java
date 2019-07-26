@@ -32,7 +32,7 @@ import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.SplitMemoryEntityCache;
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.guild.Guild;
-import com.mewna.catnip.entity.misc.MemberChunkRerequest;
+import com.mewna.catnip.entity.lifecycle.MemberChunkRerequest;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.rest.ratelimit.DefaultRateLimiter;
@@ -227,12 +227,12 @@ public final class CatnipOptions implements Cloneable {
      */
     private Scheduler scheduler = RxHelpers.forkJoinScheduler();
     /**
-     * If this option is enabled, a lot of built-in logging -- things like
-     * shard connects / disconnects, 429 HTTP responses, ... -- will be emitted
-     * as events over the event bus rather than directly logging messages via
-     * the configured {@link #logAdapter}.
+     * If this option is enabled, lifecycle-related events -- things like shard
+     * connects / disconnects, 429 HTTP responses, ... -- will be directly
+     * logged via the configured {@link #logAdapter}, in addition to being
+     * emitted over the event bus.
      */
-    private boolean logsAsLifecycleEvents;
+    private boolean logLifecycleEvents = true;
     /**
      * If this option is enabled, emit a {@link MemberChunkRerequest} over the
      * event bus when a shard needs to re-request member chunks for a guild,

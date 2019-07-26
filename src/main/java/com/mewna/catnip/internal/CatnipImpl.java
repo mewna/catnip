@@ -59,7 +59,6 @@ import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.logging.LogAdapter;
 import io.reactivex.Scheduler;
 import io.reactivex.Single;
-import io.reactivex.plugins.RxJavaPlugins;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
@@ -119,7 +118,7 @@ public class CatnipImpl implements Catnip {
     private Presence initialPresence;
     private Set<String> disabledEvents;
     private Scheduler scheduler;
-    private boolean logsAsLifecycleEvents;
+    private boolean logLifecycleEvents;
     private boolean manualChunkRerequesting;
     private CatnipOptions options;
     
@@ -155,7 +154,7 @@ public class CatnipImpl implements Catnip {
         logUncachedPresenceWhenNotChunking = options.logUncachedPresenceWhenNotChunking();
         warnOnEntityVersionMismatch = options.warnOnEntityVersionMismatch();
         scheduler = options.scheduler();
-        logsAsLifecycleEvents = options.logsAsLifecycleEvents();
+        logLifecycleEvents = options.logLifecycleEvents();
         manualChunkRerequesting = options.manualChunkRerequesting();
         
         injectSelf();
@@ -409,6 +408,9 @@ public class CatnipImpl implements Catnip {
             eventCodec(LifecycleState.class);
             eventCodec(ChunkingDoneImpl.class);
             eventCodec(MemberChunkRerequestImpl.class);
+            
+            eventCodec(GatewayWebsocketClosedImpl.class);
+            eventCodec(GatewayWebsocketConnectionFailedImpl.class);
             
             // DoubleEvents use ImmutablePair
             eventCodec(ImmutablePair.class);

@@ -25,34 +25,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.impl;
+package com.mewna.catnip.entity.lifecycle;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.lifecycle.ChunkingDone;
-import lombok.*;
-import lombok.experimental.Accessors;
+import com.mewna.catnip.entity.Entity;
 
 import javax.annotation.Nonnull;
 
 /**
+ * Fired whenever a REST ratelimit is hit.
+ *
  * @author amy
- * @since 5/16/19.
+ * @since 7/26/19.
  */
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
-@Builder
-@Accessors(fluent = true)
-@NoArgsConstructor
-@AllArgsConstructor
-public class ChunkingDoneImpl implements ChunkingDone, RequiresCatnip {
-    @JsonIgnore
-    private transient Catnip catnip;
+public interface RestRatelimitHit extends Entity {
+    /**
+     * @return The route that was ratelimited. Never {@code null}.
+     */
+    @Nonnull
+    String route();
     
-    @Override
-    public void catnip(@Nonnull final Catnip catnip) {
-        this.catnip = catnip;
-    }
+    /**
+     * @return Whether or not the ratelimit was global.
+     */
+    boolean global();
 }

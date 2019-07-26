@@ -25,21 +25,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.misc;
+package com.mewna.catnip.entity.lifecycle;
 
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.shard.ShardInfo;
 
 /**
- * Fired when a guild needs its member chunks re-requested, if and only if
- * {@link com.mewna.catnip.CatnipOptions#manualChunkRerequesting()} is
- * {@code true}.
+ * Fired when connecting to Discord's websocket gateway fails.
  *
  * @author amy
- * @since 7/4/19.
+ * @since 7/26/19.
  */
-public interface MemberChunkRerequest extends Entity {
+public interface GatewayWebsocketConnectionFailed extends Entity {
+    /**
+     * @return Information about the shard whose gateway websocket connection
+     * failed.
+     */
     ShardInfo shardInfo();
     
-    String guildId();
+    /**
+     * @return The error thrown during connection failure.
+     */
+    Throwable error();
 }

@@ -28,6 +28,7 @@
 package com.mewna.catnip.rest.requester;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.impl.RestRatelimitHitImpl;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.rest.MultipartBodyPublisher;
@@ -36,10 +37,11 @@ import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestPayloadException;
 import com.mewna.catnip.rest.Routes.Route;
 import com.mewna.catnip.rest.ratelimit.RateLimiter;
+import com.mewna.catnip.shard.LifecycleEvent.Raw;
 import com.mewna.catnip.util.CatnipMeta;
-import com.mewna.catnip.util.rx.RxHelpers;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.Utils;
+import com.mewna.catnip.util.rx.RxHelpers;
 import io.reactivex.Observable;
 import io.vertx.core.Context;
 import io.vertx.core.buffer.Buffer;
@@ -251,19 +253,27 @@ public abstract class AbstractRequester implements Requester {
             // latency instead.
             // TODO: Is there a more accurate way to do this that still
             //  respects the ms-precision ratelimits?
-            final long date = OffsetDateTime.parse(dateHeader, DateTimeFormatter.RFC_1123_DATE_TIME).toInstant().toEpochMilli();
+            final long date = OffsetDateTime.parse(dateHeader, DateTimeFormatter.RFC_1123_DATE_TIME).toInstant()
+                    .toEpochMilli();
             timeDifference = now - date + requestDuration;
             catnip.logAdapter().trace("Have date header, time difference = now - date + request duration = " +
                             "{} - {} + {} = {}",
                     now, date, requestDuration, timeDifference);
         }
         if(statusCode == 429) {
-            catnip.logAdapter().error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
-                    route.baseRoute(),
-                    headers.firstValue("X-Ratelimit-Global").orElse(null),
-                    headers.firstValue("X-Ratelimit-Limit").orElse(null),
-                    headers.firstValue("X-Ratelimit-Reset").orElse(null)
-            );
+            if(catnip.logLifecycleEvents()) {
+                catnip.logAdapter().error(
+                        "Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
+                        route.baseRoute(),
+                        headers.firstValue("X-Ratelimit-Global").orElse(null),
+                        headers.firstValue("X-Ratelimit-Limit").orElse(null),
+                        headers.firstValue("X-Ratelimit-Reset").orElse(null)
+                );
+            }
+            catnip.dispatchManager().dispatchEvent(Raw.REST_RATELIMIT_HIT,
+                    new RestRatelimitHitImpl(route.baseRoute(),
+                            Boolean.parseBoolean(headers.firstValue("X-RateLimit-Global").orElse(null)),
+                            catnip));
             
             String retry = headers.firstValue("Retry-After").orElse(null);
             if(retry == null || retry.isEmpty()) {

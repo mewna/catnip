@@ -31,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.lifecycle.ChunkingDone;
+import com.mewna.catnip.entity.lifecycle.RestRatelimitHit;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -39,7 +39,7 @@ import javax.annotation.Nonnull;
 
 /**
  * @author amy
- * @since 5/16/19.
+ * @since 7/26/19.
  */
 @Getter(onMethod_ = @JsonProperty)
 @Setter(onMethod_ = @JsonProperty)
@@ -47,7 +47,10 @@ import javax.annotation.Nonnull;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChunkingDoneImpl implements ChunkingDone, RequiresCatnip {
+public class RestRatelimitHitImpl implements RestRatelimitHit, RequiresCatnip {
+    private String route;
+    private boolean global;
+    
     @JsonIgnore
     private transient Catnip catnip;
     

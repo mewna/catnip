@@ -117,7 +117,7 @@ public class DefaultShardManager extends AbstractShardManager {
             started = true;
         }
         
-        consumers.add(catnip().eventBus().<ShardInfo>consumer(Raw.CLOSED, closeHandler -> {
+        consumers.add(catnip().eventBus().<ShardInfo>consumer(Raw.GATEWAY_WEBSOCKET_CLOSED, closeHandler -> {
             catnip().logAdapter().info("Shard {} closed, re-queuing...", closeHandler.body().getId());
             addToConnectQueue(closeHandler.body().getId());
         }));
