@@ -41,6 +41,7 @@ import com.mewna.catnip.shard.manager.AbstractShardManager;
 import com.mewna.catnip.shard.manager.DefaultShardManager;
 import com.mewna.catnip.util.BufferOutputStream;
 import com.mewna.catnip.util.JsonUtil;
+import com.mewna.catnip.util.ReentrantLockWebSocket;
 import com.mewna.catnip.util.task.GatewayTask;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.buffer.Buffer;
@@ -281,7 +282,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
     private void connectSocket(final String url) {
         client.newWebSocketBuilder().buildAsync(URI.create(url), this).thenAcceptAsync(ws -> {
             lifecycleState = CONNECTED;
-            socket = ws;
+            socket = new ReentrantLockWebSocket(ws);
             socketOpen = true;
             catnip.eventBus().publish(Raw.CONNECTED_TO_GATEWAY, shardInfo());
         }).exceptionally(t -> {
