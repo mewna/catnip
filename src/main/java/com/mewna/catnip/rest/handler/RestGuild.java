@@ -33,7 +33,7 @@ import com.mewna.catnip.entity.guild.Guild.GuildEditFields;
 import com.mewna.catnip.entity.guild.audit.ActionType;
 import com.mewna.catnip.entity.guild.audit.AuditLogEntry;
 import com.mewna.catnip.entity.misc.CreatedInvite;
-import com.mewna.catnip.entity.misc.VoiceRegion;
+import com.mewna.catnip.entity.voice.VoiceRegion;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes;

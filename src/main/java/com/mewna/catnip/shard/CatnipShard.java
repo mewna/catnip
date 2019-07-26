@@ -28,9 +28,9 @@
 package com.mewna.catnip.shard;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.impl.GatewayWebsocketClosedImpl;
-import com.mewna.catnip.entity.impl.GatewayWebsocketConnectionFailedImpl;
-import com.mewna.catnip.entity.impl.PresenceImpl;
+import com.mewna.catnip.entity.impl.lifecycle.GatewayWebsocketClosedImpl;
+import com.mewna.catnip.entity.impl.lifecycle.GatewayWebsocketConnectionFailedImpl;
+import com.mewna.catnip.entity.impl.user.PresenceImpl;
 import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.extension.Extension;

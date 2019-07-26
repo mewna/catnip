@@ -29,7 +29,7 @@ package com.mewna.catnip.entity.user;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.entity.impl.TypingUserImpl;
+import com.mewna.catnip.entity.impl.user.TypingUserImpl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;

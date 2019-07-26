@@ -29,7 +29,7 @@ package com.mewna.catnip.entity.misc;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.ApplicationOwnerImpl;
+import com.mewna.catnip.entity.impl.misc.ApplicationOwnerImpl;
 import com.mewna.catnip.entity.user.User;
 
 /**

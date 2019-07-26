@@ -28,8 +28,8 @@
 package com.mewna.catnip.entity.message;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.EmbedImpl;
-import com.mewna.catnip.entity.impl.EmbedImpl.*;
+import com.mewna.catnip.entity.impl.message.EmbedImpl;
+import com.mewna.catnip.entity.impl.message.EmbedImpl.*;
 import lombok.Getter;
 
 import javax.annotation.CheckReturnValue;

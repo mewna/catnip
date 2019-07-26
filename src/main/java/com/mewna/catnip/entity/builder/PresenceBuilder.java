@@ -27,8 +27,8 @@
 
 package com.mewna.catnip.entity.builder;
 
-import com.mewna.catnip.entity.impl.PresenceImpl;
-import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
+import com.mewna.catnip.entity.impl.user.PresenceImpl;
+import com.mewna.catnip.entity.impl.user.PresenceImpl.ActivityImpl;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.Activity;
 import com.mewna.catnip.entity.user.Presence.ActivityType;

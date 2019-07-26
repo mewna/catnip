@@ -29,10 +29,9 @@ package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.VoiceChannelImpl;
+import com.mewna.catnip.entity.impl.channel.VoiceChannelImpl;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
 
 /**
  * A voice channel in a guild.

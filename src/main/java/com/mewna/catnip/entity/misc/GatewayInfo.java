@@ -29,7 +29,7 @@ package com.mewna.catnip.entity.misc;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.impl.GatewayInfoImpl;
+import com.mewna.catnip.entity.impl.misc.GatewayInfoImpl;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;

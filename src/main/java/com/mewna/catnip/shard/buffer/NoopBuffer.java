@@ -27,7 +27,7 @@
 
 package com.mewna.catnip.shard.buffer;
 
-import com.mewna.catnip.entity.impl.ChunkingDoneImpl;
+import com.mewna.catnip.entity.impl.lifecycle.ChunkingDoneImpl;
 import com.mewna.catnip.shard.LifecycleEvent.Raw;
 import io.vertx.core.json.JsonObject;
 

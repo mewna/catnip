@@ -33,7 +33,7 @@ import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.cache.view.NamedCacheView;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.*;
-import com.mewna.catnip.entity.impl.GuildImpl;
+import com.mewna.catnip.entity.impl.guild.GuildImpl;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.User;

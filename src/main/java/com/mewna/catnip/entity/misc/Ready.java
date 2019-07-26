@@ -30,7 +30,7 @@ package com.mewna.catnip.entity.misc;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.guild.UnavailableGuild;
-import com.mewna.catnip.entity.impl.ReadyImpl;
+import com.mewna.catnip.entity.impl.misc.ReadyImpl;
 import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.Nonnegative;

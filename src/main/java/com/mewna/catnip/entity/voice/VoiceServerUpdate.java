@@ -29,7 +29,7 @@ package com.mewna.catnip.entity.voice;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.guild.GuildEntity;
-import com.mewna.catnip.entity.impl.VoiceServerUpdateImpl;
+import com.mewna.catnip.entity.impl.voice.VoiceServerUpdateImpl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

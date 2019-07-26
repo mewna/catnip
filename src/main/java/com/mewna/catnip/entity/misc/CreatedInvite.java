@@ -29,7 +29,7 @@ package com.mewna.catnip.entity.misc;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.guild.Invite;
-import com.mewna.catnip.entity.impl.CreatedInviteImpl;
+import com.mewna.catnip.entity.impl.misc.CreatedInviteImpl;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;

@@ -29,7 +29,7 @@ package com.mewna.catnip.entity.message;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.impl.BulkRemovedReactionsImpl;
+import com.mewna.catnip.entity.impl.message.BulkRemovedReactionsImpl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

@@ -28,7 +28,7 @@
 package com.mewna.catnip.entity.guild;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.EmojiUpdateImpl;
+import com.mewna.catnip.entity.impl.guild.EmojiUpdateImpl;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 
 import javax.annotation.CheckReturnValue;

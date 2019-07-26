@@ -3,7 +3,7 @@ package com.mewna.catnip.entity.misc;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.entity.impl.TeamImpl;
+import com.mewna.catnip.entity.impl.misc.TeamImpl;
 import com.mewna.catnip.entity.util.ImageOptions;
 
 import javax.annotation.CheckReturnValue;

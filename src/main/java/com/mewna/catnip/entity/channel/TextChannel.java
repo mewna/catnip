@@ -30,7 +30,7 @@ package com.mewna.catnip.entity.channel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Mentionable;
-import com.mewna.catnip.entity.impl.TextChannelImpl;
+import com.mewna.catnip.entity.impl.channel.TextChannelImpl;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
 import io.reactivex.Observable;

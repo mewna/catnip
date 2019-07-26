@@ -28,7 +28,7 @@
 package com.mewna.catnip.entity.guild;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.GatewayGuildBanImpl;
+import com.mewna.catnip.entity.impl.guild.GatewayGuildBanImpl;
 import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.CheckReturnValue;

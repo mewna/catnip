@@ -29,7 +29,7 @@ package com.mewna.catnip.entity.guild;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.entity.impl.PermissionOverrideImpl;
+import com.mewna.catnip.entity.impl.guild.PermissionOverrideImpl;
 import com.mewna.catnip.entity.util.Permission;
 import lombok.Getter;
 

@@ -32,7 +32,7 @@ import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.MessageChannel;
 import com.mewna.catnip.entity.channel.TextChannel;
 import com.mewna.catnip.entity.guild.Guild;
-import com.mewna.catnip.entity.impl.MessageEmbedUpdateImpl;
+import com.mewna.catnip.entity.impl.message.MessageEmbedUpdateImpl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

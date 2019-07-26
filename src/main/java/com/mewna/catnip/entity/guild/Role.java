@@ -31,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Mentionable;
 import com.mewna.catnip.entity.channel.GuildChannel;
-import com.mewna.catnip.entity.impl.RoleImpl;
+import com.mewna.catnip.entity.impl.guild.RoleImpl;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
 

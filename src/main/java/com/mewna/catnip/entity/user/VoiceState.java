@@ -32,7 +32,7 @@ import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.channel.VoiceChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.entity.impl.VoiceStateImpl;
+import com.mewna.catnip.entity.impl.user.VoiceStateImpl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

@@ -28,7 +28,7 @@
 package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.mewna.catnip.entity.impl.MessageImpl;
+import com.mewna.catnip.entity.impl.message.MessageImpl;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageOptions;

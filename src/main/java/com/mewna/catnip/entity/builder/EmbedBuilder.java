@@ -27,8 +27,8 @@
 
 package com.mewna.catnip.entity.builder;
 
-import com.mewna.catnip.entity.impl.EmbedImpl;
-import com.mewna.catnip.entity.impl.EmbedImpl.*;
+import com.mewna.catnip.entity.impl.message.EmbedImpl;
+import com.mewna.catnip.entity.impl.message.EmbedImpl.*;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Embed.Image;
 import com.mewna.catnip.entity.message.Embed.*;

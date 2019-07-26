@@ -31,8 +31,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.guild.Guild;
-import com.mewna.catnip.entity.impl.CustomEmojiImpl;
-import com.mewna.catnip.entity.impl.UnicodeEmojiImpl;
+import com.mewna.catnip.entity.impl.misc.CustomEmojiImpl;
+import com.mewna.catnip.entity.impl.misc.UnicodeEmojiImpl;
 import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.CheckReturnValue;

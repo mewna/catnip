@@ -28,7 +28,7 @@
 package com.mewna.catnip.rest.requester;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.impl.RestRatelimitHitImpl;
+import com.mewna.catnip.entity.impl.lifecycle.RestRatelimitHitImpl;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.rest.MultipartBodyPublisher;

@@ -34,7 +34,7 @@ import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.entity.impl.UserImpl;
+import com.mewna.catnip.entity.impl.user.UserImpl;
 import com.mewna.catnip.entity.util.ImageOptions;
 import io.reactivex.Single;
 

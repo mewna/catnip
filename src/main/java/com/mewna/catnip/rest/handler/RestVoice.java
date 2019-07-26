@@ -27,7 +27,7 @@
 
 package com.mewna.catnip.rest.handler;
 
-import com.mewna.catnip.entity.misc.VoiceRegion;
+import com.mewna.catnip.entity.voice.VoiceRegion;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes;

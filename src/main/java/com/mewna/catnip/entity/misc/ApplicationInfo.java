@@ -29,7 +29,7 @@ package com.mewna.catnip.entity.misc;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.entity.impl.ApplicationInfoImpl;
+import com.mewna.catnip.entity.impl.misc.ApplicationInfoImpl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

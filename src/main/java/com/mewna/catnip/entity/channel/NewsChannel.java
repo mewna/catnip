@@ -28,7 +28,7 @@
 package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.NewsChannelImpl;
+import com.mewna.catnip.entity.impl.channel.NewsChannelImpl;
 
 /**
  * A news channel in a guild is effectively a reskinned text channel, but with

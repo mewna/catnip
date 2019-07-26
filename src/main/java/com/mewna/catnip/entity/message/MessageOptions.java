@@ -27,7 +27,7 @@
 
 package com.mewna.catnip.entity.message;
 
-import com.mewna.catnip.entity.impl.MessageImpl;
+import com.mewna.catnip.entity.impl.message.MessageImpl;
 import io.vertx.core.buffer.Buffer;
 import lombok.*;
 import lombok.experimental.Accessors;

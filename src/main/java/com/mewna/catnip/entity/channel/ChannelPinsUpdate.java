@@ -29,7 +29,7 @@ package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.impl.ChannelPinsUpdateImpl;
+import com.mewna.catnip.entity.impl.channel.ChannelPinsUpdateImpl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

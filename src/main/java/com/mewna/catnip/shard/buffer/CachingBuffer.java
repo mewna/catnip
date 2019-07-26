@@ -27,8 +27,8 @@
 
 package com.mewna.catnip.shard.buffer;
 
-import com.mewna.catnip.entity.impl.ChunkingDoneImpl;
-import com.mewna.catnip.entity.impl.MemberChunkRerequestImpl;
+import com.mewna.catnip.entity.impl.lifecycle.ChunkingDoneImpl;
+import com.mewna.catnip.entity.impl.lifecycle.MemberChunkRerequestImpl;
 import com.mewna.catnip.shard.LifecycleEvent;
 import com.mewna.catnip.shard.ShardInfo;
 import com.mewna.catnip.util.JsonUtil;

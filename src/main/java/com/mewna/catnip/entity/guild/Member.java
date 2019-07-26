@@ -33,11 +33,10 @@ import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.entity.Mentionable;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.channel.GuildChannel;
-import com.mewna.catnip.entity.impl.MemberImpl;
+import com.mewna.catnip.entity.impl.guild.MemberImpl;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
-import io.reactivex.Observable;
 import io.reactivex.Single;
 
 import javax.annotation.CheckReturnValue;

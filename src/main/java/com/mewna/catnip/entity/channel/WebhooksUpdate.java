@@ -29,7 +29,7 @@ package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.guild.GuildEntity;
-import com.mewna.catnip.entity.impl.WebhooksUpdateImpl;
+import com.mewna.catnip.entity.impl.channel.WebhooksUpdateImpl;
 
 import javax.annotation.CheckReturnValue;
 

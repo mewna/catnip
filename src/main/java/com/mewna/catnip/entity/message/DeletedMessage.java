@@ -31,7 +31,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.guild.GuildEntity;
-import com.mewna.catnip.entity.impl.DeletedMessageImpl;
+import com.mewna.catnip.entity.impl.message.DeletedMessageImpl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
