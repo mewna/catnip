@@ -476,7 +476,6 @@ public class CatnipShard extends AbstractVerticle implements Listener {
                 }
             }
         }
-        webSocket.request(1L);
         return null;
     }
     
