@@ -41,6 +41,7 @@ import com.mewna.catnip.shard.manager.AbstractShardManager;
 import com.mewna.catnip.shard.manager.DefaultShardManager;
 import com.mewna.catnip.util.BufferOutputStream;
 import com.mewna.catnip.util.JsonUtil;
+import com.mewna.catnip.util.ReentrantLockWebSocket;
 import com.mewna.catnip.util.task.GatewayTask;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.buffer.Buffer;
@@ -281,7 +282,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
     private void connectSocket(final String url) {
         client.newWebSocketBuilder().buildAsync(URI.create(url), this).thenAcceptAsync(ws -> {
             lifecycleState = CONNECTED;
-            socket = ws;
+            socket = new ReentrantLockWebSocket(ws);
             socketOpen = true;
             catnip.eventBus().publish(Raw.CONNECTED_TO_GATEWAY, shardInfo());
         }).exceptionally(t -> {
@@ -380,15 +381,9 @@ public class CatnipShard extends AbstractVerticle implements Listener {
     public CompletionStage<?> onText(final WebSocket webSocket, final CharSequence data, final boolean last) {
         if(socket == null) {
             // Socket is too quick!
-            socket = webSocket;
+            socket = new ReentrantLockWebSocket(webSocket);
             socketOpen = true;
         }
-        // This assertion should only trip if the same 'CatnipShard' instance
-        // is bound to two sockets, which should *never* happen under normal
-        // conditions.
-        // If this does become an issue, we can add logic to ensure one of the
-        // sockets die, and persist the other.
-        assert webSocket == socket : id + " expected " + socket + "; got" + webSocket;
         if(last) {
             try {
                 handleSocketData(new JsonObject(socketInputBuffer.length() > 0 ? socketInputBuffer.append(data).toString() : data.toString()));
@@ -398,7 +393,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
         } else {
             socketInputBuffer.append(data);
         }
-        webSocket.request(1L);
+        socket.request(1L);
         return null;
     }
     
@@ -406,33 +401,19 @@ public class CatnipShard extends AbstractVerticle implements Listener {
     public CompletionStage<?> onBinary(final WebSocket webSocket, final ByteBuffer data, final boolean last) {
         if(socket == null) {
             // Socket is too quick!
-            socket = webSocket;
+            socket = new ReentrantLockWebSocket(webSocket);
             socketOpen = true;
         }
-        // This assertion should only trip if the same 'CatnipShard' instance
-        // is bound to two sockets, which should *never* happen under normal
-        // conditions.
-        // If this does become an issue, we can add logic to ensure one of the
-        // sockets die, and persist the other.
-        assert webSocket == socket : id + " expected " + socket + "; got" + webSocket;
-        
         // This may need revising, due to the tendency of the socket splitting
         // frames. Although, the method does have a built in handler, so
         // :shrug:
         handleBinaryData(Buffer.buffer(data.array()));
-        webSocket.request(1L);
+        socket.request(1L);
         return null;
     }
     
     @Override
     public void onError(final WebSocket webSocket, final Throwable error) {
-        // This assertion should only trip if the same 'CatnipShard' instance
-        // is bound to two sockets, which should *never* happen under normal
-        // conditions.
-        // If this does become an issue, we can add logic to ensure one of the
-        // sockets die, and persist the other.
-        assert webSocket == socket : id + " expected " + socket + "; got" + webSocket;
-        
         socket = null;
         socketOpen = false;
         if(catnip.logLifecycleEvents()) {
@@ -446,13 +427,6 @@ public class CatnipShard extends AbstractVerticle implements Listener {
     //@SuppressWarnings("squid:S1172")
     @Override
     public CompletionStage<?> onClose(final WebSocket webSocket, final int closeCode, final String reason) {
-        // This assertion should only trip if the same 'CatnipShard' instance
-        // is bound to two sockets, which should *never* happen under normal
-        // conditions.
-        // If this does become an issue, we can add logic to ensure one of the
-        // sockets die, and persist the other.
-        assert webSocket == socket : id + " expected " + socket + "; got" + webSocket;
-        
         // Since the socket closed, lets cancel the timer.
         final boolean cancel = vertx.cancelTimer(heartbeatTask.get());
         catnip.logAdapter().debug("Canceled timer task from socket close: {}", cancel);
@@ -502,7 +476,6 @@ public class CatnipShard extends AbstractVerticle implements Listener {
                 }
             }
         }
-        webSocket.request(1L);
         return null;
     }
     
