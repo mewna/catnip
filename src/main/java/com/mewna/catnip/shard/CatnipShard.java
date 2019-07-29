@@ -28,8 +28,8 @@
 package com.mewna.catnip.shard;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.impl.lifecycle.GatewayWebsocketClosedImpl;
-import com.mewna.catnip.entity.impl.lifecycle.GatewayWebsocketConnectionFailedImpl;
+import com.mewna.catnip.entity.impl.lifecycle.GatewayClosedImpl;
+import com.mewna.catnip.entity.impl.lifecycle.GatewayConnectionFailedImpl;
 import com.mewna.catnip.entity.impl.user.PresenceImpl;
 import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.Presence;
@@ -293,7 +293,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
                 catnip.logAdapter().error("Shard {}/{}: Couldn't connect socket:", id, limit, t);
             }
             catnip.dispatchManager().dispatchEvent(Raw.GATEWAY_WEBSOCKET_CONNECTION_FAILED,
-                    new GatewayWebsocketConnectionFailedImpl(shardInfo(), t, catnip));
+                    new GatewayConnectionFailedImpl(shardInfo(), t, catnip));
             stateReply(ShardConnectState.FAILED);
             return null;
         });
@@ -420,7 +420,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
             catnip.logAdapter().error("Shard {}/{}: Couldn't connect socket:", id, limit, error);
         }
         catnip.dispatchManager().dispatchEvent(Raw.GATEWAY_WEBSOCKET_CONNECTION_FAILED,
-                new GatewayWebsocketConnectionFailedImpl(shardInfo(), error, catnip));
+                new GatewayConnectionFailedImpl(shardInfo(), error, catnip));
         stateReply(ShardConnectState.FAILED);
     }
     
@@ -439,7 +439,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
             socketOpen = false;
             closedByClient = false;
             catnip.dispatchManager().dispatchEvent(Raw.GATEWAY_WEBSOCKET_CLOSED,
-                    new GatewayWebsocketClosedImpl(shardInfo(), closeCode, reason, catnip));
+                    new GatewayClosedImpl(shardInfo(), closeCode, reason, catnip));
         } catch(final Exception e) {
             catnip.logAdapter().error("Shard {}/{}: Failure closing socket:", id, limit, e);
             stateReply(ShardConnectState.FAILED);

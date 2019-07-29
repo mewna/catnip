@@ -40,7 +40,7 @@ import javax.annotation.Nullable;
  * @author amy
  * @since 7/26/19.
  */
-public interface GatewayWebsocketClosed extends Entity {
+public interface GatewayClosed extends Entity {
     /**
      * @return Information about the shard whose gateway websocket closed.
      */

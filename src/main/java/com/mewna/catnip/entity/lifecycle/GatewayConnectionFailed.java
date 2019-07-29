@@ -36,7 +36,7 @@ import com.mewna.catnip.shard.ShardInfo;
  * @author amy
  * @since 7/26/19.
  */
-public interface GatewayWebsocketConnectionFailed extends Entity {
+public interface GatewayConnectionFailed extends Entity {
     /**
      * @return Information about the shard whose gateway websocket connection
      * failed.

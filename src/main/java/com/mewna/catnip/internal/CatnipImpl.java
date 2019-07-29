@@ -37,8 +37,8 @@ import com.mewna.catnip.entity.impl.user.PresenceImpl.ActivityImpl;
 import com.mewna.catnip.entity.impl.channel.*;
 import com.mewna.catnip.entity.impl.guild.*;
 import com.mewna.catnip.entity.impl.lifecycle.ChunkingDoneImpl;
-import com.mewna.catnip.entity.impl.lifecycle.GatewayWebsocketClosedImpl;
-import com.mewna.catnip.entity.impl.lifecycle.GatewayWebsocketConnectionFailedImpl;
+import com.mewna.catnip.entity.impl.lifecycle.GatewayClosedImpl;
+import com.mewna.catnip.entity.impl.lifecycle.GatewayConnectionFailedImpl;
 import com.mewna.catnip.entity.impl.lifecycle.MemberChunkRerequestImpl;
 import com.mewna.catnip.entity.impl.message.*;
 import com.mewna.catnip.entity.impl.misc.ReadyImpl;
@@ -419,8 +419,8 @@ public class CatnipImpl implements Catnip {
             eventCodec(ChunkingDoneImpl.class);
             eventCodec(MemberChunkRerequestImpl.class);
             
-            eventCodec(GatewayWebsocketClosedImpl.class);
-            eventCodec(GatewayWebsocketConnectionFailedImpl.class);
+            eventCodec(GatewayClosedImpl.class);
+            eventCodec(GatewayConnectionFailedImpl.class);
             
             // DoubleEvents use ImmutablePair
             eventCodec(ImmutablePair.class);

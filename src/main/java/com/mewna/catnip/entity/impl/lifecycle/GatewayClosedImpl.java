@@ -31,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.lifecycle.GatewayWebsocketConnectionFailed;
+import com.mewna.catnip.entity.lifecycle.GatewayClosed;
 import com.mewna.catnip.shard.ShardInfo;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -48,10 +48,10 @@ import javax.annotation.Nonnull;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-// God these class names are getting ridiculous
-public class GatewayWebsocketConnectionFailedImpl implements GatewayWebsocketConnectionFailed, RequiresCatnip {
+public class GatewayClosedImpl implements GatewayClosed, RequiresCatnip {
     private ShardInfo shardInfo;
-    private Throwable error;
+    private int code;
+    private String reason;
     
     @JsonIgnore
     private transient Catnip catnip;

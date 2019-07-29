@@ -83,12 +83,12 @@ public interface LifecycleEvent {
     /**
      * Fired when a shard's gateway websocket closes.
      */
-    EventType<GatewayWebsocketClosed> WEBSOCKET_CLOSED = event(Raw.GATEWAY_WEBSOCKET_CLOSED, GatewayWebsocketClosed.class);
+    EventType<GatewayClosed> WEBSOCKET_CLOSED = event(Raw.GATEWAY_WEBSOCKET_CLOSED, GatewayClosed.class);
     /**
      * Fired when a shard fails to connect to Discord's websocket gateway.
      */
-    EventType<GatewayWebsocketConnectionFailed> WEBSOCKET_CONNECTION_FAILED
-            = event(Raw.GATEWAY_WEBSOCKET_CONNECTION_FAILED, GatewayWebsocketConnectionFailed.class);
+    EventType<GatewayConnectionFailed> WEBSOCKET_CONNECTION_FAILED
+            = event(Raw.GATEWAY_WEBSOCKET_CONNECTION_FAILED, GatewayConnectionFailed.class);
     
     /**
      * Fired whenever a REST route hits a ratelimit (HTTP 429).
