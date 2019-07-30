@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.shard.event;
 
+import com.mewna.catnip.Catnip;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
@@ -47,13 +48,23 @@ import java.util.function.Consumer;
 public class DefaultDispatchManager extends AbstractDispatchManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDispatchManager.class);
     private final Map<String, Set<DefaultMessageConsumer<?>>> consumers = new ConcurrentHashMap<>();
-    private final Worker worker = catnip().rxScheduler().createWorker();
+    private Worker worker;
+    
+    @Override
+    public void catnip(final Catnip catnip) {
+        super.catnip(catnip);
+        worker = catnip().rxScheduler().createWorker();
+    }
     
     @Override
     public void dispatchEvent(final String address, final Object event) {
         final var addressConsumers = consumers.get(address);
         
         if(addressConsumers != null) {
+            if (worker == null) {
+                LOGGER.warn("Please configure the Catnip parent instance before dispatching events.");
+                throw new RuntimeException("dispatchEvent was called before DefaultDispatchManager was configured.");
+            }
             worker.schedule(() -> addressConsumers.forEach(c -> c.handle(event)));
         }
     }
@@ -68,6 +79,7 @@ public class DefaultDispatchManager extends AbstractDispatchManager {
     @Override
     public void close() {
         worker.dispose();
+        worker = null;
     }
     
     @Getter
