@@ -61,7 +61,7 @@ public interface ShardManager {
     
     /**
      * @return The shard conditions for this shard manager instance.
-     *request
+     *
      * @see ShardCondition
      */
     List<ShardCondition> conditions();
