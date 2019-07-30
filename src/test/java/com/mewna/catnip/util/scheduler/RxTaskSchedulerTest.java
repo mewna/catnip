@@ -50,7 +50,8 @@ class RxTaskSchedulerTest {
     void setTimer() throws InterruptedException {
         final var mock = mockNip();
         when(mock.rxScheduler()).thenReturn(scheduler);
-        final TaskScheduler tasker = new RxTaskScheduler(mock);
+        final TaskScheduler tasker = new RxTaskScheduler();
+        tasker.catnip(mock);
         final int[] test = {0};
         tasker.setTimer(50L, __ -> test[0] += 1);
         Thread.sleep(100L);
@@ -66,7 +67,8 @@ class RxTaskSchedulerTest {
     void setInterval() throws InterruptedException {
         final var mock = mockNip();
         when(mock.rxScheduler()).thenReturn(scheduler);
-        final TaskScheduler tasker = new RxTaskScheduler(mock);
+        final TaskScheduler tasker = new RxTaskScheduler();
+        tasker.catnip(mock);
         final int[] test = {0};
         final long taskId = tasker.setInterval(100L, __ -> test[0] += 1);
         Thread.sleep(350L);
@@ -78,7 +80,8 @@ class RxTaskSchedulerTest {
     void cancel() throws InterruptedException {
         final var mock = mockNip();
         when(mock.rxScheduler()).thenReturn(scheduler);
-        final TaskScheduler tasker = new RxTaskScheduler(mock);
+        final TaskScheduler tasker = new RxTaskScheduler();
+        tasker.catnip(mock);
         final int[] test = {0};
         final var task1 = tasker.setInterval(100L, __ -> test[0] += 1);
         final var task2 = tasker.setInterval(110L, __ -> test[0] += 2);

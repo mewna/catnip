@@ -44,9 +44,7 @@ import java.util.function.Consumer;
  * @since 7/29/19.
  */
 @RequiredArgsConstructor
-public class RxTaskScheduler implements TaskScheduler {
-    private final Catnip catnip;
-    
+public class RxTaskScheduler extends AbstractTaskScheduler {
     private final AtomicLong idCounter = new AtomicLong(0);
     // TODO: Should this be using something other than CHM here?
     private final Map<Long, Disposable> tasks = new ConcurrentHashMap<>();
@@ -55,8 +53,8 @@ public class RxTaskScheduler implements TaskScheduler {
     public long setTimer(final long ms, @Nonnull final Consumer<Long> task) {
         final var id = idCounter.getAndIncrement();
         final var disposable = Observable.timer(ms, TimeUnit.MILLISECONDS)
-                .observeOn(catnip.rxScheduler())
-                .subscribeOn(catnip.rxScheduler())
+                .observeOn(catnip().rxScheduler())
+                .subscribeOn(catnip().rxScheduler())
                 .forEach(l -> {
                     // Once the task is running, cancellation shouldn't(?) have any effect
                     // TODO: Check correctness
@@ -71,8 +69,8 @@ public class RxTaskScheduler implements TaskScheduler {
     public long setInterval(final long ms, @Nonnull final Consumer<Long> task) {
         final var id = idCounter.getAndIncrement();
         final var disposable = Observable.interval(ms, TimeUnit.MILLISECONDS)
-                .observeOn(catnip.rxScheduler())
-                .subscribeOn(catnip.rxScheduler())
+                .observeOn(catnip().rxScheduler())
+                .subscribeOn(catnip().rxScheduler())
                 .forEach(task::accept);
         tasks.put(id, disposable);
         return id;

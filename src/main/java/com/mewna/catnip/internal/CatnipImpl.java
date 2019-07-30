@@ -67,6 +67,7 @@ import com.mewna.catnip.util.JsonPojoCodec;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.logging.LogAdapter;
+import com.mewna.catnip.util.scheduler.RxTaskScheduler;
 import com.mewna.catnip.util.scheduler.TaskScheduler;
 import io.reactivex.Scheduler;
 import io.reactivex.Single;
@@ -409,6 +410,7 @@ public class CatnipImpl implements Catnip {
         eventBuffer.catnip(this);
         cache.catnip(this);
         requester.catnip(this);
+        taskScheduler.catnip(this);
     }
     
     private void codecs() {
