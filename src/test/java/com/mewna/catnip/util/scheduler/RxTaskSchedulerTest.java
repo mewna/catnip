@@ -85,7 +85,7 @@ class RxTaskSchedulerTest {
         Thread.sleep(250L);
         tasker.cancel(task2);
         assertEquals(6, test[0]);
-        Thread.sleep(150L);
+        Thread.sleep(130L);
         tasker.cancel(task1);
         assertEquals(7, test[0]);
     }
