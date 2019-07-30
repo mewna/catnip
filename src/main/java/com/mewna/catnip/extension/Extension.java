@@ -31,6 +31,7 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.extension.manager.ExtensionManager;
+import io.reactivex.Completable;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
@@ -47,8 +48,8 @@ import java.util.function.Function;
  * that an end-user could then optionally load in.
  * <p>
  * Note that the lifecycle callbacks are called <strong>SYNCHRONOUSLY</strong>
- * by vert.x, and as such you should take care to not block the event loop in
- * those callbacks!
+ * by the default extension manager, and as such you should take care to not
+ * block the event loop in those callbacks!
  *
  * @author amy
  * @since 9/6/18
@@ -127,13 +128,21 @@ public interface Extension {
     
     /**
      * Callback called once the Extension has been loaded by the {@link ExtensionManager}.
+     *
+     * @return a {@link Completable} which will be waited by the
+     * calling thread for its completion, or null if none.
      */
-    default void onLoaded() {
+    default Completable onLoaded() {
+        return null;
     }
     
     /**
      * Callback called once the Extension has been unloaded by the {@link ExtensionManager}.
+     *
+     * @return a {@link Completable} which will be waited by the
+     * calling thread for its completion, or null if none.
      */
-    default void onUnloaded() {
+    default Completable onUnloaded() {
+        return null;
     }
 }

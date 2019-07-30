@@ -32,6 +32,8 @@ import com.mewna.catnip.extension.Extension;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -48,6 +50,8 @@ import java.util.stream.Collectors;
 @Accessors(fluent = true)
 @RequiredArgsConstructor
 public class DefaultExtensionManager implements ExtensionManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultExtensionManager.class);
+    
     @Getter
     private final Catnip catnip;
     private final Collection<Extension> loadedExtensions = ConcurrentHashMap.newKeySet();
@@ -57,7 +61,17 @@ public class DefaultExtensionManager implements ExtensionManager {
         if(!loadedExtensions.contains(extension)) {
             extension.catnip(catnip);
             loadedExtensions.add(extension);
-            catnip.rxScheduler().scheduleDirect(extension::onLoaded);
+            try {
+                final var completable = extension.onLoaded();
+                if(completable != null) {
+                    final var result = completable.blockingGet();
+                    if(result != null) {
+                        throw result;
+                    }
+                }
+            } catch(final Throwable e) {
+                LOGGER.error("Extension " + extension + " threw an exception on loading.", e);
+            }
         }
         return this;
     }
@@ -66,7 +80,17 @@ public class DefaultExtensionManager implements ExtensionManager {
     public ExtensionManager unloadExtension(@Nonnull final Extension extension) {
         if(loadedExtensions.contains(extension)) {
             loadedExtensions.remove(extension);
-            catnip.rxScheduler().scheduleDirect(extension::onUnloaded);
+            try {
+                final var completable = extension.onLoaded();
+                if(completable != null) {
+                    final var result = completable.blockingGet();
+                    if(result != null) {
+                        throw result;
+                    }
+                }
+            } catch(final Throwable e) {
+                LOGGER.error("Extension " + extension + " threw an exception on unloading.", e);
+            }
         }
         return this;
     }
