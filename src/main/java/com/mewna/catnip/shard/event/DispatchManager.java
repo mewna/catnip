@@ -51,4 +51,7 @@ public interface DispatchManager extends Closeable {
      * @return A consumer listening on the provided address.
      */
     <T> MessageConsumer<T> createConsumer(String address);
+    
+    @Override
+    void close();
 }

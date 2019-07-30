@@ -256,6 +256,7 @@ public class CatnipImpl implements Catnip {
     
     @Override
     public void shutdown(final boolean vertx) {
+        dispatchManager.close();
         shardManager.shutdown();
         if(vertx) {
             this.vertx.close();
