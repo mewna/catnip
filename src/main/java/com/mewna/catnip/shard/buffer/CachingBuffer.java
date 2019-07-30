@@ -45,7 +45,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-import static com.mewna.catnip.shard.CatnipShard.LARGE_THRESHOLD;
 import static com.mewna.catnip.shard.DiscordEvent.Raw;
 
 /**
@@ -148,7 +147,7 @@ public class CachingBuffer extends AbstractBuffer {
             
             // Trigger member chunking if needed
             final Integer memberCount = payloadData.getInteger("member_count");
-            if(catnip().chunkMembers() && memberCount > LARGE_THRESHOLD) {
+            if(catnip().chunkMembers() && memberCount > catnip().largeThreshold()) {
                 // If we're chunking members, calculate how many chunks we have to await
                 int chunks = memberCount / 1000;
                 if(memberCount % 1000 != 0) {

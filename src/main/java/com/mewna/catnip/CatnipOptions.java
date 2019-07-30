@@ -239,6 +239,18 @@ public final class CatnipOptions implements Cloneable {
      * instead of automatically re-requesting them.
      */
     private boolean manualChunkRerequesting;
+    /**
+     * Total number of members where the gateway will stop sending offline
+     * members in the guild member list. If a guild's member count is over this
+     * limit, member chunking will happen. See {@link #chunkMembers}
+     * {@link #manualChunkRerequesting} {@link #memberChunkTimeout} for more.
+     *
+     * <strong>This must be between 50 and 250.</strong>
+     *
+     * For Discord's documentation, go here:
+     * https://discordapp.com/developers/docs/topics/gateway#identify-identify-structure
+     */
+    private int largeThreshold = 250;
     
     @Override
     public Object clone() {

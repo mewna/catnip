@@ -32,8 +32,8 @@ import com.mewna.catnip.cache.EntityCache;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.channel.Webhook;
-import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.lifecycle.MemberChunkRerequest;
+import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.ActivityType;
 import com.mewna.catnip.entity.user.Presence.OnlineStatus;
@@ -374,6 +374,12 @@ public interface Catnip {
      * @see CatnipOptions#memberChunkTimeout()
      */
     boolean manualChunkRerequesting();
+    
+    /**
+     * @return The largest a guild can be before member chunking needs to
+     * happen.
+     */
+    int largeThreshold();
     
     /**
      * @return A set of all ids of unavailable guilds.

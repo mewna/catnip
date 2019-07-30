@@ -93,7 +93,6 @@ import static com.mewna.catnip.shard.ShardAddress.*;
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class CatnipShard extends AbstractVerticle implements Listener {
     public static final int ZLIB_SUFFIX = 0x0000FFFF;
-    public static final int LARGE_THRESHOLD = 250;
     
     private final Catnip catnip;
     private final int id;
@@ -631,7 +630,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
                 .put("token", catnip.token())
                 .put("compress", false)
                 .put("guild_subscriptions", ((CatnipImpl) catnip).options().enableGuildSubscriptions())
-                .put("large_threshold", LARGE_THRESHOLD)
+                .put("large_threshold", catnip.largeThreshold())
                 .put("shard", new JsonArray().add(id).add(limit))
                 .put("properties", new JsonObject()
                         .put("$os", "JVM")

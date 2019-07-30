@@ -130,6 +130,7 @@ public class CatnipImpl implements Catnip {
     private Scheduler rxScheduler;
     private boolean logLifecycleEvents;
     private boolean manualChunkRerequesting;
+    private int largeThreshold;
     private CatnipOptions options;
     
     public CatnipImpl(@Nonnull final Vertx vertx, @Nonnull final CatnipOptions options) {
@@ -166,6 +167,12 @@ public class CatnipImpl implements Catnip {
         rxScheduler = options.rxScheduler();
         logLifecycleEvents = options.logLifecycleEvents();
         manualChunkRerequesting = options.manualChunkRerequesting();
+        largeThreshold = options.largeThreshold();
+        
+        // Sanity checks
+        if(largeThreshold > 250 || largeThreshold < 50) {
+            throw new IllegalArgumentException("Large threshold of " + largeThreshold + " not between 50 and 250!");
+        }
         
         injectSelf();
     }
