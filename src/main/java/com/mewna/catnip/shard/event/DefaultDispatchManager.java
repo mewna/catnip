@@ -38,7 +38,6 @@ import lombok.experimental.Accessors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -63,7 +62,7 @@ public class DefaultDispatchManager extends AbstractDispatchManager {
         if(addressConsumers != null) {
             if (worker == null) {
                 LOGGER.warn("Please configure the Catnip parent instance before dispatching events.");
-                throw new RuntimeException("dispatchEvent was called before DefaultDispatchManager was configured.");
+                throw new IllegalStateException("dispatchEvent was called before DefaultDispatchManager was configured.");
             }
             worker.schedule(() -> addressConsumers.forEach(c -> c.handle(event)));
         }

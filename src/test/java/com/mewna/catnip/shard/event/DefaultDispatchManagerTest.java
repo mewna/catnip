@@ -8,7 +8,8 @@ import org.mockito.Mockito;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 class DefaultDispatchManagerTest {
@@ -35,7 +36,6 @@ class DefaultDispatchManagerTest {
         assertTrue(wasExecuted[0], "Not dispatched");
     }
     
-    
     @Test
     void testConsistency() throws InterruptedException {
         final var dispatchManager = dispatchManager();
@@ -49,7 +49,7 @@ class DefaultDispatchManagerTest {
             dispatchManager.dispatchEvent("testConsistency", event);
         }
         
-        Thread.sleep(20L);
+        Thread.sleep(50L);
         assertEquals(counted.get(), amount, "Not all events were dispatched");
     }
     
@@ -70,13 +70,13 @@ class DefaultDispatchManagerTest {
         Thread.sleep(50L);
         
         assertEquals(counted.get(), amount, "Not all events were dispatched");
+        disposable.dispose();
     
         for(int i = 0; i < amount; i++) {
             dispatchManager.dispatchEvent("testObservable", event);
         }
-        disposable.dispose();
-        Thread.sleep(50L);
-        assertNotEquals(counted.get(), amount * 2, "Observable was not disposed");
+    
+        assertEquals(counted.get(), amount, "Observable was not disposed");
     }
     
     @Test
@@ -96,13 +96,13 @@ class DefaultDispatchManagerTest {
         Thread.sleep(50L);
     
         assertEquals(counted.get(), amount, "Not all events were dispatched");
+        disposable.dispose();
     
         for(int i = 0; i < amount; i++) {
             dispatchManager.dispatchEvent("testFlowable", event);
         }
-        disposable.dispose();
-        Thread.sleep(50L);
-        assertNotEquals(counted.get(), amount * 2, "Flowable was not disposed");
+        
+        assertEquals(counted.get(), amount, "Flowable was not disposed");
     }
     
     
