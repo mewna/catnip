@@ -69,7 +69,6 @@ class DefaultDispatchManagerTest {
         
         Thread.sleep(50L);
         
-        disposable.dispose();
         assertEquals(counted.get(), amount, "Not all events were dispatched");
     
         for(int i = 0; i < amount; i++) {
@@ -96,7 +95,6 @@ class DefaultDispatchManagerTest {
     
         Thread.sleep(50L);
     
-        disposable.dispose();
         assertEquals(counted.get(), amount, "Not all events were dispatched");
     
         for(int i = 0; i < amount; i++) {
