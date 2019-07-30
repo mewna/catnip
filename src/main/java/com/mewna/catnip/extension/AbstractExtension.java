@@ -29,7 +29,6 @@ package com.mewna.catnip.extension;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.extension.hook.CatnipHook;
-import io.vertx.core.impl.ConcurrentHashSet;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -38,6 +37,7 @@ import lombok.experimental.Accessors;
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author amy
@@ -49,7 +49,7 @@ import java.util.Set;
 public abstract class AbstractExtension implements Extension {
     @Getter
     private final String name;
-    private final Collection<CatnipHook> hooks = new ConcurrentHashSet<>();
+    private final Collection<CatnipHook> hooks = ConcurrentHashMap.newKeySet();
     @Getter
     @Setter
     private Catnip catnip;

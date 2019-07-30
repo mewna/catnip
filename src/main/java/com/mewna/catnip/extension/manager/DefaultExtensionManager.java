@@ -29,7 +29,6 @@ package com.mewna.catnip.extension.manager;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.extension.Extension;
-import io.vertx.core.impl.ConcurrentHashSet;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
@@ -38,6 +37,7 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 public class DefaultExtensionManager implements ExtensionManager {
     @Getter
     private final Catnip catnip;
-    private final Collection<Extension> loadedExtensions = new ConcurrentHashSet<>();
+    private final Collection<Extension> loadedExtensions = ConcurrentHashMap.newKeySet();
     
     @Override
     public ExtensionManager loadExtension(@Nonnull final Extension extension) {
