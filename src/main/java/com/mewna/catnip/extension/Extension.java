@@ -30,18 +30,11 @@ package com.mewna.catnip.extension;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.extension.hook.CatnipHook;
-import com.mewna.catnip.shard.event.DoubleEventType;
-import com.mewna.catnip.shard.event.EventType;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Future;
-import io.vertx.core.Verticle;
-import io.vertx.core.eventbus.MessageConsumer;
-import org.apache.commons.lang3.tuple.Pair;
+import com.mewna.catnip.extension.manager.ExtensionManager;
+import io.reactivex.Completable;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -54,34 +47,15 @@ import java.util.function.Function;
  * library of some sort. Your library code would be implemented as an extension
  * that an end-user could then optionally load in.
  * <p>
- * Note that this class extends {@link Verticle}. This is because extensions
- * are expected to be deployed as vert.x verticles. A proper catnip
- * implementation will keep track of these deployments to allow unloading or
- * reloading extensions at runtime. Since this class extends {@link Verticle},
- * the easiest way for a custom extension to be "compliant" is to simply extend
- * {@link AbstractExtension}, which itself extends {@link AbstractVerticle}, as
- * well as implementing this interface.
- * <p>
- * Extensions are deployed as vert.x verticles. vert.x provides two lifecycle
- * hooks - {@link Verticle#start(Future)} and {@link Verticle#stop(Future)} -
- * that should be used for managing an extension's lifecycle. This is not, say,
- * a Bukkit server, and as such, there is no need for lifecycle hooks like
- * {@code preload} or {@code unload} or similar to be provided. It is possible
- * that this may change in a future catnip update, but is currently unlikely.
- * Note that {@link AbstractVerticle#start()} and {@link AbstractVerticle#stop()}
- * are provided as convenience methods for when a {@link Future} is not needed,
- * and will automatically be available if implementations are based off of
- * {@link AbstractExtension} or {@link AbstractVerticle}.
- * <p>
  * Note that the lifecycle callbacks are called <strong>SYNCHRONOUSLY</strong>
- * by vert.x, and as such you should take care to not block the event loop in
- * those callbacks!
+ * by the default extension manager, and as such you should take care to not
+ * block the event loop in those callbacks!
  *
  * @author amy
  * @since 9/6/18
  */
 @SuppressWarnings("unused")
-public interface Extension extends Verticle {
+public interface Extension {
     /**
      * The name of this extension. Note that an extension's name is
      * <strong>NOT</strong> guaranteed unique, and so your code should NOT rely
@@ -107,8 +81,7 @@ public interface Extension extends Verticle {
      * the catnip version that is deploying this extension, and must not be
      * {@code null}. A proper extension manager implementation will call this
      * method to inject a catnip instance BEFORE deploying the extension, ie.
-     * {@link Verticle#start(Future)} / {@link AbstractVerticle#start()} will
-     * be called AFTER this method.
+     * {@link Extension#onLoaded()} will be called AFTER this method.
      *
      * @param catnip The catnip instance to inject. May not be {@code null}.
      */
@@ -154,61 +127,22 @@ public interface Extension extends Verticle {
     }
     
     /**
-     * Add a consumer for the specified event type.
-     * <p>
-     * This method behaves similarly to {@link Catnip#on(EventType)},
-     * but the event listeners are unregistered when the extension unloads
+     * Callback called once the Extension has been loaded by the {@link ExtensionManager}.
      *
-     * @param type The type of event to listen on.
-     * @param <T>  The object type of event being listened on.
-     *
-     * @return The vert.x message consumer.
+     * @return a {@link Completable} which will be waited by the
+     * calling thread for its completion, or null if none.
      */
-    <T> MessageConsumer<T> on(@Nonnull EventType<T> type);
+    default Completable onLoaded() {
+        return null;
+    }
     
     /**
-     * Add a consumer for the specified event type with the given handler
-     * callback.
-     * <p>
-     * This method behaves similarly to {@link Catnip#on(EventType, Consumer)},
-     * but the event listeners are unregistered when the extension unloads
+     * Callback called once the Extension has been unloaded by the {@link ExtensionManager}.
      *
-     * @param type    The type of event to listen on.
-     * @param handler The handler for the event object.
-     * @param <T>     The object type of event being listened on.
-     *
-     * @return The vert.x message consumer.
+     * @return a {@link Completable} which will be waited by the
+     * calling thread for its completion, or null if none.
      */
-    <T> MessageConsumer<T> on(@Nonnull EventType<T> type, @Nonnull Consumer<T> handler);
-    
-    /**
-     * Add a consumer for the specified event type.
-     * <p>
-     * This method behaves similarly to {@link Catnip#on(DoubleEventType)},
-     * but the event listeners are unregistered when the extension unloads
-     *
-     * @param type The type of event to listen on.
-     * @param <T>  The first type of event being listened on.
-     * @param <E>  The second type of event being listened on.
-     *
-     * @return The vert.x message consumer.
-     */
-    <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull DoubleEventType<T, E> type);
-    
-    /**
-     * Add a consumer for the specified event type.
-     * <p>
-     * This method behaves similarly to {@link Catnip#on(DoubleEventType)},
-     * but the event listeners are unregistered when the extension unloads
-     *
-     * @param type    The type of event to listen on.
-     * @param handler The handler for the event objects.
-     * @param <T>     The first type of event object being listened on.
-     * @param <E>     The second type of event object being listened on.
-     *
-     * @return The vert.x message consumer.
-     */
-    <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull DoubleEventType<T, E> type, @Nonnull BiConsumer<T, E> handler);
-    
-    String deploymentID();
+    default Completable onUnloaded() {
+        return null;
+    }
 }

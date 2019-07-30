@@ -29,15 +29,17 @@ package com.mewna.catnip.extension.manager;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.extension.Extension;
-import io.vertx.core.impl.ConcurrentHashSet;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -48,16 +50,28 @@ import java.util.stream.Collectors;
 @Accessors(fluent = true)
 @RequiredArgsConstructor
 public class DefaultExtensionManager implements ExtensionManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultExtensionManager.class);
+    
     @Getter
     private final Catnip catnip;
-    private final Collection<Extension> loadedExtensions = new ConcurrentHashSet<>();
+    private final Collection<Extension> loadedExtensions = ConcurrentHashMap.newKeySet();
     
     @Override
     public ExtensionManager loadExtension(@Nonnull final Extension extension) {
         if(!loadedExtensions.contains(extension)) {
             extension.catnip(catnip);
             loadedExtensions.add(extension);
-            catnip.vertx().deployVerticle(extension);
+            try {
+                final var completable = extension.onLoaded();
+                if(completable != null) {
+                    final var result = completable.blockingGet();
+                    if(result != null) {
+                        throw result;
+                    }
+                }
+            } catch(final Throwable e) {
+                LOGGER.error("Extension " + extension + " threw an exception on loading.", e);
+            }
         }
         return this;
     }
@@ -65,8 +79,18 @@ public class DefaultExtensionManager implements ExtensionManager {
     @Override
     public ExtensionManager unloadExtension(@Nonnull final Extension extension) {
         if(loadedExtensions.contains(extension)) {
-            catnip.vertx().undeploy(extension.deploymentID());
             loadedExtensions.remove(extension);
+            try {
+                final var completable = extension.onLoaded();
+                if(completable != null) {
+                    final var result = completable.blockingGet();
+                    if(result != null) {
+                        throw result;
+                    }
+                }
+            } catch(final Throwable e) {
+                LOGGER.error("Extension " + extension + " threw an exception on unloading.", e);
+            }
         }
         return this;
     }

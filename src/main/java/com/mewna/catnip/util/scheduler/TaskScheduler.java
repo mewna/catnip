@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.util.scheduler;
 
+import com.mewna.catnip.entity.RequiresCatnip;
 import io.reactivex.Observable;
 
 import javax.annotation.Nonnegative;
@@ -44,7 +45,7 @@ import java.util.function.Consumer;
  * @since 7/29/19.
  */
 // If we overflow longs, we have bigger issues.
-public interface TaskScheduler {
+public interface TaskScheduler extends RequiresCatnip {
     /**
      * Schedules a new task to be run in the future.
      *

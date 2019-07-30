@@ -25,33 +25,20 @@
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.shard.event;
+package com.mewna.catnip.util.scheduler;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.shard.event.DispatchManager;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 
-import java.io.Closeable;
-
-public interface DispatchManager extends Closeable {
-    void catnip(Catnip catnip);
-    
-    /**
-     * Dispatches an event to the provided address.
-     *
-     * @param address Address to send the event to.
-     * @param event   Event to dispatch.
-     */
-    void dispatchEvent(String address, Object event);
-    
-    /**
-     * Returns a consumer listening on the provided address.
-     *
-     * @param address Address to listen on.
-     * @param <T>     Type of the event handled by the consumer.
-     *
-     * @return A consumer listening on the provided address.
-     */
-    <T> MessageConsumer<T> createConsumer(String address);
+public abstract class AbstractTaskScheduler implements TaskScheduler {
+    @Getter
+    @Accessors(fluent = true)
+    private Catnip catnip;
     
     @Override
-    void close();
+    public void catnip(final Catnip catnip) {
+        this.catnip = catnip;
+    }
 }

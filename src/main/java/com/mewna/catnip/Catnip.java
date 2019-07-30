@@ -46,6 +46,7 @@ import com.mewna.catnip.shard.buffer.EventBuffer;
 import com.mewna.catnip.shard.event.DispatchManager;
 import com.mewna.catnip.shard.event.DoubleEventType;
 import com.mewna.catnip.shard.event.EventType;
+import com.mewna.catnip.shard.event.MessageConsumer;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.SessionManager;
@@ -58,7 +59,6 @@ import io.reactivex.Scheduler;
 import io.reactivex.Single;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.FlowableHelper;
 import io.vertx.reactivex.ObservableHelper;
@@ -724,7 +724,7 @@ public interface Catnip {
     }
     
     private <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler) {
-        return on(type).handler(m -> handler.accept(m.body()));
+        return on(type).handler(handler);
     }
     
     /**
@@ -741,7 +741,7 @@ public interface Catnip {
      * @return The observable.
      */
     default <T> Observable<T> observable(@Nonnull final EventType<T> type) {
-        return ObservableHelper.toObservable(on(type).bodyStream()).subscribeOn(rxScheduler()).observeOn(rxScheduler());
+        return on(type).asObservable().subscribeOn(rxScheduler()).observeOn(rxScheduler());
     }
     
     /**
@@ -758,7 +758,7 @@ public interface Catnip {
      * @return The flowable.
      */
     default <T> Flowable<T> flowable(@Nonnull final EventType<T> type) {
-        return FlowableHelper.toFlowable(on(type).bodyStream()).subscribeOn(rxScheduler()).observeOn(rxScheduler());
+        return on(type).asFlowable().subscribeOn(rxScheduler()).observeOn(rxScheduler());
     }
     
     /**
@@ -788,7 +788,7 @@ public interface Catnip {
      */
     private <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
                                                   @Nonnull final BiConsumer<T, E> handler) {
-        return on(type).handler(m -> handler.accept(m.body().getLeft(), m.body().getRight()));
+        return on(type).handler(m ->  handler.accept(m.getLeft(), m.getRight()));
     }
     
     /**
@@ -806,7 +806,7 @@ public interface Catnip {
      * @return The observable.
      */
     default <T, E> Observable<Pair<T, E>> observable(@Nonnull final DoubleEventType<T, E> type) {
-        return ObservableHelper.toObservable(on(type).bodyStream()).subscribeOn(rxScheduler()).observeOn(rxScheduler());
+        return on(type).asObservable().subscribeOn(rxScheduler()).observeOn(rxScheduler());
     }
     
     /**
@@ -824,7 +824,7 @@ public interface Catnip {
      * @return The flowable.
      */
     default <T, E> Flowable<Pair<T, E>> flowable(@Nonnull final DoubleEventType<T, E> type) {
-        return FlowableHelper.toFlowable(on(type).bodyStream()).subscribeOn(rxScheduler()).observeOn(rxScheduler());
+        return on(type).asFlowable().subscribeOn(rxScheduler()).observeOn(rxScheduler());
     }
     
     /**

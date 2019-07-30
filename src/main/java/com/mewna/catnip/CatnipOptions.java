@@ -53,6 +53,7 @@ import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.util.logging.DefaultLogAdapter;
 import com.mewna.catnip.util.logging.LogAdapter;
 import com.mewna.catnip.util.rx.RxHelpers;
+import com.mewna.catnip.util.scheduler.RxTaskScheduler;
 import com.mewna.catnip.util.scheduler.TaskScheduler;
 import io.reactivex.Scheduler;
 import io.vertx.core.json.JsonObject;
@@ -258,7 +259,7 @@ public final class CatnipOptions implements Cloneable {
      * {@link Catnip#taskScheduler()}, and can safely be used for any task
      * scheduling needs you may have.
      */
-    private TaskScheduler taskScheduler;
+    private TaskScheduler taskScheduler = new RxTaskScheduler();
     
     @Override
     public Object clone() {
