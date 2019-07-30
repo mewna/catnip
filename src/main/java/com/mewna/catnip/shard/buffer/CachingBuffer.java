@@ -160,7 +160,7 @@ public class CachingBuffer extends AbstractBuffer {
                 // I hate this
                 final int finalChunks = chunks;
                 // TODO: Cancel this task when the shard closes
-                catnip().vertx().setTimer(catnip().memberChunkTimeout(), __ -> {
+                catnip().taskScheduler().setTimer(catnip().memberChunkTimeout(), __ -> {
                     if(bufferState.guildChunkCount().containsKey(guild)) {
                         final Counter counter = bufferState.guildChunkCount().get(guild);
                         if(counter != null) {
@@ -185,7 +185,7 @@ public class CachingBuffer extends AbstractBuffer {
                                                     .build());
                                 } else {
                                     catnip().chunkMembers(guild);
-                                    catnip().vertx().setTimer(catnip().memberChunkTimeout(), ___ -> {
+                                    catnip().taskScheduler().setTimer(catnip().memberChunkTimeout(), ___ -> {
                                         if(bufferState.guildChunkCount().containsKey(guild)) {
                                             final Counter counterTwo = bufferState.guildChunkCount().get(guild);
                                             if(counterTwo != null && finalChunks - counterTwo.count() > 0) {
@@ -206,7 +206,7 @@ public class CachingBuffer extends AbstractBuffer {
             } else {
                 // Defer 100ms to try to wait for the guild role create event
                 // that might come
-                catnip().vertx().setTimer(100L, __ -> {
+                catnip().taskScheduler().setTimer(100L, __ -> {
                     emitter().emit(event);
                     bufferState.replayGuild(guild);
                     // Replay all buffered events once we run out

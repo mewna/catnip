@@ -258,7 +258,7 @@ public class DefaultShardManager extends AbstractShardManager {
         if(connectQueue.isEmpty()) {
             // No shards that we can queue, schedule the task to run again
             // later.
-            catnip().vertx().setTimer(1000L, t -> runConnectQueue());
+            catnip().taskScheduler().setTimer(1000L, t -> runConnectQueue());
             return;
         }
         
@@ -267,11 +267,11 @@ public class DefaultShardManager extends AbstractShardManager {
         SafeVertxCompletableFuture.allOf(conditions().stream().map(e -> e.preshard(id)).toArray(CompletableFuture[]::new))
                 .thenAccept(t -> {
                     connectQueue.run();
-                    catnip().vertx().setTimer(5500, r -> runConnectQueue());
+                    catnip().taskScheduler().setTimer(5500, r -> runConnectQueue());
                 })
                 .exceptionally(e -> {
                     catnip().logAdapter().debug("Couldn't complete shard conditions, trying again in 1s", e);
-                    catnip().vertx().setTimer(1000L, t -> runConnectQueue());
+                    catnip().taskScheduler().setTimer(1000L, t -> runConnectQueue());
                     return null;
                 });
     }

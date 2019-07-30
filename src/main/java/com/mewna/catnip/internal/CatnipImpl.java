@@ -67,6 +67,7 @@ import com.mewna.catnip.util.JsonPojoCodec;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.logging.LogAdapter;
+import com.mewna.catnip.util.scheduler.TaskScheduler;
 import io.reactivex.Scheduler;
 import io.reactivex.Single;
 import io.vertx.core.Future;
@@ -131,6 +132,7 @@ public class CatnipImpl implements Catnip {
     private boolean logLifecycleEvents;
     private boolean manualChunkRerequesting;
     private int largeThreshold;
+    private TaskScheduler taskScheduler;
     private CatnipOptions options;
     
     public CatnipImpl(@Nonnull final Vertx vertx, @Nonnull final CatnipOptions options) {
@@ -168,6 +170,7 @@ public class CatnipImpl implements Catnip {
         logLifecycleEvents = options.logLifecycleEvents();
         manualChunkRerequesting = options.manualChunkRerequesting();
         largeThreshold = options.largeThreshold();
+        taskScheduler = options.taskScheduler();
         
         // Sanity checks
         if(largeThreshold > 250 || largeThreshold < 50) {

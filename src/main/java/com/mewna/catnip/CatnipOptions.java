@@ -53,6 +53,7 @@ import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.util.logging.DefaultLogAdapter;
 import com.mewna.catnip.util.logging.LogAdapter;
 import com.mewna.catnip.util.rx.RxHelpers;
+import com.mewna.catnip.util.scheduler.TaskScheduler;
 import io.reactivex.Scheduler;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
@@ -246,11 +247,18 @@ public final class CatnipOptions implements Cloneable {
      * {@link #manualChunkRerequesting} {@link #memberChunkTimeout} for more.
      *
      * <strong>This must be between 50 and 250.</strong>
-     *
+     * <p>
      * For Discord's documentation, go here:
      * https://discordapp.com/developers/docs/topics/gateway#identify-identify-structure
      */
     private int largeThreshold = 250;
+    /**
+     * The task scheduler that catnip will use for scheduling its own internal
+     * tasks. This scheduler is exposed to the outside world through
+     * {@link Catnip#taskScheduler()}, and can safely be used for any task
+     * scheduling needs you may have.
+     */
+    private TaskScheduler taskScheduler;
     
     @Override
     public Object clone() {

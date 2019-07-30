@@ -68,7 +68,7 @@ public class GatewayTask<T> extends QueueTask<T> {
             if(catnip.gatewayRatelimiter().checkRatelimit(id, periodMs, limit).left) {
                 if(!queued) {
                     queued = true;
-                    catnip.vertx().setTimer(1000, __ -> {
+                    catnip.taskScheduler().setTimer(1000, __ -> {
                         queued = false;
                         run();
                     });

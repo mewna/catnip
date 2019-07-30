@@ -27,16 +27,23 @@
 
 package com.mewna.catnip.util.scheduler;
 
+import io.reactivex.Observable;
+
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
- * A basic task scheduler to replace vert.x's setTimer() and setPeriodic().
+ * A basic task scheduler to replace vert.x's setTimer() and setPeriodic(). The
+ * default implementation is {@link RxTaskScheduler}, which is a basic wrapper
+ * over {@link Observable#timer(long, TimeUnit)} and
+ * {@link Observable#interval(long, TimeUnit)}.
  *
  * @author amy
  * @since 7/29/19.
  */
+// If we overflow longs, we have bigger issues.
 public interface TaskScheduler {
     /**
      * Schedules a new task to be run in the future.

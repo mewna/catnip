@@ -122,7 +122,7 @@ public class DefaultRateLimiter implements RateLimiter {
         if(container.timerId != null) {
             return;
         }
-        container.timerId = catnip.vertx().setTimer(retryAfter(container.reset), __ -> {
+        container.timerId = catnip.taskScheduler().setTimer(retryAfter(container.reset), __ -> {
             synchronized(container) {
                 container.timerId = null;
                 final long now = System.currentTimeMillis();

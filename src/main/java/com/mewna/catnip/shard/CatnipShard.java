@@ -203,7 +203,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
         }
         heartbeatAcked = true;
         
-        catnip.vertx().cancelTimer(heartbeatTask.get());
+        catnip.taskScheduler().cancel(heartbeatTask.get());
     }
     
     private void handleVoiceStateUpdateQueue(final Message<JsonObject> message) {
@@ -499,7 +499,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
         final JsonObject payload = event.getJsonObject("d");
         trace = JsonUtil.toStringList(payload.getJsonArray("_trace"));
         
-        final long taskId = catnip.vertx().setPeriodic(payload.getInteger("heartbeat_interval"), timerId -> {
+        final long taskId = catnip.taskScheduler().setInterval(payload.getInteger("heartbeat_interval"), timerId -> {
             if(socket != null && socketOpen) {
                 if(!heartbeatAcked) {
                     // Zombie
@@ -512,7 +512,7 @@ public class CatnipShard extends AbstractVerticle implements Listener {
                 lastHeartbeat = System.nanoTime();
                 heartbeatAcked = false;
             } else {
-                final boolean cancel = catnip.vertx().cancelTimer(heartbeatTask.get());
+                final boolean cancel = catnip.taskScheduler().cancel(heartbeatTask.get());
                 catnip.logAdapter().debug("Canceled timer task inside of itself: {}", cancel);
             }
         });

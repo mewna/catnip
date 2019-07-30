@@ -51,6 +51,7 @@ import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.logging.LogAdapter;
+import com.mewna.catnip.util.scheduler.TaskScheduler;
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
@@ -68,6 +69,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -380,6 +382,17 @@ public interface Catnip {
      * happen.
      */
     int largeThreshold();
+    
+    /**
+     * The task scheduler allows for scheduling one-off and recurring tasks
+     * that are executed at some point in the future. By default, the task
+     * scheduler is effectively just a simple wrapper over
+     * {@link Observable#timer(long, TimeUnit)} and
+     * {@link Observable#interval(long, TimeUnit)}.
+     *
+     * @return The task scheduler used by this catnip instance.
+     */
+    TaskScheduler taskScheduler();
     
     /**
      * @return A set of all ids of unavailable guilds.
