@@ -32,10 +32,10 @@ import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.shard.event.DoubleEventType;
 import com.mewna.catnip.shard.event.EventType;
+import com.mewna.catnip.shard.event.MessageConsumer;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Verticle;
-import io.vertx.core.eventbus.MessageConsumer;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
