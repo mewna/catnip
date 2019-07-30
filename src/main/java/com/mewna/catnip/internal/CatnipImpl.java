@@ -127,7 +127,7 @@ public class CatnipImpl implements Catnip {
     private long memberChunkTimeout;
     private Presence initialPresence;
     private Set<String> disabledEvents;
-    private Scheduler scheduler;
+    private Scheduler rxScheduler;
     private boolean logLifecycleEvents;
     private boolean manualChunkRerequesting;
     private CatnipOptions options;
@@ -163,7 +163,7 @@ public class CatnipImpl implements Catnip {
         disabledEvents = Set.copyOf(options.disabledEvents());
         logUncachedPresenceWhenNotChunking = options.logUncachedPresenceWhenNotChunking();
         warnOnEntityVersionMismatch = options.warnOnEntityVersionMismatch();
-        scheduler = options.scheduler();
+        rxScheduler = options.rxScheduler();
         logLifecycleEvents = options.logLifecycleEvents();
         manualChunkRerequesting = options.manualChunkRerequesting();
         

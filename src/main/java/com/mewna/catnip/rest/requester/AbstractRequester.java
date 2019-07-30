@@ -107,8 +107,8 @@ public abstract class AbstractRequester implements Requester {
         }
         bucket.queueRequest(new QueuedRequest(r, r.route(), future, bucket, stacktrace));
         return RxHelpers.futureToObservable(future)
-                .subscribeOn(catnip.scheduler())
-                .observeOn(catnip.scheduler());
+                .subscribeOn(catnip.rxScheduler())
+                .observeOn(catnip.rxScheduler());
     }
     
     @Nonnull

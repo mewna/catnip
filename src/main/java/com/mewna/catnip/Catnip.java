@@ -188,7 +188,7 @@ public interface Catnip {
     
     @Nonnull
     @CheckReturnValue
-    Scheduler scheduler();
+    Scheduler rxScheduler();
     
     /**
      * @return The cached gateway info. May be null if it hasn't been fetched
@@ -712,9 +712,9 @@ public interface Catnip {
      * Add a reactive stream handler for events of the given type. Can be
      * disposed of with {@link Observable#unsubscribeOn(Scheduler)}. The
      * {@code scheduler} argument can be created with
-     * {@link #scheduler()}.
+     * {@link #rxScheduler()}.
      * <p>
-     * This method automatically subscribes on {@link #scheduler()}.
+     * This method automatically subscribes on {@link #rxScheduler()}.
      *
      * @param type The type of event to stream.
      * @param <T>  The object type of the event being streamed.
@@ -722,16 +722,16 @@ public interface Catnip {
      * @return The observable.
      */
     default <T> Observable<T> observable(@Nonnull final EventType<T> type) {
-        return ObservableHelper.toObservable(on(type).bodyStream()).subscribeOn(scheduler()).observeOn(scheduler());
+        return ObservableHelper.toObservable(on(type).bodyStream()).subscribeOn(rxScheduler()).observeOn(rxScheduler());
     }
     
     /**
      * Add a reactive stream handler for events of the given type.  Can be
      * disposed of with {@link Flowable#unsubscribeOn(Scheduler)}. The
      * {@code scheduler} argument can be created with
-     * {@link #scheduler()}.
+     * {@link #rxScheduler()}.
      * <p>
-     * This method automatically subscribes on {@link #scheduler()}.
+     * This method automatically subscribes on {@link #rxScheduler()}.
      *
      * @param type The type of event to stream.
      * @param <T>  The object type of the event being streamed.
@@ -739,7 +739,7 @@ public interface Catnip {
      * @return The flowable.
      */
     default <T> Flowable<T> flowable(@Nonnull final EventType<T> type) {
-        return FlowableHelper.toFlowable(on(type).bodyStream()).subscribeOn(scheduler()).observeOn(scheduler());
+        return FlowableHelper.toFlowable(on(type).bodyStream()).subscribeOn(rxScheduler()).observeOn(rxScheduler());
     }
     
     /**
@@ -776,9 +776,9 @@ public interface Catnip {
      * Add a reactive stream handler for events of the given type. Can be
      * disposed of with {@link Observable#unsubscribeOn(Scheduler)}. The
      * {@code scheduler} argument can be created with
-     * {@link #scheduler()}.
+     * {@link #rxScheduler()}.
      * <p>
-     * This method automatically subscribes on {@link #scheduler()}.
+     * This method automatically subscribes on {@link #rxScheduler()}.
      *
      * @param type The type of event to stream.
      * @param <T>  The object type of the event being streamed.
@@ -787,16 +787,16 @@ public interface Catnip {
      * @return The observable.
      */
     default <T, E> Observable<Pair<T, E>> observable(@Nonnull final DoubleEventType<T, E> type) {
-        return ObservableHelper.toObservable(on(type).bodyStream()).subscribeOn(scheduler()).observeOn(scheduler());
+        return ObservableHelper.toObservable(on(type).bodyStream()).subscribeOn(rxScheduler()).observeOn(rxScheduler());
     }
     
     /**
      * Add a reactive stream handler for events of the given type. Can be
      * disposed of with {@link Flowable#unsubscribeOn(Scheduler)}. The
      * {@code scheduler} argument can be created with
-     * {@link #scheduler()}.
+     * {@link #rxScheduler()}.
      * <p>
-     * This method automatically subscribes on {@link #scheduler()}.
+     * This method automatically subscribes on {@link #rxScheduler()}.
      *
      * @param type The type of event to stream.
      * @param <T>  The object type of the event being streamed.
@@ -805,7 +805,7 @@ public interface Catnip {
      * @return The flowable.
      */
     default <T, E> Flowable<Pair<T, E>> flowable(@Nonnull final DoubleEventType<T, E> type) {
-        return FlowableHelper.toFlowable(on(type).bodyStream()).subscribeOn(scheduler()).observeOn(scheduler());
+        return FlowableHelper.toFlowable(on(type).bodyStream()).subscribeOn(rxScheduler()).observeOn(rxScheduler());
     }
     
     /**

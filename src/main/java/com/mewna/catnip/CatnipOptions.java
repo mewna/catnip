@@ -225,7 +225,7 @@ public final class CatnipOptions implements Cloneable {
      * The RxJava scheduler that catnip should use for scheduling things like
      * stream subscriptions. Defaults to {@link RxHelpers#forkJoinScheduler()}.
      */
-    private Scheduler scheduler = RxHelpers.forkJoinScheduler();
+    private Scheduler rxScheduler = RxHelpers.forkJoinScheduler();
     /**
      * If this option is enabled, lifecycle-related events -- things like shard
      * connects / disconnects, 429 HTTP responses, ... -- will be directly
