@@ -1,7 +1,6 @@
 package com.mewna.catnip.shard.event;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.shard.DiscordEvent;
 import com.mewna.catnip.util.rx.RxHelpers;
 import io.reactivex.Scheduler;
 import org.junit.jupiter.api.Test;
@@ -53,4 +52,60 @@ class DefaultDispatchManagerTest {
         Thread.sleep(20L);
         assertEquals(counted.get(), amount, "Not all events were dispatched");
     }
+    
+    @Test
+    void testObservable() throws InterruptedException {
+        final var dispatchManager = dispatchManager();
+        final var event = new Object();
+        final var amount = 100000;
+        final AtomicInteger counted = new AtomicInteger();
+    
+        final var disposable = dispatchManager.createConsumer("testObservable")
+                .asObservable().subscribe(o -> counted.incrementAndGet());
+    
+        for(int i = 0; i < amount; i++) {
+            dispatchManager.dispatchEvent("testObservable", event);
+        }
+        
+        Thread.sleep(50L);
+        
+        disposable.dispose();
+        assertEquals(counted.get(), amount, "Not all events were dispatched");
+    
+        for(int i = 0; i < amount; i++) {
+            dispatchManager.dispatchEvent("testObservable", event);
+        }
+        disposable.dispose();
+        Thread.sleep(50L);
+        assertNotEquals(counted.get(), amount * 2, "Observable was not disposed");
+    }
+    
+    @Test
+    void testFlowable() throws InterruptedException {
+        final var dispatchManager = dispatchManager();
+        final var event = new Object();
+        final var amount = 100000;
+        final AtomicInteger counted = new AtomicInteger();
+        
+        final var disposable = dispatchManager.createConsumer("testFlowable")
+                .asFlowable().subscribe(o -> counted.incrementAndGet());
+        
+        for(int i = 0; i < amount; i++) {
+            dispatchManager.dispatchEvent("testFlowable", event);
+        }
+    
+        Thread.sleep(50L);
+    
+        disposable.dispose();
+        assertEquals(counted.get(), amount, "Not all events were dispatched");
+    
+        for(int i = 0; i < amount; i++) {
+            dispatchManager.dispatchEvent("testFlowable", event);
+        }
+        disposable.dispose();
+        Thread.sleep(50L);
+        assertNotEquals(counted.get(), amount * 2, "Flowable was not disposed");
+    }
+    
+    
 }
