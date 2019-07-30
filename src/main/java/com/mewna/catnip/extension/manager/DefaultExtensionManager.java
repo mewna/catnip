@@ -57,7 +57,7 @@ public class DefaultExtensionManager implements ExtensionManager {
         if(!loadedExtensions.contains(extension)) {
             extension.catnip(catnip);
             loadedExtensions.add(extension);
-            catnip.vertx().deployVerticle(extension);
+            catnip.rxScheduler().scheduleDirect(extension::onLoaded);
         }
         return this;
     }
@@ -65,8 +65,8 @@ public class DefaultExtensionManager implements ExtensionManager {
     @Override
     public ExtensionManager unloadExtension(@Nonnull final Extension extension) {
         if(loadedExtensions.contains(extension)) {
-            catnip.vertx().undeploy(extension.deploymentID());
             loadedExtensions.remove(extension);
+            catnip.rxScheduler().scheduleDirect(extension::onUnloaded);
         }
         return this;
     }
