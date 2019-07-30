@@ -58,10 +58,7 @@ import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 import io.reactivex.Single;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
-import io.vertx.reactivex.FlowableHelper;
-import io.vertx.reactivex.ObservableHelper;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.CheckReturnValue;
@@ -227,9 +224,9 @@ public interface Catnip {
      *
      * @see #vertx()
      */
-    @Nonnull
-    @CheckReturnValue
-    EventBus eventBus();
+    //@Nonnull
+    //@CheckReturnValue
+    //EventBus eventBus();
     
     /**
      * Handles dispatching and listening to events.
@@ -666,7 +663,7 @@ public interface Catnip {
      *
      * @return A Single that completes with the shard's presence.
      */
-    Single<Presence> presence(@Nonnegative final int shardId);
+    Presence presence(@Nonnegative final int shardId);
     
     /**
      * Update the presence for all shards.
