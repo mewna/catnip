@@ -219,16 +219,6 @@ public interface Catnip {
     // Implementations are lombok-generated
     
     /**
-     * @return The event bus used by the vert.x instance that this catnip
-     * instance uses.
-     *
-     * @see #vertx()
-     */
-    //@Nonnull
-    //@CheckReturnValue
-    //EventBus eventBus();
-    
-    /**
      * Handles dispatching and listening to events.
      *
      * @return The current dispatch manager instance.

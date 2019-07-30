@@ -195,7 +195,7 @@ public class DefaultShardManager extends AbstractShardManager {
         final CatnipShardImpl shard = shards.get(id);
         
         if(shard == null) {
-            catnip().logAdapter().error("Cannot find deployment ID of shard {}, re-queueing...", id);
+            catnip().logAdapter().error("Cannot find shard {}, re-queueing...", id);
             addToConnectQueue(id);
             return;
         }
