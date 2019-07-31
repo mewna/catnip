@@ -39,7 +39,6 @@ import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
-import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import io.reactivex.Single;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
@@ -119,7 +118,7 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
     public Single<Guild> guildAsync(final long id) {
-        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
+        return Single.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -131,7 +130,7 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
     public Single<User> userAsync(final long id) {
-        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
+        return Single.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -143,7 +142,7 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
     public Single<Presence> presenceAsync(final long id) {
-        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
+        return Single.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -155,7 +154,7 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
     public Single<Member> memberAsync(final long guildId, final long id) {
-        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
+        return Single.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -173,7 +172,7 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
     public Single<Role> roleAsync(final long guildId, final long id) {
-        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
+        return Single.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -191,7 +190,7 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
     public Single<GuildChannel> channelAsync(final long guildId, final long id) {
-        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
+        return Single.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -209,7 +208,7 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
     public Single<UserDMChannel> dmChannelAsync(final long id) {
-        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
+        return Single.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -221,7 +220,7 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
     public Single<CustomEmoji> emojiAsync(final long guildId, final long id) {
-        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
+        return Single.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -239,7 +238,7 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
     public Single<VoiceState> voiceStateAsync(final long guildId, final long id) {
-        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
+        return Single.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -257,6 +256,6 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
     public Single<User> selfUserAsync() {
-        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip, null));
+        return Single.error(new IllegalArgumentException("No entity"));
     }
 }

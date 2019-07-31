@@ -40,7 +40,6 @@ import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
-import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import io.reactivex.Single;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
@@ -339,64 +338,72 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     
     // Man these """async""" methods are a joke.
     
+    protected <I, T> Single<T> or(final I id, final T data) {
+        if(data == null) {
+            return Single.error(new IllegalArgumentException("No entity for: " + id));
+        } else {
+            return Single.just(data);
+        }
+    }
+    
     @Nonnull
     @Override
     public Single<Guild> guildAsync(final long id) {
-        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(guild(id)));
+        return or(id, guild(id));
     }
     
     @Nonnull
     @Override
     public Single<User> userAsync(final long id) {
-        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(user(id)));
+        return or(id, user(id));
     }
     
     @Nonnull
     @Override
     public Single<Presence> presenceAsync(final long id) {
-        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(presence(id)));
+        return or(id, presence(id));
     }
     
     @Nonnull
     @Override
     public Single<Member> memberAsync(final long guildId, final long id) {
-        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(member(guildId, id)));
+        return or(id, member(guildId, id));
     }
     
     @Nonnull
     @Override
     public Single<Role> roleAsync(final long guildId, final long id) {
-        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(role(guildId, id)));
+        return or(id, role(guildId, id));
     }
     
     @Nonnull
     @Override
     public Single<GuildChannel> channelAsync(final long guildId, final long id) {
-        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(channel(guildId, id)));
+        return or(id, channel(guildId, id));
     }
     
     @Nonnull
     @Override
     public Single<UserDMChannel> dmChannelAsync(final long id) {
-        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(dmChannel(id)));
+        return or(id, dmChannel(id));
     }
     
     @Nonnull
     @Override
     public Single<CustomEmoji> emojiAsync(final long guildId, final long id) {
-        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(emoji(guildId, id)));
+        return or(id, emoji(guildId, id));
     }
     
     @Nonnull
     @Override
     public Single<VoiceState> voiceStateAsync(final long guildId, final long id) {
-        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(voiceState(guildId, id)));
+        return or(id, voiceState(guildId, id));
     }
     
     @Nonnull
     @Override
     public Single<User> selfUserAsync() {
-        return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(selfUser()));
+        return or("self user", selfUser());
     }
     
     protected int shardId(final long entityId) {

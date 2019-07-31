@@ -122,7 +122,8 @@ public class DefaultShardManager extends AbstractShardManager {
         if(catnip().gatewayInfo() != null) {
             // If we already have gateway info, eg. from validating the token,
             // then don't bother fetching it a second time
-            gatewayInfoCompletableFuture = Single.fromFuture(SafeVertxCompletableFuture.completedFuture(catnip().gatewayInfo()));
+            //noinspection ConstantConditions
+            gatewayInfoCompletableFuture = Single.just(catnip().gatewayInfo());
         } else {
             gatewayInfoCompletableFuture = catnip().rest().user().getGatewayBot();
         }

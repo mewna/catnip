@@ -53,7 +53,6 @@ import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.util.PermissionUtil;
-import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.logging.LogAdapter;
 import com.mewna.catnip.util.scheduler.TaskScheduler;
 import io.reactivex.Scheduler;
@@ -365,10 +364,10 @@ public class CatnipImpl implements Catnip {
                 parseClientId();
             } catch(final IllegalArgumentException e) {
                 final Exception wrapped = new RuntimeException("The provided token was invalid!", e);
-                return Single.fromFuture(SafeVertxCompletableFuture.failedFuture(wrapped));
+                return Single.error(wrapped);
             }
             
-            return Single.fromFuture(SafeVertxCompletableFuture.completedFuture(this));
+            return Single.just(this);
         }
     }
     
