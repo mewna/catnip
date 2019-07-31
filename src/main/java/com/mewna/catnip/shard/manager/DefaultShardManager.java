@@ -56,7 +56,7 @@ import java.util.stream.IntStream;
 @Accessors(fluent = true)
 public class DefaultShardManager extends AbstractShardManager {
     private final Collection<MessageConsumer> consumers = new HashSet<>();
-    private final Map<Integer, CatnipShardImpl> shards = new ConcurrentHashMap<>();
+    private final Map<Integer, CatnipShard> shards = new ConcurrentHashMap<>();
     private final Collection<Integer> shardIds;
     @Getter
     private int shardCount;
@@ -170,10 +170,9 @@ public class DefaultShardManager extends AbstractShardManager {
         undeploy(id);
         catnip().logAdapter().info("Connecting shard {} (queue len {})", id, connectQueue.size());
     
-        final var catnipShard = new CatnipShardImpl(catnip(), id, shardCount, catnip().initialPresence());
+        final CatnipShard catnipShard = new CatnipShardImpl(catnip(), id, shardCount, catnip().initialPresence());
         
         try {
-            catnipShard.start();
             shards.put(id, catnipShard);
             catnip().logAdapter().info("Deployed shard {}(/{})", id, shardCount);
             connectShard(id);
@@ -184,15 +183,15 @@ public class DefaultShardManager extends AbstractShardManager {
     }
     
     private void undeploy(final int id) {
-        final CatnipShardImpl shard = shards.remove(id);
+        final CatnipShard shard = shards.remove(id);
         if(shard != null) {
-            shard.stop();
+            shard.disconnect();
         }
     }
     
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private void connectShard(final int id) {
-        final CatnipShardImpl shard = shards.get(id);
+        final CatnipShard shard = shards.get(id);
         
         if(shard == null) {
             catnip().logAdapter().error("Cannot find shard {}, re-queueing...", id);
@@ -273,7 +272,7 @@ public class DefaultShardManager extends AbstractShardManager {
         started = false;
         consumers.forEach(MessageConsumer::close);
         consumers.clear();
-        shards.values().forEach(CatnipShardImpl::stop);
+        shards.values().forEach(CatnipShard::disconnect);
         shards.clear();
     }
 }

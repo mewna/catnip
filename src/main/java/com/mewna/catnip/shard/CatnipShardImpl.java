@@ -39,6 +39,7 @@ import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.shard.LifecycleEvent.Raw;
 import com.mewna.catnip.shard.manager.AbstractShardManager;
 import com.mewna.catnip.shard.manager.DefaultShardManager;
+import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.util.BufferOutputStream;
 import com.mewna.catnip.util.JsonUtil;
 import com.mewna.catnip.util.ReentrantLockWebSocket;
@@ -68,22 +69,15 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterOutputStream;
 
 import static com.mewna.catnip.shard.LifecycleState.*;
-import static com.mewna.catnip.shard.ShardAddress.PRESENCE_UPDATE_REQUEST;
-import static com.mewna.catnip.shard.ShardAddress.computeAddress;
 
 /**
  * A catnip shard encapsulates a single websocket connection to Discord's
- * real-time gateway. Shards are implemented as vert.x verticles and should be
- * un/deployed as such; see {@link DefaultShardManager} and
- * {@link AbstractShardManager} for more.
+ * real-time gateway. Shards should be deployed/undeployed by a {@link ShardManager};
+ * see {@link DefaultShardManager} and {@link AbstractShardManager} for more.
  * <p/>
- * Shards are controlled by sending messages over the vert.x event bus; it is
- * NOT recommended that you store a reference to a shard verticle anywhere. To
- * send a message to a shard:
- * <ol>
- * <li>Get the shard's control address with {@code ShardAddress.computeAddress(ShardAddress.CONTROL, id)}.</li>
- * <li>Send a {@link ShardControlMessage} to it.</li>
- * </ol>
+ * Shards are controlled by calling the methods exposed on the {@link CatnipShard};
+ * it is NOT recommended that you store a reference to a shard object; and instead
+ * poll the {@link ShardManager} for the shard when needed.
  *
  * @author amy
  * @since 8/31/18.
@@ -133,13 +127,12 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         this.presence = presence;
         
         client = HttpClient.newHttpClient();
-    
-        final String presenceUpdateRequest = computeAddress(PRESENCE_UPDATE_REQUEST, id);
-        sendTask = GatewayTask.gatewaySendTask(catnip, "catnip:gateway:" + id + ":outgoing-send", this::handleSocketSend);
-        presenceTask = GatewayTask.gatewayPresenceTask(catnip, presenceUpdateRequest, update -> {
-            handleSocketSend(basePayload(GatewayOp.STATUS_UPDATE, update.asJson()));
-            currentPresence = update;
-        });
+        sendTask = GatewayTask.gatewaySendTask(catnip, "catnip:gateway:" + id + ":outgoing-send", this::sendToSocket);
+        presenceTask = GatewayTask.gatewayPresenceTask(catnip, "catnip:gateway:ws-outgoing:" + id + ":presence-update",
+                update -> {
+                    sendToSocket(basePayload(GatewayOp.STATUS_UPDATE, update.asJson()));
+                    currentPresence = update;
+                });
         lifecycleState = CREATED;
     }
     
@@ -158,26 +151,6 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                 .put("op", op.opcode())
                 .put("d", payload);
     }
-    
-    public void start() {
-        lifecycleState = DEPLOYED;
-    }
-    
-    public void stop() {
-        stateReply(ShardConnectState.CANCEL);
-        lifecycleState = DISCONNECTED;
-        
-        if(socket != null) {
-            closedByClient = true;
-            if(socketOpen) {
-                socket.sendClose(4000, "Shutdown");
-            }
-        }
-        heartbeatAcked = true;
-        
-        catnip.taskScheduler().cancel(heartbeatTask.get());
-    }
-    
     
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private void connectSocket() {
@@ -429,13 +402,29 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     @Override
-    public void handleSocketQueue(final JsonObject payload) {
+    public void disconnect() {
+        stateReply(ShardConnectState.CANCEL);
+        lifecycleState = DISCONNECTED;
+        
+        if(socket != null) {
+            closedByClient = true;
+            if(socketOpen) {
+                socket.sendClose(4000, "Shutdown");
+            }
+        }
+        heartbeatAcked = true;
+        
+        catnip.taskScheduler().cancel(heartbeatTask.get());
+    }
+    
+    @Override
+    public void queueSendToSocket(@Nonnull final JsonObject payload) {
         sendTask.offer(payload);
         sendTask.run();
     }
     
     @Override
-    public void handleSocketSend(JsonObject payload) {
+    public void sendToSocket(@Nonnull JsonObject payload) {
         if(socket != null && socketOpen) {
             for(final Extension extension : catnip.extensionManager().extensions()) {
                 for(final CatnipHook hook : extension.hooks()) {
@@ -459,7 +448,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     @Override
-    public void queueVoiceStateUpdate(final JsonObject json) {
+    public void queueVoiceStateUpdate(@Nonnull final JsonObject json) {
         sendTask.offer(basePayload(GatewayOp.VOICE_STATE_UPDATE, json));
         sendTask.run();
     }
@@ -477,7 +466,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                     socket.sendClose(4000, "Heartbeat zombie");
                     return;
                 }
-                handleSocketSend(basePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().seqnum(id)));
+                sendToSocket(basePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().seqnum(id)));
                 lastHeartbeat = System.nanoTime();
                 heartbeatAcked = false;
             } else {
@@ -500,10 +489,10 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             // window, your session is no longer resumable.
             // See: https://discordapp.com/channels/81384788765712384/381887113391505410/584900930525200386
             lifecycleState = RESUMING;
-            handleSocketSend(resume());
+            sendToSocket(resume());
         } else {
             lifecycleState = IDENTIFYING;
-            handleSocketSend(identify());
+            sendToSocket(identify());
         }
     }
     
@@ -555,7 +544,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     private void handleHeartbeat() {
-        handleSocketSend(basePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().seqnum(id)));
+        sendToSocket(basePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().seqnum(id)));
     }
     
     private void handleHeartbeatAck() {

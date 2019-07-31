@@ -287,7 +287,7 @@ public class CatnipImpl implements Catnip {
     
     @Override
     public void chunkMembers(@Nonnull final String guildId, @Nonnull final String query, @Nonnegative final int limit) {
-        shardManager().shard(shardIdFor(guildId)).handleSocketQueue(
+        shardManager().shard(shardIdFor(guildId)).queueSendToSocket(
                 CatnipShardImpl.basePayload(GatewayOp.REQUEST_GUILD_MEMBERS,
                         new JsonObject()
                                 .put("guild_id", guildId)

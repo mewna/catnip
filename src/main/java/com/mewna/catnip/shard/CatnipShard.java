@@ -5,41 +5,72 @@ import com.mewna.catnip.entity.user.Presence;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.util.List;
 
 public interface CatnipShard {
-    //region handleControlMessage
+    /**
+     * Fetches the trace from the shard.
+     *
+     * @return The shard's trace.
+     */
     @Nonnull
     List<String> getTrace();
     
+    /**
+     * Checks whether or not the current shard is currently connected to the
+     * websocket gateway. This is done as a boolean because - at least for now
+     * - there's only 2 meaningful states: connected, and queued to be connected.
+     *
+     * @return Whether or not the shard with the given id is currently
+     * connected to the websocket gateway.
+     */
+    @CheckReturnValue
     boolean isConnected();
     
+    /**
+     * Get the lifecycle state for the current shard. This provides more
+     * meaningful info than {@link #isConnected()}, because it provides more
+     * granular info about the shard's state. However, it does not
+     * differentiate between "connected" or not per se; it is up to the
+     * end-user to determine whether or not the lifecycle state is actually a
+     * state of being "connected."
+     *
+     * @return The lifecycle state of the shard.
+     */
     @Nonnull
+    @CheckReturnValue
     LifecycleState getLifecycleState();
     
+    /**
+     * Return the shard's computed gateway latency, ie. the time it takes for
+     * the shard to send a heartbeat to Discord and get a response.
+     *
+     * @return The shard's computed gateway latency.
+     */
     long getLastHeartbeatLatency();
+    
+    /**
+     * Return the shard's current presence.
+     *
+     * @return The shard's current presence.
+     */
+    @Nonnull
+    Presence getPresence();
+    
+    // internal methods
     
     @Nonnull
     Single<ShardConnectState> connect();
-    //endregion
     
-    //region handleSocketQueue
-    void handleSocketQueue(final JsonObject json);
-    //endregion
+    void disconnect();
     
-    //region handleSocketSend
-    void handleSocketSend(final JsonObject json);
-    //endregion
-    
-    //region handlePresenceUpdate
     void updatePresence(@Nonnull final PresenceImpl presence);
     
-    @Nonnull
-    Presence getPresence();
-    //endregion
+    void queueSendToSocket(@Nonnull final JsonObject json);
     
-    //region handleVoiceStateUpdateQueue
-    void queueVoiceStateUpdate(final JsonObject json);
-    //endregion
+    void queueVoiceStateUpdate(@Nonnull final JsonObject json);
+    
+    void sendToSocket(@Nonnull final JsonObject json);
 }

@@ -43,7 +43,6 @@ import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.rx.RxHelpers;
 import io.reactivex.Observable;
-import io.vertx.core.Context;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -183,7 +182,6 @@ public abstract class AbstractRequester implements Requester {
     
     protected void executeHttpRequest(@Nonnull final Route route, @Nullable final BodyPublisher body,
                                       @Nonnull final QueuedRequest request, @Nonnull final String mediaType) {
-        final Context context = catnip.vertx().getOrCreateContext();
         final HttpRequest.Builder builder;
         
         if(route.method() == GET) {
@@ -214,12 +212,12 @@ public abstract class AbstractRequester implements Requester {
                     final long requestEnd = System.nanoTime();
                     
                     if(res.body() == null) {
-                        context.runOnContext(__ ->
+                        catnip.rxScheduler().scheduleDirect(() ->
                                 handleResponse(route, code, message, requestEnd, null, res.headers(), request));
                     } else {
                         final byte[] bodyBytes = res.body().getBytes();
                         
-                        context.runOnContext(__ ->
+                        catnip.rxScheduler().scheduleDirect(() ->
                                 handleResponse(route, code, message, requestEnd, Buffer.buffer(bodyBytes),
                                         res.headers(), request));
                     }
