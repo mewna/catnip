@@ -651,7 +651,7 @@ public interface Catnip {
      *
      * @param shardId The shard id to get presence for.
      *
-     * @return A Single that completes with the shard's presence.
+     * @return The shard's presence.
      */
     Presence presence(@Nonnegative final int shardId);
     
@@ -836,7 +836,7 @@ public interface Catnip {
      *
      * @param webhookUrl The URL of the webhook.
      *
-     * @return A stage that completes when the webhook is validated.
+     * @return A Single that completes when the webhook is validated.
      */
     default Single<Webhook> parseWebhook(final String webhookUrl) {
         final Pair<String, String> parse = Utils.parseWebhook(webhookUrl);
@@ -850,7 +850,7 @@ public interface Catnip {
      * @param id    The webhook's id.
      * @param token The webhook's token.
      *
-     * @return A stage that completes when the webhook is validated.
+     * @return A Single that completes when the webhook is validated.
      */
     default Single<Webhook> parseWebhook(final String id, final String token) {
         return rest().webhook().getWebhookToken(id, token);
