@@ -58,10 +58,7 @@ import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 import io.reactivex.Single;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
-import io.vertx.reactivex.FlowableHelper;
-import io.vertx.reactivex.ObservableHelper;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.CheckReturnValue;
@@ -220,16 +217,6 @@ public interface Catnip {
     Vertx vertx();
     
     // Implementations are lombok-generated
-    
-    /**
-     * @return The event bus used by the vert.x instance that this catnip
-     * instance uses.
-     *
-     * @see #vertx()
-     */
-    @Nonnull
-    @CheckReturnValue
-    EventBus eventBus();
     
     /**
      * Handles dispatching and listening to events.
@@ -664,9 +651,9 @@ public interface Catnip {
      *
      * @param shardId The shard id to get presence for.
      *
-     * @return A Single that completes with the shard's presence.
+     * @return The shard's presence.
      */
-    Single<Presence> presence(@Nonnegative final int shardId);
+    Presence presence(@Nonnegative final int shardId);
     
     /**
      * Update the presence for all shards.
@@ -849,7 +836,7 @@ public interface Catnip {
      *
      * @param webhookUrl The URL of the webhook.
      *
-     * @return A stage that completes when the webhook is validated.
+     * @return A Single that completes when the webhook is validated.
      */
     default Single<Webhook> parseWebhook(final String webhookUrl) {
         final Pair<String, String> parse = Utils.parseWebhook(webhookUrl);
@@ -863,7 +850,7 @@ public interface Catnip {
      * @param id    The webhook's id.
      * @param token The webhook's token.
      *
-     * @return A stage that completes when the webhook is validated.
+     * @return A Single that completes when the webhook is validated.
      */
     default Single<Webhook> parseWebhook(final String id, final String token) {
         return rest().webhook().getWebhookToken(id, token);

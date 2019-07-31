@@ -41,19 +41,19 @@ import com.mewna.catnip.entity.guild.Invite.InviteGuild;
 import com.mewna.catnip.entity.guild.Invite.Inviter;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
 import com.mewna.catnip.entity.guild.audit.*;
-import com.mewna.catnip.entity.impl.message.*;
-import com.mewna.catnip.entity.impl.message.EmbedImpl.*;
 import com.mewna.catnip.entity.impl.channel.*;
+import com.mewna.catnip.entity.impl.guild.*;
 import com.mewna.catnip.entity.impl.guild.InviteImpl.InviteChannelImpl;
 import com.mewna.catnip.entity.impl.guild.InviteImpl.InviteGuildImpl;
 import com.mewna.catnip.entity.impl.guild.InviteImpl.InviterImpl;
+import com.mewna.catnip.entity.impl.guild.audit.*;
+import com.mewna.catnip.entity.impl.message.*;
+import com.mewna.catnip.entity.impl.message.EmbedImpl.*;
 import com.mewna.catnip.entity.impl.message.MessageImpl.AttachmentImpl;
 import com.mewna.catnip.entity.impl.message.MessageImpl.ReactionImpl;
+import com.mewna.catnip.entity.impl.misc.*;
 import com.mewna.catnip.entity.impl.user.*;
 import com.mewna.catnip.entity.impl.user.PresenceImpl.ActivityImpl;
-import com.mewna.catnip.entity.impl.guild.*;
-import com.mewna.catnip.entity.impl.guild.audit.*;
-import com.mewna.catnip.entity.impl.misc.*;
 import com.mewna.catnip.entity.impl.voice.VoiceRegionImpl;
 import com.mewna.catnip.entity.impl.voice.VoiceServerUpdateImpl;
 import com.mewna.catnip.entity.message.*;
@@ -71,9 +71,8 @@ import com.mewna.catnip.entity.user.Presence.OnlineStatus;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.entity.voice.VoiceRegion;
 import com.mewna.catnip.entity.voice.VoiceServerUpdate;
-import com.mewna.catnip.util.JsonEntityCodec;
-import com.mewna.catnip.util.JsonPojoCodec;
-import io.vertx.core.buffer.Buffer;
+import com.mewna.catnip.util.JsonUtil;
+import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -94,15 +93,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Note: We can't use {@link Object#equals} of most entities because many of them only check the ids for being equal.
  */
 @SuppressWarnings("OverlyCoupledClass")
-class CodecTest {
+class EntityTest {
     private <T extends Entity> void testEntity(final T entity) {
         final Catnip thisCatnip = mockNip();
         @SuppressWarnings("unchecked")
         final Class<T> entityClass = (Class<T>) entity.getClass();
-        final JsonEntityCodec<T> codec = new JsonEntityCodec<>(thisCatnip, entityClass);
-        final Buffer buffer = Buffer.buffer();
-        codec.encodeToWire(buffer, entity);
-        final T deserialized = codec.decodeFromWire(0, buffer);
+        final T deserialized = Entity.fromJson(thisCatnip, entityClass, entity.toJson());
         
         final Map<Object, Object> deepEqualsOptions = new HashMap<>();
         deepEqualsOptions.put(DeepEquals.IGNORE_CUSTOM_EQUALS, Collections.emptySet()); //empty set = ignore all
@@ -124,10 +120,11 @@ class CodecTest {
         final Catnip thisCatnip = mockNip();
         @SuppressWarnings("unchecked")
         final Class<T> entityClass = (Class<T>) entity.getClass();
-        final JsonPojoCodec<T> codec = new JsonPojoCodec<>(thisCatnip, entityClass);
-        final Buffer buffer = Buffer.buffer();
-        codec.encodeToWire(buffer, entity);
-        final T deserialized = codec.decodeFromWire(0, buffer);
+        final JsonObject data = JsonUtil.destringifySnowflakes(JsonUtil.stringifySnowflakes(JsonObject.mapFrom(entity)));
+        final T deserialized = data.mapTo(entityClass);
+        if(deserialized instanceof RequiresCatnip) {
+            ((RequiresCatnip) deserialized).catnip(thisCatnip);
+        }
         
         final Map<Object, Object> deepEqualsOptions = new HashMap<>();
         deepEqualsOptions.put(DeepEquals.IGNORE_CUSTOM_EQUALS, Collections.emptySet()); //empty set = ignore all

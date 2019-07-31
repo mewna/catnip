@@ -28,26 +28,14 @@
 package com.mewna.catnip.shard.manager;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.shard.ShardControlMessage;
-import com.mewna.catnip.shard.LifecycleState;
-import com.mewna.catnip.util.JsonUtil;
-import com.mewna.catnip.util.SafeVertxCompletableFuture;
-import io.reactivex.Single;
-import io.vertx.core.json.JsonArray;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import static com.mewna.catnip.shard.ShardAddress.CONTROL;
-import static com.mewna.catnip.shard.ShardAddress.computeAddress;
 
 /**
  * @author amy
@@ -67,69 +55,5 @@ public abstract class AbstractShardManager implements ShardManager {
     public ShardManager addCondition(@Nonnull final ShardCondition condition) {
         conditions.add(condition);
         return this;
-    }
-    
-    @Nonnull
-    @Override
-    public Single<List<String>> trace(@Nonnegative final int shard) {
-        final CompletableFuture<List<String>> future = new SafeVertxCompletableFuture<>(catnip);
-        catnip.eventBus().<JsonArray>send(computeAddress(CONTROL, shard), ShardControlMessage.TRACE,
-                reply -> {
-                    if(reply.succeeded()) {
-                        // ow
-                        future.complete(JsonUtil.toStringList(reply.result().body()));
-                    } else {
-                        future.completeExceptionally(reply.cause());
-                    }
-                });
-        return Single.fromFuture(future);
-    }
-    
-    @Nonnull
-    @Override
-    public Single<Long> latency(final int shard) {
-        final CompletableFuture<Long> future = new SafeVertxCompletableFuture<>(catnip);
-        catnip.eventBus().<Long>send(computeAddress(CONTROL, shard), ShardControlMessage.LATENCY,
-                reply -> {
-                    if(reply.succeeded()) {
-                        // ow
-                        future.complete(reply.result().body());
-                    } else {
-                        future.completeExceptionally(reply.cause());
-                    }
-                });
-        return Single.fromFuture(future);
-    }
-    
-    @Nonnull
-    @Override
-    @CheckReturnValue
-    public Single<Boolean> isConnected(@Nonnegative final int id) {
-        final CompletableFuture<Boolean> future = new SafeVertxCompletableFuture<>(catnip);
-        catnip.eventBus().<Boolean>send(computeAddress(CONTROL, id), ShardControlMessage.CONNECTED,
-                reply -> {
-                    if(reply.succeeded()) {
-                        future.complete(reply.result().body());
-                    } else {
-                        future.completeExceptionally(reply.cause());
-                    }
-                });
-        return Single.fromFuture(future);
-    }
-    
-    @Nonnull
-    @Override
-    @CheckReturnValue
-    public Single<LifecycleState> shardState(@Nonnegative final int id) {
-        final CompletableFuture<LifecycleState> future = new SafeVertxCompletableFuture<>(catnip);
-        catnip.eventBus().<LifecycleState>send(computeAddress(CONTROL, id), ShardControlMessage.LIFECYCLE_STATE,
-                reply -> {
-                    if(reply.succeeded()) {
-                        future.complete(reply.result().body());
-                    } else {
-                        future.completeExceptionally(reply.cause());
-                    }
-                });
-        return Single.fromFuture(future);
     }
 }

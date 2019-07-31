@@ -31,19 +31,8 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
-import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.impl.user.*;
+import com.mewna.catnip.entity.impl.user.PresenceImpl;
 import com.mewna.catnip.entity.impl.user.PresenceImpl.ActivityImpl;
-import com.mewna.catnip.entity.impl.channel.*;
-import com.mewna.catnip.entity.impl.guild.*;
-import com.mewna.catnip.entity.impl.lifecycle.ChunkingDoneImpl;
-import com.mewna.catnip.entity.impl.lifecycle.GatewayClosedImpl;
-import com.mewna.catnip.entity.impl.lifecycle.GatewayConnectionFailedImpl;
-import com.mewna.catnip.entity.impl.lifecycle.MemberChunkRerequestImpl;
-import com.mewna.catnip.entity.impl.message.*;
-import com.mewna.catnip.entity.impl.misc.ReadyImpl;
-import com.mewna.catnip.entity.impl.misc.ResumedImpl;
-import com.mewna.catnip.entity.impl.voice.VoiceServerUpdateImpl;
 import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.Activity;
@@ -56,31 +45,26 @@ import com.mewna.catnip.extension.manager.DefaultExtensionManager;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.requester.Requester;
-import com.mewna.catnip.shard.*;
+import com.mewna.catnip.shard.CatnipShardImpl;
+import com.mewna.catnip.shard.GatewayOp;
 import com.mewna.catnip.shard.buffer.EventBuffer;
 import com.mewna.catnip.shard.event.DispatchManager;
 import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.SessionManager;
-import com.mewna.catnip.util.JsonEntityCodec;
-import com.mewna.catnip.util.JsonPojoCodec;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.logging.LogAdapter;
-import com.mewna.catnip.util.scheduler.RxTaskScheduler;
 import com.mewna.catnip.util.scheduler.TaskScheduler;
 import io.reactivex.Scheduler;
 import io.reactivex.Single;
-import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -89,8 +73,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-
-import static com.mewna.catnip.shard.ShardAddress.*;
 
 /**
  * @author amy
@@ -227,13 +209,6 @@ public class CatnipImpl implements Catnip {
     
     @Nonnull
     @Override
-    @CheckReturnValue
-    public EventBus eventBus() {
-        return vertx.eventBus();
-    }
-    
-    @Nonnull
-    @Override
     public Catnip loadExtension(@Nonnull final Extension extension) {
         extensionManager.loadExtension(extension);
         return this;
@@ -287,7 +262,7 @@ public class CatnipImpl implements Catnip {
     public void openVoiceConnection(@Nonnull final String guildId, @Nonnull final String channelId, final boolean selfMute,
                                     final boolean selfDeaf) {
         PermissionUtil.checkPermissions(this, guildId, channelId, Permission.CONNECT);
-        eventBus().send(computeAddress(VOICE_STATE_UPDATE_QUEUE, shardIdFor(guildId)),
+        shardManager().shard(shardIdFor(guildId)).queueVoiceStateUpdate(
                 new JsonObject()
                         .put("guild_id", guildId)
                         .put("channel_id", channelId)
@@ -297,7 +272,7 @@ public class CatnipImpl implements Catnip {
     
     @Override
     public void closeVoiceConnection(@Nonnull final String guildId) {
-        eventBus().send(computeAddress(VOICE_STATE_UPDATE_QUEUE, shardIdFor(guildId)),
+        shardManager().shard(shardIdFor(guildId)).queueVoiceStateUpdate(
                 new JsonObject()
                         .put("guild_id", guildId)
                         .putNull("channel_id")
@@ -312,8 +287,8 @@ public class CatnipImpl implements Catnip {
     
     @Override
     public void chunkMembers(@Nonnull final String guildId, @Nonnull final String query, @Nonnegative final int limit) {
-        eventBus().send(computeAddress(WEBSOCKET_QUEUE, shardIdFor(guildId)),
-                CatnipShard.basePayload(GatewayOp.REQUEST_GUILD_MEMBERS,
+        shardManager().shard(shardIdFor(guildId)).queueSendToSocket(
+                CatnipShardImpl.basePayload(GatewayOp.REQUEST_GUILD_MEMBERS,
                         new JsonObject()
                                 .put("guild_id", guildId)
                                 .put("query", query)
@@ -321,12 +296,8 @@ public class CatnipImpl implements Catnip {
     }
     
     @Override
-    public Single<Presence> presence(@Nonnegative final int shardId) {
-        final Future<Presence> future = Future.future();
-        eventBus().send(
-                computeAddress(PRESENCE_UPDATE_REQUEST, shardId), null,
-                result -> future.complete((Presence) result.result().body()));
-        return Single.fromFuture(SafeVertxCompletableFuture.from(this, future));
+    public Presence presence(@Nonnegative final int shardId) {
+        return shardManager().shard(shardId).getPresence();
     }
     
     @Override
@@ -342,7 +313,7 @@ public class CatnipImpl implements Catnip {
     
     @Override
     public void presence(@Nonnull final Presence presence, @Nonnegative final int shardId) {
-        eventBus().publish(computeAddress(PRESENCE_UPDATE_REQUEST, shardId), presence);
+        shardManager().shard(shardId).updatePresence((PresenceImpl) presence);
     }
     
     @Override
@@ -376,8 +347,6 @@ public class CatnipImpl implements Catnip {
     
     @Nonnull
     public Single<Catnip> setup() {
-        codecs();
-        
         if(validateToken) {
             return fetchGatewayInfo()
                     .map(gateway -> {
@@ -411,96 +380,6 @@ public class CatnipImpl implements Catnip {
         cache.catnip(this);
         requester.catnip(this);
         taskScheduler.catnip(this);
-    }
-    
-    private void codecs() {
-        try {
-            // Register codecs
-            // God I hate having to do this
-            // This is necessary to make Vert.x allow passing arbitrary objects
-            // over the bus tho, since it doesn't obey typical Java serialization
-            // stuff (for reasons I don't really get) and won't just dump stuff to
-            // JSON when it doesn't have a codec
-            // *sigh*
-            // This is mainly important for distributed catnip; locally it'll just
-            // not apply any transformations
-            
-            // Lifecycle
-            entityCodec(ReadyImpl.class);
-            entityCodec(ResumedImpl.class);
-            eventCodec(LifecycleState.class);
-            eventCodec(ChunkingDoneImpl.class);
-            eventCodec(MemberChunkRerequestImpl.class);
-            
-            eventCodec(GatewayClosedImpl.class);
-            eventCodec(GatewayConnectionFailedImpl.class);
-            
-            // DoubleEvents use ImmutablePair
-            eventCodec(ImmutablePair.class);
-            
-            // Messages
-            entityCodec(MessageImpl.class);
-            entityCodec(DeletedMessageImpl.class);
-            entityCodec(BulkDeletedMessagesImpl.class);
-            entityCodec(TypingUserImpl.class);
-            entityCodec(ReactionUpdateImpl.class);
-            entityCodec(BulkRemovedReactionsImpl.class);
-            entityCodec(MessageEmbedUpdateImpl.class);
-            
-            // Channels
-            entityCodec(CategoryImpl.class);
-            entityCodec(GroupDMChannelImpl.class);
-            entityCodec(TextChannelImpl.class);
-            entityCodec(UserDMChannelImpl.class);
-            entityCodec(VoiceChannelImpl.class);
-            entityCodec(NewsChannelImpl.class);
-            entityCodec(StoreChannelImpl.class);
-            entityCodec(WebhookImpl.class);
-            entityCodec(ChannelPinsUpdateImpl.class);
-            entityCodec(WebhooksUpdateImpl.class);
-            
-            // Guilds
-            entityCodec(GuildImpl.class);
-            entityCodec(GatewayGuildBanImpl.class);
-            entityCodec(EmojiUpdateImpl.class);
-            entityCodec(UnavailableGuildImpl.class);
-            
-            // Roles
-            entityCodec(RoleImpl.class);
-            entityCodec(PartialRoleImpl.class);
-            entityCodec(PermissionOverrideImpl.class);
-            
-            // Members
-            entityCodec(MemberImpl.class);
-            entityCodec(PartialMemberImpl.class);
-            
-            // Users
-            entityCodec(UserImpl.class);
-            entityCodec(PresenceImpl.class);
-            entityCodec(PresenceUpdateImpl.class);
-            
-            // Voice
-            entityCodec(VoiceStateImpl.class);
-            entityCodec(VoiceServerUpdateImpl.class);
-            
-            // Shards
-            eventCodec(ShardInfo.class);
-            eventCodec(ShardConnectState.class);
-            eventCodec(ShardControlMessage.class);
-        } catch(final IllegalStateException e) {
-            //only log once instead of one time per codec
-            logAdapter.debug("Couldn't register codecs because they are already registered. " +
-                    "This is probably because you're running multiple catnip instances on the same vert.x " +
-                    "instance. If you're sure this is correct, you can ignore this warning.", e);
-        }
-    }
-    
-    private <T extends Entity> void entityCodec(@Nonnull final Class<T> cls) {
-        eventBus().registerDefaultCodec(cls, new JsonEntityCodec<>(this, cls));
-    }
-    
-    private <T> void eventCodec(@Nonnull final Class<T> cls) {
-        eventBus().registerDefaultCodec(cls, new JsonPojoCodec<>(this, cls));
     }
     
     @Nonnull
