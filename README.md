@@ -132,14 +132,5 @@ corresponding option in `CatnipOptions`.
   have them, I just wanted to not.
 - I wanted modular usage to be exactly the same more / less no matter what; everything
   should be doable through the catnip instance that you create.
-- I wanted to make a lib built on vert.x.
+- I wanted to make a lib built on RxJava.
 - To take over the world and convert all Java bots. :^)
-
-### Why vert.x?
-
-- vert.x is nice and reactive and async. :tm:
-- You can use callbacks or Rx (like we do), but vert.x also provides support for reactive streams
-  and kotlin coroutines.
-- There's a *lot* of [vert.x libraries and documentation](https://vertx.io/docs/) for just about
-  anything you want.
-- The reactive, event-loop-driven model fits well for a Discord bot use-case.
