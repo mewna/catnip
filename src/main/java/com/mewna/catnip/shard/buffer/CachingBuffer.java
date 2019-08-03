@@ -32,7 +32,8 @@ import com.mewna.catnip.entity.impl.lifecycle.MemberChunkRerequestImpl;
 import com.mewna.catnip.shard.LifecycleEvent;
 import com.mewna.catnip.shard.ShardInfo;
 import com.mewna.catnip.util.JsonUtil;
-import io.vertx.core.Future;
+import com.mewna.catnip.util.rx.RxHelpers;
+import io.reactivex.Completable;
 import io.vertx.core.json.JsonObject;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -132,7 +133,8 @@ public class CachingBuffer extends AbstractBuffer {
         catnip().logAdapter().debug("Prepared new BufferState for shard {} with {} guilds.", shardId, guilds.size());
         // READY is also a cache event, as it does come with
         // information about the current user
-        maybeCache(eventType, shardId, payloadData).setHandler(_res -> emitter().emit(event));
+        //noinspection ResultOfMethodCallIgnored
+        maybeCache(eventType, shardId, payloadData).subscribe(() -> emitter().emit(event));
     }
     
     private void handleGuildCreate(final BufferState bufferState, final JsonObject event) {
@@ -141,7 +143,8 @@ public class CachingBuffer extends AbstractBuffer {
         final String guild = payloadData.getString("id");
         // Make sure to cache guild
         // This will always succeed unless something goes horribly wrong
-        maybeCache(Raw.GUILD_CREATE, shardId, payloadData).setHandler(_res -> {
+        //noinspection ResultOfMethodCallIgnored
+        maybeCache(Raw.GUILD_CREATE, shardId, payloadData).subscribe(() -> {
             // Add the guild to be awaited so that we can buffer members
             bufferState.awaitGuild(guild);
             
@@ -267,17 +270,17 @@ public class CachingBuffer extends AbstractBuffer {
         maybeCache(type, id, d);
     }
     
-    private Future<Void> maybeCache(final String eventType, final int shardId, final JsonObject data) {
+    private Completable maybeCache(final String eventType, final int shardId, final JsonObject data) {
         if(CACHE_EVENTS.contains(eventType)) {
             try {
                 return catnip().cacheWorker().updateCache(eventType, shardId, data);
             } catch(final Exception e) {
                 catnip().logAdapter().warn("Got error updating cache for payload {}", eventType, e);
                 catnip().logAdapter().warn("Payload: {}", data.encodePrettily());
-                return Future.failedFuture(e);
+                return RxHelpers.completedCompletable(catnip());
             }
         } else {
-            return Future.succeededFuture();
+            return RxHelpers.completedCompletable(catnip());
         }
     }
     

@@ -39,7 +39,6 @@ import com.mewna.catnip.rest.Routes.Route;
 import com.mewna.catnip.rest.ratelimit.RateLimiter;
 import com.mewna.catnip.shard.LifecycleEvent.Raw;
 import com.mewna.catnip.util.CatnipMeta;
-import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.rx.RxHelpers;
 import io.reactivex.Observable;
@@ -95,7 +94,7 @@ public abstract class AbstractRequester implements Requester {
     @Nonnull
     @Override
     public Observable<ResponsePayload> queue(@Nonnull final OutboundRequest r) {
-        final CompletableFuture<ResponsePayload> future = new SafeVertxCompletableFuture<>(catnip);
+        final CompletableFuture<ResponsePayload> future = new CompletableFuture<>();
         final Bucket bucket = getBucket(r.route());
         // Capture stacktrace if possible
         final StackTraceElement[] stacktrace;
@@ -284,14 +283,16 @@ public abstract class AbstractRequester implements Requester {
                 updateBucket(route, headers,
                         System.currentTimeMillis() + timeDifference + retryAfter, timeDifference);
             }
+            // It should get autodisposed anyway, so we don't need to worry
+            // about handling the method result
+            //noinspection ResultOfMethodCallIgnored
             rateLimiter.requestExecution(route)
-                    .thenAccept(__ -> executeRequest(request))
-                    .exceptionally(e -> {
-                        final Throwable throwable = new RuntimeException("REST error context");
-                        throwable.setStackTrace(request.stacktrace());
-                        request.future().completeExceptionally(e.initCause(throwable));
-                        return null;
-                    });
+                    .subscribe(() -> executeRequest(request),
+                            e -> {
+                                final Throwable throwable = new RuntimeException("REST error context");
+                                throwable.setStackTrace(request.stacktrace());
+                                request.future().completeExceptionally(e.initCause(throwable));
+                            });
         } else {
             updateBucket(route, headers, -1, timeDifference);
             request.bucket().requestDone();

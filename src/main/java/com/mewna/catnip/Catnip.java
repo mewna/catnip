@@ -100,7 +100,7 @@ public interface Catnip {
      * @return A new catnip instance.
      */
     static Single<Catnip> catnipAsync(@Nonnull final String token) {
-        return catnipAsync(token, Vertx.vertx());
+        return catnipAsync(token);
     }
     
     /**
@@ -126,63 +126,7 @@ public interface Catnip {
      * @return A new catnip instance.
      */
     static Single<Catnip> catnipAsync(@Nonnull final CatnipOptions options) {
-        return catnipAsync(options, Vertx.vertx());
-    }
-    
-    /**
-     * Create a new catnip instance with the given token and vert.x instance.
-     * <p>
-     * <strong>This method may block while validating the provided token.</strong>
-     *
-     * @param token The token to be used for all API operations.
-     * @param vertx The vert.x instance used to run the bot.
-     *
-     * @return A new catnip instance.
-     */
-    static Catnip catnip(@Nonnull final String token, @Nonnull final Vertx vertx) {
-        return catnipAsync(token, vertx).blockingGet();
-    }
-    
-    /**
-     * Create a new catnip instance with the given token and vert.x instance.
-     * <p>
-     * <strong>This method may block while validating the provided token.</strong>
-     *
-     * @param token The token to be used for all API operations.
-     * @param vertx The vert.x instance used to run the bot.
-     *
-     * @return A new catnip instance.
-     */
-    static Single<Catnip> catnipAsync(@Nonnull final String token, @Nonnull final Vertx vertx) {
-        return catnipAsync(new CatnipOptions(token), vertx);
-    }
-    
-    /**
-     * Create a new catnip instance with the given options and vert.x instance.
-     * <p>
-     * <strong>This method may block while validating the provided token.</strong>
-     *
-     * @param options The options to be applied to the catnip instance.
-     * @param vertx   The vert.x instance used to run the bot.
-     *
-     * @return A new catnip instance.
-     */
-    static Catnip catnip(@Nonnull final CatnipOptions options, @Nonnull final Vertx vertx) {
-        return catnipAsync(options, vertx).blockingGet();
-    }
-    
-    /**
-     * Create a new catnip instance with the given options and vert.x instance.
-     * <p>
-     * <strong>This method may block while validating the provided token.</strong>
-     *
-     * @param options The options to be applied to the catnip instance.
-     * @param vertx   The vert.x instance used to run the bot.
-     *
-     * @return A new catnip instance.
-     */
-    static Single<Catnip> catnipAsync(@Nonnull final CatnipOptions options, @Nonnull final Vertx vertx) {
-        return new CatnipImpl(vertx, options).setup();
+        return new CatnipImpl(options).setup();
     }
     
     @Nonnull
@@ -208,13 +152,6 @@ public interface Catnip {
     @Nonnull
     @CheckReturnValue
     Single<GatewayInfo> fetchGatewayInfo();
-    
-    /**
-     * @return The vert.x instance being used by this catnip instance.
-     */
-    @Nonnull
-    @CheckReturnValue
-    Vertx vertx();
     
     // Implementations are lombok-generated
     
@@ -815,20 +752,9 @@ public interface Catnip {
     }
     
     /**
-     * Shutdown the catnip instance, undeploy all shards, and shutdown the
-     * vert.x instance.
+     * Shutdown the catnip instance, and undeploy all shards.
      */
-    default void shutdown() {
-        shutdown(true);
-    }
-    
-    /**
-     * Shutdown the catnip instance, undeploy all shards, and optionally
-     * shutdown the vert.x instance.
-     *
-     * @param vertx Whether or not to shut down the vert.x instance.
-     */
-    void shutdown(boolean vertx);
+    void shutdown();
     
     /**
      * Get a webhook object for the specified webhook URL. This method will

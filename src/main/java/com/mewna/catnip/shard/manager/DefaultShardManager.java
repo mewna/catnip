@@ -33,7 +33,6 @@ import com.mewna.catnip.shard.CatnipShardImpl;
 import com.mewna.catnip.shard.LifecycleEvent.Raw;
 import com.mewna.catnip.shard.ShardInfo;
 import com.mewna.catnip.shard.event.MessageConsumer;
-import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.task.QueueTask;
 import com.mewna.catnip.util.task.ShardConnectTask;
 import io.reactivex.Single;
@@ -43,7 +42,6 @@ import lombok.experimental.Accessors;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -111,6 +109,7 @@ public class DefaultShardManager extends AbstractShardManager {
             throw new IllegalStateException("Shard manager is already started!");
         } else {
             started = true;
+            catnip().logAdapter().debug("Started DefaultShardManager.");
         }
         
         consumers.add(catnip().dispatchManager().<ShardInfo>createConsumer(Raw.GATEWAY_WEBSOCKET_CLOSED).handler(shardInfo -> {
@@ -170,7 +169,7 @@ public class DefaultShardManager extends AbstractShardManager {
     private void startShard(final int id) {
         undeploy(id);
         catnip().logAdapter().info("Connecting shard {} (queue len {})", id, connectQueue.size());
-    
+        
         final CatnipShard catnipShard = new CatnipShardImpl(catnip(), id, shardCount, catnip().initialPresence());
         
         try {
@@ -244,6 +243,7 @@ public class DefaultShardManager extends AbstractShardManager {
     
     private void runConnectQueue() {
         if(!started) {
+            catnip().logAdapter().warn("Shard manager not started, refusing to run connect queue!");
             return;
         }
         
@@ -255,17 +255,34 @@ public class DefaultShardManager extends AbstractShardManager {
         }
         
         final int id = connectQueue.peek();
-        
-        SafeVertxCompletableFuture.allOf(conditions().stream().map(e -> e.preshard(id)).toArray(CompletableFuture[]::new))
-                .thenAccept(t -> {
-                    connectQueue.run();
-                    catnip().taskScheduler().setTimer(5500, r -> runConnectQueue());
-                })
-                .exceptionally(e -> {
-                    catnip().logAdapter().debug("Couldn't complete shard conditions, trying again in 1s", e);
-                    catnip().taskScheduler().setTimer(1000L, t -> runConnectQueue());
-                    return null;
-                });
+        catnip().logAdapter().debug("Peeked id {} off of connect queue", id);
+    
+        if(conditions().isEmpty()) {
+            connectNextShard();
+        } else {
+            //noinspection ResultOfMethodCallIgnored
+            Single.zip(conditions().stream().map(e -> e.preshard(id)).collect(Collectors.toUnmodifiableList()),
+                    // Yikes
+                    data -> Arrays.stream(data).allMatch(e -> e == Boolean.TRUE))
+                    .doOnSuccess(res -> {
+                        if(res) {
+                            connectNextShard();
+                        } else {
+                            catnip().logAdapter().debug("Not all shard conditions succeeded, trying again in 1s");
+                            catnip().taskScheduler().setTimer(1000L, t -> runConnectQueue());
+                        }
+                    })
+                    .doOnError(e -> {
+                        catnip().logAdapter().debug("Couldn't complete shard conditions, trying again in 1s", e);
+                        catnip().taskScheduler().setTimer(1000L, t -> runConnectQueue());
+                    });
+        }
+    }
+    
+    private void connectNextShard() {
+        catnip().logAdapter().debug("Connecting next shard: {}", connectQueue.peek());
+        connectQueue.run();
+        catnip().taskScheduler().setTimer(5500, r -> runConnectQueue());
     }
     
     @Override

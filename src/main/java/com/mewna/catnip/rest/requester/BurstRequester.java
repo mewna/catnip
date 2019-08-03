@@ -55,12 +55,10 @@ public class BurstRequester extends AbstractRequester {
         
         @Override
         public void queueRequest(@Nonnull final QueuedRequest request) {
+            //noinspection ResultOfMethodCallIgnored
             requester.rateLimiter.requestExecution(request.route())
-                    .thenAccept(__ -> requester.executeRequest(request))
-                    .exceptionally(e -> {
-                        request.future.completeExceptionally(e);
-                        return null;
-                    });
+                    .subscribe(() -> requester.executeRequest(request),
+                            request.future::completeExceptionally);
         }
         
         @Override

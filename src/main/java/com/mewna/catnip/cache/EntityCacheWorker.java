@@ -35,7 +35,7 @@ import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
-import io.vertx.core.Future;
+import io.reactivex.Completable;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnegative;
@@ -63,7 +63,7 @@ public interface EntityCacheWorker extends EntityCache {
      */
     @Nonnull
     @SuppressWarnings("UnusedReturnValue")
-    Future<Void> updateCache(@Nonnull String eventType, @Nonnegative int shardId, @Nonnull JsonObject payload);
+    Completable updateCache(@Nonnull String eventType, @Nonnegative int shardId, @Nonnull JsonObject payload);
     
     void bulkCacheUsers(@Nonnegative int shardId, @Nonnull Collection<User> users);
     

@@ -27,10 +27,13 @@
 
 package com.mewna.catnip.util.rx;
 
+import com.mewna.catnip.Catnip;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 import io.reactivex.schedulers.Schedulers;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
@@ -59,5 +62,11 @@ public final class RxHelpers {
                         subscriber.onComplete();
                     }
                 }));
+    }
+    
+    public static Completable completedCompletable(@Nonnull final Catnip catnip) {
+        return Completable.fromFuture(CompletableFuture.completedFuture(null))
+                .subscribeOn(catnip.rxScheduler())
+                .observeOn(catnip.rxScheduler());
     }
 }

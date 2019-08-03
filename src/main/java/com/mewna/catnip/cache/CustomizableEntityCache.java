@@ -39,6 +39,8 @@ import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
+import com.mewna.catnip.util.rx.RxHelpers;
+import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
@@ -71,8 +73,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Future<Void> updateCache(@Nonnull final String eventType, final int shardId, @Nonnull final JsonObject payload) {
-        return Future.succeededFuture();
+    public Completable updateCache(@Nonnull final String eventType, final int shardId, @Nonnull final JsonObject payload) {
+        return RxHelpers.completedCompletable(catnip);
     }
     
     @Override

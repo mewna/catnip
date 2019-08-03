@@ -57,7 +57,6 @@ import com.mewna.catnip.util.logging.LogAdapter;
 import com.mewna.catnip.util.scheduler.TaskScheduler;
 import io.reactivex.Scheduler;
 import io.reactivex.Single;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -70,6 +69,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
@@ -81,7 +81,6 @@ import java.util.function.Function;
 @SuppressWarnings("OverlyCoupledClass")
 @Accessors(fluent = true, chain = true)
 public class CatnipImpl implements Catnip {
-    private final Vertx vertx;
     private final String token;
     private final boolean logExtensionOverrides;
     private final boolean validateToken;
@@ -90,6 +89,11 @@ public class CatnipImpl implements Catnip {
     private final ExtensionManager extensionManager = new DefaultExtensionManager(this);
     private final Set<String> unavailableGuilds = ConcurrentHashMap.newKeySet();
     private final AtomicReference<GatewayInfo> gatewayInfo = new AtomicReference<>(null);
+    
+    private final Thread keepaliveThread;
+    private final CountDownLatch latch = new CountDownLatch(1);
+    
+    private boolean startedKeepalive;
     private long clientIdAsLong;
     
     private DispatchManager dispatchManager;
@@ -117,12 +121,19 @@ public class CatnipImpl implements Catnip {
     private TaskScheduler taskScheduler;
     private CatnipOptions options;
     
-    public CatnipImpl(@Nonnull final Vertx vertx, @Nonnull final CatnipOptions options) {
-        this.vertx = vertx;
+    public CatnipImpl(@Nonnull final CatnipOptions options) {
         applyOptions(options);
         token = options.token();
         logExtensionOverrides = options.logExtensionOverrides();
         validateToken = options.validateToken();
+        keepaliveThread = new Thread(() -> {
+            try {
+                latch.await();
+            } catch(final InterruptedException ignored) {
+            }
+        });
+        // Just to be safe
+        keepaliveThread.setDaemon(false);
     }
     
     private void applyOptions(@Nonnull final CatnipOptions options) {
@@ -230,12 +241,12 @@ public class CatnipImpl implements Catnip {
     }
     
     @Override
-    public void shutdown(final boolean vertx) {
+    public void shutdown() {
+        logAdapter.info("Shutting down!");
         dispatchManager.close();
         shardManager.shutdown();
-        if(vertx) {
-            this.vertx.close();
-        }
+        // Will let the keepalive thread halt
+        latch.countDown();
     }
     
     @Nonnull
@@ -346,6 +357,10 @@ public class CatnipImpl implements Catnip {
     
     @Nonnull
     public Single<Catnip> setup() {
+        if(!startedKeepalive) {
+            startedKeepalive = true;
+            keepaliveThread.start();
+        }
         if(validateToken) {
             return fetchGatewayInfo()
                     .map(gateway -> {

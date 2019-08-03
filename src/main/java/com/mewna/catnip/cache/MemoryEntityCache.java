@@ -40,8 +40,9 @@ import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
+import com.mewna.catnip.util.rx.RxHelpers;
+import io.reactivex.Completable;
 import io.reactivex.Single;
-import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.Getter;
@@ -54,6 +55,7 @@ import javax.annotation.Nullable;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -425,7 +427,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     @SuppressWarnings("DuplicateBranchesInSwitch")
     @Nonnull
     @Override
-    public Future<Void> updateCache(@Nonnull final String eventType, @Nonnegative final int shardId, @Nonnull final JsonObject payload) {
+    public Completable updateCache(@Nonnull final String eventType, @Nonnegative final int shardId, @Nonnull final JsonObject payload) {
         switch(eventType) {
             // Lifecycle
             case Raw.READY: {
@@ -471,22 +473,16 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                 // This is wrapped in a blocking executor because there could
                 // be cases of massive guilds that end blocking for a
                 // significant amount of time while the guild is being cached.
-                final Future<Void> future = Future.future();
-                catnip().vertx().executeBlocking(f -> {
-                    final Guild guild = entityBuilder.createAndCacheGuild(shardId, payload);
-                    guildCache(shardId(guild.idAsLong())).put(guild.idAsLong(), guild);
-                    f.complete(null);
-                }, __ -> future.complete(null));
-                return future;
+                // TODO: Move these back onto blocking threads(?)
+                final Guild guild = entityBuilder.createAndCacheGuild(shardId, payload);
+                guildCache(shardId(guild.idAsLong())).put(guild.idAsLong(), guild);
+                break;
             }
             case Raw.GUILD_UPDATE: {
-                final Future<Void> future = Future.future();
-                catnip().vertx().executeBlocking(f -> {
-                    final Guild guild = entityBuilder.createGuild(payload);
-                    guildCache(shardId(guild.idAsLong())).put(guild.idAsLong(), guild);
-                    f.complete(null);
-                }, __ -> future.complete(null));
-                return future;
+                // TODO: Move these back onto blocking threads(?)
+                final Guild guild = entityBuilder.createGuild(payload);
+                guildCache(shardId(guild.idAsLong())).put(guild.idAsLong(), guild);
+                break;
             }
             case Raw.GUILD_DELETE: {
                 final long guildId = Long.parseUnsignedLong(payload.getString("id"));
@@ -629,7 +625,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
             }
         }
         // Default case; most events don't need to have special future cases
-        return Future.succeededFuture();
+        return RxHelpers.completedCompletable(catnip);
     }
     
     private void cacheVoiceState(final VoiceState state) {
