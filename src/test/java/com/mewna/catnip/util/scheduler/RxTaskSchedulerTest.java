@@ -33,7 +33,7 @@ import io.reactivex.Scheduler;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 /**
@@ -41,7 +41,8 @@ import static org.mockito.Mockito.when;
  * @since 7/29/19.
  */
 class RxTaskSchedulerTest {
-    private final Scheduler scheduler = RxHelpers.forkJoinScheduler();
+    private final Scheduler scheduler = RxHelpers.FORK_JOIN_SCHEDULER;
+    
     private Catnip mockNip() {
         return Mockito.mock(Catnip.class);
     }
@@ -56,7 +57,7 @@ class RxTaskSchedulerTest {
         tasker.setTimer(50L, __ -> test[0] += 1);
         Thread.sleep(100L);
         assertEquals(1, test[0]);
-    
+        
         final long taskId = tasker.setTimer(100L, __ -> test[0] += 1);
         Thread.sleep(50L);
         tasker.cancel(taskId);

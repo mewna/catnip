@@ -56,7 +56,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.WebSocket;
 import java.net.http.WebSocket.Listener;
 import java.nio.ByteBuffer;
@@ -91,8 +90,6 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     private final int limit;
     private final Presence presence;
     
-    private final HttpClient client;
-    
     // This is an AtomicLong instead of a volatile long because IntelliJ got
     // A N G E R Y because I guess longs don't get written atomically.
     private final AtomicLong heartbeatTask = new AtomicLong(-1L);
@@ -126,7 +123,6 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         this.limit = limit;
         this.presence = presence;
         
-        client = HttpClient.newHttpClient();
         sendTask = GatewayTask.gatewaySendTask(catnip, "catnip:gateway:" + id + ":outgoing-send", this::sendToSocket);
         presenceTask = GatewayTask.gatewayPresenceTask(catnip, "catnip:gateway:ws-outgoing:" + id + ":presence-update",
                 update -> {
@@ -174,7 +170,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     
     @SuppressWarnings("squid:HiddenFieldCheck")
     private void connectSocket(final String url) {
-        client.newWebSocketBuilder().buildAsync(URI.create(url), this).thenAcceptAsync(ws -> {
+        catnip.httpClient().newWebSocketBuilder().buildAsync(URI.create(url), this).thenAcceptAsync(ws -> {
             lifecycleState = CONNECTED;
             socket = new ReentrantLockWebSocket(ws);
             socketOpen = true;

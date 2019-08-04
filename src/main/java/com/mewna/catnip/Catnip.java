@@ -57,7 +57,6 @@ import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 import io.reactivex.Single;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -65,6 +64,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.net.http.HttpClient;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
@@ -100,7 +100,7 @@ public interface Catnip {
      * @return A new catnip instance.
      */
     static Single<Catnip> catnipAsync(@Nonnull final String token) {
-        return catnipAsync(token);
+        return catnipAsync(new CatnipOptions(token));
     }
     
     /**
@@ -433,6 +433,12 @@ public interface Catnip {
     long memberChunkTimeout();
     
     /**
+     * @return The HTTP client that catnip uses for websockets and REST
+     * requests.
+     */
+    HttpClient httpClient();
+    
+    /**
      * Opens a voice connection to the provided guild and channel. The connection is
      * opened asynchronously, with
      * {@link com.mewna.catnip.shard.DiscordEvent#VOICE_STATE_UPDATE VOICE_STATE_UPDATE} and
@@ -712,7 +718,7 @@ public interface Catnip {
      */
     private <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
                                                   @Nonnull final BiConsumer<T, E> handler) {
-        return on(type).handler(m ->  handler.accept(m.getLeft(), m.getRight()));
+        return on(type).handler(m -> handler.accept(m.getLeft(), m.getRight()));
     }
     
     /**

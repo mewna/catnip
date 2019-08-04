@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 class DefaultDispatchManagerTest {
-    private final Scheduler scheduler = RxHelpers.forkJoinScheduler();
+    private final Scheduler scheduler = RxHelpers.FORK_JOIN_SCHEDULER;
     
     private DispatchManager dispatchManager() {
         final var mock = Mockito.mock(Catnip.class);
