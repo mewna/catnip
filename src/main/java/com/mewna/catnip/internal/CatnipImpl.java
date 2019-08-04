@@ -134,6 +134,7 @@ public class CatnipImpl implements Catnip {
         });
         // Just to be safe
         keepaliveThread.setDaemon(false);
+        keepaliveThread.setName("catnip keepalive thread");
     }
     
     private void applyOptions(@Nonnull final CatnipOptions options) {
