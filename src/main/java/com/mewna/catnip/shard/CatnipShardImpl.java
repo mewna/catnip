@@ -594,13 +594,13 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                 .value("guild_subscriptions", ((CatnipImpl) catnip).options().enableGuildSubscriptions())
                 .value("large_threshold", catnip.largeThreshold())
                 .array("shard")
-                .value(id)
-                .value(limit)
+                    .value(id)
+                    .value(limit)
                 .end()
                 .object("properties")
-                .value("$os", "JVM")
-                .value("$browser", "catnip")
-                .value("$device", "catnip")
+                    .value("$os", "JVM")
+                    .value("$browser", "catnip")
+                    .value("$device", "catnip")
                 .end()
                 .done();
         if(presence != null) {
@@ -616,9 +616,9 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                 .value("session_id", catnip.sessionManager().session(id))
                 .value("seq", catnip.sessionManager().seqnum(id))
                 .object("properties")
-                .value("$os", "JVM")
-                .value("$browser", "catnip")
-                .value("$device", "catnip")
+                    .value("$os", "JVM")
+                    .value("$browser", "catnip")
+                    .value("$device", "catnip")
                 .end()
                 .done();
     }
