@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.cache;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.cache.view.NamedCacheView;
@@ -42,8 +43,6 @@ import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.util.rx.RxHelpers;
 import io.reactivex.Completable;
 import io.reactivex.Single;
-import io.vertx.core.Future;
-import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;

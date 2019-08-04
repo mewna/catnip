@@ -27,6 +27,8 @@
 
 package com.mewna.catnip.rest.handler;
 
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.channel.Webhook.WebhookEditFields;
 import com.mewna.catnip.entity.message.Message;
@@ -38,8 +40,6 @@ import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -189,7 +189,7 @@ public class RestWebhook extends RestHandler {
             body.put("embeds", new JsonArray().add(entityBuilder().embedToJson(options.embed())));
         }
         
-        if(body.getValue("embeds", null) == null && body.getValue("content", null) == null
+        if(body.get("embeds") == null && body.get("content") == null
                 && !options.hasFiles()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
         }

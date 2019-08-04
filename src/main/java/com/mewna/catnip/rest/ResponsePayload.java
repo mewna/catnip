@@ -27,26 +27,35 @@
 
 package com.mewna.catnip.rest;
 
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
+import com.grack.nanojson.JsonParser;
+import com.grack.nanojson.JsonParserException;
 
 public class ResponsePayload {
-    private final Buffer buffer;
+    private final String body;
     
-    public ResponsePayload(final Buffer buffer) {
-        this.buffer = buffer;
+    public ResponsePayload(final String body) {
+        this.body = body;
     }
     
     public String string() {
-        return buffer.toString();
+        return body;
     }
     
     public JsonObject object() {
-        return buffer.toJsonObject();
+        try {
+            return JsonParser.object().from(body);
+        } catch(final JsonParserException e) {
+            throw new IllegalStateException(e);
+        }
     }
     
     public JsonArray array() {
-        return buffer.toJsonArray();
+        try {
+            return JsonParser.array().from(body);
+        } catch(final JsonParserException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

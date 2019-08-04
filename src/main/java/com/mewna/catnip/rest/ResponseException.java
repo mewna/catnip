@@ -27,7 +27,7 @@
 
 package com.mewna.catnip.rest;
 
-import io.vertx.core.json.JsonObject;
+import com.grack.nanojson.JsonObject;
 
 /**
  * @author SamOphis

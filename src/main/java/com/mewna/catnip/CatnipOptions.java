@@ -27,6 +27,7 @@
 
 package com.mewna.catnip;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.SplitMemoryEntityCache;
@@ -56,7 +57,6 @@ import com.mewna.catnip.util.rx.RxHelpers;
 import com.mewna.catnip.util.scheduler.RxTaskScheduler;
 import com.mewna.catnip.util.scheduler.TaskScheduler;
 import io.reactivex.Scheduler;
-import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

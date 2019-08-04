@@ -27,8 +27,8 @@
 
 package com.mewna.catnip.util.pagination;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;

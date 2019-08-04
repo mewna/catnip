@@ -27,6 +27,8 @@
 
 package com.mewna.catnip.rest.handler;
 
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.guild.*;
 import com.mewna.catnip.entity.guild.Guild.GuildEditFields;
@@ -45,8 +47,6 @@ import com.mewna.catnip.util.pagination.MemberPaginator;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -90,7 +90,7 @@ public class RestGuild extends RestHandler {
         final JsonArray array = new JsonArray();
         updater.entries()
                 .stream()
-                .map(x -> new JsonObject().put("id", x.getKey()).put("position", x.getValue()))
+                .map(x -> JsonObject.builder().value("id", x.getKey()).value("position", x.getValue()).done())
                 .forEach(array::add);
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.MODIFY_GUILD_CHANNEL_POSITIONS.withMajorParam(updater.guildId()),
@@ -110,7 +110,7 @@ public class RestGuild extends RestHandler {
         final JsonArray array = new JsonArray();
         updater.entries()
                 .stream()
-                .map(x -> new JsonObject().put("id", x.getKey()).put("position", x.getValue()))
+                .map(x -> JsonObject.builder().value("id", x.getKey()).value("position", x.getValue()).done())
                 .forEach(array::add);
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.MODIFY_GUILD_ROLE_POSITIONS.withMajorParam(updater.guildId()),
@@ -182,8 +182,8 @@ public class RestGuild extends RestHandler {
     public Observable<JsonObject> modifyGuildEmbedRaw(@Nonnull final String guildId, @Nullable final String channelId,
                                                       final boolean enabled, @Nullable final String reason) {
         return catnip().requester()
-                .queue(new OutboundRequest(Routes.MODIFY_GUILD_EMBED.withMajorParam(guildId),
-                        Map.of(), new JsonObject().put("channel_id", channelId).put("enabled", enabled), reason))
+                .queue(new OutboundRequest(Routes.MODIFY_GUILD_EMBED.withMajorParam(guildId), Map.of(),
+                        JsonObject.builder().value("channel_id", channelId).value("enabled", enabled).done(), reason))
                 .map(ResponsePayload::object);
     }
     
@@ -471,7 +471,7 @@ public class RestGuild extends RestHandler {
                                                  @Nullable final String reason) {
         return Single.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.MODIFY_CURRENT_USERS_NICK.withQueryString(guildId),
-                        Map.of(), new JsonObject().put("nick", nick), reason))
+                        Map.of(), JsonObject.builder().value("nick", nick).done(), reason))
                 .map(ResponsePayload::string));
     }
     
@@ -539,7 +539,7 @@ public class RestGuild extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public Single<Integer> getGuildPruneCount(@Nonnull final String guildId, @Nonnegative final int days) {
-        return Single.fromObservable(getGuildPruneCountRaw(guildId, days).map(e -> e.getInteger("pruned")));
+        return Single.fromObservable(getGuildPruneCountRaw(guildId, days).map(e -> e.getInt("pruned")));
     }
     
     @Nonnull
@@ -554,7 +554,7 @@ public class RestGuild extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public Single<Integer> beginGuildPrune(@Nonnull final String guildId, @Nonnegative final int days) {
-        return Single.fromObservable(beginGuildPruneRaw(guildId, days).map(e -> e.getInteger("pruned")));
+        return Single.fromObservable(beginGuildPruneRaw(guildId, days).map(e -> e.getInt("pruned")));
     }
     
     @Nonnull

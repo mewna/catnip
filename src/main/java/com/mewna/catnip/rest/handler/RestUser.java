@@ -27,6 +27,8 @@
 
 package com.mewna.catnip.rest.handler;
 
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.guild.PartialGuild;
 import com.mewna.catnip.entity.misc.ApplicationInfo;
@@ -42,8 +44,6 @@ import com.mewna.catnip.util.pagination.GuildPaginator;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -171,7 +171,7 @@ public class RestUser extends RestHandler {
     @CheckReturnValue
     public Observable<JsonObject> createDMRaw(@Nonnull final String recipientId) {
         return catnip().requester().queue(new OutboundRequest(Routes.CREATE_DM, Map.of(),
-                new JsonObject().put("recipient_id", recipientId)))
+                JsonObject.builder().value("recipient_id", recipientId).done()))
                 .map(ResponsePayload::object);
     }
     

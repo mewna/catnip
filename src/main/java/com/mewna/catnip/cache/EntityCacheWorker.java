@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.cache;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.guild.Member;
@@ -36,7 +37,6 @@ import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
 import io.reactivex.Completable;
-import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;

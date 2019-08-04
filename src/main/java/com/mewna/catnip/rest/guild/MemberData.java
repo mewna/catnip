@@ -27,11 +27,11 @@
 
 package com.mewna.catnip.rest.guild;
 
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.user.VoiceState;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

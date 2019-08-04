@@ -27,7 +27,7 @@
 
 package com.mewna.catnip.util;
 
-import io.vertx.core.json.JsonObject;
+import com.grack.nanojson.JsonObject;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

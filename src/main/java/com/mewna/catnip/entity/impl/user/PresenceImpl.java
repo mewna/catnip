@@ -29,10 +29,10 @@ package com.mewna.catnip.entity.impl.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.user.Presence;
-import io.vertx.core.json.JsonObject;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -69,25 +69,25 @@ public class PresenceImpl implements Presence, RequiresCatnip {
     @Nonnull
     @CheckReturnValue
     public JsonObject asJson() {
-        final JsonObject innerData = new JsonObject()
-                .put("status", status.asString());
+        final JsonObject innerData = new JsonObject();
+        innerData.put("status", status.asString());
         if(status == OnlineStatus.IDLE) {
             innerData.put("since", System.currentTimeMillis());
             innerData.put("afk", true);
         } else {
-            innerData.putNull("since");
+            innerData.put("since", null);
             innerData.put("afk", false);
         }
         if(activity != null) {
-            final JsonObject game = new JsonObject()
-                    .put("name", activity.name())
-                    .put("type", activity.type().id());
+            final JsonObject game = new JsonObject();
+            game.put("name", activity.name());
+            game.put("type", activity.type().id());
             if(activity.url() != null) {
                 game.put("url", activity.url());
             }
             innerData.put("game", game);
         } else {
-            innerData.putNull("game");
+            innerData.put("game", null);
         }
         
         return innerData;

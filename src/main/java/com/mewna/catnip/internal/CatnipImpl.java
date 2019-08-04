@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.internal;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.cache.CacheFlag;
@@ -57,7 +58,6 @@ import com.mewna.catnip.util.logging.LogAdapter;
 import com.mewna.catnip.util.scheduler.TaskScheduler;
 import io.reactivex.Scheduler;
 import io.reactivex.Single;
-import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -278,21 +278,23 @@ public class CatnipImpl implements Catnip {
                                     final boolean selfDeaf) {
         PermissionUtil.checkPermissions(this, guildId, channelId, Permission.CONNECT);
         shardManager().shard(shardIdFor(guildId)).queueVoiceStateUpdate(
-                new JsonObject()
-                        .put("guild_id", guildId)
-                        .put("channel_id", channelId)
-                        .put("self_mute", selfMute)
-                        .put("self_deaf", selfDeaf));
+                JsonObject.builder()
+                        .value("guild_id", guildId)
+                        .value("channel_id", channelId)
+                        .value("self_mute", selfMute)
+                        .value("self_deaf", selfDeaf)
+                        .done());
     }
     
     @Override
     public void closeVoiceConnection(@Nonnull final String guildId) {
         shardManager().shard(shardIdFor(guildId)).queueVoiceStateUpdate(
-                new JsonObject()
-                        .put("guild_id", guildId)
-                        .putNull("channel_id")
-                        .put("self_mute", false)
-                        .put("self_deaf", false));
+                JsonObject.builder()
+                        .value("guild_id", guildId)
+                        .nul("channel_id")
+                        .value("self_mute", false)
+                        .value("self_deaf", false)
+                        .done());
     }
     
     @Override
@@ -304,10 +306,11 @@ public class CatnipImpl implements Catnip {
     public void chunkMembers(@Nonnull final String guildId, @Nonnull final String query, @Nonnegative final int limit) {
         shardManager().shard(shardIdFor(guildId)).queueSendToSocket(
                 CatnipShardImpl.basePayload(GatewayOp.REQUEST_GUILD_MEMBERS,
-                        new JsonObject()
-                                .put("guild_id", guildId)
-                                .put("query", query)
-                                .put("limit", limit)));
+                        JsonObject.builder()
+                                .value("guild_id", guildId)
+                                .value("query", query)
+                                .value("limit", limit)
+                                .done()));
     }
     
     @Override

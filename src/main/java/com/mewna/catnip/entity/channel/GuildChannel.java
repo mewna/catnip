@@ -28,6 +28,8 @@
 package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.guild.GuildEntity;
 import com.mewna.catnip.entity.guild.PermissionOverride;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
@@ -38,8 +40,6 @@ import com.mewna.catnip.rest.invite.InviteCreateOptions;
 import com.mewna.catnip.util.PermissionUtil;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -138,7 +138,7 @@ public interface GuildChannel extends GuildEntity, Channel {
     @JsonIgnore
     @CheckReturnValue
     default Single<CreatedInvite> createInvite(@Nullable final InviteCreateOptions options,
-                                                   @Nullable final String reason) {
+                                               @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), guildId(), id(), Permission.CREATE_INSTANT_INVITE);
         return catnip().rest().channel().createInvite(id(), options, reason);
     }

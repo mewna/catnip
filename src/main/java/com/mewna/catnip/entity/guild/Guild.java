@@ -29,6 +29,7 @@ package com.mewna.catnip.entity.guild;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.cache.view.NamedCacheView;
 import com.mewna.catnip.entity.Snowflake;
@@ -45,7 +46,6 @@ import com.mewna.catnip.util.Utils;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -811,7 +811,7 @@ public interface Guild extends Snowflake {
     @Nonnull
     @JsonIgnore
     default Single<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final byte[] image,
-                                                @Nonnull final Collection<String> roles) {
+                                            @Nonnull final Collection<String> roles) {
         return createEmoji(name, image, roles, null);
     }
     
@@ -828,7 +828,7 @@ public interface Guild extends Snowflake {
     @Nonnull
     @JsonIgnore
     default Single<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final URI imageData,
-                                                @Nonnull final Collection<String> roles, @Nullable final String reason) {
+                                            @Nonnull final Collection<String> roles, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJI);
         return catnip().rest().emoji().createGuildEmoji(id(), name, imageData, roles, reason);
     }
@@ -845,7 +845,7 @@ public interface Guild extends Snowflake {
     @Nonnull
     @JsonIgnore
     default Single<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final URI imageData,
-                                                @Nonnull final Collection<String> roles) {
+                                            @Nonnull final Collection<String> roles) {
         return createEmoji(name, imageData, roles, null);
     }
     
@@ -863,7 +863,7 @@ public interface Guild extends Snowflake {
     @Nonnull
     @JsonIgnore
     default Single<CustomEmoji> modifyEmoji(@Nonnull final String emojiId, @Nonnull final String name,
-                                                @Nonnull final Collection<String> roles, @Nullable final String reason) {
+                                            @Nonnull final Collection<String> roles, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJI);
         return catnip().rest().emoji().modifyGuildEmoji(id(), emojiId, name, roles, reason);
     }
@@ -881,7 +881,7 @@ public interface Guild extends Snowflake {
     @Nonnull
     @JsonIgnore
     default Single<CustomEmoji> modifyEmoji(@Nonnull final String emojiId, @Nonnull final String name,
-                                                @Nonnull final Collection<String> roles) {
+                                            @Nonnull final Collection<String> roles) {
         return modifyEmoji(emojiId, name, roles, null);
     }
     
@@ -973,8 +973,8 @@ public interface Guild extends Snowflake {
     @Nonnull
     @JsonIgnore
     default Completable ban(@Nonnull final String userId,
-                                 @Nullable final String reason,
-                                 @Nonnegative final int deleteMessageDays) {
+                            @Nullable final String reason,
+                            @Nonnegative final int deleteMessageDays) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.BAN_MEMBERS);
         final Member member = catnip().cache().member(id(), userId);
         if(member != null) {
@@ -997,8 +997,8 @@ public interface Guild extends Snowflake {
     @Nonnull
     @JsonIgnore
     default Completable ban(final long userId,
-                                 @Nullable final String reason,
-                                 @Nonnegative final int deleteMessageDays) {
+                            @Nullable final String reason,
+                            @Nonnegative final int deleteMessageDays) {
         return ban(Long.toUnsignedString(userId), reason, deleteMessageDays);
     }
     
@@ -1015,7 +1015,7 @@ public interface Guild extends Snowflake {
     @Nonnull
     @JsonIgnore
     default Completable ban(final long userId,
-                                 @Nonnegative final int deleteMessageDays) {
+                            @Nonnegative final int deleteMessageDays) {
         return ban(userId, null, deleteMessageDays);
     }
     
@@ -1033,8 +1033,8 @@ public interface Guild extends Snowflake {
     @Nonnull
     @JsonIgnore
     default Completable ban(@Nonnull final Member member,
-                                 @Nullable final String reason,
-                                 @Nonnegative final int deleteMessageDays) {
+                            @Nullable final String reason,
+                            @Nonnegative final int deleteMessageDays) {
         return ban(member.id(), reason, deleteMessageDays);
     }
     

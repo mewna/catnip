@@ -27,9 +27,9 @@
 
 package com.mewna.catnip.util.task;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.impl.user.PresenceImpl;
-import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayDeque;

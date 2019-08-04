@@ -27,6 +27,8 @@
 
 package com.mewna.catnip.shard;
 
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.Snowflake;
@@ -40,8 +42,7 @@ import com.mewna.catnip.entity.user.Presence.OnlineStatus;
 import com.mewna.catnip.entity.user.PresenceUpdate;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.internal.CatnipImpl;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import com.mewna.catnip.util.JsonUtil;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.Nonnull;
@@ -93,12 +94,12 @@ public final class DispatchEmitter {
     @SuppressWarnings("DuplicateBranchesInSwitch")
     private void emit0(@Nonnull final JsonObject payload) {
         final String type = payload.getString("t");
-        final JsonObject data = payload.getJsonObject("d");
+        final JsonObject data = payload.getObject("d");
         
         switch(type) {
             // Lifecycle
             case Raw.READY: {
-                final JsonArray guilds = data.getJsonArray("guilds");
+                final JsonArray guilds = data.getArray("guilds");
                 // All READY guilds are unavailable, marked available as the gateway
                 // streams them to us
                 guilds.stream()
@@ -122,7 +123,7 @@ public final class DispatchEmitter {
                 break;
             }
             case Raw.MESSAGE_UPDATE: {
-                if(data.getJsonObject("author", null) == null) {
+                if(data.getObject("author", null) == null) {
                     // Embeds update, emit the special case
                     catnip.dispatchManager().dispatchEvent(Raw.MESSAGE_EMBEDS_UPDATE,
                             entityBuilder.createMessageEmbedUpdate(data));
@@ -223,11 +224,11 @@ public final class DispatchEmitter {
             // Roles
             case Raw.GUILD_ROLE_CREATE: {
                 catnip.dispatchManager().dispatchEvent(type, entityBuilder.createRole(data.getString("guild_id"),
-                        data.getJsonObject("role")));
+                        data.getObject("role")));
                 break;
             }
             case Raw.GUILD_ROLE_UPDATE: {
-                final Role role = entityBuilder.createRole(data.getString("guild_id"), data.getJsonObject("role"));
+                final Role role = entityBuilder.createRole(data.getString("guild_id"), data.getObject("role"));
                 catnip.cache().roleAsync(role.guildIdAsLong(), role.idAsLong())
                         .doOnError(e -> cacheErrorLog(type, e))
                         .doOnSuccess(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, role)));
@@ -274,11 +275,11 @@ public final class DispatchEmitter {
             case Raw.PRESENCE_UPDATE: {
                 final PresenceUpdate presence = entityBuilder.createPresenceUpdate(data);
                 if(presence.status() == OnlineStatus.INVISIBLE) {
-                    final JsonObject clone = payload.copy();
+                    final JsonObject clone = new JsonObject(payload);
                     clone.remove("shard");
                     catnip.logAdapter().warn("Received a presence update with 'invisible' as the online status, " +
                             "but we should never get this. If you report this to Discord, include the following " +
-                            "JSON in your report:\n{}", clone.encodePrettily());
+                            "JSON in your report:\n{}", JsonUtil.encodePrettily(clone));
                 }
                 catnip.cache().presenceAsync(presence.idAsLong())
                         .doOnError(e -> cacheErrorLog(type, e))

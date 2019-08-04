@@ -27,8 +27,10 @@
 
 package com.mewna.catnip.util;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
+import com.grack.nanojson.JsonWriter;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -38,6 +40,7 @@ import java.util.function.Function;
 
 public final class JsonUtil {
     public static final long MAX_SAFE_INTEGER = 9007199254740991L;
+    public static final ObjectMapper MAPPER = new ObjectMapper();
     
     private JsonUtil() {
     }
@@ -56,18 +59,15 @@ public final class JsonUtil {
      */
     @Nonnull
     public static JsonObject stringifySnowflakes(@Nonnull final JsonObject json) {
-        final Set<String> keys = json.getMap().keySet();
-        keys.forEach(key -> {
+        json.forEach((key, value) -> {
             // TODO: More efficient way to do this?
             if(key.toLowerCase().contains("idaslong")) {
-                json.put(key, Long.toString(json.getLong(key)));
+                json.put(key, json.getNumber(key).toString());
             } else {
-                final Object value = json.getValue(key);
                 if(value instanceof JsonObject) {
                     json.put(key, stringifySnowflakes((JsonObject) value));
                 } else if(value instanceof JsonArray) {
-                    final List<Object> array = new ArrayList<>();
-                    ((JsonArray) value).forEach(array::add);
+                    final List<Object> array = new ArrayList<>((JsonArray) value);
                     for(int i = 0; i < array.size(); i++) {
                         final Object arrayMember = array.get(i);
                         if(arrayMember instanceof JsonObject) {
@@ -95,18 +95,15 @@ public final class JsonUtil {
      */
     @Nonnull
     public static JsonObject destringifySnowflakes(@Nonnull final JsonObject json) {
-        final Set<String> keys = json.getMap().keySet();
-        keys.forEach(key -> {
+        json.forEach((key, value) -> {
             // TODO: More efficient way to do this?
             if(key.toLowerCase().contains("idaslong")) {
                 json.put(key, Long.parseLong(json.getString(key)));
             } else {
-                final Object value = json.getValue(key);
                 if(value instanceof JsonObject) {
                     json.put(key, destringifySnowflakes((JsonObject) value));
                 } else if(value instanceof JsonArray) {
-                    final List<Object> array = new ArrayList<>();
-                    ((JsonArray) value).forEach(array::add);
+                    final List<Object> array = new ArrayList<>((JsonArray) value);
                     for(int i = 0; i < array.size(); i++) {
                         final Object arrayMember = array.get(i);
                         if(arrayMember instanceof JsonObject) {
@@ -276,5 +273,22 @@ public final class JsonUtil {
             }
             return Collections.unmodifiableList(result);
         };
+    }
+    
+    public static <T> T mapTo(final JsonObject data, final Class<T> type) {
+        return MAPPER.convertValue(data, type);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static JsonObject mapFrom(final Object obj) {
+        if(obj == null) {
+            return null;
+        } else {
+            return new JsonObject((Map<String, Object>) MAPPER.convertValue(obj, Map.class));
+        }
+    }
+    
+    public static String encodePrettily(final JsonObject data) {
+        return JsonWriter.indent("  ").string().value(data).done();
     }
 }

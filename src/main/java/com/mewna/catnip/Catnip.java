@@ -27,6 +27,7 @@
 
 package com.mewna.catnip;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCache;
 import com.mewna.catnip.cache.EntityCacheWorker;
@@ -57,7 +58,6 @@ import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 import io.reactivex.Single;
-import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.CheckReturnValue;

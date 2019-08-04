@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.rest.handler;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.guild.Invite;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
@@ -34,7 +35,6 @@ import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

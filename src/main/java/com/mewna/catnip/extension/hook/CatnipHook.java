@@ -27,9 +27,9 @@
 
 package com.mewna.catnip.extension.hook;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes.Route;
-import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

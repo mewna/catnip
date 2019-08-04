@@ -27,6 +27,8 @@
 
 package com.mewna.catnip.rest.handler;
 
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
@@ -36,8 +38,6 @@ import com.mewna.catnip.util.Utils;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -116,16 +116,17 @@ public class RestEmoji extends RestHandler {
             rolesArray = null;
         } else {
             rolesArray = new JsonArray();
-            roles.forEach(rolesArray::add);
+            rolesArray.addAll(roles);
         }
         return catnip().requester().queue(
                 new OutboundRequest(
                         Routes.CREATE_GUILD_EMOJI.withMajorParam(guildId),
                         Map.of(),
-                        new JsonObject()
-                                .put("name", name)
-                                .put("image", imageData.toString())
-                                .put("roles", rolesArray),
+                        JsonObject.builder()
+                                .value("name", name)
+                                .value("image", imageData.toString())
+                                .value("roles", rolesArray)
+                                .done(),
                         reason
                 ))
                 .map(ResponsePayload::object);
@@ -180,9 +181,10 @@ public class RestEmoji extends RestHandler {
                 new OutboundRequest(
                         Routes.MODIFY_GUILD_EMOJI.withMajorParam(guildId),
                         Map.of("emojis.id", emojiId),
-                        new JsonObject()
-                                .put("name", name)
-                                .put("roles", rolesArray),
+                        JsonObject.builder()
+                                .value("name", name)
+                                .value("roles", rolesArray)
+                                .done(),
                         reason
                 ))
                 .map(ResponsePayload::object);

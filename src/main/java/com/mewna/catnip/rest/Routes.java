@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.rest;
 
-import io.vertx.core.http.HttpMethod;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -35,7 +34,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import static io.vertx.core.http.HttpMethod.*;
+import static com.mewna.catnip.rest.Routes.HttpMethod.*;
 
 /**
  * @author amy
@@ -130,6 +129,10 @@ public final class Routes {
     public static final Route LIST_VOICE_REGIONS                  = new Route(GET,    "/voice/regions");
 
     private Routes() {
+    }
+    
+    public enum HttpMethod {
+        OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT, PATCH, OTHER
     }
 
     @Accessors(fluent = true)

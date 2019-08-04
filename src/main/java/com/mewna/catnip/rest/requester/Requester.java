@@ -27,13 +27,13 @@
 
 package com.mewna.catnip.rest.requester;
 
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes.Route;
 import io.reactivex.Observable;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
