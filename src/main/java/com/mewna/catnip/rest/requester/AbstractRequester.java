@@ -54,7 +54,6 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpClient.Builder;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
@@ -78,7 +77,6 @@ public abstract class AbstractRequester implements Requester {
     protected final RateLimiter rateLimiter;
     protected final Builder clientBuilder;
     protected Catnip catnip;
-    private volatile HttpClient client;
     
     public AbstractRequester(@Nonnull final RateLimiter rateLimiter, @Nonnull final Builder clientBuilder) {
         this.rateLimiter = rateLimiter;
@@ -112,15 +110,6 @@ public abstract class AbstractRequester implements Requester {
     @Nonnull
     @CheckReturnValue
     protected abstract Bucket getBucket(@Nonnull Route route);
-    
-    @Nonnull
-    @CheckReturnValue
-    protected synchronized HttpClient client() {
-        if(client != null) {
-            return client;
-        }
-        return client = clientBuilder.build();
-    }
     
     protected void executeRequest(@Nonnull final QueuedRequest request) {
         Route route = request.route();
@@ -204,7 +193,7 @@ public abstract class AbstractRequester implements Requester {
         // Update request start time as soon as possible
         // See QueuedRequest docs for why we do this
         request.start = System.nanoTime();
-        client().sendAsync(builder.build(), BodyHandlers.ofString())
+        catnip.httpClient().sendAsync(builder.build(), BodyHandlers.ofString())
                 .thenAccept(res -> {
                     final int code = res.statusCode();
                     final String message = "Unavailable to due Java's HTTP client.";

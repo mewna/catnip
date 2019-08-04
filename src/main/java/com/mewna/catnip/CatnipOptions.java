@@ -225,9 +225,9 @@ public final class CatnipOptions implements Cloneable {
     private long memberChunkTimeout = TimeUnit.SECONDS.toMillis(10);
     /**
      * The RxJava scheduler that catnip should use for scheduling things like
-     * stream subscriptions. Defaults to {@link RxHelpers#forkJoinScheduler()}.
+     * stream subscriptions. Defaults to {@link RxHelpers#FORK_JOIN_SCHEDULER}.
      */
-    private Scheduler rxScheduler = RxHelpers.forkJoinScheduler();
+    private Scheduler rxScheduler = RxHelpers.FORK_JOIN_SCHEDULER;
     /**
      * If this option is enabled, lifecycle-related events -- things like shard
      * connects / disconnects, 429 HTTP responses, ... -- will be directly
@@ -257,9 +257,17 @@ public final class CatnipOptions implements Cloneable {
      * The task scheduler that catnip will use for scheduling its own internal
      * tasks. This scheduler is exposed to the outside world through
      * {@link Catnip#taskScheduler()}, and can safely be used for any task
-     * scheduling needs you may have.
+     * scheduling needs you may have. Defaults to {@link RxTaskScheduler}.
      */
     private TaskScheduler taskScheduler = new RxTaskScheduler();
+    /**
+     * The HTTP client that catnip uses internally for websockets and REST
+     * requests. Defaults to an instance that uses
+     * {@link RxHelpers#FORK_JOIN_POOL} as its executor.
+     */
+    private HttpClient httpClient = HttpClient.newBuilder()
+            .executor(RxHelpers.FORK_JOIN_POOL)
+            .build();
     
     @Override
     public Object clone() {

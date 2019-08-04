@@ -67,6 +67,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
+import java.net.http.HttpClient;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -119,6 +120,8 @@ public class CatnipImpl implements Catnip {
     private boolean manualChunkRerequesting;
     private int largeThreshold;
     private TaskScheduler taskScheduler;
+    private HttpClient httpClient;
+    
     private CatnipOptions options;
     
     public CatnipImpl(@Nonnull final CatnipOptions options) {
@@ -165,6 +168,7 @@ public class CatnipImpl implements Catnip {
         manualChunkRerequesting = options.manualChunkRerequesting();
         largeThreshold = options.largeThreshold();
         taskScheduler = options.taskScheduler();
+        httpClient = options.httpClient();
         
         // Sanity checks
         if(largeThreshold > 250 || largeThreshold < 50) {

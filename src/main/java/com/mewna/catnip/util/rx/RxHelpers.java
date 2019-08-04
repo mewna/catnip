@@ -35,6 +35,7 @@ import io.reactivex.schedulers.Schedulers;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
@@ -45,11 +46,10 @@ import java.util.concurrent.Executors;
  * @since 5/18/19.
  */
 public final class RxHelpers {
-    private RxHelpers() {
-    }
+    public static final ExecutorService FORK_JOIN_POOL = Executors.newWorkStealingPool();
+    public static final Scheduler FORK_JOIN_SCHEDULER = Schedulers.from(FORK_JOIN_POOL);
     
-    public static Scheduler forkJoinScheduler() {
-        return Schedulers.from(Executors.newWorkStealingPool());
+    private RxHelpers() {
     }
     
     public static <T> Observable<T> futureToObservable(final CompletableFuture<T> future) {
