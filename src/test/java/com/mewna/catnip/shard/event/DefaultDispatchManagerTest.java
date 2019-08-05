@@ -86,8 +86,7 @@ class DefaultDispatchManagerTest {
     @Test
     void testFlowable() throws InterruptedException {
         final var dispatchManager = dispatchManager();
-        final var event = new Object();
-        final var amount = 1000;
+        final var amount = 100;
         final AtomicInteger counted = new AtomicInteger();
         final Semaphore semaphore = new Semaphore(amount);
         semaphore.acquire(amount);
