@@ -48,12 +48,13 @@ import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
 
 import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.net.http.WebSocket;
 import java.net.http.WebSocket.Listener;
@@ -84,6 +85,7 @@ import static com.mewna.catnip.shard.LifecycleState.*;
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class CatnipShardImpl implements CatnipShard, Listener {
     public static final int ZLIB_SUFFIX = 0x0000FFFF;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CatnipShardImpl.class);
     
     private final Catnip catnip;
     private final int id;
@@ -112,7 +114,6 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     private volatile boolean socketOpen;
     private volatile boolean closedByClient;
     private WebSocket socket;
-    private boolean readBuffered;
     private SingleEmitter<ShardConnectState> message;
     private LifecycleState lifecycleState;
     
@@ -191,29 +192,20 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         });
     }
     
-    private void handleBinaryData(final byte[] binary) {
+    private void handleBinaryData(final ByteBuffer buffer) {
         if(socket == null) {
             return;
         }
-        final int last = (binary[binary.length - 4] << 24) + (binary[binary.length - 3] << 16)
-                + (binary[binary.length - 2] << 8) + binary[binary.length - 1];
-        
+        final var last = buffer.getInt(buffer.remaining() - 4);
         final boolean isEnd = last == ZLIB_SUFFIX;
-        if(!isEnd) {
-            try {
-                readBuffer.write(binary);
-            } catch(IOException ignored) {
-                //impossible
-            }
-            readBuffered = true;
-        }
+        LOGGER.debug("Received a buffer of {} bytes, isEnd={}, last=0x{}", buffer.remaining(), isEnd, Integer.toHexString(last));
+        readBuffer.write(buffer.array(), buffer.position(), buffer.remaining());
         if(isEnd) {
             final ByteArrayOutputStream decompressed = decompressBuffer;
-            final byte[] dataToDecompress = readBuffered ? readBuffer.toByteArray() : binary;
             try(final InflaterOutputStream ios = new InflaterOutputStream(decompressed, inflater)) {
                 final String value;
                 synchronized(decompressBuffer) {
-                    ios.write(dataToDecompress, 0, dataToDecompress.length);
+                    ios.write(readBuffer.toByteArray());
                     value = decompressed.toString(StandardCharsets.UTF_8);
                     decompressed.reset();
                 }
@@ -225,8 +217,6 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             } catch(final JsonParserException e) {
                 catnip.logAdapter().error("Shard {}/{}: Error parsing payload", id, limit, e);
                 stateReply(ShardConnectState.FAILED);
-            } finally {
-                readBuffered = false;
             }
         }
     }
@@ -307,7 +297,8 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         // This may need revising, due to the tendency of the socket splitting
         // frames. Although, the method does have a built in handler, so
         // :shrug:
-        handleBinaryData(data.array());
+        
+        handleBinaryData(data);
         socket.request(1L);
         return null;
     }
@@ -592,7 +583,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     private JsonObject identify() {
         final JsonObject data = JsonObject.builder()
                 .value("token", catnip.token())
-                .value("compress", false)
+                .value("compress", true)
                 .value("guild_subscriptions", ((CatnipImpl) catnip).options().enableGuildSubscriptions())
                 .value("large_threshold", catnip.largeThreshold())
                 .array("shard")
@@ -614,7 +605,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     private JsonObject resume() {
         return JsonObject.builder()
                 .value("token", catnip.token())
-                .value("compress", false)
+                .value("compress", true)
                 .value("session_id", catnip.sessionManager().session(id))
                 .value("seq", catnip.sessionManager().seqnum(id))
                 .object("properties")
