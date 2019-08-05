@@ -133,7 +133,7 @@ public class MemberData {
         final JsonObject object = new JsonObject();
         if(roles != null) {
             final JsonArray array = new JsonArray();
-            roles.forEach(array::add);
+            array.addAll(roles);
             object.put("roles", array);
         }
         if(nickname != null) {

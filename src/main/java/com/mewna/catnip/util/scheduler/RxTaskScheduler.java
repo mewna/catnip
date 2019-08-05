@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.util.scheduler;
 
-import com.mewna.catnip.Catnip;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import lombok.RequiredArgsConstructor;

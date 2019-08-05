@@ -32,7 +32,6 @@ import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.CatnipShardImpl;
 import com.mewna.catnip.shard.LifecycleEvent.Raw;
-import com.mewna.catnip.shard.ShardInfo;
 import com.mewna.catnip.shard.event.MessageConsumer;
 import com.mewna.catnip.util.task.QueueTask;
 import com.mewna.catnip.util.task.ShardConnectTask;

@@ -28,9 +28,10 @@
 package com.mewna.catnip.util.scheduler;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.shard.event.DispatchManager;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+
+import javax.annotation.Nonnull;
 
 public abstract class AbstractTaskScheduler implements TaskScheduler {
     @Getter
@@ -38,7 +39,7 @@ public abstract class AbstractTaskScheduler implements TaskScheduler {
     private Catnip catnip;
     
     @Override
-    public void catnip(final Catnip catnip) {
+    public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
     }
 }

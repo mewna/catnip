@@ -167,7 +167,6 @@ public final class Routes {
         
         @Nonnull
         @CheckReturnValue
-        @SuppressWarnings("TypeMayBeWeakened")
         public Route withMajorParam(@Nonnull final String value) {
             if(majorParam == null) {
                 throw new IllegalStateException("This route takes no major params!");
@@ -179,7 +178,6 @@ public final class Routes {
         
         @Nonnull
         @CheckReturnValue
-        @SuppressWarnings("TypeMayBeWeakened")
         public Route compile(@Nonnull final String param, @Nonnull final String value) {
             if(param.equalsIgnoreCase(majorParam)) {
                 return this;

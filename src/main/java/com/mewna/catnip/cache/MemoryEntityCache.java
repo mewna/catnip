@@ -68,7 +68,7 @@ import static com.mewna.catnip.util.Utils.removeIf;
  * @since 9/18/18.
  */
 @Accessors(fluent = true, chain = true)
-@SuppressWarnings({"unused", "MismatchedQueryAndUpdateOfCollection"})
+@SuppressWarnings("unused")
 public abstract class MemoryEntityCache implements EntityCacheWorker {
     @SuppressWarnings("WeakerAccess")
     protected final MutableNamedCacheView<Guild> guildCache = createGuildCacheView();

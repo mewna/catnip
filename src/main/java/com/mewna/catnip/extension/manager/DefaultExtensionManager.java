@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
@@ -100,18 +99,18 @@ public class DefaultExtensionManager implements ExtensionManager {
     public Set<Extension> matchingExtensions(@Nonnull final String regex) {
         //small optimization
         final Pattern pattern = Pattern.compile(regex);
-        return Collections.unmodifiableSet(loadedExtensions.stream()
+        return loadedExtensions.stream()
                 .filter(e -> pattern.matcher(e.name()).matches())
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toUnmodifiableSet());
     }
     
     @Nonnull
     @Override
     public <T extends Extension> Set<? extends T> matchingExtensions(@Nonnull final Class<T> extensionClass) {
-        return Collections.unmodifiableSet(loadedExtensions.stream()
+        return loadedExtensions.stream()
                 .filter(extensionClass::isInstance)
                 .map(extensionClass::cast)
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toUnmodifiableSet());
     }
     
     @Nonnull

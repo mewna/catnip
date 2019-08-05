@@ -50,6 +50,7 @@ public class DefaultLogAdapter implements LogAdapter {
     
     @Override
     public void log(@Nonnull final Level level, @Nonnull final String message, @Nullable final Object... objects) {
+        //noinspection OptionalGetWithoutIsPresent
         final Class<?> caller = stackWalker.walk(s -> s.skip(2).findFirst()).get().getDeclaringClass();
         final Logger logger = LoggerFactory.getLogger(caller);
         final FormattingTuple tuple = MessageFormatter.arrayFormat(message, objects);

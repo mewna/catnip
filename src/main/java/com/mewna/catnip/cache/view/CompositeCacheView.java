@@ -151,7 +151,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
     public Optional<T> reduce(@Nonnull final BinaryOperator<T> accumulator) {
         final Iterator<? extends CacheView<T>> it = sources.iterator();
         Optional<T> maybeFirst = Optional.empty();
-        while(!maybeFirst.isPresent()) {
+        while(maybeFirst.isEmpty()) {
             if(!it.hasNext()) {
                 return Optional.empty();
             }
@@ -207,7 +207,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
     public Optional<T> min(@Nonnull final Comparator<? super T> comparator) {
         final Iterator<? extends CacheView<T>> it = sources.iterator();
         Optional<T> maybeFirst = Optional.empty();
-        while(!maybeFirst.isPresent()) {
+        while(maybeFirst.isEmpty()) {
             if(!it.hasNext()) {
                 return Optional.empty();
             }
@@ -232,7 +232,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
     public Optional<T> max(@Nonnull final Comparator<? super T> comparator) {
         final Iterator<? extends CacheView<T>> it = sources.iterator();
         Optional<T> maybeFirst = Optional.empty();
-        while(!maybeFirst.isPresent()) {
+        while(maybeFirst.isEmpty()) {
             if(!it.hasNext()) {
                 return Optional.empty();
             }
@@ -265,13 +265,13 @@ public class CompositeCacheView<T> implements CacheView<T> {
     @Nonnull
     @Override
     public Set<Long> keys() {
-        return Collections.unmodifiableSet(new AbstractSet<Long>() {
+        return Collections.unmodifiableSet(new AbstractSet<>() {
             @Nonnull
             @Override
             public Iterator<Long> iterator() {
                 return CompositeCacheView.this.iterator(c -> c.keys().iterator());
             }
-            
+    
             @Override
             public int size() {
                 return (int) CompositeCacheView.this.size();
@@ -282,13 +282,13 @@ public class CompositeCacheView<T> implements CacheView<T> {
     @Nonnull
     @Override
     public Collection<T> values() {
-        return Collections.unmodifiableCollection(new AbstractCollection<T>() {
+        return Collections.unmodifiableCollection(new AbstractCollection<>() {
             @Nonnull
             @Override
             public Iterator<T> iterator() {
                 return CompositeCacheView.this.iterator();
             }
-            
+    
             @Override
             public int size() {
                 return (int) CompositeCacheView.this.size();

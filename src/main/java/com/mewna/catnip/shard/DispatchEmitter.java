@@ -91,7 +91,7 @@ public final class DispatchEmitter {
         }
     }
     
-    @SuppressWarnings("DuplicateBranchesInSwitch")
+    @SuppressWarnings({"DuplicateBranchesInSwitch", "ResultOfMethodCallIgnored"})
     private void emit0(@Nonnull final JsonObject payload) {
         final String type = payload.getString("t");
         final JsonObject data = payload.getObject("d");

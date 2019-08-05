@@ -88,7 +88,6 @@ import static com.mewna.catnip.util.JsonUtil.*;
 public final class EntityBuilder {
     private static final JsonArray EMPTY_JSON_ARRAY = new JsonArray();
     
-    @SuppressWarnings("FieldCanBeLocal")
     private final Catnip catnip;
     
     public EntityBuilder(final Catnip catnip) {

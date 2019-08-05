@@ -175,7 +175,7 @@ public class RestEmoji extends RestHandler {
             rolesArray = null;
         } else {
             rolesArray = new JsonArray();
-            roles.forEach(rolesArray::add);
+            rolesArray.addAll(roles);
         }
         return catnip().requester().queue(
                 new OutboundRequest(

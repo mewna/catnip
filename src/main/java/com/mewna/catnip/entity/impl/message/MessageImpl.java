@@ -116,14 +116,12 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
     
     @Override
     @Nonnull
-    @SuppressWarnings("unchecked")
     public List<Attachment> attachments() {
         return attachments;
     }
     
     @Override
     @Nonnull
-    @SuppressWarnings("unchecked")
     public List<Reaction> reactions() {
         return reactions;
     }
