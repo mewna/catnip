@@ -170,7 +170,11 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     @SuppressWarnings("squid:HiddenFieldCheck")
-    private void connectSocket(final String url) {
+    private void connectSocket(String url) {
+        url += "?v=6&encoding=json";
+        if(catnip.compressionMode() != CompressionMode.NONE) {
+            url += "&compress=" + catnip.compressionMode().asDiscord();
+        }
         catnip.httpClient().newWebSocketBuilder().buildAsync(URI.create(url), this).thenAcceptAsync(ws -> {
             lifecycleState = CONNECTED;
             socket = new ReentrantLockWebSocket(ws);
@@ -204,7 +208,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             final Buffer decompressed = decompressBuffer;
             final Buffer dataToDecompress = readBufferPosition > 0 ? readBuffer : binary;
             try(final InflaterOutputStream ios = new InflaterOutputStream(new BufferOutputStream(decompressed, 0), inflater)) {
-                // TODO: ???
+                // TODO: ??? How to handle this non-final warning?
                 synchronized(decompressBuffer) {
                     final int length = Math.max(readBufferPosition, binary.length());
                     int r = 0;
