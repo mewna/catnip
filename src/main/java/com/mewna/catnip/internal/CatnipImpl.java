@@ -318,7 +318,7 @@ public class CatnipImpl implements Catnip {
     
     @Override
     public Presence presence(@Nonnegative final int shardId) {
-        return shardManager().shard(shardId).getPresence();
+        return shardManager().shard(shardId).presence();
     }
     
     @Override

@@ -47,8 +47,6 @@ import com.mewna.catnip.util.task.GatewayTask;
 import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
 import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -400,12 +398,12 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     
     @Nonnull
     @Override
-    public LifecycleState getLifecycleState() {
+    public LifecycleState lifecycleState() {
         return lifecycleState;
     }
     
     @Override
-    public long getLastHeartbeatLatency() {
+    public long lastHeartbeatLatency() {
         return lastHeartbeatLatency;
     }
     
@@ -463,7 +461,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     
     @Nonnull
     @Override
-    public Presence getPresence() {
+    public Presence presence() {
         return currentPresence;
     }
     

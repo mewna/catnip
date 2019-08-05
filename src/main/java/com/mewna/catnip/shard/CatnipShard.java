@@ -41,7 +41,7 @@ public interface CatnipShard {
      */
     @Nonnull
     @CheckReturnValue
-    LifecycleState getLifecycleState();
+    LifecycleState lifecycleState();
     
     /**
      * Return the shard's computed gateway latency, ie. the time it takes for
@@ -49,7 +49,8 @@ public interface CatnipShard {
      *
      * @return The shard's computed gateway latency.
      */
-    long getLastHeartbeatLatency();
+    @CheckReturnValue
+    long lastHeartbeatLatency();
     
     /**
      * Return the shard's current presence.
@@ -57,11 +58,13 @@ public interface CatnipShard {
      * @return The shard's current presence.
      */
     @Nonnull
-    Presence getPresence();
+    @CheckReturnValue
+    Presence presence();
     
     // internal methods
     
     @Nonnull
+    @CheckReturnValue
     Single<ShardConnectState> connect();
     
     void disconnect();
