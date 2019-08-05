@@ -13,8 +13,9 @@
         <delombok.output>${project.basedir}/delombok</delombok.output>
 
         <lombok.version>1.18.6</lombok.version>
-        <vertx.version>3.8.0</vertx.version>
-        <vertx-completable-future.version>vertx-completable-future-0.1.2</vertx-completable-future.version>
+        <rxjava.version>2.2.4</rxjava.version>
+        <jackson-core.version>2.9.9</jackson-core.version>
+        <jackson-databind.version>2.9.9.1</jackson-databind.version>
         <slf4j.version>1.7.26</slf4j.version>
         <commons.lang.version>3.9</commons.lang.version>
         <jsr305.version>3.0.2</jsr305.version>
@@ -56,16 +57,23 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Vert.x -->
+        <!-- Rxjava2 -->
         <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-core</artifactId>
-            <version>${vertx.version}</version>
+            <groupId>io.reactivex.rxjava2</groupId>
+            <artifactId>rxjava</artifactId>
+            <version>${rxjava.version}</version>
+        </dependency>
+
+        <!-- Jackson -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson-core.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-rx-java2</artifactId>
-            <version>${vertx.version}</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson-databind.version}</version>
         </dependency>
 
         <!-- slf4j -->

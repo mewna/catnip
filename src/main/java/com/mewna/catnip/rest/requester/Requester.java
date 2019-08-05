@@ -33,7 +33,6 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes.Route;
 import io.reactivex.Observable;
-import io.vertx.core.buffer.Buffer;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -72,7 +71,7 @@ public interface Requester {
         private String reason;
         
         @Setter
-        private List<ImmutablePair<String, Buffer>> buffers;
+        private List<ImmutablePair<String, byte[]>> buffers;
         
         @Setter
         private boolean emptyBody;

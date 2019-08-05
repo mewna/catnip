@@ -43,7 +43,6 @@ import com.mewna.catnip.util.CatnipMeta;
 import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.rx.RxHelpers;
 import io.reactivex.Observable;
-import io.vertx.core.buffer.Buffer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
@@ -128,7 +127,7 @@ public abstract class AbstractRequester implements Requester {
             final MultipartBodyPublisher publisher = new MultipartBodyPublisher();
             final OutboundRequest r = request.request();
             for(int index = 0; index < r.buffers().size(); index++) {
-                final ImmutablePair<String, Buffer> pair = r.buffers().get(index);
+                final ImmutablePair<String, byte[]> pair = r.buffers().get(index);
                 publisher.addPart("file" + index, pair.left, pair.right);
             }
             if(r.object() != null) {
