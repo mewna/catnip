@@ -204,6 +204,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             final Buffer decompressed = decompressBuffer;
             final Buffer dataToDecompress = readBufferPosition > 0 ? readBuffer : binary;
             try(final InflaterOutputStream ios = new InflaterOutputStream(new BufferOutputStream(decompressed, 0), inflater)) {
+                // TODO: ???
                 synchronized(decompressBuffer) {
                     final int length = Math.max(readBufferPosition, binary.length());
                     int r = 0;
@@ -595,9 +596,9 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     private JsonObject identify() {
+        // @formatter:off
         final JsonObject data = JsonObject.builder()
                 .value("token", catnip.token())
-                .value("compress", true)
                 .value("guild_subscriptions", ((CatnipImpl) catnip).options().enableGuildSubscriptions())
                 .value("large_threshold", catnip.largeThreshold())
                 .array("shard")
@@ -605,11 +606,12 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                 .value(limit)
                 .end()
                 .object("properties")
-                .value("$os", "JVM")
-                .value("$browser", "catnip")
-                .value("$device", "catnip")
+                    .value("$os", "JVM")
+                    .value("$browser", "catnip")
+                    .value("$device", "catnip")
                 .end()
                 .done();
+        // @formatter:on
         if(presence != null) {
             data.put("presence", ((PresenceImpl) presence).asJson());
         }
@@ -617,17 +619,18 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     private JsonObject resume() {
+        // @formatter:off
         return JsonObject.builder()
                 .value("token", catnip.token())
-                .value("compress", true)
                 .value("session_id", catnip.sessionManager().session(id))
                 .value("seq", catnip.sessionManager().seqnum(id))
                 .object("properties")
-                .value("$os", "JVM")
-                .value("$browser", "catnip")
-                .value("$device", "catnip")
+                    .value("$os", "JVM")
+                    .value("$browser", "catnip")
+                    .value("$device", "catnip")
                 .end()
                 .done();
+        // @formatter:on
     }
     
     private ShardInfo shardInfo() {
