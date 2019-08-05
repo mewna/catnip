@@ -171,7 +171,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     
     @SuppressWarnings("squid:HiddenFieldCheck")
     private void connectSocket(final String url) {
-        catnip.httpClient().newWebSocketBuilder().buildAsync(URI.create(url + "?v=6&encoding=json&compress=zlib-stream"), this).thenAcceptAsync(ws -> {
+        catnip.httpClient().newWebSocketBuilder().buildAsync(URI.create(url), this).thenAcceptAsync(ws -> {
             lifecycleState = CONNECTED;
             socket = new ReentrantLockWebSocket(ws);
             socketOpen = true;
