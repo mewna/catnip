@@ -39,6 +39,7 @@ import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.rest.ratelimit.DefaultRateLimiter;
 import com.mewna.catnip.rest.requester.Requester;
 import com.mewna.catnip.rest.requester.SerialRequester;
+import com.mewna.catnip.shard.CompressionMode;
 import com.mewna.catnip.shard.DiscordEvent.Raw;
 import com.mewna.catnip.shard.buffer.CachingBuffer;
 import com.mewna.catnip.shard.buffer.EventBuffer;
@@ -268,6 +269,11 @@ public final class CatnipOptions implements Cloneable {
     private HttpClient httpClient = HttpClient.newBuilder()
             .executor(RxHelpers.FORK_JOIN_POOL)
             .build();
+    /**
+     * How catnip compresses incoming events from Discord. Default is
+     * {@link CompressionMode#ZLIB}.
+     */
+    private CompressionMode compressionMode = CompressionMode.ZLIB;
     
     @Override
     public Object clone() {

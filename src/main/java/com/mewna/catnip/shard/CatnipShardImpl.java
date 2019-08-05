@@ -85,7 +85,6 @@ import static com.mewna.catnip.shard.LifecycleState.*;
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class CatnipShardImpl implements CatnipShard, Listener {
     public static final int ZLIB_SUFFIX = 0x0000FFFF;
-    private static final Logger LOGGER = LoggerFactory.getLogger(CatnipShardImpl.class);
     
     private final Catnip catnip;
     private final int id;
@@ -170,8 +169,12 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     @SuppressWarnings("squid:HiddenFieldCheck")
-    private void connectSocket(final String url) {
-        catnip.httpClient().newWebSocketBuilder().buildAsync(URI.create(url + "?compress=zlib-stream"), this).thenAcceptAsync(ws -> {
+    private void connectSocket(String url) {
+        url += "?v=6&encoding=json";
+        if(catnip.compressionMode() != CompressionMode.NONE) {
+            url += "&compress=" + catnip.compressionMode().asDiscord();
+        }
+        catnip.httpClient().newWebSocketBuilder().buildAsync(URI.create(url), this).thenAcceptAsync(ws -> {
             lifecycleState = CONNECTED;
             socket = new ReentrantLockWebSocket(ws);
             socketOpen = true;
@@ -263,10 +266,8 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             socket = new ReentrantLockWebSocket(webSocket);
             socketOpen = true;
         }
-    
         final boolean isEnd = data.getInt(data.remaining() - 4) == ZLIB_SUFFIX;
-        LOGGER.debug("Received a buffer {} of {} bytes, isEnd={}, last={}", data.order(), data.remaining(), isEnd, last);
-        readBuffer.write(data.array(), data.position(), data.remaining());
+        readBuffer.write(data.array(), data.position() + data.arrayOffset(), data.remaining());
         if(isEnd) {
             final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             try(final InflaterOutputStream decompressor = new InflaterOutputStream(buffer, inflater)) {
@@ -284,6 +285,46 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         socket.request(1L);
         return null;
     }
+    
+    /*
+           final boolean isEnd = binary.getInt(binary.length() - 4) == ZLIB_SUFFIX;
+        if(!isEnd || readBufferPosition > 0) {
+            final int position = readBufferPosition;
+            readBuffer.setBuffer(position, binary);
+            readBufferPosition = position + binary.length();
+        }
+        if(isEnd) {
+            final Buffer decompressed = decompressBuffer;
+            final Buffer dataToDecompress = readBufferPosition > 0 ? readBuffer : binary;
+            try(final InflaterOutputStream ios = new InflaterOutputStream(new BufferOutputStream(decompressed, 0), inflater)) {
+                synchronized(decompressBuffer) {
+                    final int length = Math.max(readBufferPosition, binary.length());
+                    int r = 0;
+                    while(r < length) {
+                        // How many bytes we can read
+                        final int read = Math.min(decompress.length, length - r);
+                        dataToDecompress.getBytes(r, r + read, decompress);
+                        // Decompress
+                        ios.write(decompress, 0, read);
+                        r += read;
+                    }
+                }
+                handleSocketData(JsonParser.object().from(decompressed.toString()));
+                decompressBuffer = Buffer.buffer();
+            } catch(final IOException e) {
+                catnip.logAdapter().error("Shard {}/{}: Error decompressing payload", id, limit, e);
+                catnip.logAdapter().error(decompressed.toString());
+                stateReply(ShardConnectState.FAILED);
+            } catch(final JsonParserException e) {
+                catnip.logAdapter().error("Shard {}/{}: Error parsing payload", id, limit, e);
+                catnip.logAdapter().error("PAYLOAD LENGTH: {}", decompressed.toString().length());
+                catnip.logAdapter().error(decompressed.toString());
+                stateReply(ShardConnectState.FAILED);
+            } finally {
+                readBufferPosition = 0;
+            }
+        }
+     */
     
     @Override
     public void onError(final WebSocket webSocket, final Throwable error) {
@@ -563,21 +604,22 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     private JsonObject identify() {
+        // @formatter:off
         final JsonObject data = JsonObject.builder()
                 .value("token", catnip.token())
-                .value("compress", true)
                 .value("guild_subscriptions", ((CatnipImpl) catnip).options().enableGuildSubscriptions())
                 .value("large_threshold", catnip.largeThreshold())
                 .array("shard")
-                .value(id)
-                .value(limit)
+                    .value(id)
+                    .value(limit)
                 .end()
                 .object("properties")
-                .value("$os", "JVM")
-                .value("$browser", "catnip")
-                .value("$device", "catnip")
+                    .value("$os", "JVM")
+                    .value("$browser", "catnip")
+                    .value("$device", "catnip")
                 .end()
                 .done();
+        // @formatter:on
         if(presence != null) {
             data.put("presence", ((PresenceImpl) presence).asJson());
         }
@@ -585,17 +627,18 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     private JsonObject resume() {
+        // @formatter:off
         return JsonObject.builder()
                 .value("token", catnip.token())
-                .value("compress", true)
                 .value("session_id", catnip.sessionManager().session(id))
                 .value("seq", catnip.sessionManager().seqnum(id))
                 .object("properties")
-                .value("$os", "JVM")
-                .value("$browser", "catnip")
-                .value("$device", "catnip")
+                    .value("$os", "JVM")
+                    .value("$browser", "catnip")
+                    .value("$device", "catnip")
                 .end()
                 .done();
+        // @formatter:on
     }
     
     private ShardInfo shardInfo() {

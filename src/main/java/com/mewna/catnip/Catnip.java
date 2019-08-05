@@ -43,6 +43,7 @@ import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.Rest;
+import com.mewna.catnip.shard.CompressionMode;
 import com.mewna.catnip.shard.buffer.EventBuffer;
 import com.mewna.catnip.shard.event.DispatchManager;
 import com.mewna.catnip.shard.event.DoubleEventType;
@@ -437,6 +438,12 @@ public interface Catnip {
      * requests.
      */
     HttpClient httpClient();
+    
+    /**
+     * @return The compression method catnip uses for incoming events from
+     * Discord.
+     */
+    CompressionMode compressionMode();
     
     /**
      * Opens a voice connection to the provided guild and channel. The connection is
