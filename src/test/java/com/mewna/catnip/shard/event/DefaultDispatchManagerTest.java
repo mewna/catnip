@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 class DefaultDispatchManagerTest {
     private final Scheduler scheduler = RxHelpers.FORK_JOIN_SCHEDULER;
+    private final Object event = new Object();
     
     private DispatchManager dispatchManager() {
         final var mock = Mockito.mock(Catnip.class);
@@ -27,20 +28,18 @@ class DefaultDispatchManagerTest {
     @Test
     void simpleRun() throws InterruptedException {
         final var dispatchManager = dispatchManager();
-        final var event = new Object();
         final boolean[] wasExecuted = { false };
     
         dispatchManager.createConsumer("simpleRun").handler(o -> wasExecuted[0] = true);
         dispatchManager.dispatchEvent("simpleRun", event);
-        Thread.sleep(350L);
+        Thread.sleep(100L);
         assertTrue(wasExecuted[0], "Not dispatched");
     }
     
     @Test
     void testConsistency() throws InterruptedException {
         final var dispatchManager = dispatchManager();
-        final var event = new Object();
-        final var amount = 100000;
+        final var amount = 1000;
         final AtomicInteger counted = new AtomicInteger();
     
         dispatchManager.createConsumer("testConsistency").handler(o -> counted.incrementAndGet());
@@ -49,15 +48,14 @@ class DefaultDispatchManagerTest {
             dispatchManager.dispatchEvent("testConsistency", event);
         }
         
-        Thread.sleep(50L);
-        assertEquals(counted.get(), amount, "Not all events were dispatched");
+        Thread.sleep(100L);
+        assertEquals(amount, counted.get(), "Not all events were dispatched");
     }
     
     @Test
     void testObservable() throws InterruptedException {
         final var dispatchManager = dispatchManager();
-        final var event = new Object();
-        final var amount = 100000;
+        final var amount = 1000;
         final AtomicInteger counted = new AtomicInteger();
     
         final var disposable = dispatchManager.createConsumer("testObservable")
@@ -67,23 +65,23 @@ class DefaultDispatchManagerTest {
             dispatchManager.dispatchEvent("testObservable", event);
         }
         
-        Thread.sleep(50L);
+        Thread.sleep(100L);
         
-        assertEquals(counted.get(), amount, "Not all events were dispatched");
+        assertEquals(amount, counted.get(), "Not all events were dispatched");
         disposable.dispose();
     
         for(int i = 0; i < amount; i++) {
             dispatchManager.dispatchEvent("testObservable", event);
         }
     
-        assertEquals(counted.get(), amount, "Observable was not disposed");
+        assertEquals(amount, counted.get(), "Observable was not disposed");
     }
     
     @Test
     void testFlowable() throws InterruptedException {
         final var dispatchManager = dispatchManager();
         final var event = new Object();
-        final var amount = 100000;
+        final var amount = 1000;
         final AtomicInteger counted = new AtomicInteger();
         
         final var disposable = dispatchManager.createConsumer("testFlowable")
@@ -93,16 +91,16 @@ class DefaultDispatchManagerTest {
             dispatchManager.dispatchEvent("testFlowable", event);
         }
     
-        Thread.sleep(50L);
+        Thread.sleep(100L);
     
-        assertEquals(counted.get(), amount, "Not all events were dispatched");
+        assertEquals(amount, counted.get(), "Not all events were dispatched");
         disposable.dispose();
     
         for(int i = 0; i < amount; i++) {
             dispatchManager.dispatchEvent("testFlowable", event);
         }
         
-        assertEquals(counted.get(), amount, "Flowable was not disposed");
+        assertEquals(amount, counted.get(), "Flowable was not disposed");
     }
     
     
