@@ -16,7 +16,7 @@ public interface CatnipShard {
      * @return The shard's trace.
      */
     @Nonnull
-    List<String> getTrace();
+    List<String> trace();
     
     /**
      * Checks whether or not the current shard is currently connected to the
