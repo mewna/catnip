@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.shard.manager;
 
+import com.mewna.catnip.entity.lifecycle.GatewayClosed;
 import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.CatnipShardImpl;
@@ -112,9 +113,9 @@ public class DefaultShardManager extends AbstractShardManager {
             catnip().logAdapter().debug("Started DefaultShardManager.");
         }
         
-        consumers.add(catnip().dispatchManager().<ShardInfo>createConsumer(Raw.GATEWAY_WEBSOCKET_CLOSED).handler(shardInfo -> {
-            catnip().logAdapter().info("Shard {} closed, re-queuing...", shardInfo.getId());
-            addToConnectQueue(shardInfo.getId());
+        consumers.add(catnip().dispatchManager().<GatewayClosed>createConsumer(Raw.GATEWAY_WEBSOCKET_CLOSED).handler(gatewayClosed -> {
+            catnip().logAdapter().info("Shard {} closed, re-queuing...", gatewayClosed.shardInfo().getId());
+            addToConnectQueue(gatewayClosed.shardInfo().getId());
         }));
         
         final Single<GatewayInfo> gatewayInfoCompletableFuture;

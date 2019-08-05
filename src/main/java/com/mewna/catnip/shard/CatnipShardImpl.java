@@ -46,7 +46,6 @@ import com.mewna.catnip.util.ReentrantLockWebSocket;
 import com.mewna.catnip.util.task.GatewayTask;
 import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
-
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +53,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.WebSocket;
 import java.net.http.WebSocket.Listener;
@@ -97,9 +97,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     private final AtomicLong heartbeatTask = new AtomicLong(-1L);
     private final ByteArrayOutputStream readBuffer = new ByteArrayOutputStream();
     private final Inflater inflater = new Inflater();
-    private final ByteArrayOutputStream decompressBuffer = new ByteArrayOutputStream();
     private final StringBuffer socketInputBuffer = new StringBuffer(); //Using a StringBuffer instead of a StringBuilder due to async-friendly synchronizations.
-    private final byte[] decompress = new byte[1024];
     private final GatewayTask<JsonObject> sendTask;
     private final GatewayTask<PresenceImpl> presenceTask;
     private volatile Presence currentPresence;
@@ -173,7 +171,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     
     @SuppressWarnings("squid:HiddenFieldCheck")
     private void connectSocket(final String url) {
-        catnip.httpClient().newWebSocketBuilder().buildAsync(URI.create(url), this).thenAcceptAsync(ws -> {
+        catnip.httpClient().newWebSocketBuilder().buildAsync(URI.create(url + "?compress=zlib-stream"), this).thenAcceptAsync(ws -> {
             lifecycleState = CONNECTED;
             socket = new ReentrantLockWebSocket(ws);
             socketOpen = true;
@@ -190,35 +188,6 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             stateReply(ShardConnectState.FAILED);
             return null;
         });
-    }
-    
-    private void handleBinaryData(final ByteBuffer buffer) {
-        if(socket == null) {
-            return;
-        }
-        final var last = buffer.getInt(buffer.remaining() - 4);
-        final boolean isEnd = last == ZLIB_SUFFIX;
-        LOGGER.debug("Received a buffer of {} bytes, isEnd={}, last=0x{}", buffer.remaining(), isEnd, Integer.toHexString(last));
-        readBuffer.write(buffer.array(), buffer.position(), buffer.remaining());
-        if(isEnd) {
-            final ByteArrayOutputStream decompressed = decompressBuffer;
-            try(final InflaterOutputStream ios = new InflaterOutputStream(decompressed, inflater)) {
-                final String value;
-                synchronized(decompressBuffer) {
-                    ios.write(readBuffer.toByteArray());
-                    value = decompressed.toString(StandardCharsets.UTF_8);
-                    decompressed.reset();
-                }
-                readBuffer.reset();
-                handleSocketData(JsonParser.object().from(value));
-            } catch(final IOException e) {
-                catnip.logAdapter().error("Shard {}/{}: Error decompressing payload", id, limit, e);
-                stateReply(ShardConnectState.FAILED);
-            } catch(final JsonParserException e) {
-                catnip.logAdapter().error("Shard {}/{}: Error parsing payload", id, limit, e);
-                stateReply(ShardConnectState.FAILED);
-            }
-        }
     }
     
     private void handleSocketData(JsonObject payload) {
@@ -294,11 +263,24 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             socket = new ReentrantLockWebSocket(webSocket);
             socketOpen = true;
         }
-        // This may need revising, due to the tendency of the socket splitting
-        // frames. Although, the method does have a built in handler, so
-        // :shrug:
-        
-        handleBinaryData(data);
+    
+        final boolean isEnd = data.getInt(data.remaining() - 4) == ZLIB_SUFFIX;
+        LOGGER.debug("Received a buffer {} of {} bytes, isEnd={}, last={}", data.order(), data.remaining(), isEnd, last);
+        readBuffer.write(data.array(), data.position(), data.remaining());
+        if(isEnd) {
+            final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            try(final InflaterOutputStream decompressor = new InflaterOutputStream(buffer, inflater)) {
+                readBuffer.writeTo(decompressor);
+                readBuffer.reset();
+                handleSocketData(JsonParser.object().from(buffer.toString(StandardCharsets.UTF_8)));
+            } catch(final IOException e) {
+                catnip.logAdapter().error("Shard {}/{}: Error decompressing payload", id, limit, e);
+                stateReply(ShardConnectState.FAILED);
+            } catch(final JsonParserException e) {
+                catnip.logAdapter().error("Shard {}/{}: Error parsing payload", id, limit, e);
+                stateReply(ShardConnectState.FAILED);
+            }
+        }
         socket.request(1L);
         return null;
     }
@@ -587,13 +569,13 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                 .value("guild_subscriptions", ((CatnipImpl) catnip).options().enableGuildSubscriptions())
                 .value("large_threshold", catnip.largeThreshold())
                 .array("shard")
-                    .value(id)
-                    .value(limit)
+                .value(id)
+                .value(limit)
                 .end()
                 .object("properties")
-                    .value("$os", "JVM")
-                    .value("$browser", "catnip")
-                    .value("$device", "catnip")
+                .value("$os", "JVM")
+                .value("$browser", "catnip")
+                .value("$device", "catnip")
                 .end()
                 .done();
         if(presence != null) {
@@ -609,9 +591,9 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                 .value("session_id", catnip.sessionManager().session(id))
                 .value("seq", catnip.sessionManager().seqnum(id))
                 .object("properties")
-                    .value("$os", "JVM")
-                    .value("$browser", "catnip")
-                    .value("$device", "catnip")
+                .value("$os", "JVM")
+                .value("$browser", "catnip")
+                .value("$device", "catnip")
                 .end()
                 .done();
     }
