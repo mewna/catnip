@@ -28,7 +28,6 @@
 package com.mewna.catnip.entity.message;
 
 import com.mewna.catnip.entity.impl.message.MessageImpl;
-import io.vertx.core.buffer.Buffer;
 import lombok.*;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -61,7 +60,7 @@ public class MessageOptions {
     private Embed embed;
     
     @Setter(AccessLevel.NONE)
-    private List<ImmutablePair<String, Buffer>> files;
+    private List<ImmutablePair<String, byte[]>> files;
     
     public MessageOptions(@Nonnull final MessageOptions options) {
         content = options.content;
@@ -166,7 +165,7 @@ public class MessageOptions {
         if(files.size() == 10) {
             throw new UnsupportedOperationException("maximum limit of 10 attachments!");
         }
-        files.add(new ImmutablePair<>(name, Buffer.buffer(data)));
+        files.add(new ImmutablePair<>(name, data));
         return this;
     }
     
@@ -187,7 +186,7 @@ public class MessageOptions {
      */
     @CheckReturnValue
     @Nonnull
-    public List<ImmutablePair<String, Buffer>> files() {
+    public List<ImmutablePair<String, byte[]>> files() {
         return hasFiles() ? List.copyOf(files) : List.of();
     }
     

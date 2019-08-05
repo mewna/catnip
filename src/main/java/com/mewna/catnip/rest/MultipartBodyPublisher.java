@@ -1,6 +1,5 @@
 package com.mewna.catnip.rest;
 
-import io.vertx.core.buffer.Buffer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -35,13 +34,13 @@ public class MultipartBodyPublisher {
     
     @ParametersAreNonnullByDefault
     public MultipartBodyPublisher addPart(final String name, final String value) {
-        partsSpecificationList.add(new PartsSpecification(Type.STRING, name).value(Buffer.buffer(value)));
+        partsSpecificationList.add(new PartsSpecification(Type.STRING, name).value(value.getBytes(StandardCharsets.UTF_8)));
         return this;
     }
     
     //Using Vert.x's buffer. Reflects message's usage of Buffers.
     @ParametersAreNonnullByDefault
-    public MultipartBodyPublisher addPart(final String name, final String filename, final Buffer value) {
+    public MultipartBodyPublisher addPart(final String name, final String filename, final byte[] value) {
         partsSpecificationList.add(new PartsSpecification(Type.FILE, name).filename(filename).value(value));
         return this;
     }
@@ -61,7 +60,7 @@ public class MultipartBodyPublisher {
     protected class PartsSpecification {
         protected final Type type;
         protected final String name;
-        protected Buffer value;
+        protected byte[] value;
         protected String filename;
         
         public String toString() {
@@ -78,7 +77,7 @@ public class MultipartBodyPublisher {
     class PartsIterator implements Iterator<byte[]> {
         
         private final Iterator<PartsSpecification> iter;
-        private Buffer currentFileInput;
+        private byte[] currentFileInput;
         private int index;
         
         private boolean done;
@@ -122,9 +121,9 @@ public class MultipartBodyPublisher {
                 final PartsSpecification nextPart = iter.next();
                 if(nextPart.type == Type.STRING) {
                     final byte[] stub = nextPart.toString().getBytes(StandardCharsets.UTF_8);
-                    final byte[] arr = new byte[nextPart.value.length() + stub.length + 2 /*2 to make up for \r\n*/];
+                    final byte[] arr = new byte[nextPart.value.length + stub.length + 2 /*2 to make up for \r\n*/];
                     System.arraycopy(stub, 0, arr, 0, stub.length);
-                    nextPart.value.getBytes(arr, stub.length);
+                    System.arraycopy(nextPart.value, 0, arr, stub.length, nextPart.value.length);
                     arr[arr.length - 2] = '\r';
                     arr[arr.length - 1] = '\n';
                     return arr;
@@ -134,16 +133,17 @@ public class MultipartBodyPublisher {
                 }
                 return nextPart.toString().getBytes(StandardCharsets.UTF_8);
             } else {
-                final int len = currentFileInput.length();
+                final int len = currentFileInput.length;
                 final int remain = len - index;
                 if(remain > 0) {
                     final byte[] buf;
                     if(remain >= 8192) {
                         buf = new byte[8192];
-                        currentFileInput.getBytes(index, index += 8192, buf);
+                        System.arraycopy(currentFileInput, index, buf, 0, 8192);
+                        index += 8192;
                     } else {
                         buf = new byte[remain];
-                        currentFileInput.getBytes(index, index += remain, buf);
+                        System.arraycopy(currentFileInput, index, buf, 0, remain);
                     }
                     return buf;
                 } else {

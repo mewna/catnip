@@ -41,23 +41,24 @@ import com.mewna.catnip.shard.LifecycleEvent.Raw;
 import com.mewna.catnip.shard.manager.AbstractShardManager;
 import com.mewna.catnip.shard.manager.DefaultShardManager;
 import com.mewna.catnip.shard.manager.ShardManager;
-import com.mewna.catnip.util.BufferOutputStream;
 import com.mewna.catnip.util.JsonUtil;
 import com.mewna.catnip.util.ReentrantLockWebSocket;
 import com.mewna.catnip.util.task.GatewayTask;
 import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
-import io.vertx.core.buffer.Buffer;
+
 import lombok.Getter;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.WebSocket;
 import java.net.http.WebSocket.Listener;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
@@ -92,8 +93,9 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     // This is an AtomicLong instead of a volatile long because IntelliJ got
     // A N G E R Y because I guess longs don't get written atomically.
     private final AtomicLong heartbeatTask = new AtomicLong(-1L);
-    private final Buffer readBuffer = Buffer.buffer();
-    private final Buffer decompressBuffer = Buffer.buffer();
+    private final ByteArrayOutputStream readBuffer = new ByteArrayOutputStream();
+    private final Inflater inflater = new Inflater();
+    private final ByteArrayOutputStream decompressBuffer = new ByteArrayOutputStream();
     private final StringBuffer socketInputBuffer = new StringBuffer(); //Using a StringBuffer instead of a StringBuilder due to async-friendly synchronizations.
     private final byte[] decompress = new byte[1024];
     private final GatewayTask<JsonObject> sendTask;
@@ -110,8 +112,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     private volatile boolean socketOpen;
     private volatile boolean closedByClient;
     private WebSocket socket;
-    private Inflater inflater;
-    private int readBufferPosition;
+    private boolean readBuffered;
     private SingleEmitter<ShardConnectState> message;
     private LifecycleState lifecycleState;
     
@@ -190,33 +191,34 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         });
     }
     
-    private void handleBinaryData(final Buffer binary) {
+    private void handleBinaryData(final byte[] binary) {
         if(socket == null) {
             return;
         }
-        final boolean isEnd = binary.getInt(binary.length() - 4) == ZLIB_SUFFIX;
-        if(!isEnd || readBufferPosition > 0) {
-            final int position = readBufferPosition;
-            readBuffer.setBuffer(position, binary);
-            readBufferPosition = position + binary.length();
+        final int last = (binary[binary.length - 4] << 24) + (binary[binary.length - 3] << 16)
+                + (binary[binary.length - 2] << 8) + binary[binary.length - 1];
+        
+        final boolean isEnd = last == ZLIB_SUFFIX;
+        if(!isEnd) {
+            try {
+                readBuffer.write(binary);
+            } catch(IOException ignored) {
+                //impossible
+            }
+            readBuffered = true;
         }
         if(isEnd) {
-            final Buffer decompressed = decompressBuffer;
-            final Buffer dataToDecompress = readBufferPosition > 0 ? readBuffer : binary;
-            try(final InflaterOutputStream ios = new InflaterOutputStream(new BufferOutputStream(decompressed, 0), inflater)) {
+            final ByteArrayOutputStream decompressed = decompressBuffer;
+            final byte[] dataToDecompress = readBuffered ? readBuffer.toByteArray() : binary;
+            try(final InflaterOutputStream ios = new InflaterOutputStream(decompressed, inflater)) {
+                final String value;
                 synchronized(decompressBuffer) {
-                    final int length = Math.max(readBufferPosition, binary.length());
-                    int r = 0;
-                    while(r < length) {
-                        // How many bytes we can read
-                        final int read = Math.min(decompress.length, length - r);
-                        dataToDecompress.getBytes(r, r + read, decompress);
-                        // Decompress
-                        ios.write(decompress, 0, read);
-                        r += read;
-                    }
+                    ios.write(dataToDecompress, 0, dataToDecompress.length);
+                    value = decompressed.toString(StandardCharsets.UTF_8);
+                    decompressed.reset();
                 }
-                handleSocketData(JsonParser.object().from(decompressed.toString()));
+                readBuffer.reset();
+                handleSocketData(JsonParser.object().from(value));
             } catch(final IOException e) {
                 catnip.logAdapter().error("Shard {}/{}: Error decompressing payload", id, limit, e);
                 stateReply(ShardConnectState.FAILED);
@@ -224,7 +226,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                 catnip.logAdapter().error("Shard {}/{}: Error parsing payload", id, limit, e);
                 stateReply(ShardConnectState.FAILED);
             } finally {
-                readBufferPosition = 0;
+                readBuffered = false;
             }
         }
     }
@@ -305,7 +307,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         // This may need revising, due to the tendency of the socket splitting
         // frames. Although, the method does have a built in handler, so
         // :shrug:
-        handleBinaryData(Buffer.buffer(data.array()));
+        handleBinaryData(data.array());
         socket.request(1L);
         return null;
     }

@@ -53,7 +53,6 @@ import com.mewna.catnip.util.pagination.ReactionPaginator;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.vertx.core.buffer.Buffer;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.CheckReturnValue;
@@ -131,7 +130,7 @@ public class RestChannel extends RestHandler {
         }
         
         final OutboundRequest request = new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), Map.of(), json);
-        final List<ImmutablePair<String, Buffer>> buffers = options.files();
+        final List<ImmutablePair<String, byte[]>> buffers = options.files();
         if(buffers != null && !buffers.isEmpty()) {
             request.buffers(buffers);
         }
