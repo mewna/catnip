@@ -1,9 +1,9 @@
 package com.mewna.catnip.shard;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.impl.user.PresenceImpl;
 import com.mewna.catnip.entity.user.Presence;
 import io.reactivex.Single;
-import io.vertx.core.json.JsonObject;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

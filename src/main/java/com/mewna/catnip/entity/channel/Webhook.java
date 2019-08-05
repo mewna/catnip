@@ -29,6 +29,7 @@ package com.mewna.catnip.entity.channel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.guild.GuildEntity;
 import com.mewna.catnip.entity.impl.channel.WebhookImpl;
@@ -41,7 +42,6 @@ import com.mewna.catnip.rest.requester.Requester;
 import com.mewna.catnip.util.PermissionUtil;
 import io.reactivex.Completable;
 import io.reactivex.Single;
-import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

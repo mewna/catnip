@@ -27,9 +27,9 @@
 
 package com.mewna.catnip.shard.buffer;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.impl.lifecycle.ChunkingDoneImpl;
 import com.mewna.catnip.shard.LifecycleEvent.Raw;
-import io.vertx.core.json.JsonObject;
 
 /**
  * A no-op implementation of {@link EventBuffer}. The no-op buffer simply

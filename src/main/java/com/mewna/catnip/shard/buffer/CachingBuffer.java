@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.shard.buffer;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.impl.lifecycle.ChunkingDoneImpl;
 import com.mewna.catnip.entity.impl.lifecycle.MemberChunkRerequestImpl;
 import com.mewna.catnip.shard.LifecycleEvent;
@@ -34,7 +35,6 @@ import com.mewna.catnip.shard.ShardInfo;
 import com.mewna.catnip.util.JsonUtil;
 import com.mewna.catnip.util.rx.RxHelpers;
 import io.reactivex.Completable;
-import io.vertx.core.json.JsonObject;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Value;
@@ -94,11 +94,11 @@ public class CachingBuffer extends AbstractBuffer {
     
     @Override
     public void buffer(final JsonObject event) {
-        final JsonObject shardData = event.getJsonObject("shard");
-        final int id = shardData.getInteger("id");
+        final JsonObject shardData = event.getObject("shard");
+        final int id = shardData.getInt("id");
         final String type = event.getString("t");
         
-        final JsonObject d = event.getJsonObject("d");
+        final JsonObject d = event.getObject("d");
         final BufferState bufferState = buffers.get(id);
         switch(type) {
             case Raw.READY: {
@@ -126,9 +126,9 @@ public class CachingBuffer extends AbstractBuffer {
     }
     
     private void handleReady(final int shardId, final JsonObject event) {
-        final JsonObject payloadData = event.getJsonObject("d");
+        final JsonObject payloadData = event.getObject("d");
         final String eventType = event.getString("t");
-        final Set<String> guilds = JsonUtil.toMutableSet(payloadData.getJsonArray("guilds"), g -> g.getString("id"));
+        final Set<String> guilds = JsonUtil.toMutableSet(payloadData.getArray("guilds"), g -> g.getString("id"));
         buffers.put(shardId, new BufferState(shardId, guilds));
         catnip().logAdapter().debug("Prepared new BufferState for shard {} with {} guilds.", shardId, guilds.size());
         // READY is also a cache event, as it does come with
@@ -139,7 +139,7 @@ public class CachingBuffer extends AbstractBuffer {
     
     private void handleGuildCreate(final BufferState bufferState, final JsonObject event) {
         final int shardId = bufferState.id();
-        final JsonObject payloadData = event.getJsonObject("d");
+        final JsonObject payloadData = event.getObject("d");
         final String guild = payloadData.getString("id");
         // Make sure to cache guild
         // This will always succeed unless something goes horribly wrong
@@ -149,7 +149,7 @@ public class CachingBuffer extends AbstractBuffer {
             bufferState.awaitGuild(guild);
             
             // Trigger member chunking if needed
-            final Integer memberCount = payloadData.getInteger("member_count");
+            final int memberCount = payloadData.getInt("member_count");
             if(catnip().chunkMembers() && memberCount > catnip().largeThreshold()) {
                 // If we're chunking members, calculate how many chunks we have to await
                 int chunks = memberCount / 1000;
@@ -222,7 +222,7 @@ public class CachingBuffer extends AbstractBuffer {
     }
     
     private void handleGuildMemberChunk(final BufferState bufferState, final JsonObject event) {
-        final JsonObject payloadData = event.getJsonObject("d");
+        final JsonObject payloadData = event.getObject("d");
         final String eventType = event.getString("t");
         
         if(catnip().chunkMembers()) {
@@ -241,7 +241,7 @@ public class CachingBuffer extends AbstractBuffer {
     }
     
     private void handleEvent(final int id, final BufferState bufferState, final JsonObject event) {
-        final JsonObject payloadData = event.getJsonObject("d");
+        final JsonObject payloadData = event.getObject("d");
         final String eventType = event.getString("t");
         
         final String guildId = payloadData.getString("guild_id", null);
@@ -265,7 +265,7 @@ public class CachingBuffer extends AbstractBuffer {
     private void cacheAndDispatch(final String type, final int id, final JsonObject event) {
         // TODO: Cache updates are async - this is likely a race condition
         //  Is there any reasonable way to fix this?
-        final JsonObject d = event.getJsonObject("d");
+        final JsonObject d = event.getObject("d");
         emitter().emit(event);
         maybeCache(type, id, d);
     }
@@ -276,7 +276,7 @@ public class CachingBuffer extends AbstractBuffer {
                 return catnip().cacheWorker().updateCache(eventType, shardId, data);
             } catch(final Exception e) {
                 catnip().logAdapter().warn("Got error updating cache for payload {}", eventType, e);
-                catnip().logAdapter().warn("Payload: {}", data.encodePrettily());
+                catnip().logAdapter().warn("Payload: {}", JsonUtil.encodePrettily(data));
                 return RxHelpers.completedCompletable(catnip());
             }
         } else {

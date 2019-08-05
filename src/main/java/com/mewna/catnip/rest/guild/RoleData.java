@@ -27,10 +27,10 @@
 
 package com.mewna.catnip.rest.guild;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.JsonConvertible;
-import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

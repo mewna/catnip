@@ -89,6 +89,13 @@
             <version>${jsr305.version}</version>
         </dependency>
 
+        <!-- nanojson -->
+        <dependency>
+            <groupId>com.grack</groupId>
+            <artifactId>nanojson</artifactId>
+            <version>1.3</version>
+        </dependency>
+
         <!-- Collections -->
         <!-- lombok is retarded and doesn't work if this annotation processor is present
              on j11

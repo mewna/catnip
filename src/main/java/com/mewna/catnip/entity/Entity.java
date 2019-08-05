@@ -28,10 +28,10 @@
 package com.mewna.catnip.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.util.CatnipMeta;
 import com.mewna.catnip.util.JsonUtil;
-import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
 
@@ -58,14 +58,14 @@ public interface Entity {
     @SuppressWarnings("ClassReferencesSubclass")
     static <T> T fromJson(@Nonnull final Catnip catnip, @Nonnull final Class<T> type, @Nonnull final JsonObject json) {
         final String v = json.getString("v");
-        final JsonObject data = JsonUtil.destringifySnowflakes(json.getJsonObject("d"));
+        final JsonObject data = JsonUtil.destringifySnowflakes(json.getObject("d"));
         
         if(!CatnipMeta.VERSION.equals(v) && catnip.warnOnEntityVersionMismatch()) {
             catnip.logAdapter().warn("Attempting to deserialize an entity from catnip v{}, but we're on v{}! " +
                     "This may not work, so update your versions!", v, CatnipMeta.VERSION);
         }
         
-        final T t = data.mapTo(type);
+        final T t = JsonUtil.mapTo(data, type);
         // Yeah I know this is a Bad Thing:tm: to do with referencing the
         // subclass, but it was the easiest way to do things :<
         if(t instanceof RequiresCatnip) {
@@ -91,9 +91,10 @@ public interface Entity {
     @JsonIgnore
     default JsonObject toJson() {
         return JsonUtil.stringifySnowflakes(
-                new JsonObject()
-                        .put("d", JsonObject.mapFrom(this))
-                        .put("v", CatnipMeta.VERSION)
+                JsonObject.builder()
+                        .value("d", JsonUtil.mapFrom(this))
+                        .value("v", CatnipMeta.VERSION)
+                        .done()
         );
     }
 }

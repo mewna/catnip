@@ -72,7 +72,7 @@ import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.entity.voice.VoiceRegion;
 import com.mewna.catnip.entity.voice.VoiceServerUpdate;
 import com.mewna.catnip.util.JsonUtil;
-import io.vertx.core.json.JsonObject;
+import com.grack.nanojson.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -120,8 +120,8 @@ class EntityTest {
         final Catnip thisCatnip = mockNip();
         @SuppressWarnings("unchecked")
         final Class<T> entityClass = (Class<T>) entity.getClass();
-        final JsonObject data = JsonUtil.destringifySnowflakes(JsonUtil.stringifySnowflakes(JsonObject.mapFrom(entity)));
-        final T deserialized = data.mapTo(entityClass);
+        final JsonObject data = JsonUtil.destringifySnowflakes(JsonUtil.stringifySnowflakes(JsonUtil.mapFrom(entity)));
+        final T deserialized = JsonUtil.mapTo(data, entityClass);
         if(deserialized instanceof RequiresCatnip) {
             ((RequiresCatnip) deserialized).catnip(thisCatnip);
         }

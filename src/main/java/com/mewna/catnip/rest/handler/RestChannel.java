@@ -27,6 +27,8 @@
 
 package com.mewna.catnip.rest.handler;
 
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.channel.GuildChannel.ChannelEditFields;
@@ -52,8 +54,6 @@ import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.CheckReturnValue;
@@ -107,7 +107,7 @@ public class RestChannel extends RestHandler {
         if(embeds != null && !embeds.isEmpty()) {
             json.put("embed", entityBuilder().embedToJson(embeds.get(0)));
         }
-        if(json.getValue("embed", null) == null && json.getValue("content", null) == null && message.attachments().isEmpty()) {
+        if(json.get("embed") == null && json.get("content") == null && message.attachments().isEmpty()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no attachments!");
         }
         
@@ -126,7 +126,7 @@ public class RestChannel extends RestHandler {
         if(options.embed() != null) {
             json.put("embed", entityBuilder().embedToJson(options.embed()));
         }
-        if(json.getValue("embed", null) == null && json.getValue("content", null) == null && !options.hasFiles()) {
+        if(json.get("embed") == null && json.get("content") == null && !options.hasFiles()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no attachments!");
         }
         
@@ -184,7 +184,7 @@ public class RestChannel extends RestHandler {
         if(message.embeds() != null && !message.embeds().isEmpty()) {
             json.put("embed", entityBuilder().embedToJson(message.embeds().get(0)));
         }
-        if(json.getValue("embed", null) == null && json.getValue("content", null) == null) {
+        if(json.get("embed") == null && json.get("content") == null) {
             throw new IllegalArgumentException("Can't build a message with no content and no embed!");
         }
         return catnip().requester()
@@ -211,7 +211,7 @@ public class RestChannel extends RestHandler {
                                       @Nullable final String reason) {
         return catnip().requester()
                 .queue(new OutboundRequest(Routes.BULK_DELETE_MESSAGES.withMajorParam(channelId),
-                        Map.of(), new JsonObject().put("messages", new JsonArray(messageIds)), reason))
+                        Map.of(), JsonObject.builder().value("messages", new JsonArray(messageIds)).done(), reason))
                 .ignoreElements();
     }
     
@@ -517,10 +517,11 @@ public class RestChannel extends RestHandler {
                                               final boolean isMember, @Nullable final String reason) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.EDIT_CHANNEL_PERMISSIONS.withMajorParam(channelId),
-                        Map.of("overwrite.id", overwriteId), new JsonObject()
-                        .put("allow", Permission.from(allowed))
-                        .put("deny", Permission.from(denied))
-                        .put("type", isMember ? "member" : "role"),
+                        Map.of("overwrite.id", overwriteId), JsonObject.builder()
+                        .value("allow", Permission.from(allowed))
+                        .value("deny", Permission.from(denied))
+                        .value("type", isMember ? "member" : "role")
+                        .done(),
                         reason
                 )));
     }
@@ -611,7 +612,7 @@ public class RestChannel extends RestHandler {
     public Observable<JsonObject> createWebhookRaw(@Nonnull final String channelId, @Nonnull final String name,
                                                    @Nullable final String avatar, @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.CREATE_WEBHOOK.withMajorParam(channelId),
-                Map.of(), new JsonObject().put("name", name).put("avatar", avatar), reason))
+                Map.of(), JsonObject.builder().value("name", name).value("avatar", avatar).done(), reason))
                 .map(ResponsePayload::object);
     }
 }

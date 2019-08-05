@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.rest.guild;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.PermissionOverride;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
@@ -34,7 +35,6 @@ import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.JsonConvertible;
-import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
@@ -107,10 +107,11 @@ public class PermissionOverrideData implements JsonConvertible {
     @Nonnull
     @Override
     public JsonObject toJson() {
-        return new JsonObject()
-                .put("id", targetId)
-                .put("type", type.getKey())
-                .put("allow", Permission.from(allow))
-                .put("deny", Permission.from(deny));
+        return JsonObject.builder()
+                .value("id", targetId)
+                .value("type", type.getKey())
+                .value("allow", Permission.from(allow))
+                .value("deny", Permission.from(deny))
+                .done();
     }
 }

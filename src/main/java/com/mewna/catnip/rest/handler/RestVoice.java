@@ -27,13 +27,13 @@
 
 package com.mewna.catnip.rest.handler;
 
+import com.grack.nanojson.JsonArray;
 import com.mewna.catnip.entity.voice.VoiceRegion;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
 import io.reactivex.Observable;
-import io.vertx.core.json.JsonArray;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

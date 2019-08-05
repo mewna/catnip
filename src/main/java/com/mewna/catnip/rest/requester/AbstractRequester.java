@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.rest.requester;
 
+import com.grack.nanojson.*;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.impl.lifecycle.RestRatelimitHitImpl;
 import com.mewna.catnip.extension.Extension;
@@ -43,8 +44,6 @@ import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.rx.RxHelpers;
 import io.reactivex.Observable;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
@@ -67,8 +66,8 @@ import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static io.vertx.core.http.HttpMethod.GET;
-import static io.vertx.core.http.HttpMethod.PUT;
+import static com.mewna.catnip.rest.Routes.HttpMethod.GET;
+import static com.mewna.catnip.rest.Routes.HttpMethod.PUT;
 
 @SuppressWarnings("WeakerAccess")
 public abstract class AbstractRequester implements Requester {
@@ -138,11 +137,18 @@ public abstract class AbstractRequester implements Requester {
                         r.object(hook.rawRestSendObjectHook(finalRoute, r.object()));
                     }
                 }
-                publisher.addPart("payload_json", r.object().encode());
+                publisher.addPart("payload_json", JsonWriter.string(r.object()));
             } else if(r.array() != null) {
-                publisher.addPart("payload_json", r.array().encode());
+                publisher.addPart("payload_json", JsonWriter.string(r.array()));
             } else {
-                publisher.addPart("payload_json", new JsonObject().putNull("content").putNull("embed").encode());
+                
+                publisher.addPart("payload_json",
+                        JsonWriter.string()
+                                .object()
+                                .nul("content")
+                                .nul("embed")
+                                .end()
+                                .done());
             }
             executeHttpRequest(finalRoute, publisher.build(), request, "multipart/form-data;boundary=" + publisher.getBoundary());
         } catch(final Exception e) {
@@ -159,9 +165,9 @@ public abstract class AbstractRequester implements Requester {
                     r.object(hook.rawRestSendObjectHook(finalRoute, r.object()));
                 }
             }
-            encoded = r.object().encode();
+            encoded = JsonWriter.string(r.object());
         } else if(r.array() != null) {
-            encoded = r.object().encode();
+            encoded = JsonWriter.string(r.array());
         } else {
             encoded = null;
         }
@@ -199,16 +205,8 @@ public abstract class AbstractRequester implements Requester {
                     final String message = "Unavailable to due Java's HTTP client.";
                     final long requestEnd = System.nanoTime();
                     
-                    if(res.body() == null) {
-                        catnip.rxScheduler().scheduleDirect(() ->
-                                handleResponse(route, code, message, requestEnd, null, res.headers(), request));
-                    } else {
-                        final byte[] bodyBytes = res.body().getBytes();
-                        
-                        catnip.rxScheduler().scheduleDirect(() ->
-                                handleResponse(route, code, message, requestEnd, Buffer.buffer(bodyBytes),
-                                        res.headers(), request));
-                    }
+                    catnip.rxScheduler().scheduleDirect(() ->
+                            handleResponse(route, code, message, requestEnd, res.body(), res.headers(), request));
                 })
                 .exceptionally(e -> {
                     request.bucket.failedRequest(request, e);
@@ -218,7 +216,7 @@ public abstract class AbstractRequester implements Requester {
     
     protected void handleResponse(@Nonnull final Route route, final int statusCode,
                                   @SuppressWarnings("SameParameterValue") @Nonnull final String statusMessage,
-                                  final long requestEnd, final Buffer body, final HttpHeaders headers,
+                                  final long requestEnd, final String body, final HttpHeaders headers,
                                   @Nonnull final QueuedRequest request) {
         final String dateHeader = headers.firstValue("Date").orElse(null);
         final long requestDuration = TimeUnit.NANOSECONDS.toMillis(requestEnd - request.start);
@@ -263,7 +261,11 @@ public abstract class AbstractRequester implements Requester {
             
             String retry = headers.firstValue("Retry-After").orElse(null);
             if(retry == null || retry.isEmpty()) {
-                retry = body.toJsonObject().getValue("retry_after").toString();
+                try {
+                    retry = JsonParser.object().from(body).get("retry_after").toString();
+                } catch(final JsonParserException e) {
+                    throw new IllegalStateException(e);
+                }
             }
             final long retryAfter = Long.parseLong(retry);
             if(Boolean.parseBoolean(headers.firstValue("X-RateLimit-Global").orElse(null))) {
@@ -295,26 +297,26 @@ public abstract class AbstractRequester implements Requester {
             // We got a 4xx, meaning there's errors. Fail the request with this and move on.
             if(statusCode >= 400) {
                 final JsonObject response = payload.object();
-                if(statusCode == 400 && response.getInteger("code", -1) > 1000) {
+                if(statusCode == 400 && response.getInt("code", -1) > 1000) {
                     // 1000 was just the easiest number to check to skip over http error codes
                     // Discord error codes are all >=10000 afaik, so this should be safe?
                     
                     final Map<String, List<String>> failures = new HashMap<>();
-                    response.forEach(e -> {
-                        if(e.getValue() instanceof JsonArray) {
-                            final JsonArray arr = (JsonArray) e.getValue();
+                    response.forEach((key, value) -> {
+                        if(value instanceof JsonArray) {
+                            final JsonArray arr = (JsonArray) value;
                             final List<String> errorStrings = new ArrayList<>();
                             arr.stream().map(element -> (String) element).forEach(errorStrings::add);
-                            failures.put(e.getKey(), errorStrings);
-                        } else if(e.getValue() instanceof Integer) {
-                            failures.put(e.getKey(), List.of(String.valueOf(e.getValue())));
-                        } else if(e.getValue() instanceof String) {
-                            failures.put(e.getKey(), List.of((String) e.getValue()));
+                            failures.put(key, errorStrings);
+                        } else if(value instanceof Integer) {
+                            failures.put(key, List.of(String.valueOf(value)));
+                        } else if(value instanceof String) {
+                            failures.put(key, List.of((String) value));
                         } else {
                             // If we don't know what it is, just stringify it and log a warning so that people can tell us
                             catnip.logAdapter().warn("Got unknown error response type: {} (Please report this!)",
-                                    e.getValue().getClass().getName());
-                            failures.put(e.getKey(), List.of(String.valueOf(e.getValue())));
+                                    value.getClass().getName());
+                            failures.put(key, List.of(String.valueOf(value)));
                         }
                     });
                     final Throwable throwable = new RuntimeException("REST error context");
@@ -322,7 +324,7 @@ public abstract class AbstractRequester implements Requester {
                     request.future().completeExceptionally(new RestPayloadException(failures).initCause(throwable));
                 } else {
                     final String message = response.getString("message", "No message.");
-                    final int code = response.getInteger("code", -1);
+                    final int code = response.getInt("code", -1);
                     final Throwable throwable = new RuntimeException("REST error context");
                     throwable.setStackTrace(request.stacktrace());
                     request.future().completeExceptionally(new ResponseException(route.toString(), statusCode,

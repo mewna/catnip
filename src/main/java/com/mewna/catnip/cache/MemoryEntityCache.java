@@ -27,6 +27,8 @@
 
 package com.mewna.catnip.cache;
 
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.cache.view.*;
 import com.mewna.catnip.entity.channel.Channel;
@@ -43,8 +45,6 @@ import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.util.rx.RxHelpers;
 import io.reactivex.Completable;
 import io.reactivex.Single;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -55,7 +55,6 @@ import javax.annotation.Nullable;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -431,7 +430,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
         switch(eventType) {
             // Lifecycle
             case Raw.READY: {
-                selfUser.set(entityBuilder.createUser(payload.getJsonObject("user")));
+                selfUser.set(entityBuilder.createUser(payload.getObject("user")));
                 break;
             }
             // Channels
@@ -497,14 +496,14 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
             // Roles
             case Raw.GUILD_ROLE_CREATE: {
                 final String guild = payload.getString("guild_id");
-                final JsonObject json = payload.getJsonObject("role");
+                final JsonObject json = payload.getObject("role");
                 final Role role = entityBuilder.createRole(guild, json);
                 cacheRole(role);
                 break;
             }
             case Raw.GUILD_ROLE_UPDATE: {
                 final String guild = payload.getString("guild_id");
-                final JsonObject json = payload.getJsonObject("role");
+                final JsonObject json = payload.getObject("role");
                 final Role role = entityBuilder.createRole(guild, json);
                 cacheRole(role);
                 break;
@@ -521,7 +520,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
             // Members
             case Raw.GUILD_MEMBER_ADD: {
                 final Member member = entityBuilder.createMember(payload.getString("guild_id"), payload);
-                final User user = entityBuilder.createUser(payload.getJsonObject("user"));
+                final User user = entityBuilder.createUser(payload.getObject("user"));
                 userCache(shardId).put(user.idAsLong(), user);
                 cacheMember(member);
                 break;
@@ -529,21 +528,22 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
             case Raw.GUILD_MEMBER_UPDATE: {
                 // This doesn't send an object like all the other events, so we build a fake
                 // payload object and create an entity from that
-                final JsonObject user = payload.getJsonObject("user");
+                final JsonObject user = payload.getObject("user");
                 final String id = user.getString("id");
                 final String guild = payload.getString("guild_id");
                 final Member old = member(guild, id);
                 if(old != null) {
                     @SuppressWarnings("ConstantConditions")
-                    final JsonObject data = new JsonObject()
-                            .put("user", user)
-                            .put("roles", payload.getJsonArray("roles"))
-                            .put("nick", payload.getString("nick"))
-                            .put("deaf", old.deaf())
-                            .put("mute", old.mute())
-                            .put("joined_at", old.joinedAt()
+                    final JsonObject data = JsonObject.builder()
+                            .value("user", user)
+                            .value("roles", payload.getArray("roles"))
+                            .value("nick", payload.getString("nick"))
+                            .value("deaf", old.deaf())
+                            .value("mute", old.mute())
+                            .value("joined_at", old.joinedAt()
                                     // If we have an old member cached, this shouldn't be an issue
-                                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+                                    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+                            .done();
                     final Member member = entityBuilder.createMember(guild, data);
                     cacheMember(member);
                 } else {
@@ -553,7 +553,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
             }
             case Raw.GUILD_MEMBER_REMOVE: {
                 final String guild = payload.getString("guild_id");
-                final String user = payload.getJsonObject("user").getString("id");
+                final String user = payload.getObject("user").getString("id");
                 final MutableCacheView<Member> cache = memberCache(Long.parseUnsignedLong(guild), true);
                 if(cache != null) {
                     cache.remove(Long.parseUnsignedLong(user));
@@ -563,7 +563,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
             // Member chunking
             case Raw.GUILD_MEMBERS_CHUNK: {
                 final String guild = payload.getString("guild_id");
-                final JsonArray members = payload.getJsonArray("members");
+                final JsonArray members = payload.getArray("members");
                 members.stream().map(e -> entityBuilder.createMember(guild, (JsonObject) e)).forEach(this::cacheMember);
                 break;
             }
@@ -571,7 +571,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
             case Raw.GUILD_EMOJIS_UPDATE: {
                 if(!catnip.cacheFlags().contains(CacheFlag.DROP_EMOJI)) {
                     final String guild = payload.getString("guild_id");
-                    final JsonArray emojis = payload.getJsonArray("emojis");
+                    final JsonArray emojis = payload.getArray("emojis");
                     emojis.stream().map(e -> entityBuilder.createCustomEmoji(guild, (JsonObject) e)).forEach(this::cacheEmoji);
                 }
                 break;
@@ -585,7 +585,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
             }
             // Users
             case Raw.PRESENCE_UPDATE: {
-                final JsonObject user = payload.getJsonObject("user");
+                final JsonObject user = payload.getObject("user");
                 final String id = user.getString("id");
                 final User old = user(id);
                 if(old == null && !catnip.chunkMembers() && catnip.logUncachedPresenceWhenNotChunking()) {
@@ -596,12 +596,13 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                     // - discriminator
                     // - avatar
                     // so we check the existing cache for a user, and update as needed
-                    final User updated = entityBuilder.createUser(new JsonObject()
-                            .put("id", id)
-                            .put("bot", old.bot())
-                            .put("username", user.getString("username", old.username()))
-                            .put("discriminator", user.getString("discriminator", old.discriminator()))
-                            .put("avatar", user.getString("avatar", old.avatar()))
+                    final User updated = entityBuilder.createUser(JsonObject.builder()
+                            .value("id", id)
+                            .value("bot", old.bot())
+                            .value("username", user.getString("username", old.username()))
+                            .value("discriminator", user.getString("discriminator", old.discriminator()))
+                            .value("avatar", user.getString("avatar", old.avatar()))
+                            .done()
                     );
                     userCache(shardId).put(updated.idAsLong(), updated);
                     if(!catnip.cacheFlags().contains(CacheFlag.DROP_GAME_STATUSES)) {

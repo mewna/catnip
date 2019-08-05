@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.shard;
 
+import com.grack.nanojson.*;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.impl.lifecycle.GatewayClosedImpl;
 import com.mewna.catnip.entity.impl.lifecycle.GatewayConnectionFailedImpl;
@@ -47,8 +48,6 @@ import com.mewna.catnip.util.task.GatewayTask;
 import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 
 import javax.annotation.Nonnegative;
@@ -137,15 +136,17 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     public static JsonObject basePayload(@Nonnull final GatewayOp op, @Nullable final JsonObject payload) {
-        return new JsonObject()
-                .put("op", op.opcode())
-                .put("d", payload);
+        return JsonObject.builder()
+                .value("op", op.opcode())
+                .value("d", payload)
+                .done();
     }
     
     public static JsonObject basePayload(@Nonnull final GatewayOp op, @Nonnull @Nonnegative final Integer payload) {
-        return new JsonObject()
-                .put("op", op.opcode())
-                .put("d", payload);
+        return JsonObject.builder()
+                .value("op", op.opcode())
+                .value("d", payload)
+                .done();
     }
     
     @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -215,9 +216,12 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                         r += read;
                     }
                 }
-                handleSocketData(decompressed.toJsonObject());
+                handleSocketData(JsonParser.object().from(decompressed.toString()));
             } catch(final IOException e) {
                 catnip.logAdapter().error("Shard {}/{}: Error decompressing payload", id, limit, e);
+                stateReply(ShardConnectState.FAILED);
+            } catch(final JsonParserException e) {
+                catnip.logAdapter().error("Shard {}/{}: Error parsing payload", id, limit, e);
                 stateReply(ShardConnectState.FAILED);
             } finally {
                 readBufferPosition = 0;
@@ -232,7 +236,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             }
         }
         
-        final GatewayOp op = GatewayOp.byId(payload.getInteger("op"));
+        final GatewayOp op = GatewayOp.byId(payload.getInt("op"));
         switch(op) {
             case HELLO: {
                 handleHello(payload);
@@ -276,7 +280,11 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         }
         if(last) {
             try {
-                handleSocketData(new JsonObject(socketInputBuffer.length() > 0 ? socketInputBuffer.append(data).toString() : data.toString()));
+                final var payload = socketInputBuffer.length() > 0 ? socketInputBuffer.append(data).toString() : data.toString();
+                handleSocketData(JsonParser.object().from(payload));
+            } catch(final JsonParserException e) {
+                catnip.logAdapter().error("Shard {}/{}: Error parsing payload", id, limit, e);
+                stateReply(ShardConnectState.FAILED);
             } finally {
                 socketInputBuffer.setLength(0);
             }
@@ -427,7 +435,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                     payload = hook.rawGatewaySendHook(payload);
                 }
             }
-            socket.sendText(payload.encode(), true);
+            socket.sendText(JsonWriter.string(payload), true);
         }
     }
     
@@ -450,10 +458,10 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     private void handleHello(final JsonObject event) {
-        final JsonObject payload = event.getJsonObject("d");
-        trace = JsonUtil.toStringList(payload.getJsonArray("_trace"));
+        final JsonObject payload = event.getObject("d");
+        trace = JsonUtil.toStringList(payload.getArray("_trace"));
         
-        final long taskId = catnip.taskScheduler().setInterval(payload.getInteger("heartbeat_interval"), timerId -> {
+        final long taskId = catnip.taskScheduler().setInterval(payload.getInt("heartbeat_interval"), timerId -> {
             if(socket != null && socketOpen) {
                 if(!heartbeatAcked) {
                     // Zombie
@@ -494,21 +502,21 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     
     private void handleDispatch(final JsonObject event) {
         // Should be safe to ignore
-        if(event.getValue("d") instanceof JsonArray) {
+        if(event.get("d") instanceof JsonArray) {
             return;
         }
-        final JsonObject data = event.getJsonObject("d");
+        final JsonObject data = event.getObject("d");
         final String type = event.getString("t");
         
         // Update trace and seqnum as needed
-        if(data.getJsonArray("_trace", null) != null) {
-            trace = JsonUtil.toStringList(data.getJsonArray("_trace"));
+        if(data.getArray("_trace", null) != null) {
+            trace = JsonUtil.toStringList(data.getArray("_trace"));
         } else {
             trace = Collections.emptyList();
         }
         
-        if(event.getValue("s", null) != null) {
-            catnip.sessionManager().seqnum(id, event.getInteger("s"));
+        if(event.get("s") != null) {
+            catnip.sessionManager().seqnum(id, event.getInt("s"));
         }
         
         switch(type) {
@@ -535,7 +543,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         // This allows a buffer to know WHERE an event is coming from, so that
         // it can be accurate in the case of ex. buffering events until a shard
         // has finished booting.
-        event.put("shard", new JsonObject().put("id", id).put("limit", limit));
+        event.put("shard", JsonObject.builder().value("id", id).value("limit", limit).done());
         catnip.eventBuffer().buffer(event);
     }
     
@@ -580,17 +588,21 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     private JsonObject identify() {
-        final JsonObject data = new JsonObject()
-                .put("token", catnip.token())
-                .put("compress", false)
-                .put("guild_subscriptions", ((CatnipImpl) catnip).options().enableGuildSubscriptions())
-                .put("large_threshold", catnip.largeThreshold())
-                .put("shard", new JsonArray().add(id).add(limit))
-                .put("properties", new JsonObject()
-                        .put("$os", "JVM")
-                        .put("$browser", "catnip")
-                        .put("$device", "catnip")
-                );
+        final JsonObject data = JsonObject.builder()
+                .value("token", catnip.token())
+                .value("compress", false)
+                .value("guild_subscriptions", ((CatnipImpl) catnip).options().enableGuildSubscriptions())
+                .value("large_threshold", catnip.largeThreshold())
+                .array("shard")
+                    .value(id)
+                    .value(limit)
+                .end()
+                .object("properties")
+                    .value("$os", "JVM")
+                    .value("$browser", "catnip")
+                    .value("$device", "catnip")
+                .end()
+                .done();
         if(presence != null) {
             data.put("presence", ((PresenceImpl) presence).asJson());
         }
@@ -598,17 +610,17 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     private JsonObject resume() {
-        return basePayload(GatewayOp.RESUME, new JsonObject()
-                .put("token", catnip.token())
-                .put("compress", false)
-                .put("session_id", catnip.sessionManager().session(id))
-                .put("seq", catnip.sessionManager().seqnum(id))
-                .put("properties", new JsonObject()
-                        .put("$os", "JVM")
-                        .put("$browser", "catnip")
-                        .put("$device", "catnip")
-                )
-        );
+        return JsonObject.builder()
+                .value("token", catnip.token())
+                .value("compress", false)
+                .value("session_id", catnip.sessionManager().session(id))
+                .value("seq", catnip.sessionManager().seqnum(id))
+                .object("properties")
+                    .value("$os", "JVM")
+                    .value("$browser", "catnip")
+                    .value("$device", "catnip")
+                .end()
+                .done();
     }
     
     private ShardInfo shardInfo() {

@@ -27,8 +27,8 @@
 
 package com.mewna.catnip.rest.invite;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.util.JsonConvertible;
-import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -54,10 +54,11 @@ public class InviteCreateOptions implements JsonConvertible {
     @Nonnull
     @Override
     public JsonObject toJson() {
-        return new JsonObject()
-                .put("max_age", maxAge)
-                .put("max_uses", maxUses)
-                .put("temporary", temporary)
-                .put("unique", unique);
+        return JsonObject.builder()
+                .value("max_age", maxAge)
+                .value("max_uses", maxUses)
+                .value("temporary", temporary)
+                .value("unique", unique)
+                .done();
     }
 }
