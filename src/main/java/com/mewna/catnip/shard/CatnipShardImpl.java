@@ -93,11 +93,12 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     // A N G E R Y because I guess longs don't get written atomically.
     private final AtomicLong heartbeatTask = new AtomicLong(-1L);
     private final Buffer readBuffer = Buffer.buffer();
-    private final Buffer decompressBuffer = Buffer.buffer();
+    private Buffer decompressBuffer = Buffer.buffer();
     private final StringBuffer socketInputBuffer = new StringBuffer(); //Using a StringBuffer instead of a StringBuilder due to async-friendly synchronizations.
     private final byte[] decompress = new byte[1024];
     private final GatewayTask<JsonObject> sendTask;
     private final GatewayTask<PresenceImpl> presenceTask;
+    private final Inflater inflater = new Inflater();
     private volatile Presence currentPresence;
     private volatile boolean heartbeatAcked = true;
     private volatile long lastHeartbeat = -1; //use System.nanoTime() as that is monotonic
@@ -110,7 +111,6 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     private volatile boolean socketOpen;
     private volatile boolean closedByClient;
     private WebSocket socket;
-    private Inflater inflater;
     private int readBufferPosition;
     private SingleEmitter<ShardConnectState> message;
     private LifecycleState lifecycleState;
@@ -170,7 +170,11 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     @SuppressWarnings("squid:HiddenFieldCheck")
-    private void connectSocket(final String url) {
+    private void connectSocket(String url) {
+        url += "?v=6&encoding=json";
+        if(catnip.compressionMode() != CompressionMode.NONE) {
+            url += "&compress=" + catnip.compressionMode().asDiscord();
+        }
         catnip.httpClient().newWebSocketBuilder().buildAsync(URI.create(url), this).thenAcceptAsync(ws -> {
             lifecycleState = CONNECTED;
             socket = new ReentrantLockWebSocket(ws);
@@ -204,6 +208,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             final Buffer decompressed = decompressBuffer;
             final Buffer dataToDecompress = readBufferPosition > 0 ? readBuffer : binary;
             try(final InflaterOutputStream ios = new InflaterOutputStream(new BufferOutputStream(decompressed, 0), inflater)) {
+                // TODO: ??? How to handle this non-final warning?
                 synchronized(decompressBuffer) {
                     final int length = Math.max(readBufferPosition, binary.length());
                     int r = 0;
@@ -217,11 +222,15 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                     }
                 }
                 handleSocketData(JsonParser.object().from(decompressed.toString()));
+                decompressBuffer = Buffer.buffer();
             } catch(final IOException e) {
                 catnip.logAdapter().error("Shard {}/{}: Error decompressing payload", id, limit, e);
+                catnip.logAdapter().error(decompressed.toString());
                 stateReply(ShardConnectState.FAILED);
             } catch(final JsonParserException e) {
                 catnip.logAdapter().error("Shard {}/{}: Error parsing payload", id, limit, e);
+                catnip.logAdapter().error("PAYLOAD LENGTH: {}", decompressed.toString().length());
+                catnip.logAdapter().error(decompressed.toString());
                 stateReply(ShardConnectState.FAILED);
             } finally {
                 readBufferPosition = 0;
@@ -305,7 +314,10 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         // This may need revising, due to the tendency of the socket splitting
         // frames. Although, the method does have a built in handler, so
         // :shrug:
-        handleBinaryData(Buffer.buffer(data.array()));
+        data.position(0);
+        final byte[] array = new byte[data.remaining()];
+        data.get(array);
+        handleBinaryData(Buffer.buffer(array));
         socket.request(1L);
         return null;
     }
@@ -588,14 +600,14 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     private JsonObject identify() {
+        // @formatter:off
         final JsonObject data = JsonObject.builder()
                 .value("token", catnip.token())
-                .value("compress", false)
                 .value("guild_subscriptions", ((CatnipImpl) catnip).options().enableGuildSubscriptions())
                 .value("large_threshold", catnip.largeThreshold())
                 .array("shard")
-                    .value(id)
-                    .value(limit)
+                .value(id)
+                .value(limit)
                 .end()
                 .object("properties")
                     .value("$os", "JVM")
@@ -603,6 +615,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                     .value("$device", "catnip")
                 .end()
                 .done();
+        // @formatter:on
         if(presence != null) {
             data.put("presence", ((PresenceImpl) presence).asJson());
         }
@@ -610,9 +623,9 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     private JsonObject resume() {
+        // @formatter:off
         return JsonObject.builder()
                 .value("token", catnip.token())
-                .value("compress", false)
                 .value("session_id", catnip.sessionManager().session(id))
                 .value("seq", catnip.sessionManager().seqnum(id))
                 .object("properties")
@@ -621,6 +634,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                     .value("$device", "catnip")
                 .end()
                 .done();
+        // @formatter:on
     }
     
     private ShardInfo shardInfo() {

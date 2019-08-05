@@ -47,6 +47,7 @@ import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.requester.Requester;
 import com.mewna.catnip.shard.CatnipShardImpl;
+import com.mewna.catnip.shard.CompressionMode;
 import com.mewna.catnip.shard.GatewayOp;
 import com.mewna.catnip.shard.buffer.EventBuffer;
 import com.mewna.catnip.shard.event.DispatchManager;
@@ -121,6 +122,7 @@ public class CatnipImpl implements Catnip {
     private int largeThreshold;
     private TaskScheduler taskScheduler;
     private HttpClient httpClient;
+    private CompressionMode compressionMode;
     
     private CatnipOptions options;
     
@@ -169,6 +171,7 @@ public class CatnipImpl implements Catnip {
         largeThreshold = options.largeThreshold();
         taskScheduler = options.taskScheduler();
         httpClient = options.httpClient();
+        compressionMode = options.compressionMode();
         
         // Sanity checks
         if(largeThreshold > 250 || largeThreshold < 50) {
