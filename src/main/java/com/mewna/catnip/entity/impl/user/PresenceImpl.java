@@ -69,28 +69,32 @@ public class PresenceImpl implements Presence, RequiresCatnip {
     @Nonnull
     @CheckReturnValue
     public JsonObject asJson() {
-        final JsonObject innerData = new JsonObject();
-        innerData.put("status", status.asString());
+        final var builder = JsonObject.builder()
+                .value("status", status.asString());
+        
         if(status == OnlineStatus.IDLE) {
-            innerData.put("since", System.currentTimeMillis());
-            innerData.put("afk", true);
+            builder.value("since", System.currentTimeMillis())
+                    .value("afk", true);
         } else {
-            innerData.put("since", null);
-            innerData.put("afk", false);
-        }
-        if(activity != null) {
-            final JsonObject game = new JsonObject();
-            game.put("name", activity.name());
-            game.put("type", activity.type().id());
-            if(activity.url() != null) {
-                game.put("url", activity.url());
-            }
-            innerData.put("game", game);
-        } else {
-            innerData.put("game", null);
+            builder.nul("since")
+                    .value("afk", false);
         }
         
-        return innerData;
+        if(activity != null) {
+            builder.value("game")
+                    .value("name", activity.name())
+                    .value("type", activity.type().id());
+            
+            if(activity.url() != null) {
+                builder.value("url", activity.url());
+            }
+            
+            builder.end();
+        } else {
+            builder.nul("game");
+        }
+        
+        return builder.done();
     }
     
     @Getter
