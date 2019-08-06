@@ -37,6 +37,8 @@ import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.impl.message.MessageImpl;
 import com.mewna.catnip.entity.impl.message.MessageImpl.AttachmentImpl;
+import com.mewna.catnip.entity.impl.message.MessageImpl.MessageActivityImpl;
+import com.mewna.catnip.entity.impl.message.MessageImpl.MessageApplicationImpl;
 import com.mewna.catnip.entity.impl.message.MessageImpl.ReactionImpl;
 import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
@@ -268,6 +270,22 @@ public interface Message extends Snowflake {
     @Nonnull
     @CheckReturnValue
     List<Reaction> reactions();
+    
+    /**
+     * @return The message's activity. Sent in Rich Presence-related embeds.
+     * May be null.
+     */
+    @Nullable
+    @CheckReturnValue
+    MessageActivity activity();
+    
+    /**
+     * @return The message's application. Sent in Rich Presence-related embeds.
+     * May be null.
+     */
+    @Nullable
+    @CheckReturnValue
+    MessageApplication application();
     
     /**
      * The snowflake ID of the guild this message was sent in.
@@ -506,5 +524,60 @@ public interface Message extends Snowflake {
         @Nonnull
         @CheckReturnValue
         Emoji emoji();
+    }
+    
+    @JsonDeserialize(as = MessageActivityImpl.class)
+    interface MessageActivity {
+        /**
+         * @return The type of the message activity.
+         */
+        @Nonnull
+        @CheckReturnValue
+        MessageActivityType type();
+    
+        /**
+         * @return The Rich Presence party id. May be null.
+         */
+        @Nullable
+        @CheckReturnValue
+        String partyId();
+    }
+    
+    @JsonDeserialize(as = MessageApplicationImpl.class)
+    interface MessageApplication {
+        /**
+         * @return The application's id.
+         */
+        @Nonnull
+        @CheckReturnValue
+        String id();
+    
+        /**
+         * @return The application's cover image. Shown in embeds. May be null.
+         */
+        @Nullable
+        @CheckReturnValue
+        String coverImage();
+    
+        /**
+         * @return The application's description.
+         */
+        @Nonnull
+        @CheckReturnValue
+        String description();
+    
+        /**
+         * @return The application's icon id (hash). May be null.
+         */
+        @Nullable
+        @CheckReturnValue
+        String icon();
+    
+        /**
+         * @return The application's name.
+         */
+        @Nonnull
+        @CheckReturnValue
+        String name();
     }
 }

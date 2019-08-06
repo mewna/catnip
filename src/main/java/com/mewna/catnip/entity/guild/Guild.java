@@ -384,7 +384,6 @@ public interface Guild extends Snowflake {
     /**
      * @return The guild's description.
      */
-    // TODO: What actually is this?
     @Nullable
     @CheckReturnValue
     String description();

@@ -51,6 +51,8 @@ import com.mewna.catnip.entity.impl.guild.audit.*;
 import com.mewna.catnip.entity.impl.message.*;
 import com.mewna.catnip.entity.impl.message.EmbedImpl.*;
 import com.mewna.catnip.entity.impl.message.MessageImpl.AttachmentImpl;
+import com.mewna.catnip.entity.impl.message.MessageImpl.MessageActivityImpl;
+import com.mewna.catnip.entity.impl.message.MessageImpl.MessageApplicationImpl;
 import com.mewna.catnip.entity.impl.message.MessageImpl.ReactionImpl;
 import com.mewna.catnip.entity.impl.misc.*;
 import com.mewna.catnip.entity.impl.user.*;
@@ -60,6 +62,8 @@ import com.mewna.catnip.entity.impl.voice.VoiceServerUpdateImpl;
 import com.mewna.catnip.entity.message.*;
 import com.mewna.catnip.entity.message.Embed.*;
 import com.mewna.catnip.entity.message.Message.Attachment;
+import com.mewna.catnip.entity.message.Message.MessageActivity;
+import com.mewna.catnip.entity.message.Message.MessageApplication;
 import com.mewna.catnip.entity.message.Message.Reaction;
 import com.mewna.catnip.entity.misc.*;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
@@ -258,7 +262,7 @@ public final class EntityBuilder {
                 .description(data.getString("description"))
                 .url(data.getString("url"))
                 .timestamp(data.getString("timestamp"))
-                .color(data.getInt("color")) //TODO?
+                .color(data.getInt("color"))
                 .footer(footer)
                 .image(image)
                 .thumbnail(thumbnail)
@@ -855,7 +859,24 @@ public final class EntityBuilder {
         if(guildId != null) {
             mentionedMembers.addAll(toList(data.getArray("mentions"), o -> createPartialMemberMention(guildId, o)));
         }
-    
+        
+        final JsonObject activityRaw = data.getObject("activity");
+        final JsonObject applicationRaw = data.getObject("application");
+        
+        final MessageActivity activity;
+        if(activityRaw == null) {
+            activity = null;
+        } else {
+            activity = createMessageActivity(activityRaw);
+        }
+        
+        final MessageApplication application;
+        if(applicationRaw == null) {
+            application = null;
+        } else {
+            application = createMessageApplication(applicationRaw);
+        }
+        
         return MessageImpl.builder()
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
@@ -878,6 +899,29 @@ public final class EntityBuilder {
                 .member(member)
                 .guildIdAsLong(guildId == null ? 0 : Long.parseUnsignedLong(guildId))
                 .webhookIdAsLong(webhookId == null ? 0 : Long.parseUnsignedLong(webhookId))
+                .activity(activity)
+                .application(application)
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public MessageActivity createMessageActivity(@Nonnull final JsonObject data) {
+        return MessageActivityImpl.builder()
+                .type(MessageActivityType.byId(data.getInt("type")))
+                .partyId(data.getString("party_id"))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public MessageApplication createMessageApplication(@Nonnull final JsonObject data) {
+        return MessageApplicationImpl.builder()
+                .id(data.getString("id"))
+                .coverImage(data.getString("cover_image", null))
+                .description(data.getString("description"))
+                .icon(data.getString("icon", null))
+                .name(data.getString("name"))
                 .build();
     }
     

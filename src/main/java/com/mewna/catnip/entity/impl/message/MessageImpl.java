@@ -35,6 +35,7 @@ import com.mewna.catnip.entity.Timestamped;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
+import com.mewna.catnip.entity.message.MessageActivityType;
 import com.mewna.catnip.entity.message.MessageType;
 import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
@@ -78,6 +79,8 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
     private List<Embed> embeds;
     @JsonProperty
     private List<Reaction> reactions;
+    private MessageActivity activity;
+    private MessageApplication application;
     private String nonce;
     private boolean pinned;
     private long webhookIdAsLong;
@@ -201,5 +204,28 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
         public String toString() {
             return String.format("Reaction (%d x %s, self = %b)", count, emoji, self);
         }
+    }
+    
+    @Getter(onMethod_ = @JsonProperty)
+    @Setter(onMethod_ = @JsonProperty)
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public class MessageActivityImpl implements MessageActivity {
+        private MessageActivityType type;
+        private String partyId;
+    }
+    
+    @Getter(onMethod_ = @JsonProperty)
+    @Setter(onMethod_ = @JsonProperty)
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public class MessageApplicationImpl implements MessageApplication {
+        private String id;
+        private String coverImage;
+        private String description;
+        private String icon;
+        private String name;
     }
 }

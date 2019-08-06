@@ -45,7 +45,6 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor
 public class RxTaskScheduler extends AbstractTaskScheduler {
     private final AtomicLong idCounter = new AtomicLong(0);
-    // TODO: Should this be using something other than CHM here?
     private final Map<Long, Disposable> tasks = new ConcurrentHashMap<>();
     
     @Override
@@ -56,7 +55,6 @@ public class RxTaskScheduler extends AbstractTaskScheduler {
                 .subscribeOn(catnip().rxScheduler())
                 .forEach(l -> {
                     // Once the task is running, cancellation shouldn't(?) have any effect
-                    // TODO: Check correctness
                     tasks.remove(id);
                     task.accept(l);
                 });
