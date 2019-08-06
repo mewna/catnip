@@ -855,8 +855,7 @@ public final class EntityBuilder {
         if(guildId != null) {
             mentionedMembers.addAll(toList(data.getArray("mentions"), o -> createPartialMemberMention(guildId, o)));
         }
-        
-        //noinspection ConstantConditions
+    
         return MessageImpl.builder()
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
@@ -869,7 +868,7 @@ public final class EntityBuilder {
                 .mentionsEveryone(data.getBoolean("mention_everyone", false))
                 .mentionedUsers(toList(data.getArray("mentions"), this::createUser))
                 .mentionedMembers(mentionedMembers)
-                .mentionedRoles(toListFromCache(data.getArray("mention_roles"), e -> catnip.cache().role(guildId, e)))
+                .mentionedRoleIds(toStringList(data.getArray("mention_roles")))
                 .attachments(toList(data.getArray("attachments"), this::createAttachment))
                 .embeds(toList(data.getArray("embeds"), this::createEmbed))
                 .reactions(toList(data.getArray("reactions"), e -> createReaction(data.getString("guild_id"), e)))

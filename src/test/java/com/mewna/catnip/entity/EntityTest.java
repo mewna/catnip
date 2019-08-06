@@ -28,6 +28,7 @@
 package com.mewna.catnip.entity;
 
 import com.cedarsoftware.util.DeepEquals;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.channel.*;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
@@ -72,12 +73,12 @@ import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.entity.voice.VoiceRegion;
 import com.mewna.catnip.entity.voice.VoiceServerUpdate;
 import com.mewna.catnip.util.JsonUtil;
-import com.grack.nanojson.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.awt.*;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -469,7 +470,8 @@ class EntityTest {
                 .tts(ThreadLocalRandom.current().nextBoolean())
                 .mentionsEveryone(ThreadLocalRandom.current().nextBoolean())
                 .mentionedUsers(Arrays.asList(user(mockNip), user(mockNip)))
-                .mentionedRoles(Arrays.asList(role(mockNip), role(mockNip)))
+                .mentionedRoleIds(List.of(randomPositiveLongAsString(), randomPositiveLongAsString(),
+                        randomPositiveLongAsString(), randomPositiveLongAsString()))
                 .attachments(Arrays.asList(attachment(mockNip), attachment(mockNip)))
                 .embeds(Arrays.asList(embed(mockNip), embed(mockNip)))
                 .reactions(Arrays.asList(reaction(mockNip), reaction(mockNip)))

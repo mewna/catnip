@@ -33,7 +33,6 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.Timestamped;
 import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageType;
@@ -73,7 +72,7 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
     private boolean mentionsEveryone;
     private List<User> mentionedUsers;
     private List<Member> mentionedMembers;
-    private List<Role> mentionedRoles;
+    private List<String> mentionedRoleIds;
     @JsonProperty
     private List<Attachment> attachments;
     private List<Embed> embeds;

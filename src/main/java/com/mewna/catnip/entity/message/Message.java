@@ -52,6 +52,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A single message in Discord.
@@ -140,11 +141,29 @@ public interface Message extends Snowflake {
      * List of roles @mentioned by this message.
      * <br>All users with these roles will also be mentioned
      *
-     * @return List of Roles. Never null.
+     * @return List of roles. Never null.
      */
     @Nonnull
     @CheckReturnValue
-    List<Role> mentionedRoles();
+    default List<Role> mentionedRoles() {
+        if(guildId() == null) {
+            return List.of();
+        }
+        //noinspection ConstantConditions
+        return mentionedRoleIds().stream()
+                .map(e -> catnip().cache().role(guildId(), e))
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * List of the ids of all roles @mentioned by this message.<br />
+     * All users with at least one of these roles will also be mentioned.
+     *
+     * @return List of role ids. Never null.
+     */
+    @Nonnull
+    @CheckReturnValue
+    List<String> mentionedRoleIds();
     
     /**
      * The author of the message, as a member of the guild.
