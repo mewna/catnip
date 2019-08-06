@@ -27,105 +27,40 @@
 
 package com.mewna.catnip.entity.impl.message;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.Timestamped;
-import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
-import com.mewna.catnip.entity.message.MessageActivityType;
-import com.mewna.catnip.entity.message.MessageType;
-import com.mewna.catnip.entity.misc.Emoji;
-import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.entity.message.Message.Attachment;
 import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.time.OffsetDateTime;
-import java.util.List;
 
 /**
  * @author amy
- * @since 9/2/18.
+ * @since 8/5/19.
  */
 @Getter(onMethod_ = @JsonProperty)
 @Setter(onMethod_ = @JsonProperty)
-@Builder
 @Accessors(fluent = true)
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MessageImpl implements Message, RequiresCatnip, Timestamped {
-    @JsonIgnore
+public class AttachmentImpl implements Attachment, RequiresCatnip {
     private transient Catnip catnip;
     
     private long idAsLong;
-    private long channelIdAsLong;
-    private User author;
-    private String content;
-    @JsonProperty
-    private String timestamp;
-    @JsonProperty
-    private String editedTimestamp;
-    private boolean tts;
-    private boolean mentionsEveryone;
-    private List<User> mentionedUsers;
-    private List<Member> mentionedMembers;
-    private List<String> mentionedRoleIds;
-    @JsonProperty
-    private List<Attachment> attachments;
-    private List<Embed> embeds;
-    @JsonProperty
-    private List<Reaction> reactions;
-    private MessageActivity activity;
-    private MessageApplication application;
-    private String nonce;
-    private boolean pinned;
-    private long webhookIdAsLong;
-    private MessageType type;
-    private Member member;
-    private long guildIdAsLong;
+    private String fileName;
+    private int size;
+    private String url;
+    private String proxyUrl;
+    private int height;
+    private int width;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
-        if(author instanceof RequiresCatnip) {
-            ((RequiresCatnip) author).catnip(catnip);
-        }
-        for(final User user : mentionedUsers) {
-            if(user instanceof RequiresCatnip) {
-                ((RequiresCatnip) user).catnip(catnip);
-            }
-        }
-        if(member instanceof RequiresCatnip) {
-            ((RequiresCatnip) member).catnip(catnip);
-        }
-    }
-    
-    @Nonnull
-    @Override
-    public OffsetDateTime timestamp() {
-        return parseTimestamp(timestamp);
-    }
-    
-    @Nullable
-    @Override
-    public OffsetDateTime editedTimestamp() {
-        return parseTimestamp(editedTimestamp);
-    }
-    
-    @Override
-    @Nonnull
-    public List<Attachment> attachments() {
-        return attachments;
-    }
-    
-    @Override
-    @Nonnull
-    public List<Reaction> reactions() {
-        return reactions;
     }
     
     @Override
@@ -135,11 +70,11 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Message && ((Message) obj).idAsLong() == idAsLong;
+        return obj instanceof Attachment && ((Attachment) obj).idAsLong() == idAsLong;
     }
     
     @Override
     public String toString() {
-        return String.format("Message (%s)", content);
+        return String.format("Attachment (%s)", fileName);
     }
 }
