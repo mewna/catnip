@@ -441,6 +441,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             if(socket != null && socketOpen) {
                 if(!heartbeatAcked) {
                     // Zombie
+                    // TODO: Sometimes this doesn't actually close the socket? Why?
                     catnip.logAdapter().warn("Shard {}/{}: Heartbeat zombie, queueing reconnect!", id, limit);
                     closedByClient = true;
                     socket.sendClose(4000, "Heartbeat zombie");
