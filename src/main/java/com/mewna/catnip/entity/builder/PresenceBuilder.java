@@ -49,7 +49,7 @@ import javax.annotation.Nonnull;
 @Accessors(fluent = true, chain = true)
 @SuppressWarnings("unused")
 public class PresenceBuilder {
-    private OnlineStatus status;
+    private OnlineStatus status = OnlineStatus.ONLINE;
     private ActivityType type;
     private String name;
     private String url;
