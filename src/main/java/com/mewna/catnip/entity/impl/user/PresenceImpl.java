@@ -81,7 +81,7 @@ public class PresenceImpl implements Presence, RequiresCatnip {
         }
         
         if(activity != null) {
-            builder.value("game")
+            builder.object("game")
                     .value("name", activity.name())
                     .value("type", activity.type().id());
             
