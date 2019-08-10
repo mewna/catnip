@@ -181,9 +181,16 @@ public abstract class AbstractRequester implements Requester {
             // No body
             builder = HttpRequest.newBuilder(URI.create(API_HOST + API_BASE + route.baseRoute())).GET();
         } else {
+            final var fakeBody = request.request.emptyBody();
             builder = HttpRequest.newBuilder(URI.create(API_HOST + API_BASE + route.baseRoute()))
                     .setHeader("Content-Type", mediaType)
-                    .method(route.method().name(), body);
+                    .method(route.method().name(), fakeBody ? BodyPublishers.ofString(" ") : body);
+            if(fakeBody) {
+                // If we don't have a body, then the body param is null, which
+                // seems to not set a Content-Length. This explicitly tries to set
+                // up a request shaped in a way that makes Discord not complain.
+                catnip.logAdapter().trace("Set fake body due to lack of body.");
+            }
         }
         
         builder.setHeader("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')');
@@ -194,13 +201,6 @@ public abstract class AbstractRequester implements Requester {
         if(request.request().reason() != null) {
             catnip.logAdapter().trace("Adding reason header due to specific needs.");
             builder.header(Requester.REASON_HEADER, Utils.encodeUTF8(request.request().reason()));
-        }
-        if(request.request.emptyBody() || body == null) {
-            // If we don't have a body, then the body param is null, which
-            // seems to not set a Content-Length. This explicitly sets it so
-            // that we can avoid 411s from Discord.
-            catnip.logAdapter().trace("Setting Content-Length=0 due to lack of body.");
-            builder.setHeader("Content-Length", Long.toString(0L));
         }
         
         // Update request start time as soon as possible
