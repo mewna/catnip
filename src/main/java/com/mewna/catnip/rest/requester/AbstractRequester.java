@@ -194,6 +194,12 @@ public abstract class AbstractRequester implements Requester {
         if(request.request().reason() != null) {
             builder.header(Requester.REASON_HEADER, Utils.encodeUTF8(request.request().reason()));
         }
+        if(body == null) {
+            // If we don't have a body, then the body param is null, which
+            // seems to not set a Content-Length. This explicitly sets it so
+            // that we can avoid 411s from Discord.
+            builder.setHeader("Content-Length", Long.toString(0L));
+        }
         
         // Update request start time as soon as possible
         // See QueuedRequest docs for why we do this
