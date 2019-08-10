@@ -268,8 +268,10 @@ public abstract class AbstractRequester implements Requester {
             }
             final long retryAfter = Long.parseLong(retry);
             if(Boolean.parseBoolean(headers.firstValue("X-RateLimit-Global").orElse(null))) {
+                catnip.logAdapter().trace("Updating global bucket due to ratelimit.");
                 rateLimiter.updateGlobalRateLimit(System.currentTimeMillis() + timeDifference + retryAfter);
             } else {
+                catnip.logAdapter().trace("Updating bucket headers due to ratelimit.");
                 updateBucket(route, headers,
                         System.currentTimeMillis() + timeDifference + retryAfter, timeDifference);
             }
@@ -284,6 +286,7 @@ public abstract class AbstractRequester implements Requester {
                                 request.future().completeExceptionally(e.initCause(throwable));
                             });
         } else {
+            catnip.logAdapter().trace("Updating bucket headers from successful request completion.");
             updateBucket(route, headers, -1, timeDifference);
             request.bucket().requestDone();
             
