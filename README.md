@@ -56,9 +56,9 @@ This is the simplest possible bot you can make right now:
 final Catnip catnip = Catnip.catnip("your token goes here");
 catnip.observable(DiscordEvent.MESSAGE_CREATE)
     .filter(msg -> msg.content().equals("!ping"))
-    .forEach(msg -> {
+    .subscribe(msg -> {
         msg.channel().sendMessage("pong!");
-    });
+    }, error -> error.printStackTrace());
 catnip.connect();
 ```
 
@@ -70,14 +70,14 @@ message:
 final Catnip catnip = Catnip.catnip("your token goes here");
 catnip.observable(DiscordEvent.MESSAGE_CREATE)
         .filter(msg -> msg.content().equals("!ping"))
-        .forEach(msg -> {
+        .subscribe(msg -> {
             long start = System.currentTimeMillis();
             msg.channel().sendMessage("pong!")
                     .subscribe(ping -> {
                         long end = System.currentTimeMillis();
                         ping.edit("pong! (took " + (end - start) + "ms).");
                     });
-        });
+        }, error -> error.printStackTrace());
 catnip.connect();
 ```
 
@@ -87,14 +87,23 @@ You can also create a catnip instance asynchronously:
 Catnip.catnipAsync("your token here").subscribe(catnip -> {
     catnip.observable(DiscordEvent.MESSAGE_CREATE)
         .filter(msg -> msg.content().equals("!ping"))
-        .forEach(msg -> {
+        .subscribe(msg -> {
             msg.channel().sendMessage("pong!");
-        });
+        }, error -> error.printStackTrace());
     catnip.connect();
 });
 ```
 
 Also check out the [examples](https://github.com/mewna/catnip/tree/master/src/main/example/basic) for Kotlin and Scala usage.
+
+### A note on Observable#subscribe vs. Observable#forEach
+
+`Observable#forEach` seems like the obvious way to use the reactive methods, but as it turns out,
+it's also the wrong thing to do. `Observable#forEach` is generally intended for finite streams of
+data; the events that catnip emits aren't finite, and as such, `Observable#forEach` isn't the
+correct tool to use. In addition, **`Observable#forEach` will stop processing events if an uncaught
+exception is thrown.** Instead, you should use `Observable#subscribe(eventCallback, exceptionCallback)`,
+which will handle exceptions properly.
 
 ### Modular usage
 
