@@ -146,7 +146,7 @@ public class RestWebhook extends RestHandler {
     public Completable deleteWebhook(@Nonnull final String webhookId, @Nullable final String reason) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.DELETE_WEBHOOK.withMajorParam(webhookId),
-                        Map.of()).reason(reason)));
+                        Map.of()).reason(reason).emptyBody(true)));
     }
     
     @Nonnull

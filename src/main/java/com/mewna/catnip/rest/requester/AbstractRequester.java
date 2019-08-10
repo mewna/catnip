@@ -192,12 +192,14 @@ public abstract class AbstractRequester implements Requester {
             builder.setHeader("Authorization", "Bot " + catnip.token());
         }
         if(request.request().reason() != null) {
+            catnip.logAdapter().trace("Adding reason header due to specific needs.");
             builder.header(Requester.REASON_HEADER, Utils.encodeUTF8(request.request().reason()));
         }
-        if(body == null) {
+        if(request.request.emptyBody() || body == null) {
             // If we don't have a body, then the body param is null, which
             // seems to not set a Content-Length. This explicitly sets it so
             // that we can avoid 411s from Discord.
+            catnip.logAdapter().trace("Setting Content-Length=0 due to lack of body.");
             builder.setHeader("Content-Length", Long.toString(0L));
         }
         

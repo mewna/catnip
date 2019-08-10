@@ -238,7 +238,7 @@ public class RestChannel extends RestHandler {
                                          @Nonnull final String emoji) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.DELETE_OWN_REACTION.withMajorParam(channelId),
-                        Map.of("message.id", messageId, "emojis", encodeUTF8(emoji)))));
+                        Map.of("message.id", messageId, "emojis", encodeUTF8(emoji))).emptyBody(true)));
     }
     
     @Nonnull
@@ -252,7 +252,8 @@ public class RestChannel extends RestHandler {
                                           @Nonnull final String userId, @Nonnull final String emoji) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.DELETE_USER_REACTION.withMajorParam(channelId),
-                        Map.of("message.id", messageId, "emojis", encodeUTF8(emoji), "user.id", userId))));
+                        Map.of("message.id", messageId, "emojis", encodeUTF8(emoji), "user.id", userId))
+                        .emptyBody(true)));
     }
     
     @Nonnull
@@ -265,7 +266,7 @@ public class RestChannel extends RestHandler {
     public Completable deleteAllReactions(@Nonnull final String channelId, @Nonnull final String messageId) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.DELETE_ALL_REACTIONS.withMajorParam(channelId),
-                        Map.of("message.id", messageId))));
+                        Map.of("message.id", messageId)).emptyBody(true)));
     }
     
     @Nonnull
@@ -388,7 +389,7 @@ public class RestChannel extends RestHandler {
     public Completable triggerTypingIndicator(@Nonnull final String channelId) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.TRIGGER_TYPING_INDICATOR.withMajorParam(channelId),
-                        Map.of(), new JsonObject())));
+                        Map.of()).emptyBody(true)));
     }
     
     @Nonnull
@@ -493,7 +494,7 @@ public class RestChannel extends RestHandler {
                                                 @Nonnull final String overwriteId, @Nullable final String reason) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.DELETE_CHANNEL_PERMISSION.withMajorParam(channelId),
-                        Map.of("overwrite.id", overwriteId)).reason(reason)));
+                        Map.of("overwrite.id", overwriteId)).reason(reason).emptyBody(true)));
     }
     
     @Nonnull
@@ -574,7 +575,7 @@ public class RestChannel extends RestHandler {
     public Completable deletePinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.DELETE_PINNED_CHANNEL_MESSAGE.withMajorParam(channelId),
-                        Map.of("message.id", messageId))));
+                        Map.of("message.id", messageId)).emptyBody(true)));
     }
     
     @Nonnull

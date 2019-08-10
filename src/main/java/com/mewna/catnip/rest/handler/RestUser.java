@@ -179,7 +179,7 @@ public class RestUser extends RestHandler {
     public Completable leaveGuild(@Nonnull final String guildId) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.LEAVE_GUILD,
-                        Map.of("guild.id", guildId))));
+                        Map.of("guild.id", guildId)).emptyBody(true)));
     }
     
     @Nonnull

@@ -196,7 +196,7 @@ public class RestEmoji extends RestHandler {
         return Completable.fromObservable(catnip().requester().queue(
                 new OutboundRequest(
                         Routes.DELETE_GUILD_EMOJI.withMajorParam(guildId),
-                        Map.of("emojis.id", emojiId)).reason(reason)));
+                        Map.of("emojis.id", emojiId)).reason(reason).emptyBody(true)));
     }
     
     @Nonnull
