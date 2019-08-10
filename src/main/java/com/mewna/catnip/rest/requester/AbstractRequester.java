@@ -307,40 +307,49 @@ public abstract class AbstractRequester implements Requester {
             // We got a 4xx, meaning there's errors. Fail the request with this and move on.
             if(statusCode >= 400) {
                 catnip.logAdapter().trace("Request received an error code ({} >= 400), processing...", statusCode);
-                final JsonObject response = payload.object();
-                if(statusCode == 400 && response.getInt("code", -1) > 1000) {
-                    // 1000 was just the easiest number to check to skip over http error codes
-                    // Discord error codes are all >=10000 afaik, so this should be safe?
-                    catnip.logAdapter().trace("Status code 400 + JSON code, creating RestPayloadException...");
-                    final Map<String, List<String>> failures = new HashMap<>();
-                    response.forEach((key, value) -> {
-                        if(value instanceof JsonArray) {
-                            final JsonArray arr = (JsonArray) value;
-                            final List<String> errorStrings = new ArrayList<>();
-                            arr.stream().map(element -> (String) element).forEach(errorStrings::add);
-                            failures.put(key, errorStrings);
-                        } else if(value instanceof Integer) {
-                            failures.put(key, List.of(String.valueOf(value)));
-                        } else if(value instanceof String) {
-                            failures.put(key, List.of((String) value));
-                        } else {
-                            // If we don't know what it is, just stringify it and log a warning so that people can tell us
-                            catnip.logAdapter().warn("Got unknown error response type: {} (Please report this!)",
-                                    value.getClass().getName());
-                            failures.put(key, List.of(String.valueOf(value)));
-                        }
-                    });
-                    final Throwable throwable = new RuntimeException("REST error context");
-                    throwable.setStackTrace(request.stacktrace());
-                    request.future().completeExceptionally(new RestPayloadException(failures).initCause(throwable));
+                if(payload.string() != null && payload.string().startsWith("{")) {
+                    // If the payload HAS a body, AND it looks like a JSON object, try to parse it for info
+                    final JsonObject response = payload.object();
+                    if(statusCode == 400 && response.getInt("code", -1) > 1000) {
+                        // 1000 was just the easiest number to check to skip over http error codes
+                        // Discord error codes are all >=10000 afaik, so this should be safe?
+                        catnip.logAdapter().trace("Status code 400 + JSON code, creating RestPayloadException...");
+                        final Map<String, List<String>> failures = new HashMap<>();
+                        response.forEach((key, value) -> {
+                            if(value instanceof JsonArray) {
+                                final JsonArray arr = (JsonArray) value;
+                                final List<String> errorStrings = new ArrayList<>();
+                                arr.stream().map(element -> (String) element).forEach(errorStrings::add);
+                                failures.put(key, errorStrings);
+                            } else if(value instanceof Integer) {
+                                failures.put(key, List.of(String.valueOf(value)));
+                            } else if(value instanceof String) {
+                                failures.put(key, List.of((String) value));
+                            } else {
+                                // If we don't know what it is, just stringify it and log a warning so that people can tell us
+                                catnip.logAdapter().warn("Got unknown error response type: {} (Please report this!)",
+                                        value.getClass().getName());
+                                failures.put(key, List.of(String.valueOf(value)));
+                            }
+                        });
+                        final Throwable throwable = new RuntimeException("REST error context");
+                        throwable.setStackTrace(request.stacktrace());
+                        request.future().completeExceptionally(new RestPayloadException(failures).initCause(throwable));
+                    } else {
+                        catnip.logAdapter().trace("Status code != 400, creating ResponseException...");
+                        final String message = response.getString("message", "No message.");
+                        final int code = response.getInt("code", -1);
+                        final Throwable throwable = new RuntimeException("REST error context");
+                        throwable.setStackTrace(request.stacktrace());
+                        request.future().completeExceptionally(new ResponseException(route.toString(), statusCode,
+                                statusMessage, code, message, response).initCause(throwable));
+                    }
                 } else {
-                    catnip.logAdapter().trace("Status code != 400, creating ResponseException...");
-                    final String message = response.getString("message", "No message.");
-                    final int code = response.getInt("code", -1);
+                    catnip.logAdapter().trace("Status code != 400 and no JSON body, creating ResponseException...");
                     final Throwable throwable = new RuntimeException("REST error context");
                     throwable.setStackTrace(request.stacktrace());
                     request.future().completeExceptionally(new ResponseException(route.toString(), statusCode,
-                            statusMessage, code, message, response).initCause(throwable));
+                            statusMessage, -1, "No message.", null).initCause(throwable));
                 }
             } else {
                 catnip.logAdapter().trace("Successfully completed request future.");
