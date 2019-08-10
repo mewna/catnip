@@ -286,7 +286,7 @@ public abstract class AbstractRequester implements Requester {
                                 request.future().completeExceptionally(e.initCause(throwable));
                             });
         } else {
-            catnip.logAdapter().trace("Updating bucket headers from successful request completion.");
+            catnip.logAdapter().trace("Updating bucket headers from successful completion with code {}.", statusCode);
             updateBucket(route, headers, -1, timeDifference);
             request.bucket().requestDone();
             
@@ -298,11 +298,12 @@ public abstract class AbstractRequester implements Requester {
             }
             // We got a 4xx, meaning there's errors. Fail the request with this and move on.
             if(statusCode >= 400) {
+                catnip.logAdapter().trace("Request received an error code ({} >= 400), processing...", statusCode);
                 final JsonObject response = payload.object();
                 if(statusCode == 400 && response.getInt("code", -1) > 1000) {
                     // 1000 was just the easiest number to check to skip over http error codes
                     // Discord error codes are all >=10000 afaik, so this should be safe?
-                    
+                    catnip.logAdapter().trace("Status code 400 + JSON code, creating RestPayloadException...");
                     final Map<String, List<String>> failures = new HashMap<>();
                     response.forEach((key, value) -> {
                         if(value instanceof JsonArray) {
@@ -325,6 +326,7 @@ public abstract class AbstractRequester implements Requester {
                     throwable.setStackTrace(request.stacktrace());
                     request.future().completeExceptionally(new RestPayloadException(failures).initCause(throwable));
                 } else {
+                    catnip.logAdapter().trace("Status code != 400, creating ResponseException...");
                     final String message = response.getString("message", "No message.");
                     final int code = response.getInt("code", -1);
                     final Throwable throwable = new RuntimeException("REST error context");
@@ -333,6 +335,7 @@ public abstract class AbstractRequester implements Requester {
                             statusMessage, code, message, response).initCause(throwable));
                 }
             } else {
+                catnip.logAdapter().trace("Successfully completed request future.");
                 request.future().complete(payload);
             }
         }
