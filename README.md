@@ -137,7 +137,7 @@ corresponding option in `CatnipOptions`.
 - I wanted to try to maximize extensibility / customizability, beyond just making it modular. Things
   like being able to intercept raw websocket messages (as JSON), write custom distributed cache handlers,
   ... are incredibly useful.
-- I like everything returning `CompletionStage`s instead of custom classes. I do get why other libs
+- I like everything returning Rx classes instead of custom classes. I do get why other libs
   have them, I just wanted to not.
 - I wanted modular usage to be exactly the same more / less no matter what; everything
   should be doable through the catnip instance that you create.
