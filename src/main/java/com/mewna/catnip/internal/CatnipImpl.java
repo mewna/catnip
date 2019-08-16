@@ -386,11 +386,13 @@ public class CatnipImpl implements Catnip {
                         throw new RuntimeException(e);
                     });
         } else {
-            try {
-                parseClientId();
-            } catch(final IllegalArgumentException e) {
-                final Exception wrapped = new RuntimeException("The provided token was invalid!", e);
-                return Single.error(wrapped);
+            if(!token.isEmpty()) {
+                try {
+                    parseClientId();
+                } catch(final IllegalArgumentException e) {
+                    final Exception wrapped = new RuntimeException("The provided token was invalid!", e);
+                    return Single.error(wrapped);
+                }
             }
             
             return Single.just(this);
