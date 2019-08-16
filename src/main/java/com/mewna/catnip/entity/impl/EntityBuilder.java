@@ -1135,7 +1135,7 @@ public final class EntityBuilder {
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id")))
                 .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
-                .user(createUser(data.getObject("user")))
+                .user(data.isNull("user") ? null : createUser(data.getObject("user")))
                 .name(data.getString("name"))
                 .avatar(data.getString("avatar"))
                 .token(data.getString("token"))

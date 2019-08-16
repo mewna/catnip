@@ -166,7 +166,7 @@ public interface Webhook extends GuildEntity, Snowflake {
     /**
      * @return The user that created this webhook.
      */
-    @Nonnull
+    @Nullable
     @CheckReturnValue
     User user();
     
