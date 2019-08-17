@@ -706,7 +706,7 @@ public interface Catnip {
      * @param <T>  The first object type of event being listened on.
      * @param <E>  The second object type of event being listened on.
      *
-     * @return The vert.x message consumer.
+     * @return The message consumer.
      */
     private <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type) {
         return dispatchManager().createConsumer(type.key());
@@ -721,7 +721,7 @@ public interface Catnip {
      * @param <T>     The first object type of event being listened on.
      * @param <E>     The second object type of event being listened on.
      *
-     * @return The vert.x message consumer.
+     * @return The message consumer.
      */
     private <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
                                                   @Nonnull final BiConsumer<T, E> handler) {

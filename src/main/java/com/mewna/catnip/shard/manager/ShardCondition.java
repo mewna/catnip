@@ -45,7 +45,7 @@ import javax.annotation.Nonnull;
 public interface ShardCondition {
     /**
      * Get the future for this shard condition. This function is called
-     * ASYNCHRONOUSLY and must be ASYNCHRONOUS to avoid blocking the vert.x
+     * ASYNCHRONOUSLY and must be ASYNCHRONOUS to avoid blocking the
      * event loop threads.
      * <p>
      * This is run prior to sharding.
