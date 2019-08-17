@@ -201,8 +201,6 @@ public class RestWebhook extends RestHandler {
                 && !options.hasFiles()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
         }
-    
-        System.out.println("executeWebhookRaw json: " + body);
         
         return catnip().requester().
                 queue(new OutboundRequest(Routes.EXECUTE_WEBHOOK.withMajorParam(webhookId).withQueryString("?wait=true"),
