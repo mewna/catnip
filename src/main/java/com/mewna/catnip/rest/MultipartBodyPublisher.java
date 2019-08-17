@@ -38,7 +38,6 @@ public class MultipartBodyPublisher {
         return this;
     }
     
-    //Using Vert.x's buffer. Reflects message's usage of Buffers.
     @ParametersAreNonnullByDefault
     public MultipartBodyPublisher addPart(final String name, final String filename, final byte[] value) {
         partsSpecificationList.add(new PartsSpecification(Type.FILE, name).filename(filename).value(value));
@@ -75,16 +74,12 @@ public class MultipartBodyPublisher {
     }
     
     class PartsIterator implements Iterator<byte[]> {
-        
-        private final Iterator<PartsSpecification> iter;
-        private byte[] currentFileInput;
-        private int index;
-        
+        private final Iterator<PartsSpecification> parts;
         private boolean done;
-        private byte[] next;
+        private final List<byte[]> next = new ArrayList<>();
         
         PartsIterator() {
-            iter = partsSpecificationList.iterator();
+            parts = partsSpecificationList.iterator();
         }
         
         @Override
@@ -92,11 +87,11 @@ public class MultipartBodyPublisher {
             if(done) {
                 return false;
             }
-            if(next != null) {
+            if(!next.isEmpty()) {
                 return true;
             }
-            next = computeNext();
-            if(next == null) {
+            computeNext();
+            if(next.isEmpty()) {
                 done = true;
                 return false;
             }
@@ -108,49 +103,18 @@ public class MultipartBodyPublisher {
             if(!hasNext()) {
                 throw new NoSuchElementException();
             }
-            final byte[] res = next;
-            next = null;
-            return res;
+            return next.remove(0);
         }
         
-        private byte[] computeNext() {
-            if(currentFileInput == null) {
-                if(!iter.hasNext()) {
-                    return null;
-                }
-                final PartsSpecification nextPart = iter.next();
-                if(nextPart.type == Type.STRING) {
-                    final byte[] stub = nextPart.toString().getBytes(StandardCharsets.UTF_8);
-                    final byte[] arr = new byte[nextPart.value.length + stub.length + 2 /*2 to make up for \r\n*/];
-                    System.arraycopy(stub, 0, arr, 0, stub.length);
-                    System.arraycopy(nextPart.value, 0, arr, stub.length, nextPart.value.length);
-                    arr[arr.length - 2] = '\r';
-                    arr[arr.length - 1] = '\n';
-                    return arr;
-                }
-                if(nextPart.type == Type.FILE) {
-                    currentFileInput = nextPart.value;
-                }
-                return nextPart.toString().getBytes(StandardCharsets.UTF_8);
-            } else {
-                final int len = currentFileInput.length;
-                final int remain = len - index;
-                if(remain > 0) {
-                    final byte[] buf;
-                    if(remain >= 8192) {
-                        buf = new byte[8192];
-                        System.arraycopy(currentFileInput, index, buf, 0, 8192);
-                        index += 8192;
-                    } else {
-                        buf = new byte[remain];
-                        System.arraycopy(currentFileInput, index, buf, 0, remain);
-                    }
-                    return buf;
-                } else {
-                    currentFileInput = null;
-                    index = 0;
-                    return new byte[] {'\r', '\n'};
-                }
+        private void computeNext() {
+            if(!parts.hasNext()) {
+                return;
+            }
+            final var part = parts.next();
+            next.add(part.toString().getBytes(StandardCharsets.UTF_8));
+            if(part.type != Type.FINAL_BOUNDARY) {
+                next.add(part.value);
+                next.add(new byte[] {'\r', '\n'});
             }
         }
     }
