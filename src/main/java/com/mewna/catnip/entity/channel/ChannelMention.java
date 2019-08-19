@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2019 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,49 +24,23 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.mewna.catnip.entity.guild;
 
-import com.mewna.catnip.entity.Entity;
+package com.mewna.catnip.entity.channel;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
-import java.util.Objects;
+import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.channel.Channel.ChannelType;
+import com.mewna.catnip.entity.guild.GuildEntity;
 
 /**
- * An entity which is guild-scoped in catnip.
+ * Represents a channel mention in a message. Not all messages will have this,
+ * nor will all channels mentioned in a message have a corresponding mention
+ * object.
  *
- * @author AdrianTodt
- * @since 1/19/19.
+ * @author amy
+ * @since 8/19/19.
  */
-public interface GuildEntity extends Entity {
-    /**
-     * The id of the guild this entity is from.
-     *
-     * @return String representing the guild ID.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default String guildId() {
-        return Long.toUnsignedString(guildIdAsLong());
-    }
+public interface ChannelMention extends GuildEntity, Snowflake {
+    String name();
     
-    /**
-     * The id of the guild this entity is from.
-     *
-     * @return Long representing the guild ID.
-     */
-    @CheckReturnValue
-    long guildIdAsLong();
-    
-    /**
-     * The guild this entity is from.
-     *
-     * @return Guild represented by the guild ID.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default Guild guild() {
-        return Objects.requireNonNull(catnip().cache().guild(guildIdAsLong()),
-                "Guild not found. It may have been removed from the cache");
-    }
+    ChannelType type();
 }

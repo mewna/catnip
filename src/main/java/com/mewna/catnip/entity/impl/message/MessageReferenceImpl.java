@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2019 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,49 +24,38 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.mewna.catnip.entity.guild;
 
-import com.mewna.catnip.entity.Entity;
+package com.mewna.catnip.entity.impl.message;
 
-import javax.annotation.CheckReturnValue;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.message.MessageReference;
+import lombok.*;
+import lombok.experimental.Accessors;
+
 import javax.annotation.Nonnull;
-import java.util.Objects;
 
 /**
- * An entity which is guild-scoped in catnip.
- *
- * @author AdrianTodt
- * @since 1/19/19.
+ * @author amy
+ * @since 8/19/19.
  */
-public interface GuildEntity extends Entity {
-    /**
-     * The id of the guild this entity is from.
-     *
-     * @return String representing the guild ID.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default String guildId() {
-        return Long.toUnsignedString(guildIdAsLong());
-    }
+@Getter(onMethod_ = @JsonProperty)
+@Setter(onMethod_ = @JsonProperty)
+@Builder
+@Accessors(fluent = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class MessageReferenceImpl implements MessageReference, RequiresCatnip {
+    @JsonIgnore
+    private transient Catnip catnip;
+    private String messageId;
+    private String channelId;
+    private String guildId;
     
-    /**
-     * The id of the guild this entity is from.
-     *
-     * @return Long representing the guild ID.
-     */
-    @CheckReturnValue
-    long guildIdAsLong();
-    
-    /**
-     * The guild this entity is from.
-     *
-     * @return Guild represented by the guild ID.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default Guild guild() {
-        return Objects.requireNonNull(catnip().cache().guild(guildIdAsLong()),
-                "Guild not found. It may have been removed from the cache");
+    @Override
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
     }
 }

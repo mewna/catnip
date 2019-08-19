@@ -872,22 +872,10 @@ public final class EntityBuilder {
             mentionedMembers.addAll(toList(data.getArray("mentions"), o -> createPartialMemberMention(guildId, o)));
         }
         
-        final JsonObject activityRaw = data.getObject("activity");
-        final JsonObject applicationRaw = data.getObject("application");
-        
-        final MessageActivity activity;
-        if(activityRaw == null) {
-            activity = null;
-        } else {
-            activity = createMessageActivity(activityRaw);
-        }
-        
-        final MessageApplication application;
-        if(applicationRaw == null) {
-            application = null;
-        } else {
-            application = createMessageApplication(applicationRaw);
-        }
+        final var activity = createMessageActivity(data.getObject("activity"));
+        final var application = createMessageApplication(data.getObject("application"));
+        final var reference = createMessageReference(data.getObject("message_reference"));
+        final var channelMentions = data.getArray("mention_channels", new JsonArray());
         
         return MessageImpl.builder()
                 .catnip(catnip)
@@ -902,6 +890,7 @@ public final class EntityBuilder {
                 .mentionedUsers(toList(data.getArray("mentions"), this::createUser))
                 .mentionedMembers(mentionedMembers)
                 .mentionedRoleIds(toStringList(data.getArray("mention_roles")))
+                .mentionedChannels(toList(data.getArray("mention_channels"), this::createChannelMention))
                 .attachments(toList(data.getArray("attachments"), this::createAttachment))
                 .embeds(toList(data.getArray("embeds"), this::createEmbed))
                 .reactions(toList(data.getArray("reactions"), e -> createReaction(data.getString("guild_id"), e)))
@@ -913,28 +902,68 @@ public final class EntityBuilder {
                 .webhookIdAsLong(webhookId == null ? 0 : Long.parseUnsignedLong(webhookId))
                 .activity(activity)
                 .application(application)
+                .flagsRaw(data.getInt("flags", 0))
                 .build();
     }
     
-    @Nonnull
+    @Nullable
     @CheckReturnValue
-    public MessageActivity createMessageActivity(@Nonnull final JsonObject data) {
-        return MessageActivityImpl.builder()
-                .type(MessageActivityType.byId(data.getInt("type")))
-                .partyId(data.getString("party_id"))
-                .build();
+    public ChannelMention createChannelMention(@Nullable final JsonObject data) {
+        if(data == null) {
+            return null;
+        } else {
+            return ChannelMentionImpl.builder()
+                    .catnip(catnip)
+                    .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                    .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id")))
+                    .name(data.getString("name"))
+                    .type(ChannelType.byKey(data.getInt("type")))
+                    .build();
+        }
     }
     
-    @Nonnull
+    @Nullable
     @CheckReturnValue
-    public MessageApplication createMessageApplication(@Nonnull final JsonObject data) {
-        return MessageApplicationImpl.builder()
-                .id(data.getString("id"))
-                .coverImage(data.getString("cover_image", null))
-                .description(data.getString("description"))
-                .icon(data.getString("icon", null))
-                .name(data.getString("name"))
-                .build();
+    public MessageActivity createMessageActivity(@Nullable final JsonObject data) {
+        if(data == null) {
+            return null;
+        } else {
+            return MessageActivityImpl.builder()
+                    .type(MessageActivityType.byId(data.getInt("type")))
+                    .partyId(data.getString("party_id"))
+                    .build();
+        }
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    public MessageApplication createMessageApplication(@Nullable final JsonObject data) {
+        if(data == null) {
+            return null;
+        } else {
+            return MessageApplicationImpl.builder()
+                    .id(data.getString("id"))
+                    .coverImage(data.getString("cover_image", null))
+                    .description(data.getString("description"))
+                    .icon(data.getString("icon", null))
+                    .name(data.getString("name"))
+                    .build();
+        }
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    private MessageReference createMessageReference(@Nullable final JsonObject data) {
+        if(data == null) {
+            return null;
+        } else {
+            return MessageReferenceImpl.builder()
+                    .catnip(catnip)
+                    .guildId(data.getString("guild_id"))
+                    .channelId(data.getString("channel_id"))
+                    .messageId(data.getString("message_id"))
+                    .build();
+        }
     }
     
     @Nullable

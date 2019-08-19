@@ -32,12 +32,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.Timestamped;
+import com.mewna.catnip.entity.channel.ChannelMention;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
-import com.mewna.catnip.entity.message.MessageActivityType;
+import com.mewna.catnip.entity.message.MessageReference;
 import com.mewna.catnip.entity.message.MessageType;
-import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -81,12 +81,15 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
     private List<Reaction> reactions;
     private MessageActivity activity;
     private MessageApplication application;
+    private MessageReference messageReference;
     private String nonce;
     private boolean pinned;
     private long webhookIdAsLong;
     private MessageType type;
     private Member member;
     private long guildIdAsLong;
+    private int flagsRaw;
+    private List<ChannelMention> mentionedChannels;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {

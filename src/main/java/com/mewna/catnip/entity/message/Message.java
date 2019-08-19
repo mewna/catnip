@@ -30,16 +30,13 @@ package com.mewna.catnip.entity.message;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.channel.ChannelMention;
 import com.mewna.catnip.entity.channel.MessageChannel;
 import com.mewna.catnip.entity.channel.TextChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
-import com.mewna.catnip.entity.impl.message.MessageImpl;
-import com.mewna.catnip.entity.impl.message.AttachmentImpl;
-import com.mewna.catnip.entity.impl.message.MessageActivityImpl;
-import com.mewna.catnip.entity.impl.message.MessageApplicationImpl;
-import com.mewna.catnip.entity.impl.message.ReactionImpl;
+import com.mewna.catnip.entity.impl.message.*;
 import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
@@ -54,6 +51,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -286,6 +284,37 @@ public interface Message extends Snowflake {
     @Nullable
     @CheckReturnValue
     MessageApplication application();
+    
+    /**
+     * @return Reference data sent with crossposted messages.
+     */
+    @Nullable
+    @CheckReturnValue
+    MessageReference messageReference();
+    
+    /**
+     * @return Raw bits of flags set on this message.
+     */
+    @CheckReturnValue
+    int flagsRaw();
+    
+    /**
+     * @return The set of flags set on this message.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Set<MessageFlag> flags() {
+        return MessageFlag.toSet(flagsRaw());
+    }
+    
+    /**
+     * @return All channels mentioned in this message. Not all messages will
+     * have this, nor will all channels mentioned in a message have a
+     * corresponding mention object.
+     */
+    @Nonnull
+    @CheckReturnValue
+    List<ChannelMention> mentionedChannels();
     
     /**
      * The snowflake ID of the guild this message was sent in.
@@ -534,7 +563,7 @@ public interface Message extends Snowflake {
         @Nonnull
         @CheckReturnValue
         MessageActivityType type();
-    
+        
         /**
          * @return The Rich Presence party id. May be null.
          */
@@ -551,28 +580,28 @@ public interface Message extends Snowflake {
         @Nonnull
         @CheckReturnValue
         String id();
-    
+        
         /**
          * @return The application's cover image. Shown in embeds. May be null.
          */
         @Nullable
         @CheckReturnValue
         String coverImage();
-    
+        
         /**
          * @return The application's description.
          */
         @Nonnull
         @CheckReturnValue
         String description();
-    
+        
         /**
          * @return The application's icon id (hash). May be null.
          */
         @Nullable
         @CheckReturnValue
         String icon();
-    
+        
         /**
          * @return The application's name.
          */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2019 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,49 +24,59 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.mewna.catnip.entity.guild;
+
+package com.mewna.catnip.entity.message;
 
 import com.mewna.catnip.entity.Entity;
+import com.mewna.catnip.entity.guild.Guild;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import java.util.Objects;
+import javax.annotation.Nullable;
 
 /**
- * An entity which is guild-scoped in catnip.
- *
- * @author AdrianTodt
- * @since 1/19/19.
+ * @author amy
+ * @since 8/19/19.
  */
-public interface GuildEntity extends Entity {
+public interface MessageReference extends Entity {
     /**
-     * The id of the guild this entity is from.
+     * The id of the message this message reference is from. May be null.
+     *
+     * @return String representing the message ID.
+     */
+    @Nullable
+    String messageId();
+    
+    /**
+     * The id of the channel this message reference is from. May not be null.
+     *
+     * @return String representing the channel ID.
+     */
+    @Nonnull
+    String channelId();
+    
+    /**
+     * The id of the guild this message reference is from. May be null.
      *
      * @return String representing the guild ID.
      */
-    @Nonnull
+    @Nullable
     @CheckReturnValue
-    default String guildId() {
-        return Long.toUnsignedString(guildIdAsLong());
-    }
-    
-    /**
-     * The id of the guild this entity is from.
-     *
-     * @return Long representing the guild ID.
-     */
-    @CheckReturnValue
-    long guildIdAsLong();
+    String guildId();
     
     /**
      * The guild this entity is from.
      *
      * @return Guild represented by the guild ID.
      */
-    @Nonnull
+    @Nullable
     @CheckReturnValue
     default Guild guild() {
-        return Objects.requireNonNull(catnip().cache().guild(guildIdAsLong()),
-                "Guild not found. It may have been removed from the cache");
+        if(guildId() == null) {
+            return null;
+        } else {
+            //noinspection ConstantConditions
+            return catnip().cache().guild(guildId());
+        }
     }
 }
