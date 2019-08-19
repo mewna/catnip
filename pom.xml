@@ -16,7 +16,7 @@
         <rxjava.version>2.2.4</rxjava.version>
         <jackson-core.version>2.9.9</jackson-core.version>
         <jackson-databind.version>2.9.9.1</jackson-databind.version>
-        <slf4j.version>1.7.27</slf4j.version>
+        <slf4j.version>1.7.28</slf4j.version>
         <commons.lang.version>3.9</commons.lang.version>
         <jsr305.version>3.0.2</jsr305.version>
 
