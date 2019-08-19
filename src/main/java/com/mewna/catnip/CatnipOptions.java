@@ -274,6 +274,15 @@ public final class CatnipOptions implements Cloneable {
      * {@link CompressionMode#ZLIB}.
      */
     private CompressionMode compressionMode = CompressionMode.ZLIB;
+    /**
+     * Whether or not catnip should assume the inability to have a properly
+     * synchronized clock when computing REST ratelimits. When this option is
+     * set to {@code true}, catnip will assume that the local clock cannot be
+     * properly synced, and will use a less-efficient method provided by
+     * Discord for computing REST ratelimits. See
+     * https://github.com/discordapp/discord-api-docs/pull/1069 for more info.
+     */
+    private boolean restRatelimitsWithoutClockSync;
     
     @Override
     public Object clone() {

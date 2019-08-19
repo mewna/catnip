@@ -368,9 +368,12 @@ public abstract class AbstractRequester implements Requester {
     
     protected void updateBucket(@Nonnull final Route route, @Nonnull final HttpHeaders headers, final long retryAfter,
                                 final long timeDifference) {
-        final Optional<Long> rateLimitReset = headers.firstValue("X-RateLimit-Reset").map(s -> Long.parseLong(s.replace(".", "")));
-        final Optional<Long> rateLimitRemaining = headers.firstValue("X-RateLimit-Remaining").map(s -> Long.parseLong(s.replace(".", "")));
-        final Optional<Long> rateLimitLimit = headers.firstValue("X-RateLimit-Limit").map(s -> Long.parseLong(s.replace(".", "")));
+        final Optional<Long> rateLimitReset = headers.firstValue("X-RateLimit-Reset")
+                .map(s -> Long.parseLong(s.replace(".", "")));
+        final OptionalLong rateLimitRemaining = headers.firstValueAsLong("X-RateLimit-Remaining");
+        final OptionalLong rateLimitLimit = headers.firstValueAsLong("X-RateLimit-Limit");
+        final Optional<Long> rateLimitResetAfter = headers.firstValue("X-RateLimit-Reset-After")
+                .map(s -> Long.parseLong(s.replace(".", "")));
         
         catnip.logAdapter().trace(
                 "Updating headers for {} ({}): remaining = {}, limit = {}, reset = {}, retryAfter = {}, timeDifference = {}",
@@ -380,7 +383,12 @@ public abstract class AbstractRequester implements Requester {
         
         if(retryAfter > 0) {
             rateLimiter.updateRemaining(route, 0);
-            rateLimiter.updateReset(route, retryAfter);
+            if(catnip.restRatelimitsWithoutClockSync() && rateLimitResetAfter.isPresent()) {
+                rateLimiter.updateReset(route, System.currentTimeMillis() + timeDifference
+                        + rateLimitResetAfter.get());
+            } else {
+                rateLimiter.updateReset(route, retryAfter);
+            }
         }
         
         rateLimitReset.ifPresent(aLong -> rateLimiter.updateReset(route, aLong + timeDifference));

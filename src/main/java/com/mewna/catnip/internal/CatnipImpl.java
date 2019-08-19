@@ -123,6 +123,7 @@ public class CatnipImpl implements Catnip {
     private TaskScheduler taskScheduler;
     private HttpClient httpClient;
     private CompressionMode compressionMode;
+    private boolean restRatelimitsWithoutClockSync;
     
     private CatnipOptions options;
     
@@ -172,6 +173,7 @@ public class CatnipImpl implements Catnip {
         taskScheduler = options.taskScheduler();
         httpClient = options.httpClient();
         compressionMode = options.compressionMode();
+        restRatelimitsWithoutClockSync = options.restRatelimitsWithoutClockSync();
         
         // Sanity checks
         if(largeThreshold > 250 || largeThreshold < 50) {

@@ -446,6 +446,12 @@ public interface Catnip {
     CompressionMode compressionMode();
     
     /**
+     * @return Whether or not catnip should assume a lack of proper clock
+     * synchronization when calculating REST ratelimit data.
+     */
+    boolean restRatelimitsWithoutClockSync();
+    
+    /**
      * Opens a voice connection to the provided guild and channel. The connection is
      * opened asynchronously, with
      * {@link com.mewna.catnip.shard.DiscordEvent#VOICE_STATE_UPDATE VOICE_STATE_UPDATE} and
