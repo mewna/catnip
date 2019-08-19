@@ -193,7 +193,15 @@ public abstract class AbstractRequester implements Requester {
             }
         }
         
+        // Required by Discord
         builder.setHeader("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')');
+        // Request more precise ratelimit headers for better timing
+        // NOTE: THIS SHOULD NOT BE CONFIGURABLE BY THE END USER
+        // This is pretty important for getting timing of things like reaction
+        // routes correct, so there's no use for the end-user messing around
+        // with this.
+        // If they REALLY want it, they can write their own requester.
+        builder.setHeader("X-RateLimit-Precision", "millisecond");
         
         if(request.request().needsToken()) {
             builder.setHeader("Authorization", "Bot " + catnip.token());
@@ -360,9 +368,9 @@ public abstract class AbstractRequester implements Requester {
     
     protected void updateBucket(@Nonnull final Route route, @Nonnull final HttpHeaders headers, final long retryAfter,
                                 final long timeDifference) {
-        final OptionalLong rateLimitReset = headers.firstValueAsLong("X-RateLimit-Reset");
-        final OptionalLong rateLimitRemaining = headers.firstValueAsLong("X-RateLimit-Remaining");
-        final OptionalLong rateLimitLimit = headers.firstValueAsLong("X-RateLimit-Limit");
+        final Optional<Long> rateLimitReset = headers.firstValue("X-RateLimit-Reset").map(s -> Long.parseLong(s.replace(".", "")));
+        final Optional<Long> rateLimitRemaining = headers.firstValue("X-RateLimit-Remaining").map(s -> Long.parseLong(s.replace(".", "")));
+        final Optional<Long> rateLimitLimit = headers.firstValue("X-RateLimit-Limit").map(s -> Long.parseLong(s.replace(".", "")));
         
         catnip.logAdapter().trace(
                 "Updating headers for {} ({}): remaining = {}, limit = {}, reset = {}, retryAfter = {}, timeDifference = {}",
@@ -375,22 +383,9 @@ public abstract class AbstractRequester implements Requester {
             rateLimiter.updateReset(route, retryAfter);
         }
         
-        if(route.method() == PUT && route.baseRoute().contains("/reactions/")) {
-            rateLimiter.updateLimit(route, 1);
-            rateLimiter.updateReset(route, System.currentTimeMillis() + timeDifference + 250);
-        } else {
-            if(rateLimitReset.isPresent()) {
-                rateLimiter.updateReset(route, rateLimitReset.getAsLong() * 1000 + timeDifference);
-            }
-            
-            if(rateLimitLimit.isPresent()) {
-                rateLimiter.updateLimit(route, Math.toIntExact(rateLimitLimit.getAsLong()));
-            }
-        }
-        
-        if(rateLimitRemaining.isPresent()) {
-            rateLimiter.updateRemaining(route, Math.toIntExact(rateLimitRemaining.getAsLong()));
-        }
+        rateLimitReset.ifPresent(aLong -> rateLimiter.updateReset(route, aLong + timeDifference));
+        rateLimitLimit.ifPresent(aLong -> rateLimiter.updateLimit(route, Math.toIntExact(aLong)));
+        rateLimitRemaining.ifPresent(aLong -> rateLimiter.updateRemaining(route, Math.toIntExact(aLong)));
         
         rateLimiter.updateDone(route);
     }
