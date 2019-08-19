@@ -362,7 +362,7 @@ public class CatnipImpl implements Catnip {
         presence(PresenceImpl.builder()
                 .catnip(this)
                 .status(stat)
-                .activity(activity)
+                .activities(activity != null ? List.of(activity) : List.of())
                 .build());
     }
     

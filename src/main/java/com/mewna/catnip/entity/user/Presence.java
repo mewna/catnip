@@ -39,6 +39,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -55,7 +56,7 @@ public interface Presence {
     static Presence of(@Nonnull final OnlineStatus status, @Nullable final Activity activity) {
         return PresenceImpl.builder()
                 .status(status)
-                .activity(activity)
+                .activities(activity != null ? List.of(activity) : List.of())
                 .build();
     }
     
@@ -80,8 +81,8 @@ public interface Presence {
     @Nullable
     OnlineStatus desktopStatus();
     
-    @Nullable
-    Activity activity();
+    @Nonnull
+    List<Activity> activities();
     
     @Accessors(fluent = true, chain = true)
     enum OnlineStatus {

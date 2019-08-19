@@ -503,10 +503,18 @@ public final class EntityBuilder {
         final String mobileStatusString = clientStatus == null ? null : clientStatus.getString("mobile");
         final String webStatusString = clientStatus == null ? null : clientStatus.getString("web");
         final String desktopStatusString = clientStatus == null ? null : clientStatus.getString("desktop");
+        
+        final List<Activity> activities;
+        if(clientStatus != null) {
+            activities = toList(clientStatus.getArray("activities", new JsonArray()), this::createActivity);
+        } else {
+            activities = List.of();
+        }
+        
         return PresenceImpl.builder()
                 .catnip(catnip)
                 .status(OnlineStatus.fromString(data.getString("status")))
-                .activity(createActivity(data.getObject("game", null)))
+                .activities(activities)
                 .mobileStatus(mobileStatusString != null ? OnlineStatus.fromString(mobileStatusString) : null)
                 .webStatus(webStatusString != null ? OnlineStatus.fromString(webStatusString) : null)
                 .desktopStatus(desktopStatusString != null ? OnlineStatus.fromString(desktopStatusString) : null)
@@ -520,10 +528,18 @@ public final class EntityBuilder {
         final String mobileStatusString = clientStatus == null ? null : clientStatus.getString("mobile");
         final String webStatusString = clientStatus == null ? null : clientStatus.getString("web");
         final String desktopStatusString = clientStatus == null ? null : clientStatus.getString("desktop");
+    
+        final List<Activity> activities;
+        if(clientStatus != null) {
+            activities = toList(clientStatus.getArray("activities", new JsonArray()), this::createActivity);
+        } else {
+            activities = List.of();
+        }
+        
         return PresenceUpdateImpl.builder()
                 .catnip(catnip)
                 .status(OnlineStatus.fromString(data.getString("status")))
-                .activity(createActivity(data.getObject("game", null)))
+                .activities(activities)
                 .idAsLong(Long.parseUnsignedLong(data.getObject("user").getString("id")))
                 .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id")))
                 .roles(toStringSet(data.getArray("roles")))

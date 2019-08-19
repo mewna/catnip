@@ -38,6 +38,7 @@ import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -56,7 +57,8 @@ public class PresenceImpl implements Presence, RequiresCatnip {
     private transient Catnip catnip;
     
     private OnlineStatus status;
-    private Activity activity;
+    @Nonnull
+    private List<Activity> activities;
     private OnlineStatus mobileStatus;
     private OnlineStatus webStatus;
     private OnlineStatus desktopStatus;
@@ -68,7 +70,7 @@ public class PresenceImpl implements Presence, RequiresCatnip {
     
     @Nonnull
     @CheckReturnValue
-    public JsonObject asJson() {
+    public JsonObject asPresenceUpdateJson() {
         final var builder = JsonObject.builder()
                 .value("status", status.asString());
         
@@ -80,7 +82,8 @@ public class PresenceImpl implements Presence, RequiresCatnip {
                     .value("afk", false);
         }
         
-        if(activity != null) {
+        if(!activities.isEmpty()) {
+            final var activity = activities.get(0);
             builder.object("game")
                     .value("name", activity.name())
                     .value("type", activity.type().id());

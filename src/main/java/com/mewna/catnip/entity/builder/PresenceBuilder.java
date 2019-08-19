@@ -39,6 +39,7 @@ import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * @author SamOphis
@@ -56,11 +57,13 @@ public class PresenceBuilder {
     
     public PresenceBuilder(final Presence presence) {
         status = presence.status();
-        final Activity activity = presence.activity();
-        if(activity != null) {
-            type = activity.type();
-            name = activity.name();
-            url = activity.url();
+        if(!presence.activities().isEmpty()) {
+            final Activity activity = presence.activities().get(0);
+            if(activity != null) {
+                type = activity.type();
+                name = activity.name();
+                url = activity.url();
+            }
         }
     }
     
@@ -74,7 +77,7 @@ public class PresenceBuilder {
                 : null;
         return PresenceImpl.builder()
                 .status(status)
-                .activity(activity)
+                .activities(activity != null ? List.of(activity) : null)
                 .build();
     }
 }

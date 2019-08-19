@@ -124,7 +124,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         sendTask = GatewayTask.gatewaySendTask(catnip, "catnip:gateway:" + id + ":outgoing-send", this::sendToSocket);
         presenceTask = GatewayTask.gatewayPresenceTask(catnip, "catnip:gateway:ws-outgoing:" + id + ":presence-update",
                 update -> {
-                    sendToSocket(basePayload(GatewayOp.STATUS_UPDATE, update.asJson()));
+                    sendToSocket(basePayload(GatewayOp.STATUS_UPDATE, update.asPresenceUpdateJson()));
                     currentPresence = update;
                 });
         lifecycleState = CREATED;
@@ -582,7 +582,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                 .done();
         // @formatter:on
         if(presence != null) {
-            data.put("presence", ((PresenceImpl) presence).asJson());
+            data.put("presence", ((PresenceImpl) presence).asPresenceUpdateJson());
         }
         return basePayload(GatewayOp.IDENTIFY, data);
     }

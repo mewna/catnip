@@ -36,6 +36,7 @@ import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -55,7 +56,7 @@ public class PresenceUpdateImpl implements PresenceUpdate, RequiresCatnip {
     private long idAsLong;
     private long guildIdAsLong;
     private OnlineStatus status;
-    private Activity activity;
+    private List<Activity> activities;
     private Set<String> roles;
     private String nick;
     private OnlineStatus mobileStatus;

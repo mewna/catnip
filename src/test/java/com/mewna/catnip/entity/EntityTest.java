@@ -565,7 +565,7 @@ class EntityTest {
         final Presence presence = PresenceImpl.builder()
                 .catnip(mockNip)
                 .status(random(OnlineStatus.values()))
-                .activity(activity(mockNip))
+                .activities(List.of(activity(mockNip)))
                 .mobileStatus(random(OnlineStatus.values()))
                 .webStatus(random(OnlineStatus.values()))
                 .build();
@@ -581,7 +581,7 @@ class EntityTest {
                 .idAsLong(randomPositiveLong())
                 .guildIdAsLong(randomPositiveLong())
                 .status(random(OnlineStatus.values()))
-                .activity(activity(mockNip))
+                .activities(List.of(activity(mockNip)))
                 .roles(new HashSet<>(Arrays.asList(randomPositiveLongAsString(), randomPositiveLongAsString())))
                 .nick("xXx_Ch1cksT3rm1n4t0r_69_xXx")
                 .mobileStatus(random(OnlineStatus.values()))
