@@ -179,30 +179,31 @@ public class RestWebhook extends RestHandler {
     public Observable<JsonObject> executeWebhookRaw(@Nonnull final String webhookId, @Nonnull final String webhookToken,
                                                     @Nullable final String username, @Nullable final String avatarUrl,
                                                     @Nonnull final MessageOptions options) {
-        final JsonObject body = new JsonObject();
+        
+        final var builder = JsonObject.builder();
         
         if(options.content() != null && !options.content().isEmpty()) {
-            body.put("content", options.content());
+            builder.value("content", options.content());
+        }
+        if(options.embed() != null) {
+            builder.array("embeds").value(entityBuilder().embedToJson(options.embed())).end();
+        }
+        if(username != null && !username.isEmpty()) {
+            builder.value("username", username);
+        }
+        if(avatarUrl != null && !avatarUrl.isEmpty()) {
+            builder.value("avatar_url", avatarUrl);
         }
         
-        if(options.embed() != null) {
-            body.put("embeds", new JsonArray().add(entityBuilder().embedToJson(options.embed())));
-        }
+        final JsonObject body = builder.done();
         
         if(body.get("embeds") == null && body.get("content") == null
                 && !options.hasFiles()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
         }
         
-        if(username != null && !username.isEmpty()) {
-            body.put("username", username);
-        }
-        if(avatarUrl != null && !avatarUrl.isEmpty()) {
-            body.put("avatar_url", avatarUrl);
-        }
-        
         return catnip().requester().
-                queue(new OutboundRequest(Routes.EXECUTE_WEBHOOK.withMajorParam(webhookId),
+                queue(new OutboundRequest(Routes.EXECUTE_WEBHOOK.withMajorParam(webhookId).withQueryString("?wait=true"),
                         Map.of("webhook.token", webhookToken), body).needsToken(false)
                         .buffers(options.files()))
                 .map(ResponsePayload::object);

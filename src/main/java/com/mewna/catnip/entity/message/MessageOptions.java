@@ -129,18 +129,7 @@ public class MessageOptions {
     @Nonnull
     public MessageOptions addFile(@Nonnull final String name, @Nonnull final InputStream stream) {
         try {
-            final ByteArrayOutputStream out = new ByteArrayOutputStream(Math.max(32, stream.available()));
-            final byte[] buf = new byte[Math.min(4096, stream.available() > 0 ? stream.available() : 4096)];
-            long total = 0;
-            while(true) {
-                final int r = stream.read(buf);
-                if(r == -1) {
-                    break;
-                }
-                out.write(buf, 0, r);
-                total += r;
-            }
-            return addFile(name, out.toByteArray());
+            return addFile(name, stream.readAllBytes());
         } catch(final IOException exc) {
             throw new IllegalArgumentException("cannot read data from inputstream!", exc);
         }
