@@ -33,6 +33,7 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.Timestamped;
 import com.mewna.catnip.entity.guild.Guild;
+import com.mewna.catnip.entity.guild.GuildFeature;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.CDNFormat;
@@ -75,7 +76,7 @@ public class GuildImpl implements Guild, RequiresCatnip, Timestamped {
     private VerificationLevel verificationLevel;
     private NotificationLevel defaultMessageNotifications;
     private ContentFilterLevel explicitContentFilter;
-    private List<String> features;
+    private List<GuildFeature> features;
     private MFALevel mfaLevel;
     private long applicationIdAsLong;
     private boolean widgetEnabled;

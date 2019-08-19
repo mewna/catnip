@@ -50,10 +50,6 @@ import com.mewna.catnip.entity.impl.guild.InviteImpl.InviterImpl;
 import com.mewna.catnip.entity.impl.guild.audit.*;
 import com.mewna.catnip.entity.impl.message.*;
 import com.mewna.catnip.entity.impl.message.EmbedImpl.*;
-import com.mewna.catnip.entity.impl.message.AttachmentImpl;
-import com.mewna.catnip.entity.impl.message.MessageActivityImpl;
-import com.mewna.catnip.entity.impl.message.MessageApplicationImpl;
-import com.mewna.catnip.entity.impl.message.ReactionImpl;
 import com.mewna.catnip.entity.impl.misc.*;
 import com.mewna.catnip.entity.impl.user.*;
 import com.mewna.catnip.entity.impl.user.PresenceImpl.*;
@@ -1035,7 +1031,7 @@ public final class EntityBuilder {
                 .verificationLevel(VerificationLevel.byKey(data.getInt("verification_level", 0)))
                 .defaultMessageNotifications(NotificationLevel.byKey(data.getInt("default_message_notifications", 0)))
                 .explicitContentFilter(ContentFilterLevel.byKey(data.getInt("explicit_content_filter", 0)))
-                .features(toStringList(data.getArray("features")))
+                .features(stringListToTypedList(data.getArray("features"), GuildFeature::valueOf))
                 .mfaLevel(MFALevel.byKey(data.getInt("mfa_level", 0)))
                 .applicationIdAsLong(applicationId == null ? 0 : Long.parseUnsignedLong(applicationId))
                 .widgetEnabled(data.getBoolean("widget_enabled", false))
@@ -1154,7 +1150,7 @@ public final class EntityBuilder {
                 .name(data.getString("name"))
                 .icon(data.getString("icon"))
                 .splash(data.getString("splash"))
-                .features(toStringList(data.getArray("features")))
+                .features(stringListToTypedList(data.getArray("features"), GuildFeature::valueOf))
                 .verificationLevel(VerificationLevel.byKey(data.getInt("verification_level", 0)))
                 .build();
     }

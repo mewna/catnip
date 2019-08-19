@@ -33,6 +33,7 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
 import com.mewna.catnip.entity.guild.Guild.VerificationLevel;
+import com.mewna.catnip.entity.guild.GuildFeature;
 import com.mewna.catnip.entity.guild.Invite;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.ImageType;
@@ -176,7 +177,7 @@ public class InviteImpl implements Invite, RequiresCatnip {
         private String name;
         private String icon;
         private String splash;
-        private List<String> features;
+        private List<GuildFeature> features;
         private VerificationLevel verificationLevel;
         
         @Override

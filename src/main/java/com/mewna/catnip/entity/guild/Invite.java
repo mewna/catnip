@@ -174,7 +174,7 @@ public interface Invite extends Entity {
         
         @Nonnull
         @CheckReturnValue
-        List<String> features();
+        List<GuildFeature> features();
         
         @Nonnull
         @CheckReturnValue

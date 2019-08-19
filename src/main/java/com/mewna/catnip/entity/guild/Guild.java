@@ -269,7 +269,7 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @CheckReturnValue
-    List<String> features();
+    List<GuildFeature> features();
     
     /**
      * @return The MFA level set for guild administrators.
