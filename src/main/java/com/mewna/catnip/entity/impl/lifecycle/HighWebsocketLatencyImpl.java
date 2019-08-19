@@ -36,6 +36,8 @@ import com.mewna.catnip.shard.ShardInfo;
 import lombok.*;
 import lombok.experimental.Accessors;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author amy
  * @since 8/19/19.
@@ -52,4 +54,9 @@ public class HighWebsocketLatencyImpl implements HighWebsocketLatency, RequiresC
     
     private ShardInfo shardInfo;
     private long latency;
+    
+    @Override
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
+    }
 }
