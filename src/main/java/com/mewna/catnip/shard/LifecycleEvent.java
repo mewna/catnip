@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.shard;
 
+import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.entity.lifecycle.*;
 import com.mewna.catnip.shard.event.EventType;
 
@@ -89,11 +90,15 @@ public interface LifecycleEvent {
      */
     EventType<GatewayConnectionFailed> WEBSOCKET_CONNECTION_FAILED
             = event(Raw.GATEWAY_WEBSOCKET_CONNECTION_FAILED, GatewayConnectionFailed.class);
-    
     /**
      * Fired whenever a REST route hits a ratelimit (HTTP 429).
      */
     EventType<RestRatelimitHit> REST_RATELIMIT_HIT = event(Raw.REST_RATELIMIT_HIT, RestRatelimitHit.class);
+    /**
+     * Fired whenever a shard's latency is higher than the value specified in
+     * {@link CatnipOptions#highLatencyThreshold()}.
+     */
+    EventType<HighWebsocketLatency> HIGH_WEBSOCKET_LATENCY = event(Raw.HIGH_WEBSOCKET_LATENCY, HighWebsocketLatency.class);
     
     interface Raw {
         // @formatter:off
@@ -110,6 +115,7 @@ public interface LifecycleEvent {
         String GATEWAY_WEBSOCKET_CLOSED            = "GATEWAY_WEBSOCKET_CLOSED";
         String GATEWAY_WEBSOCKET_CONNECTION_FAILED = "GATEWAY_WEBSOCKET_CONNECTION_FAILED";
         String REST_RATELIMIT_HIT                  = "REST_RATELIMIT_HIT";
+        String HIGH_WEBSOCKET_LATENCY              = "HIGH_WEBSOCKET_LATENCY";
         // @formatter:on
     }
 }

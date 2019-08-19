@@ -124,6 +124,7 @@ public class CatnipImpl implements Catnip {
     private HttpClient httpClient;
     private CompressionMode compressionMode;
     private boolean restRatelimitsWithoutClockSync;
+    private long highLatencyThreshold;
     
     private CatnipOptions options;
     
@@ -174,10 +175,14 @@ public class CatnipImpl implements Catnip {
         httpClient = options.httpClient();
         compressionMode = options.compressionMode();
         restRatelimitsWithoutClockSync = options.restRatelimitsWithoutClockSync();
+        highLatencyThreshold = options.highLatencyThreshold();
         
         // Sanity checks
         if(largeThreshold > 250 || largeThreshold < 50) {
             throw new IllegalArgumentException("Large threshold of " + largeThreshold + " not between 50 and 250!");
+        }
+        if(highLatencyThreshold < 0) {
+            throw new IllegalArgumentException("High latench threshold of " + highLatencyThreshold + " not greater than zero!");
         }
         
         injectSelf();

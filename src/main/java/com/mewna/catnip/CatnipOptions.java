@@ -33,6 +33,7 @@ import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.SplitMemoryEntityCache;
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.guild.Guild;
+import com.mewna.catnip.entity.lifecycle.HighWebsocketLatency;
 import com.mewna.catnip.entity.lifecycle.MemberChunkRerequest;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.extension.Extension;
@@ -283,6 +284,14 @@ public final class CatnipOptions implements Cloneable {
      * https://github.com/discordapp/discord-api-docs/pull/1069 for more info.
      */
     private boolean restRatelimitsWithoutClockSync;
+    /**
+     * If heartbeat latency takes longer than this much time, catnip will emit
+     * a {@link HighWebsocketLatency} event containing information about which
+     * shard is experiencing high latency and how high the latency is.<br />
+     *
+     * <strong>This value is specified in nanoseconds.</strong>
+     */
+    private long highLatencyThreshold = TimeUnit.SECONDS.toNanos(10);
     
     @Override
     public Object clone() {

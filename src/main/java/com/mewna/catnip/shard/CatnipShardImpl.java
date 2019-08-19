@@ -31,6 +31,7 @@ import com.grack.nanojson.*;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.impl.lifecycle.GatewayClosedImpl;
 import com.mewna.catnip.entity.impl.lifecycle.GatewayConnectionFailedImpl;
+import com.mewna.catnip.entity.impl.lifecycle.HighWebsocketLatencyImpl;
 import com.mewna.catnip.entity.impl.user.PresenceImpl;
 import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.Presence;
@@ -531,6 +532,10 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     private void handleHeartbeatAck() {
         heartbeatAcked = true;
         lastHeartbeatLatency = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - lastHeartbeat);
+        if(lastHeartbeatLatency > catnip.highLatencyThreshold()) {
+            catnip.dispatchManager().dispatchEvent(Raw.HIGH_WEBSOCKET_LATENCY,
+                    new HighWebsocketLatencyImpl(catnip, shardInfo(), TimeUnit.NANOSECONDS.toMillis(lastHeartbeatLatency)));
+        }
     }
     
     private void handleInvalidSession(final JsonObject event) {

@@ -33,6 +33,7 @@ import com.mewna.catnip.cache.EntityCache;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.channel.Webhook;
+import com.mewna.catnip.entity.lifecycle.HighWebsocketLatency;
 import com.mewna.catnip.entity.lifecycle.MemberChunkRerequest;
 import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.Presence;
@@ -450,6 +451,12 @@ public interface Catnip {
      * synchronization when calculating REST ratelimit data.
      */
     boolean restRatelimitsWithoutClockSync();
+    
+    /**
+     * @return How high, in nanoseconds, a shard's heartbeat latency can be
+     * before catnip emits a {@link HighWebsocketLatency} event.
+     */
+    long highLatencyThreshold();
     
     /**
      * Opens a voice connection to the provided guild and channel. The connection is
