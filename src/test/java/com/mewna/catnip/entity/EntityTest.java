@@ -381,7 +381,7 @@ class EntityTest {
                 .verificationLevel(random(VerificationLevel.values()))
                 .defaultMessageNotifications(random(NotificationLevel.values()))
                 .explicitContentFilter(random(ContentFilterLevel.values()))
-                .features(Arrays.asList(randomPositiveLongAsString(), randomPositiveLongAsString()))
+                .features(List.of(GuildFeature.COMMERCE, GuildFeature.ANIMATED_ICON))
                 .mfaLevel(random(MFALevel.values()))
                 .applicationIdAsLong(randomPositiveLong())
                 .widgetEnabled(ThreadLocalRandom.current().nextBoolean())
@@ -988,7 +988,7 @@ class EntityTest {
                 .name("Guildy McGuildface")
                 .icon(imageUrl())
                 .splash(imageUrl())
-                .features(Arrays.asList(randomPositiveLongAsString(), randomPositiveLongAsString()))
+                .features(List.of(GuildFeature.COMMERCE, GuildFeature.ANIMATED_ICON))
                 .verificationLevel(random(VerificationLevel.values()))
                 .build();
     }
