@@ -93,6 +93,7 @@ public class GuildImpl implements Guild, RequiresCatnip, Timestamped {
     private String banner;
     private PremiumTier premiumTier;
     private int premiumSubscriptionCount;
+    private String preferredLocale;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {

@@ -416,6 +416,15 @@ public interface Guild extends Snowflake {
     int premiumSubscriptionCount();
     
     /**
+     * @return The preferred locale for this guild. Defaults to {@code en-US}.
+     * Is only modifiable on guilds that have {@link GuildFeature#DISCOVERABLE}
+     * set.
+     */
+    @Nonnull
+    @CheckReturnValue
+    String preferredLocale();
+    
+    /**
      * @return Whether or not this guild is currently unavailable.
      */
     @CheckReturnValue

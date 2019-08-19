@@ -1076,6 +1076,7 @@ public final class EntityBuilder {
                 .banner(data.getString("banner"))
                 .premiumTier(PremiumTier.byKey(data.getInt("premium_tier", 0)))
                 .premiumSubscriptionCount(premiumSubscriptionCount)
+                .preferredLocale(data.getString("preferred_locale"))
                 .build();
     }
     
