@@ -88,6 +88,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     public static final int ZLIB_SUFFIX = 0x0000FFFF;
     
     private final Catnip catnip;
+    @Getter
     private final ShardInfo shardInfo;
     private final Presence presence;
     
@@ -545,7 +546,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         lastHeartbeatLatency = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - lastHeartbeat);
         if(lastHeartbeatLatency > catnip.highLatencyThreshold()) {
             catnip.dispatchManager().dispatchEvent(Raw.HIGH_WEBSOCKET_LATENCY,
-                    new HighWebsocketLatencyImpl(catnip, shardInfo(), TimeUnit.NANOSECONDS.toMillis(lastHeartbeatLatency)));
+                    new HighWebsocketLatencyImpl(catnip, shardInfo, TimeUnit.NANOSECONDS.toMillis(lastHeartbeatLatency)));
         }
     }
     
