@@ -39,4 +39,8 @@ import lombok.Getter;
 public class ShardInfo {
     private final int id;
     private final int limit;
+    
+    public String toString() {
+        return id + "/" + limit;
+    }
 }

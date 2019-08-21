@@ -36,6 +36,7 @@ import io.reactivex.Completable;
 import javax.annotation.Nonnull;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  * <strong>If you are unsure if you need to implement this interface, you
@@ -121,6 +122,13 @@ public interface Extension {
      *
      * @return The extension instance.
      */
+    default Extension injectOptions(@Nonnull final UnaryOperator<CatnipOptions> optionsPatcher) {
+        // This is only temporary so any classes that may happen to be extending
+        // the now deprecated method can move over at their own pace.
+        return injectOptions((Function<CatnipOptions, CatnipOptions>) optionsPatcher);
+    }
+    
+    @Deprecated
     default Extension injectOptions(@Nonnull final Function<CatnipOptions, CatnipOptions> optionsPatcher) {
         catnip().injectOptions(this, optionsPatcher);
         return this;
