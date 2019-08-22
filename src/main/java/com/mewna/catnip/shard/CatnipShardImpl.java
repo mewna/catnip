@@ -600,7 +600,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     
     private JsonObject resume() {
         // @formatter:off
-        return JsonObject.builder()
+        return basePayload(GatewayOp.RESUME, JsonObject.builder()
                 .value("token", catnip.token())
                 .value("session_id", catnip.sessionManager().session(shardInfo.getId()))
                 .value("seq", catnip.sessionManager().seqnum(shardInfo.getId()))
@@ -609,7 +609,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                     .value("$browser", "catnip")
                     .value("$device", "catnip")
                 .end()
-                .done();
+                .done());
         // @formatter:on
     }
 }
