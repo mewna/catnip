@@ -73,7 +73,7 @@ public class RestGuild extends RestHandler {
                                          @Nonnull final MemberData data, @Nullable final String reason) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.MODIFY_GUILD_MEMBER.withMajorParam(guildId),
-                        Map.of("user.id", memberId), data.toJson(), reason)));
+                        Map.of("user", memberId), data.toJson(), reason)));
     }
     
     @Nonnull
@@ -230,7 +230,7 @@ public class RestGuild extends RestHandler {
                                                      @Nonnull final RoleData roleData, @Nullable final String reason) {
         return catnip().requester()
                 .queue(new OutboundRequest(Routes.MODIFY_GUILD_ROLE.withMajorParam(guildId),
-                        Map.of("role.id", roleId), roleData.toJson(), reason))
+                        Map.of("role", roleId), roleData.toJson(), reason))
                 .map(ResponsePayload::object);
     }
     
@@ -240,7 +240,7 @@ public class RestGuild extends RestHandler {
                                        @Nullable final String reason) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.DELETE_GUILD_ROLE.withMajorParam(guildId),
-                        Map.of("role.id", roleId)).reason(reason).emptyBody(true)));
+                        Map.of("role", roleId)).reason(reason).emptyBody(true)));
     }
     
     @Nonnull
@@ -424,7 +424,7 @@ public class RestGuild extends RestHandler {
     @CheckReturnValue
     public Observable<JsonObject> getGuildBanRaw(@Nonnull final String guildId, @Nonnull final String userId) {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BAN.withMajorParam(guildId),
-                Map.of("user.id", userId)))
+                Map.of("user", userId)))
                 .map(ResponsePayload::object);
     }
     
@@ -444,7 +444,7 @@ public class RestGuild extends RestHandler {
         final String query = builder.build();
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.CREATE_GUILD_BAN.withMajorParam(guildId).withQueryString(query),
-                        Map.of("user.id", userId)).reason(reason).emptyBody(true)));
+                        Map.of("user", userId)).reason(reason).emptyBody(true)));
     }
     
     @Nonnull
@@ -458,7 +458,7 @@ public class RestGuild extends RestHandler {
                                       @Nullable final String reason) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.REMOVE_GUILD_BAN.withMajorParam(guildId),
-                        Map.of("user.id", userId)).reason(reason).emptyBody(true)));
+                        Map.of("user", userId)).reason(reason).emptyBody(true)));
     }
     
     @Nonnull
@@ -485,7 +485,7 @@ public class RestGuild extends RestHandler {
                                          @Nullable final String reason) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.REMOVE_GUILD_MEMBER.withMajorParam(guildId),
-                        Map.of("user.id", userId)).reason(reason).emptyBody(true)));
+                        Map.of("user", userId)).reason(reason).emptyBody(true)));
     }
     
     @Nonnull
@@ -504,7 +504,7 @@ public class RestGuild extends RestHandler {
     @CheckReturnValue
     public Observable<JsonObject> getGuildMemberRaw(@Nonnull final String guildId, @Nonnull final String userId) {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_MEMBER.withMajorParam(guildId),
-                Map.of("user.id", userId)))
+                Map.of("user", userId)))
                 .map(ResponsePayload::object);
     }
     
@@ -513,7 +513,7 @@ public class RestGuild extends RestHandler {
                                              @Nonnull final String roleId, @Nullable final String reason) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.REMOVE_GUILD_MEMBER_ROLE.withMajorParam(guildId),
-                        Map.of("user.id", userId, "role.id", roleId)).reason(reason).emptyBody(true)));
+                        Map.of("user", userId, "role", roleId)).reason(reason).emptyBody(true)));
     }
     
     @Nonnull
@@ -527,7 +527,7 @@ public class RestGuild extends RestHandler {
                                           @Nonnull final String roleId, @Nullable final String reason) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.ADD_GUILD_MEMBER_ROLE.withMajorParam(guildId),
-                        Map.of("user.id", userId, "role.id", roleId)).reason(reason).emptyBody(true)));
+                        Map.of("user", userId, "role", roleId)).reason(reason).emptyBody(true)));
     }
     
     @Nonnull

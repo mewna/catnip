@@ -61,7 +61,7 @@ public class RestInvite extends RestHandler {
     @CheckReturnValue
     public Observable<JsonObject> getInviteRaw(@Nonnull final String code) {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_INVITE,
-                Map.of("invite.code", code)))
+                Map.of("invite", code)))
                 .map(ResponsePayload::object);
     }
     
@@ -81,7 +81,7 @@ public class RestInvite extends RestHandler {
     @CheckReturnValue
     public Observable<JsonObject> deleteInviteRaw(@Nonnull final String code, @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.DELETE_INVITE,
-                Map.of("invite.code", code)).reason(reason))
+                Map.of("invite", code)).reason(reason))
                 .map(ResponsePayload::object);
     }
 }

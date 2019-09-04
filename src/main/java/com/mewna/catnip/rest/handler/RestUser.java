@@ -87,7 +87,7 @@ public class RestUser extends RestHandler {
     @CheckReturnValue
     public Observable<JsonObject> getUserRaw(@Nonnull final String userId) {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_USER,
-                Map.of("user.id", userId)))
+                Map.of("user", userId)))
                 .map(ResponsePayload::object);
     }
     
@@ -179,7 +179,7 @@ public class RestUser extends RestHandler {
     public Completable leaveGuild(@Nonnull final String guildId) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.LEAVE_GUILD,
-                        Map.of("guild.id", guildId)).emptyBody(true)));
+                        Map.of("guild", guildId)).emptyBody(true)));
     }
     
     @Nonnull

@@ -150,7 +150,7 @@ public class RestChannel extends RestHandler {
     public Observable<JsonObject> getMessageRaw(@Nonnull final String channelId, @Nonnull final String messageId) {
         return catnip().requester().queue(
                 new OutboundRequest(Routes.GET_CHANNEL_MESSAGE.withMajorParam(channelId),
-                        Map.of("message.id", messageId)))
+                        Map.of("message", messageId)))
                 .map(ResponsePayload::object);
     }
     
@@ -188,7 +188,7 @@ public class RestChannel extends RestHandler {
         }
         return catnip().requester()
                 .queue(new OutboundRequest(Routes.EDIT_MESSAGE.withMajorParam(channelId),
-                        Map.of("message.id", messageId), json))
+                        Map.of("message", messageId), json))
                 .map(ResponsePayload::object);
     }
     
@@ -196,7 +196,7 @@ public class RestChannel extends RestHandler {
     public Completable deleteMessage(@Nonnull final String channelId, @Nonnull final String messageId,
                                      @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.DELETE_MESSAGE.withMajorParam(channelId),
-                Map.of("message.id", messageId)).reason(reason))
+                Map.of("message", messageId)).reason(reason))
                 .ignoreElements();
     }
     
@@ -223,7 +223,7 @@ public class RestChannel extends RestHandler {
     public Completable addReaction(@Nonnull final String channelId, @Nonnull final String messageId,
                                    @Nonnull final String emoji) {
         return catnip().requester().queue(new OutboundRequest(Routes.CREATE_REACTION.withMajorParam(channelId),
-                Map.of("message.id", messageId, "emojis", encodeUTF8(emoji)), new JsonObject()))
+                Map.of("message", messageId, "emojis", encodeUTF8(emoji)), new JsonObject()))
                 .ignoreElements();
     }
     
@@ -238,7 +238,7 @@ public class RestChannel extends RestHandler {
                                          @Nonnull final String emoji) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.DELETE_OWN_REACTION.withMajorParam(channelId),
-                        Map.of("message.id", messageId, "emojis", encodeUTF8(emoji))).emptyBody(true)));
+                        Map.of("message", messageId, "emojis", encodeUTF8(emoji))).emptyBody(true)));
     }
     
     @Nonnull
@@ -252,7 +252,7 @@ public class RestChannel extends RestHandler {
                                           @Nonnull final String userId, @Nonnull final String emoji) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.DELETE_USER_REACTION.withMajorParam(channelId),
-                        Map.of("message.id", messageId, "emojis", encodeUTF8(emoji), "user.id", userId))
+                        Map.of("message", messageId, "emojis", encodeUTF8(emoji), "user", userId))
                         .emptyBody(true)));
     }
     
@@ -266,7 +266,7 @@ public class RestChannel extends RestHandler {
     public Completable deleteAllReactions(@Nonnull final String channelId, @Nonnull final String messageId) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.DELETE_ALL_REACTIONS.withMajorParam(channelId),
-                        Map.of("message.id", messageId)).emptyBody(true)));
+                        Map.of("message", messageId)).emptyBody(true)));
     }
     
     @Nonnull
@@ -312,7 +312,7 @@ public class RestChannel extends RestHandler {
         final String query = builder.build();
         return catnip().requester()
                 .queue(new OutboundRequest(Routes.GET_REACTIONS.withMajorParam(channelId).withQueryString(query),
-                        Map.of("message.id", messageId, "emojis", encodeUTF8(emoji))))
+                        Map.of("message", messageId, "emojis", encodeUTF8(emoji))))
                 .map(ResponsePayload::array);
     }
     
@@ -494,7 +494,7 @@ public class RestChannel extends RestHandler {
                                                 @Nonnull final String overwriteId, @Nullable final String reason) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.DELETE_CHANNEL_PERMISSION.withMajorParam(channelId),
-                        Map.of("overwrite.id", overwriteId)).reason(reason).emptyBody(true)));
+                        Map.of("overwrite", overwriteId)).reason(reason).emptyBody(true)));
     }
     
     @Nonnull
@@ -517,7 +517,7 @@ public class RestChannel extends RestHandler {
                                               final boolean isMember, @Nullable final String reason) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.EDIT_CHANNEL_PERMISSIONS.withMajorParam(channelId),
-                        Map.of("overwrite.id", overwriteId), JsonObject.builder()
+                        Map.of("overwrite", overwriteId), JsonObject.builder()
                         .value("allow", Permission.from(allowed))
                         .value("deny", Permission.from(denied))
                         .value("type", isMember ? "member" : "role")
@@ -575,7 +575,7 @@ public class RestChannel extends RestHandler {
     public Completable deletePinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.DELETE_PINNED_CHANNEL_MESSAGE.withMajorParam(channelId),
-                        Map.of("message.id", messageId)).emptyBody(true)));
+                        Map.of("message", messageId)).emptyBody(true)));
     }
     
     @Nonnull
@@ -586,7 +586,7 @@ public class RestChannel extends RestHandler {
     @Nonnull
     public Completable addPinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
         return catnip().requester().queue(new OutboundRequest(Routes.ADD_PINNED_CHANNEL_MESSAGE.withMajorParam(channelId),
-                Map.of("message.id", messageId), new JsonObject()))
+                Map.of("message", messageId), new JsonObject()))
                 .ignoreElements();
     }
     
