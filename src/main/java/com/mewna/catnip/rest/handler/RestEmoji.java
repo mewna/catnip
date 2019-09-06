@@ -84,7 +84,7 @@ public class RestEmoji extends RestHandler {
         return catnip().requester().queue(
                 new OutboundRequest(
                         Routes.GET_GUILD_EMOJI.withMajorParam(guildId),
-                        Map.of("emojis.id", emojiId)))
+                        Map.of("emojis", emojiId)))
                 .map(ResponsePayload::object);
     }
     
@@ -180,7 +180,7 @@ public class RestEmoji extends RestHandler {
         return catnip().requester().queue(
                 new OutboundRequest(
                         Routes.MODIFY_GUILD_EMOJI.withMajorParam(guildId),
-                        Map.of("emojis.id", emojiId),
+                        Map.of("emojis", emojiId),
                         JsonObject.builder()
                                 .value("name", name)
                                 .value("roles", rolesArray)
@@ -196,7 +196,7 @@ public class RestEmoji extends RestHandler {
         return Completable.fromObservable(catnip().requester().queue(
                 new OutboundRequest(
                         Routes.DELETE_GUILD_EMOJI.withMajorParam(guildId),
-                        Map.of("emojis.id", emojiId)).reason(reason).emptyBody(true)));
+                        Map.of("emojis", emojiId)).reason(reason).emptyBody(true)));
     }
     
     @Nonnull
