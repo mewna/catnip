@@ -69,11 +69,25 @@ public final class CDNFormat {
         if(icon == null) {
             return null;
         }
-        if(options.getType() == ImageType.GIF) {
-            throw new IllegalArgumentException("Guild icons may not be GIFs");
+        if(options.getType() == ImageType.GIF && !icon.startsWith("a_")) {
+            throw new IllegalArgumentException("Cannot build gif icon URL for non gif icon!");
         }
         return options.buildUrl(
                 String.format("https://cdn.discordapp.com/icons/%s/%s", id, icon)
+        );
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    public static String teamIconUrl(@Nonnull final String id, @Nullable final String icon, @Nonnull final ImageOptions options) {
+        if(icon == null) {
+            return null;
+        }
+        if(options.getType() == ImageType.GIF) {
+            throw new IllegalArgumentException("Team icons may not be GIFs");
+        }
+        return options.buildUrl(
+                String.format("https://cdn.discordapp.com/team-icons/%s/%s", id, icon)
         );
     }
     

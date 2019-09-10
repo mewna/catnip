@@ -3,8 +3,6 @@
     <option name="GENERATE_FINAL_LOCALS" value="true" />
     <option name="GENERATE_FINAL_PARAMETERS" value="true" />
     <option name="RIGHT_MARGIN" value="126" />
-    <option name="JD_ADD_BLANK_AFTER_PARM_COMMENTS" value="true" />
-    <option name="JD_ADD_BLANK_AFTER_RETURN" value="true" />
     <option name="FORMATTER_TAGS_ENABLED" value="true" />
     <JSCodeStyleSettings version="0">
       <option name="SPACE_BEFORE_FUNCTION_LEFT_PARENTH" value="false" />
@@ -24,7 +22,6 @@
           <option value="scalaxy.beans._" />
         </array>
       </option>
-      <option name="USE_SCALADOC2_FORMATTING" value="false" />
     </ScalaCodeStyleSettings>
     <XML>
       <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
@@ -58,9 +55,6 @@
       <option name="SPACE_BEFORE_SWITCH_PARENTHESES" value="false" />
     </codeStyleSettings>
     <codeStyleSettings language="Scala">
-      <option name="SPACE_BEFORE_IF_PARENTHESES" value="false" />
-      <option name="SPACE_BEFORE_WHILE_PARENTHESES" value="false" />
-      <option name="SPACE_BEFORE_FOR_PARENTHESES" value="false" />
       <indentOptions>
         <option name="KEEP_INDENTS_ON_EMPTY_LINES" value="true" />
       </indentOptions>

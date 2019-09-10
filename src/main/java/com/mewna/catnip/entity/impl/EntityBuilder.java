@@ -935,6 +935,7 @@ public final class EntityBuilder {
         final String widgetChannelId = data.getString("widget_channel_id");
         final String systemChannelId = data.getString("system_channel_id");
         final Integer maxPresences = data.getInteger("max_presences", 5000);
+        final Integer premiumSubscriptionCount = data.getInteger("premium_subscription_count", 0);
         return GuildImpl.builder()
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
@@ -967,7 +968,7 @@ public final class EntityBuilder {
                 .description(data.getString("description"))
                 .banner(data.getString("banner"))
                 .premiumTier(PremiumTier.byKey(data.getInteger("premium_tier", 0)))
-                .premiumSubscriptionCount(data.getInteger("premium_subscription_count", 0))
+                .premiumSubscriptionCount(premiumSubscriptionCount == null ? 0 : premiumSubscriptionCount)
                 .build();
     }
     
@@ -1249,6 +1250,7 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public ApplicationInfo createApplicationInfo(@Nonnull final JsonObject data) {
+        final JsonObject team = data.getJsonObject("team");
         return ApplicationInfoImpl.builder()
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
@@ -1259,6 +1261,7 @@ public final class EntityBuilder {
                 .publicBot(data.getBoolean("bot_public"))
                 .requiresCodeGrant(data.getBoolean("bot_require_code_grant"))
                 .owner(createApplicationOwner(data.getJsonObject("owner")))
+                .team(team == null ? null : createTeam(team))
                 .build();
     }
     
@@ -1272,6 +1275,31 @@ public final class EntityBuilder {
                 .discriminator(data.getString("discriminator"))
                 .avatar(data.getString("avatar", null))
                 .bot(data.getBoolean("bot", false))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Team createTeam(@Nonnull final JsonObject data) {
+        return TeamImpl.builder()
+                .catnip(catnip)
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .ownerIdAsLong(Long.parseUnsignedLong(data.getString("owner_user_id")))
+                .name(data.getString("name"))
+                .icon(data.getString("icon"))
+                .members(toList(data.getJsonArray("members"), this::createTeamMember))
+                .build();
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public TeamMember createTeamMember(@Nonnull final JsonObject data) {
+        return TeamMemberImpl.builder()
+                .catnip(catnip)
+                .teamIdAsLong(Long.parseUnsignedLong(data.getString("team_id")))
+                .membershipState(data.getInteger("membership_state"))
+                .permissions(toStringList(data.getJsonArray("permissions")))
+                .user(createUser(data.getJsonObject("user")))
                 .build();
     }
     

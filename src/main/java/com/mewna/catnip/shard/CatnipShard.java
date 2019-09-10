@@ -33,6 +33,7 @@ import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
+import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.shard.LifecycleEvent.Raw;
 import com.mewna.catnip.shard.manager.AbstractShardManager;
 import com.mewna.catnip.shard.manager.DefaultShardManager;
@@ -194,9 +195,9 @@ public class CatnipShard extends AbstractVerticle {
         if(socket != null) {
             closedByClient = true;
             if(socketOpen) {
+                socketOpen = false;
                 socket.close((short) 4000);
             }
-            socketOpen = false;
         }
         heartbeatAcked = true;
         
@@ -473,6 +474,7 @@ public class CatnipShard extends AbstractVerticle {
                     // Zombie
                     catnip.logAdapter().warn("Shard {}/{}: Heartbeat zombie, queueing reconnect!", id, limit);
                     closedByClient = true;
+                    socketOpen = false;
                     try {
                         socket.close();
                     } catch(final IllegalStateException e) {
@@ -570,6 +572,7 @@ public class CatnipShard extends AbstractVerticle {
         stateReply(ShardConnectState.INVALID);
         
         if(socket != null && socketOpen) {
+            socketOpen = false;
             socket.close();
         }
     }
@@ -579,6 +582,7 @@ public class CatnipShard extends AbstractVerticle {
         if(socket != null) {
             closedByClient = true;
             if(socketOpen) {
+                socketOpen = false;
                 socket.close();
             }
         }
@@ -588,6 +592,7 @@ public class CatnipShard extends AbstractVerticle {
         final JsonObject data = new JsonObject()
                 .put("token", catnip.token())
                 .put("compress", false)
+                .put("guild_subscriptions", ((CatnipImpl) catnip).options().enableGuildSubscriptions())
                 .put("large_threshold", LARGE_THRESHOLD)
                 .put("shard", new JsonArray().add(id).add(limit))
                 .put("properties", new JsonObject()

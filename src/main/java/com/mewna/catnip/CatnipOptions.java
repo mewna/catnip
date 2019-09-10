@@ -200,6 +200,12 @@ public final class CatnipOptions implements Cloneable {
      */
     private boolean logUncachedPresenceWhenNotChunking = true;
     /**
+     * Whether or not Discord should subscribe to guild workers and provide stuff
+     * such as presence updates, typing events, member updates and other stuff,
+     * see discord-api-docs#1016 for more information.
+     */
+    private boolean enableGuildSubscriptions = true;
+    /**
      * Whether or not {@link Entity#fromJson(Catnip, Class, JsonObject)} should
      * log a warning when deserializing entities with mismatched catnip
      * versions. Generally, this should only be disabled if you can guarantee
