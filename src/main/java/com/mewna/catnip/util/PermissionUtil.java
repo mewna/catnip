@@ -38,6 +38,7 @@ import com.mewna.catnip.entity.util.Permission;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Comparator;
 
 public final class PermissionUtil {
     private PermissionUtil() {
@@ -242,7 +243,7 @@ public final class PermissionUtil {
             return actor.isOwner();
         }
         // Check if the highest role of the actor is higher than the role of the target
-        return canInteract(actor.orderedRoles().iterator().next(), target);
+        return canInteract(actor.orderedRoles(Comparator.reverseOrder()).iterator().next(), target);
     }
     
     /**
