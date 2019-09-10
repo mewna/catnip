@@ -38,6 +38,7 @@ import com.mewna.catnip.entity.util.Permission;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 
 public final class PermissionUtil {
@@ -202,7 +203,7 @@ public final class PermissionUtil {
         if(actor.orderedRoles().isEmpty()) {
             return actor.isOwner();
         }
-        return canInteract(actor.orderedRoles().iterator().next(), target);
+        return canInteract(actor.orderedRoles(Collections.reverseOrder()).iterator().next(), target);
     }
     
     /**
@@ -222,7 +223,7 @@ public final class PermissionUtil {
         if(target.orderedRoles().isEmpty()) {
             return true;
         }
-        return canInteract(actor, target.orderedRoles().iterator().next());
+        return canInteract(actor, target.orderedRoles(Comparator.reverseOrder()).iterator().next());
     }
     
     /**
