@@ -185,4 +185,10 @@ public interface VoiceState extends Entity {
      */
     @CheckReturnValue
     boolean suppress();
+    
+    /**
+     * @return Whether the user is currently streaming (go live).
+     */
+    @CheckReturnValue
+    boolean selfStream();
 }

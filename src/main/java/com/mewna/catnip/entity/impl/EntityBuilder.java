@@ -740,6 +740,7 @@ public final class EntityBuilder {
                 .selfDeaf(data.getBoolean("self_deaf"))
                 .selfMute(data.getBoolean("self_mute"))
                 .suppress(data.getBoolean("suppress"))
+                .selfStream(data.getBoolean("self_stream", false))
                 .build();
     }
     
