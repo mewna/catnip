@@ -35,6 +35,7 @@ import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.entity.impl.user.PresenceImpl;
 import com.mewna.catnip.entity.impl.user.PresenceImpl.ActivityImpl;
 import com.mewna.catnip.entity.misc.GatewayInfo;
+import com.mewna.catnip.entity.serialization.EntitySerializer;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.Activity;
 import com.mewna.catnip.entity.user.Presence.ActivityType;
@@ -125,6 +126,7 @@ public class CatnipImpl implements Catnip {
     private CompressionMode compressionMode;
     private boolean restRatelimitsWithoutClockSync;
     private long highLatencyThreshold;
+    private EntitySerializer<?> entitySerializer;
     
     private CatnipOptions options;
     
@@ -176,6 +178,7 @@ public class CatnipImpl implements Catnip {
         compressionMode = options.compressionMode();
         restRatelimitsWithoutClockSync = options.restRatelimitsWithoutClockSync();
         highLatencyThreshold = options.highLatencyThreshold();
+        entitySerializer = options.entitySerializer();
         
         // Sanity checks
         if(largeThreshold > 250 || largeThreshold < 50) {

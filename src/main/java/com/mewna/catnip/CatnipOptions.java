@@ -300,7 +300,7 @@ public final class CatnipOptions implements Cloneable {
      * behaves internally, but rather will affect user-controlled serialization
      * for interfacing with the outside world.
      */
-    private EntitySerializer<?> serializer = new DefaultEntitySerializer();
+    private EntitySerializer<?> entitySerializer = new DefaultEntitySerializer();
     
     @Override
     public Object clone() {
