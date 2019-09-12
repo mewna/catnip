@@ -27,9 +27,7 @@
 
 package com.mewna.catnip.entity.guild.audit;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.impl.guild.audit.AuditLogChangeImpl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -40,7 +38,6 @@ import javax.annotation.Nullable;
  * @since 10/07/18
  */
 @SuppressWarnings("unused")
-@JsonDeserialize(as = AuditLogChangeImpl.class)
 public interface AuditLogChange extends Entity {
     @Nullable
     @CheckReturnValue

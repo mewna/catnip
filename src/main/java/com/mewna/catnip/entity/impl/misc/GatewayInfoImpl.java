@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.impl.misc;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.misc.GatewayInfo;
@@ -41,14 +39,13 @@ import javax.annotation.Nonnull;
  * @author amy
  * @since 12/10/18.
  */
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(fluent = true)
 public class GatewayInfoImpl implements GatewayInfo, RequiresCatnip {
-    @JsonIgnore
     private transient Catnip catnip;
     
     private String url;

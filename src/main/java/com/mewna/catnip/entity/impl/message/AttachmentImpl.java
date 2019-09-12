@@ -27,10 +27,8 @@
 
 package com.mewna.catnip.entity.impl.message;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.Message.Attachment;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -41,8 +39,8 @@ import javax.annotation.Nonnull;
  * @author amy
  * @since 8/5/19.
  */
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
+@Getter
+@Setter
 @Accessors(fluent = true)
 @Builder
 @NoArgsConstructor

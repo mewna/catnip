@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.entity.channel;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mewna.catnip.entity.impl.message.MessageImpl;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
@@ -59,7 +58,6 @@ public interface MessageChannel extends Channel {
      * @return A Observable that completes when the message is sent.
      */
     @Nonnull
-    @JsonIgnore
     default Single<Message> sendMessage(@Nonnull final String content) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
@@ -81,7 +79,6 @@ public interface MessageChannel extends Channel {
      * @return A Observable that completes when the message is sent.
      */
     @Nonnull
-    @JsonIgnore
     default Single<Message> sendMessage(@Nonnull final Embed embed) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
@@ -98,7 +95,6 @@ public interface MessageChannel extends Channel {
      * @return A Observable that completes when the message is sent.
      */
     @Nonnull
-    @JsonIgnore
     default Single<Message> sendMessage(@Nonnull final Message message) {
         if(isGuild()) {
             if(!message.embeds().isEmpty()) {
@@ -120,7 +116,6 @@ public interface MessageChannel extends Channel {
      * @return A Observable that completes when the message is sent.
      */
     @Nonnull
-    @JsonIgnore
     default Single<Message> sendMessage(@Nonnull final MessageOptions options) {
         if(isGuild()) {
             if(options.hasFiles()) {
@@ -154,7 +149,6 @@ public interface MessageChannel extends Channel {
      * @return A Observable that completes when the message is edited.
      */
     @Nonnull
-    @JsonIgnore
     default Single<Message> editMessage(@Nonnull final String messageId, @Nonnull final String content) {
         return catnip().rest().channel().editMessage(id(), messageId, content);
     }
@@ -169,7 +163,6 @@ public interface MessageChannel extends Channel {
      * @return A Observable that completes when the message is edited.
      */
     @Nonnull
-    @JsonIgnore
     default Single<Message> editMessage(@Nonnull final String messageId, @Nonnull final Embed embed) {
         return catnip().rest().channel().editMessage(id(), messageId, embed);
     }
@@ -184,7 +177,6 @@ public interface MessageChannel extends Channel {
      * @return A Observable that completes when the message is edited.
      */
     @Nonnull
-    @JsonIgnore
     default Single<Message> editMessage(@Nonnull final String messageId, @Nonnull final Message message) {
         return catnip().rest().channel().editMessage(id(), messageId, message);
     }
@@ -198,7 +190,6 @@ public interface MessageChannel extends Channel {
      * @return A Observable that completes when the message is deleted.
      */
     @Nonnull
-    @JsonIgnore
     default Completable deleteMessage(@Nonnull final String messageId, @Nullable final String reason) {
         return catnip().rest().channel().deleteMessage(id(), messageId, reason);
     }
@@ -211,7 +202,6 @@ public interface MessageChannel extends Channel {
      * @return A Observable that completes when the message is deleted.
      */
     @Nonnull
-    @JsonIgnore
     default Completable deleteMessage(@Nonnull final String messageId) {
         return deleteMessage(messageId, null);
     }
@@ -225,7 +215,6 @@ public interface MessageChannel extends Channel {
      * @return A Observable that completes when the reaction is added.
      */
     @Nonnull
-    @JsonIgnore
     default Completable addReaction(@Nonnull final String messageId, @Nonnull final String emoji) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
@@ -243,7 +232,6 @@ public interface MessageChannel extends Channel {
      * @return A Observable that completes when the reaction is added.
      */
     @Nonnull
-    @JsonIgnore
     default Completable addReaction(@Nonnull final String messageId, @Nonnull final Emoji emoji) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
@@ -261,7 +249,6 @@ public interface MessageChannel extends Channel {
      * @return A Observable that completes when the reaction is removed.
      */
     @Nonnull
-    @JsonIgnore
     default Completable deleteOwnReaction(@Nonnull final String messageId, @Nonnull final String emoji) {
         return catnip().rest().channel().deleteOwnReaction(id(), messageId, emoji);
     }
@@ -275,7 +262,6 @@ public interface MessageChannel extends Channel {
      * @return A Observable that completes when the reaction is removed.
      */
     @Nonnull
-    @JsonIgnore
     default Completable deleteOwnReaction(@Nonnull final String messageId, @Nonnull final Emoji emoji) {
         return catnip().rest().channel().deleteOwnReaction(id(), messageId, emoji);
     }
@@ -290,7 +276,6 @@ public interface MessageChannel extends Channel {
      * @return A Observable that completes when the reaction is removed.
      */
     @Nonnull
-    @JsonIgnore
     default Completable deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId,
                                            @Nonnull final String emoji) {
         if(isGuild()) {
@@ -310,7 +295,6 @@ public interface MessageChannel extends Channel {
      * @return A Observable that completes when the reaction is removed.
      */
     @Nonnull
-    @JsonIgnore
     default Completable deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId,
                                            @Nonnull final Emoji emoji) {
         if(isGuild()) {
@@ -328,7 +312,6 @@ public interface MessageChannel extends Channel {
      * @return A Observable that completes when the reaction is removed.
      */
     @Nonnull
-    @JsonIgnore
     default Completable bulkRemoveReaction(@Nonnull final String messageId) {
         if(isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
@@ -345,7 +328,6 @@ public interface MessageChannel extends Channel {
      * triggered.
      */
     @Nonnull
-    @JsonIgnore
     default Completable triggerTypingIndicator() {
         return catnip().rest().channel().triggerTypingIndicator(id());
     }
@@ -358,7 +340,6 @@ public interface MessageChannel extends Channel {
      * @return A Observable that completes when the message is fetched.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default Single<Message> fetchMessage(@Nonnull final String messageId) {
         if(isGuild()) {
@@ -374,7 +355,6 @@ public interface MessageChannel extends Channel {
      * @return The paginator for channel history.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default MessagePaginator fetchMessages() {
         if(isGuild()) {

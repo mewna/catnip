@@ -27,12 +27,8 @@
 
 package com.mewna.catnip.entity.misc;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.guild.Guild;
-import com.mewna.catnip.entity.impl.misc.CustomEmojiImpl;
-import com.mewna.catnip.entity.impl.misc.UnicodeEmojiImpl;
 import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.CheckReturnValue;
@@ -45,7 +41,6 @@ import java.util.List;
  * @author natanbc
  * @since 9/5/18.
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS)
 public interface Emoji extends Snowflake {
     /**
      * ID of this emoji, or null if it has no ID.
@@ -172,7 +167,6 @@ public interface Emoji extends Snowflake {
     @CheckReturnValue
     boolean is(@Nonnull String emoji);
     
-    @JsonDeserialize(as = CustomEmojiImpl.class)
     interface CustomEmoji extends Emoji {
         @Override
         @Nonnull
@@ -180,7 +174,7 @@ public interface Emoji extends Snowflake {
         default String id() {
             return Long.toUnsignedString(idAsLong());
         }
-    
+        
         /**
          * Guild that owns this emoji, or {@code null} if it has no guild.
          * <p>
@@ -198,7 +192,7 @@ public interface Emoji extends Snowflake {
             }
             return catnip().cache().guild(guildIdAsLong());
         }
-    
+        
         /**
          * ID of guild that owns this emoji, or {@code null} if it has no guild.
          * <p>
@@ -216,7 +210,7 @@ public interface Emoji extends Snowflake {
             }
             return Long.toUnsignedString(id);
         }
-    
+        
         /**
          * ID of guild that owns this emoji, or {@code 0} if it has no guild.
          * <p>
@@ -255,13 +249,12 @@ public interface Emoji extends Snowflake {
         }
     }
     
-    @JsonDeserialize(as = UnicodeEmojiImpl.class)
     interface UnicodeEmoji extends Emoji {
         @Override
         default String id() {
             throw new IllegalStateException("Unicode emojis have no IDs!");
         }
-    
+        
         @Override
         default long idAsLong() {
             throw new IllegalStateException("Unicode emojis have no IDs!");

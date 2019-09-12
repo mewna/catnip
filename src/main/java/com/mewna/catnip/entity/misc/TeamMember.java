@@ -1,7 +1,5 @@
 package com.mewna.catnip.entity.misc;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.misc.TeamMemberImpl;
 import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.CheckReturnValue;
@@ -14,7 +12,6 @@ import java.util.List;
  * @author Bowser65
  * @since 06/24/19.
  */
-@JsonDeserialize(as = TeamMemberImpl.class)
 public interface TeamMember {
     /**
      * @return The membership state. Either 1 for pending, 2 for accepted.

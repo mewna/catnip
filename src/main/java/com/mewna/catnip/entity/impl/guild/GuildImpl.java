@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.impl.guild;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.Timestamped;
@@ -51,14 +49,13 @@ import java.util.Set;
  * @author natanbc
  * @since 9/6/18.
  */
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
+@Getter
+@Setter
 @Builder
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class GuildImpl implements Guild, RequiresCatnip, Timestamped {
-    @JsonIgnore
     private transient Catnip catnip;
     
     private long idAsLong;
@@ -82,7 +79,6 @@ public class GuildImpl implements Guild, RequiresCatnip, Timestamped {
     private boolean widgetEnabled;
     private long widgetChannelIdAsLong;
     private long systemChannelIdAsLong;
-    @JsonProperty
     private String joinedAt;
     private boolean large;
     private boolean unavailable;
@@ -127,7 +123,7 @@ public class GuildImpl implements Guild, RequiresCatnip, Timestamped {
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof Guild && ((Guild)obj).idAsLong() == idAsLong;
+        return obj instanceof Guild && ((Guild) obj).idAsLong() == idAsLong;
     }
     
     @Override

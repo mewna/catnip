@@ -27,10 +27,8 @@
 
 package com.mewna.catnip.entity.user;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.guild.GuildEntity;
-import com.mewna.catnip.entity.impl.user.PresenceUpdateImpl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -40,7 +38,6 @@ import java.util.Set;
  * @author natanbc
  * @since 12/14/18
  */
-@JsonDeserialize(as = PresenceUpdateImpl.class)
 public interface PresenceUpdate extends Presence, GuildEntity, Snowflake {
     /**
      * @return Roles the user has.

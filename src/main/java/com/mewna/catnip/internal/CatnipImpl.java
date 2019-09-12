@@ -113,7 +113,6 @@ public class CatnipImpl implements Catnip {
     private boolean enforcePermissions;
     private boolean captureRestStacktraces;
     private boolean logUncachedPresenceWhenNotChunking;
-    private boolean warnOnEntityVersionMismatch;
     private long memberChunkTimeout;
     private Presence initialPresence;
     private Set<String> disabledEvents;
@@ -168,7 +167,6 @@ public class CatnipImpl implements Catnip {
         memberChunkTimeout = options.memberChunkTimeout();
         disabledEvents = Set.copyOf(options.disabledEvents());
         logUncachedPresenceWhenNotChunking = options.logUncachedPresenceWhenNotChunking();
-        warnOnEntityVersionMismatch = options.warnOnEntityVersionMismatch();
         rxScheduler = options.rxScheduler();
         logLifecycleEvents = options.logLifecycleEvents();
         manualChunkRerequesting = options.manualChunkRerequesting();

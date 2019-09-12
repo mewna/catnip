@@ -27,9 +27,7 @@
 
 package com.mewna.catnip.entity.message;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.impl.message.BulkDeletedMessagesImpl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -42,7 +40,6 @@ import java.util.List;
  * @author amy
  * @since 10/4/18.
  */
-@JsonDeserialize(as = BulkDeletedMessagesImpl.class)
 public interface BulkDeletedMessages extends Entity {
     /**
      * @return The ids of the messages that were deleted.

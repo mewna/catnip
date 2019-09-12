@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.impl.misc;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.misc.TeamMember;
@@ -43,15 +41,14 @@ import java.util.List;
  * @author Bowser65
  * @since 06/24/19.
  */
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
+@Getter
+@Setter
 @Builder
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class TeamMemberImpl implements TeamMember, RequiresCatnip {
-    @JsonIgnore
     private transient Catnip catnip;
     
     private long teamIdAsLong;
@@ -71,7 +68,7 @@ public class TeamMemberImpl implements TeamMember, RequiresCatnip {
     
     @Override
     public boolean equals(final Object obj) {
-        if (obj instanceof TeamMember) {
+        if(obj instanceof TeamMember) {
             final TeamMember member = (TeamMember) obj;
             return member.teamIdAsLong() == teamIdAsLong && member.user().idAsLong() == user.idAsLong();
         }

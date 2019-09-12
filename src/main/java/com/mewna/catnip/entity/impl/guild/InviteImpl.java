@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.impl.guild;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
@@ -50,14 +48,13 @@ import java.util.Objects;
  * @author natanbc
  * @since 9/14/18.
  */
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
+@Getter
+@Setter
 @Builder
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class InviteImpl implements Invite, RequiresCatnip {
-    @JsonIgnore
     private transient Catnip catnip;
     
     private String code;
@@ -87,8 +84,8 @@ public class InviteImpl implements Invite, RequiresCatnip {
         return String.format("Invite (%s)", code);
     }
     
-    @Getter(onMethod_ = @JsonProperty)
-    @Setter(onMethod_ = @JsonProperty)
+    @Getter
+    @Setter
     @Builder
     @Accessors(fluent = true)
     @NoArgsConstructor
@@ -164,8 +161,8 @@ public class InviteImpl implements Invite, RequiresCatnip {
         }
     }
     
-    @Getter(onMethod_ = @JsonProperty)
-    @Setter(onMethod_ = @JsonProperty)
+    @Getter
+    @Setter
     @Builder
     @Accessors(fluent = true)
     @NoArgsConstructor
@@ -213,8 +210,8 @@ public class InviteImpl implements Invite, RequiresCatnip {
         }
     }
     
-    @Getter(onMethod_ = @JsonProperty)
-    @Setter(onMethod_ = @JsonProperty)
+    @Getter
+    @Setter
     @Builder
     @Accessors(fluent = true)
     @NoArgsConstructor

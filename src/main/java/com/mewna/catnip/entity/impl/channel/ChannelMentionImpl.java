@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.impl.channel;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
@@ -42,14 +40,13 @@ import javax.annotation.Nonnull;
  * @author amy
  * @since 8/19/19.
  */
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
+@Getter
+@Setter
 @Builder
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChannelMentionImpl implements ChannelMention, RequiresCatnip {
-    @JsonIgnore
     private transient Catnip catnip;
     private String name;
     private ChannelType type;

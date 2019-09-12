@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.message;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.ChannelMention;
 import com.mewna.catnip.entity.channel.MessageChannel;
@@ -36,7 +34,6 @@ import com.mewna.catnip.entity.channel.TextChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
-import com.mewna.catnip.entity.impl.message.*;
 import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
@@ -61,7 +58,6 @@ import java.util.stream.Collectors;
  * @since 9/4/18.
  */
 @SuppressWarnings("unused")
-@JsonDeserialize(as = MessageImpl.class)
 public interface Message extends Snowflake {
     /**
      * The type of message. Use this to tell normal messages from system messages.
@@ -388,7 +384,6 @@ public interface Message extends Snowflake {
      * @return Future for the reaction.
      */
     @Nonnull
-    @JsonIgnore
     default Completable react(@Nonnull final Emoji emoji) {
         PermissionUtil.checkPermissions(catnip(), guildId(), channelId(),
                 Permission.ADD_REACTIONS, Permission.READ_MESSAGE_HISTORY);
@@ -404,7 +399,6 @@ public interface Message extends Snowflake {
      * @return Future for the reaction.
      */
     @Nonnull
-    @JsonIgnore
     default Completable react(@Nonnull final String emoji) {
         PermissionUtil.checkPermissions(catnip(), guildId(), channelId(),
                 Permission.ADD_REACTIONS, Permission.READ_MESSAGE_HISTORY);
@@ -414,7 +408,6 @@ public interface Message extends Snowflake {
 //    default Completable removeReaction()
     
     @Nonnull
-    @JsonIgnore
     default Completable delete(@Nullable final String reason) {
         final User self = catnip().selfUser();
         if(self != null && !author().id().equals(self.id())) {
@@ -425,43 +418,36 @@ public interface Message extends Snowflake {
     }
     
     @Nonnull
-    @JsonIgnore
     default Completable delete() {
         return delete(null);
     }
     
     @Nonnull
-    @JsonIgnore
     default Single<Message> edit(@Nonnull final String content) {
         return catnip().rest().channel().editMessage(channelId(), id(), content);
     }
     
     @Nonnull
-    @JsonIgnore
     default Single<Message> edit(@Nonnull final Embed embed) {
         return catnip().rest().channel().editMessage(channelId(), id(), embed);
     }
     
     @Nonnull
-    @JsonIgnore
     default Single<Message> edit(@Nonnull final Message message) {
         Validate.isTrue(message.attachments().isEmpty(), "attachments cannot be edited into messages");
         return catnip().rest().channel().editMessage(channelId(), id(), message);
     }
     
     @Nonnull
-    @JsonIgnore
     default Single<Message> edit(@Nonnull final MessageOptions options) {
         Validate.isTrue(options.files().isEmpty(), "attachments cannot be edited into messages");
         return catnip().rest().channel().editMessage(channelId(), id(), options.buildMessage());
     }
     
-    @JsonIgnore
     default boolean isRickRoll() {
         return content().contains("https://www.youtube.com/watch?v=dQw4w9WgXcQ") || content().contains("https://youtu.be/dQw4w9WgXcQ");
     }
     
-    @JsonDeserialize(as = AttachmentImpl.class)
     interface Attachment extends Snowflake {
         /**
          * The name of the file represented by this attachment.
@@ -526,7 +512,6 @@ public interface Message extends Snowflake {
         }
     }
     
-    @JsonDeserialize(as = ReactionImpl.class)
     interface Reaction {
         /**
          * The count of reactions.
@@ -555,7 +540,6 @@ public interface Message extends Snowflake {
         Emoji emoji();
     }
     
-    @JsonDeserialize(as = MessageActivityImpl.class)
     interface MessageActivity {
         /**
          * @return The type of the message activity.
@@ -572,7 +556,6 @@ public interface Message extends Snowflake {
         String partyId();
     }
     
-    @JsonDeserialize(as = MessageApplicationImpl.class)
     interface MessageApplication {
         /**
          * @return The application's id.

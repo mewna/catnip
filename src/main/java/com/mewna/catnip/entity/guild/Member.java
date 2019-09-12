@@ -27,13 +27,10 @@
 
 package com.mewna.catnip.entity.guild;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.entity.Mentionable;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.channel.GuildChannel;
-import com.mewna.catnip.entity.impl.guild.MemberImpl;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
@@ -55,7 +52,6 @@ import java.util.stream.Collectors;
  * @since 9/4/18.
  */
 @SuppressWarnings("unused")
-@JsonDeserialize(as = MemberImpl.class)
 public interface Member extends Mentionable, PermissionHolder {
     /**
      * The user equivalent to this member.
@@ -210,7 +206,6 @@ public interface Member extends Mentionable, PermissionHolder {
      *
      * @return Future with the result of the DM creation.
      */
-    @JsonIgnore
     @CheckReturnValue
     default Single<DMChannel> createDM() {
         return catnip().rest().user().createDM(id());
@@ -253,7 +248,6 @@ public interface Member extends Mentionable, PermissionHolder {
      *
      * @return Whether the member owns the guild or not
      */
-    @JsonIgnore
     default boolean isOwner() {
         return guild().owner().equals(this);
     }
@@ -262,7 +256,6 @@ public interface Member extends Mentionable, PermissionHolder {
      * @return A mention for this member that can be sent in a message.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default String asMention() {
         return nick() != null ? "<@!" + id() + '>' : "<@" + id() + '>';

@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.guild;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.guild.GatewayGuildBanImpl;
 import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.CheckReturnValue;
@@ -40,9 +38,8 @@ import javax.annotation.Nonnull;
  * @author amy
  * @since 10/6/18.
  */
-@JsonDeserialize(as = GatewayGuildBanImpl.class)
 public interface GatewayGuildBan extends GuildEntity {
-
+    
     /**
      * @return The user who was banned.
      */

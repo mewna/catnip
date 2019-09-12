@@ -27,11 +27,9 @@
 
 package com.mewna.catnip;
 
-import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.SplitMemoryEntityCache;
-import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.lifecycle.HighWebsocketLatency;
 import com.mewna.catnip.entity.lifecycle.MemberChunkRerequest;
@@ -213,13 +211,6 @@ public final class CatnipOptions implements Cloneable {
      * see discord-api-docs#1016 for more information.
      */
     private boolean enableGuildSubscriptions = true;
-    /**
-     * Whether or not {@link Entity#fromJson(Catnip, Class, JsonObject)} should
-     * log a warning when deserializing entities with mismatched catnip
-     * versions. Generally, this should only be disabled if you can guarantee
-     * that the version mismatches won't be an issue.
-     */
-    private boolean warnOnEntityVersionMismatch = true;
     /**
      * How long catnip should wait to ensure that all member chunks have been
      * received, in milliseconds. If all member chunks still haven't been

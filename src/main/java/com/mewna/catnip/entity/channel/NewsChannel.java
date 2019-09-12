@@ -27,9 +27,6 @@
 
 package com.mewna.catnip.entity.channel;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.channel.NewsChannelImpl;
-
 /**
  * A news channel in a guild is effectively a reskinned text channel, but with
  * two important differences:
@@ -41,7 +38,6 @@ import com.mewna.catnip.entity.impl.channel.NewsChannelImpl;
  * @author amy
  * @since 3/10/19.
  */
-@JsonDeserialize(as = NewsChannelImpl.class)
 public interface NewsChannel extends TextChannel {
     @Override
     default int rateLimitPerUser() {

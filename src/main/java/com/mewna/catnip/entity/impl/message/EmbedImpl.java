@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.entity.impl.message;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.entity.Timestamped;
 import com.mewna.catnip.entity.message.Embed;
 import lombok.*;
@@ -42,8 +41,8 @@ import java.util.List;
  * @author natanbc
  * @since 9/2/18.
  */
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
+@Getter
+@Setter
 @Builder
 @Accessors(fluent = true)
 @SuppressWarnings("WeakerAccess")
@@ -54,7 +53,6 @@ public class EmbedImpl implements Embed, Timestamped {
     private EmbedType type;
     private String description;
     private String url;
-    @JsonProperty
     private String timestamp;
     private Integer color;
     private Footer footer;
@@ -63,7 +61,6 @@ public class EmbedImpl implements Embed, Timestamped {
     private Video video;
     private Provider provider;
     private Author author;
-    @JsonProperty
     private List<? extends Field> fields;
     
     @Override
@@ -79,8 +76,8 @@ public class EmbedImpl implements Embed, Timestamped {
         return parseTimestamp(timestamp);
     }
     
-    @Getter(onMethod_ = @JsonProperty)
-    @Setter(onMethod_ = @JsonProperty)
+    @Getter
+    @Setter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -91,8 +88,8 @@ public class EmbedImpl implements Embed, Timestamped {
         private String proxyIconUrl;
     }
     
-    @Getter(onMethod_ = @JsonProperty)
-    @Setter(onMethod_ = @JsonProperty)
+    @Getter
+    @Setter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -102,8 +99,8 @@ public class EmbedImpl implements Embed, Timestamped {
         private boolean inline;
     }
     
-    @Getter(onMethod_ = @JsonProperty)
-    @Setter(onMethod_ = @JsonProperty)
+    @Getter
+    @Setter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -113,8 +110,8 @@ public class EmbedImpl implements Embed, Timestamped {
         private String proxyIconUrl;
     }
     
-    @Getter(onMethod_ = @JsonProperty)
-    @Setter(onMethod_ = @JsonProperty)
+    @Getter
+    @Setter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -125,8 +122,8 @@ public class EmbedImpl implements Embed, Timestamped {
         private int width;
     }
     
-    @Getter(onMethod_ = @JsonProperty)
-    @Setter(onMethod_ = @JsonProperty)
+    @Getter
+    @Setter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -135,8 +132,8 @@ public class EmbedImpl implements Embed, Timestamped {
         private String url;
     }
     
-    @Getter(onMethod_ = @JsonProperty)
-    @Setter(onMethod_ = @JsonProperty)
+    @Getter
+    @Setter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -147,8 +144,8 @@ public class EmbedImpl implements Embed, Timestamped {
         private int width;
     }
     
-    @Getter(onMethod_ = @JsonProperty)
-    @Setter(onMethod_ = @JsonProperty)
+    @Getter
+    @Setter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor

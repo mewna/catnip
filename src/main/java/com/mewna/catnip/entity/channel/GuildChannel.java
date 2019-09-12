@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.entity.channel;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.guild.GuildEntity;
@@ -135,7 +134,6 @@ public interface GuildChannel extends GuildEntity, Channel {
      * @return A Observable that completes when the invite is created.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default Single<CreatedInvite> createInvite(@Nullable final InviteCreateOptions options,
                                                @Nullable final String reason) {
@@ -151,7 +149,6 @@ public interface GuildChannel extends GuildEntity, Channel {
      * @return A Observable that completes when the invite is created.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default Single<CreatedInvite> createInvite(@Nullable final InviteCreateOptions options) {
         return createInvite(options, null);
@@ -163,7 +160,6 @@ public interface GuildChannel extends GuildEntity, Channel {
      * @return A Observable that completes when the invite is created.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default Single<CreatedInvite> createInvite() {
         PermissionUtil.checkPermissions(catnip(), guildId(), id(), Permission.CREATE_INSTANT_INVITE);
@@ -177,7 +173,6 @@ public interface GuildChannel extends GuildEntity, Channel {
      * @return A Observable that completes when the invite is created.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default Observable<CreatedInvite> fetchInvites() {
         PermissionUtil.checkPermissions(catnip(), guildId(), id(), Permission.MANAGE_CHANNELS);
@@ -190,7 +185,6 @@ public interface GuildChannel extends GuildEntity, Channel {
      * @return A channel editor that can complete the editing.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default ChannelEditFields edit() {
         PermissionUtil.checkPermissions(catnip(), guildId(), id(), Permission.MANAGE_CHANNELS);

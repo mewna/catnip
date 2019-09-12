@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.impl.channel;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.channel.WebhooksUpdate;
@@ -41,14 +39,13 @@ import javax.annotation.Nonnull;
  * @author amy
  * @since 11/10/18.
  */
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
+@Getter
+@Setter
 @Builder
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class WebhooksUpdateImpl implements WebhooksUpdate, RequiresCatnip {
-    @JsonIgnore
     private transient Catnip catnip;
     
     private long channelIdAsLong;

@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.guild;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.guild.EmojiUpdateImpl;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 
 import javax.annotation.CheckReturnValue;
@@ -41,7 +39,6 @@ import java.util.List;
  * @author amy
  * @since 10/9/18.
  */
-@JsonDeserialize(as = EmojiUpdateImpl.class)
 public interface EmojiUpdate extends GuildEntity {
     /**
      * @return A non-{@code null}, possibly-empty list of the guild's emojis.

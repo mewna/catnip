@@ -425,12 +425,6 @@ public interface Catnip {
     boolean logUncachedPresenceWhenNotChunking();
     
     /**
-     * @return Whether or not to log warnings about catnip entity version
-     * mismatches in {@link Entity#fromJson(Catnip, Class, JsonObject)}.
-     */
-    boolean warnOnEntityVersionMismatch();
-    
-    /**
      * @return How long to wait before re-chunking members, in milliseconds.
      */
     long memberChunkTimeout();

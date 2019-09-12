@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.impl.message;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.Timestamped;
@@ -51,33 +49,28 @@ import java.util.List;
  * @author amy
  * @since 9/2/18.
  */
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
+@Getter
+@Setter
 @Builder
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class MessageImpl implements Message, RequiresCatnip, Timestamped {
-    @JsonIgnore
     private transient Catnip catnip;
     
     private long idAsLong;
     private long channelIdAsLong;
     private User author;
     private String content;
-    @JsonProperty
     private String timestamp;
-    @JsonProperty
     private String editedTimestamp;
     private boolean tts;
     private boolean mentionsEveryone;
     private List<User> mentionedUsers;
     private List<Member> mentionedMembers;
     private List<String> mentionedRoleIds;
-    @JsonProperty
     private List<Attachment> attachments;
     private List<Embed> embeds;
-    @JsonProperty
     private List<Reaction> reactions;
     private MessageActivity activity;
     private MessageApplication application;

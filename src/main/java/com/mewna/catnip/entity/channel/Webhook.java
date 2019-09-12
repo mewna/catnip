@@ -27,12 +27,9 @@
 
 package com.mewna.catnip.entity.channel;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.guild.GuildEntity;
-import com.mewna.catnip.entity.impl.channel.WebhookImpl;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageOptions;
@@ -59,7 +56,6 @@ import java.util.Objects;
  * @since 9/15/18
  */
 @SuppressWarnings("unused")
-@JsonDeserialize(as = WebhookImpl.class)
 public interface Webhook extends GuildEntity, Snowflake {
     /**
      * Send a message to this channel with the specified content.
@@ -69,7 +65,6 @@ public interface Webhook extends GuildEntity, Snowflake {
      * @return A Single that completes when the message is sent.
      */
     @Nonnull
-    @JsonIgnore
     default Single<Message> executeWebhook(@Nonnull final String content) {
         return executeWebhook(content, null, null);
     }
@@ -82,7 +77,6 @@ public interface Webhook extends GuildEntity, Snowflake {
      * @return A Single that completes when the message is sent.
      */
     @Nonnull
-    @JsonIgnore
     default Single<Message> executeWebhook(@Nonnull final Embed embed) {
         return executeWebhook(embed, null, null);
     }
@@ -95,7 +89,6 @@ public interface Webhook extends GuildEntity, Snowflake {
      * @return A Single that completes when the message is sent.
      */
     @Nonnull
-    @JsonIgnore
     default Single<Message> executeWebhook(@Nonnull final MessageOptions options) {
         return executeWebhook(options, null, null);
     }
@@ -110,7 +103,6 @@ public interface Webhook extends GuildEntity, Snowflake {
      * @return A Single that completes when the message is sent.
      */
     @Nonnull
-    @JsonIgnore
     default Single<Message> executeWebhook(@Nonnull final String content,
                                            @Nullable final String username, @Nullable final String avatarUrl) {
         return executeWebhook(new MessageOptions().content(content), username, avatarUrl);
@@ -126,7 +118,6 @@ public interface Webhook extends GuildEntity, Snowflake {
      * @return A Single that completes when the message is sent.
      */
     @Nonnull
-    @JsonIgnore
     default Single<Message> executeWebhook(@Nonnull final Embed embed,
                                            @Nullable final String username, @Nullable final String avatarUrl) {
         return executeWebhook(new MessageOptions().embed(embed), username, avatarUrl);
@@ -142,7 +133,6 @@ public interface Webhook extends GuildEntity, Snowflake {
      * @return A Single that completes when the message is sent.
      */
     @Nonnull
-    @JsonIgnore
     default Single<Message> executeWebhook(@Nonnull final MessageOptions options,
                                            @Nullable final String username, @Nullable final String avatarUrl) {
         return catnip().rest().webhook().executeWebhook(id(), token(), username, avatarUrl, options);
@@ -206,7 +196,6 @@ public interface Webhook extends GuildEntity, Snowflake {
      * @return A Single that completes when the webhook is deleted.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default Completable delete() {
         PermissionUtil.checkPermissions(catnip(), guildId(), channelId(), Permission.MANAGE_WEBHOOKS);
@@ -219,7 +208,6 @@ public interface Webhook extends GuildEntity, Snowflake {
      * @return A webhook editor that can complete the editing.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default WebhookEditFields edit() {
         PermissionUtil.checkPermissions(catnip(), guildId(), channelId(), Permission.MANAGE_WEBHOOKS);

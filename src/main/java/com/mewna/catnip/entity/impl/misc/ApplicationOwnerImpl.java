@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.impl.misc;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.misc.ApplicationOwner;
@@ -44,14 +42,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
 
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
+@Getter
+@Setter
 @Builder
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class ApplicationOwnerImpl implements ApplicationOwner, RequiresCatnip {
-    @JsonIgnore
     private transient Catnip catnip;
     
     private long idAsLong;
@@ -66,7 +63,9 @@ public class ApplicationOwnerImpl implements ApplicationOwner, RequiresCatnip {
     }
     
     @Override
-    public void catnip(@Nonnull final Catnip catnip) { this.catnip = catnip; }
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
+    }
     
     @Override
     @CheckReturnValue

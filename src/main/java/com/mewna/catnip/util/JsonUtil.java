@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonWriter;
@@ -40,7 +39,6 @@ import java.util.function.Function;
 
 public final class JsonUtil {
     public static final long MAX_SAFE_INTEGER = 9007199254740991L;
-    public static final ObjectMapper MAPPER = new ObjectMapper();
     
     private JsonUtil() {
     }
@@ -291,19 +289,6 @@ public final class JsonUtil {
             }
             return List.copyOf(result);
         };
-    }
-    
-    public static <T> T mapTo(final JsonObject data, final Class<T> type) {
-        return MAPPER.convertValue(data, type);
-    }
-    
-    @SuppressWarnings("unchecked")
-    public static JsonObject mapFrom(final Object obj) {
-        if(obj == null) {
-            return null;
-        } else {
-            return new JsonObject((Map<String, Object>) MAPPER.convertValue(obj, Map.class));
-        }
     }
     
     public static String encodePrettily(final JsonObject data) {

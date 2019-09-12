@@ -27,14 +27,11 @@
 
 package com.mewna.catnip.entity.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Mentionable;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.entity.impl.user.UserImpl;
 import com.mewna.catnip.entity.util.ImageOptions;
 import io.reactivex.Single;
 
@@ -49,14 +46,12 @@ import javax.annotation.Nullable;
  * @since 9/4/18
  */
 @SuppressWarnings("unused")
-@JsonDeserialize(as = UserImpl.class)
 public interface User extends Snowflake, Mentionable {
     /**
      * Whether the user's avatar is animated.
      *
      * @return True if the avatar is animated, false otherwise.
      */
-    @JsonIgnore
     @CheckReturnValue
     boolean animatedAvatar();
     
@@ -66,7 +61,6 @@ public interface User extends Snowflake, Mentionable {
      * @return String containing the URL to the default avatar. Never null.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     String defaultAvatarUrl();
     
@@ -81,7 +75,6 @@ public interface User extends Snowflake, Mentionable {
      * @see User#effectiveAvatarUrl() Getting the user's effective avatar
      */
     @Nullable
-    @JsonIgnore
     @CheckReturnValue
     String avatarUrl(@Nonnull final ImageOptions options);
     
@@ -94,7 +87,6 @@ public interface User extends Snowflake, Mentionable {
      * @see User#effectiveAvatarUrl() Getting the user's effective avatar
      */
     @Nullable
-    @JsonIgnore
     @CheckReturnValue
     String avatarUrl();
     
@@ -108,7 +100,6 @@ public interface User extends Snowflake, Mentionable {
      * @return String containing a URL to their effective avatar, options considered. Never null.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     String effectiveAvatarUrl(@Nonnull final ImageOptions options);
     
@@ -120,7 +111,6 @@ public interface User extends Snowflake, Mentionable {
      * @return String containing a URL to their effective avatar. Never null.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     String effectiveAvatarUrl();
     
@@ -207,7 +197,6 @@ public interface User extends Snowflake, Mentionable {
      *
      * @return Future with the result of the DM creation.
      */
-    @JsonIgnore
     @CheckReturnValue
     default Single<DMChannel> createDM() {
         return catnip().rest().user().createDM(id());

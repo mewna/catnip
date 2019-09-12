@@ -27,9 +27,6 @@
 
 package com.mewna.catnip.entity.message;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.message.EmbedImpl;
-import com.mewna.catnip.entity.impl.message.EmbedImpl.*;
 import lombok.Getter;
 
 import javax.annotation.CheckReturnValue;
@@ -45,7 +42,6 @@ import java.util.List;
  * @since 9/2/18.
  */
 @SuppressWarnings("unused")
-@JsonDeserialize(as = EmbedImpl.class)
 public interface Embed {
     /**
      * Embed title.
@@ -190,7 +186,6 @@ public interface Embed {
         }
     }
     
-    @JsonDeserialize(as = AuthorImpl.class)
     interface Author {
         /**
          * Name of the author.
@@ -226,7 +221,6 @@ public interface Embed {
         String proxyIconUrl();
     }
     
-    @JsonDeserialize(as = FieldImpl.class)
     interface Field {
         /**
          * Name of the field.
@@ -255,7 +249,6 @@ public interface Embed {
         boolean inline();
     }
     
-    @JsonDeserialize(as = FooterImpl.class)
     interface Footer {
         /**
          * Text of the footer.
@@ -283,7 +276,6 @@ public interface Embed {
         String proxyIconUrl();
     }
     
-    @JsonDeserialize(as = ImageImpl.class)
     interface Image {
         /**
          * URL of the image.
@@ -319,7 +311,6 @@ public interface Embed {
         int width();
     }
     
-    @JsonDeserialize(as = ProviderImpl.class)
     interface Provider {
         /**
          * Name of the provider.
@@ -339,7 +330,6 @@ public interface Embed {
         String url();
     }
     
-    @JsonDeserialize(as = ThumbnailImpl.class)
     interface Thumbnail {
         /**
          * URL of the thumbnail.
@@ -375,7 +365,6 @@ public interface Embed {
         int width();
     }
     
-    @JsonDeserialize(as = VideoImpl.class)
     interface Video {
         /**
          * URL of the video.

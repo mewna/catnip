@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.entity.user;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.impl.user.PresenceImpl;
 import com.mewna.catnip.entity.impl.user.PresenceImpl.ActivityImpl;
 import lombok.Getter;
@@ -49,7 +48,6 @@ import java.util.Set;
  * @since 9/21/18.
  */
 @SuppressWarnings("unused")
-@JsonDeserialize(as = PresenceImpl.class)
 public interface Presence {
     @Nonnull
     @CheckReturnValue
@@ -112,7 +110,7 @@ public interface Presence {
                     return OFFLINE;
                 }
                 case "invisible": {
-                    return  INVISIBLE;
+                    return INVISIBLE;
                 }
                 default: {
                     throw new IllegalArgumentException("Unknown status: " + status);
@@ -219,7 +217,6 @@ public interface Presence {
         String match();
     }
     
-    @JsonDeserialize(as = ActivityImpl.class)
     interface Activity {
         @Nonnull
         @CheckReturnValue

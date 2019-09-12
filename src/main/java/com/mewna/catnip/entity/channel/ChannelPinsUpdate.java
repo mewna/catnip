@@ -27,9 +27,7 @@
 
 package com.mewna.catnip.entity.channel;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.impl.channel.ChannelPinsUpdateImpl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -42,7 +40,6 @@ import java.time.OffsetDateTime;
  * @author amy
  * @since 10/9/18.
  */
-@JsonDeserialize(as = ChannelPinsUpdateImpl.class)
 public interface ChannelPinsUpdate extends Entity {
     /**
      * @return The id of the channel that pins were updated in. Will never be

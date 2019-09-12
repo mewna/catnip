@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.impl.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
@@ -45,19 +43,18 @@ import java.util.Set;
  * @author amy
  * @since 9/21/18.
  */
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
+@Getter
+@Setter
 @Builder
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @SuppressWarnings("WeakerAccess")
 public class PresenceImpl implements Presence, RequiresCatnip {
-    @JsonIgnore
+    
     private transient Catnip catnip;
     
     private OnlineStatus status;
-    @Nonnull
     private List<Activity> activities;
     private OnlineStatus mobileStatus;
     private OnlineStatus webStatus;
@@ -148,8 +145,8 @@ public class PresenceImpl implements Presence, RequiresCatnip {
         private String match;
     }
     
-    @Getter(onMethod_ = @JsonProperty)
-    @Setter(onMethod_ = @JsonProperty)
+    @Getter
+    @Setter
     @Builder
     @Accessors(fluent = true)
     @NoArgsConstructor

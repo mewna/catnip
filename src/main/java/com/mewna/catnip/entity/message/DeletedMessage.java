@@ -27,11 +27,9 @@
 
 package com.mewna.catnip.entity.message;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.guild.GuildEntity;
-import com.mewna.catnip.entity.impl.message.DeletedMessageImpl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -43,7 +41,6 @@ import javax.annotation.Nullable;
  * @author amy
  * @since 10/4/18.
  */
-@JsonDeserialize(as = DeletedMessageImpl.class)
 public interface DeletedMessage extends GuildEntity, Snowflake {
     /**
      * @return The id of the channel where it was deleted.

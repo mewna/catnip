@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.impl.guild.audit;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.guild.audit.AuditLogChange;
@@ -41,19 +39,16 @@ import javax.annotation.Nonnull;
  * @author SamOphis
  * @since 10/07/2018
  */
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(fluent = true)
 public class AuditLogChangeImpl implements AuditLogChange, RequiresCatnip {
-    @JsonIgnore
     private transient Catnip catnip;
     
-    @JsonProperty
     private Object oldValue;
-    @JsonProperty
     private Object newValue;
     private String key;
     

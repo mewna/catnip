@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.impl.guild;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.guild.GuildEmbed;
 import lombok.*;
@@ -41,14 +39,13 @@ import javax.annotation.Nonnull;
  * @since 10/18/2018
  */
 
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Accessors(fluent = true, chain = true)
 public class GuildEmbedImpl implements GuildEmbed {
-    @JsonIgnore
     private transient Catnip catnip;
     
     private long channelIdAsLong;

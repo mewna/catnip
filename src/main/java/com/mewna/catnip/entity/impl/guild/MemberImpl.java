@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.impl.guild;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.Timestamped;
@@ -44,23 +42,20 @@ import java.util.Set;
  * @author amy
  * @since 9/1/18.
  */
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
+@Getter
+@Setter
 @Builder
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class MemberImpl implements Member, RequiresCatnip, Timestamped {
-    @JsonIgnore
     private transient Catnip catnip;
     
     private long idAsLong;
     private long guildIdAsLong;
     private String nick;
     private Set<String> roleIds;
-    @JsonProperty
     private String joinedAt;
-    @JsonProperty
     private String premiumSince;
     private boolean deaf;
     private boolean mute;

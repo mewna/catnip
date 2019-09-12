@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.impl.lifecycle;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.lifecycle.HighWebsocketLatency;
@@ -42,14 +40,13 @@ import javax.annotation.Nonnull;
  * @author amy
  * @since 8/19/19.
  */
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
+@Getter
+@Setter
 @Builder
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class HighWebsocketLatencyImpl implements HighWebsocketLatency, RequiresCatnip {
-    @JsonIgnore
     private transient Catnip catnip;
     
     private ShardInfo shardInfo;

@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.impl.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.user.VoiceState;
@@ -41,33 +39,23 @@ import javax.annotation.Nonnull;
  * @author amy
  * @since 9/21/18.
  */
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
+@Getter
+@Setter
 @Builder
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class VoiceStateImpl implements VoiceState, RequiresCatnip {
-    @JsonIgnore
     private transient Catnip catnip;
     
-    @JsonProperty
     private long guildIdAsLong;
-    @JsonProperty
     private long channelIdAsLong;
-    @JsonProperty
     private long userIdAsLong;
-    @JsonProperty
     private String sessionId;
-    @JsonProperty
     private boolean deaf;
-    @JsonProperty
     private boolean mute;
-    @JsonProperty
     private boolean selfDeaf;
-    @JsonProperty
     private boolean selfMute;
-    @JsonProperty
     private boolean suppress;
     
     public void catnip(@Nonnull final Catnip catnip) {

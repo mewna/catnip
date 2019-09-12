@@ -27,9 +27,7 @@
 
 package com.mewna.catnip.entity.guild;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.impl.guild.GuildEmbedImpl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -41,7 +39,6 @@ import javax.annotation.Nullable;
  * @since 10/18/2018
  */
 @SuppressWarnings("unused")
-@JsonDeserialize(as = GuildEmbedImpl.class)
 public interface GuildEmbed extends RequiresCatnip {
     /**
      * @return Whether the embed is enabled.

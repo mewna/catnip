@@ -27,14 +27,11 @@
 
 package com.mewna.catnip.entity.guild;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.cache.view.NamedCacheView;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.*;
-import com.mewna.catnip.entity.impl.guild.GuildImpl;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.User;
@@ -69,7 +66,6 @@ import java.util.Set;
  * @since 9/6/18
  */
 @SuppressWarnings("unused")
-@JsonDeserialize(as = GuildImpl.class)
 public interface Guild extends Snowflake {
     
     int NICKNAME_MAX_LENGTH = 32;
@@ -719,7 +715,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the roles are fetched.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default Observable<Role> fetchRoles() {
         return catnip().rest().guild().getGuildRoles(id());
@@ -731,7 +726,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the channels are fetched.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default Observable<GuildChannel> fetchChannels() {
         return catnip().rest().guild().getGuildChannels(id());
@@ -743,7 +737,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the invites are fetched.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default Observable<CreatedInvite> fetchInvites() {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_GUILD);
@@ -756,7 +749,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the webhooks are fetched.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default Observable<Webhook> fetchWebhooks() {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_WEBHOOKS);
@@ -769,7 +761,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the emojis are fetched.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default Observable<CustomEmoji> fetchEmojis() {
         return catnip().rest().emoji().listGuildEmojis(id());
@@ -783,7 +774,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the emoji is fetched.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default Single<CustomEmoji> fetchEmoji(@Nonnull final String emojiId) {
         return catnip().rest().emoji().getGuildEmoji(id(), emojiId);
@@ -800,7 +790,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the emoji is created.
      */
     @Nonnull
-    @JsonIgnore
     default Single<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final byte[] image,
                                             @Nonnull final Collection<String> roles, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJI);
@@ -817,7 +806,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the emoji is created.
      */
     @Nonnull
-    @JsonIgnore
     default Single<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final byte[] image,
                                             @Nonnull final Collection<String> roles) {
         return createEmoji(name, image, roles, null);
@@ -834,7 +822,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the emoji is created.
      */
     @Nonnull
-    @JsonIgnore
     default Single<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final URI imageData,
                                             @Nonnull final Collection<String> roles, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJI);
@@ -851,7 +838,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the emoji is created.
      */
     @Nonnull
-    @JsonIgnore
     default Single<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final URI imageData,
                                             @Nonnull final Collection<String> roles) {
         return createEmoji(name, imageData, roles, null);
@@ -869,7 +855,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the emoji is modified.
      */
     @Nonnull
-    @JsonIgnore
     default Single<CustomEmoji> modifyEmoji(@Nonnull final String emojiId, @Nonnull final String name,
                                             @Nonnull final Collection<String> roles, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJI);
@@ -887,7 +872,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the emoji is modified.
      */
     @Nonnull
-    @JsonIgnore
     default Single<CustomEmoji> modifyEmoji(@Nonnull final String emojiId, @Nonnull final String name,
                                             @Nonnull final Collection<String> roles) {
         return modifyEmoji(emojiId, name, roles, null);
@@ -902,7 +886,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the emoji is deleted.
      */
     @Nonnull
-    @JsonIgnore
     default Completable deleteEmoji(@Nonnull final String emojiId, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJI);
         return catnip().rest().emoji().deleteGuildEmoji(id(), emojiId, reason);
@@ -916,7 +899,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the emoji is deleted.
      */
     @Nonnull
-    @JsonIgnore
     default Completable deleteEmoji(@Nonnull final String emojiId) {
         return deleteEmoji(emojiId, null);
     }
@@ -927,7 +909,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the guild is left.
      */
     @Nonnull
-    @JsonIgnore
     default Completable leave() {
         return catnip().rest().user().leaveGuild(id());
     }
@@ -938,7 +919,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the guild is deleted.
      */
     @Nonnull
-    @JsonIgnore
     default Completable delete() {
         return catnip().rest().guild().deleteGuild(id());
     }
@@ -949,7 +929,6 @@ public interface Guild extends Snowflake {
      *
      * @see com.mewna.catnip.Catnip#closeVoiceConnection(String)
      */
-    @JsonIgnore
     default void closeVoiceConnection() {
         catnip().closeVoiceConnection(id());
     }
@@ -960,7 +939,6 @@ public interface Guild extends Snowflake {
      * @return A guild editor that can complete the editing.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default GuildEditFields edit() {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_GUILD);
@@ -979,7 +957,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the member got banned
      */
     @Nonnull
-    @JsonIgnore
     default Completable ban(@Nonnull final String userId,
                             @Nullable final String reason,
                             @Nonnegative final int deleteMessageDays) {
@@ -1003,7 +980,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the member got banned
      */
     @Nonnull
-    @JsonIgnore
     default Completable ban(final long userId,
                             @Nullable final String reason,
                             @Nonnegative final int deleteMessageDays) {
@@ -1021,7 +997,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the member got banned
      */
     @Nonnull
-    @JsonIgnore
     default Completable ban(final long userId,
                             @Nonnegative final int deleteMessageDays) {
         return ban(userId, null, deleteMessageDays);
@@ -1039,7 +1014,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the member got banned
      */
     @Nonnull
-    @JsonIgnore
     default Completable ban(@Nonnull final Member member,
                             @Nullable final String reason,
                             @Nonnegative final int deleteMessageDays) {
@@ -1057,7 +1031,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the ban got removed
      */
     @Nonnull
-    @JsonIgnore
     default Completable unban(@Nonnull final String userId, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.BAN_MEMBERS);
         return catnip().rest().guild().removeGuildBan(id(), userId, reason);
@@ -1073,7 +1046,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the ban got removed
      */
     @Nonnull
-    @JsonIgnore
     default Completable unban(@Nonnull final String userId) {
         return unban(userId, null);
     }
@@ -1089,7 +1061,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the ban got removed
      */
     @Nonnull
-    @JsonIgnore
     default Completable unban(final long userId, @Nullable final String reason) {
         return unban(Long.toUnsignedString(userId), reason);
     }
@@ -1104,7 +1075,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the ban got removed
      */
     @Nonnull
-    @JsonIgnore
     default Completable unban(final long userId) {
         return unban(userId, null);
     }
@@ -1120,7 +1090,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the ban got removed
      */
     @Nonnull
-    @JsonIgnore
     default Completable unban(@Nonnull final User user, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.BAN_MEMBERS);
         return catnip().rest().guild().removeGuildBan(id(), user.id(), reason);
@@ -1136,7 +1105,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the ban got removed
      */
     @Nonnull
-    @JsonIgnore
     default Completable unban(@Nonnull final User user) {
         return unban(user, null);
     }
@@ -1152,7 +1120,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that is finished when the user got kicked
      */
     @Nonnull
-    @JsonIgnore
     default Completable kick(@Nonnull final String userId, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.KICK_MEMBERS);
         PermissionUtil.checkHierarchy(Objects.requireNonNull(catnip().cache().member(id(), userId)), this);
@@ -1169,7 +1136,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that is finished when the user got kicked
      */
     @Nonnull
-    @JsonIgnore
     default Completable kick(@Nonnull final String userId) {
         return kick(userId, null);
     }
@@ -1185,7 +1151,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that is finished when the user got kicked
      */
     @Nonnull
-    @JsonIgnore
     default Completable kick(final long userId, @Nullable final String reason) {
         return kick(Long.toUnsignedString(userId), reason);
     }
@@ -1200,7 +1165,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that is finished when the user got kicked
      */
     @Nonnull
-    @JsonIgnore
     default Completable kick(final long userId) {
         return kick(userId, null);
     }
@@ -1216,7 +1180,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that is finished when the user got kicked
      */
     @Nonnull
-    @JsonIgnore
     default Completable kick(final Member member, @Nullable final String reason) {
         return kick(member.id(), reason);
     }
@@ -1231,7 +1194,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that is finished when the user got kicked
      */
     @Nonnull
-    @JsonIgnore
     default Completable kick(final Member member) {
         return kick(member.id(), null);
     }
@@ -1248,7 +1210,6 @@ public interface Guild extends Snowflake {
      * @throws IllegalArgumentException If the nickname is longer than {@link Guild#NICKNAME_MAX_LENGTH}
      */
     @Nonnull
-    @JsonIgnore
     default Single<String> changeNickName(@Nonnull final String nickname, @Nullable final String reason) {
         if(nickname.length() > NICKNAME_MAX_LENGTH) {
             throw new IllegalArgumentException("Nickname must not be longer than" + NICKNAME_MAX_LENGTH);
@@ -1268,7 +1229,6 @@ public interface Guild extends Snowflake {
      * @throws IllegalArgumentException If the nickname is longer than {@link Guild#NICKNAME_MAX_LENGTH}
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default Single<String> changeNickName(@Nonnull final String nickname) {
         return changeNickName(nickname, null);
@@ -1286,7 +1246,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the role got added
      */
     @Nonnull
-    @JsonIgnore
     default Completable addRoleToMember(@Nonnull final Role role, @Nonnull final Member member, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_ROLES);
         PermissionUtil.checkHierarchy(role, this);
@@ -1304,7 +1263,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the role got added
      */
     @Nonnull
-    @JsonIgnore
     default Completable addRoleToMember(@Nonnull final Role role, @Nonnull final Member member) {
         return addRoleToMember(role, member, null);
     }
@@ -1321,7 +1279,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the role got removed
      */
     @Nonnull
-    @JsonIgnore
     default Completable removeRoleFromMember(@Nonnull final Role role, @Nonnull final Member member,
                                              @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_ROLES);
@@ -1340,7 +1297,6 @@ public interface Guild extends Snowflake {
      * @return A Observable that completes when the role got removed
      */
     @Nonnull
-    @JsonIgnore
     default Completable removeRoleFromMember(@Nonnull final Role role, @Nonnull final Member member) {
         return removeRoleFromMember(role, member, null);
     }

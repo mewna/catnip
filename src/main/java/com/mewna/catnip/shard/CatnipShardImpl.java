@@ -325,7 +325,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             socketOpen = false;
             closedByClient = false;
             catnip.dispatchManager().dispatchEvent(Raw.GATEWAY_WEBSOCKET_CLOSED,
-                    new GatewayClosedImpl(shardInfo, closeCode, reason, catnip));
+                    new GatewayClosedImpl(catnip, shardInfo, closeCode, reason));
         } catch(final Exception e) {
             catnip.logAdapter().error("Shard {}: Failure closing socket:", shardInfo, e);
             stateReply(ShardConnectState.FAILED);

@@ -27,9 +27,7 @@
 
 package com.mewna.catnip.entity.voice;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.impl.voice.VoiceRegionImpl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -40,7 +38,6 @@ import javax.annotation.Nonnull;
  * @author natanbc
  * @since 9/14/18
  */
-@JsonDeserialize(as = VoiceRegionImpl.class)
 public interface VoiceRegion extends Entity {
     /**
      * @return The id of the voice region.

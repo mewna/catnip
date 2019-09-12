@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.impl.guild;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.guild.PartialGuild;
@@ -47,14 +45,13 @@ import java.util.Set;
  * @author natanbc
  * @since 9/12/18
  */
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
+@Getter
+@Setter
 @Builder
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class PartialGuildImpl implements PartialGuild, RequiresCatnip {
-    @JsonIgnore
     private transient Catnip catnip;
     
     private long idAsLong;
@@ -82,7 +79,7 @@ public class PartialGuildImpl implements PartialGuild, RequiresCatnip {
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof PartialGuild && ((PartialGuild)obj).idAsLong() == idAsLong;
+        return obj instanceof PartialGuild && ((PartialGuild) obj).idAsLong() == idAsLong;
     }
     
     @Override

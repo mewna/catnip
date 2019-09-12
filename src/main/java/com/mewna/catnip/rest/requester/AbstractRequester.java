@@ -270,9 +270,8 @@ public abstract class AbstractRequester implements Requester {
                 );
             }
             catnip.dispatchManager().dispatchEvent(Raw.REST_RATELIMIT_HIT,
-                    new RestRatelimitHitImpl(route.baseRoute(),
-                            Boolean.parseBoolean(headers.firstValue("X-RateLimit-Global").orElse(null)),
-                            catnip));
+                    new RestRatelimitHitImpl(catnip, route.baseRoute(),
+                            Boolean.parseBoolean(headers.firstValue("X-RateLimit-Global").orElse(null))));
             
             String retry = headers.firstValue("Retry-After").orElse(null);
             if(retry == null || retry.isEmpty()) {

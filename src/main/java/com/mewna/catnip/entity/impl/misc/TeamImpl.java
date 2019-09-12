@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.impl.misc;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.misc.Team;
@@ -47,15 +45,14 @@ import java.util.List;
  * @author Bowser65
  * @since 06/24/19.
  */
-@Getter(onMethod_ = @JsonProperty)
-@Setter(onMethod_ = @JsonProperty)
+@Getter
+@Setter
 @Builder
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class TeamImpl implements Team, RequiresCatnip {
-    @JsonIgnore
     private transient Catnip catnip;
     
     private long idAsLong;
