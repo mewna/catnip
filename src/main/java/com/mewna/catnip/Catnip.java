@@ -670,11 +670,29 @@ public interface Catnip {
         presence(null, game, type, url);
     }
     
-    private <T> MessageConsumer<T> on(@Nonnull final EventType<T> type) {
+    /**
+     * Add a consumer for the specified event type.
+     *
+     * @param type The type of event to listen on.
+     * @param <T>  The object type of event being listened on.
+     *
+     * @return The message consumer.
+     */
+    default <T> MessageConsumer<T> on(@Nonnull final EventType<T> type) {
         return dispatchManager().createConsumer(type.key());
     }
     
-    private <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler) {
+    /**
+     * Add a consumer for the specified event type with the given handler
+     * callback.
+     *
+     * @param type    The type of event to listen on.
+     * @param handler The handler for the event object.
+     * @param <T>     The object type of event being listened on.
+     *
+     * @return The message consumer.
+     */
+    default <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler) {
         return on(type).handler(handler);
     }
     
@@ -712,11 +730,32 @@ public interface Catnip {
         return on(type).asFlowable().subscribeOn(rxScheduler()).observeOn(rxScheduler());
     }
     
-    private <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type) {
+    /**
+     * Add a consumer for the specified event type with the given handler
+     * callback.
+     *
+     * @param type The type of event to listen on.
+     * @param <T>  The first object type of event being listened on.
+     * @param <E>  The second object type of event being listened on.
+     *
+     * @return The message consumer.
+     */
+    default <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type) {
         return dispatchManager().createConsumer(type.key());
     }
     
-    private <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
+    /**
+     * Add a consumer for the specified event type with the given handler
+     * callback.
+     *
+     * @param type    The type of event to listen on.
+     * @param handler The handler for the event object.
+     * @param <T>     The first object type of event being listened on.
+     * @param <E>     The second object type of event being listened on.
+     *
+     * @return The message consumer.
+     */
+    default <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
                                                   @Nonnull final BiConsumer<T, E> handler) {
         return on(type).handler(m -> handler.accept(m.getLeft(), m.getRight()));
     }

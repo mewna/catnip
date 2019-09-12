@@ -34,7 +34,6 @@ import com.mewna.catnip.shard.event.EventType;
 import com.mewna.catnip.shard.event.MessageConsumer;
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
-import io.reactivex.Scheduler;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -61,10 +60,10 @@ public abstract class AbstractExtension implements Extension {
     private final String name;
     private final Collection<CatnipHook> hooks = ConcurrentHashMap.newKeySet();
     @Getter
+    private final Set<MessageConsumer<?>> listeners = new CopyOnWriteArraySet<>();
+    @Getter
     @Setter
     private Catnip catnip;
-    @Getter
-    private final Set<MessageConsumer<?>> listeners = new CopyOnWriteArraySet<>();
     
     @Override
     public Extension registerHook(@Nonnull final CatnipHook hook) {
@@ -83,96 +82,46 @@ public abstract class AbstractExtension implements Extension {
         return Set.copyOf(hooks);
     }
     
-    private <T> MessageConsumer<T> on(@Nonnull final EventType<T> type) {
+    @Override
+    public <T> MessageConsumer<T> on(@Nonnull final EventType<T> type) {
         final MessageConsumer<T> consumer = catnip().dispatchManager().createConsumer(type.key());
         listeners.add(consumer);
         return consumer;
     }
     
-    private <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler) {
+    @Override
+    public <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler) {
         return on(type).handler(handler);
     }
     
-    /**
-     * Add a reactive stream handler for events of the given type. Can be
-     * disposed of with {@link Observable#unsubscribeOn(Scheduler)}. The
-     * {@code scheduler} argument can be created with
-     * {@link Catnip#rxScheduler()}.
-     * <p>
-     * This method automatically subscribes on {@link Catnip#rxScheduler()}.
-     *
-     * @param type The type of event to stream.
-     * @param <T>  The object type of the event being streamed.
-     *
-     * @return The observable.
-     */
     @Override
     public <T> Observable<T> observable(@Nonnull final EventType<T> type) {
         return on(type).asObservable().subscribeOn(catnip().rxScheduler()).observeOn(catnip().rxScheduler());
     }
     
-    /**
-     * Add a reactive stream handler for events of the given type.  Can be
-     * disposed of with {@link Flowable#unsubscribeOn(Scheduler)}. The
-     * {@code scheduler} argument can be created with
-     * {@link Catnip#rxScheduler()}.
-     * <p>
-     * This method automatically subscribes on {@link Catnip#rxScheduler()}.
-     *
-     * @param type The type of event to stream.
-     * @param <T>  The object type of the event being streamed.
-     *
-     * @return The flowable.
-     */
     @Override
     public <T> Flowable<T> flowable(@Nonnull final EventType<T> type) {
         return on(type).asFlowable().subscribeOn(catnip().rxScheduler()).observeOn(catnip().rxScheduler());
     }
     
-    private <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type) {
+    @Override
+    public <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type) {
         final MessageConsumer<Pair<T, E>> consumer = catnip().dispatchManager().createConsumer(type.key());
         listeners.add(consumer);
         return consumer;
     }
     
-    private <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
-                                                  @Nonnull final BiConsumer<T, E> handler) {
+    @Override
+    public <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
+                                                 @Nonnull final BiConsumer<T, E> handler) {
         return on(type).handler(m -> handler.accept(m.getLeft(), m.getRight()));
     }
     
-    /**
-     * Add a reactive stream handler for events of the given type. Can be
-     * disposed of with {@link Observable#unsubscribeOn(Scheduler)}. The
-     * {@code scheduler} argument can be created with
-     * {@link Catnip#rxScheduler()}.
-     * <p>
-     * This method automatically subscribes on {@link Catnip#rxScheduler()}.
-     *
-     * @param type The type of event to stream.
-     * @param <T>  The object type of the event being streamed.
-     * @param <E>  The object type of the event being streamed.
-     *
-     * @return The observable.
-     */
     @Override
     public <T, E> Observable<Pair<T, E>> observable(@Nonnull final DoubleEventType<T, E> type) {
         return on(type).asObservable().subscribeOn(catnip().rxScheduler()).observeOn(catnip().rxScheduler());
     }
     
-    /**
-     * Add a reactive stream handler for events of the given type. Can be
-     * disposed of with {@link Flowable#unsubscribeOn(Scheduler)}. The
-     * {@code scheduler} argument can be created with
-     * {@link Catnip#rxScheduler()}.
-     * <p>
-     * This method automatically subscribes on {@link Catnip#rxScheduler()}.
-     *
-     * @param type The type of event to stream.
-     * @param <T>  The object type of the event being streamed.
-     * @param <E>  The object type of the event being streamed.
-     *
-     * @return The flowable.
-     */
     @Override
     public <T, E> Flowable<Pair<T, E>> flowable(@Nonnull final DoubleEventType<T, E> type) {
         return on(type).asFlowable().subscribeOn(catnip().rxScheduler()).observeOn(catnip().rxScheduler());

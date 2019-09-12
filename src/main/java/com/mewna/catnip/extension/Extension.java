@@ -42,6 +42,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -168,6 +170,28 @@ public interface Extension {
     }
     
     /**
+     * Add a consumer for the specified event type.
+     *
+     * @param type The type of event to listen on.
+     * @param <T>  The object type of event being listened on.
+     *
+     * @return The message consumer.
+     */
+    <T> MessageConsumer<T> on(@Nonnull final EventType<T> type);
+    
+    /**
+     * Add a consumer for the specified event type with the given handler
+     * callback.
+     *
+     * @param type    The type of event to listen on.
+     * @param handler The handler for the event object.
+     * @param <T>     The object type of event being listened on.
+     *
+     * @return The message consumer.
+     */
+    <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler);
+    
+    /**
      * Add a reactive stream handler for events of the given type. Can be
      * disposed of with {@link Observable#unsubscribeOn(Scheduler)}. The
      * {@code scheduler} argument can be created with
@@ -196,6 +220,32 @@ public interface Extension {
      * @return The flowable.
      */
     <T> Flowable<T> flowable(@Nonnull final EventType<T> type);
+    
+    /**
+     * Add a consumer for the specified event type with the given handler
+     * callback.
+     *
+     * @param type The type of event to listen on.
+     * @param <T>  The first object type of event being listened on.
+     * @param <E>  The second object type of event being listened on.
+     *
+     * @return The message consumer.
+     */
+    <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type);
+    
+    /**
+     * Add a consumer for the specified event type with the given handler
+     * callback.
+     *
+     * @param type    The type of event to listen on.
+     * @param handler The handler for the event object.
+     * @param <T>     The first object type of event being listened on.
+     * @param <E>     The second object type of event being listened on.
+     *
+     * @return The message consumer.
+     */
+    <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
+                                                  @Nonnull final BiConsumer<T, E> handler);
     
     /**
      * Add a reactive stream handler for events of the given type. Can be
