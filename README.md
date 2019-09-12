@@ -62,9 +62,9 @@ catnip.observable(DiscordEvent.MESSAGE_CREATE)
 catnip.connect();
 ```
 
-catnip returns `CompletionStage`s from all REST methods. For example,
-editing your ping message to include time it took to create the
-message:
+catnip returns RxJava operators (`Completable`/`Observable`/`Single`/...) from
+all REST methods. For example, editing your ping message to include time it
+took to create the message:
 
 ```Java
 final Catnip catnip = Catnip.catnip("your token goes here");
