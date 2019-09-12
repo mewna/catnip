@@ -196,7 +196,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     private void handleSocketData(JsonObject payload) {
         for(final Extension extension : catnip.extensionManager().extensions()) {
             for(final CatnipHook hook : extension.hooks()) {
-                payload = hook.rawGatewayReceiveHook(payload);
+                payload = hook.rawGatewayReceiveHook(shardInfo, payload);
             }
         }
         
@@ -232,7 +232,6 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         }
     }
     
-    // Unsure if we need special impl.
     @Override
     public void onOpen(final WebSocket webSocket) {
         for(final Extension extension : catnip.extensionManager().extensions()) {
@@ -293,7 +292,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         socket.request(1L);
         return null;
     }
-
+    
     @Override
     public void onError(final WebSocket webSocket, final Throwable error) {
         socket = null;
@@ -421,7 +420,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         if(socket != null && socketOpen) {
             for(final Extension extension : catnip.extensionManager().extensions()) {
                 for(final CatnipHook hook : extension.hooks()) {
-                    payload = hook.rawGatewaySendHook(payload);
+                    payload = hook.rawGatewaySendHook(shardInfo, payload);
                 }
             }
             socket.sendText(JsonWriter.string(payload), true);
@@ -555,7 +554,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             if(catnip.logLifecycleEvents()) {
                 catnip.logAdapter().info("Session invalidated (OP 9), clearing shard data and reconnecting");
             }
-    
+            
             catnip.cacheWorker().invalidateShard(shardInfo.getId());
             catnip.sessionManager().clearSession(shardInfo.getId());
             catnip.sessionManager().clearSeqnum(shardInfo.getId());

@@ -63,7 +63,7 @@ public interface CatnipHook {
      *
      * @return A possibly-edited gateway-sent JSON payload.
      */
-    default JsonObject rawGatewayReceiveHook(@Nonnull final JsonObject json) {
+    default JsonObject rawGatewayReceiveHook(@Nonnull final ShardInfo shardInfo, @Nonnull final JsonObject json) {
         return json;
     }
     
@@ -75,7 +75,7 @@ public interface CatnipHook {
      *
      * @return A possibly-edited gateway-sent JSON payload.
      */
-    default JsonObject rawGatewaySendHook(@Nonnull final JsonObject json) {
+    default JsonObject rawGatewaySendHook(@Nonnull final ShardInfo shardInfo, @Nonnull final JsonObject json) {
         return json;
     }
     

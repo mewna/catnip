@@ -55,7 +55,7 @@ import java.util.function.UnaryOperator;
  * @author amy
  * @since 9/6/18
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "UnusedReturnValue"})
 public interface Extension {
     /**
      * The name of this extension. Note that an extension's name is
