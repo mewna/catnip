@@ -263,6 +263,7 @@ public class CatnipImpl implements Catnip {
         logAdapter.info("Shutting down!");
         dispatchManager.close();
         shardManager.shutdown();
+        extensionManager.shutdown();
         // Will let the keepalive thread halt
         latch.countDown();
     }

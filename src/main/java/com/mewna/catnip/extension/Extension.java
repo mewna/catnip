@@ -31,7 +31,14 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.extension.manager.ExtensionManager;
+import com.mewna.catnip.shard.event.DoubleEventType;
+import com.mewna.catnip.shard.event.EventType;
+import com.mewna.catnip.shard.event.MessageConsumer;
 import io.reactivex.Completable;
+import io.reactivex.Flowable;
+import io.reactivex.Observable;
+import io.reactivex.Scheduler;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
@@ -105,6 +112,12 @@ public interface Extension {
     Set<CatnipHook> hooks();
     
     /**
+     * @return All listeners registered by this extension instance. Used for
+     * things like automatic unregistration of listeners on shutdown.
+     */
+    Set<MessageConsumer<?>> listeners();
+    
+    /**
      * Unregister a hook from catnip.
      *
      * @param hook The hook to unregister.
@@ -153,4 +166,66 @@ public interface Extension {
     default Completable onUnloaded() {
         return null;
     }
+    
+    /**
+     * Add a reactive stream handler for events of the given type. Can be
+     * disposed of with {@link Observable#unsubscribeOn(Scheduler)}. The
+     * {@code scheduler} argument can be created with
+     * {@link Catnip#rxScheduler()}.
+     * <p>
+     * This method automatically subscribes on {@link Catnip#rxScheduler()}.
+     *
+     * @param type The type of event to stream.
+     * @param <T>  The object type of the event being streamed.
+     *
+     * @return The observable.
+     */
+    <T> Observable<T> observable(@Nonnull final EventType<T> type);
+    
+    /**
+     * Add a reactive stream handler for events of the given type.  Can be
+     * disposed of with {@link Flowable#unsubscribeOn(Scheduler)}. The
+     * {@code scheduler} argument can be created with
+     * {@link Catnip#rxScheduler()}.
+     * <p>
+     * This method automatically subscribes on {@link Catnip#rxScheduler()}.
+     *
+     * @param type The type of event to stream.
+     * @param <T>  The object type of the event being streamed.
+     *
+     * @return The flowable.
+     */
+    <T> Flowable<T> flowable(@Nonnull final EventType<T> type);
+    
+    /**
+     * Add a reactive stream handler for events of the given type. Can be
+     * disposed of with {@link Observable#unsubscribeOn(Scheduler)}. The
+     * {@code scheduler} argument can be created with
+     * {@link Catnip#rxScheduler()}.
+     * <p>
+     * This method automatically subscribes on {@link Catnip#rxScheduler()}.
+     *
+     * @param type The type of event to stream.
+     * @param <T>  The object type of the event being streamed.
+     * @param <E>  The object type of the event being streamed.
+     *
+     * @return The observable.
+     */
+    <T, E> Observable<Pair<T, E>> observable(@Nonnull final DoubleEventType<T, E> type);
+    
+    /**
+     * Add a reactive stream handler for events of the given type. Can be
+     * disposed of with {@link Flowable#unsubscribeOn(Scheduler)}. The
+     * {@code scheduler} argument can be created with
+     * {@link Catnip#rxScheduler()}.
+     * <p>
+     * This method automatically subscribes on {@link Catnip#rxScheduler()}.
+     *
+     * @param type The type of event to stream.
+     * @param <T>  The object type of the event being streamed.
+     * @param <E>  The object type of the event being streamed.
+     *
+     * @return The flowable.
+     */
+    <T, E> Flowable<Pair<T, E>> flowable(@Nonnull final DoubleEventType<T, E> type);
 }

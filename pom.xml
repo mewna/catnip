@@ -105,15 +105,6 @@
         </dependency>
 
         <!-- Collections -->
-        <!-- lombok is retarded and doesn't work if this annotation processor is present
-             on j11
-        <dependency>
-            <groupId>com.koloboke</groupId>
-            <artifactId>koloboke-compile</artifactId>
-            <version>${koloboke-compile.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        -->
         <dependency>
             <groupId>com.koloboke</groupId>
             <artifactId>koloboke-impl-common-jdk8</artifactId>

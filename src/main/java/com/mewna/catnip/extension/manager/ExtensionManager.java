@@ -118,5 +118,10 @@ public interface ExtensionManager {
     @Nonnull
     Set<Extension> extensions();
     
+    /**
+     * Shuts down the extension manager and unloads all extensions.
+     */
+    void shutdown();
+    
     Catnip catnip();
 }

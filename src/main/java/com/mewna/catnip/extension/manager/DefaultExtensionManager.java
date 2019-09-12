@@ -29,6 +29,7 @@ package com.mewna.catnip.extension.manager;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.extension.Extension;
+import com.mewna.catnip.shard.event.MessageConsumer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
@@ -80,7 +81,8 @@ public class DefaultExtensionManager implements ExtensionManager {
         if(loadedExtensions.contains(extension)) {
             loadedExtensions.remove(extension);
             try {
-                final var completable = extension.onLoaded();
+                extension.listeners().forEach(MessageConsumer::close);
+                final var completable = extension.onUnloaded();
                 if(completable != null) {
                     final var result = completable.blockingGet();
                     if(result != null) {
@@ -117,5 +119,10 @@ public class DefaultExtensionManager implements ExtensionManager {
     @Override
     public Set<Extension> extensions() {
         return Set.copyOf(loadedExtensions);
+    }
+    
+    @Override
+    public void shutdown() {
+        loadedExtensions.forEach(this::unloadExtension);
     }
 }

@@ -718,31 +718,10 @@ public interface Catnip {
         return on(type).asFlowable().subscribeOn(rxScheduler()).observeOn(rxScheduler());
     }
     
-    /**
-     * Add a consumer for the specified event type with the given handler
-     * callback.
-     *
-     * @param type The type of event to listen on.
-     * @param <T>  The first object type of event being listened on.
-     * @param <E>  The second object type of event being listened on.
-     *
-     * @return The message consumer.
-     */
     private <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type) {
         return dispatchManager().createConsumer(type.key());
     }
     
-    /**
-     * Add a consumer for the specified event type with the given handler
-     * callback.
-     *
-     * @param type    The type of event to listen on.
-     * @param handler The handler for the event object.
-     * @param <T>     The first object type of event being listened on.
-     * @param <E>     The second object type of event being listened on.
-     *
-     * @return The message consumer.
-     */
     private <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
                                                   @Nonnull final BiConsumer<T, E> handler) {
         return on(type).handler(m -> handler.accept(m.getLeft(), m.getRight()));
