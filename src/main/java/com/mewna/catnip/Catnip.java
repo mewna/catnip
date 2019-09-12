@@ -27,11 +27,9 @@
 
 package com.mewna.catnip;
 
-import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCache;
 import com.mewna.catnip.cache.EntityCacheWorker;
-import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.lifecycle.HighWebsocketLatency;
 import com.mewna.catnip.entity.lifecycle.MemberChunkRerequest;
@@ -72,7 +70,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  * @author amy
@@ -381,7 +379,7 @@ public interface Catnip {
      */
     @Nonnull
     @SuppressWarnings("UnusedReturnValue")
-    Catnip injectOptions(@Nonnull Extension extension, @Nonnull Function<CatnipOptions, CatnipOptions> optionsPatcher);
+    Catnip injectOptions(@Nonnull Extension extension, @Nonnull UnaryOperator<CatnipOptions> optionsPatcher);
     
     /**
      * @return The currently-logged-in user. May be {@code null} if no shards

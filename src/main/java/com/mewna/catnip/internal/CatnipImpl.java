@@ -75,6 +75,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  * @author amy
@@ -191,7 +192,7 @@ public class CatnipImpl implements Catnip {
     
     @Nonnull
     @Override
-    public Catnip injectOptions(@Nonnull final Extension extension, @Nonnull final Function<CatnipOptions, CatnipOptions> optionsPatcher) {
+    public Catnip injectOptions(@Nonnull final Extension extension, @Nonnull final UnaryOperator<CatnipOptions> optionsPatcher) {
         if(!extensionManager.matchingExtensions(extension.getClass()).isEmpty()) {
             final CatnipOptions patchedOptions = optionsPatcher.apply((CatnipOptions) options.clone());
             final Map<String, Pair<Object, Object>> diff = diff(patchedOptions);
