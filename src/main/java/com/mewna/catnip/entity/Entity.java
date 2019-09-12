@@ -30,9 +30,11 @@ package com.mewna.catnip.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.serialization.EntitySerializer;
 import com.mewna.catnip.util.CatnipMeta;
 import com.mewna.catnip.util.JsonUtil;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
 /**
@@ -55,6 +57,7 @@ public interface Entity {
      */
     @Nonnull
     @JsonIgnore
+    @Deprecated
     @SuppressWarnings("ClassReferencesSubclass")
     static <T> T fromJson(@Nonnull final Catnip catnip, @Nonnull final Class<T> type, @Nonnull final JsonObject json) {
         final String v = json.getString("v");
@@ -89,6 +92,7 @@ public interface Entity {
      */
     @Nonnull
     @JsonIgnore
+    @Deprecated
     default JsonObject toJson() {
         return JsonUtil.stringifySnowflakes(
                 JsonObject.builder()
@@ -96,5 +100,22 @@ public interface Entity {
                         .value("v", CatnipMeta.VERSION)
                         .done()
         );
+    }
+    
+    @Nonnull
+    @JsonIgnore
+    @CheckReturnValue
+    @SuppressWarnings("unchecked")
+    default <T> T serialize() {
+        return (T) catnip().entitySerializer().serialize(this);
+    }
+    
+    @Nonnull
+    @JsonIgnore
+    @CheckReturnValue
+    @SuppressWarnings("unchecked")
+    static <T, E extends Entity> E deserialize(@Nonnull final Catnip catnip, @Nonnull final Class<E> type,
+                                               @Nonnull final T data) {
+        return ((EntitySerializer<T>) catnip.entitySerializer()).deserialize(data, type);
     }
 }

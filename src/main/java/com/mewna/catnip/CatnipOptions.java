@@ -35,6 +35,8 @@ import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.lifecycle.HighWebsocketLatency;
 import com.mewna.catnip.entity.lifecycle.MemberChunkRerequest;
+import com.mewna.catnip.entity.serialization.DefaultEntitySerializer;
+import com.mewna.catnip.entity.serialization.EntitySerializer;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.rest.ratelimit.DefaultRateLimiter;
@@ -292,6 +294,13 @@ public final class CatnipOptions implements Cloneable {
      * <strong>This value is specified in nanoseconds.</strong>
      */
     private long highLatencyThreshold = TimeUnit.SECONDS.toNanos(10);
+    /**
+     * The entity serializer that catnip uses for de/serializing entities for
+     * external usage. The value of this option will not affect how catnip
+     * behaves internally, but rather will affect user-controlled serialization
+     * for interfacing with the outside world.
+     */
+    private EntitySerializer<?> serializer = new DefaultEntitySerializer();
     
     @Override
     public Object clone() {

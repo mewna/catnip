@@ -36,6 +36,7 @@ import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.lifecycle.HighWebsocketLatency;
 import com.mewna.catnip.entity.lifecycle.MemberChunkRerequest;
 import com.mewna.catnip.entity.misc.GatewayInfo;
+import com.mewna.catnip.entity.serialization.EntitySerializer;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.ActivityType;
 import com.mewna.catnip.entity.user.Presence.OnlineStatus;
@@ -457,6 +458,12 @@ public interface Catnip {
      * before catnip emits a {@link HighWebsocketLatency} event.
      */
     long highLatencyThreshold();
+    
+    /**
+     * @return The entity serializer that catnip uses for converting entities
+     * into an external-friendly format.
+     */
+    EntitySerializer<?> entitySerializer();
     
     /**
      * Opens a voice connection to the provided guild and channel. The connection is
