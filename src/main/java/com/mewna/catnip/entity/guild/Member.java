@@ -118,6 +118,12 @@ public interface Member extends Mentionable, PermissionHolder {
     @Nonnull
     @CheckReturnValue
     default List<Role> orderedRoles() {
+        return orderedRoles(Comparator.naturalOrder());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    default List<Role> orderedRoles(final Comparator<Role> comparator) {
         final CacheView<Role> roles = catnip().cache().roles(guildId());
         final List<Role> ordered = new ArrayList<>(roleIds().size());
         for(final String id : roleIds()) {
@@ -126,7 +132,7 @@ public interface Member extends Mentionable, PermissionHolder {
                 ordered.add(role);
             }
         }
-        Collections.sort(ordered);
+        ordered.sort(comparator);
         return ordered;
     }
     
