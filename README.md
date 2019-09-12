@@ -119,6 +119,8 @@ where `JsonPojoCodec` is `com.mewna.catnip.util.JsonPojoCodec` and is safe to us
   https://github.com/natanbc/catnip-voice
 - `catnip-utilities` - Some extensions for typesafe commands, event waiters, reaction menus, 
   and more. https://github.com/queer/catnip-utilities 
+- `discordbotlist-stats-catnip` - Wrapper aiming at combining all Discord Bot Lists AND Wrappers into one artifact.
+  Automatically handles pushing bot stats to bot lists. https://github.com/burdoto/discordbotlist-stats#usage-example-catnip
 
 ## Why write a fourth Java lib?
 
