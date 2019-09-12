@@ -44,7 +44,6 @@ import javax.annotation.Nonnull;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 /**
@@ -238,7 +237,7 @@ public interface Extension {
      * @return The message consumer.
      */
     <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
-                                                  @Nonnull final BiConsumer<T, E> handler);
+                                          @Nonnull final BiConsumer<T, E> handler);
     
     /**
      * Add a reactive stream handler for events of the given type. Can be
