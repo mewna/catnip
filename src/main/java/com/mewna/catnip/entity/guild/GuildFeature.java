@@ -37,6 +37,7 @@ public enum GuildFeature {
     VANITY_URL,
     VERIFIED,
     PARTNERED,
+    @Deprecated
     LURKABLE,
     COMMERCE,
     NEWS,
@@ -44,4 +45,8 @@ public enum GuildFeature {
     FEATURABLE,
     ANIMATED_ICON,
     BANNER,
+    /**
+     * Replaces {@link #LURKABLE}. See https://github.com/discordapp/discord-api-docs/issues/1117#issuecomment-533757618
+     */
+    PUBLIC,
 }
