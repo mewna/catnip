@@ -82,7 +82,7 @@ public class RestWebhook extends RestHandler {
     @CheckReturnValue
     public Observable<JsonObject> getWebhookTokenRaw(@Nonnull final String webhookId, @Nonnull final String token) {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_WEBHOOK_TOKEN.withMajorParam(webhookId),
-                Map.of("webhook", token)))
+                Map.of("token", token)))
                 .map(ResponsePayload::object);
     }
     
