@@ -86,8 +86,6 @@ import static com.mewna.catnip.util.JsonUtil.*;
  */
 @SuppressWarnings({"WeakerAccess", "unused", "OverlyCoupledClass"})
 public final class EntityBuilder {
-    private static final JsonArray EMPTY_JSON_ARRAY = new JsonArray();
-    
     private final Catnip catnip;
     
     public EntityBuilder(final Catnip catnip) {
