@@ -49,4 +49,8 @@ public enum GuildFeature {
      * Replaces {@link #LURKABLE}. See https://github.com/discordapp/discord-api-docs/issues/1117#issuecomment-533757618
      */
     PUBLIC,
+    /**
+     * See https://github.com/mewna/catnip/issues/392
+     */
+    MEMBER_LIST_DISABLED,
 }
