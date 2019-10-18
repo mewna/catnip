@@ -63,10 +63,10 @@ public final class DispatchEmitter {
     }
     
     public void emit(@Nonnull final String type, @Nonnull final Entity payload) {
-        if(!catnip.emitEventObjects()) {
+        if(!catnip.options().emitEventObjects()) {
             return;
         }
-        if(catnip.disabledEvents().contains(type)) {
+        if(catnip.options().disabledEvents().contains(type)) {
             return;
         }
         try {
@@ -77,11 +77,11 @@ public final class DispatchEmitter {
     }
     
     public void emit(@Nonnull final JsonObject payload) {
-        if(!catnip.emitEventObjects()) {
+        if(!catnip.options().emitEventObjects()) {
             return;
         }
         final String type = payload.getString("t");
-        if(catnip.disabledEvents().contains(type)) {
+        if(catnip.options().disabledEvents().contains(type)) {
             return;
         }
         try {

@@ -115,7 +115,7 @@ public final class PermissionUtil {
     
     public static void checkPermissions(@Nonnull final Catnip catnip, @Nullable final String guildId,
                                         @Nonnull final Permission... permissions) {
-        if(!catnip.enforcePermissions() || guildId == null) {
+        if(!catnip.options().enforcePermissions() || guildId == null) {
             return;
         }
         final User me = catnip.selfUser();
@@ -136,7 +136,7 @@ public final class PermissionUtil {
     
     public static void checkPermissions(@Nonnull final Catnip catnip, @Nullable final String guildId,
                                         @Nullable final String channelId, @Nonnull final Permission... permissions) {
-        if(!catnip.enforcePermissions() || guildId == null || channelId == null) {
+        if(!catnip.options().enforcePermissions() || guildId == null || channelId == null) {
             return;
         }
         final User me = catnip.selfUser();

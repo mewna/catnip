@@ -30,12 +30,9 @@ package com.mewna.catnip.internal;
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
-import com.mewna.catnip.cache.CacheFlag;
-import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.entity.impl.user.PresenceImpl;
 import com.mewna.catnip.entity.impl.user.PresenceImpl.ActivityImpl;
 import com.mewna.catnip.entity.misc.GatewayInfo;
-import com.mewna.catnip.entity.serialization.EntitySerializer;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.Activity;
 import com.mewna.catnip.entity.user.Presence.ActivityType;
@@ -48,17 +45,8 @@ import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.requester.Requester;
 import com.mewna.catnip.shard.CatnipShardImpl;
-import com.mewna.catnip.shard.CompressionMode;
 import com.mewna.catnip.shard.GatewayOp;
-import com.mewna.catnip.shard.buffer.EventBuffer;
-import com.mewna.catnip.shard.event.DispatchManager;
-import com.mewna.catnip.shard.manager.ShardManager;
-import com.mewna.catnip.shard.ratelimit.Ratelimiter;
-import com.mewna.catnip.shard.session.SessionManager;
 import com.mewna.catnip.util.PermissionUtil;
-import com.mewna.catnip.util.logging.LogAdapter;
-import com.mewna.catnip.util.scheduler.TaskScheduler;
-import io.reactivex.Scheduler;
 import io.reactivex.Single;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -69,7 +57,6 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
-import java.net.http.HttpClient;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -81,59 +68,29 @@ import java.util.function.UnaryOperator;
  * @since 8/31/18.
  */
 @Getter
-@SuppressWarnings("OverlyCoupledClass")
 @Accessors(fluent = true, chain = true)
 public class CatnipImpl implements Catnip {
+    private static final List<String> UNPATCHABLE_OPTIONS = List.of("token", "logExtensionOverrides", "validateToken");
     private final String token;
     private final boolean logExtensionOverrides;
     private final boolean validateToken;
-    
     private final Rest rest = new Rest(this);
     private final ExtensionManager extensionManager = new DefaultExtensionManager(this);
     private final Set<String> unavailableGuilds = ConcurrentHashMap.newKeySet();
     private final AtomicReference<GatewayInfo> gatewayInfo = new AtomicReference<>(null);
-    
     private final Thread keepaliveThread;
     private final CountDownLatch latch = new CountDownLatch(1);
-    
     private boolean startedKeepalive;
     private long clientIdAsLong;
-    
-    private DispatchManager dispatchManager;
-    private Requester requester;
-    private ShardManager shardManager;
-    private SessionManager sessionManager;
-    private Ratelimiter gatewayRatelimiter;
-    private LogAdapter logAdapter;
-    private EventBuffer eventBuffer;
-    private EntityCacheWorker cache;
-    private Set<CacheFlag> cacheFlags;
-    private boolean chunkMembers;
-    private boolean emitEventObjects;
-    private boolean enforcePermissions;
-    private boolean captureRestStacktraces;
-    private boolean logUncachedPresenceWhenNotChunking;
-    private long memberChunkTimeout;
-    private Presence initialPresence;
-    private Set<String> disabledEvents;
-    private Scheduler rxScheduler;
-    private boolean logLifecycleEvents;
-    private boolean manualChunkRerequesting;
-    private int largeThreshold;
-    private TaskScheduler taskScheduler;
-    private HttpClient httpClient;
-    private CompressionMode compressionMode;
-    private boolean restRatelimitsWithoutClockSync;
-    private long highLatencyThreshold;
-    private EntitySerializer<?> entitySerializer;
-    
     private CatnipOptions options;
     
     public CatnipImpl(@Nonnull final CatnipOptions options) {
-        applyOptions(options);
+        this.options = options;
+        
         token = options.token();
         logExtensionOverrides = options.logExtensionOverrides();
         validateToken = options.validateToken();
+        
         keepaliveThread = new Thread(() -> {
             try {
                 latch.await();
@@ -145,48 +102,13 @@ public class CatnipImpl implements Catnip {
         keepaliveThread.setName("catnip keepalive thread");
     }
     
-    private void applyOptions(@Nonnull final CatnipOptions options) {
-        // TODO: Should probably make this behave like #diff
-        //  so that we don't need to update this every single time that the
-        //  options change.
-        this.options = options;
-        dispatchManager = options.dispatchManager();
-        requester = options.requester();
-        shardManager = options.shardManager();
-        sessionManager = options.sessionManager();
-        gatewayRatelimiter = options.gatewayRatelimiter();
-        logAdapter = options.logAdapter();
-        eventBuffer = options.eventBuffer();
-        cache = options.cacheWorker();
-        cacheFlags = options.cacheFlags();
-        chunkMembers = options.chunkMembers();
-        emitEventObjects = options.emitEventObjects();
-        enforcePermissions = options.enforcePermissions();
-        captureRestStacktraces = options.captureRestStacktraces();
-        initialPresence = options.presence();
-        memberChunkTimeout = options.memberChunkTimeout();
-        disabledEvents = Set.copyOf(options.disabledEvents());
-        logUncachedPresenceWhenNotChunking = options.logUncachedPresenceWhenNotChunking();
-        rxScheduler = options.rxScheduler();
-        logLifecycleEvents = options.logLifecycleEvents();
-        manualChunkRerequesting = options.manualChunkRerequesting();
-        largeThreshold = options.largeThreshold();
-        taskScheduler = options.taskScheduler();
-        httpClient = options.httpClient();
-        compressionMode = options.compressionMode();
-        restRatelimitsWithoutClockSync = options.restRatelimitsWithoutClockSync();
-        highLatencyThreshold = options.highLatencyThreshold();
-        entitySerializer = options.entitySerializer();
-        
-        // Sanity checks
-        if(largeThreshold > 250 || largeThreshold < 50) {
-            throw new IllegalArgumentException("Large threshold of " + largeThreshold + " not between 50 and 250!");
+    private void sanityCheckOptions(@Nonnull final CatnipOptions options) {
+        if(options.largeThreshold() > 250 || options.largeThreshold() < 50) {
+            throw new IllegalArgumentException("Large threshold of " + options.largeThreshold() + " not between 50 and 250!");
         }
-        if(highLatencyThreshold < 0) {
-            throw new IllegalArgumentException("High latench threshold of " + highLatencyThreshold + " not greater than zero!");
+        if(options.highLatencyThreshold() < 0) {
+            throw new IllegalArgumentException("High latency threshold of " + options.highLatencyThreshold() + " not greater than zero!");
         }
-        
-        injectSelf();
     }
     
     @Nonnull
@@ -196,9 +118,10 @@ public class CatnipImpl implements Catnip {
             final CatnipOptions patchedOptions = optionsPatcher.apply((CatnipOptions) options.clone());
             final Map<String, Pair<Object, Object>> diff = diff(patchedOptions);
             if(!diff.isEmpty()) {
-                applyOptions(patchedOptions);
+                sanityCheckOptions(patchedOptions);
+                options = patchedOptions;
                 if(logExtensionOverrides) {
-                    diff.forEach((name, patch) -> logAdapter.info("Extension {} updated {} from \"{}\" to \"{}\".",
+                    diff.forEach((name, patch) -> logAdapter().info("Extension {} updated {} from \"{}\" to \"{}\".",
                             extension.name(), name, patch.getLeft(), patch.getRight()));
                 }
             }
@@ -216,8 +139,9 @@ public class CatnipImpl implements Catnip {
         // automatically diff it without having to know about what every
         // field is.
         for(final Field field : patch.getClass().getDeclaredFields()) {
-            // Don't compare tokens because there's no point
-            if(!field.getName().equals("token")) {
+            // Don't compare certain because there's no point; they only get
+            // checked / set once at startup and never again.
+            if(!UNPATCHABLE_OPTIONS.contains(field.getName())) {
                 try {
                     field.setAccessible(true);
                     final Object input = field.get(patch);
@@ -226,11 +150,25 @@ public class CatnipImpl implements Catnip {
                         diff.put(field.getName(), ImmutablePair.of(original, input));
                     }
                 } catch(final IllegalAccessException e) {
-                    logAdapter.error("Reflection did a \uD83D\uDCA9", e);
+                    logAdapter().error("Reflection did a \uD83D\uDCA9", e);
                 }
             }
         }
         return diff;
+    }
+    
+    // We don't expose this to the outside world because the ability to make
+    // raw requests is already exposed via #rest(). If someone REALLY needs
+    // this functionality, they can just get it by casting to CatnipImpl.
+    // The only reason I can think of to have this as a part of the public
+    // API is because someone wants to use undocumented routes -- in which case
+    // they shouldn't be doing that -- or if we haven't added a route yet, in
+    // which case they should be opening an issue so that we can get it added
+    // for everyone.
+    // TLDR, if you *really* need this then you know what you're doing, so you
+    // can live with casting instead of exposing it as part of the public API.
+    public Requester requester() {
+        return options.requester();
     }
     
     @Nonnull
@@ -258,9 +196,9 @@ public class CatnipImpl implements Catnip {
     
     @Override
     public void shutdown() {
-        logAdapter.info("Shutting down!");
-        dispatchManager.close();
-        shardManager.shutdown();
+        logAdapter().info("Shutting down!");
+        dispatchManager().close();
+        shardManager().shutdown();
         extensionManager.shutdown();
         // Will let the keepalive thread halt
         latch.countDown();
@@ -384,14 +322,14 @@ public class CatnipImpl implements Catnip {
         if(validateToken) {
             return fetchGatewayInfo()
                     .map(gateway -> {
-                        logAdapter.info("Token validated!");
+                        logAdapter().info("Token validated!");
                         
                         parseClientId();
                         
                         //this is actually needed because generics are dumb
                         return (Catnip) this;
                     }).doOnError(e -> {
-                        logAdapter.warn("Couldn't validate token!", e);
+                        logAdapter().warn("Couldn't validate token!", e);
                         throw new RuntimeException(e);
                     });
         } else {
@@ -410,29 +348,23 @@ public class CatnipImpl implements Catnip {
     
     private void injectSelf() {
         // Inject catnip instance into dependent fields
-        dispatchManager.catnip(this);
-        shardManager.catnip(this);
-        eventBuffer.catnip(this);
-        cache.catnip(this);
-        requester.catnip(this);
-        taskScheduler.catnip(this);
-    }
-    
-    @Nonnull
-    @Override
-    public EntityCacheWorker cacheWorker() {
-        return cache;
+        dispatchManager().catnip(this);
+        shardManager().catnip(this);
+        eventBuffer().catnip(this);
+        cacheWorker().catnip(this);
+        options.requester().catnip(this);
+        taskScheduler().catnip(this);
     }
     
     @Nonnull
     public Catnip connect() {
-        shardManager.start();
+        shardManager().start();
         return this;
     }
     
     private int shardIdFor(@Nonnull final String guildId) {
         final long idLong = Long.parseUnsignedLong(guildId);
-        return (int) ((idLong >>> 22) % shardManager.shardCount());
+        return (int) ((idLong >>> 22) % shardManager().shardCount());
     }
     
     private void parseClientId() {

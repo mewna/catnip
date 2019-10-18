@@ -94,7 +94,7 @@ public abstract class AbstractRequester implements Requester {
         final Bucket bucket = getBucket(r.route());
         // Capture stacktrace if possible
         final StackTraceElement[] stacktrace;
-        if(catnip.captureRestStacktraces()) {
+        if(catnip.options().captureRestStacktraces()) {
             stacktrace = Thread.currentThread().getStackTrace();
         } else {
             stacktrace = new StackTraceElement[0];
@@ -204,7 +204,7 @@ public abstract class AbstractRequester implements Requester {
         builder.setHeader("X-RateLimit-Precision", "millisecond");
         
         if(request.request().needsToken()) {
-            builder.setHeader("Authorization", "Bot " + catnip.token());
+            builder.setHeader("Authorization", "Bot " + catnip.options().token());
         }
         if(request.request().reason() != null) {
             catnip.logAdapter().trace("Adding reason header due to specific needs.");
@@ -260,7 +260,7 @@ public abstract class AbstractRequester implements Requester {
                     now, date, requestDuration, timeDifference);
         }
         if(statusCode == 429) {
-            if(catnip.logLifecycleEvents()) {
+            if(catnip.options().logLifecycleEvents()) {
                 catnip.logAdapter().error(
                         "Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
                         route.baseRoute(),
@@ -382,7 +382,7 @@ public abstract class AbstractRequester implements Requester {
         
         if(retryAfter > 0) {
             rateLimiter.updateRemaining(route, 0);
-            if(catnip.restRatelimitsWithoutClockSync() && rateLimitResetAfter.isPresent()) {
+            if(catnip.options().restRatelimitsWithoutClockSync() && rateLimitResetAfter.isPresent()) {
                 rateLimiter.updateReset(route, System.currentTimeMillis() + timeDifference
                         + rateLimitResetAfter.get());
             } else {

@@ -150,7 +150,7 @@ public class CachingBuffer extends AbstractBuffer {
             
             // Trigger member chunking if needed
             final int memberCount = payloadData.getInt("member_count");
-            if(catnip().chunkMembers() && memberCount > catnip().largeThreshold()) {
+            if(catnip().options().chunkMembers() && memberCount > catnip().options().largeThreshold()) {
                 // If we're chunking members, calculate how many chunks we have to await
                 int chunks = memberCount / 1000;
                 if(memberCount % 1000 != 0) {
@@ -163,7 +163,7 @@ public class CachingBuffer extends AbstractBuffer {
                 // I hate this
                 final int finalChunks = chunks;
                 // TODO: Cancel this task when the shard closes
-                catnip().taskScheduler().setTimer(catnip().memberChunkTimeout(), __ -> {
+                catnip().taskScheduler().setTimer(catnip().options().memberChunkTimeout(), __ -> {
                     if(bufferState.guildChunkCount().containsKey(guild)) {
                         final Counter counter = bufferState.guildChunkCount().get(guild);
                         if(counter != null) {
@@ -179,7 +179,7 @@ public class CachingBuffer extends AbstractBuffer {
                                                 guild);
                                 // Reset chunk count
                                 bufferState.initialGuildChunkCount(guild, finalChunks, event);
-                                if(catnip().manualChunkRerequesting()) {
+                                if(catnip().options().manualChunkRerequesting()) {
                                     emitter().emit(LifecycleEvent.Raw.MEMBER_CHUNK_REREQUEST,
                                             MemberChunkRerequestImpl.builder()
                                                     .catnip(catnip())
@@ -188,7 +188,7 @@ public class CachingBuffer extends AbstractBuffer {
                                                     .build());
                                 } else {
                                     catnip().chunkMembers(guild);
-                                    catnip().taskScheduler().setTimer(catnip().memberChunkTimeout(), ___ -> {
+                                    catnip().taskScheduler().setTimer(catnip().options().memberChunkTimeout(), ___ -> {
                                         if(bufferState.guildChunkCount().containsKey(guild)) {
                                             final Counter counterTwo = bufferState.guildChunkCount().get(guild);
                                             if(counterTwo != null && finalChunks - counterTwo.count() > 0) {
@@ -196,7 +196,7 @@ public class CachingBuffer extends AbstractBuffer {
                                                         .warn("Didn't recv. member chunks for guild {} after {}ms even " +
                                                                         "after retrying (missing {} chunks)! You should probably " +
                                                                         "increase the value of CatnipOptions#memberChunkTimeout!",
-                                                                guild, catnip().memberChunkTimeout(),
+                                                                guild, catnip().options().memberChunkTimeout(),
                                                                 finalChunks - counterTwo.count());
                                             }
                                         }
@@ -225,7 +225,7 @@ public class CachingBuffer extends AbstractBuffer {
         final JsonObject payloadData = event.getObject("d");
         final String eventType = event.getString("t");
         
-        if(catnip().chunkMembers()) {
+        if(catnip().options().chunkMembers()) {
             final String guild = payloadData.getString("guild_id");
             cacheAndDispatch(eventType, bufferState.id(), event);
             bufferState.acceptChunk(guild);
@@ -350,7 +350,7 @@ public class CachingBuffer extends AbstractBuffer {
     
     @Accessors(fluent = true)
     @AllArgsConstructor
-    private final class Counter {
+    private static final class Counter {
         @Getter
         private final JsonObject guildCreate;
         @Getter

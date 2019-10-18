@@ -569,7 +569,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
             }
             // Emojis
             case Raw.GUILD_EMOJIS_UPDATE: {
-                if(!catnip.cacheFlags().contains(CacheFlag.DROP_EMOJI)) {
+                if(!catnip.options().cacheFlags().contains(CacheFlag.DROP_EMOJI)) {
                     final String guild = payload.getString("guild_id");
                     final JsonArray emojis = payload.getArray("emojis");
                     emojis.stream().map(e -> entityBuilder.createCustomEmoji(guild, (JsonObject) e)).forEach(this::cacheEmoji);
@@ -588,7 +588,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                 final JsonObject user = payload.getObject("user");
                 final String id = user.getString("id");
                 final User old = user(id);
-                if(old == null && !catnip.chunkMembers() && catnip.logUncachedPresenceWhenNotChunking()) {
+                if(old == null && !catnip.options().chunkMembers() && catnip.options().logUncachedPresenceWhenNotChunking()) {
                     catnip.logAdapter().warn("Received PRESENCE_UPDATE for uncached user {}!?", id);
                 } else if(old != null) {
                     // This could potentially update:
@@ -605,11 +605,11 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                             .done()
                     );
                     userCache(shardId).put(updated.idAsLong(), updated);
-                    if(!catnip.cacheFlags().contains(CacheFlag.DROP_GAME_STATUSES)) {
+                    if(!catnip.options().cacheFlags().contains(CacheFlag.DROP_GAME_STATUSES)) {
                         final Presence presence = entityBuilder.createPresence(payload);
                         presenceCache(shardId).put(updated.idAsLong(), presence);
                     }
-                } else if(catnip.chunkMembers()) {
+                } else if(catnip.options().chunkMembers()) {
                     final String guildId = payload.getString("guild_id", "No guild");
                     catnip.logAdapter().warn("Received PRESENCE_UPDATE for unknown user {} (guild: {})!? (member chunking enabled)",
                             id, guildId);
@@ -618,7 +618,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
             }
             // Voice
             case Raw.VOICE_STATE_UPDATE: {
-                if(!catnip.cacheFlags().contains(CacheFlag.DROP_VOICE_STATES)) {
+                if(!catnip.options().cacheFlags().contains(CacheFlag.DROP_VOICE_STATES)) {
                     final VoiceState state = entityBuilder.createVoiceState(payload);
                     cacheVoiceState(state);
                 }

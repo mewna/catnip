@@ -53,6 +53,7 @@ import com.mewna.catnip.shard.ratelimit.MemoryRatelimiter;
 import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.DefaultSessionManager;
 import com.mewna.catnip.shard.session.SessionManager;
+import com.mewna.catnip.util.CatnipOptionsView;
 import com.mewna.catnip.util.logging.DefaultLogAdapter;
 import com.mewna.catnip.util.logging.LogAdapter;
 import com.mewna.catnip.util.rx.RxHelpers;
@@ -80,217 +81,51 @@ import java.util.concurrent.TimeUnit;
 @Accessors(fluent = true, chain = true)
 @RequiredArgsConstructor
 @SuppressWarnings("OverlyCoupledClass")
-public final class CatnipOptions implements Cloneable {
-    /**
-     * The token for catnip to use.
-     * <p>
-     * May not be overridden by extensions.
-     */
+public final class CatnipOptions implements CatnipOptionsView, Cloneable {
     @Nonnull
     private final String token;
-    /**
-     * The shard manager for catnip to use. Defaults to {@link DefaultShardManager}.
-     */
     @Nonnull
     private ShardManager shardManager = new DefaultShardManager();
-    /**
-     * The session manager for catnip to use. Defaults to {@link DefaultSessionManager}
-     */
     @Nonnull
     private SessionManager sessionManager = new DefaultSessionManager();
-    /**
-     * The gateway ratelimiter for catnip to use. Defaults to {@link MemoryRatelimiter}
-     */
     @Nonnull
     private Ratelimiter gatewayRatelimiter = new MemoryRatelimiter();
-    /**
-     * The log adapter for catnip to use. Defaults to {@link DefaultLogAdapter},
-     * which uses SLF4J.
-     */
     @Nonnull
     private LogAdapter logAdapter = new DefaultLogAdapter();
-    /**
-     * The event buffer for catnip to use. Defaults to {@link CachingBuffer}.
-     * If you want to use an alternative event buffering strategy (ex. no
-     * buffering, only buffer certain events, ...) you can write your own
-     * implementation. For no buffering, {@link NoopBuffer} is provided.
-     * <p>Do NOT change this if you don't know what you're doing!</p>
-     */
     @Nonnull
     private EventBuffer eventBuffer = new CachingBuffer();
-    /**
-     * The cache worker for catnip to use. Defaults to {@link SplitMemoryEntityCache}.
-     * Change this if you want to use your own {@link EntityCacheWorker}.
-     */
     @Nonnull
     private EntityCacheWorker cacheWorker = new SplitMemoryEntityCache();
-    /**
-     * The set of cache flags for catnip to obey. Used to prevent caching certain
-     * things.
-     */
     @Nonnull
     private Set<CacheFlag> cacheFlags = EnumSet.noneOf(CacheFlag.class);
-    /**
-     * Manages event dispatching and consumers. Defaults to {@link DefaultDispatchManager}.
-     */
     @Nonnull
     private DispatchManager dispatchManager = new DefaultDispatchManager();
-    /**
-     * Whether or not catnip should chunk members. Do not disable this if you
-     * don't know what it does.
-     */
     private boolean chunkMembers = true;
-    /**
-     * Whether or not catnip should emit full event objects. Do not disable
-     * this if you don't know what it does. Mainly only useful for ex. an
-     * {@link Extension} that does things with the raw gateway payloads, like
-     * sending them to a message queue.
-     */
     private boolean emitEventObjects = true;
-    /**
-     * Whether or not catnip should enforce permissions for REST actions. Note
-     * that this will NOT enforce permissions if you directly call methods via
-     * {@link Catnip#rest()}, but will enforce them if you call them from
-     * entity objects (ex. doing {@link Guild#delete()}).
-     */
     private boolean enforcePermissions = true;
-    /**
-     * The presence that catnip should set for shards as they log in. This is
-     * for setting whether your bot appears online/DND/away/offline, as well as
-     * the "playing XXX" status.
-     */
     @Nullable
-    private Presence presence;
-    /**
-     * The events that catnip should not emit. You can use {@link Raw} to get
-     * the event names.
-     */
+    private Presence initialPresence;
     @Nonnull
     private Set<String> disabledEvents = Set.of();
     @Nonnull
     private Requester requester = new SerialRequester(new DefaultRateLimiter(), HttpClient.newBuilder());
-    /**
-     * Whether or not extensions overriding options should be logged. Defaults
-     * to {@code true}.
-     * <p>
-     * May not be overridden by extensions.
-     */
     private boolean logExtensionOverrides = true;
-    /**
-     * Whether or not to validate the provided token when setting up catnip. It
-     * is HIGHLY recommended that you leave this with the default setting.
-     * <p>
-     * May not be overridden by extensions.
-     */
     private boolean validateToken = true;
-    /**
-     * Whether or not catnip should capture REST stacktraces before running
-     * REST requests.
-     * <p>
-     * catnip runs REST requests asynchronously. Because of this, we lose the
-     * caller's stacktrace, and exceptions thrown from REST calls are lost to
-     * the ether basically. If this option is enabled, catnip will capture a
-     * stacktrace before REST requests, and make it available to any exceptions
-     * thrown by the REST handler.
-     * <p>
-     * NOTE: Capturing stacktraces is <strong>s l o w</strong>. If you have
-     * performance problems around REST requests, you can disable this, at the
-     * cost of losing debuggability.
-     * <p>
-     * TODO: When we move off of Java 8, use the stack walking API for this
-     */
     private boolean captureRestStacktraces = true;
-    /**
-     * Whether or not to log "Received presence for uncached user XXX" when
-     * catnip is not chunking members. Basically, this avoids a ton of logspam.
-     */
     private boolean logUncachedPresenceWhenNotChunking = true;
-    /**
-     * Whether or not Discord should subscribe to guild workers and provide stuff
-     * such as presence updates, typing events, member updates and other stuff,
-     * see discord-api-docs#1016 for more information.
-     */
     private boolean enableGuildSubscriptions = true;
-    /**
-     * How long catnip should wait to ensure that all member chunks have been
-     * received, in milliseconds. If all member chunks still haven't been
-     * received after this period, member chunking will be re-requested, to try
-     * to make sure we're not missing any.
-     */
     private long memberChunkTimeout = TimeUnit.SECONDS.toMillis(10);
-    /**
-     * The RxJava scheduler that catnip should use for scheduling things like
-     * stream subscriptions. Defaults to {@link RxHelpers#FORK_JOIN_SCHEDULER}.
-     */
     private Scheduler rxScheduler = RxHelpers.FORK_JOIN_SCHEDULER;
-    /**
-     * If this option is enabled, lifecycle-related events -- things like shard
-     * connects / disconnects, 429 HTTP responses, ... -- will be directly
-     * logged via the configured {@link #logAdapter}, in addition to being
-     * emitted over the event bus.
-     */
     private boolean logLifecycleEvents = true;
-    /**
-     * If this option is enabled, emit a {@link MemberChunkRerequest} over the
-     * event bus when a shard needs to re-request member chunks for a guild,
-     * instead of automatically re-requesting them.
-     */
     private boolean manualChunkRerequesting;
-    /**
-     * Total number of members where the gateway will stop sending offline
-     * members in the guild member list. If a guild's member count is over this
-     * limit, member chunking will happen. See {@link #chunkMembers}
-     * {@link #manualChunkRerequesting} {@link #memberChunkTimeout} for more.
-     *
-     * <strong>This must be between 50 and 250.</strong>
-     * <p>
-     * For Discord's documentation, go here:
-     * https://discordapp.com/developers/docs/topics/gateway#identify-identify-structure
-     */
     private int largeThreshold = 250;
-    /**
-     * The task scheduler that catnip will use for scheduling its own internal
-     * tasks. This scheduler is exposed to the outside world through
-     * {@link Catnip#taskScheduler()}, and can safely be used for any task
-     * scheduling needs you may have. Defaults to {@link RxTaskScheduler}.
-     */
     private TaskScheduler taskScheduler = new RxTaskScheduler();
-    /**
-     * The HTTP client that catnip uses internally for websockets and REST
-     * requests. Defaults to an instance that uses
-     * {@link RxHelpers#FORK_JOIN_POOL} as its executor.
-     */
     private HttpClient httpClient = HttpClient.newBuilder()
             .executor(RxHelpers.FORK_JOIN_POOL)
             .build();
-    /**
-     * How catnip compresses incoming events from Discord. Default is
-     * {@link CompressionMode#ZLIB}.
-     */
     private CompressionMode compressionMode = CompressionMode.ZLIB;
-    /**
-     * Whether or not catnip should assume the inability to have a properly
-     * synchronized clock when computing REST ratelimits. When this option is
-     * set to {@code true}, catnip will assume that the local clock cannot be
-     * properly synced, and will use a less-efficient method provided by
-     * Discord for computing REST ratelimits. See
-     * https://github.com/discordapp/discord-api-docs/pull/1069 for more info.
-     */
     private boolean restRatelimitsWithoutClockSync;
-    /**
-     * If heartbeat latency takes longer than this much time, catnip will emit
-     * a {@link HighWebsocketLatency} event containing information about which
-     * shard is experiencing high latency and how high the latency is.<br />
-     *
-     * <strong>This value is specified in nanoseconds.</strong>
-     */
     private long highLatencyThreshold = TimeUnit.SECONDS.toNanos(10);
-    /**
-     * The entity serializer that catnip uses for de/serializing entities for
-     * external usage. The value of this option will not affect how catnip
-     * behaves internally, but rather will affect user-controlled serialization
-     * for interfacing with the outside world.
-     */
     private EntitySerializer<?> entitySerializer = new DefaultEntitySerializer();
     
     @Override

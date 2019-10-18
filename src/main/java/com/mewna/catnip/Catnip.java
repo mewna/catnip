@@ -27,12 +27,9 @@
 
 package com.mewna.catnip;
 
-import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCache;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.entity.channel.Webhook;
-import com.mewna.catnip.entity.lifecycle.HighWebsocketLatency;
-import com.mewna.catnip.entity.lifecycle.MemberChunkRerequest;
 import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.serialization.EntitySerializer;
 import com.mewna.catnip.entity.user.Presence;
@@ -43,15 +40,14 @@ import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.Rest;
-import com.mewna.catnip.shard.CompressionMode;
 import com.mewna.catnip.shard.buffer.EventBuffer;
 import com.mewna.catnip.shard.event.DispatchManager;
 import com.mewna.catnip.shard.event.DoubleEventType;
 import com.mewna.catnip.shard.event.EventType;
 import com.mewna.catnip.shard.event.MessageConsumer;
 import com.mewna.catnip.shard.manager.ShardManager;
-import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.SessionManager;
+import com.mewna.catnip.util.CatnipOptionsView;
 import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.logging.LogAdapter;
 import com.mewna.catnip.util.scheduler.TaskScheduler;
@@ -130,9 +126,12 @@ public interface Catnip {
         return new CatnipImpl(options).setup();
     }
     
+    /**
+     * @return An immutable view of the current instance's options.
+     */
     @Nonnull
     @CheckReturnValue
-    Scheduler rxScheduler();
+    CatnipOptionsView options();
     
     /**
      * @return The cached gateway info. May be null if it hasn't been fetched
@@ -154,17 +153,6 @@ public interface Catnip {
     @CheckReturnValue
     Single<GatewayInfo> fetchGatewayInfo();
     
-    // Implementations are lombok-generated
-    
-    /**
-     * Handles dispatching and listening to events.
-     *
-     * @return The current dispatch manager instance.
-     */
-    @Nonnull
-    @CheckReturnValue
-    DispatchManager dispatchManager();
-    
     /**
      * Start all shards asynchronously. To customize the shard spawning /
      * management strategy, see {@link CatnipOptions}.
@@ -174,30 +162,48 @@ public interface Catnip {
     @Nonnull
     Catnip connect();
     
+    // Implementations are lombok-generated
+    
+    @Nonnull
+    @CheckReturnValue
+    default Scheduler rxScheduler() {
+        return options().rxScheduler();
+    }
+    
     /**
-     * @return The token being used by this catnip instance.
+     * Handles dispatching and listening to events.
+     *
+     * @return The current dispatch manager instance.
      */
     @Nonnull
-    String token();
+    @CheckReturnValue
+    default DispatchManager dispatchManager() {
+        return options().dispatchManager();
+    }
     
     /**
      * @return The shard manager being used by this catnip instance.
      */
     @Nonnull
-    ShardManager shardManager();
+    default ShardManager shardManager() {
+        return options().shardManager();
+    }
     
     /**
      * @return The session manager being used by this catnip instance.
      */
     @Nonnull
-    SessionManager sessionManager();
+    default SessionManager sessionManager() {
+        return options().sessionManager();
+    }
     
     /**
-     * @return The gateway message send ratelimiter being used by this catnip
-     * instance.
+     * @return The event buffer being used by this catnip instance.
      */
     @Nonnull
-    Ratelimiter gatewayRatelimiter();
+    default EventBuffer eventBuffer() {
+        return options().eventBuffer();
+    }
     
     /**
      * @return The REST API instance for this catnip instance.
@@ -217,19 +223,17 @@ public interface Catnip {
      * @return The logging adapter being used by this catnip instance.
      */
     @Nonnull
-    LogAdapter logAdapter();
-    
-    /**
-     * @return The event buffer being used by this catnip instance.
-     */
-    @Nonnull
-    EventBuffer eventBuffer();
+    default LogAdapter logAdapter() {
+        return options().logAdapter();
+    }
     
     /**
      * @return The entity cache being used by this catnip instance.
      */
     @Nonnull
-    EntityCache cache();
+    default EntityCache cache() {
+        return options().cacheWorker();
+    }
     
     /**
      * The cache worker being used by this catnip instance. You should use this
@@ -238,75 +242,9 @@ public interface Catnip {
      * @return The cache worker being used by this catnip instance.
      */
     @Nonnull
-    EntityCacheWorker cacheWorker();
-    
-    /**
-     * The set of cache flags to be applied to the entity cache. These
-     * currently allow for simply dropping data instead of caching it, but may
-     * be expanded on in the future.
-     *
-     * @return The set of cache flags being used by this catnip instance.
-     */
-    @Nonnull
-    Set<CacheFlag> cacheFlags();
-    
-    /**
-     * @return Whether or not this catnip instance will chunk guild members
-     * when it connects to the websocket gateway.
-     */
-    boolean chunkMembers();
-    
-    /**
-     * @return Whether or not this catnip instance will emit event objects as
-     * it receives events from the gateway. You should only disable this if you
-     * want to do something special with the raw event objects via hooks.
-     */
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    boolean emitEventObjects();
-    
-    /**
-     * @return Whether or not this catnip instance will execute permission
-     * checks before doing a request. Does not affect direct calls to {@link #rest() Rest}
-     * methods. If, for whatever reason, the needed entities for the permission
-     * calculation cannot be retrieved from the cache, such as using a
-     * {@link com.mewna.catnip.cache.NoopEntityCache noop cache} or attempting to
-     * do the requests before the cache has been populated, the check will assume
-     * all permissions are available.
-     */
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    boolean enforcePermissions();
-    
-    /**
-     * @return Whether or not this catnip instance will capture stacktraces
-     * before sending REST requests. This is useful for debugging.
-     *
-     * @see CatnipOptions#captureRestStacktraces()
-     */
-    boolean captureRestStacktraces();
-    
-    /**
-     * @return Whether or not this catnip instance will emit events instead of
-     * certain log messages.
-     *
-     * @see CatnipOptions#logLifecycleEvents()
-     */
-    boolean logLifecycleEvents();
-    
-    /**
-     * @return Whether or not this catnip instance will emit a
-     * {@link MemberChunkRerequest} event to allow for manual chunk
-     * re-requesting instead of automatically re-requesting chunks.
-     *
-     * @see CatnipOptions#manualChunkRerequesting()
-     * @see CatnipOptions#memberChunkTimeout()
-     */
-    boolean manualChunkRerequesting();
-    
-    /**
-     * @return The largest a guild can be before member chunking needs to
-     * happen.
-     */
-    int largeThreshold();
+    default EntityCacheWorker cacheWorker() {
+        return options().cacheWorker();
+    }
     
     /**
      * The task scheduler allows for scheduling one-off and recurring tasks
@@ -317,7 +255,9 @@ public interface Catnip {
      *
      * @return The task scheduler used by this catnip instance.
      */
-    TaskScheduler taskScheduler();
+    default TaskScheduler taskScheduler() {
+        return options().taskScheduler();
+    }
     
     /**
      * @return A set of all ids of unavailable guilds.
@@ -403,59 +343,20 @@ public interface Catnip {
     long clientIdAsLong();
     
     /**
-     * @return The initial presence to set when logging in via the gateway.
-     * Will be null if not set via {@link CatnipOptions}.
-     */
-    @Nullable
-    @CheckReturnValue
-    Presence initialPresence();
-    
-    /**
-     * @return The set of events that will not be fired. Empty by default.
-     */
-    @Nonnull
-    @CheckReturnValue
-    Set<String> disabledEvents();
-    
-    /**
-     * @return Whether or not to log "uncached presence" warning
-     */
-    boolean logUncachedPresenceWhenNotChunking();
-    
-    /**
-     * @return How long to wait before re-chunking members, in milliseconds.
-     */
-    long memberChunkTimeout();
-    
-    /**
      * @return The HTTP client that catnip uses for websockets and REST
      * requests.
      */
-    HttpClient httpClient();
-    
-    /**
-     * @return The compression method catnip uses for incoming events from
-     * Discord.
-     */
-    CompressionMode compressionMode();
-    
-    /**
-     * @return Whether or not catnip should assume a lack of proper clock
-     * synchronization when calculating REST ratelimit data.
-     */
-    boolean restRatelimitsWithoutClockSync();
-    
-    /**
-     * @return How high, in nanoseconds, a shard's heartbeat latency can be
-     * before catnip emits a {@link HighWebsocketLatency} event.
-     */
-    long highLatencyThreshold();
+    default HttpClient httpClient() {
+        return options().httpClient();
+    }
     
     /**
      * @return The entity serializer that catnip uses for converting entities
      * into an external-friendly format.
      */
-    EntitySerializer<?> entitySerializer();
+    default EntitySerializer<?> entitySerializer() {
+        return options().entitySerializer();
+    }
     
     /**
      * Opens a voice connection to the provided guild and channel. The connection is

@@ -170,7 +170,7 @@ public class DefaultShardManager extends AbstractShardManager {
         undeploy(id);
         catnip().logAdapter().info("Connecting shard {} (queue len {})", id, connectQueue.size());
         
-        final CatnipShard catnipShard = new CatnipShardImpl(catnip(), id, shardCount, catnip().initialPresence());
+        final CatnipShard catnipShard = new CatnipShardImpl(catnip(), id, shardCount, catnip().options().initialPresence());
         
         try {
             shards.put(id, catnipShard);
