@@ -206,9 +206,11 @@ public interface CatnipOptionsView {
      * <p>
      * NOTE: Capturing stacktraces is <strong>s l o w</strong>. If you have
      * performance problems around REST requests, you can disable this, at the
-     * cost of losing debuggability.
+     * cost of losing debuggability. Note that it may be useful to add
+     * <code>-XX:-OmitStackTraceInFastThrow</code> to your JVM flags to ensure
+     * that this doesn't get optimized out.
      * <p>
-     * TODO: When we move off of Java 8, use the stack walking API for this
+     * TODO: Verify that -XX:-OmitStackTraceInFastThrow isn't needed now.
      */
     boolean captureRestStacktraces();
     

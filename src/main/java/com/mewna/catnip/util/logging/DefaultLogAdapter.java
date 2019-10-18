@@ -37,7 +37,6 @@ import org.slf4j.helpers.MessageFormatter;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.StackWalker.Option;
-import java.util.Collections;
 
 /**
  * @author amy
@@ -45,7 +44,7 @@ import java.util.Collections;
  */
 @Accessors(fluent = true)
 public class DefaultLogAdapter implements LogAdapter {
-    private final StackWalker stackWalker = StackWalker.getInstance(Collections.singleton(Option.RETAIN_CLASS_REFERENCE));
+    private final StackWalker stackWalker = StackWalker.getInstance(Option.RETAIN_CLASS_REFERENCE);
     
     @Override
     public void log(@Nonnull final Level level, @Nonnull final String message, @Nullable final Object... objects) {

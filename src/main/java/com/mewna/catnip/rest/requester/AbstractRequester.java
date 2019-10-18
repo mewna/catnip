@@ -51,6 +51,8 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.StackWalker.Option;
+import java.lang.StackWalker.StackFrame;
 import java.net.URI;
 import java.net.http.HttpClient.Builder;
 import java.net.http.HttpHeaders;
@@ -71,6 +73,7 @@ import static com.mewna.catnip.rest.Routes.HttpMethod.PUT;
 @SuppressWarnings("WeakerAccess")
 public abstract class AbstractRequester implements Requester {
     public static final BodyPublisher EMPTY_BODY = BodyPublishers.noBody();
+    private static final StackWalker STACK_WALKER = StackWalker.getInstance(Set.of(Option.RETAIN_CLASS_REFERENCE));
     
     protected final RateLimiter rateLimiter;
     protected final Builder clientBuilder;
@@ -95,7 +98,9 @@ public abstract class AbstractRequester implements Requester {
         // Capture stacktrace if possible
         final StackTraceElement[] stacktrace;
         if(catnip.options().captureRestStacktraces()) {
-            stacktrace = Thread.currentThread().getStackTrace();
+            stacktrace = STACK_WALKER.walk(stream -> stream
+                    .map(StackFrame::toStackTraceElement)
+                    .toArray(StackTraceElement[]::new));
         } else {
             stacktrace = new StackTraceElement[0];
         }
