@@ -100,6 +100,7 @@ public class CatnipImpl implements Catnip {
         // Just to be safe
         keepaliveThread.setDaemon(false);
         keepaliveThread.setName("catnip keepalive thread");
+        injectSelf();
     }
     
     private void sanityCheckOptions(@Nonnull final CatnipOptions options) {
@@ -120,6 +121,7 @@ public class CatnipImpl implements Catnip {
             if(!diff.isEmpty()) {
                 sanityCheckOptions(patchedOptions);
                 options = patchedOptions;
+                injectSelf();
                 if(logExtensionOverrides) {
                     diff.forEach((name, patch) -> logAdapter().info("Extension {} updated {} from \"{}\" to \"{}\".",
                             extension.name(), name, patch.getLeft(), patch.getRight()));
