@@ -5,7 +5,7 @@
 ![GitHub tag (latest by date)](https://img.shields.io/github/tag-date/mewna/catnip.svg?style=popout)
 
 
-A Discord API wrapper in Java. Fully async / reactive, built on top of
+A Discord API wrapper in Java. Fully async/reactive, built on top of
 [vert.x](https://vertx.io). catnip tries to map roughly 1:1 to how the Discord 
 API works, both in terms of events and REST methods available.
 
@@ -32,8 +32,8 @@ No. Use a real build tool like [Maven](https://maven.apache.org/) or [Gradle](ht
 - Automatic sharding
 - Very customizable - you can write [extensions](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/extension/Extension.java)
   for the library, as well as [options](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/CatnipOptions.java)
-  for most anything you could want to change. See `EXTENSIONS.md` for more.
-- Modular - REST / shards can be used independently. See `MODULAR_USAGE.md` for more.
+  for almost anything, you could want to change. See `EXTENSIONS.md` for more.
+- Modular - REST/shards can be used independently. See `MODULAR_USAGE.md` for more.
 - Customizable caching - Can run with [no cache](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/cache/NoopEntityCache.java),
   [partial caching](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/cache/CacheFlag.java),
   or [write your own cache handler](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/cache/EntityCacheWorker.java).
@@ -41,7 +41,7 @@ No. Use a real build tool like [Maven](https://maven.apache.org/) or [Gradle](ht
 - Asynchronous cache accesses.
 - You can disable individual events.
 - You can disable all events, and handle gateway events directly.
-- Customizable ratelimit/session data handling - wanna store your 
+- Customizable rate limit/session data handling - wanna store your 
   [sessions/seqnums](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/shard/session/SessionManager.java) 
   and [REST ratelimit data](https://github.com/mewna/catnip/tree/master/src/main/java/com/mewna/catnip/rest/ratelimit)
   in Redis, but [gateway ratelimits](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/shard/ratelimit/Ratelimiter.java)
@@ -50,7 +50,7 @@ No. Use a real build tool like [Maven](https://maven.apache.org/) or [Gradle](ht
 
 ## Basic usage
 
-This is the simplest possible bot you can make right now:
+This is the simplest possible but you can make right now:
 
 ```Java
 final Catnip catnip = Catnip.catnip("your token goes here");
@@ -84,7 +84,7 @@ catnip.connect();
 You can also create a catnip instance asynchronously:
 
 ```Java
-Catnip.catnipAsync("your token here").thenAccept(catnip -> {
+Catnip.catnipAsync("your token here").then accept(catnip -> {
     catnip.on(DiscordEvent.MESSAGE_CREATE, msg -> {
         if(msg.content().startsWith("!ping")) {
             msg.channel().sendMessage("pong!");
@@ -94,18 +94,18 @@ Catnip.catnipAsync("your token here").thenAccept(catnip -> {
 });
 ```
 
-Also check out the [examples](https://github.com/mewna/catnip/tree/master/src/main/example/basic) for Kotlin and Scala usage.
+Also, check out the [examples](https://github.com/mewna/catnip/tree/master/src/main/example/basic) for Kotlin and Scala usage.
 
 ### Modular usage
 
 catnip supports being used in REST-only or shards-only configurations. The nice thing about catnip
-is that using it like this is **exactly the same** as using it normally. The only difference is
+is that using it like this is ** the same** as using it normally. The only difference is
 that to use catnip in REST-only mode, you don't call `catnip.connect()` and use 
 `catnip.rest().whatever()` instead. 
 
 ### Custom event bus events
 
-Because vert.x is intended to be used in clustered mode as well as in a single-node configuration,
+Because vert.x is intended to be used in a clustered mode as well as in a single-node configuration,
 emitting events over the built-in event bus requires registering a codec for the events that you
 want to fire. If you have an event class `MyEvent`, you can just do something to the effect of
 ```Java
@@ -127,14 +127,13 @@ where `JsonPojoCodec` is `com.mewna.catnip.util.JsonPojoCodec` and is safe to us
 - JDA is very nice, but doesn't allow for as much freedom with customizing the internals;
   it's more / less "do it this way or use another lib" in my experience.
 - I didn't want ten billion events for every possible case. catnip maps more/less 1:1 with the
-  Discord API, and any "extra" events on top of that need to be user-provided via extensions or
-  other means. I guess really I just didn't want my lib to be as "high-level" as other libs are.
-- I wanted to try to maximize extensibility / customizability, beyond just making it modular. Things
-  like being able to intercept raw websocket messages (as JSON), write custom distributed cache handlers,
+  Discord API, and any "extra" events on top of that need to be user-provided via extensions or other means. I guess I just didn't want my lib to be as "high-level" as other libs are.
+- I wanted to try to maximize extensibility/customizability, beyond just making it modular. Things
+  like being able to intercept raw WebSocket messages (as JSON), write custom distributed cache handlers,
   ... are incredibly useful.
 - I like everything returning `CompletionStage`s instead of custom classes. I do get why other libs
   have them, I just wanted to not.
-- I wanted modular usage to be exactly the same more / less no matter what; everything
+- I wanted modular usage to be the same more / less no matter what; everything
   should be doable through the catnip instance that you create.
 - I wanted to make a lib built on vert.x.
 - To take over the world and convert all Java bots. :^)
