@@ -219,6 +219,8 @@ public class RestGuild extends RestHandler {
                 .map(obj -> entityBuilder().createRole(guildId, obj)));
     }
     
+    @Nonnull
+    @CheckReturnValue
     public Single<Role> modifyGuildRole(@Nonnull final String guildId, @Nonnull final String roleId,
                                         @Nonnull final RoleData roleData) {
         return modifyGuildRole(guildId, roleId, roleData, null);

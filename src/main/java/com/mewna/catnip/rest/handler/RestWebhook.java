@@ -204,7 +204,7 @@ public class RestWebhook extends RestHandler {
         
         return catnip().requester().
                 queue(new OutboundRequest(Routes.EXECUTE_WEBHOOK.withMajorParam(webhookId).withQueryString("?wait=true"),
-                        Map.of("webhook", webhookToken), body).needsToken(false)
+                        Map.of("token", webhookToken), body).needsToken(false)
                         .buffers(options.files()))
                 .map(ResponsePayload::object);
     }
