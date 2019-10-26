@@ -30,6 +30,7 @@ package com.mewna.catnip.entity.impl.user;
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.misc.Emoji.ActivityEmoji;
 import com.mewna.catnip.entity.user.Presence;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -159,6 +160,7 @@ public class PresenceImpl implements Presence, RequiresCatnip {
         private long applicationIdAsLong;
         private String details;
         private String state;
+        private ActivityEmoji emoji;
         private ActivityParty party;
         private ActivityAssets assets;
         private ActivitySecrets secrets;

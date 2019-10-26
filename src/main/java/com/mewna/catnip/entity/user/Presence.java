@@ -29,6 +29,7 @@ package com.mewna.catnip.entity.user;
 
 import com.mewna.catnip.entity.impl.user.PresenceImpl;
 import com.mewna.catnip.entity.impl.user.PresenceImpl.ActivityImpl;
+import com.mewna.catnip.entity.misc.Emoji.ActivityEmoji;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
@@ -266,8 +267,18 @@ public interface Presence {
         @Nullable
         String details();
         
+        /**
+         * @return the user's current party status or custom status text.
+         */
         @Nullable
         String state();
+        
+        /**
+         * @return The emoji used for {@link ActivityType#CUSTOM_STATUS}, if
+         * any.
+         */
+        @Nullable
+        ActivityEmoji emoji();
         
         @Nullable
         ActivityParty party();

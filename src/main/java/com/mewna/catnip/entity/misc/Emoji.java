@@ -115,7 +115,6 @@ public interface Emoji extends Snowflake {
      *
      * @return True if this emoji is custom, false otherwise.
      */
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     @CheckReturnValue
     boolean custom();
     
@@ -306,6 +305,73 @@ public interface Emoji extends Snowflake {
             return name();
         }
         
+        @Override
+        @CheckReturnValue
+        default boolean is(@Nonnull final String emoji) {
+            return name().equals(emoji);
+        }
+    }
+    
+    /**
+     * The emoji in a user's activity, ex. for custom status messages. Note
+     * that the majority of getters on this class return default falsey values.
+     * The only fields currently set with non-default-falsey values are
+     * {@code id}, {@code animated}, and {@code name}.
+     */
+    interface ActivityEmoji extends Emoji {
+        @Override
+        @Nullable
+        @CheckReturnValue
+        default String id() {
+            return idAsLong() != 0 ? Long.toUnsignedString(idAsLong()) : null;
+        }
+        
+        @Override
+        @Nonnull
+        @CheckReturnValue
+        default List<String> roles() {
+            return Collections.emptyList();
+        }
+    
+        @Override
+        @Nullable
+        @CheckReturnValue
+        default User user() {
+            return null;
+        }
+    
+        @Override
+        @CheckReturnValue
+        default boolean managed() {
+            return false;
+        }
+    
+        @Override
+        @CheckReturnValue
+        default boolean custom() {
+            return false;
+        }
+    
+        @Override
+        @CheckReturnValue
+        default boolean requiresColons() {
+            return false;
+        }
+    
+        @Override
+        @Nonnull
+        @CheckReturnValue
+        default String forMessage() {
+            return String.format("<%s:%s:%s>", animated() ? "a" : "", name(), id());
+        }
+    
+        @Override
+        @Nonnull
+        @CheckReturnValue
+        default String forReaction() {
+            return String.format("%s:%s", name(), id());
+        }
+    
         @Override
         @CheckReturnValue
         default boolean is(@Nonnull final String emoji) {

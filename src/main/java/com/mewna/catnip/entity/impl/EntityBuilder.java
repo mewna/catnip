@@ -62,6 +62,7 @@ import com.mewna.catnip.entity.message.Message.MessageActivity;
 import com.mewna.catnip.entity.message.Message.MessageApplication;
 import com.mewna.catnip.entity.message.Message.Reaction;
 import com.mewna.catnip.entity.misc.*;
+import com.mewna.catnip.entity.misc.Emoji.ActivityEmoji;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.misc.Emoji.UnicodeEmoji;
 import com.mewna.catnip.entity.user.*;
@@ -564,6 +565,19 @@ public final class EntityBuilder {
                     .secrets(createSecrets(data.getObject("secrets", null)))
                     .instance(data.getBoolean("instance", false))
                     .flags(ActivityFlag.fromInt(data.getInt("flags", 0)))
+                    .build();
+        }
+    }
+    
+    public ActivityEmoji createActivityEmoji(@Nullable final JsonObject data) {
+        if(data == null) {
+            return null;
+        } else {
+            final String id = data.getString("id");
+            return ActivityEmojiImpl.builder()
+                    .idAsLong(id != null ? Long.parseUnsignedLong(id) : 0)
+                    .animated(data.getBoolean("animated", false))
+                    .name(data.getString("name"))
                     .build();
         }
     }
