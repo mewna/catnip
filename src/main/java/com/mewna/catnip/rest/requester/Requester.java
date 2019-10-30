@@ -44,9 +44,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface Requester {
-    String API_HOST = "https://discordapp.com";
-    int API_VERSION = 6;
-    String API_BASE = "/api/v" + API_VERSION;
     String REASON_HEADER = "X-Audit-Log-Reason";
     
     void catnip(@Nonnull Catnip catnip);

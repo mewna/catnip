@@ -187,7 +187,7 @@ public interface Webhook extends GuildEntity, Snowflake {
     @Nonnull
     @CheckReturnValue
     default String url() {
-        return String.format("%s/webhooks/%s/%s", Requester.API_BASE, id(), token());
+        return String.format("/api/v%s/webhooks/%s/%s", catnip().options().apiVersion(), id(), token());
     }
     
     /**
