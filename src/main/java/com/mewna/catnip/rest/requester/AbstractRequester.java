@@ -181,13 +181,14 @@ public abstract class AbstractRequester implements Requester {
     protected void executeHttpRequest(@Nonnull final Route route, @Nullable final BodyPublisher body,
                                       @Nonnull final QueuedRequest request, @Nonnull final String mediaType) {
         final HttpRequest.Builder builder;
-        
+        final String apiHostVersion = catnip.options().apiHost() + "/api/v" + catnip.options().apiVersion();
+    
         if(route.method() == GET) {
             // No body
-            builder = HttpRequest.newBuilder(URI.create(API_HOST + API_BASE + route.baseRoute())).GET();
+            builder = HttpRequest.newBuilder(URI.create(apiHostVersion + route.baseRoute())).GET();
         } else {
             final var fakeBody = request.request.emptyBody();
-            builder = HttpRequest.newBuilder(URI.create(API_HOST + API_BASE + route.baseRoute()))
+            builder = HttpRequest.newBuilder(URI.create(apiHostVersion + route.baseRoute()))
                     .setHeader("Content-Type", mediaType)
                     .method(route.method().name(), fakeBody ? BodyPublishers.ofString(" ") : body);
             if(fakeBody) {

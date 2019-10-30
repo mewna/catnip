@@ -316,4 +316,20 @@ public interface CatnipOptionsView {
      * for interfacing with the outside world.
      */
     EntitySerializer<?> entitySerializer();
+    
+    /**
+     * The host used for Discord API requests. Defaults to
+     * {@code https://discordapp.com}. Changing this is only really useful for
+     * the case of ex. running tests against a local mock API. Providing the
+     * protocol is <strong>REQUIRED</strong>.
+     */
+    String apiHost();
+    
+    /**
+     * @return The version of the Discord REST API to use. Defaults to
+     * {@code 6}. Changing this is really only useful for the case of ex.
+     * running tests against a local mock API. Note that catnip is not tested
+     * against API v7, nor is v7 actively supported at this time.
+     */
+    int apiVersion();
 }

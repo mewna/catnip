@@ -127,6 +127,8 @@ public final class CatnipOptions implements CatnipOptionsView, Cloneable {
     private boolean restRatelimitsWithoutClockSync;
     private long highLatencyThreshold = TimeUnit.SECONDS.toNanos(10);
     private EntitySerializer<?> entitySerializer = new DefaultEntitySerializer();
+    private String apiHost;
+    private int apiVersion;
     
     @Override
     public Object clone() {
