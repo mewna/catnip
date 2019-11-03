@@ -127,8 +127,8 @@ public final class CatnipOptions implements CatnipOptionsView, Cloneable {
     private boolean restRatelimitsWithoutClockSync;
     private long highLatencyThreshold = TimeUnit.SECONDS.toNanos(10);
     private EntitySerializer<?> entitySerializer = new DefaultEntitySerializer();
-    private String apiHost;
-    private int apiVersion;
+    private String apiHost = "https://discordapp.com";
+    private int apiVersion = 6;
     
     @Override
     public Object clone() {
