@@ -207,7 +207,7 @@ public final class DispatchEmitter {
                     ((CatnipImpl) catnip).markUnavailable(id);
                     catnip.dispatchManager().dispatchEvent(Raw.GUILD_UNAVAILABLE, entityBuilder.createUnavailableGuild(data));
                 } else {
-                    catnip.dispatchManager().dispatchEvent(type, entityBuilder.createGuild(data));
+                    catnip.dispatchManager().dispatchEvent(type, catnip.cache().guild(id));
                 }
                 break;
             }
