@@ -68,7 +68,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static com.mewna.catnip.rest.Routes.HttpMethod.GET;
-import static com.mewna.catnip.rest.Routes.HttpMethod.PUT;
 
 @SuppressWarnings("WeakerAccess")
 public abstract class AbstractRequester implements Requester {
@@ -182,7 +181,7 @@ public abstract class AbstractRequester implements Requester {
                                       @Nonnull final QueuedRequest request, @Nonnull final String mediaType) {
         final HttpRequest.Builder builder;
         final String apiHostVersion = catnip.options().apiHost() + "/api/v" + catnip.options().apiVersion();
-    
+        
         if(route.method() == GET) {
             // No body
             builder = HttpRequest.newBuilder(URI.create(apiHostVersion + route.baseRoute())).GET();
@@ -242,22 +241,11 @@ public abstract class AbstractRequester implements Requester {
         final String dateHeader = headers.firstValue("Date").orElse(null);
         final long requestDuration = TimeUnit.NANOSECONDS.toMillis(requestEnd - request.start);
         final long timeDifference;
-        if(route.method() == PUT && route.baseRoute().contains("/reactions/")) {
-            timeDifference = requestDuration;
-            catnip.logAdapter().trace("Reaction route, using time difference = request duration = {}", timeDifference);
-        } else if(dateHeader == null) {
+        if(dateHeader == null) {
             timeDifference = requestDuration;
             catnip.logAdapter().trace("No date header, time difference = request duration = {}", timeDifference);
         } else {
             final long now = System.currentTimeMillis();
-            // Parsing the date header like this will only be accurate to the
-            // second, meaning that reaction routes will be significantly
-            // inaccurate using this method, as those routes have ratelimits
-            // with millisecond precision. This leads to ex. very slow reaction
-            // menus. To solve this, we use the request duration to measure
-            // latency instead.
-            // TODO: Is there a more accurate way to do this that still
-            //  respects the ms-precision ratelimits?
             final long date = OffsetDateTime.parse(dateHeader, DateTimeFormatter.RFC_1123_DATE_TIME).toInstant()
                     .toEpochMilli();
             timeDifference = now - date + requestDuration;
