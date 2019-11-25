@@ -49,6 +49,7 @@ public enum MessageType {
     USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1(9),
     USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2(10),
     USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3(11),
+    CHANNEL_FOLLOW_ADD(12),
     ;
     @Getter
     private final int id;
