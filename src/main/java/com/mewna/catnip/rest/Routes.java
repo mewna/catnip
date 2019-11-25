@@ -148,10 +148,10 @@ public final class Routes {
         @Getter
         private String ratelimitKey;
         // Some routes, specifically reaction-create, require millisecond
-        // millisecond precision for correct operation. Rather than
-        // special-casing this with a String.contains() or similar, we can just
-        // mark individual routes as needed, and then the requester can just
-        // check Route#requiresMsPrecision()
+        // precision for correct operation. Rather than special-casing this
+        // with a String.contains() or similar, we can just mark individual
+        // routes as needed, and then the requester can just check
+        // Route#requiresMsPrecision()
         @Getter
         private boolean requiresMsPrecision;
         
