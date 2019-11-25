@@ -551,6 +551,7 @@ public final class EntityBuilder {
                     .secrets(createSecrets(data.getObject("secrets", null)))
                     .instance(data.getBoolean("instance", false))
                     .flags(ActivityFlag.fromInt(data.getInt("flags", 0)))
+                    .emoji(createActivityEmoji(data.getObject("emoji", null)))
                     .build();
         }
     }
