@@ -255,6 +255,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                 handleSocketData(JsonParser.object().from(payload));
             } catch(final JsonParserException e) {
                 catnip.logAdapter().error("Shard {}: Error parsing payload", shardInfo, e);
+                // TODO
                 stateReply(ShardConnectState.FAILED);
             } finally {
                 socketInputBuffer.setLength(0);
@@ -283,10 +284,10 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                 handleSocketData(JsonParser.object().from(buffer.toString(StandardCharsets.UTF_8)));
             } catch(final IOException e) {
                 catnip.logAdapter().error("Shard {}: Error decompressing payload", shardInfo, e);
-                stateReply(ShardConnectState.FAILED);
+                disconnectFromSocket(ShardConnectState.FAILED);
             } catch(final JsonParserException e) {
                 catnip.logAdapter().error("Shard {}: Error parsing payload", shardInfo, e);
-                stateReply(ShardConnectState.FAILED);
+                disconnectFromSocket(ShardConnectState.FAILED);
             }
         }
         socket.request(1L);
@@ -302,7 +303,11 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         }
         catnip.dispatchManager().dispatchEvent(Raw.GATEWAY_WEBSOCKET_CONNECTION_FAILED,
                 new GatewayConnectionFailedImpl(shardInfo, error, catnip));
-        stateReply(ShardConnectState.FAILED);
+        if(socketOpen) {
+            addToConnectQueue();
+        } else {
+            stateReply(ShardConnectState.FAILED);
+        }
     }
     
     //@SuppressWarnings("squid:S1172")
@@ -328,7 +333,6 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                     new GatewayClosedImpl(catnip, shardInfo, closeCode, reason));
         } catch(final Exception e) {
             catnip.logAdapter().error("Shard {}: Failure closing socket:", shardInfo, e);
-            stateReply(ShardConnectState.FAILED);
         }
         
         if(closeCode == GatewayCloseCode.INVALID_SEQ.code() || closeCode == GatewayCloseCode.SESSION_TIMEOUT.code()) {
@@ -361,6 +365,11 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                             shardInfo, closeCode, reason);
                 }
             }
+        }
+        if(socketOpen) {
+            addToConnectQueue();
+        } else {
+            stateReply(ShardConnectState.FAILED);
         }
         return null;
     }
@@ -395,9 +404,12 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     
     @Override
     public void disconnect() {
-        stateReply(ShardConnectState.CANCEL);
+        disconnectFromSocket(ShardConnectState.CANCEL);
+    }
+    
+    private void disconnectFromSocket(final ShardConnectState connectState) {
         lifecycleState = DISCONNECTED;
-        
+    
         if(socket != null) {
             closedByClient = true;
             if(socketOpen) {
@@ -405,8 +417,13 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             }
         }
         heartbeatAcked = true;
-        
+    
         catnip.taskScheduler().cancel(heartbeatTask.get());
+        if(socketOpen) {
+            addToConnectQueue();
+        } else {
+            stateReply(ShardConnectState.CANCEL);
+        }
     }
     
     @Override
@@ -563,6 +580,8 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             closedByClient = true;
         }
         
+        // TODO: Might this end up borking? Can we recv. something like this
+        //  when we've already IDENTIFYd?
         stateReply(ShardConnectState.INVALID);
         
         if(socket != null && socketOpen) {
@@ -578,6 +597,10 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                 socket.sendClose(1000, "Reconnecting...");
             }
         }
+    }
+    
+    private void addToConnectQueue() {
+        catnip.shardManager().addToConnectQueue(shardInfo.getId());
     }
     
     private JsonObject identify() {
