@@ -58,7 +58,7 @@ public final class Routes {
     public static final Route DELETE_ALL_REACTIONS                = new Route(DELETE, "/channels/:channel/messages/:message/reactions", "channel");
     public static final Route GET_REACTIONS                       = new Route(GET,    "/channels/:channel/messages/:message/reactions/:emojis", "channel");
     public static final Route DELETE_OWN_REACTION                 = new Route(DELETE, "/channels/:channel/messages/:message/reactions/:emojis/@me", "channel");
-    public static final Route CREATE_REACTION                     = new Route(PUT,    "/channels/:channel/messages/:message/reactions/:emojis/@me", "channel");
+    public static final Route CREATE_REACTION                     = new Route(PUT,    "/channels/:channel/messages/:message/reactions/:emojis/@me", "channel", true);
     public static final Route DELETE_USER_REACTION                = new Route(DELETE, "/channels/:channel/messages/:message/reactions/:emojis/:user", "channel");
     public static final Route DELETE_CHANNEL_PERMISSION           = new Route(DELETE, "/channels/:channel/permissions/:overwrite", "channel");
     public static final Route EDIT_CHANNEL_PERMISSIONS            = new Route(PUT,    "/channels/:channel/permissions/:overwrite", "channel");
@@ -128,16 +128,16 @@ public final class Routes {
     public static final Route GET_CURRENT_APPLICATION_INFORMATION = new Route(GET,    "/oauth2/applications/@me");
     public static final Route LIST_VOICE_REGIONS                  = new Route(GET,    "/voice/regions");
     // @formatter:on
-
+    
     private Routes() {
     }
     
     public enum HttpMethod {
         OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT, PATCH, OTHER
     }
-
+    
     @Accessors(fluent = true)
-    @SuppressWarnings({"WeakerAccess", "unused"})
+    @SuppressWarnings({"WeakerAccess", "unused", "ClassWithTooManyConstructors"})
     public static final class Route {
         @Getter
         private HttpMethod method;
@@ -147,6 +147,13 @@ public final class Routes {
         private String majorParam;
         @Getter
         private String ratelimitKey;
+        // Some routes, specifically reaction-create, require millisecond
+        // millisecond precision for correct operation. Rather than
+        // special-casing this with a String.contains() or similar, we can just
+        // mark individual routes as needed, and then the requester can just
+        // check Route#requiresMsPrecision()
+        @Getter
+        private boolean requiresMsPrecision;
         
         public Route() {
         }
@@ -154,16 +161,32 @@ public final class Routes {
         public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute) {
             this(method, baseRoute, null);
         }
-    
+        
+        public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute, final boolean requiresMsPrecision) {
+            this(method, baseRoute, null, requiresMsPrecision);
+        }
+        
         public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute, @Nullable final String majorParam) {
             this(method, baseRoute, majorParam, baseRoute);
         }
-    
-        public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute, @Nullable final String majorParam, @Nonnull final String ratelimitKey) {
+        
+        public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute, @Nullable final String majorParam,
+                     final boolean requiresMsPrecision) {
+            this(method, baseRoute, majorParam, baseRoute, requiresMsPrecision);
+        }
+        
+        public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute, @Nullable final String majorParam,
+                     @Nonnull final String ratelimitKey) {
+            this(method, baseRoute, majorParam, ratelimitKey, false);
+        }
+        
+        public Route(@Nonnull final HttpMethod method, @Nonnull final String baseRoute, @Nullable final String majorParam,
+                     @Nonnull final String ratelimitKey, final boolean requiresMsPrecision) {
             this.method = method;
             this.baseRoute = baseRoute;
             this.majorParam = majorParam;
             this.ratelimitKey = ratelimitKey;
+            this.requiresMsPrecision = requiresMsPrecision;
         }
         
         @Nonnull
@@ -174,7 +197,7 @@ public final class Routes {
             }
             final String majorParamString = ':' + majorParam;
             return new Route(method, baseRoute.replace(majorParamString, value), null,
-                    baseRoute.replace(majorParamString, value));
+                    baseRoute.replace(majorParamString, value), requiresMsPrecision);
         }
         
         @Nonnull
@@ -183,7 +206,7 @@ public final class Routes {
             if(param.equalsIgnoreCase(majorParam)) {
                 return this;
             }
-            return new Route(method, baseRoute.replace(':' + param, value), majorParam, ratelimitKey);
+            return new Route(method, baseRoute.replace(':' + param, value), majorParam, ratelimitKey, requiresMsPrecision);
         }
         
         @Nonnull
@@ -193,14 +216,14 @@ public final class Routes {
         }
         
         public Route withQueryString(final String qs) {
-            return new Route(method, baseRoute + qs, majorParam, ratelimitKey);
+            return new Route(method, baseRoute + qs, majorParam, ratelimitKey, requiresMsPrecision);
         }
-    
+        
         @Override
         public int hashCode() {
             return baseRoute.hashCode();
         }
-    
+        
         @Override
         public boolean equals(final Object o) {
             if(!(o instanceof Route)) {
@@ -208,7 +231,7 @@ public final class Routes {
             }
             return baseRoute.equalsIgnoreCase(((Route) o).baseRoute);
         }
-    
+        
         @Override
         public String toString() {
             return method + " " + baseRoute;
