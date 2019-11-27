@@ -1,5 +1,11 @@
 # catnip
 
+## READ THIS
+
+catnip v2 requires Java11+, but there is a bug with Java 11 + TLSv1.3 that causes runaway CPU usage.
+To avoid this problem, use Java 12 or later. See https://stackoverflow.com/questions/55298459 and
+https://stackoverflow.com/questions/54485755
+
 [![CircleCI](https://circleci.com/gh/mewna/catnip.svg?style=svg)](https://circleci.com/gh/mewna/catnip)
 [![powered by potato](https://img.shields.io/badge/powered%20by-potato-%23db325c.svg)](https://mewna.com/)
 ![GitHub tag (latest by date)](https://img.shields.io/github/tag-date/mewna/catnip.svg?style=popout)
