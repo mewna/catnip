@@ -264,15 +264,14 @@ public class DefaultShardManager extends AbstractShardManager {
             Single.zip(conditions().stream().map(e -> e.preshard(id)).collect(Collectors.toUnmodifiableList()),
                     // Yikes
                     data -> Arrays.stream(data).allMatch(e -> e == Boolean.TRUE))
-                    .doOnSuccess(res -> {
+                    .subscribe(res -> {
                         if(res) {
                             connectNextShard();
                         } else {
                             catnip().logAdapter().debug("Not all shard conditions succeeded, trying again in 1s");
                             catnip().taskScheduler().setTimer(1000L, t -> runConnectQueue());
                         }
-                    })
-                    .doOnError(e -> {
+                    }, e -> {
                         catnip().logAdapter().debug("Couldn't complete shard conditions, trying again in 1s", e);
                         catnip().taskScheduler().setTimer(1000L, t -> runConnectQueue());
                     });

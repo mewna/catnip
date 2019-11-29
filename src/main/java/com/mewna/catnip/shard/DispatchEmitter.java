@@ -194,8 +194,7 @@ public final class DispatchEmitter {
             case Raw.GUILD_UPDATE: {
                 final Guild guild = entityBuilder.createGuild(data);
                 catnip.cache().guildAsync(guild.idAsLong())
-                        .doOnError(e -> cacheErrorLog(type, e))
-                        .doOnSuccess(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, guild)));
+                        .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, guild)), e -> cacheErrorLog(type, e));
                 break;
             }
             case Raw.GUILD_DELETE: {
@@ -230,8 +229,7 @@ public final class DispatchEmitter {
             case Raw.GUILD_ROLE_UPDATE: {
                 final Role role = entityBuilder.createRole(data.getString("guild_id"), data.getObject("role"));
                 catnip.cache().roleAsync(role.guildIdAsLong(), role.idAsLong())
-                        .doOnError(e -> cacheErrorLog(type, e))
-                        .doOnSuccess(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, role)));
+                        .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, role)), e -> cacheErrorLog(type, e));
                 break;
             }
             case Raw.GUILD_ROLE_DELETE: {
@@ -259,8 +257,7 @@ public final class DispatchEmitter {
                 final String guild = data.getString("guild_id");
                 final PartialMember partialMember = entityBuilder.createPartialMember(guild, data);
                 catnip.cache().memberAsync(partialMember.guildIdAsLong(), partialMember.idAsLong())
-                        .doOnError(e -> cacheErrorLog(type, e))
-                        .doOnSuccess(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, partialMember)));
+                        .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, partialMember)), e -> cacheErrorLog(type, e));
                 break;
             }
             
@@ -268,8 +265,7 @@ public final class DispatchEmitter {
             case Raw.USER_UPDATE: {
                 final User user = entityBuilder.createUser(data);
                 catnip.cache().selfUserAsync()
-                        .doOnError(e -> cacheErrorLog(type, e))
-                        .doOnSuccess(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, user)));
+                        .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, user)), e -> cacheErrorLog(type, e));
                 break;
             }
             case Raw.PRESENCE_UPDATE: {
@@ -282,8 +278,7 @@ public final class DispatchEmitter {
                             "JSON in your report:\n{}", JsonUtil.encodePrettily(clone));
                 }
                 catnip.cache().presenceAsync(presence.idAsLong())
-                        .doOnError(e -> cacheErrorLog(type, e))
-                        .doOnSuccess(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, presence)));
+                        .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, presence)), e -> cacheErrorLog(type, e));
                 break;
             }
             

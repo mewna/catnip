@@ -157,7 +157,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         if(info != null) {
             connectSocket(info.url());
         } else {
-            catnip.fetchGatewayInfo().doOnSuccess(i -> connectSocket(i.url()));
+            catnip.fetchGatewayInfo().subscribe(i -> connectSocket(i.url()));
         }
     }
     
