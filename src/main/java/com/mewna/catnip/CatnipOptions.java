@@ -30,21 +30,16 @@ package com.mewna.catnip;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.SplitMemoryEntityCache;
-import com.mewna.catnip.entity.guild.Guild;
-import com.mewna.catnip.entity.lifecycle.HighWebsocketLatency;
-import com.mewna.catnip.entity.lifecycle.MemberChunkRerequest;
 import com.mewna.catnip.entity.serialization.DefaultEntitySerializer;
 import com.mewna.catnip.entity.serialization.EntitySerializer;
 import com.mewna.catnip.entity.user.Presence;
-import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.rest.ratelimit.DefaultRateLimiter;
 import com.mewna.catnip.rest.requester.Requester;
 import com.mewna.catnip.rest.requester.SerialRequester;
 import com.mewna.catnip.shard.CompressionMode;
-import com.mewna.catnip.shard.DiscordEvent.Raw;
+import com.mewna.catnip.shard.GatewayIntent;
 import com.mewna.catnip.shard.buffer.CachingBuffer;
 import com.mewna.catnip.shard.buffer.EventBuffer;
-import com.mewna.catnip.shard.buffer.NoopBuffer;
 import com.mewna.catnip.shard.event.DefaultDispatchManager;
 import com.mewna.catnip.shard.event.DispatchManager;
 import com.mewna.catnip.shard.manager.DefaultShardManager;
@@ -119,16 +114,23 @@ public final class CatnipOptions implements CatnipOptionsView, Cloneable {
     private boolean logLifecycleEvents = true;
     private boolean manualChunkRerequesting;
     private int largeThreshold = 250;
+    @Nonnull
     private TaskScheduler taskScheduler = new RxTaskScheduler();
+    @Nonnull
     private HttpClient httpClient = HttpClient.newBuilder()
             .executor(RxHelpers.FORK_JOIN_POOL)
             .build();
+    @Nonnull
     private CompressionMode compressionMode = CompressionMode.ZLIB;
     private boolean restRatelimitsWithoutClockSync;
     private long highLatencyThreshold = TimeUnit.SECONDS.toNanos(10);
+    @Nonnull
     private EntitySerializer<?> entitySerializer = new DefaultEntitySerializer();
+    @Nonnull
     private String apiHost = "https://discordapp.com";
     private int apiVersion = 6;
+    @Nonnull
+    private Set<GatewayIntent> intents = GatewayIntent.ALL_INTENTS;
     
     @Override
     public Object clone() {

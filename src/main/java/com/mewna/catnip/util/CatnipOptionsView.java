@@ -41,6 +41,7 @@ import com.mewna.catnip.rest.requester.Requester;
 import com.mewna.catnip.rest.requester.SerialRequester;
 import com.mewna.catnip.shard.CompressionMode;
 import com.mewna.catnip.shard.DiscordEvent.Raw;
+import com.mewna.catnip.shard.GatewayIntent;
 import com.mewna.catnip.shard.buffer.CachingBuffer;
 import com.mewna.catnip.shard.buffer.EventBuffer;
 import com.mewna.catnip.shard.buffer.NoopBuffer;
@@ -332,4 +333,16 @@ public interface CatnipOptionsView {
      * against API v7, nor is v7 actively supported at this time.
      */
     int apiVersion();
+    
+    /**
+     * @return The set of gateway intents that this bot wishes to use. This is
+     * OPTIONAL as of gateway v6, but will be REQUIRED in gateway v7.<br />
+     * Gateway intents are used to control the events that your bor receives.
+     * Intents are relatively-broad categories of events; see the documentation
+     * on each member of {@link GatewayIntent} for more information about what
+     * events are covered by each intent.<br/>
+     * <strong>NOTE THAT THIS IS NOT THE SAME AS
+     * {@link #disabledEvents()}!</strong>
+     */
+    Set<GatewayIntent> intents();
 }

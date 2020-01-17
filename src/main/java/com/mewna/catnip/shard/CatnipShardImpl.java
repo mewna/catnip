@@ -37,7 +37,6 @@ import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
-import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.shard.LifecycleEvent.Raw;
 import com.mewna.catnip.shard.manager.AbstractShardManager;
 import com.mewna.catnip.shard.manager.DefaultShardManager;
@@ -409,7 +408,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     
     private void disconnectFromSocket(final ShardConnectState connectState) {
         lifecycleState = DISCONNECTED;
-    
+        
         if(socket != null) {
             closedByClient = true;
             if(socketOpen) {
@@ -417,7 +416,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             }
         }
         heartbeatAcked = true;
-    
+        
         catnip.taskScheduler().cancel(heartbeatTask.get());
         if(socketOpen) {
             addToConnectQueue();
@@ -607,8 +606,9 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         // @formatter:off
         final JsonObject data = JsonObject.builder()
                 .value("token", catnip.options().token())
-                .value("guild_subscriptions", ((CatnipImpl) catnip).options().enableGuildSubscriptions())
+                .value("guild_subscriptions", catnip.options().enableGuildSubscriptions())
                 .value("large_threshold", catnip.options().largeThreshold())
+                .value("intents", GatewayIntent.from(catnip.options().intents()))
                 .array("shard")
                     .value(shardInfo.getId())
                     .value(shardInfo.getLimit())
