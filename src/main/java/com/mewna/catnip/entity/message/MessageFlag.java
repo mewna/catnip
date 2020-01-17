@@ -27,10 +27,10 @@
 
 package com.mewna.catnip.entity.message;
 
-import com.mewna.catnip.entity.util.Permission;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
+import javax.annotation.Nonnull;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -40,18 +40,21 @@ import java.util.Set;
  */
 @Accessors(fluent = true)
 public enum MessageFlag {
-    CROSSPOSTED(0x00000001),
-    IS_CROSSPOST(0x00000002),
-    SUPPRESS_EMBEDS(0x00000004),
-    SOURCE_MESSAGE_DELETED(0x00000008),
-    URGENT(0x00000010)
+    CROSSPOSTED(0x00000001, false),
+    IS_CROSSPOST(0x00000002, false),
+    SUPPRESS_EMBEDS(0x00000004, true),
+    SOURCE_MESSAGE_DELETED(0x00000008, false),
+    URGENT(0x00000010, false)
     ;
     
     @Getter
     private final int value;
+    @Getter
+    private final boolean canBeSet;
     
-    MessageFlag(final int value) {
+    MessageFlag(final int value, final boolean canBeSet) {
         this.value = value;
+        this.canBeSet = canBeSet;
     }
     
     public static Set<MessageFlag> toSet(final long asLong) {
@@ -64,5 +67,23 @@ public enum MessageFlag {
         }
         
         return perms;
+    }
+    
+    public static long from(@Nonnull final Iterable<MessageFlag> flags) {
+        long result = 0;
+        for(final MessageFlag flag : flags) {
+            result |= flag.value;
+        }
+        return result;
+    }
+    public static long fromSettable(@Nonnull final Iterable<MessageFlag> flags) {
+        long result = 0;
+        for(final MessageFlag flag : flags) {
+            if(!flag.canBeSet) {
+                throw new IllegalArgumentException("Message flag " + flag.name() + " can't be set!");
+            }
+            result |= flag.value;
+        }
+        return result;
     }
 }

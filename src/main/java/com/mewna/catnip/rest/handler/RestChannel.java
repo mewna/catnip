@@ -37,6 +37,7 @@ import com.mewna.catnip.entity.guild.PermissionOverride;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
+import com.mewna.catnip.entity.message.MessageFlag;
 import com.mewna.catnip.entity.message.MessageOptions;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.Emoji;
@@ -62,6 +63,7 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.mewna.catnip.util.JsonUtil.mapObjectContents;
 import static com.mewna.catnip.util.Utils.encodeUTF8;
@@ -162,19 +164,39 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
+                                       @Nonnull final String content, @Nonnull final Set<MessageFlag> flags) {
+        return editMessage(channelId, messageId, new MessageOptions().content(content).buildMessage(), flags);
+    }
+    
+    @Nonnull
+    public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
                                        @Nonnull final Embed embed) {
         return editMessage(channelId, messageId, new MessageOptions().embed(embed).buildMessage());
     }
     
     @Nonnull
     public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
+                                       @Nonnull final Embed embed, @Nonnull final Set<MessageFlag> flags) {
+        return editMessage(channelId, messageId, new MessageOptions().embed(embed).buildMessage(), flags);
+    }
+    
+    @Nonnull
+    public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
                                        @Nonnull final Message message) {
-        return Single.fromObservable(editMessageRaw(channelId, messageId, message).map(entityBuilder()::createMessage));
+        return editMessage(channelId, messageId, message, Set.of());
+    }
+    
+    @Nonnull
+    public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
+                                       @Nonnull final Message message, @Nonnull final Set<MessageFlag> flags) {
+        return Single.fromObservable(editMessageRaw(channelId, messageId, message, flags)
+                .map(entityBuilder()::createMessage));
     }
     
     @Nonnull
     public Observable<JsonObject> editMessageRaw(@Nonnull final String channelId, @Nonnull final String messageId,
-                                                 @Nonnull final Message message) {
+                                                 @Nonnull final Message message,
+                                                 @SuppressWarnings("TypeMayBeWeakened") @Nonnull final Set<MessageFlag> flags) {
         final JsonObject json = new JsonObject();
         if(message.embeds().isEmpty() && (message.content() == null || message.content().isEmpty())) {
             throw new IllegalArgumentException("Can't build a message with no content and no embed!");
@@ -185,6 +207,9 @@ public class RestChannel extends RestHandler {
         }
         if(json.get("embed") == null && json.get("content") == null) {
             throw new IllegalArgumentException("Can't build a message with no content and no embed!");
+        }
+        if(!flags.isEmpty()) {
+            json.put("flags", MessageFlag.fromSettable(flags));
         }
         return catnip().requester()
                 .queue(new OutboundRequest(Routes.EDIT_MESSAGE.withMajorParam(channelId),
