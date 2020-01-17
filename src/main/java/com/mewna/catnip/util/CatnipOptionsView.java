@@ -337,7 +337,7 @@ public interface CatnipOptionsView {
     /**
      * @return The set of gateway intents that this bot wishes to use. This is
      * OPTIONAL as of gateway v6, but will be REQUIRED in gateway v7.<br />
-     * Gateway intents are used to control the events that your bor receives.
+     * Gateway intents are used to control the events that your bot receives.
      * Intents are relatively-broad categories of events; see the documentation
      * on each member of {@link GatewayIntent} for more information about what
      * events are covered by each intent.<br/>
