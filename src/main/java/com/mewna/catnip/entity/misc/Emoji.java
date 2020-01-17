@@ -53,11 +53,12 @@ public interface Emoji extends Snowflake {
     String id();
     
     /**
-     * Name of this emoji, if it's {@link #custom() custom}, or it's {@link #unicode() unicode} value.
+     * Name of this emoji, if it's {@link #custom() custom}, or it's {@link #unicode() unicode} value.<br/>
+     * This may be null in the case of reactions.
      *
      * @return String representing the name or unicode value.
      */
-    @Nonnull
+    @Nullable
     @CheckReturnValue
     String name();
     
