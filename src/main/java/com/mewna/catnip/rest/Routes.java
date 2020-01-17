@@ -82,6 +82,7 @@ public final class Routes {
     public static final Route CREATE_GUILD_CHANNEL                = new Route(POST,   "/guilds/:guild/channels", "guild");
     public static final Route GET_GUILD_EMBED                     = new Route(GET,    "/guilds/:guild/embed", "guild");
     public static final Route MODIFY_GUILD_EMBED                  = new Route(PATCH,  "/guilds/:guild/embed", "guild");
+    public static final Route GET_GUILD_VANITY_URL                = new Route(GET,    "/guilds/:guild/vanity-url", "guild");
     public static final Route LIST_GUILD_EMOJIS                   = new Route(GET,    "/guilds/:guild/emojis", "guild");
     public static final Route GET_GUILD_EMOJI                     = new Route(GET,    "/guilds/:guild/emojis/:emojis", "guild");
     public static final Route CREATE_GUILD_EMOJI                  = new Route(POST,   "/guilds/:guild/emojis", "guild");

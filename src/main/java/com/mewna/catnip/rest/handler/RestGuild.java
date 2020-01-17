@@ -189,6 +189,18 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
+    public Single<CreatedInvite> getGuildVanityURL(@Nonnull final String guildId) {
+        return Single.fromObservable(getGuildVanityURLRaw(guildId))
+                .map(entityBuilder()::createCreatedInvite);
+    }
+    
+    public Observable<JsonObject> getGuildVanityURLRaw(@Nonnull final String guildId) {
+        return catnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_VANITY_URL.withMajorParam(guildId), Map.of()))
+                .map(ResponsePayload::object);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public Single<Role> createGuildRole(@Nonnull final String guildId, @Nonnull final RoleData roleData,
                                         @Nullable final String reason) {
         return Single.fromObservable(createGuildRoleRaw(guildId, roleData, reason)
