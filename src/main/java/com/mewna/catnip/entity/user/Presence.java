@@ -223,10 +223,15 @@ public interface Presence {
         @CheckReturnValue
         static Activity of(@Nonnull final String name, @Nonnull final ActivityType type, @Nullable final String url) {
             if(url == null && type == ActivityType.STREAMING) {
-                throw new IllegalArgumentException("A valid twitch.tv URL must be specified when the ActivityType == STREAMING!");
+                throw new IllegalArgumentException("A non-null twitch.tv or youtube.com URL must be specified when the ActivityType == STREAMING!");
             }
             if(url != null && type != ActivityType.STREAMING) {
                 throw new IllegalArgumentException("You can only specify an URL when the ActivityType == STREAMING!");
+            }
+            if(type == ActivityType.STREAMING) {
+                if(!url.startsWith("https://youtube.com/") && !url.startsWith("https://twitch.tv/")) {
+                    throw new IllegalArgumentException("A valid twitch.tv or youtube.com URL must be specified when the ActivityType == STREAMING!");
+                }
             }
             return ActivityImpl.builder()
                     .name(name)

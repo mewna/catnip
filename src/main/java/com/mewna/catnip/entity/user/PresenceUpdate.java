@@ -32,6 +32,7 @@ import com.mewna.catnip.entity.guild.GuildEntity;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.time.OffsetDateTime;
 import java.util.Set;
 
 /**
@@ -68,4 +69,10 @@ public interface PresenceUpdate extends Presence, GuildEntity, Snowflake {
      */
     @Nullable
     OnlineStatus desktopStatus();
+    
+    /**
+     * @return When the user started boosting this server.
+     */
+    @Nullable
+    OffsetDateTime premiumSince();
 }

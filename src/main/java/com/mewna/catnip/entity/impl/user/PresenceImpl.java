@@ -52,7 +52,6 @@ import java.util.Set;
 @AllArgsConstructor
 @SuppressWarnings("WeakerAccess")
 public class PresenceImpl implements Presence, RequiresCatnip {
-    
     private transient Catnip catnip;
     
     private OnlineStatus status;

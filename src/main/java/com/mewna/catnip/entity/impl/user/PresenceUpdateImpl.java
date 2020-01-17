@@ -29,11 +29,14 @@ package com.mewna.catnip.entity.impl.user;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.Timestamped;
 import com.mewna.catnip.entity.user.PresenceUpdate;
 import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -47,7 +50,7 @@ import java.util.Set;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class PresenceUpdateImpl implements PresenceUpdate, RequiresCatnip {
+public class PresenceUpdateImpl implements PresenceUpdate, RequiresCatnip, Timestamped {
     private transient Catnip catnip;
     
     private long idAsLong;
@@ -59,8 +62,15 @@ public class PresenceUpdateImpl implements PresenceUpdate, RequiresCatnip {
     private OnlineStatus mobileStatus;
     private OnlineStatus webStatus;
     private OnlineStatus desktopStatus;
+    private String premiumSince;
     
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
+    }
+    
+    @Nullable
+    @Override
+    public OffsetDateTime premiumSince() {
+        return parseTimestamp(premiumSince);
     }
 }

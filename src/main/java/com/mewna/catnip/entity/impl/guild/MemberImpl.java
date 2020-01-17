@@ -35,6 +35,7 @@ import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.Set;
 
@@ -66,10 +67,10 @@ public class MemberImpl implements Member, RequiresCatnip, Timestamped {
         return parseTimestamp(joinedAt);
     }
     
-    @Nonnull
+    @Nullable
     @Override
     public OffsetDateTime premiumSince() {
-        return parseTimestamp(premiumSince);
+        return premiumSince == null ? null : parseTimestamp(premiumSince);
     }
     
     @Override
