@@ -608,7 +608,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                 .value("token", catnip.options().token())
                 .value("guild_subscriptions", catnip.options().enableGuildSubscriptions())
                 .value("large_threshold", catnip.options().largeThreshold())
-                .value("intents", GatewayIntent.from(catnip.options().intents()))
+                // .value("intents", GatewayIntent.from(catnip.options().intents()))
                 .array("shard")
                     .value(shardInfo.getId())
                     .value(shardInfo.getLimit())
@@ -622,6 +622,12 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         // @formatter:on
         if(presence != null) {
             data.put("presence", ((PresenceImpl) presence).asPresenceUpdateJson());
+        }
+        // TODO: Hack: Allow not specifying intents for v6 gateway; remove this when intents required!
+        if(catnip.options().apiVersion() == 6 && !catnip.options().intents().isEmpty()) {
+            data.put("intents", GatewayIntent.from(catnip.options().intents()));
+        } else if(catnip.options().apiVersion() == 7) {
+            data.put("intents", GatewayIntent.from(catnip.options().intents()));
         }
         return basePayload(GatewayOp.IDENTIFY, data);
     }

@@ -130,7 +130,7 @@ public final class CatnipOptions implements CatnipOptionsView, Cloneable {
     private String apiHost = "https://discordapp.com";
     private int apiVersion = 6;
     @Nonnull
-    private Set<GatewayIntent> intents = GatewayIntent.ALL_INTENTS;
+    private Set<GatewayIntent> intents = GatewayIntent.UNPRIVILEGED_INTENTS;
     
     @Override
     public Object clone() {

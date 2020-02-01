@@ -31,6 +31,7 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.Set;
 
 /**
@@ -188,6 +189,9 @@ public enum GatewayIntent {
     DIRECT_MESSAGE_TYPING(1 << 14, false),
     ;
     public static final Set<GatewayIntent> ALL_INTENTS = Set.of(values());
+    public static final Set<GatewayIntent> UNPRIVILEGED_INTENTS = Set.of(Arrays.stream(values())
+            .filter(e -> !e.privileged)
+            .toArray(GatewayIntent[]::new));
     @Getter
     private final int value;
     @Getter
