@@ -71,7 +71,7 @@ public enum GatewayIntent {
      *     <li>{@link DiscordEvent#GUILD_MEMBER_REMOVE}</li>
      * </ul>
      */
-    GUILD_MEMBERS(1 << 1, false),
+    GUILD_MEMBERS(1 << 1, true),
     
     /**
      * <ul>
