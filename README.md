@@ -4,6 +4,9 @@
 [![powered by potato](https://img.shields.io/badge/powered%20by-potato-%23db325c.svg)](https://mewna.com/)
 ![GitHub tag (latest by date)](https://img.shields.io/github/tag-date/mewna/catnip.svg?style=popout)
 
+**This is catnip v1. v2 is currently in active development and is the only supported branch right now.**
+
+**Click [here](https://github.com/mewna/catnip/tree/v2) to go to the v2 branch.**
 
 A Discord API wrapper in Java. Fully async / reactive, built on top of
 [vert.x](https://vertx.io). catnip tries to map roughly 1:1 to how the Discord 
