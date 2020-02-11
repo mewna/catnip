@@ -45,6 +45,7 @@ import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.requester.Requester;
 import com.mewna.catnip.shard.CatnipShardImpl;
+import com.mewna.catnip.shard.GatewayIntent;
 import com.mewna.catnip.shard.GatewayOp;
 import com.mewna.catnip.util.PermissionUtil;
 import io.reactivex.Single;
@@ -62,6 +63,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 /**
  * @author amy
@@ -356,6 +358,15 @@ public class CatnipImpl implements Catnip {
         cacheWorker().catnip(this);
         options.requester().catnip(this);
         taskScheduler().catnip(this);
+        final List<GatewayIntent> privilegedIntents = options.intents().stream()
+                .filter(GatewayIntent::privileged)
+                .collect(Collectors.toList());
+        if(!privilegedIntents.isEmpty() && options.logPrivilegedIntentWarning()) {
+            // TODO: Check application flags to make sure this is actually a
+            //  necessary log -- requires REST request.
+            logAdapter().warn("Catnip is configured with the following privileged intents: {}", privilegedIntents);
+            logAdapter().warn("Please make sure your bot is whitelisted to use these intents!");
+        }
     }
     
     @Nonnull

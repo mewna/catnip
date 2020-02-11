@@ -11,10 +11,6 @@ https://stackoverflow.com/questions/54485755
 ![GitHub tag (latest by date)](https://img.shields.io/github/tag-date/mewna/catnip.svg?style=popout)
 ![LGTM Grade](https://img.shields.io/lgtm/grade/java/github/mewna/catnip)
 
-**This is catnip v1. v2 is currently in active development and is the only supported branch right now.**
-
-**Click [here](https://github.com/mewna/catnip/tree/v2) to go to the v2 branch.**
-
 A Discord API wrapper in Java. Fully async / reactive, built on top of
 [RxJava](http://reactivex.io). catnip tries to map roughly 1:1 to how the Discord 
 API works, both in terms of events and REST methods available.

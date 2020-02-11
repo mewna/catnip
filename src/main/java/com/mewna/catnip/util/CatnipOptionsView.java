@@ -345,4 +345,10 @@ public interface CatnipOptionsView {
      * {@link #disabledEvents()}!</strong>
      */
     Set<GatewayIntent> intents();
+    
+    /**
+     * Whether or not to log a warning about the use of privileged
+     * {@link GatewayIntent}s. Defaults to {@code true}.
+     */
+    boolean logPrivilegedIntentWarning();
 }

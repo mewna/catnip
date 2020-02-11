@@ -131,6 +131,7 @@ public final class CatnipOptions implements CatnipOptionsView, Cloneable {
     private int apiVersion = 6;
     @Nonnull
     private Set<GatewayIntent> intents = GatewayIntent.UNPRIVILEGED_INTENTS;
+    private boolean logPrivilegedIntentWarning = true;
     
     @Override
     public Object clone() {
