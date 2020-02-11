@@ -629,6 +629,9 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         } else if(catnip.options().apiVersion() == 7) {
             data.put("intents", GatewayIntent.from(catnip.options().intents()));
         }
+        if(catnip.options().customIdentifyOptions() != null) {
+            catnip.options().customIdentifyOptions().forEach(data::put);
+        }
         return basePayload(GatewayOp.IDENTIFY, data);
     }
     

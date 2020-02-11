@@ -27,6 +27,7 @@
 
 package com.mewna.catnip;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.SplitMemoryEntityCache;
@@ -132,6 +133,8 @@ public final class CatnipOptions implements CatnipOptionsView, Cloneable {
     @Nonnull
     private Set<GatewayIntent> intents = GatewayIntent.UNPRIVILEGED_INTENTS;
     private boolean logPrivilegedIntentWarning = true;
+    @Nullable
+    private JsonObject customIdentifyOptions;
     
     @Override
     public Object clone() {

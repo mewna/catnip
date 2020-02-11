@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.util;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
@@ -347,8 +348,15 @@ public interface CatnipOptionsView {
     Set<GatewayIntent> intents();
     
     /**
-     * Whether or not to log a warning about the use of privileged
+     * @return Whether or not to log a warning about the use of privileged
      * {@link GatewayIntent}s. Defaults to {@code true}.
      */
     boolean logPrivilegedIntentWarning();
+    
+    /**
+     * @return Custom {@code IDENTIFY} options to pass to the gateway when
+     * connecting. Useful for adding support for new features that catnip
+     * doesn't yet support. Defaults to {@code null}.
+     */
+    JsonObject customIdentifyOptions();
 }
