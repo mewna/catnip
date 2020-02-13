@@ -31,6 +31,7 @@ import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.cache.view.*;
+import com.mewna.catnip.entity.builder.PresenceBuilder;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.channel.UserDMChannel;
@@ -40,6 +41,7 @@ import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.Presence;
+import com.mewna.catnip.entity.user.Presence.OnlineStatus;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.util.rx.RxHelpers;
@@ -55,6 +57,7 @@ import javax.annotation.Nullable;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -70,6 +73,8 @@ import static com.mewna.catnip.util.Utils.removeIf;
 @Accessors(fluent = true, chain = true)
 @SuppressWarnings("unused")
 public abstract class MemoryEntityCache implements EntityCacheWorker {
+    private static final Presence DEFAULT_PRESENCE = new PresenceBuilder().status(OnlineStatus.OFFLINE).build();
+    
     @SuppressWarnings("WeakerAccess")
     protected final MutableNamedCacheView<Guild> guildCache = createGuildCacheView();
     @SuppressWarnings("WeakerAccess")
@@ -339,6 +344,14 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     
     // Man these """async""" methods are a joke.
     
+    protected <I, T> Single<T> or(final I id, final T data, final T def) {
+        if(data == null && def == null) {
+            return Single.error(new IllegalArgumentException("No entity for: " + id));
+        } else {
+            return Single.just(Objects.requireNonNullElse(data, def));
+        }
+    }
+    
     protected <I, T> Single<T> or(final I id, final T data) {
         if(data == null) {
             return Single.error(new IllegalArgumentException("No entity for: " + id));
@@ -362,7 +375,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
     public Single<Presence> presenceAsync(final long id) {
-        return or(id, presence(id));
+        return or(id, presence(id), DEFAULT_PRESENCE);
     }
     
     @Nonnull

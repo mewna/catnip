@@ -272,6 +272,7 @@ public final class DispatchEmitter {
                 final PresenceUpdate presence = entityBuilder.createPresenceUpdate(data);
                 if(presence.status() == OnlineStatus.INVISIBLE) {
                     final JsonObject clone = new JsonObject(payload);
+                    // catnip-internal key
                     clone.remove("shard");
                     catnip.logAdapter().warn("Received a presence update with 'invisible' as the online status, " +
                             "but we should never get this. If you report this to Discord, include the following " +
