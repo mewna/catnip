@@ -32,6 +32,7 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.SplitMemoryEntityCache;
+import com.mewna.catnip.entity.delegate.EntityDelegator;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.lifecycle.HighWebsocketLatency;
 import com.mewna.catnip.entity.lifecycle.MemberChunkRerequest;
@@ -61,6 +62,7 @@ import com.mewna.catnip.util.scheduler.RxTaskScheduler;
 import com.mewna.catnip.util.scheduler.TaskScheduler;
 import io.reactivex.Scheduler;
 
+import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.net.http.HttpClient;
@@ -241,6 +243,7 @@ public interface CatnipOptionsView {
      * The RxJava scheduler that catnip should use for scheduling things like
      * stream subscriptions. Defaults to {@link RxHelpers#FORK_JOIN_SCHEDULER}.
      */
+    @Nonnull
     Scheduler rxScheduler();
     
     /**
@@ -277,6 +280,7 @@ public interface CatnipOptionsView {
      * {@link Catnip#taskScheduler()}, and can safely be used for any task
      * scheduling needs you may have. Defaults to {@link RxTaskScheduler}.
      */
+    @Nonnull
     TaskScheduler taskScheduler();
     
     /**
@@ -284,12 +288,14 @@ public interface CatnipOptionsView {
      * requests. Defaults to an instance that uses
      * {@link RxHelpers#FORK_JOIN_POOL} as its executor.
      */
+    @Nonnull
     HttpClient httpClient();
     
     /**
      * How catnip compresses incoming events from Discord. Default is
      * {@link CompressionMode#ZLIB}.
      */
+    @Nonnull
     CompressionMode compressionMode();
     
     /**
@@ -317,6 +323,7 @@ public interface CatnipOptionsView {
      * behaves internally, but rather will affect user-controlled serialization
      * for interfacing with the outside world.
      */
+    @Nonnull
     EntitySerializer<?> entitySerializer();
     
     /**
@@ -325,6 +332,7 @@ public interface CatnipOptionsView {
      * the case of ex. running tests against a local mock API. Providing the
      * protocol is <strong>REQUIRED</strong>.
      */
+    @Nonnull
     String apiHost();
     
     /**
@@ -333,6 +341,7 @@ public interface CatnipOptionsView {
      * running tests against a local mock API. Note that catnip is not tested
      * against API v7, nor is v7 actively supported at this time.
      */
+    @Nonnegative
     int apiVersion();
     
     /**
@@ -345,6 +354,7 @@ public interface CatnipOptionsView {
      * <strong>NOTE THAT THIS IS NOT THE SAME AS
      * {@link #disabledEvents()}!</strong>
      */
+    @Nonnull
     Set<GatewayIntent> intents();
     
     /**
@@ -358,5 +368,13 @@ public interface CatnipOptionsView {
      * connecting. Useful for adding support for new features that catnip
      * doesn't yet support. Defaults to {@code null}.
      */
+    @Nonnull
     JsonObject customIdentifyOptions();
+    
+    /**
+     * @return The delegator used to delegate catnip entities into a custom
+     * wrapper entity. Defaults to the identity function.
+     */
+    @Nonnull
+    EntityDelegator entityDelegator();
 }

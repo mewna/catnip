@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 amy, All rights reserved.
+ * Copyright (c) 2020 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,29 +25,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.serialization;
+package com.mewna.catnip.entity.delegate;
 
-import com.mewna.catnip.entity.Entity;
-
-import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
 /**
  * @author amy
- * @since 9/12/19.
+ * @since 2/13/20.
  */
-public final class DefaultEntitySerializer implements EntitySerializer<Void> {
-    @Nonnull
+public final class DefaultEntityDelegator implements EntityDelegator {
     @Override
-    @CheckReturnValue
-    public Void serialize(@Nonnull final Entity entity) {
-        throw new IllegalStateException("Entity serialization is not configured!");
-    }
-    
-    @Nonnull
-    @Override
-    @CheckReturnValue
-    public <E extends Entity> E deserialize(@Nonnull final Void data, @Nonnull final Class<E> as) {
-        throw new IllegalStateException("Entity serialization is not configured!");
+    @SuppressWarnings("unchecked")
+    public <T, R extends T> R delegate(@Nonnull final Class<T> type, @Nonnull final T data) {
+        return (R) data;
     }
 }
