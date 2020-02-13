@@ -118,8 +118,10 @@ public final class CatnipOptions implements CatnipOptionsView, Cloneable {
     @Nonnull
     private TaskScheduler taskScheduler = new RxTaskScheduler();
     @Nonnull
+    @SuppressWarnings("UnnecessarilyQualifiedInnerClassAccess")
     private HttpClient httpClient = HttpClient.newBuilder()
             .executor(RxHelpers.FORK_JOIN_POOL)
+            .version(HttpClient.Version.HTTP_1_1)
             .build();
     @Nonnull
     private CompressionMode compressionMode = CompressionMode.ZLIB;
