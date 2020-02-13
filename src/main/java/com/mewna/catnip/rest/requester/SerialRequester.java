@@ -31,7 +31,6 @@ import com.mewna.catnip.rest.Routes.Route;
 import com.mewna.catnip.rest.ratelimit.RateLimiter;
 
 import javax.annotation.Nonnull;
-import java.net.http.HttpClient.Builder;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
@@ -40,8 +39,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SerialRequester extends AbstractRequester {
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
     
-    public SerialRequester(@Nonnull final RateLimiter rateLimiter, @Nonnull final Builder clientBuilder) {
-        super(rateLimiter, clientBuilder);
+    public SerialRequester(@Nonnull final RateLimiter rateLimiter) {
+        super(rateLimiter);
     }
     
     @Nonnull

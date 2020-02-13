@@ -104,7 +104,7 @@ public final class CatnipOptions implements CatnipOptionsView, Cloneable {
     @Nonnull
     private Set<String> disabledEvents = Set.of();
     @Nonnull
-    private Requester requester = new SerialRequester(new DefaultRateLimiter(), HttpClient.newBuilder());
+    private Requester requester = new SerialRequester(new DefaultRateLimiter());
     private boolean logExtensionOverrides = true;
     private boolean validateToken = true;
     private boolean captureRestStacktraces = true;

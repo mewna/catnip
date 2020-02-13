@@ -75,12 +75,10 @@ public abstract class AbstractRequester implements Requester {
     private static final StackWalker STACK_WALKER = StackWalker.getInstance(Set.of(Option.RETAIN_CLASS_REFERENCE));
     
     protected final RateLimiter rateLimiter;
-    protected final Builder clientBuilder;
     protected Catnip catnip;
     
-    public AbstractRequester(@Nonnull final RateLimiter rateLimiter, @Nonnull final Builder clientBuilder) {
+    public AbstractRequester(@Nonnull final RateLimiter rateLimiter) {
         this.rateLimiter = rateLimiter;
-        this.clientBuilder = clientBuilder;
     }
     
     @Override
@@ -219,7 +217,7 @@ public abstract class AbstractRequester implements Requester {
         // Update request start time as soon as possible
         // See QueuedRequest docs for why we do this
         request.start = System.nanoTime();
-        catnip.httpClient().sendAsync(builder.build(), BodyHandlers.ofString())
+        catnip.options().httpClient().sendAsync(builder.build(), BodyHandlers.ofString())
                 .thenAccept(res -> {
                     final int code = res.statusCode();
                     final String message = "Unavailable to due Java's HTTP client.";

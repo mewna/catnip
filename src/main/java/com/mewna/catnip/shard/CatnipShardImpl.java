@@ -173,7 +173,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         if(catnip.options().compressionMode() != CompressionMode.NONE) {
             url += "&compress=" + catnip.options().compressionMode().asDiscord();
         }
-        catnip.httpClient().newWebSocketBuilder().buildAsync(URI.create(url), this).thenAcceptAsync(ws -> {
+        catnip.options().httpClient().newWebSocketBuilder().buildAsync(URI.create(url), this).thenAcceptAsync(ws -> {
             lifecycleState = CONNECTED;
             socket = new ReentrantLockWebSocket(ws);
             socketOpen = true;

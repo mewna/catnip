@@ -36,8 +36,8 @@ import java.net.http.HttpClient.Builder;
 public class BurstRequester extends AbstractRequester {
     private final Bucket bucket = new BurstBucket(this);
     
-    public BurstRequester(@Nonnull final RateLimiter rateLimiter, @Nonnull final Builder clientBuilder) {
-        super(rateLimiter, clientBuilder);
+    public BurstRequester(@Nonnull final RateLimiter rateLimiter) {
+        super(rateLimiter);
     }
     
     @Nonnull

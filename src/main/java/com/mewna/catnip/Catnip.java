@@ -343,14 +343,6 @@ public interface Catnip {
     long clientIdAsLong();
     
     /**
-     * @return The HTTP client that catnip uses for websockets and REST
-     * requests.
-     */
-    default HttpClient httpClient() {
-        return options().httpClient();
-    }
-    
-    /**
      * @return The entity serializer that catnip uses for converting entities
      * into an external-friendly format.
      */
