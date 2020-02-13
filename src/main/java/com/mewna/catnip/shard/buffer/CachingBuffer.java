@@ -30,6 +30,7 @@ package com.mewna.catnip.shard.buffer;
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.impl.lifecycle.ChunkingDoneImpl;
 import com.mewna.catnip.entity.impl.lifecycle.MemberChunkRerequestImpl;
+import com.mewna.catnip.shard.GatewayIntent;
 import com.mewna.catnip.shard.LifecycleEvent;
 import com.mewna.catnip.shard.ShardInfo;
 import com.mewna.catnip.util.JsonUtil;
@@ -150,7 +151,14 @@ public class CachingBuffer extends AbstractBuffer {
             
             // Trigger member chunking if needed
             final int memberCount = payloadData.getInt("member_count");
-            if(catnip().options().chunkMembers() && memberCount > catnip().options().largeThreshold()) {
+            // TODO: v6 pre-intents compatibility hack
+            // REQUEST_GUILD_MEMBERS when using intents requires GUILD_MEMBERS
+            // intent when requesting the entire guild member list when using
+            // intents.
+            // See https://github.com/discordapp/discord-api-docs/pull/1307#issuecomment-581561519
+            final boolean canChunkViaIntents = catnip().options().intents().isEmpty()
+                    || catnip().options().intents().contains(GatewayIntent.GUILD_MEMBERS);
+            if(canChunkViaIntents && catnip().options().chunkMembers() && memberCount > catnip().options().largeThreshold()) {
                 // If we're chunking members, calculate how many chunks we have to await
                 int chunks = memberCount / 1000;
                 if(memberCount % 1000 != 0) {
@@ -284,6 +292,19 @@ public class CachingBuffer extends AbstractBuffer {
         }
     }
     
+    @Accessors(fluent = true)
+    @AllArgsConstructor
+    private static final class Counter {
+        @Getter
+        private final JsonObject guildCreate;
+        @Getter
+        private int count;
+        
+        void decrement() {
+            --count;
+        }
+    }
+    
     @Value
     @Accessors(fluent = true)
     private final class BufferState {
@@ -345,19 +366,6 @@ public class CachingBuffer extends AbstractBuffer {
         
         JsonObject guildCreate(final String guild) {
             return guildChunkCount.get(guild).guildCreate();
-        }
-    }
-    
-    @Accessors(fluent = true)
-    @AllArgsConstructor
-    private static final class Counter {
-        @Getter
-        private final JsonObject guildCreate;
-        @Getter
-        private int count;
-        
-        void decrement() {
-            --count;
         }
     }
 }
