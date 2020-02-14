@@ -373,6 +373,7 @@ public class RestGuild extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public MemberPaginator listGuildMembers(@Nonnull final String guildId) {
+        // TODO: Handle intents here (GUILD_MEMBERS)
         return new MemberPaginator(entityBuilder(), guildId) {
             @Nonnull
             @Override
