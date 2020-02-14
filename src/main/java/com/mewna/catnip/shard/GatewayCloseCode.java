@@ -58,6 +58,9 @@ public enum GatewayCloseCode {
     SESSION_TIMEOUT(4009, "Your session timed out. Reconnect and start a new one."),
     INVALID_SHARD(4010, "You sent us an invalid shard when identifying."),
     SHARDING_REQUIRED(4011, "The session would have handled too many guilds - you are required to shard your connection in order to connect."),
+    INVALID_VERSION(4012, "You sent an invalid version for the gateway."),
+    INVALID_INTENTS(4013, "You sent an invalid intent for a Gateway Intent. You may have incorrectly calculated the bitwise value."),
+    DISALLOWED_INTENTS(4014, "You sent a disallowed intent for a Gateway Intent. You may have tried to specify an intent that you have not enabled or are not whitelisted for."),
     ;
     private final int code;
     private final String message;
