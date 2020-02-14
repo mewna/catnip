@@ -361,6 +361,10 @@ public class CatnipImpl implements Catnip {
         final List<GatewayIntent> privilegedIntents = options.intents().stream()
                 .filter(GatewayIntent::privileged)
                 .collect(Collectors.toList());
+        if(!options.enableGuildSubscriptions() && options.intents().isEmpty()) {
+            logAdapter().warn("Guild subscriptions are disabled and no intents specified!");
+            logAdapter().warn("You probably want to use intents instead.");
+        }
         if(!privilegedIntents.isEmpty() && options.logPrivilegedIntentWarning()) {
             // TODO: Check application flags to make sure this is actually a
             //  necessary log -- requires REST request.
