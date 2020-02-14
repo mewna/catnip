@@ -52,5 +52,7 @@ public enum GuildFeature {
     /**
      * See https://github.com/mewna/catnip/issues/392
      */
+    @Deprecated
     MEMBER_LIST_DISABLED,
+    PUBLIC_DISABLED
 }
