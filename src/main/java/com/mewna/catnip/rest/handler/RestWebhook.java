@@ -33,6 +33,7 @@ import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.channel.Webhook.WebhookEditFields;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageOptions;
+import com.mewna.catnip.entity.message.MessageParse;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes;
@@ -44,6 +45,7 @@ import io.reactivex.Single;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.EnumSet;
 import java.util.Map;
 
 import static com.mewna.catnip.util.JsonUtil.mapObjectContents;
@@ -194,14 +196,34 @@ public class RestWebhook extends RestHandler {
         if(avatarUrl != null && !avatarUrl.isEmpty()) {
             builder.value("avatar_url", avatarUrl);
         }
-        
+    
         final JsonObject body = builder.done();
-        
+    
         if(body.get("embeds") == null && body.get("content") == null
                 && !options.hasFiles()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
         }
-        
+    
+        if(options.parse() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
+            final JsonObject allowedMentions = new JsonObject();
+            final EnumSet<MessageParse> parse = options.parse();
+            if(parse == null) {
+                // These act like a whitelist regardless of parse being present.
+                allowedMentions.put("users", options.mentionedUsers());
+                allowedMentions.put("roles", options.mentionedRoles());
+            } else {
+                allowedMentions.put("parse", parse);
+                //If either list is present along with the respective parse option, validation fails. The contains check avoids this.
+                if(!parse.contains(MessageParse.USERS)) {
+                    allowedMentions.put("users", options.mentionedUsers());
+                }
+                if(!parse.contains(MessageParse.ROLES)) {
+                    allowedMentions.put("roles", options.mentionedRoles());
+                }
+            }
+            builder.value("allowed_mentions", allowedMentions);
+        }
+    
         return catnip().requester().
                 queue(new OutboundRequest(Routes.EXECUTE_WEBHOOK.withMajorParam(webhookId).withQueryString("?wait=true"),
                         Map.of("token", webhookToken), body).needsToken(false)

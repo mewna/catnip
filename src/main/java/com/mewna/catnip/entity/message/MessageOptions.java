@@ -27,22 +27,25 @@
 
 package com.mewna.catnip.entity.message;
 
+import com.mewna.catnip.entity.guild.Member;
+import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.impl.message.MessageImpl;
-import lombok.*;
+import com.mewna.catnip.entity.user.User;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Options used for creating a new message.
@@ -62,10 +65,77 @@ public class MessageOptions {
     @Setter(AccessLevel.NONE)
     private List<ImmutablePair<String, byte[]>> files;
     
+    /**
+     * Restricts who get mentioned by this message. This does <b>NOT</b> get added to constructed {@link Message message} instances.
+     * Set to {@link EnumSet#noneOf(Class) an empty enum set} or {@link Collection#clear() clear} to disable all parsing of mentions except for whitelisted {@link #users user} and {@link #roles role} mentions.
+     * Set to null to allow all mentions. This may be overwritten by {@link #users user} and {@link #roles role} mention whitelists.
+     *
+     * @see #roles
+     * @see #users
+     * @see #parseNoMentions()
+     * @see #parseAllMentions()
+     * @see #parseMention(MessageParse)
+     * @see #parseMentions(MessageParse...)
+     * @see #parseMentions(Collection)
+     * @see #parseMentionByName(String)
+     * @see #parseMentionsByName(String...)
+     * @see #parseMentionsByName(Collection)
+     */
+    @Setter(AccessLevel.NONE)
+    private EnumSet<MessageParse> parse;
+    /**
+     * A whitelist of role IDs that gets mentioned by this message. This does <b>NOT</b> get added to constructed {@link Message message} instances.
+     * This has no effect if {@link MessageParse#ROLES roles} is present in the {@link #parse() parse} set.
+     * Set to {@link Collections#emptySet() an empty set} or {@link Collection#clear() clear} to disable all parsing of role mentions.
+     * Set to null to allow all roles to be mentioned by this message.
+     *
+     * @see #mentionedUsers()
+     * @see #mentionNoUsers()
+     * @see #mentionAllUsers()
+     * @see #mentionUser(User)
+     * @see #mentionUserById(long)
+     * @see #mentionUserById(String)
+     * @see #mentionUsers(User...)
+     * @see #mentionUsers(Collection)
+     * @see #mentionUsersById(long...)
+     * @see #mentionUsersById(String...)
+     * @see #mentionUsersById(Collection)
+     * @see #mentionMember(Member)
+     * @see #mentionMembers(Member...)
+     * @see #mentionMembers(Collection)
+     */
+    @Setter(AccessLevel.NONE)
+    @Getter(AccessLevel.NONE)
+    private Set<String> roles;
+    /**
+     * A whitelist of user IDs that gets mentioned by this message. This does <b>NOT</b> get added to constructed {@link Message message} instances.
+     * This has no effect if {@link MessageParse#USERS users} is present in the {@link #parse() parse} set.
+     * Set to {@link Collections#emptySet() an empty set} or {@link Collection#clear() clear} to disable all parsing of user mentions.
+     * Set to null to allow all users to be mentioned by this message.
+     *
+     * @see #mentionedRoles()
+     * @see #mentionNoRoles()
+     * @see #mentionAllRoles()
+     * @see #mentionRole(Role)
+     * @see #mentionRoleById(long)
+     * @see #mentionRoleById(String)
+     * @see #mentionRoles(Role...)
+     * @see #mentionRoles(Collection)
+     * @see #mentionRolesById(long...)
+     * @see #mentionRolesById(String...)
+     * @see #mentionRolesById(Collection)
+     */
+    @Setter(AccessLevel.NONE)
+    @Getter(AccessLevel.NONE)
+    private Set<String> users;
+    
     public MessageOptions(@Nonnull final MessageOptions options) {
         content = options.content;
         embed = options.embed;
         files = options.files;
+        parse = options.parse;
+        roles = options.roles;
+        users = options.users;
     }
     
     public MessageOptions(@Nonnull final Message message) {
@@ -171,6 +241,7 @@ public class MessageOptions {
     /**
      * Constructs a new immutable list containing all of the raw file data. Each immutable pair contains the name and the data buffer.
      * <br><p>This method is <b>expensive!</b> It constructs a new list each time and should be used sparingly.</p>
+     *
      * @return A copy of the raw file list.
      */
     @CheckReturnValue
@@ -180,7 +251,568 @@ public class MessageOptions {
     }
     
     /**
+     * Clears {@link #parse parse} or sets it to an empty set to mark as mention none.
+     * This may be overwritten by {@link #users user} and {@link #roles role} mention whitelists.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions parseNoMentions() {
+        if(parse == null) {
+            parse = EnumSet.noneOf(MessageParse.class);
+        } else {
+            parse.clear();
+        }
+        return this;
+    }
+    
+    /**
+     * Nullifies the {@link #parse parse} set to mark as mention all.
+     * This may be overwritten by {@link #users user} and {@link #roles role} mention whitelists.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions parseAllMentions() {
+        parse = null;
+        return this;
+    }
+    
+    /**
+     * Add a restriction on who gets mentioned by this message. This does <b>NOT</b> get added to constructed {@link Message Message} instances.
+     *
+     * @param parse A collection of mentions to allow parsing for.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions parseMentionsByName(final Collection<String> parse) {
+        for(final String id : parse) {
+            //noinspection ResultOfMethodCallIgnored
+            parseMention(MessageParse.byName(id));
+        }
+        return this;
+    }
+    
+    /**
+     * Add a restriction on who gets mentioned by this message. This does <b>NOT</b> get added to constructed {@link Message Message} instances.
+     *
+     * @param parse An array of mentions to allow parsing for.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions parseMentionsByName(final String... parse) {
+        for(final String id : parse) {
+            //noinspection ResultOfMethodCallIgnored
+            parseMention(MessageParse.byName(id));
+        }
+        return this;
+    }
+    
+    /**
+     * Add a restriction on who gets mentioned by this message. This does <b>NOT</b> get added to constructed {@link Message Message} instances.
+     *
+     * @param parse A collection of mentions to allow parsing for.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions parseMentions(final Collection<MessageParse> parse) {
+        if(this.parse == null) {
+            this.parse = EnumSet.copyOf(parse);
+        } else {
+            this.parse.addAll(parse);
+        }
+        return this;
+    }
+    
+    /**
+     * Add a restriction on who gets mentioned by this message. This does <b>NOT</b> get added to constructed {@link Message Message} instances.
+     *
+     * @param parse An array of mentions to allow parsing for.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions parseMentions(final MessageParse... parse) {
+        if(this.parse == null) {
+            this.parse = EnumSet.noneOf(MessageParse.class);
+        }
+        Collections.addAll(this.parse, parse);
+        return this;
+    }
+    
+    /**
+     * Add a restriction on who gets mentioned by this message. This does <b>NOT</b> get added to constructed {@link Message Message} instances.
+     *
+     * @param parse A mention to allow parsing for.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions parseMentionByName(final String parse) {
+        return parseMention(MessageParse.byName(parse));
+    }
+    
+    /**
+     * Add a restriction on who gets mentioned by this message. This does <b>NOT</b> get added to constructed {@link Message Message} instances.
+     *
+     * @param parse A mention to allow parsing for.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions parseMention(final MessageParse parse) {
+        if(this.parse == null) {
+            this.parse = EnumSet.of(parse);
+        } else {
+            this.parse.add(parse);
+        }
+        return this;
+    }
+    
+    /**
+     * Clears {@link #users users} or sets it to an empty set to mark as mention none.
+     * This has no effect if {@link MessageParse#USERS users} is present in the {@link #parse() parse} set.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionNoUsers() {
+        if(users == null) {
+            users = Collections.emptySet();
+        } else {
+            users.clear();
+        }
+        return this;
+    }
+    
+    /**
+     * Nullifies the {@link #users users} set to mark as mention all.
+     * This has no effect if {@link MessageParse#USERS users} is present in the {@link #parse() parse} set.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionAllUsers() {
+        users = null;
+        return this;
+    }
+    
+    /**
+     * Adds users to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#USERS users} is present in the {@link #parse() parse} set.
+     *
+     * @param users A collection of members to add.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionMembers(final Collection<Member> users) {
+        if(this.users == null || this.users == Collections.EMPTY_SET) {
+            this.users = new HashSet<>();
+        }
+        for(final Member user : users) {
+            this.users.add(user.id());
+        }
+        return this;
+    }
+    
+    /**
+     * Adds users to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#USERS users} is present in the {@link #parse() parse} set.
+     *
+     * @param users An array of members to add.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionMembers(final Member... users) {
+        if(this.users == null || this.users == Collections.EMPTY_SET) {
+            this.users = new HashSet<>();
+        }
+        for(final Member user : users) {
+            this.users.add(user.id());
+        }
+        return this;
+    }
+    
+    /**
+     * Adds users to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#USERS users} is present in the {@link #parse() parse} set.
+     *
+     * @param users A collection of users to add.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionUsers(final Collection<User> users) {
+        if(this.users == null || this.users == Collections.EMPTY_SET) {
+            this.users = new HashSet<>();
+        }
+        for(final User user : users) {
+            this.users.add(user.id());
+        }
+        return this;
+    }
+    
+    /**
+     * Adds users to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#USERS users} is present in the {@link #parse() parse} set.
+     *
+     * @param users An array of users to add.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionUsers(final User... users) {
+        if(this.users == null || this.users == Collections.EMPTY_SET) {
+            this.users = new HashSet<>();
+        }
+        for(final User user : users) {
+            this.users.add(user.id());
+        }
+        return this;
+    }
+    
+    /**
+     * Adds users to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#USERS users} is present in the {@link #parse() parse} set.
+     * There is <b>NO</b> validation of if any of these strings are a proper snowflake.
+     *
+     * @param users A collection of user IDs to add.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionUsersById(final Collection<String> users) {
+        if(this.users == null || this.users == Collections.EMPTY_SET) {
+            this.users = new HashSet<>();
+        }
+        this.users.addAll(users);
+        return this;
+    }
+    
+    /**
+     * Adds users to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#USERS users} is present in the {@link #parse() parse} set.
+     * There is <b>NO</b> validation of if any of these strings are a proper snowflake.
+     *
+     * @param users An array of user IDs to add.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionUsersById(final String... users) {
+        if(this.users == null || this.users == Collections.EMPTY_SET) {
+            this.users = new HashSet<>();
+        }
+        Collections.addAll(this.users, users);
+        return this;
+    }
+    
+    /**
+     * Adds users to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#USERS users} is present in the {@link #parse() parse} set.
+     *
+     * @param users An array of user IDs to add.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionUsersById(final long... users) {
+        if(this.users == null || this.users == Collections.EMPTY_SET) {
+            this.users = new HashSet<>();
+        }
+        for(final long user : users) {
+            this.users.add(Long.toUnsignedString(user));
+        }
+        return this;
+    }
+    
+    /**
+     * Adds a user to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#USERS users} is present in the {@link #parse() parse} set.
+     *
+     * @param member A member to add.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionMember(final Member member) {
+        return mentionUserById(member.id());
+    }
+    
+    /**
+     * Adds a user to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#USERS users} is present in the {@link #parse() parse} set.
+     *
+     * @param user A user to add.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionUser(final User user) {
+        return mentionUserById(user.id());
+    }
+    
+    /**
+     * Adds a user to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#USERS users} is present in the {@link #parse() parse} set.
+     * There is <b>NO</b> validation of if the string is a proper snowflake.
+     *
+     * @param id A user ID to add.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionUserById(final String id) {
+        if(users == null || users == Collections.EMPTY_SET) {
+            users = new HashSet<>();
+        }
+        users.add(id);
+        return this;
+    }
+    
+    /**
+     * Adds a user to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#USERS users} is present in the {@link #parse() parse} set.
+     *
+     * @param id A user ID to add.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionUserById(final long id) {
+        return mentionUserById(Long.toUnsignedString(id));
+    }
+    
+    /**
+     * A whitelist of mentioned users. Mentions returned from here are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#USERS users} is present in the {@link #parse() parse} set.
+     * There is <b>NO</b> validation of if any of the strings are a proper snowflake.
+     *
+     * @return Mutable whitelist of user IDs, or null for all.
+     */
+    @CheckReturnValue
+    @Nullable
+    public Set<String> mentionedUsers() {
+        return users;
+    }
+    
+    /**
+     * Clears {@link #roles roles} or sets it to an empty set to mark as mention none.
+     * This has no effect if {@link MessageParse#ROLES roles} is present in the {@link #parse() parse} set.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionNoRoles() {
+        if(roles == null) {
+            roles = Collections.emptySet();
+        } else {
+            roles.clear();
+        }
+        return this;
+    }
+    
+    /**
+     * Nullifies the {@link #roles roles} set to mark as mention all.
+     * This has no effect if {@link MessageParse#ROLES roles} is present in the {@link #parse() parse} set.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionAllRoles() {
+        roles = null;
+        return this;
+    }
+    
+    /**
+     * Adds roles to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#ROLES roles} is present in the {@link #parse() parse} set.
+     *
+     * @param roles A collection of roles to add.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionRoles(final Collection<Role> roles) {
+        if(this.roles == null || this.roles == Collections.EMPTY_SET) {
+            this.roles = new HashSet<>();
+        }
+        for(final Role role : roles) {
+            this.roles.add(role.id());
+        }
+        return this;
+    }
+    
+    /**
+     * Adds roles to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#ROLES roles} is present in the {@link #parse() parse} set.
+     *
+     * @param roles An array of roles to add.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionRoles(final Role... roles) {
+        if(this.roles == null || this.roles == Collections.EMPTY_SET) {
+            this.roles = new HashSet<>();
+        }
+        for(final Role role : roles) {
+            this.roles.add(role.id());
+        }
+        return this;
+    }
+    
+    /**
+     * Adds roles to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#ROLES roles} is present in the {@link #parse() parse} set.
+     * There is <b>NO</b> validation of if any of the strings are a proper snowflake.
+     *
+     * @param roles A collection of role IDs to add.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionRolesById(final Collection<String> roles) {
+        if(this.roles == null || this.roles == Collections.EMPTY_SET) {
+            this.roles = new HashSet<>();
+        }
+        this.roles.addAll(roles);
+        return this;
+    }
+    
+    /**
+     * Adds roles to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#ROLES roles} is present in the {@link #parse() parse} set.
+     * There is <b>NO</b> validation of if any of the strings are a proper snowflake.
+     *
+     * @param roles An array of role IDs to add.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionRolesById(final String... roles) {
+        if(this.roles == null || this.roles == Collections.EMPTY_SET) {
+            this.roles = new HashSet<>();
+        }
+        Collections.addAll(this.roles, roles);
+        return this;
+    }
+    
+    /**
+     * Adds roles to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#ROLES roles} is present in the {@link #parse() parse} set.
+     *
+     * @param roles An array of role IDs to add.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionRolesById(final long... roles) {
+        if(this.roles == null || this.roles == Collections.EMPTY_SET) {
+            this.roles = new HashSet<>();
+        }
+        for(final long role : roles) {
+            this.roles.add(Long.toUnsignedString(role));
+        }
+        return this;
+    }
+    
+    /**
+     * Adds a role to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#ROLES roles} is present in the {@link #parse() parse} set.
+     *
+     * @param role A role to add.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionRole(final Role role) {
+        return mentionRoleById(role.id());
+    }
+    
+    /**
+     * Adds a role to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#ROLES roles} is present in the {@link #parse() parse} set.
+     * There is <b>NO</b> validation of if the string is a proper snowflake.
+     *
+     * @param id An ID for a role to add.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionRoleById(final String id) {
+        if(roles == null || roles == Collections.EMPTY_SET) {
+            roles = new HashSet<>();
+        }
+        roles.add(id);
+        return this;
+    }
+    
+    /**
+     * Adds a role to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#ROLES roles} is present in the {@link #parse() parse} set.
+     *
+     * @param id A role ID to add.
+     *
+     * @return Itself.
+     */
+    @CheckReturnValue
+    @Nonnull
+    public MessageOptions mentionRoleById(final long id) {
+        return mentionRoleById(Long.toUnsignedString(id));
+    }
+    
+    /**
+     * A whitelist of mentioned roles. Mentions returned from here are <b>NOT</b> added to constructed {@link Message Message} instances.
+     * This list has no effect if {@link MessageParse#ROLES roles} is present in the {@link #parse() parse} set.
+     * There is <b>NO</b> validation of if any of the strings are a proper snowflake.
+     *
+     * @return Mutable whitelist of roles IDs, or null for all.
+     */
+    @CheckReturnValue
+    @Nullable
+    public Set<String> mentionedRoles() {
+        return roles;
+    }
+    
+    /**
      * Resets this MessageOptions class back to its initial state where there is no content, no embeds or no files.
+     *
      * @return Itself (but with a clean state).
      */
     @CheckReturnValue
@@ -189,6 +821,9 @@ public class MessageOptions {
         content = null;
         embed = null;
         files = null;
+        parse = null;
+        roles = null;
+        users = null;
         return this;
     }
     
