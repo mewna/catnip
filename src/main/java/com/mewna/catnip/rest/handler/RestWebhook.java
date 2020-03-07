@@ -212,7 +212,11 @@ public class RestWebhook extends RestHandler {
                 allowedMentions.put("users", options.mentionedUsers());
                 allowedMentions.put("roles", options.mentionedRoles());
             } else {
-                allowedMentions.put("parse", parse);
+                final JsonArray parseList = new JsonArray();
+                for(final MessageParse p : parse) {
+                    parseList.add(p.getName());
+                }
+                allowedMentions.put("parse", parseList);
                 //If either list is present along with the respective parse option, validation fails. The contains check avoids this.
                 if(!parse.contains(MessageParse.USERS)) {
                     allowedMentions.put("users", options.mentionedUsers());
