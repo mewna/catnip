@@ -33,7 +33,7 @@ import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.channel.Webhook.WebhookEditFields;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageOptions;
-import com.mewna.catnip.entity.message.MessageParse;
+import com.mewna.catnip.entity.message.MessageParseFlag;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes;
@@ -204,24 +204,24 @@ public class RestWebhook extends RestHandler {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
         }
     
-        if(options.parse() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
+        if(options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
             final JsonObject allowedMentions = new JsonObject();
-            final EnumSet<MessageParse> parse = options.parse();
+            final EnumSet<MessageParseFlag> parse = options.parseFlags();
             if(parse == null) {
                 // These act like a whitelist regardless of parse being present.
                 allowedMentions.put("users", options.mentionedUsers());
                 allowedMentions.put("roles", options.mentionedRoles());
             } else {
                 final JsonArray parseList = new JsonArray();
-                for(final MessageParse p : parse) {
+                for(final MessageParseFlag p : parse) {
                     parseList.add(p.getName());
                 }
                 allowedMentions.put("parse", parseList);
                 //If either list is present along with the respective parse option, validation fails. The contains check avoids this.
-                if(!parse.contains(MessageParse.USERS)) {
+                if(!parse.contains(MessageParseFlag.USERS)) {
                     allowedMentions.put("users", options.mentionedUsers());
                 }
-                if(!parse.contains(MessageParse.ROLES)) {
+                if(!parse.contains(MessageParseFlag.ROLES)) {
                     allowedMentions.put("roles", options.mentionedRoles());
                 }
             }
