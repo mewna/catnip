@@ -35,10 +35,7 @@ import com.mewna.catnip.entity.channel.GuildChannel.ChannelEditFields;
 import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.guild.PermissionOverride;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
-import com.mewna.catnip.entity.message.Embed;
-import com.mewna.catnip.entity.message.Message;
-import com.mewna.catnip.entity.message.MessageFlag;
-import com.mewna.catnip.entity.message.MessageOptions;
+import com.mewna.catnip.entity.message.*;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
@@ -60,10 +57,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.mewna.catnip.util.JsonUtil.mapObjectContents;
 import static com.mewna.catnip.util.Utils.encodeUTF8;
@@ -130,7 +124,31 @@ public class RestChannel extends RestHandler {
         if(json.get("embed") == null && json.get("content") == null && !options.hasFiles()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no attachments!");
         }
-        
+    
+        if(options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
+            final JsonObject allowedMentions = new JsonObject();
+            final EnumSet<MentionParseFlag> parse = options.parseFlags();
+            if(parse == null) {
+                // These act like a whitelist regardless of parse being present.
+                allowedMentions.put("users", options.mentionedUsers());
+                allowedMentions.put("roles", options.mentionedRoles());
+            } else {
+                final JsonArray parseList = new JsonArray();
+                for(final MentionParseFlag p : parse) {
+                    parseList.add(p.getName());
+                }
+                allowedMentions.put("parse", parseList);
+                //If either list is present along with the respective parse option, validation fails. The contains check avoids this.
+                if(!parse.contains(MentionParseFlag.USERS)) {
+                    allowedMentions.put("users", options.mentionedUsers());
+                }
+                if(!parse.contains(MentionParseFlag.ROLES)) {
+                    allowedMentions.put("roles", options.mentionedRoles());
+                }
+            }
+            json.put("allowed_mentions", allowedMentions);
+        }
+    
         final OutboundRequest request = new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), Map.of(), json);
         final List<ImmutablePair<String, byte[]>> buffers = options.files();
         if(buffers != null && !buffers.isEmpty()) {
