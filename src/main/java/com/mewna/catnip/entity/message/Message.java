@@ -448,6 +448,10 @@ public interface Message extends Snowflake {
         return content().contains("https://www.youtube.com/watch?v=dQw4w9WgXcQ") || content().contains("https://youtu.be/dQw4w9WgXcQ");
     }
     
+    default boolean isGnome() {
+        return content().contains("https://youtube.com/watch?v=6n3pFFPSlW4") || content().contains("https://youtu.be/6n3pFFPSlW4");
+    }
+    
     interface Attachment extends Snowflake {
         /**
          * The name of the file represented by this attachment.
