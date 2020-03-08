@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.util.pagination;
 
+import com.mewna.catnip.util.VoidHelper;
 import com.mewna.catnip.util.rx.RxHelpers;
 import io.reactivex.Observable;
 
@@ -177,7 +178,7 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
             update(state, data.blockingFirst());
             final T last = state.last();
             if(state.done() || remaining - fetchCount != state.remaining() || last == null) {
-                return RxHelpers.futureToObservable(CompletableFuture.completedFuture(null));
+                return RxHelpers.futureToObservable(CompletableFuture.completedFuture(VoidHelper.VOID));
             }
             return fetch(idOf.apply(last), state);
         });
@@ -188,7 +189,7 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
     @Nonnull
     @CheckReturnValue
     protected abstract Observable<J> fetchNext(@Nonnull RequestState<T> state, @Nullable String lastId,
-                                                    @Nonnegative int requestSize);
+                                               @Nonnegative int requestSize);
     
     protected static class RequestState<T> {
         private final Map<String, Object> extras = new HashMap<>();
