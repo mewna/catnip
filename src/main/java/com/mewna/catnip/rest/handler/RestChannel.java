@@ -127,22 +127,22 @@ public class RestChannel extends RestHandler {
     
         if(options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
             final JsonObject allowedMentions = new JsonObject();
-            final EnumSet<MessageParseFlag> parse = options.parseFlags();
+            final EnumSet<MentionParseFlag> parse = options.parseFlags();
             if(parse == null) {
                 // These act like a whitelist regardless of parse being present.
                 allowedMentions.put("users", options.mentionedUsers());
                 allowedMentions.put("roles", options.mentionedRoles());
             } else {
                 final JsonArray parseList = new JsonArray();
-                for(final MessageParseFlag p : parse) {
+                for(final MentionParseFlag p : parse) {
                     parseList.add(p.getName());
                 }
                 allowedMentions.put("parse", parseList);
                 //If either list is present along with the respective parse option, validation fails. The contains check avoids this.
-                if(!parse.contains(MessageParseFlag.USERS)) {
+                if(!parse.contains(MentionParseFlag.USERS)) {
                     allowedMentions.put("users", options.mentionedUsers());
                 }
-                if(!parse.contains(MessageParseFlag.ROLES)) {
+                if(!parse.contains(MentionParseFlag.ROLES)) {
                     allowedMentions.put("roles", options.mentionedRoles());
                 }
             }

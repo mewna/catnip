@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
  * @see MessageOptions#parseFlags()
  * @since March 07, 2020
  */
-public enum MessageParseFlag {
+public enum MentionParseFlag {
     ROLES("roles"),
     USERS("users"),
     EVERYONE("everyone"),
@@ -18,14 +18,14 @@ public enum MessageParseFlag {
     @Getter
     private final String name;
     
-    MessageParseFlag(final String name) {
+    MentionParseFlag(final String name) {
         this.name = name;
     }
     
     @Nonnull
     @CheckReturnValue
-    public static MessageParseFlag byName(final String name) {
-        for(final MessageParseFlag m : values()) {
+    public static MentionParseFlag byName(final String name) {
+        for(final MentionParseFlag m : values()) {
             if(m.name.equals(name)) {
                 return m;
             }

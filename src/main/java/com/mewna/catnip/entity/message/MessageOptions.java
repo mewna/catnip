@@ -74,18 +74,18 @@ public class MessageOptions {
      * @see #users
      * @see #parseNoMentions()
      * @see #parseAllMentions()
-     * @see #parseMention(MessageParseFlag)
-     * @see #parseMentions(MessageParseFlag...)
+     * @see #parseMention(MentionParseFlag)
+     * @see #parseMentions(MentionParseFlag...)
      * @see #parseMentions(Collection)
      * @see #parseMentionByName(String)
      * @see #parseMentionsByName(String...)
      * @see #parseMentionsByName(Collection)
      */
     @Setter(AccessLevel.NONE)
-    private EnumSet<MessageParseFlag> parseFlags;
+    private EnumSet<MentionParseFlag> parseFlags;
     /**
      * A whitelist of role IDs that gets mentioned by this message. This does <b>NOT</b> get added to constructed {@link Message message} instances.
-     * This has no effect if {@link MessageParseFlag#ROLES roles} is present in the {@link #parseFlags() parse} set.
+     * This has no effect if {@link MentionParseFlag#ROLES roles} is present in the {@link #parseFlags() parse} set.
      * Set to {@link Collections#emptySet() an empty set} or {@link Collection#clear() clear} to disable all parsing of role mentions.
      * Set to null to allow all roles to be mentioned by this message.
      *
@@ -109,7 +109,7 @@ public class MessageOptions {
     private Set<String> roles;
     /**
      * A whitelist of user IDs that gets mentioned by this message. This does <b>NOT</b> get added to constructed {@link Message message} instances.
-     * This has no effect if {@link MessageParseFlag#USERS users} is present in the {@link #parseFlags() parse} set.
+     * This has no effect if {@link MentionParseFlag#USERS users} is present in the {@link #parseFlags() parse} set.
      * Set to {@link Collections#emptySet() an empty set} or {@link Collection#clear() clear} to disable all parsing of user mentions.
      * Set to null to allow all users to be mentioned by this message.
      *
@@ -260,7 +260,7 @@ public class MessageOptions {
     @Nonnull
     public MessageOptions parseNoMentions() {
         if(parseFlags == null) {
-            parseFlags = EnumSet.noneOf(MessageParseFlag.class);
+            parseFlags = EnumSet.noneOf(MentionParseFlag.class);
         } else {
             parseFlags.clear();
         }
@@ -292,7 +292,7 @@ public class MessageOptions {
     public MessageOptions parseMentionsByName(final Collection<String> flags) {
         for(final String id : flags) {
             //noinspection ResultOfMethodCallIgnored
-            parseMention(MessageParseFlag.byName(id));
+            parseMention(MentionParseFlag.byName(id));
         }
         return this;
     }
@@ -309,7 +309,7 @@ public class MessageOptions {
     public MessageOptions parseMentionsByName(final String... flags) {
         for(final String id : flags) {
             //noinspection ResultOfMethodCallIgnored
-            parseMention(MessageParseFlag.byName(id));
+            parseMention(MentionParseFlag.byName(id));
         }
         return this;
     }
@@ -323,7 +323,7 @@ public class MessageOptions {
      */
     @CheckReturnValue
     @Nonnull
-    public MessageOptions parseMentions(final Collection<MessageParseFlag> flags) {
+    public MessageOptions parseMentions(final Collection<MentionParseFlag> flags) {
         if(parseFlags == null) {
             parseFlags = EnumSet.copyOf(flags);
         } else {
@@ -341,9 +341,9 @@ public class MessageOptions {
      */
     @CheckReturnValue
     @Nonnull
-    public MessageOptions parseMentions(final MessageParseFlag... flags) {
+    public MessageOptions parseMentions(final MentionParseFlag... flags) {
         if(parseFlags == null) {
-            parseFlags = EnumSet.noneOf(MessageParseFlag.class);
+            parseFlags = EnumSet.noneOf(MentionParseFlag.class);
         }
         Collections.addAll(parseFlags, flags);
         return this;
@@ -359,7 +359,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions parseMentionByName(final String flag) {
-        return parseMention(MessageParseFlag.byName(flag));
+        return parseMention(MentionParseFlag.byName(flag));
     }
     
     /**
@@ -371,7 +371,7 @@ public class MessageOptions {
      */
     @CheckReturnValue
     @Nonnull
-    public MessageOptions parseMention(final MessageParseFlag flag) {
+    public MessageOptions parseMention(final MentionParseFlag flag) {
         if(parseFlags == null) {
             parseFlags = EnumSet.of(flag);
         } else {
@@ -382,7 +382,7 @@ public class MessageOptions {
     
     /**
      * Clears {@link #users users} or sets it to an empty set to mark as mention none.
-     * This has no effect if {@link MessageParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
+     * This has no effect if {@link MentionParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
      *
      * @return Itself.
      */
@@ -399,7 +399,7 @@ public class MessageOptions {
     
     /**
      * Nullifies the {@link #users users} set to mark as mention all.
-     * This has no effect if {@link MessageParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
+     * This has no effect if {@link MentionParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
      *
      * @return Itself.
      */
@@ -412,7 +412,7 @@ public class MessageOptions {
     
     /**
      * Adds users to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
      *
      * @param users A collection of members to add.
      *
@@ -432,7 +432,7 @@ public class MessageOptions {
     
     /**
      * Adds users to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
      *
      * @param users An array of members to add.
      *
@@ -452,7 +452,7 @@ public class MessageOptions {
     
     /**
      * Adds users to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
      *
      * @param users A collection of users to add.
      *
@@ -472,7 +472,7 @@ public class MessageOptions {
     
     /**
      * Adds users to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
      *
      * @param users An array of users to add.
      *
@@ -492,7 +492,7 @@ public class MessageOptions {
     
     /**
      * Adds users to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
      * There is <b>NO</b> validation of if any of these strings are a proper snowflake.
      *
      * @param users A collection of user IDs to add.
@@ -511,7 +511,7 @@ public class MessageOptions {
     
     /**
      * Adds users to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
      * There is <b>NO</b> validation of if any of these strings are a proper snowflake.
      *
      * @param users An array of user IDs to add.
@@ -530,7 +530,7 @@ public class MessageOptions {
     
     /**
      * Adds users to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
      *
      * @param users An array of user IDs to add.
      *
@@ -550,7 +550,7 @@ public class MessageOptions {
     
     /**
      * Adds a user to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
      *
      * @param member A member to add.
      *
@@ -564,7 +564,7 @@ public class MessageOptions {
     
     /**
      * Adds a user to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
      *
      * @param user A user to add.
      *
@@ -578,7 +578,7 @@ public class MessageOptions {
     
     /**
      * Adds a user to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
      * There is <b>NO</b> validation of if the string is a proper snowflake.
      *
      * @param id A user ID to add.
@@ -597,7 +597,7 @@ public class MessageOptions {
     
     /**
      * Adds a user to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
      *
      * @param id A user ID to add.
      *
@@ -611,7 +611,7 @@ public class MessageOptions {
     
     /**
      * A whitelist of mentioned users. Mentions returned from here are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#USERS users} is present in the {@link #parseFlags() parse flags} set.
      * There is <b>NO</b> validation of if any of the strings are a proper snowflake.
      *
      * @return Mutable whitelist of user IDs, or null for all.
@@ -624,7 +624,7 @@ public class MessageOptions {
     
     /**
      * Clears {@link #roles roles} or sets it to an empty set to mark as mention none.
-     * This has no effect if {@link MessageParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
+     * This has no effect if {@link MentionParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
      *
      * @return Itself.
      */
@@ -641,7 +641,7 @@ public class MessageOptions {
     
     /**
      * Nullifies the {@link #roles roles} set to mark as mention all.
-     * This has no effect if {@link MessageParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
+     * This has no effect if {@link MentionParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
      *
      * @return Itself.
      */
@@ -654,7 +654,7 @@ public class MessageOptions {
     
     /**
      * Adds roles to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
      *
      * @param roles A collection of roles to add.
      *
@@ -674,7 +674,7 @@ public class MessageOptions {
     
     /**
      * Adds roles to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
      *
      * @param roles An array of roles to add.
      *
@@ -694,7 +694,7 @@ public class MessageOptions {
     
     /**
      * Adds roles to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
      * There is <b>NO</b> validation of if any of the strings are a proper snowflake.
      *
      * @param roles A collection of role IDs to add.
@@ -713,7 +713,7 @@ public class MessageOptions {
     
     /**
      * Adds roles to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
      * There is <b>NO</b> validation of if any of the strings are a proper snowflake.
      *
      * @param roles An array of role IDs to add.
@@ -732,7 +732,7 @@ public class MessageOptions {
     
     /**
      * Adds roles to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
      *
      * @param roles An array of role IDs to add.
      *
@@ -752,7 +752,7 @@ public class MessageOptions {
     
     /**
      * Adds a role to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
      *
      * @param role A role to add.
      *
@@ -766,7 +766,7 @@ public class MessageOptions {
     
     /**
      * Adds a role to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
      * There is <b>NO</b> validation of if the string is a proper snowflake.
      *
      * @param id An ID for a role to add.
@@ -785,7 +785,7 @@ public class MessageOptions {
     
     /**
      * Adds a role to the mention whitelist. Mentions are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
      *
      * @param id A role ID to add.
      *
@@ -799,7 +799,7 @@ public class MessageOptions {
     
     /**
      * A whitelist of mentioned roles. Mentions returned from here are <b>NOT</b> added to constructed {@link Message Message} instances.
-     * This list has no effect if {@link MessageParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
+     * This list has no effect if {@link MentionParseFlag#ROLES roles} is present in the {@link #parseFlags() parse flags} set.
      * There is <b>NO</b> validation of if any of the strings are a proper snowflake.
      *
      * @return Mutable whitelist of roles IDs, or null for all.
