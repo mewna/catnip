@@ -128,6 +128,10 @@ public class MessageOptions {
     @Setter(AccessLevel.NONE)
     @Getter(AccessLevel.NONE)
     private Set<String> users;
+    /**
+     * Whether or not to forcibly set fields even if they aren't set (read: are null).
+     */
+    private boolean override;
     
     public MessageOptions(@Nonnull final MessageOptions options) {
         content = options.content;

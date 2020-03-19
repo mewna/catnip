@@ -124,7 +124,7 @@ public class RestChannel extends RestHandler {
         if(json.get("embed") == null && json.get("content") == null && !options.hasFiles()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no attachments!");
         }
-    
+        
         if(options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
             final JsonObject allowedMentions = new JsonObject();
             final EnumSet<MentionParseFlag> parse = options.parseFlags();
@@ -148,7 +148,7 @@ public class RestChannel extends RestHandler {
             }
             json.put("allowed_mentions", allowedMentions);
         }
-    
+        
         final OutboundRequest request = new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), Map.of(), json);
         final List<ImmutablePair<String, byte[]>> buffers = options.files();
         if(buffers != null && !buffers.isEmpty()) {
@@ -183,19 +183,32 @@ public class RestChannel extends RestHandler {
     @Nonnull
     public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
                                        @Nonnull final String content, @Nonnull final Set<MessageFlag> flags) {
-        return editMessage(channelId, messageId, new MessageOptions().content(content).buildMessage(), flags);
+        return editMessage(channelId, messageId, new MessageOptions().content(content), flags);
     }
     
     @Nonnull
     public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
                                        @Nonnull final Embed embed) {
-        return editMessage(channelId, messageId, new MessageOptions().embed(embed).buildMessage());
+        return editMessage(channelId, messageId, new MessageOptions().embed(embed));
     }
     
     @Nonnull
     public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
                                        @Nonnull final Embed embed, @Nonnull final Set<MessageFlag> flags) {
-        return editMessage(channelId, messageId, new MessageOptions().embed(embed).buildMessage(), flags);
+        return editMessage(channelId, messageId, new MessageOptions().embed(embed), flags);
+    }
+    
+    @Nonnull
+    public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
+                                       @Nonnull final MessageOptions message) {
+        return editMessage(channelId, messageId, message, Set.of());
+    }
+    
+    @Nonnull
+    public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
+                                       @Nonnull final MessageOptions message, @Nonnull final Set<MessageFlag> flags) {
+        return Single.fromObservable(editMessageRaw(channelId, messageId, message, flags)
+                .map(entityBuilder()::createMessage));
     }
     
     @Nonnull
@@ -207,26 +220,30 @@ public class RestChannel extends RestHandler {
     @Nonnull
     public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
                                        @Nonnull final Message message, @Nonnull final Set<MessageFlag> flags) {
-        return Single.fromObservable(editMessageRaw(channelId, messageId, message, flags)
+        return Single.fromObservable(editMessageRaw(channelId, messageId, new MessageOptions(message), flags)
                 .map(entityBuilder()::createMessage));
     }
     
     @Nonnull
     public Observable<JsonObject> editMessageRaw(@Nonnull final String channelId, @Nonnull final String messageId,
-                                                 @Nonnull final Message message,
+                                                 @Nonnull final MessageOptions messageOptions,
                                                  @SuppressWarnings("TypeMayBeWeakened") @Nonnull final Set<MessageFlag> flags) {
         final JsonObject json = new JsonObject();
-        if(message.embeds().isEmpty() && (message.content() == null || message.content().isEmpty())) {
+        if(messageOptions.embed() == null && (messageOptions.content() == null || messageOptions.content().isEmpty())) {
             throw new IllegalArgumentException("Can't build a message with no content and no embed!");
         }
-        json.put("content", message.content());
-        if(message.embeds() != null && !message.embeds().isEmpty()) {
-            json.put("embed", entityBuilder().embedToJson(message.embeds().get(0)));
+        json.put("content", messageOptions.content());
+        if(messageOptions.embed() != null || messageOptions.override()) {
+            if(messageOptions.embed() == null) {
+                json.put("embed", null);
+            } else {
+                json.put("embed", entityBuilder().embedToJson(messageOptions.embed()));
+            }
         }
         if(json.get("embed") == null && json.get("content") == null) {
             throw new IllegalArgumentException("Can't build a message with no content and no embed!");
         }
-        if(!flags.isEmpty()) {
+        if(!flags.isEmpty() || messageOptions.override()) {
             json.put("flags", MessageFlag.fromSettable(flags));
         }
         return catnip().requester()
