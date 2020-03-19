@@ -615,27 +615,47 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public Completable deletePinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
+    public Completable deletePinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId, @Nullable final String reason) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.DELETE_PINNED_CHANNEL_MESSAGE.withMajorParam(channelId),
-                        Map.of("message", messageId)).emptyBody(true)));
+                        Map.of("message", messageId)).reason(reason).emptyBody(true)));
+    }
+    
+    @Nonnull
+    public Completable deletePinnedMessage(@Nonnull final Message message, @Nullable final String reason) {
+        return deletePinnedMessage(message.channelId(), message.id(), reason);
+    }
+    
+    @Nonnull
+    public Completable deletePinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
+        return deletePinnedMessage(channelId, messageId, null);
     }
     
     @Nonnull
     public Completable deletePinnedMessage(@Nonnull final Message message) {
-        return deletePinnedMessage(message.channelId(), message.id());
+        return deletePinnedMessage(message.channelId(), message.id(), null);
     }
     
     @Nonnull
-    public Completable addPinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
+    public Completable addPinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId, @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.ADD_PINNED_CHANNEL_MESSAGE.withMajorParam(channelId),
-                Map.of("message", messageId), new JsonObject()))
+                Map.of("message", messageId)).reason("reason").emptyBody(true))
                 .ignoreElements();
     }
     
     @Nonnull
+    public Completable addPinnedMessage(@Nonnull final Message message, @Nullable final String reason) {
+        return addPinnedMessage(message.channelId(), message.id(), reason);
+    }
+    
+    @Nonnull
+    public Completable addPinnedMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
+        return addPinnedMessage(channelId, messageId, null);
+    }
+    
+    @Nonnull
     public Completable addPinnedMessage(@Nonnull final Message message) {
-        return addPinnedMessage(message.channelId(), message.id());
+        return addPinnedMessage(message.channelId(), message.id(), null);
     }
     
     @Nonnull

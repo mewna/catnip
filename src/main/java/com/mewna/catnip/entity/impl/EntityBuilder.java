@@ -706,7 +706,7 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Member createMember(@Nonnull final String guildId, @SuppressWarnings("TypeMayBeWeakened") @Nonnull final User user,
+    public Member createMember(@Nonnull final String guildId, @Nonnull final User user,
                                @Nonnull final JsonObject data) {
         return createMember(guildId, user.id(), data);
     }
@@ -1310,11 +1310,36 @@ public final class EntityBuilder {
                         .deleteMemberDays(data.getInt("delete_member_days"))
                         .removedMembersCount(data.getInt("members_removed"))
                         .build());
+            case MEMBER_MOVE:
+                return delegate(MemberMoveInfo.class, MemberMoveInfoImpl.builder()
+                        .catnip(catnip)
+                        .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
+                        .membersMovedCount(Integer.parseUnsignedInt(data.getString("count")))
+                        .build());
+            case MEMBER_DISCONNECT:
+                return delegate(MemberDisconnectInfo.class, MemberDisconnectInfoImpl.builder()
+                        .catnip(catnip)
+                        .membersDisconnectedCount(Integer.parseUnsignedInt(data.getString("count")))
+                        .build());
             case MESSAGE_DELETE:
                 return delegate(MessageDeleteInfo.class, MessageDeleteInfoImpl.builder()
                         .catnip(catnip)
                         .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
                         .deletedMessagesCount(Integer.parseUnsignedInt(data.getString("count")))
+                        .build());
+            // The data returned for MESSAGE_BULK_DELETE *doesn't* actually follow https://discordapp.com/developers/docs/resources/audit-log#audit-log-entry-object-optional-audit-entry-info
+            // Instead, we're going to just return 'Count' as that is the only option that's present. If you're looking for 'channel_id', use 'target_id' (named targetId() and targetIdAsLong()) in AuditLogEntry.
+            case MESSAGE_BULK_DELETE:
+                return delegate(MessageBulkDeleteInfo.class, MessageBulkDeleteInfoImpl.builder()
+                        .catnip(catnip)
+                        .deletedMessagesCount(Integer.parseUnsignedInt(data.getString("count")))
+                        .build());
+            case MESSAGE_PIN:
+            case MESSAGE_UNPIN:
+                return delegate(MessagePinInfo.class, MessagePinInfoImpl.builder()
+                        .catnip(catnip)
+                        .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
+                        .messageIdAsLong(Long.parseUnsignedLong(data.getString("message_id")))
                         .build());
             case CHANNEL_OVERWRITE_CREATE:
             case CHANNEL_OVERWRITE_UPDATE:
