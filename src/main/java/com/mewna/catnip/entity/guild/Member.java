@@ -33,7 +33,9 @@ import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.rest.guild.MemberData;
 import com.mewna.catnip.util.PermissionUtil;
+import io.reactivex.Completable;
 import io.reactivex.Single;
 
 import javax.annotation.CheckReturnValue;
@@ -204,20 +206,86 @@ public interface Member extends Mentionable, PermissionHolder {
     /**
      * Creates a DM channel with this member's user.
      *
-     * @return Future with the result of the DM creation.
+     * @return Single which wraps the result of the DM creation.
      */
     @CheckReturnValue
     default Single<DMChannel> createDM() {
         return catnip().rest().user().createDM(id());
     }
     
+    /**
+     * Mutes/unmutes this member without specifying a reason.
+     * <p>
+     * </br><b>This requires you to have voice state cache enabled.</b>
+     * </p>
+     *
+     * @param muted Whether to mute or unmute this member.
+     * @return Completable which you can handle as you see fit.
+     */
+    default Completable mute(final boolean muted) {
+        return mute(muted, null);
+    }
+    
+    /**
+     * Mutes/unmutes this member with an optional reason specified.
+     * <p>
+     * </br><b>This requires you to have voice state cache enabled.</b>
+     * </p>
+     *
+     * @param muted Whether to mute or unmute this member.
+     * @param reason Nullable string containing the reason for this action. {@code null} for no reason.
+     * @return Completable which you can handle as you see fit.
+     */
+    default Completable mute(final boolean muted, @Nullable final String reason) {
+        final var memberData = MemberData.of(this).mute(muted);
+        return catnip().rest().guild().modifyGuildMember(guildId(), id(), memberData, reason);
+    }
+    
+    /**
+     * Deafens/undeafens this member without specifying a reason.
+     * <p>
+     * </br><b>This requires you to have voice state cache enabled.</b>
+     * </p>
+     *
+     * @param deafened Whether to deafen or undeafen this member.
+     * @return Completable which you can handle as you see fit.
+     */
+    default Completable deafen(final boolean deafened) {
+        return deafen(deafened, null);
+    }
+    
+    /**
+     * Deafens/undeafens this member with an optional reason specified.
+     * <p>
+     * </br><b>This requires you to have voice state cache enabled.</b>
+     * </p>
+     *
+     * @param deafened Whether to deafen or undeafen this member.
+     * @param reason Nullable string containing the reason for this action. {@code null} for no reason.
+     * @return Completable which you can handle as you see fit.
+     */
+    default Completable deafen(final boolean deafened, @Nullable final String reason) {
+        final var memberData = MemberData.of(this).deaf(deafened);
+        return catnip().rest().guild().modifyGuildMember(guildId(), id(), memberData, reason);
+    }
+    
+    /**
+     * Returns set of permissions this member effectively has.
+     * @return Set containing the permissions this member effectively has.
+     */
     default Set<Permission> permissions() {
         return Permission.toSet(PermissionUtil.effectivePermissions(this));
     }
     
+    /**
+     * Returns set of permissions this member effectively has in a given channel.
+     * @param channel Channel to check permissions against.
+     * @return Set of permissions this member effectively has, with respect to a given channel.
+     */
     default Set<Permission> permissions(@Nonnull final GuildChannel channel) {
         return Permission.toSet(PermissionUtil.effectivePermissions(this, channel));
     }
+    
     
     @Override
     default boolean hasPermissions(@Nonnull final Collection<Permission> permissions) {
