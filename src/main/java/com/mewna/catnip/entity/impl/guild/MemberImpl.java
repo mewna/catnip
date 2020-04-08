@@ -59,10 +59,8 @@ public class MemberImpl implements Member, RequiresCatnip, Timestamped {
     private String joinedAt;
     private String premiumSince;
     
-    @Setter(AccessLevel.NONE)
-    private boolean deaf;
-    @Setter(AccessLevel.NONE)
-    private boolean mute;
+    private boolean deafened;
+    private boolean muted;
     
     @Nonnull
     @Override

@@ -141,7 +141,7 @@ public interface Member extends Mentionable, PermissionHolder {
      * @return True if muted, false otherwise.
      */
     @CheckReturnValue
-    boolean mute();
+    boolean muted();
     
     /**
      * Whether the user is deafened.
@@ -150,7 +150,7 @@ public interface Member extends Mentionable, PermissionHolder {
      * @return True if deafened, false otherwise.
      */
     @CheckReturnValue
-    boolean deaf();
+    boolean deafened();
     
     /**
      * When the user joined the server last.

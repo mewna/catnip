@@ -551,8 +551,8 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                             .value("user", user)
                             .value("roles", payload.getArray("roles"))
                             .value("nick", payload.getString("nick"))
-                            .value("deaf", old.deaf())
-                            .value("mute", old.mute())
+                            .value("deaf", old.deafened())
+                            .value("mute", old.muted())
                             .value("joined_at", old.joinedAt()
                                     // If we have an old member cached, this shouldn't be an issue
                                     .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))

@@ -699,8 +699,8 @@ public final class EntityBuilder {
                 .joinedAt(joinedAt)
                 .premiumSince(data.getString("premium_since", null))
                 // If not present, it's probably(?) safe to assume not
-                .deaf(data.getBoolean("deaf", false))
-                .mute(data.getBoolean("mute", false))
+                .deafened(data.getBoolean("deaf", false))
+                .muted(data.getBoolean("mute", false))
                 .build());
     }
     

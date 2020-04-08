@@ -74,8 +74,8 @@ public class MemberData {
         final String voiceChannel = voiceChannel(member);
         return new MemberData()
                 .roles(member.roleIds())
-                .deaf(voiceChannel != null ? member.deaf() : null)
-                .mute(voiceChannel != null ? member.mute() : null)
+                .deaf(voiceChannel != null ? member.deafened() : null)
+                .mute(voiceChannel != null ? member.muted() : null)
                 .nickname(member.nick())
                 .channelId(voiceChannel)
                 ;
@@ -89,7 +89,6 @@ public class MemberData {
     
     @Nonnull
     @CheckReturnValue
-    @SuppressWarnings("TypeMayBeWeakened")
     public MemberData addRole(@Nonnull final Role role) {
         if(roles == null) {
             roles = new HashSet<>();
@@ -110,7 +109,6 @@ public class MemberData {
     
     @Nonnull
     @CheckReturnValue
-    @SuppressWarnings("TypeMayBeWeakened")
     public MemberData removeRole(@Nonnull final Role role) {
         if(roles != null) {
             roles.remove(role.id());
