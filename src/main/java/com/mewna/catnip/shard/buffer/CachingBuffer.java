@@ -35,7 +35,7 @@ import com.mewna.catnip.shard.LifecycleEvent;
 import com.mewna.catnip.shard.ShardInfo;
 import com.mewna.catnip.util.JsonUtil;
 import com.mewna.catnip.util.rx.RxHelpers;
-import io.reactivex.Completable;
+import io.reactivex.rxjava3.core.Completable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Value;

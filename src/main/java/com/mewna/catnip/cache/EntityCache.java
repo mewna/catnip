@@ -38,7 +38,7 @@ import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Single;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

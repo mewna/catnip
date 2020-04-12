@@ -42,7 +42,7 @@ import com.mewna.catnip.shard.LifecycleEvent.Raw;
 import com.mewna.catnip.util.CatnipMeta;
 import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.rx.RxHelpers;
-import io.reactivex.Observable;
+import io.reactivex.rxjava3.core.Observable;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;

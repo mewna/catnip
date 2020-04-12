@@ -29,7 +29,7 @@ package com.mewna.catnip.util.pagination;
 
 import com.mewna.catnip.util.VoidHelper;
 import com.mewna.catnip.util.rx.RxHelpers;
-import io.reactivex.Observable;
+import io.reactivex.rxjava3.core.Observable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;

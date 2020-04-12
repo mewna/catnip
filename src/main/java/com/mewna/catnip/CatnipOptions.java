@@ -57,7 +57,7 @@ import com.mewna.catnip.util.logging.LogAdapter;
 import com.mewna.catnip.util.rx.RxHelpers;
 import com.mewna.catnip.util.scheduler.RxTaskScheduler;
 import com.mewna.catnip.util.scheduler.TaskScheduler;
-import io.reactivex.Scheduler;
+import io.reactivex.rxjava3.core.Scheduler;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

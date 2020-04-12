@@ -28,10 +28,10 @@
 package com.mewna.catnip.util.rx;
 
 import com.mewna.catnip.Catnip;
-import io.reactivex.Completable;
-import io.reactivex.Observable;
-import io.reactivex.Scheduler;
-import io.reactivex.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Scheduler;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.CompletableFuture;

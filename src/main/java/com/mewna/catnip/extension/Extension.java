@@ -34,10 +34,10 @@ import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.shard.event.DoubleEventType;
 import com.mewna.catnip.shard.event.EventType;
 import com.mewna.catnip.shard.event.MessageConsumer;
-import io.reactivex.Completable;
-import io.reactivex.Flowable;
-import io.reactivex.Observable;
-import io.reactivex.Scheduler;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Scheduler;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;

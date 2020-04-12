@@ -38,8 +38,8 @@ import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
-import io.reactivex.Completable;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.CheckReturnValue;

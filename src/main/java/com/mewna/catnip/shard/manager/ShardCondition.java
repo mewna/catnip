@@ -28,7 +28,7 @@
 package com.mewna.catnip.shard.manager;
 
 import com.mewna.catnip.shard.ShardConnectState;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Single;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;

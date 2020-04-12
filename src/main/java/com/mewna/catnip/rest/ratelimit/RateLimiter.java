@@ -29,7 +29,7 @@ package com.mewna.catnip.rest.ratelimit;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.rest.Routes.Route;
-import io.reactivex.Completable;
+import io.reactivex.rxjava3.core.Completable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

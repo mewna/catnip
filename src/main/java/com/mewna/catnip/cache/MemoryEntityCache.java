@@ -45,8 +45,8 @@ import com.mewna.catnip.entity.user.Presence.OnlineStatus;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.util.rx.RxHelpers;
-import io.reactivex.Completable;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 

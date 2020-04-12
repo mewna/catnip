@@ -13,7 +13,7 @@
         <delombok.output>${project.basedir}/delombok</delombok.output>
 
         <lombok.version>1.18.10</lombok.version>
-        <rxjava.version>2.2.16</rxjava.version>
+        <rxjava.version>3.0.2</rxjava.version>
         <slf4j.version>1.7.30</slf4j.version>
         <commons.lang.version>3.9</commons.lang.version>
         <jsr305.version>3.0.2</jsr305.version>
@@ -57,7 +57,7 @@
 
         <!-- Rxjava2 -->
         <dependency>
-            <groupId>io.reactivex.rxjava2</groupId>
+            <groupId>io.reactivex.rxjava3</groupId>
             <artifactId>rxjava</artifactId>
             <version>${rxjava.version}</version>
         </dependency>

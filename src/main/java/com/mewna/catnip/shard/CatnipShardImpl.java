@@ -44,8 +44,8 @@ import com.mewna.catnip.shard.manager.ShardManager;
 import com.mewna.catnip.util.JsonUtil;
 import com.mewna.catnip.util.ReentrantLockWebSocket;
 import com.mewna.catnip.util.task.GatewayTask;
-import io.reactivex.Single;
-import io.reactivex.SingleEmitter;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.core.SingleEmitter;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 

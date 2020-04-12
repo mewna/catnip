@@ -33,7 +33,7 @@ import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
-import io.reactivex.Observable;
+import io.reactivex.rxjava3.core.Observable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

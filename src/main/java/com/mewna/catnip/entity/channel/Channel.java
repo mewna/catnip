@@ -30,8 +30,8 @@ package com.mewna.catnip.entity.channel;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
-import io.reactivex.Observable;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
 import lombok.Getter;
 
 import javax.annotation.CheckReturnValue;

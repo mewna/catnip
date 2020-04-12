@@ -35,8 +35,8 @@ import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.pagination.MessagePaginator;
-import io.reactivex.Completable;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

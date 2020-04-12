@@ -64,10 +64,7 @@ public class DefaultExtensionManager implements ExtensionManager {
             try {
                 final var completable = extension.onLoaded();
                 if(completable != null) {
-                    final var result = completable.blockingGet();
-                    if(result != null) {
-                        throw result;
-                    }
+                    completable.blockingAwait();
                 }
             } catch(final Throwable e) {
                 LOGGER.error("Extension " + extension + " threw an exception on loading.", e);
@@ -84,10 +81,7 @@ public class DefaultExtensionManager implements ExtensionManager {
                 extension.listeners().forEach(MessageConsumer::close);
                 final var completable = extension.onUnloaded();
                 if(completable != null) {
-                    final var result = completable.blockingGet();
-                    if(result != null) {
-                        throw result;
-                    }
+                    completable.blockingAwait();
                 }
             } catch(final Throwable e) {
                 LOGGER.error("Extension " + extension + " threw an exception on unloading.", e);

@@ -35,7 +35,7 @@ import com.mewna.catnip.shard.LifecycleEvent.Raw;
 import com.mewna.catnip.shard.event.MessageConsumer;
 import com.mewna.catnip.util.task.QueueTask;
 import com.mewna.catnip.util.task.ShardConnectTask;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Single;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 

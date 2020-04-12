@@ -2,7 +2,7 @@ package com.mewna.catnip.shard.event;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.util.rx.RxHelpers;
-import io.reactivex.Scheduler;
+import io.reactivex.rxjava3.core.Scheduler;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 

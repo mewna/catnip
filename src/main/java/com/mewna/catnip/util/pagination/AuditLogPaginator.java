@@ -35,7 +35,7 @@ import com.mewna.catnip.entity.guild.audit.AuditLogEntry;
 import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.util.JsonUtil;
-import io.reactivex.Observable;
+import io.reactivex.rxjava3.core.Observable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

@@ -48,7 +48,7 @@ import com.mewna.catnip.shard.CatnipShardImpl;
 import com.mewna.catnip.shard.GatewayIntent;
 import com.mewna.catnip.shard.GatewayOp;
 import com.mewna.catnip.util.PermissionUtil;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Single;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;

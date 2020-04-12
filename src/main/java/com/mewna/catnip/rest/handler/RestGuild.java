@@ -44,9 +44,9 @@ import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
 import com.mewna.catnip.util.QueryStringBuilder;
 import com.mewna.catnip.util.pagination.AuditLogPaginator;
 import com.mewna.catnip.util.pagination.MemberPaginator;
-import io.reactivex.Completable;
-import io.reactivex.Observable;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;

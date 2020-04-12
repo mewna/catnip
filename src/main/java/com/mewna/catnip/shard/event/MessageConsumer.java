@@ -1,8 +1,8 @@
 package com.mewna.catnip.shard.event;
 
-import io.reactivex.BackpressureStrategy;
-import io.reactivex.Flowable;
-import io.reactivex.Observable;
+import io.reactivex.rxjava3.core.BackpressureStrategy;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Observable;
 
 import java.io.Closeable;
 import java.util.function.Consumer;

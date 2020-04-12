@@ -32,7 +32,7 @@ import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes.Route;
-import io.reactivex.Observable;
+import io.reactivex.rxjava3.core.Observable;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

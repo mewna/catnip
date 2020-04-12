@@ -34,7 +34,7 @@ import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Single;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

@@ -48,9 +48,9 @@ import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
 import com.mewna.catnip.util.QueryStringBuilder;
 import com.mewna.catnip.util.pagination.MessagePaginator;
 import com.mewna.catnip.util.pagination.ReactionPaginator;
-import io.reactivex.Completable;
-import io.reactivex.Observable;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.CheckReturnValue;

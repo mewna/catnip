@@ -33,7 +33,7 @@ import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.util.ImageOptions;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Single;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

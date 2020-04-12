@@ -51,10 +51,10 @@ import com.mewna.catnip.util.CatnipOptionsView;
 import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.logging.LogAdapter;
 import com.mewna.catnip.util.scheduler.TaskScheduler;
-import io.reactivex.Flowable;
-import io.reactivex.Observable;
-import io.reactivex.Scheduler;
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Scheduler;
+import io.reactivex.rxjava3.core.Single;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.CheckReturnValue;

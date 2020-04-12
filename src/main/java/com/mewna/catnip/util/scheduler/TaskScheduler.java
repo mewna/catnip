@@ -28,7 +28,7 @@
 package com.mewna.catnip.util.scheduler;
 
 import com.mewna.catnip.entity.RequiresCatnip;
-import io.reactivex.Observable;
+import io.reactivex.rxjava3.core.Observable;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;

@@ -30,7 +30,7 @@ package com.mewna.catnip.entity.channel;
 import com.mewna.catnip.entity.Mentionable;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
-import io.reactivex.Observable;
+import io.reactivex.rxjava3.core.Observable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
