@@ -17,7 +17,7 @@
         <vertx-completable-future.version>vertx-completable-future-0.1.2</vertx-completable-future.version>
         <slf4j.version>1.7.30</slf4j.version>
         <commons.lang.version>3.9</commons.lang.version>
-        <guava.version>28.2-jre</guava.version>
+        <guava.version>29.0-jre</guava.version>
         <jsr305.version>3.0.2</jsr305.version>
 
         <koloboke-compile.version>0.5.1</koloboke-compile.version>
