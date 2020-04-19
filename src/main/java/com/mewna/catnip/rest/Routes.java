@@ -60,6 +60,7 @@ public final class Routes {
     public static final Route DELETE_OWN_REACTION                 = new Route(DELETE, "/channels/:channel/messages/:message/reactions/:emojis/@me", "channel");
     public static final Route CREATE_REACTION                     = new Route(PUT,    "/channels/:channel/messages/:message/reactions/:emojis/@me", "channel", true);
     public static final Route DELETE_USER_REACTION                = new Route(DELETE, "/channels/:channel/messages/:message/reactions/:emojis/:user", "channel");
+    public static final Route CROSSPOST_MESSAGE                   = new Route(POST,   "/channels/:channel/messages/:message/crosspost");
     public static final Route DELETE_CHANNEL_PERMISSION           = new Route(DELETE, "/channels/:channel/permissions/:overwrite", "channel");
     public static final Route EDIT_CHANNEL_PERMISSIONS            = new Route(PUT,    "/channels/:channel/permissions/:overwrite", "channel");
     public static final Route GET_PINNED_MESSAGES                 = new Route(GET,    "/channels/:channel/pins", "channel");

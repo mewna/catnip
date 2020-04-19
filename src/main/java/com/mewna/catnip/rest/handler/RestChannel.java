@@ -695,4 +695,18 @@ public class RestChannel extends RestHandler {
                 Map.of(), JsonObject.builder().value("name", name).value("avatar", avatar).done(), reason))
                 .map(ResponsePayload::object);
     }
+    
+    @Nonnull
+    public Single<Message> crosspostMessage(@Nonnull final String channelId, @Nonnull final String messageId) {
+        return Single.fromObservable(crosspostMessageRaw(channelId, messageId))
+                .map(entityBuilder()::createMessage);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Observable<JsonObject> crosspostMessageRaw(@Nonnull final String channelId, @Nonnull final String messageId) {
+        return catnip().requester().queue(new OutboundRequest(Routes.CROSSPOST_MESSAGE.withMajorParam(channelId),
+                Map.of("message", messageId)))
+                .map(ResponsePayload::object);
+    }
 }
