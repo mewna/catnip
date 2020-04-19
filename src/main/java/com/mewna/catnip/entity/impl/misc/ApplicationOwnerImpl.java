@@ -31,6 +31,7 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.misc.ApplicationOwner;
 import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.entity.user.UserFlag;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.ImageType;
 import com.mewna.catnip.util.CDNFormat;
@@ -41,6 +42,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -104,6 +106,12 @@ public class ApplicationOwnerImpl implements ApplicationOwner, RequiresCatnip {
     @CheckReturnValue
     public String effectiveAvatarUrl() {
         return effectiveAvatarUrl(defaultOptions());
+    }
+    
+    @Nonnull
+    @Override
+    public Set<UserFlag> publicFlags() {
+        throw new UnsupportedOperationException("unsupported method");
     }
     
     private ImageOptions defaultOptions() {
