@@ -491,6 +491,7 @@ public final class EntityBuilder {
                 .discriminator(data.getString("discriminator"))
                 .avatar(data.getString("avatar", null))
                 .bot(data.getBoolean("bot", false))
+                .publicFlags(UserFlag.toSet(data.getInt("public_flags", 0)))
                 .build());
     }
     

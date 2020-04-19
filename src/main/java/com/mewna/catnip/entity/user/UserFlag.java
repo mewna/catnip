@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 amy, All rights reserved.
+ * Copyright (c) 2020 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,65 +25,53 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.message;
+package com.mewna.catnip.entity.user;
 
+import com.mewna.catnip.entity.message.MessageFlag;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
-import javax.annotation.Nonnull;
 import java.util.EnumSet;
 import java.util.Set;
 
 /**
+ * The flags that can be on a user's account. An undocumented subset of these
+ * flags is exposed via {@link User#publicFlags()}.
+ *
  * @author amy
- * @since 8/19/19.
+ * @since 4/18/20.
  */
 @Accessors(fluent = true)
-public enum MessageFlag {
-    CROSSPOSTED(0x00000001, false),
-    IS_CROSSPOST(0x00000002, false),
-    SUPPRESS_EMBEDS(0x00000004, true),
-    SOURCE_MESSAGE_DELETED(0x00000008, false),
-    URGENT(0x00000010, false)
+public enum UserFlag {
+    DISCORD_EMPLOYEE(1),
+    DISCORD_PARTNER(1 << 1),
+    HYPESQUAD_EVENTS(1 << 2),
+    BUG_HUNTER_LEVEL_1(1 << 3),
+    HOUSE_BRAVERY(1 << 6),
+    HOUSE_BRILLIANCE(1 << 7),
+    HOUSE_BALANCE(1 << 8),
+    EARLY_SUPPORTER(1 << 9),
+    TEAM_USER(1 << 10),
+    SYSTEM(1 << 12),
+    BUG_HUNTER_LEVEL_2(1 << 14)
     ;
     
     @Getter
     private final int value;
-    @Getter
-    private final boolean canBeSet;
     
-    MessageFlag(final int value, final boolean canBeSet) {
+    UserFlag(final int value) {
         this.value = value;
-        this.canBeSet = canBeSet;
     }
     
-    public static Set<MessageFlag> toSet(final long asLong) {
-        final Set<MessageFlag> flags = EnumSet.noneOf(MessageFlag.class);
+    public static Set<UserFlag> toSet(final long asLong) {
+        final Set<UserFlag> flags = EnumSet.noneOf(UserFlag.class);
         
-        for(final MessageFlag flag : values()) {
+        for(final UserFlag flag : values()) {
             if((asLong & flag.value) == flag.value) {
                 flags.add(flag);
             }
         }
         
         return flags;
-    }
-    
-    public static long from(@Nonnull final Iterable<MessageFlag> flags) {
-        long result = 0;
-        for(final MessageFlag flag : flags) {
-            result |= flag.value;
-        }
-        return result;
-    }
-    public static long fromSettable(@Nonnull final Iterable<MessageFlag> flags) {
-        long result = 0;
-        for(final MessageFlag flag : flags) {
-            if(!flag.canBeSet) {
-                throw new IllegalArgumentException("Message flag " + flag.name() + " can't be set!");
-            }
-            result |= flag.value;
-        }
-        return result;
     }
 }

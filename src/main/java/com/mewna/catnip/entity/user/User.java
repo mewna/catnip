@@ -38,6 +38,7 @@ import io.reactivex.rxjava3.core.Single;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Set;
 
 /**
  * A single Discord user.
@@ -182,6 +183,16 @@ public interface User extends Snowflake, Mentionable {
      */
     @CheckReturnValue
     boolean bot();
+    
+    /**
+     * The public flags on a user's account. Public flags are a
+     * currently-undocumented subset of all user flags.
+     *
+     * @return The public flags on a user's account.
+     */
+    @Nonnull
+    @CheckReturnValue
+    Set<UserFlag> publicFlags();
     
     /**
      * @return The user's presence, or {@code null} if no presence is cached.

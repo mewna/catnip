@@ -30,6 +30,7 @@ package com.mewna.catnip.entity.impl.user;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.entity.user.UserFlag;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.ImageType;
 import com.mewna.catnip.util.CDNFormat;
@@ -40,6 +41,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author amy
@@ -60,6 +62,7 @@ public class UserImpl implements User, RequiresCatnip {
     private String discriminator;
     private String avatar;
     private boolean bot;
+    private Set<UserFlag> publicFlags;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
