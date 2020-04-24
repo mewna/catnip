@@ -15,7 +15,7 @@
         <lombok.version>1.18.10</lombok.version>
         <rxjava.version>3.0.2</rxjava.version>
         <slf4j.version>1.7.30</slf4j.version>
-        <commons.lang.version>3.9</commons.lang.version>
+        <commons.lang.version>3.10</commons.lang.version>
         <jsr305.version>3.0.2</jsr305.version>
 
         <koloboke-compile.version>0.5.1</koloboke-compile.version>
