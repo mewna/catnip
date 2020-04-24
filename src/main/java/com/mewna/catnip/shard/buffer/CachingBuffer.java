@@ -162,7 +162,6 @@ public class CachingBuffer extends AbstractBuffer {
             if(canChunkViaIntents && catnip().options().chunkMembers() && memberCount > catnip().options().largeThreshold()) {
                 // Actually send the chunking request
                 catnip().chunkMembers(guild);
-                // TODO: Cancel this task when the shard closes
                 catnip().taskScheduler().setTimer(catnip().options().memberChunkTimeout(), taskId -> {
                     if(catnip().shardManager().shard(shardId).lifecycleState() != LifecycleState.LOGGED_IN) {
                         catnip().logAdapter().warn("Chunk rerequest task {} for disconnected shard {}, cancelling!",
@@ -255,11 +254,9 @@ public class CachingBuffer extends AbstractBuffer {
     }
     
     private void cacheAndDispatch(final String type, final int id, final JsonObject event) {
-        // TODO: Cache updates are async - this is likely a race condition
-        //  Is there any reasonable way to fix this?
         final JsonObject d = event.getObject("d");
-        emitter().emit(event);
-        maybeCache(type, id, d);
+        //noinspection ResultOfMethodCallIgnored
+        maybeCache(type, id, d).subscribe(() -> emitter().emit(event));
     }
     
     private Completable maybeCache(final String eventType, final int shardId, final JsonObject data) {

@@ -579,8 +579,6 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             closedByClient = true;
         }
         
-        // TODO: Might this end up borking? Can we recv. something like this
-        //  when we've already IDENTIFYd?
         stateReply(ShardConnectState.INVALID);
         
         if(socket != null && socketOpen) {

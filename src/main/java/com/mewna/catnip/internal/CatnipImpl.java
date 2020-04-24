@@ -368,7 +368,7 @@ public class CatnipImpl implements Catnip {
         if(!privilegedIntents.isEmpty() && options.logPrivilegedIntentWarning()) {
             // TODO: Check application flags to make sure this is actually a
             //  necessary log -- requires REST request.
-            logAdapter().warn("Catnip is configured with the following privileged intents: {}", privilegedIntents);
+            logAdapter().warn("catnip is configured with the following privileged intents: {}", privilegedIntents);
             logAdapter().warn("Please make sure your bot is whitelisted to use these intents!");
         }
     }

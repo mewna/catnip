@@ -58,7 +58,6 @@ public final class JsonUtil {
     @Nonnull
     public static JsonObject stringifySnowflakes(@Nonnull final JsonObject json) {
         json.forEach((key, value) -> {
-            // TODO: More efficient way to do this?
             if(key.toLowerCase().contains("idaslong")) {
                 json.put(key, json.getNumber(key).toString());
             } else {
@@ -94,7 +93,6 @@ public final class JsonUtil {
     @Nonnull
     public static JsonObject destringifySnowflakes(@Nonnull final JsonObject json) {
         json.forEach((key, value) -> {
-            // TODO: More efficient way to do this?
             if(key.toLowerCase().contains("idaslong")) {
                 json.put(key, Long.parseLong(json.getString(key)));
             } else {

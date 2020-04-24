@@ -482,16 +482,11 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
             }
             // Guilds
             case Raw.GUILD_CREATE: {
-                // This is wrapped in a blocking executor because there could
-                // be cases of massive guilds that end blocking for a
-                // significant amount of time while the guild is being cached.
-                // TODO: Move these back onto blocking threads(?)
                 final Guild guild = entityBuilder.createAndCacheGuild(shardId, payload);
                 guildCache(shardId(guild.idAsLong())).put(guild.idAsLong(), guild);
                 break;
             }
             case Raw.GUILD_UPDATE: {
-                // TODO: Move these back onto blocking threads(?)
                 final Guild guild = entityBuilder.createGuild(payload);
                 guildCache(shardId(guild.idAsLong())).put(guild.idAsLong(), guild);
                 break;
