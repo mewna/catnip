@@ -27,13 +27,16 @@
 
 package com.mewna.catnip.util.pagination;
 
+import com.mewna.catnip.util.VoidHelper;
+import com.mewna.catnip.util.rx.RxHelpers;
+import io.reactivex.rxjava3.core.Observable;
+
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -114,9 +117,11 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
      */
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<List<T>> fetch() {
+    public Observable<T> fetch() {
         final List<T> list = new ArrayList<>();
-        return forEach(list::add).thenApply(__ -> Collections.unmodifiableList(list));
+        return forEach(list::add)
+                .map(__ -> Collections.unmodifiableList(list))
+                .flatMapIterable(e -> e);
     }
     
     /**
@@ -125,7 +130,7 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
      * <br>This method will not cache the provided entities, so it's
      * recommended for unbounded pagination.
      * <br>If the provided callback throws an exception, <b>pagination
-     * will stop</b> and the returned {@link CompletionStage completion stage}
+     * will stop</b> and the returned {@link Observable completion stage}
      * will be failed.
      *
      * @param action Callback for fetched entities.
@@ -133,7 +138,7 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
      * @return A completion stage representing the end of the iteration.
      */
     @Nonnull
-    public CompletionStage<Void> forEach(@Nonnull final Consumer<T> action) {
+    public Observable<Void> forEach(@Nonnull final Consumer<T> action) {
         return fetchWhile(e -> {
             action.accept(e);
             return true;
@@ -146,7 +151,7 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
      * <br>This method will not cache the provided entities, so it's
      * recommended for unbounded pagination.
      * <br>If the provided callback throws an exception, <b>pagination
-     * will stop</b> and the returned {@link CompletionStage completion stage}
+     * will stop</b> and the returned {@link Observable observable}
      * will be failed.
      *
      * @param callback Callback for fetched entities.
@@ -154,26 +159,26 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
      * @return A completion stage representing the end of the iteration.
      */
     @Nonnull
-    public CompletionStage<Void> fetchWhile(@Nonnull final PaginationCallback<T> callback) {
+    public Observable<Void> fetchWhile(@Nonnull final PaginationCallback<T> callback) {
         return fetch(callback);
     }
     
     @Nonnull
     @CheckReturnValue
-    protected CompletionStage<Void> fetch(@Nonnull final PaginationCallback<T> action) {
+    protected Observable<Void> fetch(@Nonnull final PaginationCallback<T> action) {
         return fetch(null, new RequestState<>(limit, requestSize, action));
     }
     
     @Nonnull
     @CheckReturnValue
-    protected CompletionStage<Void> fetch(@Nullable final String id, @Nonnull final RequestState<T> state) {
+    protected Observable<Void> fetch(@Nullable final String id, @Nonnull final RequestState<T> state) {
         final int fetchCount = state.entitiesToFetch();
-        return fetchNext(state, id, fetchCount).thenCompose(data -> {
+        return fetchNext(state, id, fetchCount).compose(data -> {
             final int remaining = state.remaining();
-            update(state, data);
+            update(state, data.blockingFirst());
             final T last = state.last();
             if(state.done() || remaining - fetchCount != state.remaining() || last == null) {
-                return CompletableFuture.completedFuture(null);
+                return RxHelpers.futureToObservable(CompletableFuture.completedFuture(VoidHelper.VOID));
             }
             return fetch(idOf.apply(last), state);
         });
@@ -183,8 +188,8 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
     
     @Nonnull
     @CheckReturnValue
-    protected abstract CompletionStage<J> fetchNext(@Nonnull RequestState<T> state, @Nullable String lastId,
-                                                    @Nonnegative int requestSize);
+    protected abstract Observable<J> fetchNext(@Nonnull RequestState<T> state, @Nullable String lastId,
+                                               @Nonnegative int requestSize);
     
     protected static class RequestState<T> {
         private final Map<String, Object> extras = new HashMap<>();

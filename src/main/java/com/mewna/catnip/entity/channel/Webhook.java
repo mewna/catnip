@@ -27,11 +27,9 @@
 
 package com.mewna.catnip.entity.channel;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.guild.GuildEntity;
-import com.mewna.catnip.entity.impl.WebhookImpl;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageOptions;
@@ -39,7 +37,8 @@ import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.rest.requester.Requester;
 import com.mewna.catnip.util.PermissionUtil;
-import io.vertx.core.json.JsonObject;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -48,7 +47,6 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
-import java.util.concurrent.CompletionStage;
 
 /**
  * A webhook on a channel. Allows sending messages to a text channel in a guild
@@ -58,18 +56,16 @@ import java.util.concurrent.CompletionStage;
  * @since 9/15/18
  */
 @SuppressWarnings("unused")
-@JsonDeserialize(as = WebhookImpl.class)
 public interface Webhook extends GuildEntity, Snowflake {
     /**
      * Send a message to this channel with the specified content.
      *
      * @param content The text content to send.
      *
-     * @return A CompletionStage that completes when the message is sent.
+     * @return A Single that completes when the message is sent.
      */
     @Nonnull
-    @JsonIgnore
-    default CompletionStage<Message> executeWebhook(@Nonnull final String content) {
+    default Single<Message> executeWebhook(@Nonnull final String content) {
         return executeWebhook(content, null, null);
     }
     
@@ -78,11 +74,10 @@ public interface Webhook extends GuildEntity, Snowflake {
      *
      * @param embed The embed to send.
      *
-     * @return A CompletionStage that completes when the message is sent.
+     * @return A Single that completes when the message is sent.
      */
     @Nonnull
-    @JsonIgnore
-    default CompletionStage<Message> executeWebhook(@Nonnull final Embed embed) {
+    default Single<Message> executeWebhook(@Nonnull final Embed embed) {
         return executeWebhook(embed, null, null);
     }
     
@@ -91,59 +86,55 @@ public interface Webhook extends GuildEntity, Snowflake {
      *
      * @param options The options for the message being sent.
      *
-     * @return A CompletionStage that completes when the message is sent.
+     * @return A Single that completes when the message is sent.
      */
     @Nonnull
-    @JsonIgnore
-    default CompletionStage<Message> executeWebhook(@Nonnull final MessageOptions options) {
+    default Single<Message> executeWebhook(@Nonnull final MessageOptions options) {
         return executeWebhook(options, null, null);
     }
     
     /**
      * Send a message to this channel with the specified content.
      *
-     * @param content The text content to send.
-     * @param username The username to override the webhook, if set.
+     * @param content   The text content to send.
+     * @param username  The username to override the webhook, if set.
      * @param avatarUrl The avatar to override the webhook, if set.
      *
-     * @return A CompletionStage that completes when the message is sent.
+     * @return A Single that completes when the message is sent.
      */
     @Nonnull
-    @JsonIgnore
-    default CompletionStage<Message> executeWebhook(@Nonnull final String content,
-                                                    @Nullable final String username, @Nullable final String avatarUrl) {
+    default Single<Message> executeWebhook(@Nonnull final String content,
+                                           @Nullable final String username, @Nullable final String avatarUrl) {
         return executeWebhook(new MessageOptions().content(content), username, avatarUrl);
     }
     
     /**
      * Send a message to this channel with the specified embed.
      *
-     * @param embed The embed to send.
-     * @param username The username to override the webhook, if set.
+     * @param embed     The embed to send.
+     * @param username  The username to override the webhook, if set.
      * @param avatarUrl The avatar to override the webhook, if set.
      *
-     * @return A CompletionStage that completes when the message is sent.
+     * @return A Single that completes when the message is sent.
      */
     @Nonnull
-    @JsonIgnore
-    default CompletionStage<Message> executeWebhook(@Nonnull final Embed embed,
-                                                    @Nullable final String username, @Nullable final String avatarUrl) {
+    default Single<Message> executeWebhook(@Nonnull final Embed embed,
+                                           @Nullable final String username, @Nullable final String avatarUrl) {
         return executeWebhook(new MessageOptions().embed(embed), username, avatarUrl);
     }
     
     /**
      * Send a message to this channel with the specified options.
      *
-     * @param options The options for the message being sent.
-     * @param username The username to override the webhook, if set.
+     * @param options   The options for the message being sent.
+     * @param username  The username to override the webhook, if set.
      * @param avatarUrl The avatar to override the webhook, if set.
      *
-     * @return A CompletionStage that completes when the message is sent.
+     * @return A Single that completes when the message is sent.
      */
     @Nonnull
-    @JsonIgnore
-    default CompletionStage<Message> executeWebhook(@Nonnull final MessageOptions options,
-                                                    @Nullable final String username, @Nullable final String avatarUrl) {
+    default Single<Message> executeWebhook(@Nonnull final MessageOptions options,
+                                           @Nullable final String username, @Nullable final String avatarUrl) {
         return catnip().rest().webhook().executeWebhook(id(), token(), username, avatarUrl, options);
     }
     
@@ -165,7 +156,7 @@ public interface Webhook extends GuildEntity, Snowflake {
     /**
      * @return The user that created this webhook.
      */
-    @Nonnull
+    @Nullable
     @CheckReturnValue
     User user();
     
@@ -196,18 +187,17 @@ public interface Webhook extends GuildEntity, Snowflake {
     @Nonnull
     @CheckReturnValue
     default String url() {
-        return String.format("%s/webhooks/%s/%s", Requester.API_BASE, id(), token());
+        return String.format("/api/v%s/webhooks/%s/%s", catnip().options().apiVersion(), id(), token());
     }
     
     /**
      * Deletes the webhook.
      *
-     * @return A CompletionStage that completes when the webhook is deleted.
+     * @return A Single that completes when the webhook is deleted.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
-    default CompletionStage<Void> delete() {
+    default Completable delete() {
         PermissionUtil.checkPermissions(catnip(), guildId(), channelId(), Permission.MANAGE_WEBHOOKS);
         return catnip().rest().webhook().deleteWebhook(id());
     }
@@ -218,7 +208,6 @@ public interface Webhook extends GuildEntity, Snowflake {
      * @return A webhook editor that can complete the editing.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default WebhookEditFields edit() {
         PermissionUtil.checkPermissions(catnip(), guildId(), channelId(), Permission.MANAGE_WEBHOOKS);
@@ -244,7 +233,7 @@ public interface Webhook extends GuildEntity, Snowflake {
         }
         
         @Nonnull
-        public CompletionStage<Webhook> submit() {
+        public Single<Webhook> submit() {
             if(webhook == null) {
                 throw new IllegalStateException("Cannot submit edit without a webhook object! Please use RestWebhook directly instead");
             }

@@ -35,11 +35,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -50,11 +50,7 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("WeakerAccess")
 public final class Utils {
-    public static final List<String> VALID_CONTENT_TYPES = Collections.unmodifiableList(Arrays.asList(
-            "image/jpeg",
-            "image/png",
-            "image/gif"
-    ));
+    public static final List<String> VALID_CONTENT_TYPES = List.of("image/jpeg", "image/png", "image/gif");
     public static final long DISCORD_EPOCH = 1420070400000L;
     private static final Pattern WEBHOOK_PATTERN = Pattern.compile("https://discordapp\\.com/api/webhooks/(\\d+)/([\\w\\W]+)");
     
@@ -186,10 +182,6 @@ public final class Utils {
     // Thank JDA devs! <3
     @Nonnull
     public static String encodeUTF8(@Nonnull final String chars) {
-        try {
-            return URLEncoder.encode(chars, "UTF-8");
-        } catch(final UnsupportedEncodingException e) {
-            throw new AssertionError(e); // thanks JDK 1.4
-        }
+        return URLEncoder.encode(chars, StandardCharsets.UTF_8);
     }
 }

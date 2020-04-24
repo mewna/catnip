@@ -27,22 +27,20 @@
 
 package com.mewna.catnip.entity.guild;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
 import com.mewna.catnip.entity.guild.Guild.VerificationLevel;
-import com.mewna.catnip.entity.impl.InviteImpl;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
+import io.reactivex.rxjava3.core.Single;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.concurrent.CompletionStage;
 
 /**
  * An invite to a guild.
@@ -51,7 +49,6 @@ import java.util.concurrent.CompletionStage;
  * @since 9/14/18
  */
 @SuppressWarnings("unused")
-@JsonDeserialize(as = InviteImpl.class)
 public interface Invite extends Entity {
     /**
      * @return The code for this invite.
@@ -98,10 +95,10 @@ public interface Invite extends Entity {
      *
      * @param reason The reason that will be displayed in audit log
      *
-     * @return A CompletionStage that completes when the invite is deleted.
+     * @return A Single that completes when the invite is deleted.
      */
     @Nonnull
-    default CompletionStage<Invite> delete(@Nullable final String reason) {
+    default Single<Invite> delete(@Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), guild().id(), channel().id(),
                 Permission.MANAGE_CHANNELS);
         return catnip().rest().invite().deleteInvite(code(), reason);
@@ -110,14 +107,13 @@ public interface Invite extends Entity {
     /**
      * Deletes the invite.
      *
-     * @return A CompletionStage that completes when the invite is deleted.
+     * @return A Single that completes when the invite is deleted.
      */
     @Nonnull
-    default CompletionStage<Invite> delete() {
+    default Single<Invite> delete() {
         return delete(null);
     }
     
-    @JsonDeserialize(as = InviteImpl.InviterImpl.class)
     interface Inviter extends Snowflake {
         @Nonnull
         @CheckReturnValue
@@ -155,7 +151,6 @@ public interface Invite extends Entity {
         String effectiveAvatarUrl();
     }
     
-    @JsonDeserialize(as = InviteImpl.InviteGuildImpl.class)
     interface InviteGuild extends Snowflake {
         @Nonnull
         @CheckReturnValue
@@ -171,7 +166,7 @@ public interface Invite extends Entity {
         
         @Nonnull
         @CheckReturnValue
-        List<String> features();
+        List<GuildFeature> features();
         
         @Nonnull
         @CheckReturnValue
@@ -198,7 +193,6 @@ public interface Invite extends Entity {
         }
     }
     
-    @JsonDeserialize(as = InviteImpl.InviteChannelImpl.class)
     interface InviteChannel extends Snowflake {
         @Nonnull
         @CheckReturnValue

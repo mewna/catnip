@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.cache;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.guild.Member;
@@ -35,8 +36,7 @@ import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
-import io.vertx.core.Future;
-import io.vertx.core.json.JsonObject;
+import io.reactivex.rxjava3.core.Completable;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -63,7 +63,7 @@ public interface EntityCacheWorker extends EntityCache {
      */
     @Nonnull
     @SuppressWarnings("UnusedReturnValue")
-    Future<Void> updateCache(@Nonnull String eventType, @Nonnegative int shardId, @Nonnull JsonObject payload);
+    Completable updateCache(@Nonnull String eventType, @Nonnegative int shardId, @Nonnull JsonObject payload);
     
     void bulkCacheUsers(@Nonnegative int shardId, @Nonnull Collection<User> users);
     

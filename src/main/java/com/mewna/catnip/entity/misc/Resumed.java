@@ -27,9 +27,7 @@
 
 package com.mewna.catnip.entity.misc;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.impl.ResumedImpl;
 
 /**
  * Fired when a shard resumes successfully.
@@ -37,7 +35,6 @@ import com.mewna.catnip.entity.impl.ResumedImpl;
  * @author amy
  * @since 11/10/18.
  */
-@JsonDeserialize(as = ResumedImpl.class)
 @SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
 public interface Resumed extends Entity {
 }

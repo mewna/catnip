@@ -105,25 +105,8 @@ public final class PermissionUtil {
         return null;
     }
     
-    /**
-     * @deprecated Use {@link PermissionUtil#effectivePermissions(PermissionHolder)}
-     */
-    @Deprecated
-    public static long effectivePermissions(@Nonnull final Catnip catnip, @Nonnull final PermissionHolder member) {
-        return basePermissions(member);
-    }
-    
     public static long effectivePermissions(@Nonnull final PermissionHolder member) {
         return basePermissions(member);
-    }
-    
-    /**
-     * @deprecated Use {@link PermissionUtil#effectivePermissions(PermissionHolder, GuildChannel)}
-     */
-    @Deprecated
-    public static long effectivePermissions(@Nonnull final Catnip catnip, @Nonnull final PermissionHolder member,
-                                            @Nonnull final GuildChannel channel) {
-        return overridePermissions(basePermissions(member), member, channel);
     }
     
     public static long effectivePermissions(@Nonnull final PermissionHolder member, @Nonnull final GuildChannel channel) {
@@ -132,7 +115,7 @@ public final class PermissionUtil {
     
     public static void checkPermissions(@Nonnull final Catnip catnip, @Nullable final String guildId,
                                         @Nonnull final Permission... permissions) {
-        if(!catnip.enforcePermissions() || guildId == null) {
+        if(!catnip.options().enforcePermissions() || guildId == null) {
             return;
         }
         final User me = catnip.selfUser();
@@ -153,7 +136,7 @@ public final class PermissionUtil {
     
     public static void checkPermissions(@Nonnull final Catnip catnip, @Nullable final String guildId,
                                         @Nullable final String channelId, @Nonnull final Permission... permissions) {
-        if(!catnip.enforcePermissions() || guildId == null || channelId == null) {
+        if(!catnip.options().enforcePermissions() || guildId == null || channelId == null) {
             return;
         }
         final User me = catnip.selfUser();
@@ -188,10 +171,12 @@ public final class PermissionUtil {
     /**
      * Checks whether a member has the permission to interact with another member
      *
-     * @param actor The member that want to perform the action
+     * @param actor  The member that want to perform the action
      * @param target The member that the action is performed on
-     * @throws IllegalStateException If the actor is not on the same guild as the target
+     *
      * @return Whether the actor can interact with the target or not
+     *
+     * @throws IllegalStateException If the actor is not on the same guild as the target
      */
     public static boolean canInteract(@Nonnull final Member actor, @Nonnull final Member target) {
         if(actor.isOwner()) {
@@ -209,10 +194,12 @@ public final class PermissionUtil {
     /**
      * Checks whether a role has the permission to interact with a member
      *
-     * @param actor The role that want to perform the action
+     * @param actor  The role that want to perform the action
      * @param target The member that the action is performed on
-     * @throws IllegalStateException If the actor is not on the same guild as the target
+     *
      * @return Whether the actor can interact with the target or not
+     *
+     * @throws IllegalStateException If the actor is not on the same guild as the target
      */
     public static boolean canInteract(@Nonnull final Role actor, @Nonnull final Member target) {
         checkGuildEquality(actor, target);
@@ -229,10 +216,12 @@ public final class PermissionUtil {
     /**
      * Checks whether a member has the permission to interact with a role
      *
-     * @param actor The member that want to perform the action
+     * @param actor  The member that want to perform the action
      * @param target The role that the action is performed on
-     * @throws IllegalStateException If the actor is not on the same guild as the target
+     *
      * @return Whether the actor can interact with the target or not
+     *
+     * @throws IllegalStateException If the actor is not on the same guild as the target
      */
     public static boolean canInteract(@Nonnull final Member actor, @Nonnull final Role target) {
         checkGuildEquality(actor, target);
@@ -250,10 +239,12 @@ public final class PermissionUtil {
     /**
      * Checks whether a role has the permission to interact with another role
      *
-     * @param actor The role that want to perform the action
+     * @param actor  The role that want to perform the action
      * @param target The role that the action is performed on
-     * @throws IllegalStateException If the actor is not on the same guild as the target
+     *
      * @return Whether the actor can interact with the target or not
+     *
+     * @throws IllegalStateException If the actor is not on the same guild as the target
      */
     public static boolean canInteract(@Nonnull final Role actor, @Nonnull final Role target) {
         checkGuildEquality(actor, target);

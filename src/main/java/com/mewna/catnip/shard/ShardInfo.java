@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.shard;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -36,8 +35,12 @@ import lombok.Getter;
  * @since 10/17/18.
  */
 @Getter
-@AllArgsConstructor(access = AccessLevel.PACKAGE)
+@AllArgsConstructor
 public class ShardInfo {
     private final int id;
     private final int limit;
+    
+    public String toString() {
+        return id + "/" + limit;
+    }
 }

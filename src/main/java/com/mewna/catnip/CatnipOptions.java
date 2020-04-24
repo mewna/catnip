@@ -27,21 +27,22 @@
 
 package com.mewna.catnip;
 
-import com.google.common.collect.ImmutableSet;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.SplitMemoryEntityCache;
-import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.guild.Guild;
+import com.mewna.catnip.entity.delegate.DefaultEntityDelegator;
+import com.mewna.catnip.entity.delegate.EntityDelegator;
+import com.mewna.catnip.entity.serialization.DefaultEntitySerializer;
+import com.mewna.catnip.entity.serialization.EntitySerializer;
 import com.mewna.catnip.entity.user.Presence;
-import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.rest.ratelimit.DefaultRateLimiter;
 import com.mewna.catnip.rest.requester.Requester;
 import com.mewna.catnip.rest.requester.SerialRequester;
-import com.mewna.catnip.shard.DiscordEvent.Raw;
+import com.mewna.catnip.shard.CompressionMode;
+import com.mewna.catnip.shard.GatewayIntent;
 import com.mewna.catnip.shard.buffer.CachingBuffer;
 import com.mewna.catnip.shard.buffer.EventBuffer;
-import com.mewna.catnip.shard.buffer.NoopBuffer;
 import com.mewna.catnip.shard.event.DefaultDispatchManager;
 import com.mewna.catnip.shard.event.DispatchManager;
 import com.mewna.catnip.shard.manager.DefaultShardManager;
@@ -50,17 +51,21 @@ import com.mewna.catnip.shard.ratelimit.MemoryRatelimiter;
 import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.DefaultSessionManager;
 import com.mewna.catnip.shard.session.SessionManager;
+import com.mewna.catnip.util.CatnipOptionsView;
 import com.mewna.catnip.util.logging.DefaultLogAdapter;
 import com.mewna.catnip.util.logging.LogAdapter;
-import io.vertx.core.json.JsonObject;
+import com.mewna.catnip.util.rx.RxHelpers;
+import com.mewna.catnip.util.scheduler.RxTaskScheduler;
+import com.mewna.catnip.util.scheduler.TaskScheduler;
+import io.reactivex.rxjava3.core.Scheduler;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import okhttp3.OkHttpClient.Builder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.net.http.HttpClient;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -74,151 +79,69 @@ import java.util.concurrent.TimeUnit;
 @Accessors(fluent = true, chain = true)
 @RequiredArgsConstructor
 @SuppressWarnings("OverlyCoupledClass")
-public final class CatnipOptions implements Cloneable {
-    /**
-     * The token for catnip to use.
-     * <p>
-     * May not be overridden by extensions.
-     */
+public final class CatnipOptions implements CatnipOptionsView, Cloneable {
     @Nonnull
     private final String token;
-    /**
-     * The shard manager for catnip to use. Defaults to {@link DefaultShardManager}.
-     */
     @Nonnull
     private ShardManager shardManager = new DefaultShardManager();
-    /**
-     * The session manager for catnip to use. Defaults to {@link DefaultSessionManager}
-     */
     @Nonnull
     private SessionManager sessionManager = new DefaultSessionManager();
-    /**
-     * The gateway ratelimiter for catnip to use. Defaults to {@link MemoryRatelimiter}
-     */
     @Nonnull
     private Ratelimiter gatewayRatelimiter = new MemoryRatelimiter();
-    /**
-     * The log adapter for catnip to use. Defaults to {@link DefaultLogAdapter},
-     * which uses SLF4J.
-     */
     @Nonnull
     private LogAdapter logAdapter = new DefaultLogAdapter();
-    /**
-     * The event buffer for catnip to use. Defaults to {@link CachingBuffer}.
-     * If you want to use an alternative event buffering strategy (ex. no
-     * buffering, only buffer certain events, ...) you can write your own
-     * implementation. For no buffering, {@link NoopBuffer} is provided.
-     * <p>Do NOT change this if you don't know what you're doing!</p>
-     */
     @Nonnull
     private EventBuffer eventBuffer = new CachingBuffer();
-    /**
-     * The cache worker for catnip to use. Defaults to {@link SplitMemoryEntityCache}.
-     * Change this if you want to use your own {@link EntityCacheWorker}.
-     */
     @Nonnull
     private EntityCacheWorker cacheWorker = new SplitMemoryEntityCache();
-    /**
-     * The set of cache flags for catnip to obey. Used to prevent caching certain
-     * things.
-     */
     @Nonnull
     private Set<CacheFlag> cacheFlags = EnumSet.noneOf(CacheFlag.class);
-    /**
-     * Manages event dispatching and consumers. Defaults to {@link DefaultDispatchManager}.
-     */
     @Nonnull
     private DispatchManager dispatchManager = new DefaultDispatchManager();
-    /**
-     * Whether or not catnip should chunk members. Do not disable this if you
-     * don't know what it does.
-     */
     private boolean chunkMembers = true;
-    /**
-     * Whether or not catnip should emit full event objects. Do not disable
-     * this if you don't know what it does. Mainly only useful for ex. an
-     * {@link Extension} that does things with the raw gateway payloads, like
-     * sending them to a message queue.
-     */
     private boolean emitEventObjects = true;
-    /**
-     * Whether or not catnip should enforce permissions for REST actions. Note
-     * that this will NOT enforce permissions if you directly call methods via
-     * {@link Catnip#rest()}, but will enforce them if you call them from
-     * entity objects (ex. doing {@link Guild#delete()}).
-     */
     private boolean enforcePermissions = true;
-    /**
-     * The presence that catnip should set for shards as they log in. This is
-     * for setting whether your bot appears online/DND/away/offline, as well as
-     * the "playing XXX" status.
-     */
     @Nullable
-    private Presence presence;
-    /**
-     * The events that catnip should not emit. You can use {@link Raw} to get
-     * the event names.
-     */
+    private Presence initialPresence;
     @Nonnull
-    private Set<String> disabledEvents = ImmutableSet.of();
+    private Set<String> disabledEvents = Set.of();
     @Nonnull
-    private Requester requester = new SerialRequester(new DefaultRateLimiter(), new Builder());
-    /**
-     * Whether or not extensions overriding options should be logged. Defaults
-     * to {@code true}.
-     * <p>
-     * May not be overridden by extensions.
-     */
+    private Requester requester = new SerialRequester(new DefaultRateLimiter());
     private boolean logExtensionOverrides = true;
-    /**
-     * Whether or not to validate the provided token when setting up catnip. It
-     * is HIGHLY recommended that you leave this with the default setting.
-     * <p>
-     * May not be overridden by extensions.
-     */
     private boolean validateToken = true;
-    /**
-     * Whether or not catnip should capture REST stacktraces before running
-     * REST requests.
-     * <p>
-     * catnip runs REST requests asynchronously. Because of this, we lose the
-     * caller's stacktrace, and exceptions thrown from REST calls are lost to
-     * the ether basically. If this option is enabled, catnip will capture a
-     * stacktrace before REST requests, and make it available to any exceptions
-     * thrown by the REST handler.
-     * <p>
-     * NOTE: Capturing stacktraces is <strong>s l o w</strong>. If you have
-     * performance problems around REST requests, you can disable this, at the
-     * cost of losing debuggability.
-     * <p>
-     * TODO: When we move off of Java 8, use the stack walking API for this
-     */
     private boolean captureRestStacktraces = true;
-    /**
-     * Whether or not to log "Received presence for uncached user XXX" when
-     * catnip is not chunking members. Basically, this avoids a ton of logspam.
-     */
     private boolean logUncachedPresenceWhenNotChunking = true;
-    /**
-     * Whether or not Discord should subscribe to guild workers and provide stuff
-     * such as presence updates, typing events, member updates and other stuff,
-     * see discord-api-docs#1016 for more information.
-     */
     private boolean enableGuildSubscriptions = true;
-    /**
-     * Whether or not {@link Entity#fromJson(Catnip, Class, JsonObject)} should
-     * log a warning when deserializing entities with mismatched catnip
-     * versions. Generally, this should only be disabled if you can guarantee
-     * that the version mismatches won't be an issue.
-     */
-    private boolean warnOnEntityVersionMismatch = true;
-    /**
-     * How long catnip should wait to ensure that all member chunks have been
-     * received, in milliseconds. If all member chunks still haven't been
-     * received after this period, member chunking will be re-requested, to try
-     * to make sure we're not missing any.
-     */
     private long memberChunkTimeout = TimeUnit.SECONDS.toMillis(10);
+    private Scheduler rxScheduler = RxHelpers.FORK_JOIN_SCHEDULER;
+    private boolean logLifecycleEvents = true;
+    private boolean manualChunkRerequesting;
+    private int largeThreshold = 250;
+    @Nonnull
+    private TaskScheduler taskScheduler = new RxTaskScheduler();
+    @Nonnull
+    @SuppressWarnings("UnnecessarilyQualifiedInnerClassAccess")
+    private HttpClient httpClient = HttpClient.newBuilder()
+            .executor(RxHelpers.FORK_JOIN_POOL)
+            .version(HttpClient.Version.HTTP_1_1)
+            .build();
+    @Nonnull
+    private CompressionMode compressionMode = CompressionMode.ZLIB;
+    private boolean restRatelimitsWithoutClockSync;
+    private long highLatencyThreshold = TimeUnit.SECONDS.toNanos(10);
+    @Nonnull
+    private EntitySerializer<?> entitySerializer = new DefaultEntitySerializer();
+    @Nonnull
+    private String apiHost = "https://discordapp.com";
+    private int apiVersion = 6;
+    // TODO: Default to unprivileged-only
+    @Nonnull
+    private Set<GatewayIntent> intents = Set.of(); // GatewayIntent.UNPRIVILEGED_INTENTS;
+    private boolean logPrivilegedIntentWarning = true;
+    @Nullable
+    private JsonObject customIdentifyOptions;
+    @Nonnull
+    private EntityDelegator entityDelegator = new DefaultEntityDelegator();
     
     @Override
     public Object clone() {

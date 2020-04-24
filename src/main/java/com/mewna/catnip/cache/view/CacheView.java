@@ -48,17 +48,6 @@ import java.util.stream.StreamSupport;
  */
 public interface CacheView<T> extends Iterable<T> {
     /**
-     * @return An always empty cache view. Cannot be modified.
-     *
-     * @deprecated Use {@link #noop()} instead.
-     */
-    @Nonnull
-    @Deprecated
-    static <T> NamedCacheView<T> empty() {
-        return noop();
-    }
-    
-    /**
      * @return A noop cache view. All mutation methods are noop. Always empty.
      */
     @Nonnull

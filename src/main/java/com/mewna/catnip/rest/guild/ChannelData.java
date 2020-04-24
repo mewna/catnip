@@ -27,6 +27,8 @@
 
 package com.mewna.catnip.rest.guild;
 
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.channel.Category;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.channel.TextChannel;
@@ -36,8 +38,6 @@ import com.mewna.catnip.entity.guild.PermissionOverride;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
 import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.util.JsonConvertible;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -266,7 +266,8 @@ public abstract class ChannelData implements JsonConvertible {
     @Nonnull
     @CheckReturnValue
     public JsonObject toJson() {
-        final JsonObject object = new JsonObject().put("type", type);
+        final JsonObject object = new JsonObject();
+        object.put("type", type);
         if(name != null) {
             object.put("name", name);
         }

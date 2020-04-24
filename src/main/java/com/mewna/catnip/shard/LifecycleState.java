@@ -33,7 +33,6 @@ package com.mewna.catnip.shard;
  */
 public enum LifecycleState {
     CREATED,
-    DEPLOYED,
     CONNECTING,
     CONNECTED,
     IDENTIFYING,

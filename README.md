@@ -1,12 +1,18 @@
 # catnip
 
+## READ THIS
+
+catnip v2 requires Java11+, but there is a bug with Java 11 + TLSv1.3 that causes runaway CPU usage.
+To avoid this problem, use Java 12 or later. See https://stackoverflow.com/questions/55298459 and
+https://stackoverflow.com/questions/54485755
+
 [![CircleCI](https://circleci.com/gh/mewna/catnip.svg?style=svg)](https://circleci.com/gh/mewna/catnip)
 [![powered by potato](https://img.shields.io/badge/powered%20by-potato-%23db325c.svg)](https://mewna.com/)
 ![GitHub tag (latest by date)](https://img.shields.io/github/tag-date/mewna/catnip.svg?style=popout)
-
+![LGTM Grade](https://img.shields.io/lgtm/grade/java/github/mewna/catnip)
 
 A Discord API wrapper in Java. Fully async / reactive, built on top of
-[vert.x](https://vertx.io). catnip tries to map roughly 1:1 to how the Discord 
+[RxJava](http://reactivex.io). catnip tries to map roughly 1:1 to how the Discord 
 API works, both in terms of events and REST methods available.
 
 catnip is part of the [amyware Discord server](https://discord.gg/yeF2HpP)
@@ -54,47 +60,56 @@ This is the simplest possible bot you can make right now:
 
 ```Java
 final Catnip catnip = Catnip.catnip("your token goes here");
-catnip.on(DiscordEvent.MESSAGE_CREATE, msg -> {
-    if(msg.content().startsWith("!ping")) {
+catnip.observable(DiscordEvent.MESSAGE_CREATE)
+    .filter(msg -> msg.content().equals("!ping"))
+    .subscribe(msg -> {
         msg.channel().sendMessage("pong!");
-    }
-});
+    }, error -> error.printStackTrace());
 catnip.connect();
 ```
 
-catnip returns `CompletionStage`s from all REST methods. For example,
-editing your ping message to include time it took to create the
-message:
+catnip returns RxJava operators (`Completable`/`Observable`/`Single`/...) from
+all REST methods. For example, editing your ping message to include time it
+took to create the message:
 
 ```Java
 final Catnip catnip = Catnip.catnip("your token goes here");
-catnip.on(DiscordEvent.MESSAGE_CREATE, msg -> {
-    if(msg.content().equalsIgnoreCase("!ping")) {
-        final long start = System.currentTimeMillis();
-        msg.channel().sendMessage("pong!")
-                .thenAccept(ping -> {
-                    final long end = System.currentTimeMillis();
-                    ping.edit("pong! (took " + (end - start) + "ms)");
-                });
-    }
-});
+catnip.observable(DiscordEvent.MESSAGE_CREATE)
+        .filter(msg -> msg.content().equals("!ping"))
+        .subscribe(msg -> {
+            long start = System.currentTimeMillis();
+            msg.channel().sendMessage("pong!")
+                    .subscribe(ping -> {
+                        long end = System.currentTimeMillis();
+                        ping.edit("pong! (took " + (end - start) + "ms).");
+                    });
+        }, error -> error.printStackTrace());
 catnip.connect();
 ```
 
 You can also create a catnip instance asynchronously:
 
 ```Java
-Catnip.catnipAsync("your token here").thenAccept(catnip -> {
-    catnip.on(DiscordEvent.MESSAGE_CREATE, msg -> {
-        if(msg.content().startsWith("!ping")) {
+Catnip.catnipAsync("your token here").subscribe(catnip -> {
+    catnip.observable(DiscordEvent.MESSAGE_CREATE)
+        .filter(msg -> msg.content().equals("!ping"))
+        .subscribe(msg -> {
             msg.channel().sendMessage("pong!");
-        }
-    });
+        }, error -> error.printStackTrace());
     catnip.connect();
 });
 ```
 
 Also check out the [examples](https://github.com/mewna/catnip/tree/master/src/main/example/basic) for Kotlin and Scala usage.
+
+### A note on Observable#subscribe vs. Observable#forEach
+
+`Observable#forEach` seems like the obvious way to use the reactive methods, but as it turns out,
+it's also the wrong thing to do. `Observable#forEach` is generally intended for finite streams of
+data; the events that catnip emits aren't finite, and as such, `Observable#forEach` isn't the
+correct tool to use. In addition, **`Observable#forEach` will stop processing events if an uncaught
+exception is thrown.** Instead, you should use `Observable#subscribe(eventCallback, exceptionCallback)`,
+which will handle exceptions properly.
 
 ### Modular usage
 
@@ -103,15 +118,13 @@ is that using it like this is **exactly the same** as using it normally. The onl
 that to use catnip in REST-only mode, you don't call `catnip.connect()` and use 
 `catnip.rest().whatever()` instead. 
 
-### Custom event bus events
+### RxJava schedulers
 
-Because vert.x is intended to be used in clustered mode as well as in a single-node configuration,
-emitting events over the built-in event bus requires registering a codec for the events that you
-want to fire. If you have an event class `MyEvent`, you can just do something to the effect of
-```Java
-eventBus().registerDefaultCodec(MyEvent.class, new JsonPojoCodec<>(this, MyEvent.class));
-```
-where `JsonPojoCodec` is `com.mewna.catnip.util.JsonPojoCodec` and is safe to use.
+By default, RxJava's `Observable#subscribe()` and related methods will not operate on any
+particular scheduler by default. That is, they will run on the calling thread. catnip will
+automatically subscribe RxJava objects onto a scheduler provided by catnip, that defaults
+to being a ForkJoinPool-based scheduler. You can customize the scheduler used with the
+corresponding option in `CatnipOptions`.
 
 ## Useful extensions
 
@@ -119,6 +132,8 @@ where `JsonPojoCodec` is `com.mewna.catnip.util.JsonPojoCodec` and is safe to us
   https://github.com/natanbc/catnip-voice
 - `catnip-utilities` - Some extensions for typesafe commands, event waiters, reaction menus, 
   and more. https://github.com/queer/catnip-utilities 
+- `discordbotlist-stats-catnip` - Wrapper aiming at combining all Discord Bot Lists AND Wrappers into one artifact.
+  Automatically handles pushing bot stats to bot lists. https://github.com/burdoto/discordbotlist-stats#using-with-catnip--
 
 ## Why write a fourth Java lib?
 
@@ -130,18 +145,9 @@ where `JsonPojoCodec` is `com.mewna.catnip.util.JsonPojoCodec` and is safe to us
 - I wanted to try to maximize extensibility / customizability, beyond just making it modular. Things
   like being able to intercept raw websocket messages (as JSON), write custom distributed cache handlers,
   ... are incredibly useful.
-- I like everything returning `CompletionStage`s instead of custom classes. I do get why other libs
+- I like everything returning Rx classes instead of custom `Future`-like classes. I do get why other libs
   have them, I just wanted to not.
 - I wanted modular usage to be exactly the same more / less no matter what; everything
   should be doable through the catnip instance that you create.
-- I wanted to make a lib built on vert.x.
+- I wanted to make a lib built on RxJava.
 - To take over the world and convert all Java bots. :^)
-
-### Why vert.x?
-
-- vert.x is nice and reactive and async. :tm:
-- You can use callbacks or Rx (like we do), but vert.x also provides support for reactive streams
-  and kotlin coroutines.
-- There's a *lot* of [vert.x libraries and documentation](https://vertx.io/docs/) for just about
-  anything you want.
-- The reactive, event-loop-driven model fits well for a Discord bot use-case.

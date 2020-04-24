@@ -27,21 +27,19 @@
 
 package com.mewna.catnip.entity.message;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.channel.ChannelMention;
 import com.mewna.catnip.entity.channel.MessageChannel;
 import com.mewna.catnip.entity.channel.TextChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
-import com.mewna.catnip.entity.impl.MessageImpl;
-import com.mewna.catnip.entity.impl.MessageImpl.AttachmentImpl;
-import com.mewna.catnip.entity.impl.MessageImpl.ReactionImpl;
 import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.CheckReturnValue;
@@ -50,7 +48,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.concurrent.CompletionStage;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A single message in Discord.
@@ -59,7 +58,6 @@ import java.util.concurrent.CompletionStage;
  * @since 9/4/18.
  */
 @SuppressWarnings("unused")
-@JsonDeserialize(as = MessageImpl.class)
 public interface Message extends Snowflake {
     /**
      * The type of message. Use this to tell normal messages from system messages.
@@ -139,11 +137,29 @@ public interface Message extends Snowflake {
      * List of roles @mentioned by this message.
      * <br>All users with these roles will also be mentioned
      *
-     * @return List of Roles. Never null.
+     * @return List of roles. Never null.
      */
     @Nonnull
     @CheckReturnValue
-    List<Role> mentionedRoles();
+    default List<Role> mentionedRoles() {
+        if(guildId() == null) {
+            return List.of();
+        }
+        //noinspection ConstantConditions
+        return mentionedRoleIds().stream()
+                .map(e -> catnip().cache().role(guildId(), e))
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * List of the ids of all roles @mentioned by this message.<br />
+     * All users with at least one of these roles will also be mentioned.
+     *
+     * @return List of role ids. Never null.
+     */
+    @Nonnull
+    @CheckReturnValue
+    List<String> mentionedRoleIds();
     
     /**
      * The author of the message, as a member of the guild.
@@ -250,6 +266,53 @@ public interface Message extends Snowflake {
     List<Reaction> reactions();
     
     /**
+     * @return The message's activity. Sent in Rich Presence-related embeds.
+     * May be null.
+     */
+    @Nullable
+    @CheckReturnValue
+    MessageActivity activity();
+    
+    /**
+     * @return The message's application. Sent in Rich Presence-related embeds.
+     * May be null.
+     */
+    @Nullable
+    @CheckReturnValue
+    MessageApplication application();
+    
+    /**
+     * @return Reference data sent with crossposted messages.
+     */
+    @Nullable
+    @CheckReturnValue
+    MessageReference messageReference();
+    
+    /**
+     * @return Raw bits of flags set on this message.
+     */
+    @CheckReturnValue
+    int flagsRaw();
+    
+    /**
+     * @return The set of flags set on this message.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Set<MessageFlag> flags() {
+        return MessageFlag.toSet(flagsRaw());
+    }
+    
+    /**
+     * @return All channels mentioned in this message. Not all messages will
+     * have this, nor will all channels mentioned in a message have a
+     * corresponding mention object.
+     */
+    @Nonnull
+    @CheckReturnValue
+    List<ChannelMention> mentionedChannels();
+    
+    /**
      * The snowflake ID of the guild this message was sent in.
      *
      * @return String representing the guild ID. Null if sent in DMs.
@@ -321,8 +384,7 @@ public interface Message extends Snowflake {
      * @return Future for the reaction.
      */
     @Nonnull
-    @JsonIgnore
-    default CompletionStage<Void> react(@Nonnull final Emoji emoji) {
+    default Completable react(@Nonnull final Emoji emoji) {
         PermissionUtil.checkPermissions(catnip(), guildId(), channelId(),
                 Permission.ADD_REACTIONS, Permission.READ_MESSAGE_HISTORY);
         return catnip().rest().channel().addReaction(channelId(), id(), emoji);
@@ -337,18 +399,16 @@ public interface Message extends Snowflake {
      * @return Future for the reaction.
      */
     @Nonnull
-    @JsonIgnore
-    default CompletionStage<Void> react(@Nonnull final String emoji) {
+    default Completable react(@Nonnull final String emoji) {
         PermissionUtil.checkPermissions(catnip(), guildId(), channelId(),
                 Permission.ADD_REACTIONS, Permission.READ_MESSAGE_HISTORY);
         return catnip().rest().channel().addReaction(channelId(), id(), emoji);
     }
 
-//    default CompletionStage<Void> removeReaction()
+//    default Completable removeReaction()
     
     @Nonnull
-    @JsonIgnore
-    default CompletionStage<Void> delete(@Nullable final String reason) {
+    default Completable delete(@Nullable final String reason) {
         final User self = catnip().selfUser();
         if(self != null && !author().id().equals(self.id())) {
             PermissionUtil.checkPermissions(catnip(), guildId(), channelId(),
@@ -358,43 +418,40 @@ public interface Message extends Snowflake {
     }
     
     @Nonnull
-    @JsonIgnore
-    default CompletionStage<Void> delete() {
+    default Completable delete() {
         return delete(null);
     }
     
     @Nonnull
-    @JsonIgnore
-    default CompletionStage<Message> edit(@Nonnull final String content) {
+    default Single<Message> edit(@Nonnull final String content) {
         return catnip().rest().channel().editMessage(channelId(), id(), content);
     }
     
     @Nonnull
-    @JsonIgnore
-    default CompletionStage<Message> edit(@Nonnull final Embed embed) {
+    default Single<Message> edit(@Nonnull final Embed embed) {
         return catnip().rest().channel().editMessage(channelId(), id(), embed);
     }
     
     @Nonnull
-    @JsonIgnore
-    default CompletionStage<Message> edit(@Nonnull final Message message) {
+    default Single<Message> edit(@Nonnull final Message message) {
         Validate.isTrue(message.attachments().isEmpty(), "attachments cannot be edited into messages");
         return catnip().rest().channel().editMessage(channelId(), id(), message);
     }
     
     @Nonnull
-    @JsonIgnore
-    default CompletionStage<Message> edit(@Nonnull final MessageOptions options) {
+    default Single<Message> edit(@Nonnull final MessageOptions options) {
         Validate.isTrue(options.files().isEmpty(), "attachments cannot be edited into messages");
         return catnip().rest().channel().editMessage(channelId(), id(), options.buildMessage());
     }
     
-    @JsonIgnore
     default boolean isRickRoll() {
         return content().contains("https://www.youtube.com/watch?v=dQw4w9WgXcQ") || content().contains("https://youtu.be/dQw4w9WgXcQ");
     }
     
-    @JsonDeserialize(as = AttachmentImpl.class)
+    default boolean isGnome() {
+        return content().contains("https://youtube.com/watch?v=6n3pFFPSlW4") || content().contains("https://youtu.be/6n3pFFPSlW4");
+    }
+    
     interface Attachment extends Snowflake {
         /**
          * The name of the file represented by this attachment.
@@ -459,7 +516,6 @@ public interface Message extends Snowflake {
         }
     }
     
-    @JsonDeserialize(as = ReactionImpl.class)
     interface Reaction {
         /**
          * The count of reactions.
@@ -486,5 +542,58 @@ public interface Message extends Snowflake {
         @Nonnull
         @CheckReturnValue
         Emoji emoji();
+    }
+    
+    interface MessageActivity {
+        /**
+         * @return The type of the message activity.
+         */
+        @Nonnull
+        @CheckReturnValue
+        MessageActivityType type();
+        
+        /**
+         * @return The Rich Presence party id. May be null.
+         */
+        @Nullable
+        @CheckReturnValue
+        String partyId();
+    }
+    
+    interface MessageApplication {
+        /**
+         * @return The application's id.
+         */
+        @Nonnull
+        @CheckReturnValue
+        String id();
+        
+        /**
+         * @return The application's cover image. Shown in embeds. May be null.
+         */
+        @Nullable
+        @CheckReturnValue
+        String coverImage();
+        
+        /**
+         * @return The application's description.
+         */
+        @Nonnull
+        @CheckReturnValue
+        String description();
+        
+        /**
+         * @return The application's icon id (hash). May be null.
+         */
+        @Nullable
+        @CheckReturnValue
+        String icon();
+        
+        /**
+         * @return The application's name.
+         */
+        @Nonnull
+        @CheckReturnValue
+        String name();
     }
 }

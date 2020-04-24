@@ -28,16 +28,17 @@
 package com.mewna.catnip.shard.event;
 
 import com.mewna.catnip.Catnip;
-import io.vertx.core.eventbus.MessageConsumer;
 
-public interface DispatchManager {
+import java.io.Closeable;
+
+public interface DispatchManager extends Closeable {
     void catnip(Catnip catnip);
     
     /**
      * Dispatches an event to the provided address.
      *
      * @param address Address to send the event to.
-     * @param event Event to dispatch.
+     * @param event   Event to dispatch.
      */
     void dispatchEvent(String address, Object event);
     
@@ -45,9 +46,12 @@ public interface DispatchManager {
      * Returns a consumer listening on the provided address.
      *
      * @param address Address to listen on.
-     * @param <T> Type of the event handled by the consumer.
+     * @param <T>     Type of the event handled by the consumer.
      *
      * @return A consumer listening on the provided address.
      */
     <T> MessageConsumer<T> createConsumer(String address);
+    
+    @Override
+    void close();
 }

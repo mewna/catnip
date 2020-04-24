@@ -27,8 +27,8 @@
 
 package com.mewna.catnip.entity.builder;
 
-import com.mewna.catnip.entity.impl.PresenceImpl;
-import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
+import com.mewna.catnip.entity.impl.user.PresenceImpl;
+import com.mewna.catnip.entity.impl.user.PresenceImpl.ActivityImpl;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.Activity;
 import com.mewna.catnip.entity.user.Presence.ActivityType;
@@ -39,6 +39,7 @@ import lombok.experimental.Accessors;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * @author SamOphis
@@ -49,18 +50,20 @@ import javax.annotation.Nonnull;
 @Accessors(fluent = true, chain = true)
 @SuppressWarnings("unused")
 public class PresenceBuilder {
-    private OnlineStatus status;
+    private OnlineStatus status = OnlineStatus.ONLINE;
     private ActivityType type;
     private String name;
     private String url;
     
     public PresenceBuilder(final Presence presence) {
         status = presence.status();
-        final Activity activity = presence.activity();
-        if(activity != null) {
-            type = activity.type();
-            name = activity.name();
-            url = activity.url();
+        if(!presence.activities().isEmpty()) {
+            final Activity activity = presence.activities().get(0);
+            if(activity != null) {
+                type = activity.type();
+                name = activity.name();
+                url = activity.url();
+            }
         }
     }
     
@@ -74,7 +77,7 @@ public class PresenceBuilder {
                 : null;
         return PresenceImpl.builder()
                 .status(status)
-                .activity(activity)
+                .activities(activity != null ? List.of(activity) : null)
                 .build();
     }
 }

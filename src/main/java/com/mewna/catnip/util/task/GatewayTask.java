@@ -27,9 +27,9 @@
 
 package com.mewna.catnip.util.task;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.impl.PresenceImpl;
-import io.vertx.core.json.JsonObject;
+import com.mewna.catnip.entity.impl.user.PresenceImpl;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayDeque;
@@ -65,10 +65,10 @@ public class GatewayTask<T> extends QueueTask<T> {
             return;
         }
         while(!queue.isEmpty()) {
-            if(catnip.gatewayRatelimiter().checkRatelimit(id, periodMs, limit).left) {
+            if(catnip.options().gatewayRatelimiter().checkRatelimit(id, periodMs, limit).left) {
                 if(!queued) {
                     queued = true;
-                    catnip.vertx().setTimer(1000, __ -> {
+                    catnip.taskScheduler().setTimer(1000, __ -> {
                         queued = false;
                         run();
                     });

@@ -10,3 +10,6 @@ target/
 .vertx/
 modules/
 delombok/
+*_pid*.log
+/*.java
+/src/main/java/*.java

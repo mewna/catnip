@@ -27,9 +27,7 @@
 
 package com.mewna.catnip.entity.misc;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.impl.GatewayInfoImpl;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -38,7 +36,6 @@ import javax.annotation.Nonnull;
  * @author amy
  * @since 12/10/18.
  */
-@JsonDeserialize(as = GatewayInfoImpl.class)
 public interface GatewayInfo extends Entity {
     boolean valid();
     

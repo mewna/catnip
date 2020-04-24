@@ -53,7 +53,7 @@ public class EventTypeImpl<T> implements EventType<T> {
     }
     
     public static EventType<Void> notFired(@Nonnull final String key) {
-        return new EventTypeImpl<Void>(key, Void.class) {
+        return new EventTypeImpl<>(key, Void.class) {
             @Nonnull
             @CheckReturnValue
             @Override

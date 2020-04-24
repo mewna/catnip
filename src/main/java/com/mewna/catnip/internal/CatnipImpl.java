@@ -27,14 +27,11 @@
 
 package com.mewna.catnip.internal;
 
-import com.google.common.collect.ImmutableSet;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
-import com.mewna.catnip.cache.CacheFlag;
-import com.mewna.catnip.cache.EntityCacheWorker;
-import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.impl.*;
-import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
+import com.mewna.catnip.entity.impl.user.PresenceImpl;
+import com.mewna.catnip.entity.impl.user.PresenceImpl.ActivityImpl;
 import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.Activity;
@@ -47,124 +44,88 @@ import com.mewna.catnip.extension.manager.DefaultExtensionManager;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.rest.Rest;
 import com.mewna.catnip.rest.requester.Requester;
-import com.mewna.catnip.shard.*;
-import com.mewna.catnip.shard.buffer.EventBuffer;
-import com.mewna.catnip.shard.event.DispatchManager;
-import com.mewna.catnip.shard.manager.ShardManager;
-import com.mewna.catnip.shard.ratelimit.Ratelimiter;
-import com.mewna.catnip.shard.session.SessionManager;
-import com.mewna.catnip.util.JsonEntityCodec;
-import com.mewna.catnip.util.JsonPojoCodec;
+import com.mewna.catnip.shard.CatnipShardImpl;
+import com.mewna.catnip.shard.GatewayIntent;
+import com.mewna.catnip.shard.GatewayOp;
 import com.mewna.catnip.util.PermissionUtil;
-import com.mewna.catnip.util.SafeVertxCompletableFuture;
-import com.mewna.catnip.util.logging.LogAdapter;
-import io.vertx.core.Future;
-import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.json.JsonObject;
+import io.reactivex.rxjava3.core.Single;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-
-import static com.mewna.catnip.shard.ShardAddress.*;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 /**
  * @author amy
  * @since 8/31/18.
  */
 @Getter
-@SuppressWarnings("OverlyCoupledClass")
 @Accessors(fluent = true, chain = true)
 public class CatnipImpl implements Catnip {
-    private final Vertx vertx;
+    private static final List<String> UNPATCHABLE_OPTIONS = List.of("token", "logExtensionOverrides", "validateToken");
     private final String token;
     private final boolean logExtensionOverrides;
     private final boolean validateToken;
-    
     private final Rest rest = new Rest(this);
     private final ExtensionManager extensionManager = new DefaultExtensionManager(this);
     private final Set<String> unavailableGuilds = ConcurrentHashMap.newKeySet();
     private final AtomicReference<GatewayInfo> gatewayInfo = new AtomicReference<>(null);
+    private final Thread keepaliveThread;
+    private final CountDownLatch latch = new CountDownLatch(1);
+    private boolean startedKeepalive;
     private long clientIdAsLong;
-    
-    private DispatchManager dispatchManager;
-    private Requester requester;
-    private ShardManager shardManager;
-    private SessionManager sessionManager;
-    private Ratelimiter gatewayRatelimiter;
-    private LogAdapter logAdapter;
-    private EventBuffer eventBuffer;
-    private EntityCacheWorker cache;
-    private Set<CacheFlag> cacheFlags;
-    private boolean chunkMembers;
-    private boolean emitEventObjects;
-    private boolean enforcePermissions;
-    private boolean captureRestStacktraces;
-    private boolean logUncachedPresenceWhenNotChunking;
-    private boolean warnOnEntityVersionMismatch;
-    private long memberChunkTimeout;
-    private Presence initialPresence;
-    private Set<String> disabledEvents;
     private CatnipOptions options;
     
-    public CatnipImpl(@Nonnull final Vertx vertx, @Nonnull final CatnipOptions options) {
-        this.vertx = vertx;
-        applyOptions(options);
+    public CatnipImpl(@Nonnull final CatnipOptions options) {
+        this.options = options;
+        
         token = options.token();
         logExtensionOverrides = options.logExtensionOverrides();
         validateToken = options.validateToken();
+        
+        keepaliveThread = new Thread(() -> {
+            try {
+                latch.await();
+            } catch(final InterruptedException ignored) {
+            }
+        });
+        // Just to be safe
+        keepaliveThread.setDaemon(false);
+        keepaliveThread.setName("catnip keepalive thread");
+        injectSelf();
     }
     
-    private void applyOptions(@Nonnull final CatnipOptions options) {
-        // TODO: Should probably make this behave like #diff
-        //  so that we don't need to update this every single time that the
-        //  options change.
-        this.options = options;
-        dispatchManager = options.dispatchManager();
-        requester = options.requester();
-        shardManager = options.shardManager();
-        sessionManager = options.sessionManager();
-        gatewayRatelimiter = options.gatewayRatelimiter();
-        logAdapter = options.logAdapter();
-        eventBuffer = options.eventBuffer();
-        cache = options.cacheWorker();
-        cacheFlags = options.cacheFlags();
-        chunkMembers = options.chunkMembers();
-        emitEventObjects = options.emitEventObjects();
-        enforcePermissions = options.enforcePermissions();
-        captureRestStacktraces = options.captureRestStacktraces();
-        initialPresence = options.presence();
-        memberChunkTimeout = options.memberChunkTimeout();
-        disabledEvents = ImmutableSet.copyOf(options.disabledEvents());
-        logUncachedPresenceWhenNotChunking = options.logUncachedPresenceWhenNotChunking();
-        warnOnEntityVersionMismatch = options.warnOnEntityVersionMismatch();
-        
-        injectSelf();
+    private void sanityCheckOptions(@Nonnull final CatnipOptions options) {
+        if(options.largeThreshold() > 250 || options.largeThreshold() < 50) {
+            throw new IllegalArgumentException("Large threshold of " + options.largeThreshold() + " not between 50 and 250!");
+        }
+        if(options.highLatencyThreshold() < 0) {
+            throw new IllegalArgumentException("High latency threshold of " + options.highLatencyThreshold() + " not greater than zero!");
+        }
     }
     
     @Nonnull
     @Override
-    public Catnip injectOptions(@Nonnull final Extension extension, @Nonnull final Function<CatnipOptions, CatnipOptions> optionsPatcher) {
+    public Catnip injectOptions(@Nonnull final Extension extension, @Nonnull final UnaryOperator<CatnipOptions> optionsPatcher) {
         if(!extensionManager.matchingExtensions(extension.getClass()).isEmpty()) {
             final CatnipOptions patchedOptions = optionsPatcher.apply((CatnipOptions) options.clone());
             final Map<String, Pair<Object, Object>> diff = diff(patchedOptions);
             if(!diff.isEmpty()) {
-                applyOptions(patchedOptions);
+                sanityCheckOptions(patchedOptions);
+                options = patchedOptions;
+                injectSelf();
                 if(logExtensionOverrides) {
-                    diff.forEach((name, patch) -> logAdapter.info("Extension {} updated {} from \"{}\" to \"{}\".",
+                    diff.forEach((name, patch) -> logAdapter().info("Extension {} updated {} from \"{}\" to \"{}\".",
                             extension.name(), name, patch.getLeft(), patch.getRight()));
                 }
             }
@@ -182,8 +143,9 @@ public class CatnipImpl implements Catnip {
         // automatically diff it without having to know about what every
         // field is.
         for(final Field field : patch.getClass().getDeclaredFields()) {
-            // Don't compare tokens because there's no point
-            if(!field.getName().equals("token")) {
+            // Don't compare certain because there's no point; they only get
+            // checked / set once at startup and never again.
+            if(!UNPATCHABLE_OPTIONS.contains(field.getName())) {
                 try {
                     field.setAccessible(true);
                     final Object input = field.get(patch);
@@ -192,18 +154,25 @@ public class CatnipImpl implements Catnip {
                         diff.put(field.getName(), ImmutablePair.of(original, input));
                     }
                 } catch(final IllegalAccessException e) {
-                    logAdapter.error("Reflection did a \uD83D\uDCA9", e);
+                    logAdapter().error("Reflection did a \uD83D\uDCA9", e);
                 }
             }
         }
         return diff;
     }
     
-    @Nonnull
-    @Override
-    @CheckReturnValue
-    public EventBus eventBus() {
-        return vertx.eventBus();
+    // We don't expose this to the outside world because the ability to make
+    // raw requests is already exposed via #rest(). If someone REALLY needs
+    // this functionality, they can just get it by casting to CatnipImpl.
+    // The only reason I can think of to have this as a part of the public
+    // API is because someone wants to use undocumented routes -- in which case
+    // they shouldn't be doing that -- or if we haven't added a route yet, in
+    // which case they should be opening an issue so that we can get it added
+    // for everyone.
+    // TLDR, if you *really* need this then you know what you're doing, so you
+    // can live with casting instead of exposing it as part of the public API.
+    public Requester requester() {
+        return options.requester();
     }
     
     @Nonnull
@@ -230,17 +199,19 @@ public class CatnipImpl implements Catnip {
     }
     
     @Override
-    public void shutdown(final boolean vertx) {
-        shardManager.shutdown();
-        if(vertx) {
-            this.vertx.close();
-        }
+    public void shutdown() {
+        logAdapter().info("Shutting down!");
+        dispatchManager().close();
+        shardManager().shutdown();
+        extensionManager.shutdown();
+        // Will let the keepalive thread halt
+        latch.countDown();
     }
     
     @Nonnull
     @Override
     public Set<String> unavailableGuilds() {
-        return ImmutableSet.copyOf(unavailableGuilds);
+        return Set.copyOf(unavailableGuilds);
     }
     
     public void markAvailable(final String id) {
@@ -260,22 +231,24 @@ public class CatnipImpl implements Catnip {
     public void openVoiceConnection(@Nonnull final String guildId, @Nonnull final String channelId, final boolean selfMute,
                                     final boolean selfDeaf) {
         PermissionUtil.checkPermissions(this, guildId, channelId, Permission.CONNECT);
-        eventBus().send(computeAddress(VOICE_STATE_UPDATE_QUEUE, shardIdFor(guildId)),
-                new JsonObject()
-                        .put("guild_id", guildId)
-                        .put("channel_id", channelId)
-                        .put("self_mute", selfMute)
-                        .put("self_deaf", selfDeaf));
+        shardManager().shard(shardIdFor(guildId)).queueVoiceStateUpdate(
+                JsonObject.builder()
+                        .value("guild_id", guildId)
+                        .value("channel_id", channelId)
+                        .value("self_mute", selfMute)
+                        .value("self_deaf", selfDeaf)
+                        .done());
     }
     
     @Override
     public void closeVoiceConnection(@Nonnull final String guildId) {
-        eventBus().send(computeAddress(VOICE_STATE_UPDATE_QUEUE, shardIdFor(guildId)),
-                new JsonObject()
-                        .put("guild_id", guildId)
-                        .putNull("channel_id")
-                        .put("self_mute", false)
-                        .put("self_deaf", false));
+        shardManager().shard(shardIdFor(guildId)).queueVoiceStateUpdate(
+                JsonObject.builder()
+                        .value("guild_id", guildId)
+                        .nul("channel_id")
+                        .value("self_mute", false)
+                        .value("self_deaf", false)
+                        .done());
     }
     
     @Override
@@ -285,21 +258,18 @@ public class CatnipImpl implements Catnip {
     
     @Override
     public void chunkMembers(@Nonnull final String guildId, @Nonnull final String query, @Nonnegative final int limit) {
-        eventBus().send(computeAddress(WEBSOCKET_QUEUE, shardIdFor(guildId)),
-                CatnipShard.basePayload(GatewayOp.REQUEST_GUILD_MEMBERS,
-                        new JsonObject()
-                                .put("guild_id", guildId)
-                                .put("query", query)
-                                .put("limit", limit)));
+        shardManager().shard(shardIdFor(guildId)).queueSendToSocket(
+                CatnipShardImpl.basePayload(GatewayOp.REQUEST_GUILD_MEMBERS,
+                        JsonObject.builder()
+                                .value("guild_id", guildId)
+                                .value("query", query)
+                                .value("limit", limit)
+                                .done()));
     }
     
     @Override
-    public CompletionStage<Presence> presence(@Nonnegative final int shardId) {
-        final Future<Presence> future = Future.future();
-        eventBus().send(
-                computeAddress(PRESENCE_UPDATE_REQUEST, shardId), null,
-                result -> future.complete((Presence) result.result().body()));
-        return SafeVertxCompletableFuture.from(this, future);
+    public Presence presence(@Nonnegative final int shardId) {
+        return shardManager().shard(shardId).presence();
     }
     
     @Override
@@ -315,7 +285,7 @@ public class CatnipImpl implements Catnip {
     
     @Override
     public void presence(@Nonnull final Presence presence, @Nonnegative final int shardId) {
-        eventBus().publish(computeAddress(PRESENCE_UPDATE_REQUEST, shardId), presence);
+        shardManager().shard(shardId).updatePresence((PresenceImpl) presence);
     }
     
     @Override
@@ -343,152 +313,75 @@ public class CatnipImpl implements Catnip {
         presence(PresenceImpl.builder()
                 .catnip(this)
                 .status(stat)
-                .activity(activity)
+                .activities(activity != null ? List.of(activity) : List.of())
                 .build());
     }
     
     @Nonnull
-    public CompletableFuture<Catnip> setup() {
-        codecs();
-        
+    public Single<Catnip> setup() {
+        if(!startedKeepalive) {
+            startedKeepalive = true;
+            keepaliveThread.start();
+        }
         if(validateToken) {
             return fetchGatewayInfo()
-                    .thenApply(gateway -> {
-                        logAdapter.info("Token validated!");
+                    .map(gateway -> {
+                        logAdapter().info("Token validated!");
                         
                         parseClientId();
                         
                         //this is actually needed because generics are dumb
                         return (Catnip) this;
-                    }).exceptionally(e -> {
-                        logAdapter.warn("Couldn't validate token!");
+                    }).doOnError(e -> {
+                        logAdapter().warn("Couldn't validate token!", e);
                         throw new RuntimeException(e);
-                    })
-                    .toCompletableFuture();
+                    });
         } else {
-            try {
-                parseClientId();
-            } catch(final IllegalArgumentException e) {
-                final Exception wrapped = new RuntimeException("The provided token was invalid!", e);
-                // I would use SafeVertxCompletableFuture.failedFuture but that was added in Java 9+
-                // and catnip uses Java 8
-                return SafeVertxCompletableFuture.from(this, Future.failedFuture(wrapped));
+            if(!token.isEmpty()) {
+                try {
+                    parseClientId();
+                } catch(final IllegalArgumentException e) {
+                    final Exception wrapped = new RuntimeException("The provided token was invalid!", e);
+                    return Single.error(wrapped);
+                }
             }
             
-            return SafeVertxCompletableFuture.completedFuture(this);
+            return Single.just(this);
         }
     }
     
     private void injectSelf() {
         // Inject catnip instance into dependent fields
-        dispatchManager.catnip(this);
-        shardManager.catnip(this);
-        eventBuffer.catnip(this);
-        cache.catnip(this);
-        requester.catnip(this);
-    }
-    
-    private void codecs() {
-        try {
-            // Register codecs
-            // God I hate having to do this
-            // This is necessary to make Vert.x allow passing arbitrary objects
-            // over the bus tho, since it doesn't obey typical Java serialization
-            // stuff (for reasons I don't really get) and won't just dump stuff to
-            // JSON when it doesn't have a codec
-            // *sigh*
-            // This is mainly important for distributed catnip; locally it'll just
-            // not apply any transformations
-            
-            // Lifecycle
-            entityCodec(ReadyImpl.class);
-            entityCodec(ResumedImpl.class);
-            eventCodec(LifecycleState.class);
-            eventCodec(ChunkingDoneImpl.class);
-            
-            // DoubleEvents use ImmutablePair
-            eventCodec(ImmutablePair.class);
-            
-            // Messages
-            entityCodec(MessageImpl.class);
-            entityCodec(DeletedMessageImpl.class);
-            entityCodec(BulkDeletedMessagesImpl.class);
-            entityCodec(TypingUserImpl.class);
-            entityCodec(ReactionUpdateImpl.class);
-            entityCodec(BulkRemovedReactionsImpl.class);
-            entityCodec(MessageEmbedUpdateImpl.class);
-            
-            // Channels
-            entityCodec(CategoryImpl.class);
-            entityCodec(GroupDMChannelImpl.class);
-            entityCodec(TextChannelImpl.class);
-            entityCodec(UserDMChannelImpl.class);
-            entityCodec(VoiceChannelImpl.class);
-            entityCodec(NewsChannelImpl.class);
-            entityCodec(StoreChannelImpl.class);
-            entityCodec(WebhookImpl.class);
-            entityCodec(ChannelPinsUpdateImpl.class);
-            entityCodec(WebhooksUpdateImpl.class);
-            
-            // Guilds
-            entityCodec(GuildImpl.class);
-            entityCodec(GatewayGuildBanImpl.class);
-            entityCodec(EmojiUpdateImpl.class);
-            entityCodec(UnavailableGuildImpl.class);
-            
-            // Roles
-            entityCodec(RoleImpl.class);
-            entityCodec(PartialRoleImpl.class);
-            entityCodec(PermissionOverrideImpl.class);
-            
-            // Members
-            entityCodec(MemberImpl.class);
-            entityCodec(PartialMemberImpl.class);
-            
-            // Users
-            entityCodec(UserImpl.class);
-            entityCodec(PresenceImpl.class);
-            entityCodec(PresenceUpdateImpl.class);
-            
-            // Voice
-            entityCodec(VoiceStateImpl.class);
-            entityCodec(VoiceServerUpdateImpl.class);
-            
-            // Shards
-            eventCodec(ShardInfo.class);
-            eventCodec(ShardConnectState.class);
-            eventCodec(ShardControlMessage.class);
-        } catch(final IllegalStateException e) {
-            //only log once instead of one time per codec
-            logAdapter.debug("Couldn't register codecs because they are already registered. " +
-                    "This is probably because you're running multiple catnip instances on the same vert.x " +
-                    "instance. If you're sure this is correct, you can ignore this warning.", e);
+        dispatchManager().catnip(this);
+        shardManager().catnip(this);
+        eventBuffer().catnip(this);
+        cacheWorker().catnip(this);
+        options.requester().catnip(this);
+        taskScheduler().catnip(this);
+        final List<GatewayIntent> privilegedIntents = options.intents().stream()
+                .filter(GatewayIntent::privileged)
+                .collect(Collectors.toList());
+        if(!options.enableGuildSubscriptions() && options.intents().isEmpty()) {
+            logAdapter().warn("Guild subscriptions are disabled and no intents specified!");
+            logAdapter().warn("You probably want to use intents instead.");
         }
-    }
-    
-    private <T extends Entity> void entityCodec(@Nonnull final Class<T> cls) {
-        eventBus().registerDefaultCodec(cls, new JsonEntityCodec<>(this, cls));
-    }
-    
-    private <T> void eventCodec(@Nonnull final Class<T> cls) {
-        eventBus().registerDefaultCodec(cls, new JsonPojoCodec<>(this, cls));
-    }
-    
-    @Nonnull
-    @Override
-    public EntityCacheWorker cacheWorker() {
-        return cache;
+        if(!privilegedIntents.isEmpty() && options.logPrivilegedIntentWarning()) {
+            // TODO: Check application flags to make sure this is actually a
+            //  necessary log -- requires REST request.
+            logAdapter().warn("catnip is configured with the following privileged intents: {}", privilegedIntents);
+            logAdapter().warn("Please make sure your bot is whitelisted to use these intents!");
+        }
     }
     
     @Nonnull
     public Catnip connect() {
-        shardManager.start();
+        shardManager().start();
         return this;
     }
     
     private int shardIdFor(@Nonnull final String guildId) {
         final long idLong = Long.parseUnsignedLong(guildId);
-        return (int) ((idLong >>> 22) % shardManager.shardCount());
+        return (int) ((idLong >>> 22) % shardManager().shardCount());
     }
     
     private void parseClientId() {
@@ -507,15 +400,18 @@ public class CatnipImpl implements Catnip {
     
     @Nonnull
     @Override
-    public CompletionStage<GatewayInfo> fetchGatewayInfo() {
+    public Single<GatewayInfo> fetchGatewayInfo() {
         return rest.user().getGatewayBot()
-                .thenApply(g -> {
+                .map(g -> {
                     if(g.valid()) {
                         gatewayInfo.set(g);
                         return g;
                     } else {
                         throw new RuntimeException("Gateway info not valid! Is your token valid?");
                     }
+                })
+                .doOnError(e -> {
+                    throw new RuntimeException(e);
                 });
     }
 }

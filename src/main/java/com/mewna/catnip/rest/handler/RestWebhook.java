@@ -27,23 +27,26 @@
 
 package com.mewna.catnip.rest.handler;
 
-import com.google.common.collect.ImmutableMap;
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.channel.Webhook.WebhookEditFields;
+import com.mewna.catnip.entity.message.MentionParseFlag;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageOptions;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
-import java.util.concurrent.CompletionStage;
+import java.util.EnumSet;
+import java.util.Map;
 
 import static com.mewna.catnip.util.JsonUtil.mapObjectContents;
 
@@ -59,147 +62,176 @@ public class RestWebhook extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<Webhook> getWebhook(@Nonnull final String webhookId) {
-        return getWebhookRaw(webhookId).thenApply(entityBuilder()::createWebhook);
+    public Single<Webhook> getWebhook(@Nonnull final String webhookId) {
+        return Single.fromObservable(getWebhookRaw(webhookId).map(entityBuilder()::createWebhook));
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonObject> getWebhookRaw(@Nonnull final String webhookId) {
+    public Observable<JsonObject> getWebhookRaw(@Nonnull final String webhookId) {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_WEBHOOK.withMajorParam(webhookId),
-                ImmutableMap.of()))
-                .thenApply(ResponsePayload::object);
+                Map.of()))
+                .map(ResponsePayload::object);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<Webhook> getWebhookToken(@Nonnull final String webhookId, @Nonnull final String token) {
-        return getWebhookTokenRaw(webhookId, token).thenApply(entityBuilder()::createWebhook);
+    public Single<Webhook> getWebhookToken(@Nonnull final String webhookId, @Nonnull final String token) {
+        return Single.fromObservable(getWebhookTokenRaw(webhookId, token).map(entityBuilder()::createWebhook));
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonObject> getWebhookTokenRaw(@Nonnull final String webhookId, @Nonnull final String token) {
+    public Observable<JsonObject> getWebhookTokenRaw(@Nonnull final String webhookId, @Nonnull final String token) {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_WEBHOOK_TOKEN.withMajorParam(webhookId),
-                ImmutableMap.of("webhook.token", token)))
-                .thenApply(ResponsePayload::object);
+                Map.of("token", token)))
+                .map(ResponsePayload::object);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<List<Webhook>> getGuildWebhooks(@Nonnull final String guildId) {
-        return getGuildWebhooksRaw(guildId).thenApply(mapObjectContents(entityBuilder()::createWebhook));
+    public Observable<Webhook> getGuildWebhooks(@Nonnull final String guildId) {
+        return getGuildWebhooksRaw(guildId)
+                .map(e -> mapObjectContents(entityBuilder()::createWebhook).apply(e))
+                .flatMapIterable(e -> e);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonArray> getGuildWebhooksRaw(@Nonnull final String guildId) {
+    public Observable<JsonArray> getGuildWebhooksRaw(@Nonnull final String guildId) {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_WEBHOOKS.withMajorParam(guildId),
-                ImmutableMap.of()))
-                .thenApply(ResponsePayload::array);
+                Map.of()))
+                .map(ResponsePayload::array);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<List<Webhook>> getChannelWebhooks(@Nonnull final String channelId) {
-        return getChannelWebhooksRaw(channelId).thenApply(mapObjectContents(entityBuilder()::createWebhook));
+    public Observable<Webhook> getChannelWebhooks(@Nonnull final String channelId) {
+        return getChannelWebhooksRaw(channelId)
+                .map(e -> mapObjectContents(entityBuilder()::createWebhook).apply(e))
+                .flatMapIterable(e -> e);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonArray> getChannelWebhooksRaw(@Nonnull final String channelId) {
+    public Observable<JsonArray> getChannelWebhooksRaw(@Nonnull final String channelId) {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_CHANNEL_WEBHOOKS.withMajorParam(channelId),
-                ImmutableMap.of()))
-                .thenApply(ResponsePayload::array);
+                Map.of()))
+                .map(ResponsePayload::array);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<Webhook> modifyWebhook(@Nonnull final String webhookId, @Nonnull final WebhookEditFields fields,
-                                                  @Nullable final String reason) {
-        return modifyWebhookRaw(webhookId, fields, reason).thenApply(entityBuilder()::createWebhook);
+    public Single<Webhook> modifyWebhook(@Nonnull final String webhookId, @Nonnull final WebhookEditFields fields,
+                                         @Nullable final String reason) {
+        return Single.fromObservable(modifyWebhookRaw(webhookId, fields, reason).map(entityBuilder()::createWebhook));
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<Webhook> modifyWebhook(@Nonnull final String webhookId, @Nonnull final WebhookEditFields fields) {
+    public Single<Webhook> modifyWebhook(@Nonnull final String webhookId, @Nonnull final WebhookEditFields fields) {
         return modifyWebhook(webhookId, fields, null);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonObject> modifyWebhookRaw(@Nonnull final String webhookId,
-                                                        @Nonnull final WebhookEditFields fields,
-                                                        @Nullable final String reason) {
+    public Observable<JsonObject> modifyWebhookRaw(@Nonnull final String webhookId,
+                                                   @Nonnull final WebhookEditFields fields,
+                                                   @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.MODIFY_WEBHOOK.withMajorParam(webhookId),
-                ImmutableMap.of(), fields.payload(), reason))
-                .thenApply(ResponsePayload::object);
+                Map.of(), fields.payload(), reason))
+                .map(ResponsePayload::object);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<Void> deleteWebhook(@Nonnull final String webhookId, @Nullable final String reason) {
-        return catnip().requester().queue(new OutboundRequest(Routes.DELETE_WEBHOOK.withMajorParam(webhookId),
-                ImmutableMap.of()).reason(reason))
-                .thenApply(__ -> null);
+    public Completable deleteWebhook(@Nonnull final String webhookId, @Nullable final String reason) {
+        return Completable.fromObservable(catnip().requester()
+                .queue(new OutboundRequest(Routes.DELETE_WEBHOOK.withMajorParam(webhookId),
+                        Map.of()).reason(reason).emptyBody(true)));
     }
+    
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<Void> deleteWebhook(@Nonnull final String webhookId) {
+    public Completable deleteWebhook(@Nonnull final String webhookId) {
         return deleteWebhook(webhookId, null);
     }
-    
     
     @Nonnull
     @CheckReturnValue
     @SuppressWarnings("unused")
-    public CompletionStage<Message> executeWebhook(@Nonnull final String webhookId, @Nonnull final String webhookToken,
-                                                   @Nonnull final MessageOptions options) {
+    public Single<Message> executeWebhook(@Nonnull final String webhookId, @Nonnull final String webhookToken,
+                                          @Nonnull final MessageOptions options) {
         return executeWebhook(webhookId, webhookToken, null, null, options);
     }
     
     @Nonnull
     @CheckReturnValue
     @SuppressWarnings("WeakerAccess")
-    public CompletionStage<Message> executeWebhook(@Nonnull final String webhookId, @Nonnull final String webhookToken,
-                                                   @Nullable final String username, @Nullable final String avatarUrl,
-                                                   @Nonnull final MessageOptions options) {
-        return executeWebhookRaw(webhookId, webhookToken, username, avatarUrl, options)
-                .thenApply(entityBuilder()::createMessage);
+    public Single<Message> executeWebhook(@Nonnull final String webhookId, @Nonnull final String webhookToken,
+                                          @Nullable final String username, @Nullable final String avatarUrl,
+                                          @Nonnull final MessageOptions options) {
+        return Single.fromObservable(executeWebhookRaw(webhookId, webhookToken, username, avatarUrl, options)
+                .map(entityBuilder()::createMessage));
     }
     
     @Nonnull
     @CheckReturnValue
     @SuppressWarnings("WeakerAccess")
-    public CompletionStage<JsonObject> executeWebhookRaw(@Nonnull final String webhookId, @Nonnull final String webhookToken,
-                                                         @Nullable final String username, @Nullable final String avatarUrl,
-                                                         @Nonnull final MessageOptions options) {
-        final JsonObject body = new JsonObject();
-    
+    public Observable<JsonObject> executeWebhookRaw(@Nonnull final String webhookId, @Nonnull final String webhookToken,
+                                                    @Nullable final String username, @Nullable final String avatarUrl,
+                                                    @Nonnull final MessageOptions options) {
+        
+        final var builder = JsonObject.builder();
+        
         if(options.content() != null && !options.content().isEmpty()) {
-            body.put("content", options.content());
+            builder.value("content", options.content());
         }
-    
         if(options.embed() != null) {
-            body.put("embeds", new JsonArray().add(entityBuilder().embedToJson(options.embed())));
+            builder.array("embeds").value(entityBuilder().embedToJson(options.embed())).end();
+        }
+        if(username != null && !username.isEmpty()) {
+            builder.value("username", username);
+        }
+        if(avatarUrl != null && !avatarUrl.isEmpty()) {
+            builder.value("avatar_url", avatarUrl);
         }
     
-        if(body.getValue("embeds", null) == null && body.getValue("content", null) == null
+        final JsonObject body = builder.done();
+    
+        if(body.get("embeds") == null && body.get("content") == null
                 && !options.hasFiles()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
         }
     
-        if(username != null && !username.isEmpty()) {
-            body.put("username", username);
+        if(options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
+            final JsonObject allowedMentions = new JsonObject();
+            final EnumSet<MentionParseFlag> parse = options.parseFlags();
+            if(parse == null) {
+                // These act like a whitelist regardless of parse being present.
+                allowedMentions.put("users", options.mentionedUsers());
+                allowedMentions.put("roles", options.mentionedRoles());
+            } else {
+                final JsonArray parseList = new JsonArray();
+                for(final MentionParseFlag p : parse) {
+                    parseList.add(p.getName());
+                }
+                allowedMentions.put("parse", parseList);
+                //If either list is present along with the respective parse option, validation fails. The contains check avoids this.
+                if(!parse.contains(MentionParseFlag.USERS)) {
+                    allowedMentions.put("users", options.mentionedUsers());
+                }
+                if(!parse.contains(MentionParseFlag.ROLES)) {
+                    allowedMentions.put("roles", options.mentionedRoles());
+                }
+            }
+            builder.value("allowed_mentions", allowedMentions);
         }
-        if(avatarUrl != null && !avatarUrl.isEmpty()) {
-            body.put("avatar_url", avatarUrl);
-        }
-        
+    
         return catnip().requester().
-                queue(new OutboundRequest(Routes.EXECUTE_WEBHOOK.withMajorParam(webhookId),
-                        ImmutableMap.of("webhook.token", webhookToken), body).needsToken(false)
+                queue(new OutboundRequest(Routes.EXECUTE_WEBHOOK.withMajorParam(webhookId).withQueryString("?wait=true"),
+                        Map.of("token", webhookToken), body).needsToken(false)
                         .buffers(options.files()))
-                .thenApply(ResponsePayload::object);
+                .map(ResponsePayload::object);
     }
 }

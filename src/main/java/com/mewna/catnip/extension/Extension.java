@@ -30,19 +30,21 @@ package com.mewna.catnip.extension;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.extension.hook.CatnipHook;
+import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.shard.event.DoubleEventType;
 import com.mewna.catnip.shard.event.EventType;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Future;
-import io.vertx.core.Verticle;
-import io.vertx.core.eventbus.MessageConsumer;
+import com.mewna.catnip.shard.event.MessageConsumer;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Scheduler;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  * <strong>If you are unsure if you need to implement this interface, you
@@ -54,34 +56,15 @@ import java.util.function.Function;
  * library of some sort. Your library code would be implemented as an extension
  * that an end-user could then optionally load in.
  * <p>
- * Note that this class extends {@link Verticle}. This is because extensions
- * are expected to be deployed as vert.x verticles. A proper catnip
- * implementation will keep track of these deployments to allow unloading or
- * reloading extensions at runtime. Since this class extends {@link Verticle},
- * the easiest way for a custom extension to be "compliant" is to simply extend
- * {@link AbstractExtension}, which itself extends {@link AbstractVerticle}, as
- * well as implementing this interface.
- * <p>
- * Extensions are deployed as vert.x verticles. vert.x provides two lifecycle
- * hooks - {@link Verticle#start(Future)} and {@link Verticle#stop(Future)} -
- * that should be used for managing an extension's lifecycle. This is not, say,
- * a Bukkit server, and as such, there is no need for lifecycle hooks like
- * {@code preload} or {@code unload} or similar to be provided. It is possible
- * that this may change in a future catnip update, but is currently unlikely.
- * Note that {@link AbstractVerticle#start()} and {@link AbstractVerticle#stop()}
- * are provided as convenience methods for when a {@link Future} is not needed,
- * and will automatically be available if implementations are based off of
- * {@link AbstractExtension} or {@link AbstractVerticle}.
- * <p>
  * Note that the lifecycle callbacks are called <strong>SYNCHRONOUSLY</strong>
- * by vert.x, and as such you should take care to not block the event loop in
- * those callbacks!
+ * by the default extension manager, and as such you should take care to not
+ * block the event loop in those callbacks!
  *
  * @author amy
  * @since 9/6/18
  */
-@SuppressWarnings("unused")
-public interface Extension extends Verticle {
+@SuppressWarnings({"unused", "UnusedReturnValue"})
+public interface Extension {
     /**
      * The name of this extension. Note that an extension's name is
      * <strong>NOT</strong> guaranteed unique, and so your code should NOT rely
@@ -107,8 +90,7 @@ public interface Extension extends Verticle {
      * the catnip version that is deploying this extension, and must not be
      * {@code null}. A proper extension manager implementation will call this
      * method to inject a catnip instance BEFORE deploying the extension, ie.
-     * {@link Verticle#start(Future)} / {@link AbstractVerticle#start()} will
-     * be called AFTER this method.
+     * {@link Extension#onLoaded()} will be called AFTER this method.
      *
      * @param catnip The catnip instance to inject. May not be {@code null}.
      */
@@ -131,6 +113,12 @@ public interface Extension extends Verticle {
     Set<CatnipHook> hooks();
     
     /**
+     * @return All listeners registered by this extension instance. Used for
+     * things like automatic unregistration of listeners on shutdown.
+     */
+    Set<MessageConsumer<?>> listeners();
+    
+    /**
      * Unregister a hook from catnip.
      *
      * @param hook The hook to unregister.
@@ -148,67 +136,138 @@ public interface Extension extends Verticle {
      *
      * @return The extension instance.
      */
-    default Extension injectOptions(@Nonnull final Function<CatnipOptions, CatnipOptions> optionsPatcher) {
+    default Extension injectOptions(@Nonnull final UnaryOperator<CatnipOptions> optionsPatcher) {
         catnip().injectOptions(this, optionsPatcher);
         return this;
     }
     
     /**
+     * Callback called once the Extension has been loaded by the {@link ExtensionManager}.
+     *
+     * @return a {@link Completable} which will be waited by the
+     * calling thread for its completion, or null if none.
+     */
+    default Completable onLoaded() {
+        return null;
+    }
+    
+    /**
+     * Callback called once the Extension has been unloaded by the {@link ExtensionManager}.
+     *
+     * @return a {@link Completable} which will be waited by the
+     * calling thread for its completion, or null if none.
+     */
+    default Completable onUnloaded() {
+        return null;
+    }
+    
+    /**
      * Add a consumer for the specified event type.
-     * <p>
-     * This method behaves similarly to {@link Catnip#on(EventType)},
-     * but the event listeners are unregistered when the extension unloads
      *
      * @param type The type of event to listen on.
      * @param <T>  The object type of event being listened on.
      *
-     * @return The vert.x message consumer.
+     * @return The message consumer.
      */
-    <T> MessageConsumer<T> on(@Nonnull EventType<T> type);
+    <T> MessageConsumer<T> on(@Nonnull final EventType<T> type);
     
     /**
      * Add a consumer for the specified event type with the given handler
      * callback.
-     * <p>
-     * This method behaves similarly to {@link Catnip#on(EventType, Consumer)},
-     * but the event listeners are unregistered when the extension unloads
      *
      * @param type    The type of event to listen on.
      * @param handler The handler for the event object.
      * @param <T>     The object type of event being listened on.
      *
-     * @return The vert.x message consumer.
+     * @return The message consumer.
      */
-    <T> MessageConsumer<T> on(@Nonnull EventType<T> type, @Nonnull Consumer<T> handler);
+    <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler);
     
     /**
-     * Add a consumer for the specified event type.
+     * Add a reactive stream handler for events of the given type. Can be
+     * disposed of with {@link Observable#unsubscribeOn(Scheduler)}. The
+     * {@code scheduler} argument can be created with
+     * {@link Catnip#rxScheduler()}.
      * <p>
-     * This method behaves similarly to {@link Catnip#on(DoubleEventType)},
-     * but the event listeners are unregistered when the extension unloads
+     * This method automatically subscribes on {@link Catnip#rxScheduler()}.
+     *
+     * @param type The type of event to stream.
+     * @param <T>  The object type of the event being streamed.
+     *
+     * @return The observable.
+     */
+    <T> Observable<T> observable(@Nonnull final EventType<T> type);
+    
+    /**
+     * Add a reactive stream handler for events of the given type.  Can be
+     * disposed of with {@link Flowable#unsubscribeOn(Scheduler)}. The
+     * {@code scheduler} argument can be created with
+     * {@link Catnip#rxScheduler()}.
+     * <p>
+     * This method automatically subscribes on {@link Catnip#rxScheduler()}.
+     *
+     * @param type The type of event to stream.
+     * @param <T>  The object type of the event being streamed.
+     *
+     * @return The flowable.
+     */
+    <T> Flowable<T> flowable(@Nonnull final EventType<T> type);
+    
+    /**
+     * Add a consumer for the specified event type with the given handler
+     * callback.
      *
      * @param type The type of event to listen on.
-     * @param <T>  The first type of event being listened on.
-     * @param <E>  The second type of event being listened on.
+     * @param <T>  The first object type of event being listened on.
+     * @param <E>  The second object type of event being listened on.
      *
-     * @return The vert.x message consumer.
+     * @return The message consumer.
      */
-    <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull DoubleEventType<T, E> type);
+    <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type);
     
     /**
-     * Add a consumer for the specified event type.
-     * <p>
-     * This method behaves similarly to {@link Catnip#on(DoubleEventType)},
-     * but the event listeners are unregistered when the extension unloads
+     * Add a consumer for the specified event type with the given handler
+     * callback.
      *
      * @param type    The type of event to listen on.
-     * @param handler The handler for the event objects.
-     * @param <T>     The first type of event object being listened on.
-     * @param <E>     The second type of event object being listened on.
+     * @param handler The handler for the event object.
+     * @param <T>     The first object type of event being listened on.
+     * @param <E>     The second object type of event being listened on.
      *
-     * @return The vert.x message consumer.
+     * @return The message consumer.
      */
-    <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull DoubleEventType<T, E> type, @Nonnull BiConsumer<T, E> handler);
+    <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
+                                          @Nonnull final BiConsumer<T, E> handler);
     
-    String deploymentID();
+    /**
+     * Add a reactive stream handler for events of the given type. Can be
+     * disposed of with {@link Observable#unsubscribeOn(Scheduler)}. The
+     * {@code scheduler} argument can be created with
+     * {@link Catnip#rxScheduler()}.
+     * <p>
+     * This method automatically subscribes on {@link Catnip#rxScheduler()}.
+     *
+     * @param type The type of event to stream.
+     * @param <T>  The object type of the event being streamed.
+     * @param <E>  The object type of the event being streamed.
+     *
+     * @return The observable.
+     */
+    <T, E> Observable<Pair<T, E>> observable(@Nonnull final DoubleEventType<T, E> type);
+    
+    /**
+     * Add a reactive stream handler for events of the given type. Can be
+     * disposed of with {@link Flowable#unsubscribeOn(Scheduler)}. The
+     * {@code scheduler} argument can be created with
+     * {@link Catnip#rxScheduler()}.
+     * <p>
+     * This method automatically subscribes on {@link Catnip#rxScheduler()}.
+     *
+     * @param type The type of event to stream.
+     * @param <T>  The object type of the event being streamed.
+     * @param <E>  The object type of the event being streamed.
+     *
+     * @return The flowable.
+     */
+    <T, E> Flowable<Pair<T, E>> flowable(@Nonnull final DoubleEventType<T, E> type);
 }

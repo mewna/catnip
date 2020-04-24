@@ -27,12 +27,12 @@
 
 package com.mewna.catnip.rest.requester;
 
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes.Route;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import io.reactivex.rxjava3.core.Observable;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -42,19 +42,15 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletionStage;
 
 public interface Requester {
-    String API_HOST = "https://discordapp.com";
-    int API_VERSION = 6;
-    String API_BASE = "/api/v" + API_VERSION;
     String REASON_HEADER = "X-Audit-Log-Reason";
     
     void catnip(@Nonnull Catnip catnip);
     
     @Nonnull
     @CheckReturnValue
-    CompletionStage<ResponsePayload> queue(@Nonnull OutboundRequest r);
+    Observable<ResponsePayload> queue(@Nonnull OutboundRequest r);
     
     @Getter
     @Accessors(fluent = true)
@@ -72,7 +68,7 @@ public interface Requester {
         private String reason;
         
         @Setter
-        private List<ImmutablePair<String, Buffer>> buffers;
+        private List<ImmutablePair<String, byte[]>> buffers;
         
         @Setter
         private boolean emptyBody;
@@ -86,6 +82,7 @@ public interface Requester {
             this(route, params);
             this.object = object;
         }
+        
         public OutboundRequest(final Route route, final Map<String, String> params, final JsonObject object, final String reason) {
             this(route, params, object);
             this.reason = reason;

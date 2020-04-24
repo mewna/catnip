@@ -27,18 +27,19 @@
 
 package com.mewna.catnip.extension.manager;
 
-import com.google.common.collect.ImmutableSet;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.extension.Extension;
-import io.vertx.core.impl.ConcurrentHashSet;
+import com.mewna.catnip.shard.event.MessageConsumer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -49,16 +50,25 @@ import java.util.stream.Collectors;
 @Accessors(fluent = true)
 @RequiredArgsConstructor
 public class DefaultExtensionManager implements ExtensionManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultExtensionManager.class);
+    
     @Getter
     private final Catnip catnip;
-    private final Collection<Extension> loadedExtensions = new ConcurrentHashSet<>();
+    private final Collection<Extension> loadedExtensions = ConcurrentHashMap.newKeySet();
     
     @Override
     public ExtensionManager loadExtension(@Nonnull final Extension extension) {
         if(!loadedExtensions.contains(extension)) {
             extension.catnip(catnip);
             loadedExtensions.add(extension);
-            catnip.vertx().deployVerticle(extension);
+            try {
+                final var completable = extension.onLoaded();
+                if(completable != null) {
+                    completable.blockingAwait();
+                }
+            } catch(final Throwable e) {
+                LOGGER.error("Extension " + extension + " threw an exception on loading.", e);
+            }
         }
         return this;
     }
@@ -66,8 +76,16 @@ public class DefaultExtensionManager implements ExtensionManager {
     @Override
     public ExtensionManager unloadExtension(@Nonnull final Extension extension) {
         if(loadedExtensions.contains(extension)) {
-            catnip.vertx().undeploy(extension.deploymentID());
             loadedExtensions.remove(extension);
+            try {
+                extension.listeners().forEach(MessageConsumer::close);
+                final var completable = extension.onUnloaded();
+                if(completable != null) {
+                    completable.blockingAwait();
+                }
+            } catch(final Throwable e) {
+                LOGGER.error("Extension " + extension + " threw an exception on unloading.", e);
+            }
         }
         return this;
     }
@@ -77,23 +95,28 @@ public class DefaultExtensionManager implements ExtensionManager {
     public Set<Extension> matchingExtensions(@Nonnull final String regex) {
         //small optimization
         final Pattern pattern = Pattern.compile(regex);
-        return Collections.unmodifiableSet(loadedExtensions.stream()
+        return loadedExtensions.stream()
                 .filter(e -> pattern.matcher(e.name()).matches())
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toUnmodifiableSet());
     }
     
     @Nonnull
     @Override
     public <T extends Extension> Set<? extends T> matchingExtensions(@Nonnull final Class<T> extensionClass) {
-        return Collections.unmodifiableSet(loadedExtensions.stream()
+        return loadedExtensions.stream()
                 .filter(extensionClass::isInstance)
                 .map(extensionClass::cast)
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toUnmodifiableSet());
     }
     
     @Nonnull
     @Override
     public Set<Extension> extensions() {
-        return ImmutableSet.copyOf(loadedExtensions);
+        return Set.copyOf(loadedExtensions);
+    }
+    
+    @Override
+    public void shutdown() {
+        loadedExtensions.forEach(this::unloadExtension);
     }
 }

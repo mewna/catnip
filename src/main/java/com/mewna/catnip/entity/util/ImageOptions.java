@@ -101,6 +101,6 @@ public class ImageOptions {
     @Nonnull
     @CheckReturnValue
     public String buildUrl(@Nonnull final String base) {
-        return base + '.' + type.getFileExtension() + (size == -1 ? "" : "?size=" + size);
+        return base + '.' + type.fileExtension() + (size == -1 ? "" : "?size=" + size);
     }
 }

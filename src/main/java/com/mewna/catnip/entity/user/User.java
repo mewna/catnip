@@ -27,20 +27,18 @@
 
 package com.mewna.catnip.entity.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Mentionable;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.entity.impl.UserImpl;
 import com.mewna.catnip.entity.util.ImageOptions;
+import io.reactivex.rxjava3.core.Single;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.concurrent.CompletionStage;
+import java.util.Set;
 
 /**
  * A single Discord user.
@@ -49,14 +47,12 @@ import java.util.concurrent.CompletionStage;
  * @since 9/4/18
  */
 @SuppressWarnings("unused")
-@JsonDeserialize(as = UserImpl.class)
 public interface User extends Snowflake, Mentionable {
     /**
      * Whether the user's avatar is animated.
      *
      * @return True if the avatar is animated, false otherwise.
      */
-    @JsonIgnore
     @CheckReturnValue
     boolean animatedAvatar();
     
@@ -66,7 +62,6 @@ public interface User extends Snowflake, Mentionable {
      * @return String containing the URL to the default avatar. Never null.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     String defaultAvatarUrl();
     
@@ -81,7 +76,6 @@ public interface User extends Snowflake, Mentionable {
      * @see User#effectiveAvatarUrl() Getting the user's effective avatar
      */
     @Nullable
-    @JsonIgnore
     @CheckReturnValue
     String avatarUrl(@Nonnull final ImageOptions options);
     
@@ -94,7 +88,6 @@ public interface User extends Snowflake, Mentionable {
      * @see User#effectiveAvatarUrl() Getting the user's effective avatar
      */
     @Nullable
-    @JsonIgnore
     @CheckReturnValue
     String avatarUrl();
     
@@ -108,7 +101,6 @@ public interface User extends Snowflake, Mentionable {
      * @return String containing a URL to their effective avatar, options considered. Never null.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     String effectiveAvatarUrl(@Nonnull final ImageOptions options);
     
@@ -120,7 +112,6 @@ public interface User extends Snowflake, Mentionable {
      * @return String containing a URL to their effective avatar. Never null.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     String effectiveAvatarUrl();
     
@@ -142,13 +133,13 @@ public interface User extends Snowflake, Mentionable {
     @CheckReturnValue
     default String effectiveName(@Nonnull final Guild guild) {
         final String username = username();
-    
+        
         final Member member = guild.members().getById(idAsLong());
         
         if(member == null) {
             return username;
         }
-    
+        
         final String nick = member.nick();
         return nick != null ? nick : username;
     }
@@ -194,6 +185,16 @@ public interface User extends Snowflake, Mentionable {
     boolean bot();
     
     /**
+     * The public flags on a user's account. Public flags are a
+     * currently-undocumented subset of all user flags.
+     *
+     * @return The public flags on a user's account.
+     */
+    @Nonnull
+    @CheckReturnValue
+    Set<UserFlag> publicFlags();
+    
+    /**
      * @return The user's presence, or {@code null} if no presence is cached.
      */
     @Nullable
@@ -207,9 +208,8 @@ public interface User extends Snowflake, Mentionable {
      *
      * @return Future with the result of the DM creation.
      */
-    @JsonIgnore
     @CheckReturnValue
-    default CompletionStage<DMChannel> createDM() {
+    default Single<DMChannel> createDM() {
         return catnip().rest().user().createDM(id());
     }
     

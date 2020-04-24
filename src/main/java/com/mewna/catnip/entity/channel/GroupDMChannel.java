@@ -27,9 +27,6 @@
 
 package com.mewna.catnip.entity.channel;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.GroupDMChannelImpl;
 import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.CheckReturnValue;
@@ -43,7 +40,6 @@ import java.util.List;
  * @since 9/12/18
  */
 @SuppressWarnings("unused")
-@JsonDeserialize(as = GroupDMChannelImpl.class)
 public interface GroupDMChannel extends DMChannel {
     /**
      * @return The list of users in the group DM.
@@ -76,7 +72,7 @@ public interface GroupDMChannel extends DMChannel {
     /**
      * @return The ID of the application that created the group DM.
      * May be {@code null}.
-     *
+     * <p>
      * Bots shouldn't ever have this value being null.
      */
     @CheckReturnValue
@@ -91,21 +87,19 @@ public interface GroupDMChannel extends DMChannel {
     /**
      * @return The ID of the application that created the group DM.
      * A value of {@code 0} means this group wasn't created by an application.
-     *
+     * <p>
      * Bots shouldn't ever have this value being 0.
      */
     @CheckReturnValue
     long applicationIdAsLong();
     
     @Override
-    @JsonIgnore
     @CheckReturnValue
     default boolean isUserDM() {
         return false;
     }
     
     @Override
-    @JsonIgnore
     @CheckReturnValue
     default boolean isGroupDM() {
         return true;
