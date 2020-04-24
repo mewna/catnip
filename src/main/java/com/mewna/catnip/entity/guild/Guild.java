@@ -370,6 +370,22 @@ public interface Guild extends Snowflake {
     int maxMembers();
     
     /**
+     * @return The approximate member count the guild currently has. Will be
+     * {@code 0} if no value was present.
+     */
+    @Nonnegative
+    @CheckReturnValue
+    int approximateMemberCount();
+    
+    /**
+     * @return The approximate presence count the guild currently has. Will be
+     * {@code 0} if no value was present.
+     */
+    @Nonnegative
+    @CheckReturnValue
+    int approximatePresenceCount();
+    
+    /**
      * @return The vanity invite code for this guild, ie.
      * {@code discord.gg/vanity_code}.
      */

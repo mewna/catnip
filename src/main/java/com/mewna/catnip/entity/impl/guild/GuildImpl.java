@@ -84,6 +84,8 @@ public class GuildImpl implements Guild, RequiresCatnip, Timestamped {
     private boolean unavailable;
     private int maxPresences;
     private int maxMembers;
+    private int approximateMemberCount;
+    private int approximatePresenceCount;
     private String vanityUrlCode;
     private String description;
     private String banner;

@@ -290,7 +290,8 @@ public class RestGuild extends RestHandler {
     @CheckReturnValue
     public Observable<JsonObject> getGuildRaw(@Nonnull final String guildId) {
         return catnip().requester()
-                .queue(new OutboundRequest(Routes.GET_GUILD.withMajorParam(guildId),
+                .queue(new OutboundRequest(Routes.GET_GUILD.withMajorParam(guildId)
+                        .withQueryString(new QueryStringBuilder().append("with_counts", "true").build()),
                         Map.of()))
                 .map(ResponsePayload::object);
     }

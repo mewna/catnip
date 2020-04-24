@@ -1077,6 +1077,8 @@ public final class EntityBuilder {
                 .unavailable(data.getBoolean("unavailable", false))
                 .maxPresences(maxPresences)
                 .maxMembers(data.getInt("max_members", 0))
+                .approximateMemberCount(data.getInt("approximate_member_count", 0))
+                .approximatePresenceCount(data.getInt("approximate_presence_count", 0))
                 .vanityUrlCode(data.getString("vanity_url_code"))
                 .description(data.getString("description"))
                 .banner(data.getString("banner"))
