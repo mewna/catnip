@@ -1150,6 +1150,21 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public DeletedInvite createDeletedInvite(@Nonnull final JsonObject data) {
+        long guildId = 0;
+        if(data.has("guild_id")) {
+            guildId = Long.parseUnsignedLong(data.getString("guild_id"));
+        }
+        return delegate(DeletedInvite.class, DeletedInviteImpl.builder()
+                .catnip(catnip)
+                .code(data.getString("code"))
+                .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
+                .guildIdAsLong(guildId)
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public CreatedInvite createCreatedInvite(@Nonnull final JsonObject data) {
         return delegate(CreatedInvite.class, CreatedInviteImpl.builder()
                 .catnip(catnip)

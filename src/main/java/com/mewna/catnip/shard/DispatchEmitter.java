@@ -178,6 +178,13 @@ public final class DispatchEmitter {
                 catnip.dispatchManager().dispatchEvent(type, entityBuilder.createWebhooksUpdate(data));
                 break;
             }
+            case Raw.INVITE_CREATE: {
+                catnip.dispatchManager().dispatchEvent(type, entityBuilder.createInvite(data));
+                break;
+            }
+            case Raw.INVITE_DELETE: {
+                catnip.dispatchManager().dispatchEvent(type, entityBuilder.createDeletedInvite(data));
+            }
             
             // Guilds
             case Raw.GUILD_CREATE: {

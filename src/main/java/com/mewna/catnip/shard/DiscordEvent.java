@@ -70,6 +70,8 @@ public interface DiscordEvent {
     EventType<PartialRole>                    GUILD_ROLE_DELETE           = event(Raw.GUILD_ROLE_DELETE, PartialRole.class);
     DoubleEventType<User, User>               USER_UPDATE                 = doubleEvent(Raw.USER_UPDATE, User.class, User.class);
     EventType<VoiceServerUpdate>              VOICE_SERVER_UPDATE         = event(Raw.VOICE_SERVER_UPDATE, VoiceServerUpdate.class);
+    EventType<Invite>                         INVITE_CREATE               = event(Raw.INVITE_CREATE, Invite.class);
+    EventType<Invite>                         INVITE_DELETE               = event(Raw.INVITE_CREATE, Invite.class);
     EventType<Message>                        MESSAGE_CREATE              = event(Raw.MESSAGE_CREATE, Message.class);
     EventType<Message>                        MESSAGE_UPDATE              = event(Raw.MESSAGE_UPDATE, Message.class);
     EventType<MessageEmbedUpdate>             MESSAGE_EMBEDS_UPDATE       = event(Raw.MESSAGE_EMBEDS_UPDATE, MessageEmbedUpdate.class);
@@ -117,6 +119,8 @@ public interface DiscordEvent {
         String GUILD_INTEGRATIONS_UPDATE    = "GUILD_INTEGRATIONS_UPDATE";
         String USER_UPDATE                  = "USER_UPDATE";
         String VOICE_SERVER_UPDATE          = "VOICE_SERVER_UPDATE";
+        String INVITE_CREATE                = "INVITE_CREATE";
+        String INVITE_DELETE                = "INVITE_DELETE";
         String MESSAGE_CREATE               = "MESSAGE_CREATE";
         String MESSAGE_DELETE               = "MESSAGE_DELETE";
         String MESSAGE_DELETE_BULK          = "MESSAGE_DELETE_BULK";
