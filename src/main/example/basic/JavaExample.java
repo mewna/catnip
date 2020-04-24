@@ -36,12 +36,12 @@ import com.mewna.catnip.shard.DiscordEvent;
  */
 public class JavaExample {
     public static void main(String[] args) {
-        Catnip catnip = Catnip.catnip("your token here");
-        catnip.on(DiscordEvent.MESSAGE_CREATE, msg -> {
-            if(msg.content().equals("!ping")) {
-                msg.channel().sendMessage("pong!");
-            }
-        });
+        Catnip catnip = Catnip.catnip("your token goes here");
+        catnip.observable(DiscordEvent.MESSAGE_CREATE)
+                .filter(msg -> msg.content().equals("!ping"))
+                .forEach(msg -> {
+                    msg.channel().sendMessage("pong!");
+                });
         catnip.connect();
     }
 }

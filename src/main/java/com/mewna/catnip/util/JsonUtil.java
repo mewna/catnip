@@ -27,8 +27,9 @@
 
 package com.mewna.catnip.util;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
+import com.grack.nanojson.JsonWriter;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -56,18 +57,14 @@ public final class JsonUtil {
      */
     @Nonnull
     public static JsonObject stringifySnowflakes(@Nonnull final JsonObject json) {
-        final Set<String> keys = json.getMap().keySet();
-        keys.forEach(key -> {
-            // TODO: More efficient way to do this?
+        json.forEach((key, value) -> {
             if(key.toLowerCase().contains("idaslong")) {
-                json.put(key, Long.toString(json.getLong(key)));
+                json.put(key, json.getNumber(key).toString());
             } else {
-                final Object value = json.getValue(key);
                 if(value instanceof JsonObject) {
                     json.put(key, stringifySnowflakes((JsonObject) value));
                 } else if(value instanceof JsonArray) {
-                    final List<Object> array = new ArrayList<>();
-                    ((JsonArray) value).forEach(array::add);
+                    final List<Object> array = new ArrayList<>((JsonArray) value);
                     for(int i = 0; i < array.size(); i++) {
                         final Object arrayMember = array.get(i);
                         if(arrayMember instanceof JsonObject) {
@@ -95,18 +92,14 @@ public final class JsonUtil {
      */
     @Nonnull
     public static JsonObject destringifySnowflakes(@Nonnull final JsonObject json) {
-        final Set<String> keys = json.getMap().keySet();
-        keys.forEach(key -> {
-            // TODO: More efficient way to do this?
+        json.forEach((key, value) -> {
             if(key.toLowerCase().contains("idaslong")) {
                 json.put(key, Long.parseLong(json.getString(key)));
             } else {
-                final Object value = json.getValue(key);
                 if(value instanceof JsonObject) {
                     json.put(key, destringifySnowflakes((JsonObject) value));
                 } else if(value instanceof JsonArray) {
-                    final List<Object> array = new ArrayList<>();
-                    ((JsonArray) value).forEach(array::add);
+                    final List<Object> array = new ArrayList<>((JsonArray) value);
                     for(int i = 0; i < array.size(); i++) {
                         final Object arrayMember = array.get(i);
                         if(arrayMember instanceof JsonObject) {
@@ -124,9 +117,9 @@ public final class JsonUtil {
     @CheckReturnValue
     public static <T> List<T> toList(@Nullable final JsonArray array, @Nonnull final Function<JsonObject, T> mapper) {
         if(array == null) {
-            return Collections.emptyList();
+            return List.of();
         }
-        final List<T> ret = new ArrayList<>(array.size());
+        final Collection<T> ret = new ArrayList<>(array.size());
         for(final Object object : array) {
             if(!(object instanceof JsonObject)) {
                 throw new IllegalArgumentException("Expected all values to be JsonObjects, but found " +
@@ -134,21 +127,21 @@ public final class JsonUtil {
             }
             ret.add(mapper.apply((JsonObject) object));
         }
-        return Collections.unmodifiableList(ret);
+        return List.copyOf(ret);
     }
     
     @Nonnull
     @CheckReturnValue
     public static <T> List<T> toListFromCache(@Nullable final JsonArray array, @Nonnull final Function<String, T> mapper) {
         if(array == null) {
-            return Collections.emptyList();
+            return List.of();
         }
-        final List<T> ret = new ArrayList<>(array.size());
+        final Collection<T> ret = new ArrayList<>(array.size());
         for(final Object object : array) {
             final String s = (String) object;
             ret.add(mapper.apply(s));
         }
-        return Collections.unmodifiableList(ret);
+        return List.copyOf(ret);
     }
     
     @Nonnull
@@ -207,9 +200,9 @@ public final class JsonUtil {
     @CheckReturnValue
     public static List<String> toStringList(@Nullable final JsonArray array) {
         if(array == null) {
-            return Collections.emptyList();
+            return List.of();
         }
-        final List<String> ret = new ArrayList<>(array.size());
+        final Collection<String> ret = new ArrayList<>(array.size());
         for(final Object object : array) {
             if(!(object instanceof String)) {
                 throw new IllegalArgumentException("Expected all values to be strings, but found " +
@@ -217,7 +210,25 @@ public final class JsonUtil {
             }
             ret.add((String) object);
         }
-        return Collections.unmodifiableList(ret);
+        return List.copyOf(ret);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public static <T> List<T> stringListToTypedList(@Nullable final JsonArray array,
+                                                    @Nonnull final Function<String, T> mapper) {
+        if(array == null) {
+            return List.of();
+        }
+        final Collection<T> ret = new ArrayList<>(array.size());
+        for(final Object object : array) {
+            if(!(object instanceof String)) {
+                throw new IllegalArgumentException("Expected all values to be strings, but found " +
+                        (object == null ? "null" : object.getClass()));
+            }
+            ret.add(mapper.apply((String) object));
+        }
+        return List.copyOf(ret);
     }
     
     @Nonnull
@@ -241,9 +252,9 @@ public final class JsonUtil {
     @CheckReturnValue
     public static List<Long> toSnowflakeList(@Nullable final JsonArray array) {
         if(array == null) {
-            return Collections.emptyList();
+            return List.of();
         }
-        final List<Long> ret = new ArrayList<>(array.size());
+        final Collection<Long> ret = new ArrayList<>(array.size());
         for(final Object object : array) {
             if(object instanceof Number) {
                 ret.add(((Number) object).longValue());
@@ -258,14 +269,14 @@ public final class JsonUtil {
                         (object == null ? "null" : object.getClass()));
             }
         }
-        return Collections.unmodifiableList(ret);
+        return List.copyOf(ret);
     }
     
     @Nonnull
     @CheckReturnValue
     public static <T> Function<JsonArray, List<T>> mapObjectContents(@Nonnull final Function<JsonObject, T> builder) {
         return array -> {
-            final List<T> result = new ArrayList<>(array.size());
+            final Collection<T> result = new ArrayList<>(array.size());
             for(final Object object : array) {
                 if(!(object instanceof JsonObject)) {
                     throw new IllegalArgumentException("Expected array to contain only objects, but found " +
@@ -274,7 +285,11 @@ public final class JsonUtil {
                 }
                 result.add(builder.apply((JsonObject) object));
             }
-            return Collections.unmodifiableList(result);
+            return List.copyOf(result);
         };
+    }
+    
+    public static String encodePrettily(final JsonObject data) {
+        return JsonWriter.indent("  ").string().value(data).done();
     }
 }

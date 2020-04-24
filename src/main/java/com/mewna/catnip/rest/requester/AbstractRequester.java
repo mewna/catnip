@@ -27,60 +27,58 @@
 
 package com.mewna.catnip.rest.requester;
 
-import com.google.common.collect.ImmutableList;
+import com.grack.nanojson.*;
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.impl.lifecycle.RestRatelimitHitImpl;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
+import com.mewna.catnip.rest.MultipartBodyPublisher;
 import com.mewna.catnip.rest.ResponseException;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.RestPayloadException;
 import com.mewna.catnip.rest.Routes.Route;
 import com.mewna.catnip.rest.ratelimit.RateLimiter;
+import com.mewna.catnip.shard.LifecycleEvent.Raw;
 import com.mewna.catnip.util.CatnipMeta;
-import com.mewna.catnip.util.SafeVertxCompletableFuture;
 import com.mewna.catnip.util.Utils;
-import io.vertx.core.Context;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import com.mewna.catnip.util.rx.RxHelpers;
+import io.reactivex.rxjava3.core.Observable;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
-import okhttp3.*;
-import okhttp3.Request.Builder;
-import okhttp3.internal.http.HttpMethod;
-import okio.BufferedSink;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.IOException;
+import java.lang.StackWalker.Option;
+import java.lang.StackWalker.StackFrame;
+import java.net.URI;
+import java.net.http.HttpClient.Builder;
+import java.net.http.HttpHeaders;
+import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublisher;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 
-import static io.vertx.core.http.HttpMethod.PUT;
+import static com.mewna.catnip.rest.Routes.HttpMethod.GET;
 
 @SuppressWarnings("WeakerAccess")
 public abstract class AbstractRequester implements Requester {
-    public static final RequestBody EMPTY_BODY = RequestBody.create(null, new byte[0]);
+    public static final BodyPublisher EMPTY_BODY = BodyPublishers.noBody();
+    private static final StackWalker STACK_WALKER = StackWalker.getInstance(Set.of(Option.RETAIN_CLASS_REFERENCE));
     
     protected final RateLimiter rateLimiter;
-    protected final OkHttpClient.Builder clientBuilder;
     protected Catnip catnip;
-    private volatile OkHttpClient client;
     
-    public AbstractRequester(@Nonnull final RateLimiter rateLimiter, @Nonnull final OkHttpClient.Builder clientBuilder) {
+    public AbstractRequester(@Nonnull final RateLimiter rateLimiter) {
         this.rateLimiter = rateLimiter;
-        this.clientBuilder = clientBuilder;
     }
     
     @Override
@@ -91,32 +89,27 @@ public abstract class AbstractRequester implements Requester {
     
     @Nonnull
     @Override
-    public CompletionStage<ResponsePayload> queue(@Nonnull final OutboundRequest r) {
-        final CompletableFuture<ResponsePayload> future = new SafeVertxCompletableFuture<>(catnip);
+    public Observable<ResponsePayload> queue(@Nonnull final OutboundRequest r) {
+        final CompletableFuture<ResponsePayload> future = new CompletableFuture<>();
         final Bucket bucket = getBucket(r.route());
         // Capture stacktrace if possible
         final StackTraceElement[] stacktrace;
-        if(catnip.captureRestStacktraces()) {
-            stacktrace = Thread.currentThread().getStackTrace();
+        if(catnip.options().captureRestStacktraces()) {
+            stacktrace = STACK_WALKER.walk(stream -> stream
+                    .map(StackFrame::toStackTraceElement)
+                    .toArray(StackTraceElement[]::new));
         } else {
             stacktrace = new StackTraceElement[0];
         }
         bucket.queueRequest(new QueuedRequest(r, r.route(), future, bucket, stacktrace));
-        return future;
+        return RxHelpers.futureToObservable(future)
+                .subscribeOn(catnip.rxScheduler())
+                .observeOn(catnip.rxScheduler());
     }
     
     @Nonnull
     @CheckReturnValue
     protected abstract Bucket getBucket(@Nonnull Route route);
-    
-    @Nonnull
-    @CheckReturnValue
-    protected synchronized OkHttpClient client() {
-        if(client != null) {
-            return client;
-        }
-        return client = clientBuilder.build();
-    }
     
     protected void executeRequest(@Nonnull final QueuedRequest request) {
         Route route = request.route();
@@ -133,11 +126,11 @@ public abstract class AbstractRequester implements Requester {
     
     protected void handleRouteBufferBodySend(@Nonnull final Route finalRoute, @Nonnull final QueuedRequest request) {
         try {
-            final MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
+            final MultipartBodyPublisher publisher = new MultipartBodyPublisher();
             final OutboundRequest r = request.request();
             for(int index = 0; index < r.buffers().size(); index++) {
-                final ImmutablePair<String, Buffer> pair = r.buffers().get(index);
-                builder.addFormDataPart("file" + index, pair.left, new MultipartRequestBody(pair.right));
+                final ImmutablePair<String, byte[]> pair = r.buffers().get(index);
+                publisher.addPart("file" + index, pair.left, pair.right);
             }
             if(r.object() != null) {
                 for(final Extension extension : catnip.extensionManager().extensions()) {
@@ -145,16 +138,20 @@ public abstract class AbstractRequester implements Requester {
                         r.object(hook.rawRestSendObjectHook(finalRoute, r.object()));
                     }
                 }
-                builder.addFormDataPart("payload_json", r.object().encode());
+                publisher.addPart("payload_json", JsonWriter.string(r.object()));
             } else if(r.array() != null) {
-                builder.addFormDataPart("payload_json", r.array().encode());
+                publisher.addPart("payload_json", JsonWriter.string(r.array()));
             } else {
-                builder.addFormDataPart("payload_json", new JsonObject()
-                        .putNull("content")
-                        .putNull("embed").encode());
+                
+                publisher.addPart("payload_json",
+                        JsonWriter.string()
+                                .object()
+                                .nul("content")
+                                .nul("embed")
+                                .end()
+                                .done());
             }
-            
-            executeHttpRequest(finalRoute, builder.build(), request);
+            executeHttpRequest(finalRoute, publisher.build(), request, "multipart/form-data;boundary=" + publisher.getBoundary());
         } catch(final Exception e) {
             catnip.logAdapter().error("Failed to send multipart request", e);
         }
@@ -169,120 +166,134 @@ public abstract class AbstractRequester implements Requester {
                     r.object(hook.rawRestSendObjectHook(finalRoute, r.object()));
                 }
             }
-            encoded = r.object().encode();
+            encoded = JsonWriter.string(r.object());
         } else if(r.array() != null) {
-            encoded = r.object().encode();
+            encoded = JsonWriter.string(r.array());
         } else {
             encoded = null;
         }
-        RequestBody body = null;
-        if(encoded != null) {
-            body = RequestBody.create(MediaType.parse("application/json"), encoded);
-        } else if(HttpMethod.requiresRequestBody(r.route().method().name().toUpperCase())) {
-            body = EMPTY_BODY;
-        }
-        executeHttpRequest(finalRoute, body, request);
+        executeHttpRequest(finalRoute, encoded == null ? BodyPublishers.noBody() : BodyPublishers.ofString(encoded), request, "application/json");
     }
     
-    protected void executeHttpRequest(@Nonnull final Route route, @Nullable final RequestBody body,
-                                      @Nonnull final QueuedRequest request) {
-        final Context context = catnip.vertx().getOrCreateContext();
-        final Builder requestBuilder = new Builder().url(API_HOST + API_BASE + route.baseRoute())
-                .method(route.method().name(), body)
-                .header("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')');
+    protected void executeHttpRequest(@Nonnull final Route route, @Nullable final BodyPublisher body,
+                                      @Nonnull final QueuedRequest request, @Nonnull final String mediaType) {
+        final HttpRequest.Builder builder;
+        final String apiHostVersion = catnip.options().apiHost() + "/api/v" + catnip.options().apiVersion();
+        
+        if(route.method() == GET) {
+            // No body
+            builder = HttpRequest.newBuilder(URI.create(apiHostVersion + route.baseRoute())).GET();
+        } else {
+            final var fakeBody = request.request.emptyBody();
+            builder = HttpRequest.newBuilder(URI.create(apiHostVersion + route.baseRoute()))
+                    .setHeader("Content-Type", mediaType)
+                    .method(route.method().name(), fakeBody ? BodyPublishers.ofString(" ") : body);
+            if(fakeBody) {
+                // If we don't have a body, then the body param is null, which
+                // seems to not set a Content-Length. This explicitly tries to set
+                // up a request shaped in a way that makes Discord not complain.
+                catnip.logAdapter().trace("Set fake body due to lack of body.");
+            }
+        }
+        
+        // Required by Discord
+        builder.setHeader("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')');
+        // Request more precise ratelimit headers for better timing
+        // NOTE: THIS SHOULD NOT BE CONFIGURABLE BY THE END USER
+        // This is pretty important for getting timing of things like reaction
+        // routes correct, so there's no use for the end-user messing around
+        // with this.
+        // If they REALLY want it, they can write their own requester.
+        builder.setHeader("X-RateLimit-Precision", "millisecond");
+        
         if(request.request().needsToken()) {
-            requestBuilder.header("Authorization", "Bot " + catnip.token());
+            builder.setHeader("Authorization", "Bot " + catnip.options().token());
         }
         if(request.request().reason() != null) {
-            requestBuilder.addHeader(Requester.REASON_HEADER, Utils.encodeUTF8(request.request().reason()));
+            catnip.logAdapter().trace("Adding reason header due to specific needs.");
+            builder.header(Requester.REASON_HEADER, Utils.encodeUTF8(request.request().reason()));
         }
+        
         // Update request start time as soon as possible
         // See QueuedRequest docs for why we do this
         request.start = System.nanoTime();
-        client().newCall(requestBuilder.build()).enqueue(new Callback() {
-            @Override
-            public void onFailure(@Nonnull final Call call, @Nonnull final IOException e) {
-                request.bucket.failedRequest(request, e);
-            }
-            
-            @Override
-            public void onResponse(@Nonnull final Call call, @Nonnull final Response resp) throws IOException {
-                //ensure we close it no matter what
-                try(final Response response = resp) {
-                    final int code = response.code();
-                    final String message = response.message();
-                    // See QueuedRequest docs for why we do this
+        catnip.options().httpClient().sendAsync(builder.build(), BodyHandlers.ofString())
+                .thenAccept(res -> {
+                    final int code = res.statusCode();
+                    final String message = "Unavailable to due Java's HTTP client.";
                     final long requestEnd = System.nanoTime();
-                    if(response.body() == null) {
-                        context.runOnContext(__ ->
-                                handleResponse(route, code, message, requestEnd, null, response.headers(), request));
-                    } else {
-                        final byte[] bodyBytes = response.body().bytes();
-                        
-                        context.runOnContext(__ ->
-                                handleResponse(route, code, message, requestEnd, Buffer.buffer(bodyBytes),
-                                        response.headers(), request));
-                    }
-                }
-            }
-        });
+                    
+                    catnip.rxScheduler().scheduleDirect(() ->
+                            handleResponse(route, code, message, requestEnd, res.body(), res.headers(), request));
+                })
+                .exceptionally(e -> {
+                    request.bucket.failedRequest(request, e);
+                    return null;
+                });
     }
     
-    protected void handleResponse(@Nonnull final Route route, final int statusCode, @Nonnull final String statusMessage,
-                                  final long requestEnd, final Buffer body, final Headers headers,
+    protected void handleResponse(@Nonnull final Route route, final int statusCode,
+                                  @SuppressWarnings("SameParameterValue") @Nonnull final String statusMessage,
+                                  final long requestEnd, final String body, final HttpHeaders headers,
                                   @Nonnull final QueuedRequest request) {
-        final String dateHeader = headers.get("Date");
+        final String dateHeader = headers.firstValue("Date").orElse(null);
         final long requestDuration = TimeUnit.NANOSECONDS.toMillis(requestEnd - request.start);
         final long timeDifference;
-        if(route.method() == PUT && route.baseRoute().contains("/reactions/")) {
-            timeDifference = requestDuration;
-            catnip.logAdapter().trace("Reaction route, using time difference = request duration = {}", timeDifference);
-        } else if(dateHeader == null) {
+        if(dateHeader == null || route.requiresMsPrecision()) {
             timeDifference = requestDuration;
             catnip.logAdapter().trace("No date header, time difference = request duration = {}", timeDifference);
         } else {
             final long now = System.currentTimeMillis();
-            // Parsing the date header like this will only be accurate to the
-            // second, meaning that reaction routes will be significantly
-            // inaccurate using this method, as those routes have ratelimits
-            // with millisecond precision. This leads to ex. very slow reaction
-            // menus. To solve this, we use the request duration to measure
-            // latency instead.
-            // TODO: Is there a more accurate way to do this that still
-            //  respects the ms-precision ratelimits?
-            final long date = OffsetDateTime.parse(dateHeader, DateTimeFormatter.RFC_1123_DATE_TIME).toInstant().toEpochMilli();
+            final long date = OffsetDateTime.parse(dateHeader, DateTimeFormatter.RFC_1123_DATE_TIME).toInstant()
+                    .toEpochMilli();
             timeDifference = now - date + requestDuration;
             catnip.logAdapter().trace("Have date header, time difference = now - date + request duration = " +
                             "{} - {} + {} = {}",
                     now, date, requestDuration, timeDifference);
         }
         if(statusCode == 429) {
-            catnip.logAdapter().error("Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
-                    route.baseRoute(),
-                    headers.get("X-Ratelimit-Global"),
-                    headers.get("X-Ratelimit-Limit"),
-                    headers.get("X-Ratelimit-Reset")
-            );
-            String retry = headers.get("Retry-After");
+            if(catnip.options().logLifecycleEvents()) {
+                catnip.logAdapter().error(
+                        "Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
+                        route.baseRoute(),
+                        headers.firstValue("X-Ratelimit-Global").orElse(null),
+                        headers.firstValue("X-Ratelimit-Limit").orElse(null),
+                        headers.firstValue("X-Ratelimit-Reset").orElse(null)
+                );
+            }
+            catnip.dispatchManager().dispatchEvent(Raw.REST_RATELIMIT_HIT,
+                    new RestRatelimitHitImpl(catnip, route.baseRoute(),
+                            Boolean.parseBoolean(headers.firstValue("X-RateLimit-Global").orElse(null))));
+            
+            String retry = headers.firstValue("Retry-After").orElse(null);
             if(retry == null || retry.isEmpty()) {
-                retry = body.toJsonObject().getValue("retry_after").toString();
+                try {
+                    retry = JsonParser.object().from(body).get("retry_after").toString();
+                } catch(final JsonParserException e) {
+                    throw new IllegalStateException(e);
+                }
             }
             final long retryAfter = Long.parseLong(retry);
-            if(Boolean.parseBoolean(headers.get("X-RateLimit-Global"))) {
+            if(Boolean.parseBoolean(headers.firstValue("X-RateLimit-Global").orElse(null))) {
+                catnip.logAdapter().trace("Updating global bucket due to ratelimit.");
                 rateLimiter.updateGlobalRateLimit(System.currentTimeMillis() + timeDifference + retryAfter);
             } else {
+                catnip.logAdapter().trace("Updating bucket headers due to ratelimit.");
                 updateBucket(route, headers,
                         System.currentTimeMillis() + timeDifference + retryAfter, timeDifference);
             }
+            // It should get autodisposed anyway, so we don't need to worry
+            // about handling the method result
+            //noinspection ResultOfMethodCallIgnored
             rateLimiter.requestExecution(route)
-                    .thenRun(() -> executeRequest(request))
-                    .exceptionally(e -> {
-                        final Throwable throwable = new RuntimeException("REST error context");
-                        throwable.setStackTrace(request.stacktrace());
-                        request.future().completeExceptionally(e.initCause(throwable));
-                        return null;
-                    });
+                    .subscribe(() -> executeRequest(request),
+                            e -> {
+                                final Throwable throwable = new RuntimeException("REST error context");
+                                throwable.setStackTrace(request.stacktrace());
+                                request.future().completeExceptionally(e.initCause(throwable));
+                            });
         } else {
+            catnip.logAdapter().trace("Updating bucket headers from successful completion with code {}.", statusCode);
             updateBucket(route, headers, -1, timeDifference);
             request.bucket().requestDone();
             
@@ -294,80 +305,97 @@ public abstract class AbstractRequester implements Requester {
             }
             // We got a 4xx, meaning there's errors. Fail the request with this and move on.
             if(statusCode >= 400) {
-                final JsonObject response = payload.object();
-                if(statusCode == 400 && response.getInteger("code", -1) > 1000) {
-                    // 1000 was just the easiest number to check to skip over http error codes
-                    // Discord error codes are all >=10000 afaik, so this should be safe?
-                    
-                    final Map<String, List<String>> failures = new HashMap<>();
-                    response.forEach(e -> {
-                        if(e.getValue() instanceof JsonArray) {
-                            final JsonArray arr = (JsonArray) e.getValue();
-                            final List<String> errorStrings = new ArrayList<>();
-                            arr.stream().map(element -> (String) element).forEach(errorStrings::add);
-                            failures.put(e.getKey(), errorStrings);
-                        } else if(e.getValue() instanceof Integer) {
-                            failures.put(e.getKey(), ImmutableList.of(String.valueOf(e.getValue())));
-                        } else if(e.getValue() instanceof String) {
-                            failures.put(e.getKey(), ImmutableList.of((String) e.getValue()));
-                        } else {
-                            // If we don't know what it is, just stringify it and log a warning so that people can tell us
-                            catnip.logAdapter().warn("Got unknown error response type: {} (Please report this!)",
-                                    e.getValue().getClass().getName());
-                            failures.put(e.getKey(), ImmutableList.of(String.valueOf(e.getValue())));
-                        }
-                    });
-                    final Throwable throwable = new RuntimeException("REST error context");
-                    throwable.setStackTrace(request.stacktrace());
-                    request.future().completeExceptionally(new RestPayloadException(failures).initCause(throwable));
+                catnip.logAdapter().trace("Request received an error code ({} >= 400), processing...", statusCode);
+                if(payload.string() != null && payload.string().startsWith("{")) {
+                    // If the payload HAS a body, AND it looks like a JSON object, try to parse it for info
+                    final JsonObject response = payload.object();
+                    if(statusCode == 400 && response.getInt("code", -1) > 1000) {
+                        // 1000 was just the easiest number to check to skip over http error codes
+                        // Discord error codes are all >=10000 afaik, so this should be safe?
+                        catnip.logAdapter().trace("Status code 400 + JSON code, creating RestPayloadException...");
+                        final Map<String, List<String>> failures = new HashMap<>();
+                        response.forEach((key, value) -> {
+                            if(value instanceof JsonArray) {
+                                final JsonArray arr = (JsonArray) value;
+                                final List<String> errorStrings = new ArrayList<>();
+                                arr.stream().map(element -> (String) element).forEach(errorStrings::add);
+                                failures.put(key, errorStrings);
+                            } else if(value instanceof Integer) {
+                                failures.put(key, List.of(String.valueOf(value)));
+                            } else if(value instanceof String) {
+                                failures.put(key, List.of((String) value));
+                            } else {
+                                // If we don't know what it is, just stringify it and log a warning so that people can tell us
+                                catnip.logAdapter().warn("Got unknown error response type: {} (Please report this!)",
+                                        value.getClass().getName());
+                                failures.put(key, List.of(String.valueOf(value)));
+                            }
+                        });
+                        final Throwable throwable = new RuntimeException("REST error context");
+                        throwable.setStackTrace(request.stacktrace());
+                        request.future().completeExceptionally(new RestPayloadException(failures).initCause(throwable));
+                    } else {
+                        catnip.logAdapter().trace("Status code != 400, creating ResponseException...");
+                        final String message = response.getString("message", "No message.");
+                        final int code = response.getInt("code", -1);
+                        final Throwable throwable = new RuntimeException("REST error context");
+                        throwable.setStackTrace(request.stacktrace());
+                        request.future().completeExceptionally(new ResponseException(route.toString(), statusCode,
+                                statusMessage, code, message, response).initCause(throwable));
+                    }
                 } else {
-                    final String message = response.getString("message", "No message.");
-                    final int code = response.getInteger("code", -1);
+                    catnip.logAdapter().trace("Status code != 400 and no JSON body, creating ResponseException...");
                     final Throwable throwable = new RuntimeException("REST error context");
                     throwable.setStackTrace(request.stacktrace());
                     request.future().completeExceptionally(new ResponseException(route.toString(), statusCode,
-                            statusMessage, code, message, response).initCause(throwable));
+                            statusMessage, -1, "No message.", null).initCause(throwable));
                 }
             } else {
+                catnip.logAdapter().trace("Successfully completed request future.");
                 request.future().complete(payload);
             }
         }
     }
     
-    protected void updateBucket(@Nonnull final Route route, @Nonnull final Headers headers, final long retryAfter,
+    protected void updateBucket(@Nonnull final Route route, @Nonnull final HttpHeaders headers, final long retryAfter,
                                 final long timeDifference) {
-        final String rateLimitReset = headers.get("X-RateLimit-Reset");
-        final String rateLimitRemaining = headers.get("X-RateLimit-Remaining");
-        final String rateLimitLimit = headers.get("X-RateLimit-Limit");
+        final Optional<Long> rateLimitReset = headers.firstValue("X-RateLimit-Reset")
+                .map(s -> Long.parseLong(s.replace(".", "")));
+        final OptionalLong rateLimitRemaining = headers.firstValueAsLong("X-RateLimit-Remaining");
+        final OptionalLong rateLimitLimit = headers.firstValueAsLong("X-RateLimit-Limit");
+        final Optional<Long> rateLimitResetAfter = headers.firstValue("X-RateLimit-Reset-After")
+                .map(s -> Long.parseLong(s.replace(".", "")));
         
         catnip.logAdapter().trace(
                 "Updating headers for {} ({}): remaining = {}, limit = {}, reset = {}, retryAfter = {}, timeDifference = {}",
-                route, route.ratelimitKey(), rateLimitRemaining, rateLimitLimit, rateLimitReset, retryAfter, timeDifference
+                route, route.ratelimitKey(), rateLimitRemaining.orElse(-1L), rateLimitLimit.orElse(-1L),
+                rateLimitReset.orElse(-1L), retryAfter, timeDifference
         );
         
         if(retryAfter > 0) {
             rateLimiter.updateRemaining(route, 0);
-            rateLimiter.updateReset(route, retryAfter);
-        }
-        
-        if(route.method() == PUT && route.baseRoute().contains("/reactions/")) {
-            rateLimiter.updateLimit(route, 1);
-            rateLimiter.updateReset(route, System.currentTimeMillis() + timeDifference + 250);
-        } else {
-            if(rateLimitReset != null) {
-                rateLimiter.updateReset(route, Long.parseLong(rateLimitReset) * 1000 + timeDifference);
-            }
-            
-            if(rateLimitLimit != null) {
-                rateLimiter.updateLimit(route, Integer.parseInt(rateLimitLimit));
+            if(catnip.options().restRatelimitsWithoutClockSync() && rateLimitResetAfter.isPresent()) {
+                rateLimiter.updateReset(route, System.currentTimeMillis() + timeDifference
+                        + rateLimitResetAfter.get());
+            } else {
+                rateLimiter.updateReset(route, retryAfter);
             }
         }
         
-        if(rateLimitRemaining != null) {
-            rateLimiter.updateRemaining(route, Integer.parseInt(rateLimitRemaining));
-        }
+        rateLimitReset.ifPresent(aLong -> rateLimiter.updateReset(route, aLong + timeDifference));
+        rateLimitLimit.ifPresent(aLong -> rateLimiter.updateLimit(route, Math.toIntExact(aLong)));
+        rateLimitRemaining.ifPresent(aLong -> rateLimiter.updateRemaining(route, Math.toIntExact(aLong)));
         
         rateLimiter.updateDone(route);
+    }
+    
+    private boolean requiresRequestBody(final String method) {
+        // Stolen from OkHTTP
+        return method.equals("POST")
+                || method.equals("PUT")
+                || method.equals("PATCH")
+                || method.equals("PROPPATCH") // WebDAV
+                || method.equals("REPORT");   // CalDAV/CardDAV (defined in WebDAV Versioning)
     }
     
     protected interface Bucket {
@@ -376,24 +404,6 @@ public abstract class AbstractRequester implements Requester {
         void failedRequest(@Nonnull QueuedRequest request, @Nonnull Throwable failureCause);
         
         void requestDone();
-    }
-    
-    @RequiredArgsConstructor
-    protected static class MultipartRequestBody extends RequestBody {
-        private static final MediaType contentType = MediaType.parse("application/octet-stream; charset=utf-8");
-        
-        private final Buffer buffer;
-        
-        @Nullable
-        @Override
-        public MediaType contentType() {
-            return contentType;
-        }
-        
-        @Override
-        public void writeTo(@Nonnull final BufferedSink sink) throws IOException {
-            sink.write(buffer.getBytes());
-        }
     }
     
     @Getter

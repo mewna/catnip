@@ -29,17 +29,17 @@ package com.mewna.catnip.rest.ratelimit;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.rest.Routes.Route;
+import com.mewna.catnip.util.rx.RxHelpers;
+import io.reactivex.rxjava3.core.Completable;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class DefaultRateLimiter implements RateLimiter {
-    private static final CompletionStage<Void> EXECUTE_NOW = CompletableFuture.completedFuture(null);
     private final Map<String, BucketContainer> buckets = new ConcurrentHashMap<>();
     private volatile long globalRateLimitReset;
     private Catnip catnip;
@@ -51,7 +51,7 @@ public class DefaultRateLimiter implements RateLimiter {
     
     @Nonnull
     @Override
-    public CompletionStage<Void> requestExecution(@Nonnull final Route route) {
+    public Completable requestExecution(@Nonnull final Route route) {
         catnip.logAdapter().trace("Requested execution for route {} (ratelimit key = {})", route, route.ratelimitKey());
         final BucketContainer container = buckets.computeIfAbsent(route.ratelimitKey(), __ -> new BucketContainer());
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
@@ -59,12 +59,18 @@ public class DefaultRateLimiter implements RateLimiter {
             catnip.logAdapter().trace("{} remaining requests", container.remaining);
             if(container.remaining > 0) {
                 container.remaining--;
-                return EXECUTE_NOW;
+                catnip.logAdapter().trace("EXECUTE_NOW");
+                return RxHelpers.completedCompletable(catnip)
+                        .subscribeOn(catnip.rxScheduler())
+                        .observeOn(catnip.rxScheduler());
             }
             final CompletableFuture<Void> future = new CompletableFuture<>();
             container.queue.offer(future);
             queueExecution(container);
-            return future;
+            catnip.logAdapter().trace("Execute later");
+            return Completable.fromFuture(future)
+                    .subscribeOn(catnip.rxScheduler())
+                    .observeOn(catnip.rxScheduler());
         }
     }
     
@@ -122,7 +128,7 @@ public class DefaultRateLimiter implements RateLimiter {
         if(container.timerId != null) {
             return;
         }
-        container.timerId = catnip.vertx().setTimer(retryAfter(container.reset), __ -> {
+        container.timerId = catnip.taskScheduler().setTimer(retryAfter(container.reset), __ -> {
             synchronized(container) {
                 container.timerId = null;
                 final long now = System.currentTimeMillis();

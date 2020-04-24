@@ -28,7 +28,6 @@
 package com.mewna.catnip.entity.channel;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
 
 /**
  * A category that contains channels in a guild.

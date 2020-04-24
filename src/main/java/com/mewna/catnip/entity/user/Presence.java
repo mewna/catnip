@@ -27,9 +27,9 @@
 
 package com.mewna.catnip.entity.user;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.PresenceImpl;
-import com.mewna.catnip.entity.impl.PresenceImpl.ActivityImpl;
+import com.mewna.catnip.entity.impl.user.PresenceImpl;
+import com.mewna.catnip.entity.impl.user.PresenceImpl.ActivityImpl;
+import com.mewna.catnip.entity.misc.Emoji.ActivityEmoji;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
@@ -39,6 +39,7 @@ import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -48,14 +49,13 @@ import java.util.Set;
  * @since 9/21/18.
  */
 @SuppressWarnings("unused")
-@JsonDeserialize(as = PresenceImpl.class)
 public interface Presence {
     @Nonnull
     @CheckReturnValue
     static Presence of(@Nonnull final OnlineStatus status, @Nullable final Activity activity) {
         return PresenceImpl.builder()
                 .status(status)
-                .activity(activity)
+                .activities(activity != null ? List.of(activity) : List.of())
                 .build();
     }
     
@@ -80,8 +80,8 @@ public interface Presence {
     @Nullable
     OnlineStatus desktopStatus();
     
-    @Nullable
-    Activity activity();
+    @Nonnull
+    List<Activity> activities();
     
     @Accessors(fluent = true, chain = true)
     enum OnlineStatus {
@@ -111,7 +111,7 @@ public interface Presence {
                     return OFFLINE;
                 }
                 case "invisible": {
-                    return  INVISIBLE;
+                    return INVISIBLE;
                 }
                 default: {
                     throw new IllegalArgumentException("Unknown status: " + status);
@@ -218,16 +218,20 @@ public interface Presence {
         String match();
     }
     
-    @JsonDeserialize(as = ActivityImpl.class)
     interface Activity {
         @Nonnull
         @CheckReturnValue
         static Activity of(@Nonnull final String name, @Nonnull final ActivityType type, @Nullable final String url) {
             if(url == null && type == ActivityType.STREAMING) {
-                throw new IllegalArgumentException("A valid twitch.tv URL must be specified when the ActivityType == STREAMING!");
+                throw new IllegalArgumentException("A non-null twitch.tv or youtube.com URL must be specified when the ActivityType == STREAMING!");
             }
             if(url != null && type != ActivityType.STREAMING) {
                 throw new IllegalArgumentException("You can only specify an URL when the ActivityType == STREAMING!");
+            }
+            if(type == ActivityType.STREAMING) {
+                if(!url.startsWith("https://youtube.com/") && !url.startsWith("https://twitch.tv/")) {
+                    throw new IllegalArgumentException("A valid twitch.tv or youtube.com URL must be specified when the ActivityType == STREAMING!");
+                }
             }
             return ActivityImpl.builder()
                     .name(name)
@@ -268,8 +272,18 @@ public interface Presence {
         @Nullable
         String details();
         
+        /**
+         * @return the user's current party status or custom status text.
+         */
         @Nullable
         String state();
+        
+        /**
+         * @return The emoji used for {@link ActivityType#CUSTOM_STATUS}, if
+         * any.
+         */
+        @Nullable
+        ActivityEmoji emoji();
         
         @Nullable
         ActivityParty party();

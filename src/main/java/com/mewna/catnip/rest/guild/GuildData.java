@@ -27,12 +27,12 @@
 
 package com.mewna.catnip.rest.guild;
 
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.guild.Guild.ContentFilterLevel;
 import com.mewna.catnip.entity.guild.Guild.NotificationLevel;
 import com.mewna.catnip.entity.guild.Guild.VerificationLevel;
 import com.mewna.catnip.util.JsonConvertible;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -198,7 +198,8 @@ public class GuildData implements JsonConvertible {
     @Nonnull
     @CheckReturnValue
     public JsonObject toJson() {
-        final JsonObject object = new JsonObject().put("name", name);
+        final JsonObject object = new JsonObject();
+        object.put("name", name);
         if(!channels.isEmpty()) {
             final JsonArray array = new JsonArray();
             for(final ChannelData data : channels) {

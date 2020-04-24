@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.cache;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.cache.view.NamedCacheView;
@@ -39,15 +40,14 @@ import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
-import com.mewna.catnip.util.SafeVertxCompletableFuture;
-import io.vertx.core.Future;
-import io.vertx.core.json.JsonObject;
+import com.mewna.catnip.util.rx.RxHelpers;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
 
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * A customizable entity cache is basically just what it sounds like - a cache
@@ -72,8 +72,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Future<Void> updateCache(@Nonnull final String eventType, final int shardId, @Nonnull final JsonObject payload) {
-        return Future.succeededFuture();
+    public Completable updateCache(@Nonnull final String eventType, final int shardId, @Nonnull final JsonObject payload) {
+        return RxHelpers.completedCompletable(catnip);
     }
     
     @Override
@@ -118,8 +118,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public CompletableFuture<Guild> guildAsync(final long id) {
-        return SafeVertxCompletableFuture.completedFuture(catnip, null);
+    public Single<Guild> guildAsync(final long id) {
+        return Single.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -130,8 +130,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public CompletableFuture<User> userAsync(final long id) {
-        return SafeVertxCompletableFuture.completedFuture(catnip, null);
+    public Single<User> userAsync(final long id) {
+        return Single.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -142,8 +142,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public CompletableFuture<Presence> presenceAsync(final long id) {
-        return SafeVertxCompletableFuture.completedFuture(catnip, null);
+    public Single<Presence> presenceAsync(final long id) {
+        return Single.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -154,8 +154,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public CompletableFuture<Member> memberAsync(final long guildId, final long id) {
-        return SafeVertxCompletableFuture.completedFuture(catnip, null);
+    public Single<Member> memberAsync(final long guildId, final long id) {
+        return Single.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -172,8 +172,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public CompletableFuture<Role> roleAsync(final long guildId, final long id) {
-        return SafeVertxCompletableFuture.completedFuture(catnip, null);
+    public Single<Role> roleAsync(final long guildId, final long id) {
+        return Single.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -190,8 +190,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public CompletableFuture<GuildChannel> channelAsync(final long guildId, final long id) {
-        return SafeVertxCompletableFuture.completedFuture(catnip, null);
+    public Single<GuildChannel> channelAsync(final long guildId, final long id) {
+        return Single.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -208,8 +208,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public CompletableFuture<UserDMChannel> dmChannelAsync(final long id) {
-        return SafeVertxCompletableFuture.completedFuture(catnip, null);
+    public Single<UserDMChannel> dmChannelAsync(final long id) {
+        return Single.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -220,8 +220,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public CompletableFuture<CustomEmoji> emojiAsync(final long guildId, final long id) {
-        return SafeVertxCompletableFuture.completedFuture(catnip, null);
+    public Single<CustomEmoji> emojiAsync(final long guildId, final long id) {
+        return Single.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -238,8 +238,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public CompletableFuture<VoiceState> voiceStateAsync(final long guildId, final long id) {
-        return SafeVertxCompletableFuture.completedFuture(catnip, null);
+    public Single<VoiceState> voiceStateAsync(final long guildId, final long id) {
+        return Single.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -256,7 +256,7 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public CompletableFuture<User> selfUserAsync() {
-        return SafeVertxCompletableFuture.completedFuture(catnip, null);
+    public Single<User> selfUserAsync() {
+        return Single.error(new IllegalArgumentException("No entity"));
     }
 }

@@ -27,19 +27,15 @@
 
 package com.mewna.catnip.entity.channel;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Mentionable;
-import com.mewna.catnip.entity.impl.TextChannelImpl;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
+import io.reactivex.rxjava3.core.Observable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
-import java.util.concurrent.CompletionStage;
 
 /**
  * A channel in a guild that can have text messages sent in it.
@@ -48,7 +44,6 @@ import java.util.concurrent.CompletionStage;
  * @since 9/12/18
  */
 @SuppressWarnings("unused")
-@JsonDeserialize(as = TextChannelImpl.class)
 public interface TextChannel extends GuildChannel, MessageChannel, Mentionable {
     /**
      * The channel's topic. Shown at the top of the channel. May be
@@ -77,28 +72,24 @@ public interface TextChannel extends GuildChannel, MessageChannel, Mentionable {
     int rateLimitPerUser();
     
     @Override
-    @JsonIgnore
     @CheckReturnValue
     default boolean isText() {
         return type() == ChannelType.TEXT;
     }
     
     @Override
-    @JsonIgnore
     @CheckReturnValue
     default boolean isNews() {
         return type() == ChannelType.NEWS;
     }
     
     @Override
-    @JsonIgnore
     @CheckReturnValue
     default boolean isVoice() {
         return false;
     }
     
     @Override
-    @JsonIgnore
     @CheckReturnValue
     default boolean isCategory() {
         return false;
@@ -111,9 +102,8 @@ public interface TextChannel extends GuildChannel, MessageChannel, Mentionable {
      * channel.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
-    default CompletionStage<List<Webhook>> fetchWebhooks() {
+    default Observable<Webhook> fetchWebhooks() {
         PermissionUtil.checkPermissions(catnip(), guildId(), id(), Permission.MANAGE_WEBHOOKS);
         return catnip().rest().webhook().getChannelWebhooks(id());
     }
@@ -122,7 +112,6 @@ public interface TextChannel extends GuildChannel, MessageChannel, Mentionable {
      * @return A mention for this channel that can be sent in a message.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default String asMention() {
         return "<#" + id() + '>';

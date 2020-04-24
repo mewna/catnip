@@ -37,10 +37,11 @@ import com.mewna.catnip.shard.DiscordEvent
 class GroovyExample {
     static void main(args) {
         def catnip = Catnip.catnip("your token here")
-        catnip.on(DiscordEvent.MESSAGE_CREATE, { msg ->
-            if(msg.content() == "!ping") {
-                msg.channel().sendMessage("pong!")
-            }
+
+        catnip.observable(DiscordEvent.MESSAGE_CREATE)
+            .filter(msg -> msg.content() == "!ping")
+        .forEach({ msg ->
+            msg.channel().sendMessage("!ping")
         })
         catnip.connect()
     }

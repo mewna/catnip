@@ -27,19 +27,19 @@
 
 package com.mewna.catnip.util.pagination;
 
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.guild.audit.ActionType;
 import com.mewna.catnip.entity.guild.audit.AuditLogEntry;
 import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.util.JsonUtil;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import io.reactivex.rxjava3.core.Observable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
-import java.util.concurrent.CompletionStage;
 
 /**
  * @author natanbc
@@ -81,7 +81,7 @@ public abstract class AuditLogPaginator extends BasePaginator<AuditLogEntry, Jso
     
     @Nonnull
     @Override
-    protected CompletionStage<Void> fetch(@Nonnull final PaginationCallback<AuditLogEntry> action) {
+    protected Observable<Void> fetch(@Nonnull final PaginationCallback<AuditLogEntry> action) {
         return fetch(null, new RequestState<>(limit, requestSize, action)
                 .extra("user", userId)
                 .extra("type", type)
@@ -93,9 +93,9 @@ public abstract class AuditLogPaginator extends BasePaginator<AuditLogEntry, Jso
         //inlined EntityBuilder.immutableListOf and EntityBuilder.createAuditLog
         //this is done so we can do less allocations and only parse the entries
         //we need to.
-        final Map<String, Webhook> webhooks = JsonUtil.toMap(data.getJsonArray("webhooks"), x -> x.getString("id"), builder::createWebhook);
-        final Map<String, User> users = JsonUtil.toMap(data.getJsonArray("users"), x -> x.getString("id"), builder::createUser);
-        final JsonArray entries = data.getJsonArray("audit_log_entries");
+        final Map<String, Webhook> webhooks = JsonUtil.toMap(data.getArray("webhooks"), x -> x.getString("id"), builder::createWebhook);
+        final Map<String, User> users = JsonUtil.toMap(data.getArray("users"), x -> x.getString("id"), builder::createUser);
+        final JsonArray entries = data.getArray("audit_log_entries");
         
         for(final Object object : entries) {
             if(!(object instanceof JsonObject)) {

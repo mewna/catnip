@@ -27,12 +27,10 @@
 
 package com.mewna.catnip.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.util.CatnipMeta;
-import com.mewna.catnip.util.JsonUtil;
-import io.vertx.core.json.JsonObject;
+import com.mewna.catnip.entity.serialization.EntitySerializer;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
 /**
@@ -43,35 +41,12 @@ import javax.annotation.Nonnull;
  */
 @SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
 public interface Entity {
-    /**
-     * Converts JSON to the specified entity type.
-     *
-     * @param catnip The catnip instance to attach to the entity.
-     * @param type   The type of the entity.
-     * @param json   The JSON to convert.
-     * @param <T>    The type of the entity.
-     *
-     * @return The newly-created entity.
-     */
     @Nonnull
-    @JsonIgnore
-    @SuppressWarnings("ClassReferencesSubclass")
-    static <T> T fromJson(@Nonnull final Catnip catnip, @Nonnull final Class<T> type, @Nonnull final JsonObject json) {
-        final String v = json.getString("v");
-        final JsonObject data = JsonUtil.destringifySnowflakes(json.getJsonObject("d"));
-        
-        if(!CatnipMeta.VERSION.equals(v) && catnip.warnOnEntityVersionMismatch()) {
-            catnip.logAdapter().warn("Attempting to deserialize an entity from catnip v{}, but we're on v{}! " +
-                    "This may not work, so update your versions!", v, CatnipMeta.VERSION);
-        }
-        
-        final T t = data.mapTo(type);
-        // Yeah I know this is a Bad Thing:tm: to do with referencing the
-        // subclass, but it was the easiest way to do things :<
-        if(t instanceof RequiresCatnip) {
-            ((RequiresCatnip) t).catnip(catnip);
-        }
-        return t;
+    @CheckReturnValue
+    @SuppressWarnings("unchecked")
+    static <T, E extends Entity> E deserialize(@Nonnull final Catnip catnip, @Nonnull final Class<E> type,
+                                               @Nonnull final T data) {
+        return ((EntitySerializer<T>) catnip.entitySerializer()).deserialize(data, type);
     }
     
     /**
@@ -79,21 +54,12 @@ public interface Entity {
      *
      * @return The catnip instance of this entity.
      */
-    @JsonIgnore
     Catnip catnip();
     
-    /**
-     * Map this entity instance to a JSON object.
-     *
-     * @return A JSON object representing this entity.
-     */
     @Nonnull
-    @JsonIgnore
-    default JsonObject toJson() {
-        return JsonUtil.stringifySnowflakes(
-                new JsonObject()
-                        .put("d", JsonObject.mapFrom(this))
-                        .put("v", CatnipMeta.VERSION)
-        );
+    @CheckReturnValue
+    @SuppressWarnings("unchecked")
+    default <T> T serialize() {
+        return (T) catnip().entitySerializer().serialize(this);
     }
 }

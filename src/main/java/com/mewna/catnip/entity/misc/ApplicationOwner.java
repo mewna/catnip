@@ -27,17 +27,11 @@
 
 package com.mewna.catnip.entity.misc;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.mewna.catnip.entity.impl.ApplicationOwnerImpl;
 import com.mewna.catnip.entity.user.User;
 
 /**
  * This may be changed if discord changes the format for teams in the returned response.
  */
-@JsonDeserialize(as = ApplicationOwnerImpl.class)
 public interface ApplicationOwner extends User {
-    
-    @JsonIgnore
     boolean isTeam();
 }

@@ -28,10 +28,10 @@
 package com.mewna.catnip.shard.manager;
 
 import com.mewna.catnip.shard.ShardConnectState;
+import io.reactivex.rxjava3.core.Single;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * A shard condition is an async function that determines whether or not the
@@ -45,7 +45,7 @@ import java.util.concurrent.CompletableFuture;
 public interface ShardCondition {
     /**
      * Get the future for this shard condition. This function is called
-     * ASYNCHRONOUSLY and must be ASYNCHRONOUS to avoid blocking the vert.x
+     * ASYNCHRONOUSLY and must be ASYNCHRONOUS to avoid blocking the
      * event loop threads.
      * <p>
      * This is run prior to sharding.
@@ -54,7 +54,7 @@ public interface ShardCondition {
      *
      * @return The future for this shard condition.
      */
-    CompletableFuture<Boolean> preshard(@Nonnegative final int shardId);
+    Single<Boolean> preshard(@Nonnegative final int shardId);
     
     /**
      * Run once sharding has finished. This function is called SYNCHRONOUSLY.

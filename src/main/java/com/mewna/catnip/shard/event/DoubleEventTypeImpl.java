@@ -60,7 +60,7 @@ public class DoubleEventTypeImpl<T, E> implements DoubleEventType<T, E> {
     }
     
     public static DoubleEventType<Void, Void> doubleNotFired(@Nonnull final String key) {
-        return new DoubleEventTypeImpl<Void, Void>(key, Void.class, Void.class) {
+        return new DoubleEventTypeImpl<>(key, Void.class, Void.class) {
             @Nonnull
             @CheckReturnValue
             @Override

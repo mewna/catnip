@@ -1,9 +1,6 @@
 package com.mewna.catnip.entity.misc;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.entity.impl.TeamImpl;
 import com.mewna.catnip.entity.util.ImageOptions;
 
 import javax.annotation.CheckReturnValue;
@@ -17,7 +14,6 @@ import java.util.List;
  * @author Bowser65
  * @since 06/24/19.
  */
-@JsonDeserialize(as = TeamImpl.class)
 public interface Team extends Snowflake {
     /**
      * @return The name of the team.
@@ -57,7 +53,6 @@ public interface Team extends Snowflake {
      * @return String containing the URL to its icon, options considered. Can be null.
      */
     @Nullable
-    @JsonIgnore
     @CheckReturnValue
     String iconUrl(@Nonnull final ImageOptions options);
     
@@ -67,7 +62,6 @@ public interface Team extends Snowflake {
      * @return String containing the URL to its icon. Can be null.
      */
     @Nullable
-    @JsonIgnore
     @CheckReturnValue
     String iconUrl();
     

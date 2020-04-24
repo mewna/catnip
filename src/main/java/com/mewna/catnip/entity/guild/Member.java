@@ -27,16 +27,14 @@
 
 package com.mewna.catnip.entity.guild;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.entity.Mentionable;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.channel.GuildChannel;
-import com.mewna.catnip.entity.impl.MemberImpl;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
+import io.reactivex.rxjava3.core.Single;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -45,7 +43,6 @@ import java.awt.*;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.*;
-import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 /**
@@ -55,7 +52,6 @@ import java.util.stream.Collectors;
  * @since 9/4/18.
  */
 @SuppressWarnings("unused")
-@JsonDeserialize(as = MemberImpl.class)
 public interface Member extends Mentionable, PermissionHolder {
     /**
      * The user equivalent to this member.
@@ -105,9 +101,9 @@ public interface Member extends Mentionable, PermissionHolder {
     @CheckReturnValue
     default Set<Role> roles() {
         final CacheView<Role> roles = catnip().cache().roles(guildId());
-        return Collections.unmodifiableSet(roleIds().stream()
+        return roleIds().stream()
                 .map(roles::getById)
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toUnmodifiableSet());
     }
     
     /**
@@ -210,9 +206,8 @@ public interface Member extends Mentionable, PermissionHolder {
      *
      * @return Future with the result of the DM creation.
      */
-    @JsonIgnore
     @CheckReturnValue
-    default CompletionStage<DMChannel> createDM() {
+    default Single<DMChannel> createDM() {
         return catnip().rest().user().createDM(id());
     }
     
@@ -253,7 +248,6 @@ public interface Member extends Mentionable, PermissionHolder {
      *
      * @return Whether the member owns the guild or not
      */
-    @JsonIgnore
     default boolean isOwner() {
         return guild().owner().equals(this);
     }
@@ -262,7 +256,6 @@ public interface Member extends Mentionable, PermissionHolder {
      * @return A mention for this member that can be sent in a message.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default String asMention() {
         return nick() != null ? "<@!" + id() + '>' : "<@" + id() + '>';

@@ -27,11 +27,8 @@
 
 package com.mewna.catnip.entity.guild;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Mentionable;
 import com.mewna.catnip.entity.channel.GuildChannel;
-import com.mewna.catnip.entity.impl.RoleImpl;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
 
@@ -47,7 +44,6 @@ import java.util.Set;
  * @since 9/4/18.
  */
 @SuppressWarnings("unused")
-@JsonDeserialize(as = RoleImpl.class)
 public interface Role extends Mentionable, Comparable<Role>, PermissionHolder {
     /**
      * The name of the role. Not unique
@@ -128,7 +124,6 @@ public interface Role extends Mentionable, Comparable<Role>, PermissionHolder {
      * @return A mention for this role that can be sent in a message.
      */
     @Nonnull
-    @JsonIgnore
     @CheckReturnValue
     default String asMention() {
         return "<@&" + id() + '>';

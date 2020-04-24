@@ -27,6 +27,8 @@
 
 package com.mewna.catnip.shard;
 
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.Snowflake;
@@ -40,8 +42,7 @@ import com.mewna.catnip.entity.user.Presence.OnlineStatus;
 import com.mewna.catnip.entity.user.PresenceUpdate;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.internal.CatnipImpl;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import com.mewna.catnip.util.JsonUtil;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.Nonnull;
@@ -62,10 +63,10 @@ public final class DispatchEmitter {
     }
     
     public void emit(@Nonnull final String type, @Nonnull final Entity payload) {
-        if(!catnip.emitEventObjects()) {
+        if(!catnip.options().emitEventObjects()) {
             return;
         }
-        if(catnip.disabledEvents().contains(type)) {
+        if(catnip.options().disabledEvents().contains(type)) {
             return;
         }
         try {
@@ -76,11 +77,11 @@ public final class DispatchEmitter {
     }
     
     public void emit(@Nonnull final JsonObject payload) {
-        if(!catnip.emitEventObjects()) {
+        if(!catnip.options().emitEventObjects()) {
             return;
         }
         final String type = payload.getString("t");
-        if(catnip.disabledEvents().contains(type)) {
+        if(catnip.options().disabledEvents().contains(type)) {
             return;
         }
         try {
@@ -90,15 +91,15 @@ public final class DispatchEmitter {
         }
     }
     
-    @SuppressWarnings("DuplicateBranchesInSwitch")
+    @SuppressWarnings({"DuplicateBranchesInSwitch", "ResultOfMethodCallIgnored"})
     private void emit0(@Nonnull final JsonObject payload) {
         final String type = payload.getString("t");
-        final JsonObject data = payload.getJsonObject("d");
+        final JsonObject data = payload.getObject("d");
         
         switch(type) {
             // Lifecycle
             case Raw.READY: {
-                final JsonArray guilds = data.getJsonArray("guilds");
+                final JsonArray guilds = data.getArray("guilds");
                 // All READY guilds are unavailable, marked available as the gateway
                 // streams them to us
                 guilds.stream()
@@ -122,7 +123,7 @@ public final class DispatchEmitter {
                 break;
             }
             case Raw.MESSAGE_UPDATE: {
-                if(data.getJsonObject("author", null) == null) {
+                if(data.getObject("author", null) == null) {
                     // Embeds update, emit the special case
                     catnip.dispatchManager().dispatchEvent(Raw.MESSAGE_EMBEDS_UPDATE,
                             entityBuilder.createMessageEmbedUpdate(data));
@@ -155,6 +156,10 @@ public final class DispatchEmitter {
                 catnip.dispatchManager().dispatchEvent(type, entityBuilder.createReactionUpdate(data));
                 break;
             }
+            case Raw.MESSAGE_REACTION_REMOVE_EMOJI: {
+                catnip.dispatchManager().dispatchEvent(type, entityBuilder.createReactionUpdate(data));
+                break;
+            }
             
             // Channels
             case Raw.CHANNEL_CREATE: {
@@ -177,6 +182,13 @@ public final class DispatchEmitter {
                 catnip.dispatchManager().dispatchEvent(type, entityBuilder.createWebhooksUpdate(data));
                 break;
             }
+            case Raw.INVITE_CREATE: {
+                catnip.dispatchManager().dispatchEvent(type, entityBuilder.createInvite(data));
+                break;
+            }
+            case Raw.INVITE_DELETE: {
+                catnip.dispatchManager().dispatchEvent(type, entityBuilder.createDeletedInvite(data));
+            }
             
             // Guilds
             case Raw.GUILD_CREATE: {
@@ -193,12 +205,7 @@ public final class DispatchEmitter {
             case Raw.GUILD_UPDATE: {
                 final Guild guild = entityBuilder.createGuild(data);
                 catnip.cache().guildAsync(guild.idAsLong())
-                        .thenAccept(old -> catnip.dispatchManager()
-                        .dispatchEvent(type, ImmutablePair.of(old, guild)))
-                        .exceptionally(e -> {
-                            cacheErrorLog(type, e);
-                            return null;
-                        });
+                        .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, guild)), e -> cacheErrorLog(type, e));
                 break;
             }
             case Raw.GUILD_DELETE: {
@@ -227,18 +234,13 @@ public final class DispatchEmitter {
             // Roles
             case Raw.GUILD_ROLE_CREATE: {
                 catnip.dispatchManager().dispatchEvent(type, entityBuilder.createRole(data.getString("guild_id"),
-                        data.getJsonObject("role")));
+                        data.getObject("role")));
                 break;
             }
             case Raw.GUILD_ROLE_UPDATE: {
-                final Role role = entityBuilder.createRole(data.getString("guild_id"), data.getJsonObject("role"));
+                final Role role = entityBuilder.createRole(data.getString("guild_id"), data.getObject("role"));
                 catnip.cache().roleAsync(role.guildIdAsLong(), role.idAsLong())
-                        .thenAccept(old -> catnip.dispatchManager()
-                        .dispatchEvent(type, ImmutablePair.of(old, role)))
-                        .exceptionally(e -> {
-                            cacheErrorLog(type, e);
-                            return null;
-                        });
+                        .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, role)), e -> cacheErrorLog(type, e));
                 break;
             }
             case Raw.GUILD_ROLE_DELETE: {
@@ -266,12 +268,7 @@ public final class DispatchEmitter {
                 final String guild = data.getString("guild_id");
                 final PartialMember partialMember = entityBuilder.createPartialMember(guild, data);
                 catnip.cache().memberAsync(partialMember.guildIdAsLong(), partialMember.idAsLong())
-                        .thenAccept(old -> catnip.dispatchManager()
-                                .dispatchEvent(type, ImmutablePair.of(old, partialMember)))
-                        .exceptionally(e -> {
-                            cacheErrorLog(type, e);
-                            return null;
-                        });
+                        .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, partialMember)), e -> cacheErrorLog(type, e));
                 break;
             }
             
@@ -279,30 +276,21 @@ public final class DispatchEmitter {
             case Raw.USER_UPDATE: {
                 final User user = entityBuilder.createUser(data);
                 catnip.cache().selfUserAsync()
-                        .thenAccept(old -> catnip.dispatchManager()
-                                .dispatchEvent(type, ImmutablePair.of(old, user)))
-                        .exceptionally(e -> {
-                            cacheErrorLog(type, e);
-                            return null;
-                        });
+                        .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, user)), e -> cacheErrorLog(type, e));
                 break;
             }
             case Raw.PRESENCE_UPDATE: {
                 final PresenceUpdate presence = entityBuilder.createPresenceUpdate(data);
                 if(presence.status() == OnlineStatus.INVISIBLE) {
-                    final JsonObject clone = payload.copy();
+                    final JsonObject clone = new JsonObject(payload);
+                    // catnip-internal key
                     clone.remove("shard");
                     catnip.logAdapter().warn("Received a presence update with 'invisible' as the online status, " +
                             "but we should never get this. If you report this to Discord, include the following " +
-                            "JSON in your report:\n{}", clone.encodePrettily());
+                            "JSON in your report:\n{}", JsonUtil.encodePrettily(clone));
                 }
                 catnip.cache().presenceAsync(presence.idAsLong())
-                        .thenAccept(old -> catnip.dispatchManager()
-                        .dispatchEvent(type, ImmutablePair.of(old, presence)))
-                        .exceptionally(e -> {
-                            cacheErrorLog(type, e);
-                            return null;
-                        });
+                        .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, presence)), e -> cacheErrorLog(type, e));
                 break;
             }
             

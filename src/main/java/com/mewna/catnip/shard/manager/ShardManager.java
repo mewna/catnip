@@ -28,14 +28,12 @@
 package com.mewna.catnip.shard.manager;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.shard.LifecycleState;
+import com.mewna.catnip.shard.CatnipShard;
 
-import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletionStage;
 
 /**
  * Manages the lifecycle of shards - starting, stopping, resuming, etc.
@@ -85,68 +83,14 @@ public interface ShardManager {
     void addToConnectQueue(@Nonnegative int shard);
     
     /**
-     * Fetches the trace from the given shard.
+     * Fetches a shard.
      *
-     * @param shard The shard to fetch the trace from.
+     * @param shard The id of the shard to fetch.
      *
-     * @return The shard's trace.
+     * @return The shard, if it exists, otherwise it throws a {@link NullPointerException}.
      */
     @Nonnull
-    CompletionStage<List<String>> trace(@Nonnegative int shard);
-    
-    /**
-     * Return the shard's computed gateway latency, ie. the time it takes for
-     * the shard to send a heartbeat to Discord and get a response.
-     *
-     * @param shard The shard ID to get gateway latency for.
-     *
-     * @return The shard's computed gateway latency.
-     */
-    @Nonnull
-    CompletionStage<Long> latency(@Nonnegative int shard);
-    
-    /**
-     * Checks whether or not the shard with the given ID is currently connected
-     * to the websocket gateway. This is done as a boolean because - at least
-     * for now - there's only 2 meaningful states: connected, and queued to be
-     * connected.
-     * <p>
-     * If the shard id does <strong>not</strong> exist (ex. not controlled by
-     * this shard manager instance), then the future will FAIL, and this case
-     * must also be handled.
-     * <p>
-     * This is fetched <em>asynchronously</em>.
-     *
-     * @param id The id of the shard to get connection status for.
-     *
-     * @return Whether or not the shard with the given id is currently
-     * connected to the websocket gateway.
-     */
-    @Nonnull
-    @CheckReturnValue
-    CompletionStage<Boolean> isConnected(@Nonnegative int id);
-    
-    /**
-     * Get the lifecycle state for the current shard. This provides more
-     * meaningful info than {@link #isConnected(int)}, because it provides more
-     * granular info about the shard's state. However, it does not
-     * differentiate between "connected" or not per se; it is up to the
-     * end-user to determine whether or not the lifecycle state is actually a
-     * state of being "connected."
-     * <p>
-     * If the shard id does <strong>not</strong> exist (ex. not controlled by
-     * this shard manager instance), then the future will FAIL, and this case
-     * must also be handled.
-     * <p>
-     * This is fetched <em>asynchronously</em>.
-     *
-     * @param id The id of the shard to get the lifecycle state for.
-     *
-     * @return The lifecycle state for the shard with the given id.
-     */
-    @Nonnull
-    @CheckReturnValue
-    CompletionStage<LifecycleState> shardState(@Nonnegative int id);
+    CatnipShard shard(@Nonnegative int shard);
     
     /**
      * @return The catnip instance this shard manager is for.

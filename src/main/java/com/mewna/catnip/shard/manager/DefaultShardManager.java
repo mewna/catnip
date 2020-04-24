@@ -27,32 +27,25 @@
 
 package com.mewna.catnip.shard.manager;
 
-import com.google.common.collect.ImmutableList;
+import com.mewna.catnip.entity.lifecycle.GatewayClosed;
 import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.shard.CatnipShard;
+import com.mewna.catnip.shard.CatnipShardImpl;
 import com.mewna.catnip.shard.LifecycleEvent.Raw;
-import com.mewna.catnip.shard.ShardConnectState;
-import com.mewna.catnip.shard.ShardInfo;
-import com.mewna.catnip.util.SafeVertxCompletableFuture;
+import com.mewna.catnip.shard.event.MessageConsumer;
 import com.mewna.catnip.util.task.QueueTask;
 import com.mewna.catnip.util.task.ShardConnectTask;
-import io.vertx.core.eventbus.DeliveryOptions;
-import io.vertx.core.eventbus.MessageConsumer;
+import io.reactivex.rxjava3.core.Single;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static com.mewna.catnip.shard.ShardAddress.CONTROL;
-import static com.mewna.catnip.shard.ShardAddress.computeAddress;
-import static com.mewna.catnip.shard.ShardControlMessage.CONNECT;
 
 /**
  * @author amy
@@ -61,7 +54,7 @@ import static com.mewna.catnip.shard.ShardControlMessage.CONNECT;
 @Accessors(fluent = true)
 public class DefaultShardManager extends AbstractShardManager {
     private final Collection<MessageConsumer> consumers = new HashSet<>();
-    private final Map<Integer, String> shards = new ConcurrentHashMap<>();
+    private final Map<Integer, CatnipShard> shards = new ConcurrentHashMap<>();
     private final Collection<Integer> shardIds;
     @Getter
     private int shardCount;
@@ -106,59 +99,65 @@ public class DefaultShardManager extends AbstractShardManager {
     
     @Override
     public Collection<Integer> shardIds() {
-        return ImmutableList.copyOf(shardIds);
+        return List.copyOf(shardIds);
     }
     
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
     public void start() {
         if(started) {
             throw new IllegalStateException("Shard manager is already started!");
         } else {
             started = true;
+            catnip().logAdapter().debug("Started DefaultShardManager.");
         }
         
-        consumers.add(catnip().eventBus().<ShardInfo>consumer(Raw.CLOSED, closeHandler -> {
-            catnip().logAdapter().info("Shard {} closed, re-queuing...", closeHandler.body().getId());
-            addToConnectQueue(closeHandler.body().getId());
+        consumers.add(catnip().dispatchManager().<GatewayClosed>createConsumer(Raw.GATEWAY_WEBSOCKET_CLOSED).handler(gatewayClosed -> {
+            catnip().logAdapter().info("Shard {} closed, re-queuing...", gatewayClosed.shardInfo().getId());
+            addToConnectQueue(gatewayClosed.shardInfo().getId());
         }));
         
-        final CompletionStage<GatewayInfo> gatewayInfoCompletableFuture;
+        final Single<GatewayInfo> gatewayInfoCompletableFuture;
         if(catnip().gatewayInfo() != null) {
             // If we already have gateway info, eg. from validating the token,
             // then don't bother fetching it a second time
-            gatewayInfoCompletableFuture = SafeVertxCompletableFuture.completedFuture(catnip().gatewayInfo());
+            //noinspection ConstantConditions
+            gatewayInfoCompletableFuture = Single.just(catnip().gatewayInfo());
         } else {
             gatewayInfoCompletableFuture = catnip().rest().user().getGatewayBot();
         }
         
-        gatewayInfoCompletableFuture.thenAccept(gatewayInfo -> {
-            // Do some sanity checks
-            final int expectedShardCount;
-            if(shardCount == 0) {
-                expectedShardCount = gatewayInfo.shards();
-            } else {
-                expectedShardCount = shardCount;
-            }
-            
-            if(expectedShardCount > gatewayInfo.remainingSessions()) {
-                catnip().logAdapter().warn("{} shards requested, but only {} sessions available. Reset after {}, now is {}.",
-                        expectedShardCount, gatewayInfo.remainingSessions(), gatewayInfo.resetAfter(), System.currentTimeMillis());
-                catnip().logAdapter().warn("Token reset incoming!");
-            }
-            
-            // Actually start shards
-            if(shardCount == 0) {
-                shardCount = gatewayInfo.shards();
-                catnip().logAdapter().info("Loaded expected shard count: {}", shardCount);
-                shardIds.clear();
-                shardIds.addAll(IntStream.range(0, shardCount).boxed().collect(Collectors.toList()));
-                loadShards();
-            } else {
-                loadShards();
-            }
-        }).exceptionally(e -> {
-            throw new IllegalStateException("Couldn't load gateway info!", e);
-        });
+        gatewayInfoCompletableFuture.subscribe(this::checkGatewayInfo,
+                e -> {
+                    throw new IllegalStateException("Couldn't load gateway info!", e);
+                });
+    }
+    
+    private void checkGatewayInfo(final GatewayInfo gatewayInfo) {
+        // Do some sanity checks
+        final int expectedShardCount;
+        if(shardCount == 0) {
+            expectedShardCount = gatewayInfo.shards();
+        } else {
+            expectedShardCount = shardCount;
+        }
+        
+        if(expectedShardCount > gatewayInfo.remainingSessions()) {
+            catnip().logAdapter().warn("{} shards requested, but only {} sessions available. Reset after {}, now is {}.",
+                    expectedShardCount, gatewayInfo.remainingSessions(), gatewayInfo.resetAfter(), System.currentTimeMillis());
+            catnip().logAdapter().warn("Token reset incoming!");
+        }
+        
+        // Actually start shards
+        if(shardCount == 0) {
+            shardCount = gatewayInfo.shards();
+            catnip().logAdapter().info("Loaded expected shard count: {}", shardCount);
+            shardIds.clear();
+            shardIds.addAll(IntStream.range(0, shardCount).boxed().collect(Collectors.toList()));
+            loadShards();
+        } else {
+            loadShards();
+        }
     }
     
     private void loadShards() {
@@ -171,73 +170,62 @@ public class DefaultShardManager extends AbstractShardManager {
         undeploy(id);
         catnip().logAdapter().info("Connecting shard {} (queue len {})", id, connectQueue.size());
         
-        catnip().vertx().deployVerticle(new CatnipShard(catnip(), id, shardCount, catnip().initialPresence()), deployResult -> {
-            if(deployResult.failed()) {
-                catnip().logAdapter().error("Deploying shard {} failed, re-queueing!", id, deployResult.cause());
-                addToConnectQueue(id);
-                return;
-            }
-            shards.put(id, deployResult.result());
+        final CatnipShard catnipShard = new CatnipShardImpl(catnip(), id, shardCount, catnip().options().initialPresence());
+        
+        try {
+            shards.put(id, catnipShard);
             catnip().logAdapter().info("Deployed shard {}(/{})", id, shardCount);
             connectShard(id);
-        });
-    }
-    
-    private void undeploy(final int id) {
-        final String deployment = shards.remove(id);
-        if(deployment != null) {
-            catnip().vertx().undeploy(deployment);
+        } catch(final Exception e) {
+            catnip().logAdapter().error("Deploying shard {} failed, re-queueing!", id, e);
+            addToConnectQueue(id);
         }
     }
     
+    private void undeploy(final int id) {
+        final CatnipShard shard = shards.remove(id);
+        if(shard != null) {
+            shard.disconnect();
+        }
+    }
+    
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void connectShard(final int id) {
-        final String deploymentId = shards.get(id);
+        final CatnipShard shard = shards.get(id);
         
-        if(deploymentId == null) {
-            catnip().logAdapter().error("Cannot find deployment ID of shard {}, re-queueing...", id);
+        if(shard == null) {
+            catnip().logAdapter().error("Cannot find shard {}, re-queueing...", id);
             addToConnectQueue(id);
             return;
         }
         
-        catnip().eventBus().<ShardConnectState>send(computeAddress(CONTROL, id), CONNECT,
-                new DeliveryOptions().setSendTimeout(60_000), // allow longer timeouts because of network memes.
-                result -> {
-                    // ignore the reply if deployment ID differs.
-                    if(!deploymentId.equals(shards.get(id))) {
-                        return;
-                    }
-                    
-                    if(result.failed()) {
-                        catnip().logAdapter().error("Something went really wrong while trying to connect shard {}, re-queueing...", id, result.cause());
-                        addToConnectQueue(id);
-                        return;
-                    }
-                    
-                    final ShardConnectState state = result.result().body();
-                    switch(state) {
-                        case READY:
-                            catnip().logAdapter().info("Connected shard {}(/{})", id, shardCount);
-                            break;
-                        case RESUMED:
-                            catnip().logAdapter().info("Resumed shard {}(/{})", id, shardCount);
-                            break;
-                        case FAILED:
-                            catnip().logAdapter().error("Failed connecting shard {}(/{}), re-queueing...", id, shardCount);
-                            addToConnectQueue(id);
-                            break;
-                        case INVALID:
-                            catnip().logAdapter().error("Invalid session on shard {}(/{}), re-queueing...", id, shardCount);
-                            addToConnectQueue(id);
-                            break;
-                        case CANCEL:
-                            break; // do nothing
-                        default:
-                            catnip().logAdapter().error("This shouldn't happen, but we got unknown state for shard {}: {}", id, state);
-                            break;
-                    }
-                    
-                    conditions().forEach(e -> e.postshard(id, state));
-                });
+        shard.connect().timeout(1, TimeUnit.MINUTES).subscribe(state -> {
+            switch(state) {
+                case READY:
+                    catnip().logAdapter().info("Connected shard {}(/{})", id, shardCount);
+                    break;
+                case RESUMED:
+                    catnip().logAdapter().info("Resumed shard {}(/{})", id, shardCount);
+                    break;
+                case FAILED:
+                    catnip().logAdapter().error("Failed connecting shard {}(/{}), re-queueing...", id, shardCount);
+                    addToConnectQueue(id);
+                    break;
+                case INVALID:
+                    catnip().logAdapter().error("Invalid session on shard {}(/{}), re-queueing...", id, shardCount);
+                    addToConnectQueue(id);
+                    break;
+                case CANCEL:
+                    break; // do nothing
+                default:
+                    catnip().logAdapter().error("This shouldn't happen, but we got unknown state for shard {}: {}", id, state);
+                    break;
+            }
+            conditions().forEach(e -> e.postshard(id, state));
+        }, cause -> {
+            catnip().logAdapter().error("Something went really wrong while trying to connect shard {}, re-queueing...", id, cause);
+            addToConnectQueue(id);
+        });
     }
     
     @Override
@@ -247,38 +235,61 @@ public class DefaultShardManager extends AbstractShardManager {
         }
     }
     
+    @Nonnull
+    @Override
+    public CatnipShard shard(final int shard) {
+        return Objects.requireNonNull(shards.get(shard), "Shard doesn't exist.");
+    }
+    
     private void runConnectQueue() {
         if(!started) {
+            catnip().logAdapter().warn("Shard manager not started, refusing to run connect queue!");
             return;
         }
         
         if(connectQueue.isEmpty()) {
             // No shards that we can queue, schedule the task to run again
             // later.
-            catnip().vertx().setTimer(1000L, t -> runConnectQueue());
+            catnip().taskScheduler().setTimer(1000L, t -> runConnectQueue());
             return;
         }
         
         final int id = connectQueue.peek();
-        
-        SafeVertxCompletableFuture.allOf(conditions().stream().map(e -> e.preshard(id)).toArray(CompletableFuture[]::new))
-                .thenAccept(t -> {
-                    connectQueue.run();
-                    catnip().vertx().setTimer(5500, r -> runConnectQueue());
-                })
-                .exceptionally(e -> {
-                    catnip().logAdapter().debug("Couldn't complete shard conditions, trying again in 1s", e);
-                    catnip().vertx().setTimer(1000L, t -> runConnectQueue());
-                    return null;
-                });
+        catnip().logAdapter().debug("Peeked id {} off of connect queue", id);
+    
+        if(conditions().isEmpty()) {
+            connectNextShard();
+        } else {
+            //noinspection ResultOfMethodCallIgnored
+            Single.zip(conditions().stream().map(e -> e.preshard(id)).collect(Collectors.toUnmodifiableList()),
+                    // Yikes
+                    data -> Arrays.stream(data).allMatch(e -> e == Boolean.TRUE))
+                    .subscribe(res -> {
+                        if(res) {
+                            connectNextShard();
+                        } else {
+                            catnip().logAdapter().debug("Not all shard conditions succeeded, trying again in 1s");
+                            catnip().taskScheduler().setTimer(1000L, t -> runConnectQueue());
+                        }
+                    }, e -> {
+                        catnip().logAdapter().debug("Couldn't complete shard conditions, trying again in 1s", e);
+                        catnip().taskScheduler().setTimer(1000L, t -> runConnectQueue());
+                    });
+        }
+    }
+    
+    private void connectNextShard() {
+        catnip().logAdapter().debug("Connecting next shard: {}", connectQueue.peek());
+        connectQueue.run();
+        catnip().taskScheduler().setTimer(5500, r -> runConnectQueue());
     }
     
     @Override
     public void shutdown() {
         started = false;
-        consumers.forEach(MessageConsumer::unregister);
+        consumers.forEach(MessageConsumer::close);
         consumers.clear();
-        shards.values().forEach(shard -> catnip().vertx().undeploy(shard));
+        shards.values().forEach(CatnipShard::disconnect);
         shards.clear();
     }
 }

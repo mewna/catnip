@@ -27,12 +27,11 @@
 
 package com.mewna.catnip;
 
-import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCache;
 import com.mewna.catnip.cache.EntityCacheWorker;
-import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.misc.GatewayInfo;
+import com.mewna.catnip.entity.serialization.EntitySerializer;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.ActivityType;
 import com.mewna.catnip.entity.user.Presence.OnlineStatus;
@@ -45,31 +44,29 @@ import com.mewna.catnip.shard.buffer.EventBuffer;
 import com.mewna.catnip.shard.event.DispatchManager;
 import com.mewna.catnip.shard.event.DoubleEventType;
 import com.mewna.catnip.shard.event.EventType;
+import com.mewna.catnip.shard.event.MessageConsumer;
 import com.mewna.catnip.shard.manager.ShardManager;
-import com.mewna.catnip.shard.ratelimit.Ratelimiter;
 import com.mewna.catnip.shard.session.SessionManager;
+import com.mewna.catnip.util.CatnipOptionsView;
 import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.logging.LogAdapter;
-import io.reactivex.Flowable;
-import io.reactivex.Observable;
-import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.eventbus.MessageConsumer;
-import io.vertx.core.json.JsonObject;
-import io.vertx.reactivex.FlowableHelper;
-import io.vertx.reactivex.ObservableHelper;
+import com.mewna.catnip.util.scheduler.TaskScheduler;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Scheduler;
+import io.reactivex.rxjava3.core.Single;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.net.http.HttpClient;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  * @author amy
@@ -87,7 +84,7 @@ public interface Catnip {
      * @return A new catnip instance.
      */
     static Catnip catnip(@Nonnull final String token) {
-        return catnipAsync(token).join();
+        return catnipAsync(token).blockingGet();
     }
     
     /**
@@ -99,8 +96,8 @@ public interface Catnip {
      *
      * @return A new catnip instance.
      */
-    static CompletableFuture<Catnip> catnipAsync(@Nonnull final String token) {
-        return catnipAsync(token, Vertx.vertx());
+    static Single<Catnip> catnipAsync(@Nonnull final String token) {
+        return catnipAsync(new CatnipOptions(token));
     }
     
     /**
@@ -113,7 +110,7 @@ public interface Catnip {
      * @return A new catnip instance.
      */
     static Catnip catnip(@Nonnull final CatnipOptions options) {
-        return catnipAsync(options).join();
+        return catnipAsync(options).blockingGet();
     }
     
     /**
@@ -125,65 +122,16 @@ public interface Catnip {
      *
      * @return A new catnip instance.
      */
-    static CompletableFuture<Catnip> catnipAsync(@Nonnull final CatnipOptions options) {
-        return catnipAsync(options, Vertx.vertx());
+    static Single<Catnip> catnipAsync(@Nonnull final CatnipOptions options) {
+        return new CatnipImpl(options).setup();
     }
     
     /**
-     * Create a new catnip instance with the given token and vert.x instance.
-     * <p>
-     * <strong>This method may block while validating the provided token.</strong>
-     *
-     * @param token The token to be used for all API operations.
-     * @param vertx The vert.x instance used to run the bot.
-     *
-     * @return A new catnip instance.
+     * @return An immutable view of the current instance's options.
      */
-    static Catnip catnip(@Nonnull final String token, @Nonnull final Vertx vertx) {
-        return catnipAsync(token, vertx).join();
-    }
-    
-    /**
-     * Create a new catnip instance with the given token and vert.x instance.
-     * <p>
-     * <strong>This method may block while validating the provided token.</strong>
-     *
-     * @param token The token to be used for all API operations.
-     * @param vertx The vert.x instance used to run the bot.
-     *
-     * @return A new catnip instance.
-     */
-    static CompletableFuture<Catnip> catnipAsync(@Nonnull final String token, @Nonnull final Vertx vertx) {
-        return catnipAsync(new CatnipOptions(token), vertx);
-    }
-    
-    /**
-     * Create a new catnip instance with the given options and vert.x instance.
-     * <p>
-     * <strong>This method may block while validating the provided token.</strong>
-     *
-     * @param options The options to be applied to the catnip instance.
-     * @param vertx   The vert.x instance used to run the bot.
-     *
-     * @return A new catnip instance.
-     */
-    static Catnip catnip(@Nonnull final CatnipOptions options, @Nonnull final Vertx vertx) {
-        return catnipAsync(options, vertx).join();
-    }
-    
-    /**
-     * Create a new catnip instance with the given options and vert.x instance.
-     * <p>
-     * <strong>This method may block while validating the provided token.</strong>
-     *
-     * @param options The options to be applied to the catnip instance.
-     * @param vertx   The vert.x instance used to run the bot.
-     *
-     * @return A new catnip instance.
-     */
-    static CompletableFuture<Catnip> catnipAsync(@Nonnull final CatnipOptions options, @Nonnull final Vertx vertx) {
-        return new CatnipImpl(vertx, options).setup();
-    }
+    @Nonnull
+    @CheckReturnValue
+    CatnipOptionsView options();
     
     /**
      * @return The cached gateway info. May be null if it hasn't been fetched
@@ -203,35 +151,7 @@ public interface Catnip {
      */
     @Nonnull
     @CheckReturnValue
-    CompletionStage<GatewayInfo> fetchGatewayInfo();
-    
-    /**
-     * @return The vert.x instance being used by this catnip instance.
-     */
-    @Nonnull
-    @CheckReturnValue
-    Vertx vertx();
-    
-    // Implementations are lombok-generated
-    
-    /**
-     * @return The event bus used by the vert.x instance that this catnip
-     * instance uses.
-     *
-     * @see #vertx()
-     */
-    @Nonnull
-    @CheckReturnValue
-    EventBus eventBus();
-    
-    /**
-     * Handles dispatching and listening to events.
-     *
-     * @return The current dispatch manager instance.
-     */
-    @Nonnull
-    @CheckReturnValue
-    DispatchManager dispatchManager();
+    Single<GatewayInfo> fetchGatewayInfo();
     
     /**
      * Start all shards asynchronously. To customize the shard spawning /
@@ -242,30 +162,48 @@ public interface Catnip {
     @Nonnull
     Catnip connect();
     
+    // Implementations are lombok-generated
+    
+    @Nonnull
+    @CheckReturnValue
+    default Scheduler rxScheduler() {
+        return options().rxScheduler();
+    }
+    
     /**
-     * @return The token being used by this catnip instance.
+     * Handles dispatching and listening to events.
+     *
+     * @return The current dispatch manager instance.
      */
     @Nonnull
-    String token();
+    @CheckReturnValue
+    default DispatchManager dispatchManager() {
+        return options().dispatchManager();
+    }
     
     /**
      * @return The shard manager being used by this catnip instance.
      */
     @Nonnull
-    ShardManager shardManager();
+    default ShardManager shardManager() {
+        return options().shardManager();
+    }
     
     /**
      * @return The session manager being used by this catnip instance.
      */
     @Nonnull
-    SessionManager sessionManager();
+    default SessionManager sessionManager() {
+        return options().sessionManager();
+    }
     
     /**
-     * @return The gateway message send ratelimiter being used by this catnip
-     * instance.
+     * @return The event buffer being used by this catnip instance.
      */
     @Nonnull
-    Ratelimiter gatewayRatelimiter();
+    default EventBuffer eventBuffer() {
+        return options().eventBuffer();
+    }
     
     /**
      * @return The REST API instance for this catnip instance.
@@ -285,19 +223,17 @@ public interface Catnip {
      * @return The logging adapter being used by this catnip instance.
      */
     @Nonnull
-    LogAdapter logAdapter();
-    
-    /**
-     * @return The event buffer being used by this catnip instance.
-     */
-    @Nonnull
-    EventBuffer eventBuffer();
+    default LogAdapter logAdapter() {
+        return options().logAdapter();
+    }
     
     /**
      * @return The entity cache being used by this catnip instance.
      */
     @Nonnull
-    EntityCache cache();
+    default EntityCache cache() {
+        return options().cacheWorker();
+    }
     
     /**
      * The cache worker being used by this catnip instance. You should use this
@@ -306,50 +242,22 @@ public interface Catnip {
      * @return The cache worker being used by this catnip instance.
      */
     @Nonnull
-    EntityCacheWorker cacheWorker();
+    default EntityCacheWorker cacheWorker() {
+        return options().cacheWorker();
+    }
     
     /**
-     * The set of cache flags to be applied to the entity cache. These
-     * currently allow for simply dropping data instead of caching it, but may
-     * be expanded on in the future.
+     * The task scheduler allows for scheduling one-off and recurring tasks
+     * that are executed at some point in the future. By default, the task
+     * scheduler is effectively just a simple wrapper over
+     * {@link Observable#timer(long, TimeUnit)} and
+     * {@link Observable#interval(long, TimeUnit)}.
      *
-     * @return The set of cache flags being used by this catnip instance.
+     * @return The task scheduler used by this catnip instance.
      */
-    @Nonnull
-    Set<CacheFlag> cacheFlags();
-    
-    /**
-     * @return Whether or not this catnip instance will chunk guild members
-     * when it connects to the websocket gateway.
-     */
-    boolean chunkMembers();
-    
-    /**
-     * @return Whether or not this catnip instance will emit event objects as
-     * it receives events from the gateway. You should only disable this if you
-     * want to do something special with the raw event objects via hooks.
-     */
-    boolean emitEventObjects();
-    
-    /**
-     * @return Whether or not this catnip instance will execute permission
-     * checks before doing a request. Does not affect direct calls to {@link #rest() Rest}
-     * methods. If, for whatever reason, the needed entities for the permission
-     * calculation cannot be retrieved from the cache, such as using a
-     * {@link com.mewna.catnip.cache.NoopEntityCache noop cache} or attempting to
-     * do the requests before the cache has been populated, the check will assume
-     * all permissions are available.
-     */
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    boolean enforcePermissions();
-    
-    /**
-     * @return Whether or not this catnip instance will capture stacktraces
-     * before sending REST requests. This is useful for debugging.
-     *
-     * @see CatnipOptions#captureRestStacktraces()
-     */
-    boolean captureRestStacktraces();
+    default TaskScheduler taskScheduler() {
+        return options().taskScheduler();
+    }
     
     /**
      * @return A set of all ids of unavailable guilds.
@@ -411,7 +319,7 @@ public interface Catnip {
      */
     @Nonnull
     @SuppressWarnings("UnusedReturnValue")
-    Catnip injectOptions(@Nonnull Extension extension, @Nonnull Function<CatnipOptions, CatnipOptions> optionsPatcher);
+    Catnip injectOptions(@Nonnull Extension extension, @Nonnull UnaryOperator<CatnipOptions> optionsPatcher);
     
     /**
      * @return The currently-logged-in user. May be {@code null} if no shards
@@ -435,35 +343,12 @@ public interface Catnip {
     long clientIdAsLong();
     
     /**
-     * @return The initial presence to set when logging in via the gateway.
-     * Will be null if not set via {@link CatnipOptions}.
+     * @return The entity serializer that catnip uses for converting entities
+     * into an external-friendly format.
      */
-    @Nullable
-    @CheckReturnValue
-    Presence initialPresence();
-    
-    /**
-     * @return The set of events that will not be fired. Empty by default.
-     */
-    @Nonnull
-    @CheckReturnValue
-    Set<String> disabledEvents();
-    
-    /**
-     * @return Whether or not to log "uncached presence" warning
-     */
-    boolean logUncachedPresenceWhenNotChunking();
-    
-    /**
-     * @return Whether or not to log warnings about catnip entity version
-     * mismatches in {@link Entity#fromJson(Catnip, Class, JsonObject)}.
-     */
-    boolean warnOnEntityVersionMismatch();
-    
-    /**
-     * @return How long to wait before re-chunking members, in milliseconds.
-     */
-    long memberChunkTimeout();
+    default EntitySerializer<?> entitySerializer() {
+        return options().entitySerializer();
+    }
     
     /**
      * Opens a voice connection to the provided guild and channel. The connection is
@@ -620,8 +505,10 @@ public interface Catnip {
      * Get the presence for the specified shard.
      *
      * @param shardId The shard id to get presence for.
+     *
+     * @return The shard's presence.
      */
-    CompletionStage<Presence> presence(@Nonnegative final int shardId);
+    Presence presence(@Nonnegative final int shardId);
     
     /**
      * Update the presence for all shards.
@@ -680,7 +567,7 @@ public interface Catnip {
      * @param type The type of event to listen on.
      * @param <T>  The object type of event being listened on.
      *
-     * @return The vert.x message consumer.
+     * @return The message consumer.
      */
     default <T> MessageConsumer<T> on(@Nonnull final EventType<T> type) {
         return dispatchManager().createConsumer(type.key());
@@ -694,34 +581,44 @@ public interface Catnip {
      * @param handler The handler for the event object.
      * @param <T>     The object type of event being listened on.
      *
-     * @return The vert.x message consumer.
+     * @return The message consumer.
      */
     default <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler) {
-        return on(type).handler(m -> handler.accept(m.body()));
+        return on(type).handler(handler);
     }
     
     /**
-     * Add a reactive stream handler for events of the given type.
+     * Add a reactive stream handler for events of the given type. Can be
+     * disposed of with {@link Observable#unsubscribeOn(Scheduler)}. The
+     * {@code scheduler} argument can be created with
+     * {@link #rxScheduler()}.
+     * <p>
+     * This method automatically subscribes on {@link #rxScheduler()}.
      *
      * @param type The type of event to stream.
      * @param <T>  The object type of the event being streamed.
      *
      * @return The observable.
      */
-    default <T> Observable<T> observe(@Nonnull final EventType<T> type) {
-        return ObservableHelper.toObservable(on(type).bodyStream());
+    default <T> Observable<T> observable(@Nonnull final EventType<T> type) {
+        return on(type).asObservable().subscribeOn(rxScheduler()).observeOn(rxScheduler());
     }
     
     /**
-     * Add a reactive stream handler for events of the given type.
+     * Add a reactive stream handler for events of the given type.  Can be
+     * disposed of with {@link Flowable#unsubscribeOn(Scheduler)}. The
+     * {@code scheduler} argument can be created with
+     * {@link #rxScheduler()}.
+     * <p>
+     * This method automatically subscribes on {@link #rxScheduler()}.
      *
      * @param type The type of event to stream.
      * @param <T>  The object type of the event being streamed.
      *
      * @return The flowable.
      */
-    default <T> Flowable<T> flow(@Nonnull final EventType<T> type) {
-        return FlowableHelper.toFlowable(on(type).bodyStream());
+    default <T> Flowable<T> flowable(@Nonnull final EventType<T> type) {
+        return on(type).asFlowable().subscribeOn(rxScheduler()).observeOn(rxScheduler());
     }
     
     /**
@@ -732,7 +629,7 @@ public interface Catnip {
      * @param <T>  The first object type of event being listened on.
      * @param <E>  The second object type of event being listened on.
      *
-     * @return The vert.x message consumer.
+     * @return The message consumer.
      */
     default <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type) {
         return dispatchManager().createConsumer(type.key());
@@ -747,15 +644,20 @@ public interface Catnip {
      * @param <T>     The first object type of event being listened on.
      * @param <E>     The second object type of event being listened on.
      *
-     * @return The vert.x message consumer.
+     * @return The message consumer.
      */
     default <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
                                                   @Nonnull final BiConsumer<T, E> handler) {
-        return on(type).handler(m -> handler.accept(m.body().getLeft(), m.body().getRight()));
+        return on(type).handler(m -> handler.accept(m.getLeft(), m.getRight()));
     }
     
     /**
-     * Add a reactive stream handler for events of the given type.
+     * Add a reactive stream handler for events of the given type. Can be
+     * disposed of with {@link Observable#unsubscribeOn(Scheduler)}. The
+     * {@code scheduler} argument can be created with
+     * {@link #rxScheduler()}.
+     * <p>
+     * This method automatically subscribes on {@link #rxScheduler()}.
      *
      * @param type The type of event to stream.
      * @param <T>  The object type of the event being streamed.
@@ -763,12 +665,17 @@ public interface Catnip {
      *
      * @return The observable.
      */
-    default <T, E> Observable<Pair<T, E>> observe(@Nonnull final DoubleEventType<T, E> type) {
-        return ObservableHelper.toObservable(on(type).bodyStream());
+    default <T, E> Observable<Pair<T, E>> observable(@Nonnull final DoubleEventType<T, E> type) {
+        return on(type).asObservable().subscribeOn(rxScheduler()).observeOn(rxScheduler());
     }
     
     /**
-     * Add a reactive stream handler for events of the given type.
+     * Add a reactive stream handler for events of the given type. Can be
+     * disposed of with {@link Flowable#unsubscribeOn(Scheduler)}. The
+     * {@code scheduler} argument can be created with
+     * {@link #rxScheduler()}.
+     * <p>
+     * This method automatically subscribes on {@link #rxScheduler()}.
      *
      * @param type The type of event to stream.
      * @param <T>  The object type of the event being streamed.
@@ -776,25 +683,14 @@ public interface Catnip {
      *
      * @return The flowable.
      */
-    default <T, E> Flowable<Pair<T, E>> flow(@Nonnull final DoubleEventType<T, E> type) {
-        return FlowableHelper.toFlowable(on(type).bodyStream());
+    default <T, E> Flowable<Pair<T, E>> flowable(@Nonnull final DoubleEventType<T, E> type) {
+        return on(type).asFlowable().subscribeOn(rxScheduler()).observeOn(rxScheduler());
     }
     
     /**
-     * Shutdown the catnip instance, undeploy all shards, and shutdown the
-     * vert.x instance.
+     * Shutdown the catnip instance, and undeploy all shards.
      */
-    default void shutdown() {
-        shutdown(true);
-    }
-    
-    /**
-     * Shutdown the catnip instance, undeploy all shards, and optionally
-     * shutdown the vert.x instance.
-     *
-     * @param vertx Whether or not to shut down the vert.x instance.
-     */
-    void shutdown(boolean vertx);
+    void shutdown();
     
     /**
      * Get a webhook object for the specified webhook URL. This method will
@@ -802,9 +698,9 @@ public interface Catnip {
      *
      * @param webhookUrl The URL of the webhook.
      *
-     * @return A stage that completes when the webhook is validated.
+     * @return A Single that completes when the webhook is validated.
      */
-    default CompletionStage<Webhook> parseWebhook(final String webhookUrl) {
+    default Single<Webhook> parseWebhook(final String webhookUrl) {
         final Pair<String, String> parse = Utils.parseWebhook(webhookUrl);
         return parseWebhook(parse.getLeft(), parse.getRight());
     }
@@ -816,9 +712,9 @@ public interface Catnip {
      * @param id    The webhook's id.
      * @param token The webhook's token.
      *
-     * @return A stage that completes when the webhook is validated.
+     * @return A Single that completes when the webhook is validated.
      */
-    default CompletionStage<Webhook> parseWebhook(final String id, final String token) {
+    default Single<Webhook> parseWebhook(final String id, final String token) {
         return rest().webhook().getWebhookToken(id, token);
     }
 }

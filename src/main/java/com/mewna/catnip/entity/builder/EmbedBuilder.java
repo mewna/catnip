@@ -27,8 +27,8 @@
 
 package com.mewna.catnip.entity.builder;
 
-import com.mewna.catnip.entity.impl.EmbedImpl;
-import com.mewna.catnip.entity.impl.EmbedImpl.*;
+import com.mewna.catnip.entity.impl.message.EmbedImpl;
+import com.mewna.catnip.entity.impl.message.EmbedImpl.*;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Embed.Image;
 import com.mewna.catnip.entity.message.Embed.*;
@@ -322,6 +322,8 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder replaceAtIndex(@Nonnegative final int index, @Nonnull final Field field) {
+        // index < 0 SHOULDN'T be true, but users can't be trusted...
+        //noinspection ConstantConditions
         if (index < 0 || index > 24 || index >= fields.size()) {
             throw new IndexOutOfBoundsException("Tried to set a field with an out-of-bounds index!");
         }

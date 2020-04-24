@@ -27,9 +27,7 @@
 
 package com.mewna.catnip.entity.message;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.impl.ReactionUpdateImpl;
 import com.mewna.catnip.entity.misc.Emoji;
 
 import javax.annotation.Nonnull;
@@ -41,12 +39,11 @@ import javax.annotation.Nullable;
  * @author amy
  * @since 10/6/18.
  */
-@JsonDeserialize(as = ReactionUpdateImpl.class)
 public interface ReactionUpdate extends Entity {
     /**
-     * @return The id of the user whose reaction was updated.
+     * @return The id of the user whose reaction was updated, if applicable.
      */
-    @Nonnull
+    @Nullable
     String userId();
     
     /**

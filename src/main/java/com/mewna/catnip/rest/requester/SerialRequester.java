@@ -29,7 +29,6 @@ package com.mewna.catnip.rest.requester;
 
 import com.mewna.catnip.rest.Routes.Route;
 import com.mewna.catnip.rest.ratelimit.RateLimiter;
-import okhttp3.OkHttpClient.Builder;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayDeque;
@@ -40,8 +39,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SerialRequester extends AbstractRequester {
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
     
-    public SerialRequester(@Nonnull final RateLimiter rateLimiter, @Nonnull final Builder clientBuilder) {
-        super(rateLimiter, clientBuilder);
+    public SerialRequester(@Nonnull final RateLimiter rateLimiter) {
+        super(rateLimiter);
     }
     
     @Nonnull
@@ -54,11 +53,11 @@ public class SerialRequester extends AbstractRequester {
         private final Deque<QueuedRequest> queue = new ArrayDeque<>();
         private final AbstractRequester requester;
         private volatile boolean executingRequest;
-    
+        
         SerialBucket(final AbstractRequester requester) {
             this.requester = requester;
         }
-    
+        
         @Override
         public synchronized void queueRequest(@Nonnull final QueuedRequest request) {
             queue.offer(request);
@@ -67,7 +66,7 @@ public class SerialRequester extends AbstractRequester {
                 submit();
             }
         }
-    
+        
         @Override
         public synchronized void failedRequest(@Nonnull final QueuedRequest request, @Nonnull final Throwable failureCause) {
             request.failed();
@@ -80,7 +79,7 @@ public class SerialRequester extends AbstractRequester {
                 requestDone();
             }
         }
-    
+        
         @Override
         public synchronized void requestDone() {
             final boolean hadItems = !queue.isEmpty();
@@ -95,12 +94,10 @@ public class SerialRequester extends AbstractRequester {
             if(request == null) {
                 throw new AssertionError("this should never happen");
             }
+            //noinspection ResultOfMethodCallIgnored
             requester.rateLimiter.requestExecution(request.route())
-                    .thenRun(() -> requester.executeRequest(request))
-                    .exceptionally(e -> {
-                        request.future.completeExceptionally(e);
-                        return null;
-                    });
+                    .subscribe(() -> requester.executeRequest(request),
+                            request.future::completeExceptionally);
         }
     }
 }

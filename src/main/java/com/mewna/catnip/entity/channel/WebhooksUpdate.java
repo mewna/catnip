@@ -27,9 +27,7 @@
 
 package com.mewna.catnip.entity.channel;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.guild.GuildEntity;
-import com.mewna.catnip.entity.impl.WebhooksUpdateImpl;
 
 import javax.annotation.CheckReturnValue;
 
@@ -39,7 +37,6 @@ import javax.annotation.CheckReturnValue;
  * @author amy
  * @since 11/10/18.
  */
-@JsonDeserialize(as = WebhooksUpdateImpl.class)
 public interface WebhooksUpdate extends GuildEntity {
     /**
      * @return The id of the channel that webhooks were updated in.

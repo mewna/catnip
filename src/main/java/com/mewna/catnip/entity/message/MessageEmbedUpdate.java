@@ -27,12 +27,10 @@
 
 package com.mewna.catnip.entity.message;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.MessageChannel;
 import com.mewna.catnip.entity.channel.TextChannel;
 import com.mewna.catnip.entity.guild.Guild;
-import com.mewna.catnip.entity.impl.MessageEmbedUpdateImpl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -47,7 +45,6 @@ import java.util.List;
  * @author amy
  * @since 10/9/18.
  */
-@JsonDeserialize(as = MessageEmbedUpdateImpl.class)
 public interface MessageEmbedUpdate extends Snowflake {
     @Nullable
     @CheckReturnValue

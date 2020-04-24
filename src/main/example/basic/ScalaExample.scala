@@ -33,10 +33,10 @@ import com.mewna.catnip.shard.DiscordEvent
 
 object ScalaExample extends App {
   private val catnip = Catnip.catnip("your token here")
-  catnip.on(DiscordEvent.MESSAGE_CREATE, (msg: Message) => {
-    if(msg.content().equals("!ping")) {
-      msg.channel().sendMessage("pong!")
-    }
-  })
+  catnip.observable(DiscordEvent.MESSAGE_CREATE)
+      .filter((msg: Message) => msg.content() == "!ping")
+      .forEach((msg : Message) => {
+        msg.channel().sendMessage("pong!")
+      })
   catnip.connect()
 }

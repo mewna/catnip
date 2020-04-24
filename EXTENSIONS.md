@@ -94,7 +94,7 @@ package my.cool.extension;
 
 import com.mewna.catnip.extension.AbstractExtension;
 import com.mewna.catnip.extension.hook.CatnipHook;
-import io.vertx.core.json.JsonObject;
+import com.grack.nanojson.JsonObject;
 
 import javax.annotation.Nonnull;
 

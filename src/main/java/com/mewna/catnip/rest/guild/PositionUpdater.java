@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.rest.guild;
 
-import com.google.common.collect.ImmutableSet;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +39,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Accessors(fluent = true, chain = true)
@@ -105,18 +105,18 @@ public class PositionUpdater {
     @Nonnull
     @CheckReturnValue
     public Collection<String> channelIds() {
-        return ImmutableSet.copyOf(positions.keySet());
+        return Set.copyOf(positions.keySet());
     }
     
     @Nonnull
     @CheckReturnValue
     public Collection<Integer> positions() {
-        return ImmutableSet.copyOf(positions.values());
+        return Set.copyOf(positions.values());
     }
     
     @Nonnull
     @CheckReturnValue
     public Collection<Entry<String, Integer>> entries() {
-        return ImmutableSet.copyOf(positions.entrySet());
+        return Set.copyOf(positions.entrySet());
     }
 }

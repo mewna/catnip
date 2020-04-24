@@ -38,7 +38,6 @@ import lombok.experimental.Accessors;
  * @since 9/9/18.
  */
 @Accessors(fluent = true)
-@SuppressWarnings("FieldCanBeLocal")
 public abstract class AbstractBuffer implements EventBuffer {
     @Getter(AccessLevel.PROTECTED)
     private Catnip catnip;

@@ -27,18 +27,19 @@
 
 package com.mewna.catnip.rest.handler;
 
-import com.google.common.collect.ImmutableMap;
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.guild.Invite;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
-import io.vertx.core.json.JsonObject;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.concurrent.CompletionStage;
+import java.util.Map;
 
 /**
  * @author natanbc
@@ -52,35 +53,35 @@ public class RestInvite extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<Invite> getInvite(@Nonnull final String code) {
-        return getInviteRaw(code).thenApply(entityBuilder()::createInvite);
+    public Single<Invite> getInvite(@Nonnull final String code) {
+        return Single.fromObservable(getInviteRaw(code).map(entityBuilder()::createInvite));
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonObject> getInviteRaw(@Nonnull final String code) {
+    public Observable<JsonObject> getInviteRaw(@Nonnull final String code) {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_INVITE,
-                ImmutableMap.of("invite.code", code)))
-                .thenApply(ResponsePayload::object);
+                Map.of("invite", code)))
+                .map(ResponsePayload::object);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<Invite> deleteInvite(@Nonnull final String code, @Nullable final String reason) {
-        return deleteInviteRaw(code, reason).thenApply(entityBuilder()::createInvite);
+    public Single<Invite> deleteInvite(@Nonnull final String code, @Nullable final String reason) {
+        return Single.fromObservable(deleteInviteRaw(code, reason).map(entityBuilder()::createInvite));
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<Invite> deleteInvite(@Nonnull final String code) {
+    public Single<Invite> deleteInvite(@Nonnull final String code) {
         return deleteInvite(code, null);
     }
     
     @Nonnull
     @CheckReturnValue
-    public CompletionStage<JsonObject> deleteInviteRaw(@Nonnull final String code, @Nullable final String reason) {
+    public Observable<JsonObject> deleteInviteRaw(@Nonnull final String code, @Nullable final String reason) {
         return catnip().requester().queue(new OutboundRequest(Routes.DELETE_INVITE,
-                ImmutableMap.of("invite.code", code)).reason(reason))
-                .thenApply(ResponsePayload::object);
+                Map.of("invite", code)).reason(reason))
+                .map(ResponsePayload::object);
     }
 }

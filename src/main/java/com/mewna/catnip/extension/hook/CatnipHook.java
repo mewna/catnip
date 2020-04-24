@@ -27,9 +27,10 @@
 
 package com.mewna.catnip.extension.hook;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes.Route;
-import io.vertx.core.json.JsonObject;
+import com.mewna.catnip.shard.ShardInfo;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -62,7 +63,7 @@ public interface CatnipHook {
      *
      * @return A possibly-edited gateway-sent JSON payload.
      */
-    default JsonObject rawGatewayReceiveHook(@Nonnull final JsonObject json) {
+    default JsonObject rawGatewayReceiveHook(@Nonnull final ShardInfo shardInfo, @Nonnull final JsonObject json) {
         return json;
     }
     
@@ -74,8 +75,26 @@ public interface CatnipHook {
      *
      * @return A possibly-edited gateway-sent JSON payload.
      */
-    default JsonObject rawGatewaySendHook(@Nonnull final JsonObject json) {
+    default JsonObject rawGatewaySendHook(@Nonnull final ShardInfo shardInfo, @Nonnull final JsonObject json) {
         return json;
+    }
+    
+    /**
+     * Called when the websocket is opened. The default behaviour is to do nothing.
+     *
+     * @param shard The shard of the socket.
+     */
+    default void rawGatewayOpenHook(@Nonnull final ShardInfo shard) {
+    }
+    
+    /**
+     * Called when the websocket is closed. The default behaviour is to do nothing.
+     *
+     * @param shard  The shard of the socket.
+     * @param code   The close code.
+     * @param reason The reason for closing.
+     */
+    default void rawGatewayCloseHook(@Nonnull final ShardInfo shard, final int code, @Nonnull final String reason) {
     }
     
     /**

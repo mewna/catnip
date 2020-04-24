@@ -27,8 +27,8 @@
 
 package com.mewna.catnip.shard.buffer;
 
+import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
-import io.vertx.core.json.JsonObject;
 
 /**
  * Used for buffering events for things like caching.
@@ -36,7 +36,6 @@ import io.vertx.core.json.JsonObject;
  * @author amy
  * @since 9/9/18.
  */
-@SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
 public interface EventBuffer {
     /**
      * Buffers a single event.

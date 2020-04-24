@@ -29,15 +29,15 @@ package com.mewna.catnip.rest.requester;
 
 import com.mewna.catnip.rest.Routes.Route;
 import com.mewna.catnip.rest.ratelimit.RateLimiter;
-import okhttp3.OkHttpClient.Builder;
 
 import javax.annotation.Nonnull;
+import java.net.http.HttpClient.Builder;
 
 public class BurstRequester extends AbstractRequester {
     private final Bucket bucket = new BurstBucket(this);
     
-    public BurstRequester(@Nonnull final RateLimiter rateLimiter, @Nonnull final Builder clientBuilder) {
-        super(rateLimiter, clientBuilder);
+    public BurstRequester(@Nonnull final RateLimiter rateLimiter) {
+        super(rateLimiter);
     }
     
     @Nonnull
@@ -48,21 +48,19 @@ public class BurstRequester extends AbstractRequester {
     
     private static class BurstBucket implements Bucket {
         private final AbstractRequester requester;
-    
+        
         BurstBucket(final AbstractRequester requester) {
             this.requester = requester;
         }
-    
+        
         @Override
         public void queueRequest(@Nonnull final QueuedRequest request) {
+            //noinspection ResultOfMethodCallIgnored
             requester.rateLimiter.requestExecution(request.route())
-                    .thenRun(() -> requester.executeRequest(request))
-                    .exceptionally(e -> {
-                        request.future.completeExceptionally(e);
-                        return null;
-                    });
+                    .subscribe(() -> requester.executeRequest(request),
+                            request.future::completeExceptionally);
         }
-    
+        
         @Override
         public void failedRequest(@Nonnull final QueuedRequest request, @Nonnull final Throwable failureCause) {
             request.failed();
@@ -74,7 +72,7 @@ public class BurstRequester extends AbstractRequester {
                 requestDone();
             }
         }
-    
+        
         @Override
         public void requestDone() {
             //noop

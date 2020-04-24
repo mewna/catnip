@@ -24,7 +24,9 @@
  *  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+// We disable the formatter on this class so that it doesn't get hecked up.
+// Autoformatter has no idea how to handle this class correctly.
+// @formatter:off
 
 
 package com.mewna.catnip.cache.view;
@@ -157,7 +159,7 @@ final class KolobokeLongEntityMap<T>  implements LongEntityMap<T> {
         return configWrapper;
     }
     
-    class KeyView extends AbstractLongKeyView implements HashLongSet , InternalLongCollectionOps , KolobokeLongEntityMap.Support.SeparateKVLongLHash {
+    class KeyView extends AbstractLongKeyView implements HashLongSet , InternalLongCollectionOps , KolobokeLongEntityMap.Support.SeparateKVLongLHash { // lgtm[java/inconsistent-equals-and-hashcode]
         @Nonnull
         @Override
         public HashConfig hashConfig() {
@@ -2178,7 +2180,7 @@ final class KolobokeLongEntityMap<T>  implements LongEntityMap<T> {
         }
     }
     
-    class EntryView extends AbstractSetView<Map.Entry<Long, T>> implements HashObjSet<Map.Entry<Long, T>> , InternalObjCollectionOps<Map.Entry<Long, T>> {
+    class EntryView extends AbstractSetView<Map.Entry<Long, T>> implements HashObjSet<Map.Entry<Long, T>> , InternalObjCollectionOps<Map.Entry<Long, T>> { // lgtm[java/inconsistent-equals-and-hashcode]
         @Nonnull
         @Override
         public Equivalence<Map.Entry<Long, T>> equivalence() {
@@ -2680,7 +2682,7 @@ final class KolobokeLongEntityMap<T>  implements LongEntityMap<T> {
         
         @SuppressWarnings(value = "unchecked")
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(Object o) { // lgtm[java/unchecked-cast-in-equals]
             Map.Entry e2;
             long k2;
             T v2;
