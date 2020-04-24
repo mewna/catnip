@@ -41,9 +41,9 @@ import javax.annotation.Nullable;
  */
 public interface ReactionUpdate extends Entity {
     /**
-     * @return The id of the user whose reaction was updated.
+     * @return The id of the user whose reaction was updated, if applicable.
      */
-    @Nonnull
+    @Nullable
     String userId();
     
     /**

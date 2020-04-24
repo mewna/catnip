@@ -156,6 +156,10 @@ public final class DispatchEmitter {
                 catnip.dispatchManager().dispatchEvent(type, entityBuilder.createReactionUpdate(data));
                 break;
             }
+            case Raw.MESSAGE_REACTION_REMOVE_EMOJI: {
+                catnip.dispatchManager().dispatchEvent(type, entityBuilder.createReactionUpdate(data));
+                break;
+            }
             
             // Channels
             case Raw.CHANNEL_CREATE: {
