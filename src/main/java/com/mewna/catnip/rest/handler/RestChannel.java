@@ -330,6 +330,20 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
+    public Completable deleteEmojiReaction(@Nonnull final String channelId, @Nonnull final String messageId,
+                                         @Nonnull final String emoji) {
+        return Completable.fromObservable(catnip().requester()
+                .queue(new OutboundRequest(Routes.DELETE_EMOJI_REACTIONS.withMajorParam(channelId),
+                        Map.of("message", messageId, "emojis", encodeUTF8(emoji))).emptyBody(true)));
+    }
+    
+    @Nonnull
+    public Completable deleteEmojiReaction(@Nonnull final String channelId, @Nonnull final String messageId,
+                                         @Nonnull final Emoji emoji) {
+        return deleteOwnReaction(channelId, messageId, emoji.forReaction());
+    }
+    
+    @Nonnull
     @CheckReturnValue
     public ReactionPaginator getReactions(@Nonnull final String channelId, @Nonnull final String messageId,
                                           @Nonnull final String emoji) {
@@ -706,7 +720,7 @@ public class RestChannel extends RestHandler {
     @CheckReturnValue
     public Observable<JsonObject> crosspostMessageRaw(@Nonnull final String channelId, @Nonnull final String messageId) {
         return catnip().requester().queue(new OutboundRequest(Routes.CROSSPOST_MESSAGE.withMajorParam(channelId),
-                Map.of("message", messageId)))
+                Map.of("message", messageId)).emptyBody(true))
                 .map(ResponsePayload::object);
     }
 }

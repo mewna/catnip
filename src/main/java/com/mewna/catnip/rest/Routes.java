@@ -56,6 +56,7 @@ public final class Routes {
     public static final Route GET_CHANNEL_MESSAGE                 = new Route(GET,    "/channels/:channel/messages/:message", "channel");
     public static final Route EDIT_MESSAGE                        = new Route(PATCH,  "/channels/:channel/messages/:message", "channel");
     public static final Route DELETE_ALL_REACTIONS                = new Route(DELETE, "/channels/:channel/messages/:message/reactions", "channel");
+    public static final Route DELETE_EMOJI_REACTIONS              = new Route(DELETE, "/channels/:channel/messages/:message/reactions/:emojis", "channel");
     public static final Route GET_REACTIONS                       = new Route(GET,    "/channels/:channel/messages/:message/reactions/:emojis", "channel");
     public static final Route DELETE_OWN_REACTION                 = new Route(DELETE, "/channels/:channel/messages/:message/reactions/:emojis/@me", "channel");
     public static final Route CREATE_REACTION                     = new Route(PUT,    "/channels/:channel/messages/:message/reactions/:emojis/@me", "channel", true);
