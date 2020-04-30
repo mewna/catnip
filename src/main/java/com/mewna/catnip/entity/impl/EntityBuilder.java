@@ -1066,7 +1066,8 @@ public final class EntityBuilder {
                 .verificationLevel(VerificationLevel.byKey(data.getInt("verification_level", 0)))
                 .defaultMessageNotifications(NotificationLevel.byKey(data.getInt("default_message_notifications", 0)))
                 .explicitContentFilter(ContentFilterLevel.byKey(data.getInt("explicit_content_filter", 0)))
-                .features(stringListToTypedList(data.getArray("features"), GuildFeature::valueOf))
+                .features(stringListToTypedList(data.getArray("features"),
+                        feature -> GuildFeature.unknownValueOf(catnip, feature)))
                 .mfaLevel(MFALevel.byKey(data.getInt("mfa_level", 0)))
                 .applicationIdAsLong(applicationId == null ? 0 : Long.parseUnsignedLong(applicationId))
                 .widgetEnabled(data.getBoolean("widget_enabled", false))
@@ -1203,7 +1204,8 @@ public final class EntityBuilder {
                 .name(data.getString("name"))
                 .icon(data.getString("icon"))
                 .splash(data.getString("splash"))
-                .features(stringListToTypedList(data.getArray("features"), GuildFeature::valueOf))
+                .features(stringListToTypedList(data.getArray("features"),
+                        feature -> GuildFeature.unknownValueOf(catnip, feature)))
                 .verificationLevel(VerificationLevel.byKey(data.getInt("verification_level", 0)))
                 .build());
     }

@@ -27,6 +27,8 @@
 
 package com.mewna.catnip.entity.guild;
 
+import com.mewna.catnip.Catnip;
+
 /**
  * @author amy
  * @since 8/19/19.
@@ -57,4 +59,19 @@ public enum GuildFeature {
     MEMBER_LIST_DISABLED,
     PUBLIC_DISABLED,
     WELCOME_SCREEN_ENABLED,
+    ENABLED_DISCOVERABLE_BEFORE,
+    
+    /**
+     * When no other feature matches.
+     */
+    UNKNOWN_FEATURE,;
+    
+    public static GuildFeature unknownValueOf(final Catnip catnip, final String value) {
+        try {
+            return valueOf(value);
+        } catch(final Exception ignored) {
+            catnip.logAdapter().warn("Unknown guild feature {}, returning {}!", value, UNKNOWN_FEATURE.name());
+            return UNKNOWN_FEATURE;
+        }
+    }
 }
