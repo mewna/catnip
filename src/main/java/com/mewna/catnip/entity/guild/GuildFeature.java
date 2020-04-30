@@ -42,6 +42,7 @@ public enum GuildFeature {
     COMMERCE,
     NEWS,
     DISCOVERABLE,
+    @Deprecated
     FEATURABLE,
     ANIMATED_ICON,
     BANNER,
@@ -54,5 +55,6 @@ public enum GuildFeature {
      */
     @Deprecated
     MEMBER_LIST_DISABLED,
-    PUBLIC_DISABLED
+    PUBLIC_DISABLED,
+    WELCOME_SCREEN_ENABLED,
 }
