@@ -273,7 +273,8 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             socket = new ReentrantLockWebSocket(webSocket);
             socketOpen = true;
         }
-        final boolean isEnd = data.getInt(data.remaining() - 4) == ZLIB_SUFFIX;
+        // If we get a packet <4 bytes, then we shouldn't check if it's the zlib suffix
+        final boolean isEnd = data.remaining() >= 4 && data.getInt(data.remaining() - 4) == ZLIB_SUFFIX;
         readBuffer.write(data.array(), data.position() + data.arrayOffset(), data.remaining());
         if(isEnd) {
             final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
