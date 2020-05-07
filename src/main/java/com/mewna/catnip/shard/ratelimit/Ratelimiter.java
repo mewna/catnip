@@ -30,6 +30,8 @@ package com.mewna.catnip.shard.ratelimit;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 /**
+ * Ratelimiting for the gateway websockets, aka shards.
+ *
  * @author amy
  * @since 8/16/18.
  */

@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.entity.builder;
 
+import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.impl.user.PresenceImpl;
 import com.mewna.catnip.entity.impl.user.PresenceImpl.ActivityImpl;
 import com.mewna.catnip.entity.user.Presence;
@@ -42,6 +43,8 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
+ * Builder for presences, to be set via {@link Catnip#presence(Presence)}
+ *
  * @author SamOphis
  * @since 10/12/2018
  */
@@ -55,6 +58,11 @@ public class PresenceBuilder {
     private String name;
     private String url;
     
+    /**
+     * Create a new builder from the provided presence.
+     *
+     * @param presence The presence to copy from.
+     */
     public PresenceBuilder(final Presence presence) {
         status = presence.status();
         if(!presence.activities().isEmpty()) {
@@ -67,6 +75,9 @@ public class PresenceBuilder {
         }
     }
     
+    /**
+     * @return The presence built by this builder.
+     */
     public Presence build() {
         final Activity activity = name != null && type != null
                 ? ActivityImpl.builder()

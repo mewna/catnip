@@ -34,6 +34,8 @@ import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
 
 /**
+ * A subset of entities that have an ID attached.
+ *
  * @author natanbc
  * @since 5/9/18.
  */

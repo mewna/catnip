@@ -13,7 +13,9 @@ import java.util.*;
 
 /**
  * Adapted from https://stackoverflow.com/a/54675316
- * Modified to fit the code standards of this project, to compact it, to remove unnecessary capabilities (file read straight from disc and InputStream suppliers), and add capabilities necessary to add compatibility (ie. Vert.x buffer support).
+ * Modified to fit the code standards of this project, to compact it, to remove
+ * unnecessary capabilities (file read straight from disc and InputStream
+ * suppliers), and add capabilities necessary to add compatibility.
  *
  * @author kjp12
  * @since 3/25/2019
@@ -53,7 +55,6 @@ public class MultipartBodyPublisher {
     }
     
     @RequiredArgsConstructor
-    //@Getter // We technically don't need auto-generated getters as this is an internal class, and as such, we can ignore the need.
     @Setter
     @Accessors(fluent = true)
     protected class PartsSpecification {

@@ -34,9 +34,24 @@ import io.reactivex.rxjava3.core.Completable;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
+/**
+ * Ratelimiting for the REST API. The REST ratelimiter handles checking and
+ * updating ratelimits based on the bucket that the requested route is
+ * attempting to execute on.
+ */
 public interface RateLimiter {
     void catnip(@Nonnull Catnip catnip);
     
+    /**
+     * Requests execution for a specific route. The route cannot be executed on
+     * until the bucket has requests available again, so the ratelimiter must
+     * handle this correctly.
+     *
+     * @param route The route to execute.
+     *
+     * @return A {@link Completable} that completes when the route can execute
+     * again.
+     */
     @Nonnull
     @CheckReturnValue
     Completable requestExecution(@Nonnull Route route);

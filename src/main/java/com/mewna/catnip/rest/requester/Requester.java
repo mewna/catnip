@@ -43,15 +43,28 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A REST requester. The requester is responsible for queuing up new requests,
+ * and executing them at some point in the future. Once the request has been
+ * executed, the observable can then start emitting the response.
+ */
 public interface Requester {
     String REASON_HEADER = "X-Audit-Log-Reason";
     
     void catnip(@Nonnull Catnip catnip);
     
+    /**
+     * Queues a new request to be executed.
+     * @param r The request to execute.
+     * @return An {@link Observable} that emits when the request has completed.
+     */
     @Nonnull
     @CheckReturnValue
     Observable<ResponsePayload> queue(@Nonnull OutboundRequest r);
     
+    /**
+     * POJO that represents an outbound request to Discord's REST API.
+     */
     @Getter
     @Accessors(fluent = true)
     @SuppressWarnings("unused")
