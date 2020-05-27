@@ -132,7 +132,7 @@ public final class CatnipOptions implements CatnipOptionsView, Cloneable {
     @Nonnull
     private EntitySerializer<?> entitySerializer = new DefaultEntitySerializer();
     @Nonnull
-    private String apiHost = "https://discordapp.com";
+    private String apiHost = "https://discord.com";
     private int apiVersion = 6;
     // TODO: Default to unprivileged-only
     @Nonnull
