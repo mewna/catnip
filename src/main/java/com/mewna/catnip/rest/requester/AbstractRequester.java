@@ -398,7 +398,7 @@ public abstract class AbstractRequester implements Requester {
                 || method.equals("REPORT");   // CalDAV/CardDAV (defined in WebDAV Versioning)
     }
     
-    protected interface Bucket {
+    public interface Bucket {
         void queueRequest(@Nonnull QueuedRequest request);
         
         void failedRequest(@Nonnull QueuedRequest request, @Nonnull Throwable failureCause);
@@ -409,7 +409,7 @@ public abstract class AbstractRequester implements Requester {
     @Getter
     @Accessors(fluent = true)
     @RequiredArgsConstructor
-    protected static class QueuedRequest {
+    public static class QueuedRequest {
         protected final OutboundRequest request;
         protected final Route route;
         protected final CompletableFuture<ResponsePayload> future;
@@ -418,11 +418,11 @@ public abstract class AbstractRequester implements Requester {
         protected int failedAttempts;
         private long start;
         
-        protected void failed() {
+        public void failed() {
             failedAttempts++;
         }
         
-        protected boolean shouldRetry() {
+        public boolean shouldRetry() {
             return failedAttempts < 3;
         }
     }
