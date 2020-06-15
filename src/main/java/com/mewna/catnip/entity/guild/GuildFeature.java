@@ -60,6 +60,7 @@ public enum GuildFeature {
     PUBLIC_DISABLED,
     WELCOME_SCREEN_ENABLED,
     ENABLED_DISCOVERABLE_BEFORE,
+    COMMUNITY,
     
     /**
      * When no other feature matches.
