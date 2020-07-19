@@ -497,7 +497,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             // while you're disconnected, which is what gets replayed to you on
             // RESUME. If this buffer fills up in less than that 3-minute
             // window, your session is no longer resumable.
-            // See: https://discordapp.com/channels/81384788765712384/381887113391505410/584900930525200386
+            // See: https://discord.com/channels/81384788765712384/381887113391505410/584900930525200386
             lifecycleState = RESUMING;
             sendToSocket(resume());
         } else {
