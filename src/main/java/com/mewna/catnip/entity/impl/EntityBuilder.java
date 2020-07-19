@@ -1347,7 +1347,7 @@ public final class EntityBuilder {
                         .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
                         .deletedMessagesCount(Integer.parseUnsignedInt(data.getString("count")))
                         .build());
-            // The data returned for MESSAGE_BULK_DELETE *doesn't* actually follow https://discordapp.com/developers/docs/resources/audit-log#audit-log-entry-object-optional-audit-entry-info
+            // The data returned for MESSAGE_BULK_DELETE *doesn't* actually follow https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-optional-audit-entry-info
             // Instead, we're going to just return 'Count' as that is the only option that's present. If you're looking for 'channel_id', use 'target_id' (named targetId() and targetIdAsLong()) in AuditLogEntry.
             case MESSAGE_BULK_DELETE:
                 return delegate(MessageBulkDeleteInfo.class, MessageBulkDeleteInfoImpl.builder()

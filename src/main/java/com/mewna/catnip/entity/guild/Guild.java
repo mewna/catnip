@@ -403,7 +403,7 @@ public interface Guild extends Snowflake {
     /**
      * @return The guild's banner hash.
      *
-     * @apiNote See https://discordapp.com/developers/docs/reference#image-formatting "Guild Banner"
+     * @apiNote See https://discord.com/developers/docs/reference#image-formatting "Guild Banner"
      */
     @Nullable
     @CheckReturnValue
@@ -412,7 +412,7 @@ public interface Guild extends Snowflake {
     /**
      * @return The guild's Nitro Boost tier.
      *
-     * @apiNote See https://support.discordapp.com/hc/en-us/articles/360028038352-Server-Boosting-
+     * @apiNote See https://support.discord.com/hc/en-us/articles/360028038352-Server-Boosting-
      */
     @Nonnull
     @CheckReturnValue
@@ -421,7 +421,7 @@ public interface Guild extends Snowflake {
     /**
      * @return The number of members providing Nitro Boosts to this guild.
      *
-     * @apiNote See https://support.discordapp.com/hc/en-us/articles/360028038352-Server-Boosting-
+     * @apiNote See https://support.discord.com/hc/en-us/articles/360028038352-Server-Boosting-
      */
     @Nonnegative
     @CheckReturnValue
