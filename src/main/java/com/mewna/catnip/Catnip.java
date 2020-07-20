@@ -61,6 +61,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.Closeable;
 import java.util.Base64;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -73,7 +74,7 @@ import java.util.function.UnaryOperator;
  * @since 9/3/18.
  */
 @SuppressWarnings({"unused", "OverlyCoupledClass"})
-public interface Catnip {
+public interface Catnip extends AutoCloseable {
     /**
      * Create a new catnip instance with the given token.
      * <p>
@@ -741,5 +742,10 @@ public interface Catnip {
      */
     default Single<Webhook> parseWebhook(final String id, final String token) {
         return rest().webhook().getWebhookToken(id, token);
+    }
+    
+    @Override
+    default void close() {
+        shutdown();
     }
 }
