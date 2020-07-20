@@ -6,17 +6,18 @@
 
     <groupId>com.mewna.catnip</groupId>
     <artifactId>catnip</artifactId>
-    <version>2.0.1</version>
+    <version>2.0.2</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <delombok.output>${project.basedir}/delombok</delombok.output>
 
-        <lombok.version>1.18.10</lombok.version>
+        <lombok.version>1.18.12</lombok.version>
         <rxjava.version>3.0.4</rxjava.version>
         <slf4j.version>1.7.30</slf4j.version>
         <commons.lang.version>3.10</commons.lang.version>
         <jsr305.version>3.0.2</jsr305.version>
+        <nanojson.version>1.6</nanojson.version>
 
         <koloboke-compile.version>0.5.1</koloboke-compile.version>
         <koloboke-impl.version>1.0.0</koloboke-impl.version>
@@ -55,7 +56,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Rxjava2 -->
+        <!-- Rxjava -->
         <dependency>
             <groupId>io.reactivex.rxjava3</groupId>
             <artifactId>rxjava</artifactId>
@@ -87,7 +88,7 @@
         <dependency>
             <groupId>com.grack</groupId>
             <artifactId>nanojson</artifactId>
-            <version>1.6</version>
+            <version>${nanojson.version}</version>
         </dependency>
 
         <!-- Collections -->
