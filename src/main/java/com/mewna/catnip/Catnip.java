@@ -61,7 +61,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.net.http.HttpClient;
+import java.util.Base64;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
@@ -127,6 +127,31 @@ public interface Catnip {
     }
     
     /**
+     * Parses a token and returns the client id encoded therein. Throws a
+     * {@link IllegalArgumentException} if the provided token is not
+     * well-formed.<br />
+     *
+     * See the following image for an explanation of the Discord token format:<br/>
+     *
+     * <img src="https://i.imgur.com/7WdehGn.png" alt="Token format" />
+     *
+     * @param token The token to parse.
+     *
+     * @return The client id encoded in the token.
+     *
+     * @throws IllegalArgumentException If the provided token is not well-formed.
+     */
+    static long parseIdFromToken(final String token) {
+        try {
+            final String clientIdBase64 = token.split("\\.")[0];
+            final String clientId = new String(Base64.getDecoder().decode(clientIdBase64));
+            return Long.parseUnsignedLong(clientId);
+        } catch(final IllegalArgumentException e) {
+            throw new IllegalArgumentException("Provided token was invalid!", e);
+        }
+    }
+    
+    /**
      * @return An immutable view of the current instance's options.
      */
     @Nonnull
@@ -153,6 +178,8 @@ public interface Catnip {
     @CheckReturnValue
     Single<GatewayInfo> fetchGatewayInfo();
     
+    // Implementations are lombok-generated
+    
     /**
      * Start all shards asynchronously. To customize the shard spawning /
      * management strategy, see {@link CatnipOptions}.
@@ -161,8 +188,6 @@ public interface Catnip {
      */
     @Nonnull
     Catnip connect();
-    
-    // Implementations are lombok-generated
     
     @Nonnull
     @CheckReturnValue

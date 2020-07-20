@@ -327,10 +327,10 @@ public class CatnipImpl implements Catnip {
             return fetchGatewayInfo()
                     .map(gateway -> {
                         logAdapter().info("Token validated!");
+    
+                        clientIdAsLong = Catnip.parseIdFromToken(token);
                         
-                        parseClientId();
-                        
-                        //this is actually needed because generics are dumb
+                        // this is actually needed because generics are dumb
                         return (Catnip) this;
                     }).doOnError(e -> {
                         logAdapter().warn("Couldn't validate token!", e);
@@ -339,7 +339,7 @@ public class CatnipImpl implements Catnip {
         } else {
             if(!token.isEmpty()) {
                 try {
-                    parseClientId();
+                    clientIdAsLong = Catnip.parseIdFromToken(token);
                 } catch(final IllegalArgumentException e) {
                     final Exception wrapped = new RuntimeException("The provided token was invalid!", e);
                     return Single.error(wrapped);
@@ -383,15 +383,7 @@ public class CatnipImpl implements Catnip {
         final long idLong = Long.parseUnsignedLong(guildId);
         return (int) ((idLong >>> 22) % shardManager().shardCount());
     }
-    
-    private void parseClientId() {
-        // bot tokens are comprised of 3 parts, each encoded in base 64 and joined by periods.
-        // the first part is the client id.
-        final String clientIdBase64 = token.split("\\.")[0];
-        final String clientId = new String(Base64.getDecoder().decode(clientIdBase64));
-        clientIdAsLong = Long.parseUnsignedLong(clientId);
-    }
-    
+
     @Nullable
     @Override
     public GatewayInfo gatewayInfo() {
