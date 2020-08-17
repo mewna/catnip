@@ -211,7 +211,7 @@ public abstract class AbstractRequester implements Requester {
         }
         if(request.request().reason() != null) {
             catnip.logAdapter().trace("Adding reason header due to specific needs.");
-            builder.header(Requester.REASON_HEADER, Utils.encodeUTF8(request.request().reason()));
+            builder.header(Requester.REASON_HEADER, Utils.encodeUTF8(request.request().reason()).replace('+', ' '));
         }
         
         // Update request start time as soon as possible
