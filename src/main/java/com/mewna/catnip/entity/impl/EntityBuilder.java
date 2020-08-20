@@ -468,6 +468,17 @@ public final class EntityBuilder {
                 .permissionsRaw(Long.parseUnsignedLong(data.getString("permissions_new", "0")))
                 .managed(data.getBoolean("managed"))
                 .mentionable(data.getBoolean("mentionable"))
+                .tags(createRoleTags(data))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public RoleTags createRoleTags(@Nonnull final JsonObject data) {
+        return delegate(RoleTags.class, RoleTagsImpl.builder()
+                .botId(data.getString("bot_id"))
+                .premiumSubscriber(data.has("premium_subscriber"))
+                .integrationId(data.getString("integration_id"))
                 .build());
     }
     

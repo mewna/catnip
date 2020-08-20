@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 amy, All rights reserved.
+ * Copyright (c) 2020 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,58 +25,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.impl.guild;
+package com.mewna.catnip.entity.guild;
 
-import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.guild.Role;
-import com.mewna.catnip.entity.guild.RoleTags;
-import lombok.*;
-import lombok.experimental.Accessors;
-
-import javax.annotation.Nonnull;
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 
 /**
- * @author Julia Rogers
- * @since 9/2/18
+ * @author amy
+ * @since 8/20/20.
  */
-@Getter
-@Setter
-@Builder
-@Accessors(fluent = true)
-@NoArgsConstructor
-@AllArgsConstructor
-public class RoleImpl implements Role, RequiresCatnip {
-    private transient Catnip catnip;
+public interface RoleTags {
+    /**
+     * @return The id of the bot that this role is for.
+     */
+    @Nullable
+    @CheckReturnValue
+    String botId();
     
-    private long idAsLong;
-    private long guildIdAsLong;
-    private String name;
-    private int color;
-    private boolean hoist;
-    private int position;
-    private long permissionsRaw;
-    private boolean managed;
-    private boolean mentionable;
-    private RoleTags tags;
+    /**
+     * @return Whether or not this role is the Nitro boost role.
+     */
+    @CheckReturnValue
+    boolean premiumSubscriber();
     
-    @Override
-    public void catnip(@Nonnull final Catnip catnip) {
-        this.catnip = catnip;
-    }
-    
-    @Override
-    public int hashCode() {
-        return Long.hashCode(idAsLong);
-    }
-    
-    @Override
-    public boolean equals(final Object obj) {
-        return obj instanceof Role && ((Role) obj).idAsLong() == idAsLong;
-    }
-    
-    @Override
-    public String toString() {
-        return String.format("Role (%s)", name);
-    }
+    /**
+     * @return The id of the integration that this role is for.
+     */
+    @Nullable
+    @CheckReturnValue
+    String integrationId();
 }
