@@ -72,14 +72,18 @@ public class DefaultDispatchManager extends AbstractDispatchManager {
     
     @Override
     public <T> MessageConsumer<T> createConsumer(final String address) {
-        if(catnip().options().logEventNotInIntentsWarning()) {
-            final var intents = catnip().options().intents();
-            if(intents.stream()
-                    .map(GatewayIntent::events)
-                    .flatMap(Collection::stream)
-                    .noneMatch(address::equals)) {
-                catnip().logAdapter().warn("Listening for event `{}`, but current intents disallow this!", address);
-                catnip().logAdapter().warn("If you know what you're doing, you can suppress this message with the `{}` option.");
+        // Nullability concerns are not met during tests
+        //noinspection ConstantConditions
+        if(catnip() != null && catnip().options() != null) {
+            if(catnip().options().logEventNotInIntentsWarning()) {
+                final var intents = catnip().options().intents();
+                if(intents.stream()
+                        .map(GatewayIntent::events)
+                        .flatMap(Collection::stream)
+                        .noneMatch(address::equals)) {
+                    catnip().logAdapter().warn("Listening for event `{}`, but current intents disallow this!", address);
+                    catnip().logAdapter().warn("If you know what you're doing, you can suppress this message with the `{}` option.");
+                }
             }
         }
         final var consumer = new DefaultMessageConsumer<T>(address);
