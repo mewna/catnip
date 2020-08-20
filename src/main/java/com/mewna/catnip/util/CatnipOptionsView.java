@@ -377,4 +377,11 @@ public interface CatnipOptionsView {
      */
     @Nonnull
     EntityDelegator entityDelegator();
+    
+    /**
+     * @return Whether or not a warning should be logged when attempting to
+     * listen on an event that the current intents do not allow listening on.
+     * Defaults to {@code true}.
+     */
+    boolean logEventNotInIntentsWarning();
 }
