@@ -414,6 +414,25 @@ public class RestGuild extends RestHandler {
                 .map(ResponsePayload::array);
     }
     
+    public Observable<Member> searchGuildMembers(@Nonnull final String guildId, @Nonnull final String query) {
+        return searchGuildMembers(guildId, query, 1);
+    }
+    
+    public Observable<Member> searchGuildMembers(@Nonnull final String guildId, @Nonnull final String query,
+                                                 @Nonnegative final int limit) {
+        return searchGuildMembersRaw(guildId, query, limit)
+                .map(e -> mapObjectContents(o -> entityBuilder().createMember(guildId, o)).apply(e))
+                .flatMapIterable(e -> e);
+    }
+    
+    public Observable<JsonArray> searchGuildMembersRaw(@Nonnegative final String guildId, @Nonnull final String query,
+                                                       @Nonnegative final int limit) {
+        return catnip().requester().queue(new OutboundRequest(Routes.SEARCH_GUILD_MEMBERS.withMajorParam(guildId)
+                .withQueryString(new QueryStringBuilder().append("query", query).append("limit", "" + limit).build()),
+                Map.of()))
+                .map(ResponsePayload::array);
+    }
+    
     @Nonnull
     @CheckReturnValue
     public Observable<GuildBan> getGuildBans(@Nonnull final String guildId) {
