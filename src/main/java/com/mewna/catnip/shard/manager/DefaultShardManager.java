@@ -51,9 +51,10 @@ import java.util.stream.IntStream;
  * @author amy
  * @since 8/15/18.
  */
+@SuppressWarnings("unused")
 @Accessors(fluent = true)
 public class DefaultShardManager extends AbstractShardManager {
-    private final Collection<MessageConsumer> consumers = new HashSet<>();
+    private final Collection<MessageConsumer<?>> consumers = new HashSet<>();
     private final Map<Integer, CatnipShard> shards = new ConcurrentHashMap<>();
     private final Collection<Integer> shardIds;
     @Getter
@@ -113,8 +114,8 @@ public class DefaultShardManager extends AbstractShardManager {
         }
         
         consumers.add(catnip().dispatchManager().<GatewayClosed>createConsumer(Raw.GATEWAY_WEBSOCKET_CLOSED).handler(gatewayClosed -> {
-            catnip().logAdapter().info("Shard {} closed, re-queuing...", gatewayClosed.shardInfo().getId());
-            addToConnectQueue(gatewayClosed.shardInfo().getId());
+            catnip().logAdapter().info("Shard {} closed, re-queuing...", gatewayClosed.shardInfo().id());
+            addToConnectQueue(gatewayClosed.shardInfo().id());
         }));
         
         final Single<GatewayInfo> gatewayInfoCompletableFuture;
@@ -154,10 +155,8 @@ public class DefaultShardManager extends AbstractShardManager {
             catnip().logAdapter().info("Loaded expected shard count: {}", shardCount);
             shardIds.clear();
             shardIds.addAll(IntStream.range(0, shardCount).boxed().collect(Collectors.toList()));
-            loadShards();
-        } else {
-            loadShards();
         }
+        loadShards();
     }
     
     private void loadShards() {

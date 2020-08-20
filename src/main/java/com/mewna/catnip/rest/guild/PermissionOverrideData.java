@@ -68,7 +68,6 @@ public class PermissionOverrideData implements JsonConvertible {
         return new PermissionOverrideData(OverrideType.MEMBER, member.id());
     }
     
-    @SuppressWarnings("TypeMayBeWeakened")
     public static PermissionOverrideData create(@Nonnull final User user) {
         return new PermissionOverrideData(OverrideType.MEMBER, user.id());
     }
@@ -109,9 +108,9 @@ public class PermissionOverrideData implements JsonConvertible {
     public JsonObject toJson() {
         return JsonObject.builder()
                 .value("id", targetId)
-                .value("type", type.getKey())
-                .value("allow", Permission.from(allow))
-                .value("deny", Permission.from(deny))
+                .value("type", type.key())
+                .value("allow_new", Permission.from(allow))
+                .value("deny_new", Permission.from(deny))
                 .done();
     }
 }

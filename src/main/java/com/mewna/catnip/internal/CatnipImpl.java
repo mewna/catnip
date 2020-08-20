@@ -257,13 +257,15 @@ public class CatnipImpl implements Catnip {
     }
     
     @Override
-    public void chunkMembers(@Nonnull final String guildId, @Nonnull final String query, @Nonnegative final int limit) {
+    public void chunkMembers(@Nonnull final String guildId, @Nonnull final String query, @Nonnegative final int limit,
+                             @Nullable final String nonce) {
         shardManager().shard(shardIdFor(guildId)).queueSendToSocket(
                 CatnipShardImpl.basePayload(GatewayOp.REQUEST_GUILD_MEMBERS,
                         JsonObject.builder()
                                 .value("guild_id", guildId)
                                 .value("query", query)
                                 .value("limit", limit)
+                                .value("nonce", nonce)
                                 .done()));
     }
     
@@ -327,8 +329,15 @@ public class CatnipImpl implements Catnip {
             return fetchGatewayInfo()
                     .map(gateway -> {
                         logAdapter().info("Token validated!");
+<<<<<<< HEAD
                         parseClientId();
                         // This is actually needed because generics are dumb
+=======
+                        
+                        clientIdAsLong = Catnip.parseIdFromToken(token);
+                        
+                        // this is actually needed because generics are dumb
+>>>>>>> a837a0627b8fd98257286951b98ab90a09a04015
                         return (Catnip) this;
                     }).doOnError(e -> {
                         logAdapter().warn("Couldn't validate token!", e);
@@ -337,7 +346,7 @@ public class CatnipImpl implements Catnip {
         } else {
             if(!token.isEmpty()) {
                 try {
-                    parseClientId();
+                    clientIdAsLong = Catnip.parseIdFromToken(token);
                 } catch(final IllegalArgumentException e) {
                     final Exception wrapped = new RuntimeException("The provided token was invalid!", e);
                     return Single.error(wrapped);
@@ -381,14 +390,6 @@ public class CatnipImpl implements Catnip {
     private int shardIdFor(@Nonnull final String guildId) {
         final long idLong = Long.parseUnsignedLong(guildId);
         return (int) ((idLong >>> 22) % shardManager().shardCount());
-    }
-    
-    private void parseClientId() {
-        // bot tokens are comprised of 3 parts, each encoded in base 64 and joined by periods.
-        // the first part is the client id.
-        final String clientIdBase64 = token.split("\\.")[0];
-        final String clientId = new String(Base64.getDecoder().decode(clientIdBase64));
-        clientIdAsLong = Long.parseUnsignedLong(clientId);
     }
     
     @Nullable

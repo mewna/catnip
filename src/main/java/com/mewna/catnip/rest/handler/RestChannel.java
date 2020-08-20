@@ -135,7 +135,7 @@ public class RestChannel extends RestHandler {
             } else {
                 final JsonArray parseList = new JsonArray();
                 for(final MentionParseFlag p : parse) {
-                    parseList.add(p.getName());
+                    parseList.add(p.name());
                 }
                 allowedMentions.put("parse", parseList);
                 //If either list is present along with the respective parse option, validation fails. The contains check avoids this.

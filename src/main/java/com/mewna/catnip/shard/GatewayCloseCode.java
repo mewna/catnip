@@ -38,7 +38,7 @@ import javax.annotation.Nonnegative;
  * handles. This just copies the error messages directly from the docs because
  * I think that they're probably good enough.
  * <p>
- * See also: https://discordapp.com/developers/docs/topics/opcodes-and-status-codes
+ * See also: https://discord.com/developers/docs/topics/opcodes-and-status-codes
  *
  * @author amy
  * @since 11/19/18.

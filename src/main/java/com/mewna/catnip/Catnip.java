@@ -61,7 +61,7 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.net.http.HttpClient;
+import java.util.Base64;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
@@ -69,11 +69,24 @@ import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 /**
+ * The base catnip interface. Almost everything catnip-related will be accessed
+ * through this interface -- REST access, shard management, some utilities, and
+ * more. The main exception to this rule is entities that have convenience
+ * methods exposed on their interfaces.<p />
+ * <p>
+ * Note that this interface extends {@link AutoCloseable}; this is meant for
+ * cases where some relatively-fast blocking operations are desirable, and a
+ * long-term catnip instance is not needed. An example of this is doing some
+ * quick REST calls when blocking a thread is not an issue. Another possible
+ * use-case is (ab)using the built-in {@link TaskScheduler} for one reason or
+ * another, although creating an entire catnip instance solely for that would
+ * be quite silly.
+ *
  * @author amy
  * @since 9/3/18.
  */
 @SuppressWarnings({"unused", "OverlyCoupledClass"})
-public interface Catnip {
+public interface Catnip extends AutoCloseable {
     /**
      * Create a new catnip instance with the given token.
      * <p>
@@ -127,6 +140,31 @@ public interface Catnip {
     }
     
     /**
+     * Parses a token and returns the client id encoded therein. Throws a
+     * {@link IllegalArgumentException} if the provided token is not
+     * well-formed.<br />
+     * <p>
+     * See the following image for an explanation of the Discord token format:<br/>
+     *
+     * <img src="https://i.imgur.com/7WdehGn.png" alt="Token format" />
+     *
+     * @param token The token to parse.
+     *
+     * @return The client id encoded in the token.
+     *
+     * @throws IllegalArgumentException If the provided token is not well-formed.
+     */
+    static long parseIdFromToken(final String token) {
+        try {
+            final String clientIdBase64 = token.split("\\.")[0];
+            final String clientId = new String(Base64.getDecoder().decode(clientIdBase64));
+            return Long.parseUnsignedLong(clientId);
+        } catch(final IllegalArgumentException e) {
+            throw new IllegalArgumentException("Provided token was invalid!", e);
+        }
+    }
+    
+    /**
      * @return An immutable view of the current instance's options.
      */
     @Nonnull
@@ -153,6 +191,8 @@ public interface Catnip {
     @CheckReturnValue
     Single<GatewayInfo> fetchGatewayInfo();
     
+    // Implementations are lombok-generated
+    
     /**
      * Start all shards asynchronously. To customize the shard spawning /
      * management strategy, see {@link CatnipOptions}.
@@ -161,8 +201,6 @@ public interface Catnip {
      */
     @Nonnull
     Catnip connect();
-    
-    // Implementations are lombok-generated
     
     @Nonnull
     @CheckReturnValue
@@ -438,7 +476,7 @@ public interface Catnip {
      * @param guildId Guild to request for.
      */
     default void chunkMembers(@Nonnull final String guildId) {
-        chunkMembers(guildId, "", 0);
+        chunkMembers(guildId, "", 0, null);
     }
     
     /**
@@ -458,7 +496,7 @@ public interface Catnip {
      * @param query   Member names must start with this.
      */
     default void chunkMembers(@Nonnull final String guildId, @Nonnull final String query) {
-        chunkMembers(guildId, query, 0);
+        chunkMembers(guildId, query, 0, null);
     }
     
     /**
@@ -468,7 +506,7 @@ public interface Catnip {
      * @param limit   Maximum number of members to return. 0 for no limit.
      */
     default void chunkMembers(final long guildId, @Nonnegative final int limit) {
-        chunkMembers(Long.toString(guildId), "", limit);
+        chunkMembers(Long.toString(guildId), "", limit, null);
     }
     
     /**
@@ -478,7 +516,7 @@ public interface Catnip {
      * @param limit   Maximum number of members to return. 0 for no limit.
      */
     default void chunkMembers(@Nonnull final String guildId, @Nonnegative final int limit) {
-        chunkMembers(guildId, "", limit);
+        chunkMembers(guildId, "", limit, null);
     }
     
     /**
@@ -489,7 +527,41 @@ public interface Catnip {
      * @param limit   Maximum number of members to return. 0 for no limit.
      */
     default void chunkMembers(final long guildId, @Nonnull final String query, @Nonnegative final int limit) {
-        chunkMembers(Long.toString(guildId), query, limit);
+        chunkMembers(Long.toString(guildId), query, limit, null);
+    }
+    
+    /**
+     * Request guild members for the given guild.
+     *
+     * @param guildId  Guild to request for.
+     * @param nonce    Nonce to use for knowing which chunks came from which request.
+     * @param _useless Differentiates this method from {@link #chunkMembers(String, String)}.
+     *                 Otherwise useless.
+     */
+    default void chunkMembers(@Nonnull final String guildId, @Nonnull final String nonce, final boolean _useless) {
+        chunkMembers(guildId, "", 0, nonce);
+    }
+    
+    /**
+     * Request guild members for the given guild.
+     *
+     * @param guildId Guild to request for.
+     * @param query   Members returned must have a username starting with this.
+     * @param nonce   Nonce to use for knowing which chunks came from which request.
+     */
+    default void chunkMembers(@Nonnull final String guildId, @Nonnull final String query, @Nonnull final String nonce) {
+        chunkMembers(guildId, query, 0, nonce);
+    }
+    
+    /**
+     * Request guild members for the given guild.
+     *
+     * @param guildId Guild to request for.
+     * @param limit   Maximum number of members to return. 0 for no limit.
+     * @param nonce   Nonce to use for knowing which chunks came from which request.
+     */
+    default void chunkMembers(@Nonnull final String guildId, @Nonnegative final int limit, @Nonnull final String nonce) {
+        chunkMembers(guildId, "", limit, nonce);
     }
     
     /**
@@ -498,8 +570,9 @@ public interface Catnip {
      * @param guildId Guild to request for.
      * @param query   Members returned must have a username starting with this.
      * @param limit   Maximum number of members to return. 0 for no limit.
+     * @param nonce   Nonce to use for knowing which chunks came from which request.
      */
-    void chunkMembers(@Nonnull String guildId, @Nonnull String query, @Nonnegative int limit);
+    void chunkMembers(@Nonnull String guildId, @Nonnull String query, @Nonnegative int limit, @Nullable String nonce);
     
     /**
      * Get the presence for the specified shard.
@@ -716,5 +789,10 @@ public interface Catnip {
      */
     default Single<Webhook> parseWebhook(final String id, final String token) {
         return rest().webhook().getWebhookToken(id, token);
+    }
+    
+    @Override
+    default void close() {
+        shutdown();
     }
 }

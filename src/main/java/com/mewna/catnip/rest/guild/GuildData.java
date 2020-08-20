@@ -48,7 +48,7 @@ import java.util.function.Consumer;
 @Accessors(fluent = true, chain = true)
 @Getter
 @Setter
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class GuildData implements JsonConvertible {
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
@@ -221,13 +221,13 @@ public class GuildData implements JsonConvertible {
             object.put("icon", base64Icon);
         }
         if(verificationLevel != null) {
-            object.put("verification_level", verificationLevel.getKey());
+            object.put("verification_level", verificationLevel.key());
         }
         if(defaultNotificationLevel != null) {
-            object.put("default_message_notifications", defaultNotificationLevel.getKey());
+            object.put("default_message_notifications", defaultNotificationLevel.key());
         }
         if(explicitContentFilter != null) {
-            object.put("explicit_content_filter", explicitContentFilter.getKey());
+            object.put("explicit_content_filter", explicitContentFilter.key());
         }
         return object;
     }

@@ -16,20 +16,20 @@ public enum MentionParseFlag {
     EVERYONE("everyone"),
     ;
     @Getter
-    private final String name;
+    private final String flagName;
     
-    MentionParseFlag(final String name) {
-        this.name = name;
+    MentionParseFlag(final String flagName) {
+        this.flagName = flagName;
     }
     
     @Nonnull
     @CheckReturnValue
-    public static MentionParseFlag byName(final String name) {
+    public static MentionParseFlag byName(final String flagName) {
         for(final MentionParseFlag m : values()) {
-            if(m.name.equals(name)) {
+            if(m.flagName.equals(flagName)) {
                 return m;
             }
         }
-        throw new IllegalArgumentException("No such MessageParse: " + name);
+        throw new IllegalArgumentException("No such MentionParseFlag: " + flagName);
     }
 }

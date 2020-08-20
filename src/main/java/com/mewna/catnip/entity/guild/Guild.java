@@ -403,7 +403,7 @@ public interface Guild extends Snowflake {
     /**
      * @return The guild's banner hash.
      *
-     * @apiNote See https://discordapp.com/developers/docs/reference#image-formatting "Guild Banner"
+     * @apiNote See https://discord.com/developers/docs/reference#image-formatting "Guild Banner"
      */
     @Nullable
     @CheckReturnValue
@@ -412,7 +412,7 @@ public interface Guild extends Snowflake {
     /**
      * @return The guild's Nitro Boost tier.
      *
-     * @apiNote See https://support.discordapp.com/hc/en-us/articles/360028038352-Server-Boosting-
+     * @apiNote See https://support.discord.com/hc/en-us/articles/360028038352-Server-Boosting-
      */
     @Nonnull
     @CheckReturnValue
@@ -421,7 +421,7 @@ public interface Guild extends Snowflake {
     /**
      * @return The number of members providing Nitro Boosts to this guild.
      *
-     * @apiNote See https://support.discordapp.com/hc/en-us/articles/360028038352-Server-Boosting-
+     * @apiNote See https://support.discord.com/hc/en-us/articles/360028038352-Server-Boosting-
      */
     @Nonnegative
     @CheckReturnValue
@@ -1559,13 +1559,13 @@ public interface Guild extends Snowflake {
                 payload.put("region", region);
             }
             if(verificationLevel != null && (guild == null || verificationLevel != guild.verificationLevel())) {
-                payload.put("verification_level", verificationLevel.getKey());
+                payload.put("verification_level", verificationLevel.key());
             }
             if(defaultMessageNotifications != null && (guild == null || defaultMessageNotifications != guild.defaultMessageNotifications())) {
-                payload.put("default_message_notifications", defaultMessageNotifications.getKey());
+                payload.put("default_message_notifications", defaultMessageNotifications.key());
             }
             if(explicitContentFilter != null && (guild == null || explicitContentFilter != guild.explicitContentFilter())) {
-                payload.put("explicit_content_filter", explicitContentFilter.getKey());
+                payload.put("explicit_content_filter", explicitContentFilter.key());
             }
             if(afkChannelId != null && (guild == null || !Objects.equals(afkChannelId, guild.afkChannelId()))) {
                 payload.put("afk_channel_id", afkChannelId);
