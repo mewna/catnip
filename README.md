@@ -137,8 +137,6 @@ corresponding option in `CatnipOptions`.
 
 ## Why write a fourth Java lib?
 
-- JDA is very nice, but doesn't allow for as much freedom with customizing the internals;
-  it's more / less "do it this way or use another lib" in my experience.
 - I didn't want ten billion events for every possible case. catnip maps more/less 1:1 with the
   Discord API, and any "extra" events on top of that need to be user-provided via extensions or
   other means. I guess really I just didn't want my lib to be as "high-level" as other libs are.
