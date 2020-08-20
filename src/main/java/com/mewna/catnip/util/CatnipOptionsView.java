@@ -270,7 +270,7 @@ public interface CatnipOptionsView {
      * <strong>This must be between 50 and 250.</strong>
      * <p>
      * For Discord's documentation, go here:
-     * https://discordapp.com/developers/docs/topics/gateway#identify-identify-structure
+     * https://discord.com/developers/docs/topics/gateway#identify-identify-structure
      */
     int largeThreshold();
     
@@ -304,7 +304,7 @@ public interface CatnipOptionsView {
      * set to {@code true}, catnip will assume that the local clock cannot be
      * properly synced, and will use a less-efficient method provided by
      * Discord for computing REST ratelimits. See
-     * https://github.com/discordapp/discord-api-docs/pull/1069 for more info.
+     * https://github.com/discord/discord-api-docs/pull/1069 for more info.
      */
     boolean restRatelimitsWithoutClockSync();
     
@@ -328,7 +328,7 @@ public interface CatnipOptionsView {
     
     /**
      * The host used for Discord API requests. Defaults to
-     * {@code https://discordapp.com}. Changing this is only really useful for
+     * {@code https://discord.com}. Changing this is only really useful for
      * the case of ex. running tests against a local mock API. Providing the
      * protocol is <strong>REQUIRED</strong>.
      */
@@ -377,4 +377,11 @@ public interface CatnipOptionsView {
      */
     @Nonnull
     EntityDelegator entityDelegator();
+    
+    /**
+     * @return Whether or not a warning should be logged when attempting to
+     * listen on an event that the current intents do not allow listening on.
+     * Defaults to {@code true}.
+     */
+    boolean logEventNotInIntentsWarning();
 }

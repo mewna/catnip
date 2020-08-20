@@ -34,13 +34,27 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
 /**
- * A single entity in catnip.
+ * A single entity in catnip. An entity is any data received from Discord that
+ * can be serialized or deserialized, as well as a class that must have a
+ * catnip instance attached to it.
  *
  * @author natanbc
  * @since 5/9/18.
  */
 @SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
 public interface Entity {
+    /**
+     * Deserialize the given data into an entity of the given type, with the
+     * provided catnip instanced attached to it.
+     *
+     * @param catnip The catnip instance to attach.
+     * @param type   The type of entity to deserialize to.
+     * @param data   The data to be deserialized.
+     * @param <T>    The type of data being deserialized.
+     * @param <E>    The type of entity being deserialized.
+     *
+     * @return The deserialized entity.
+     */
     @Nonnull
     @CheckReturnValue
     @SuppressWarnings("unchecked")
@@ -56,6 +70,14 @@ public interface Entity {
      */
     Catnip catnip();
     
+    /**
+     * Serialize this entity. Returns whatever type of data the configured
+     * serializer returns -- not necessarily JSON!
+     *
+     * @param <T> The type of serialized data.
+     *
+     * @return The serialized data.
+     */
     @Nonnull
     @CheckReturnValue
     @SuppressWarnings("unchecked")

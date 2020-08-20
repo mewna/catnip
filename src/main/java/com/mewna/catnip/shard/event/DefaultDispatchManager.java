@@ -28,6 +28,7 @@
 package com.mewna.catnip.shard.event;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.shard.GatewayIntent;
 import io.reactivex.rxjava3.core.BackpressureStrategy;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Observable;
@@ -38,6 +39,7 @@ import lombok.experimental.Accessors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,7 +62,7 @@ public class DefaultDispatchManager extends AbstractDispatchManager {
         final var addressConsumers = consumers.get(address);
         
         if(addressConsumers != null) {
-            if (worker == null) {
+            if(worker == null) {
                 LOGGER.warn("Please configure the Catnip parent instance before dispatching events.");
                 throw new IllegalStateException("dispatchEvent was called before DefaultDispatchManager was configured.");
             }
@@ -70,6 +72,22 @@ public class DefaultDispatchManager extends AbstractDispatchManager {
     
     @Override
     public <T> MessageConsumer<T> createConsumer(final String address) {
+        // Nullability concerns are not met during tests
+        //noinspection ConstantConditions
+        if(catnip() != null && catnip().options() != null) {
+            if(catnip().options().logEventNotInIntentsWarning() && (catnip().options().apiVersion() > 6
+                    || !catnip().options().intents().isEmpty())) {
+                final var intents = catnip().options().intents();
+                if(intents.stream()
+                        .map(GatewayIntent::events)
+                        .flatMap(Collection::stream)
+                        .noneMatch(address::equals)) {
+                    catnip().logAdapter().warn("Listening for event `{}`, but current intents disallow this!",
+                            address);
+                    catnip().logAdapter().warn("If you know what you're doing, you can suppress this message with the `logEventNotInIntentsWarning` option.");
+                }
+            }
+        }
         final var consumer = new DefaultMessageConsumer<T>(address);
         consumers.computeIfAbsent(address, __ -> new CopyOnWriteArraySet<>()).add(consumer);
         return consumer;
@@ -95,7 +113,7 @@ public class DefaultDispatchManager extends AbstractDispatchManager {
                 internalHandler.accept((T) event);
             }
         }
-    
+        
         // This method is specific to Catnip#on and can be safely removed if wanted.
         @Override
         public MessageConsumer<T> handler(final Consumer<T> handler) {

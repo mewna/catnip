@@ -30,6 +30,9 @@ package com.mewna.catnip.rest;
 import com.grack.nanojson.JsonObject;
 
 /**
+ * An exception that gets thrown when the REST requester encounters an error
+ * message that Discord sends back.
+ *
  * @author SamOphis
  * @since 02/09/2019
  */

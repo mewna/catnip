@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2020 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,47 +25,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity;
-
-import com.mewna.catnip.util.Utils;
+package com.mewna.catnip.entity.guild;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
-import java.time.OffsetDateTime;
+import javax.annotation.Nullable;
 
 /**
- * A subset of entities that have an ID attached.
- *
- * @author natanbc
- * @since 5/9/18.
+ * @author amy
+ * @since 8/20/20.
  */
-public interface Snowflake extends Entity {
+public interface RoleTags {
     /**
-     * The ID of this snowflake.
-     *
-     * @return String representing the ID.
+     * @return The id of the bot that this role is for.
      */
+    @Nullable
     @CheckReturnValue
-    default String id() {
-        return Long.toUnsignedString(idAsLong());
-    }
+    String botId();
     
     /**
-     * The ID of this snowflake, as a long.
-     *
-     * @return Long representing the ID.
+     * @return Whether or not this role is the Nitro boost role.
      */
     @CheckReturnValue
-    long idAsLong();
+    boolean premiumSubscriber();
     
     /**
-     * The time this snowflake was generated.
-     *
-     * @return OffsetDateTime representing when this snowflake was generated.
+     * @return The id of the integration that this role is for.
      */
-    @Nonnull
+    @Nullable
     @CheckReturnValue
-    default OffsetDateTime creationTime() {
-        return Utils.creationTimeOf(idAsLong());
-    }
+    String integrationId();
 }

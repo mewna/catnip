@@ -54,11 +54,11 @@ import javax.annotation.Nullable;
 import java.lang.StackWalker.Option;
 import java.lang.StackWalker.StackFrame;
 import java.net.URI;
-import java.net.http.HttpClient.Builder;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -71,7 +71,6 @@ import static com.mewna.catnip.rest.Routes.HttpMethod.GET;
 
 @SuppressWarnings("WeakerAccess")
 public abstract class AbstractRequester implements Requester {
-    public static final BodyPublisher EMPTY_BODY = BodyPublishers.noBody();
     private static final StackWalker STACK_WALKER = StackWalker.getInstance(Set.of(Option.RETAIN_CLASS_REFERENCE));
     
     protected final RateLimiter rateLimiter;
@@ -151,7 +150,7 @@ public abstract class AbstractRequester implements Requester {
                                 .end()
                                 .done());
             }
-            executeHttpRequest(finalRoute, publisher.build(), request, "multipart/form-data;boundary=" + publisher.getBoundary());
+            executeHttpRequest(finalRoute, publisher.build(), request, "multipart/form-data;boundary=" + publisher.boundary());
         } catch(final Exception e) {
             catnip.logAdapter().error("Failed to send multipart request", e);
         }
@@ -177,7 +176,7 @@ public abstract class AbstractRequester implements Requester {
     
     protected void executeHttpRequest(@Nonnull final Route route, @Nullable final BodyPublisher body,
                                       @Nonnull final QueuedRequest request, @Nonnull final String mediaType) {
-        final HttpRequest.Builder builder;
+        final Builder builder;
         final String apiHostVersion = catnip.options().apiHost() + "/api/v" + catnip.options().apiVersion();
         
         if(route.method() == GET) {
@@ -211,7 +210,7 @@ public abstract class AbstractRequester implements Requester {
         }
         if(request.request().reason() != null) {
             catnip.logAdapter().trace("Adding reason header due to specific needs.");
-            builder.header(Requester.REASON_HEADER, Utils.encodeUTF8(request.request().reason()));
+            builder.header(Requester.REASON_HEADER, Utils.encodeUTF8(request.request().reason()).replace('+', ' '));
         }
         
         // Update request start time as soon as possible
@@ -389,16 +388,7 @@ public abstract class AbstractRequester implements Requester {
         rateLimiter.updateDone(route);
     }
     
-    private boolean requiresRequestBody(final String method) {
-        // Stolen from OkHTTP
-        return method.equals("POST")
-                || method.equals("PUT")
-                || method.equals("PATCH")
-                || method.equals("PROPPATCH") // WebDAV
-                || method.equals("REPORT");   // CalDAV/CardDAV (defined in WebDAV Versioning)
-    }
-    
-    protected interface Bucket {
+    public interface Bucket {
         void queueRequest(@Nonnull QueuedRequest request);
         
         void failedRequest(@Nonnull QueuedRequest request, @Nonnull Throwable failureCause);
@@ -409,7 +399,7 @@ public abstract class AbstractRequester implements Requester {
     @Getter
     @Accessors(fluent = true)
     @RequiredArgsConstructor
-    protected static class QueuedRequest {
+    public static class QueuedRequest {
         protected final OutboundRequest request;
         protected final Route route;
         protected final CompletableFuture<ResponsePayload> future;
@@ -418,11 +408,11 @@ public abstract class AbstractRequester implements Requester {
         protected int failedAttempts;
         private long start;
         
-        protected void failed() {
+        public void failed() {
             failedAttempts++;
         }
         
-        protected boolean shouldRetry() {
+        public boolean shouldRetry() {
             return failedAttempts < 3;
         }
     }

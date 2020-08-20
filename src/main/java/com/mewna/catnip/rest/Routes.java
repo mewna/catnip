@@ -101,6 +101,7 @@ public final class Routes {
     public static final Route REMOVE_GUILD_MEMBER                 = new Route(DELETE, "/guilds/:guild/members/:user", "guild");
     public static final Route GET_GUILD_MEMBER                    = new Route(GET,    "/guilds/:guild/members/:user", "guild");
     public static final Route MODIFY_GUILD_MEMBER                 = new Route(PATCH,  "/guilds/:guild/members/:user", "guild");
+    public static final Route SEARCH_GUILD_MEMBERS                = new Route(GET,    "/guilds/:guild/members/search", "guild");
     public static final Route ADD_GUILD_MEMBER                    = new Route(PUT,    "/guilds/:guild/members/:user", "guild");
     public static final Route REMOVE_GUILD_MEMBER_ROLE            = new Route(DELETE, "/guilds/:guild/members/:user/roles/:role", "guild");
     public static final Route ADD_GUILD_MEMBER_ROLE               = new Route(PUT,    "/guilds/:guild/members/:user/roles/:role", "guild");

@@ -255,8 +255,14 @@ public class CachingBuffer extends AbstractBuffer {
     
     private void cacheAndDispatch(final String type, final int id, final JsonObject event) {
         final JsonObject d = event.getObject("d");
-        //noinspection ResultOfMethodCallIgnored
-        maybeCache(type, id, d).subscribe(() -> emitter().emit(event));
+        if(DELETE_EVENTS.contains(type)) {
+            // TODO: Will this work always?
+            emitter().emit(event);
+            maybeCache(type, id, d);
+        } else {
+            //noinspection ResultOfMethodCallIgnored
+            maybeCache(type, id, d).subscribe(() -> emitter().emit(event));
+        }
     }
     
     private Completable maybeCache(final String eventType, final int shardId, final JsonObject data) {

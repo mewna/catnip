@@ -30,6 +30,7 @@ package com.mewna.catnip.entity.impl.guild;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.guild.Role;
+import com.mewna.catnip.entity.guild.RoleTags;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -57,6 +58,7 @@ public class RoleImpl implements Role, RequiresCatnip {
     private long permissionsRaw;
     private boolean managed;
     private boolean mentionable;
+    private RoleTags tags;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {

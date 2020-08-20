@@ -123,8 +123,8 @@ public final class Utils {
     @Nullable
     @CheckReturnValue
     public static String probeContentType(@Nonnull final byte[] bytes) {
-        try {
-            return URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(bytes));
+        try(final ByteArrayInputStream stream = new ByteArrayInputStream(bytes);) {
+            return URLConnection.guessContentTypeFromStream(stream);
         } catch(final IOException e) {
             return null;
         }

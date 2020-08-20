@@ -425,7 +425,7 @@ public final class EntityBuilder {
     @CheckReturnValue
     public Channel createChannel(@Nonnull final JsonObject data) {
         final ChannelType type = ChannelType.byKey(data.getInt("type"));
-        if(type.isGuild()) {
+        if(type.guild()) {
             return createGuildChannel(data);
         } else {
             return createDMChannel(data);
@@ -449,8 +449,8 @@ public final class EntityBuilder {
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .type(OverrideType.byKey(data.getString("type")))
-                .allowRaw(data.getNumber("allow", 0L).longValue())
-                .denyRaw(data.getNumber("deny", 0L).longValue())
+                .allowRaw(Long.parseUnsignedLong(data.getString("allow_new", "0")))
+                .denyRaw(Long.parseUnsignedLong(data.getString("deny_new", "0")))
                 .build());
     }
     
@@ -465,9 +465,20 @@ public final class EntityBuilder {
                 .color(data.getInt("color"))
                 .hoist(data.getBoolean("hoist"))
                 .position(data.getInt("position"))
-                .permissionsRaw(data.getNumber("permissions", 0L).longValue())
+                .permissionsRaw(Long.parseUnsignedLong(data.getString("permissions_new", "0")))
                 .managed(data.getBoolean("managed"))
                 .mentionable(data.getBoolean("mentionable"))
+                .tags(createRoleTags(data))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public RoleTags createRoleTags(@Nonnull final JsonObject data) {
+        return delegate(RoleTags.class, RoleTagsImpl.builder()
+                .botId(data.getString("bot_id"))
+                .premiumSubscriber(data.has("premium_subscriber"))
+                .integrationId(data.getString("integration_id"))
                 .build());
     }
     
@@ -902,7 +913,7 @@ public final class EntityBuilder {
                 .reactions(toList(data.getArray("reactions"), e -> createReaction(data.getString("guild_id"), e)))
                 .nonce(String.valueOf(data.get("nonce")))
                 .pinned(data.getBoolean("pinned", false))
-                .type(MessageType.byId(data.getInt("type", MessageType.DEFAULT.getId())))
+                .type(MessageType.byId(data.getInt("type", MessageType.DEFAULT.id())))
                 .member(member)
                 .guildIdAsLong(guildId == null ? 0 : Long.parseUnsignedLong(guildId))
                 .webhookIdAsLong(webhookId == null ? 0 : Long.parseUnsignedLong(webhookId))
@@ -1066,7 +1077,8 @@ public final class EntityBuilder {
                 .verificationLevel(VerificationLevel.byKey(data.getInt("verification_level", 0)))
                 .defaultMessageNotifications(NotificationLevel.byKey(data.getInt("default_message_notifications", 0)))
                 .explicitContentFilter(ContentFilterLevel.byKey(data.getInt("explicit_content_filter", 0)))
-                .features(stringListToTypedList(data.getArray("features"), GuildFeature::valueOf))
+                .features(stringListToTypedList(data.getArray("features"),
+                        feature -> GuildFeature.unknownValueOf(catnip, feature)))
                 .mfaLevel(MFALevel.byKey(data.getInt("mfa_level", 0)))
                 .applicationIdAsLong(applicationId == null ? 0 : Long.parseUnsignedLong(applicationId))
                 .widgetEnabled(data.getBoolean("widget_enabled", false))
@@ -1203,7 +1215,8 @@ public final class EntityBuilder {
                 .name(data.getString("name"))
                 .icon(data.getString("icon"))
                 .splash(data.getString("splash"))
-                .features(stringListToTypedList(data.getArray("features"), GuildFeature::valueOf))
+                .features(stringListToTypedList(data.getArray("features"),
+                        feature -> GuildFeature.unknownValueOf(catnip, feature)))
                 .verificationLevel(VerificationLevel.byKey(data.getInt("verification_level", 0)))
                 .build());
     }
@@ -1345,7 +1358,7 @@ public final class EntityBuilder {
                         .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
                         .deletedMessagesCount(Integer.parseUnsignedInt(data.getString("count")))
                         .build());
-            // The data returned for MESSAGE_BULK_DELETE *doesn't* actually follow https://discordapp.com/developers/docs/resources/audit-log#audit-log-entry-object-optional-audit-entry-info
+            // The data returned for MESSAGE_BULK_DELETE *doesn't* actually follow https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-optional-audit-entry-info
             // Instead, we're going to just return 'Count' as that is the only option that's present. If you're looking for 'channel_id', use 'target_id' (named targetId() and targetIdAsLong()) in AuditLogEntry.
             case MESSAGE_BULK_DELETE:
                 return delegate(MessageBulkDeleteInfo.class, MessageBulkDeleteInfoImpl.builder()

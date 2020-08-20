@@ -55,7 +55,7 @@ public final class CDNFormat {
         if(avatar == null) {
             return null;
         }
-        if(options.getType() == ImageType.GIF && !avatar.startsWith("a_")) {
+        if(options.type() == ImageType.GIF && !avatar.startsWith("a_")) {
             throw new IllegalArgumentException("Cannot build gif avatar URL for non gif avatar!");
         }
         return options.buildUrl(
@@ -69,7 +69,7 @@ public final class CDNFormat {
         if(icon == null) {
             return null;
         }
-        if(options.getType() == ImageType.GIF && !icon.startsWith("a_")) {
+        if(options.type() == ImageType.GIF && !icon.startsWith("a_")) {
             throw new IllegalArgumentException("Cannot build gif icon URL for non gif icon!");
         }
         return options.buildUrl(
@@ -83,7 +83,7 @@ public final class CDNFormat {
         if(icon == null) {
             return null;
         }
-        if(options.getType() == ImageType.GIF) {
+        if(options.type() == ImageType.GIF) {
             throw new IllegalArgumentException("Team icons may not be GIFs");
         }
         return options.buildUrl(
@@ -97,7 +97,7 @@ public final class CDNFormat {
         if(splash == null) {
             return null;
         }
-        if(options.getType() == ImageType.GIF) {
+        if(options.type() == ImageType.GIF) {
             throw new IllegalArgumentException("Guild icons may not be GIFs");
         }
         return options.buildUrl(

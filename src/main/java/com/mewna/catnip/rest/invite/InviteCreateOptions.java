@@ -36,11 +36,20 @@ import lombok.experimental.Accessors;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
+/**
+ * Options for the creation of invites.
+ */
 @Accessors(fluent = true)
 @Getter
 @Setter
 public class InviteCreateOptions implements JsonConvertible {
+    /**
+     * How old the invite can be before it expires.
+     */
     private int maxAge;
+    /**
+     * How many times the invite can be used
+     */
     private int maxUses;
     private boolean temporary;
     private boolean unique;

@@ -121,6 +121,20 @@ public interface Role extends Mentionable, Comparable<Role>, PermissionHolder {
     boolean mentionable();
     
     /**
+     * The tags for this role. Role tags are things like:
+     * <ol>
+     *     <li>Whether or not this is the Nitro boost role.</li>
+     *     <li>Whether or not this is a bot-specific role.</li>
+     *     <li>Whether or not this is an integration-specific role.</li>
+     * </ol>
+     *
+     * @return The tags for this role.
+     */
+    @Nonnull
+    @CheckReturnValue
+    RoleTags tags();
+    
+    /**
      * @return A mention for this role that can be sent in a message.
      */
     @Nonnull

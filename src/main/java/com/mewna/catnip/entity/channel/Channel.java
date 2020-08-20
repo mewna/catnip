@@ -111,7 +111,7 @@ public interface Channel extends Snowflake {
      */
     @CheckReturnValue
     default boolean isGuild() {
-        return type().isGuild();
+        return type().guild();
     }
     
     /**
@@ -137,7 +137,7 @@ public interface Channel extends Snowflake {
      */
     @CheckReturnValue
     default boolean isDM() {
-        return !type().isGuild();
+        return !type().guild();
     }
     
     /**

@@ -1,11 +1,5 @@
 # catnip
 
-## READ THIS
-
-catnip v2 requires Java11+, but there is a bug with Java 11 + TLSv1.3 that causes runaway CPU usage.
-To avoid this problem, use Java 12 or later. See https://stackoverflow.com/questions/55298459 and
-https://stackoverflow.com/questions/54485755
-
 [![CircleCI](https://circleci.com/gh/mewna/catnip.svg?style=svg)](https://circleci.com/gh/mewna/catnip)
 [![powered by potato](https://img.shields.io/badge/powered%20by-potato-%23db325c.svg)](https://mewna.com/)
 ![GitHub tag (latest by date)](https://img.shields.io/github/tag-date/mewna/catnip.svg?style=popout)
@@ -18,6 +12,12 @@ API works, both in terms of events and REST methods available.
 catnip is part of the [amyware Discord server](https://discord.gg/yeF2HpP)
 
 Licensed under the [BSD 3-Clause License](https://tldrlegal.com/license/bsd-3-clause-license-(revised)).
+
+## READ THIS
+
+catnip v2 requires Java11+, but there is a bug with Java 11 + TLSv1.3 that causes runaway CPU usage.
+To avoid this problem, use Java 12 or later. See https://stackoverflow.com/questions/55298459 and
+https://stackoverflow.com/questions/54485755
 
 ## Installation
 
@@ -137,8 +137,6 @@ corresponding option in `CatnipOptions`.
 
 ## Why write a fourth Java lib?
 
-- JDA is very nice, but doesn't allow for as much freedom with customizing the internals;
-  it's more / less "do it this way or use another lib" in my experience.
 - I didn't want ten billion events for every possible case. catnip maps more/less 1:1 with the
   Discord API, and any "extra" events on top of that need to be user-provided via extensions or
   other means. I guess really I just didn't want my lib to be as "high-level" as other libs are.

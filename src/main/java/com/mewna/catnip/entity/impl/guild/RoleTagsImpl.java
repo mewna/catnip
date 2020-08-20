@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2020 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,47 +25,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.impl.guild;
 
-import com.mewna.catnip.util.Utils;
-
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
-import java.time.OffsetDateTime;
+import com.mewna.catnip.entity.guild.RoleTags;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 /**
- * A subset of entities that have an ID attached.
- *
- * @author natanbc
- * @since 5/9/18.
+ * @author amy
+ * @since 8/20/20.
  */
-public interface Snowflake extends Entity {
-    /**
-     * The ID of this snowflake.
-     *
-     * @return String representing the ID.
-     */
-    @CheckReturnValue
-    default String id() {
-        return Long.toUnsignedString(idAsLong());
-    }
-    
-    /**
-     * The ID of this snowflake, as a long.
-     *
-     * @return Long representing the ID.
-     */
-    @CheckReturnValue
-    long idAsLong();
-    
-    /**
-     * The time this snowflake was generated.
-     *
-     * @return OffsetDateTime representing when this snowflake was generated.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default OffsetDateTime creationTime() {
-        return Utils.creationTimeOf(idAsLong());
-    }
+@Getter
+@Setter
+@Builder
+@Accessors(fluent = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class RoleTagsImpl implements RoleTags {
+    private String botId;
+    private boolean premiumSubscriber;
+    private String integrationId;
 }
