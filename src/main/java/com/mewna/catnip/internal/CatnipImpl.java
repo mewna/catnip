@@ -257,13 +257,15 @@ public class CatnipImpl implements Catnip {
     }
     
     @Override
-    public void chunkMembers(@Nonnull final String guildId, @Nonnull final String query, @Nonnegative final int limit) {
+    public void chunkMembers(@Nonnull final String guildId, @Nonnull final String query, @Nonnegative final int limit,
+                             @Nullable final String nonce) {
         shardManager().shard(shardIdFor(guildId)).queueSendToSocket(
                 CatnipShardImpl.basePayload(GatewayOp.REQUEST_GUILD_MEMBERS,
                         JsonObject.builder()
                                 .value("guild_id", guildId)
                                 .value("query", query)
                                 .value("limit", limit)
+                                .value("nonce", nonce)
                                 .done()));
     }
     
@@ -327,7 +329,7 @@ public class CatnipImpl implements Catnip {
             return fetchGatewayInfo()
                     .map(gateway -> {
                         logAdapter().info("Token validated!");
-    
+                        
                         clientIdAsLong = Catnip.parseIdFromToken(token);
                         
                         // this is actually needed because generics are dumb
@@ -383,7 +385,7 @@ public class CatnipImpl implements Catnip {
         final long idLong = Long.parseUnsignedLong(guildId);
         return (int) ((idLong >>> 22) % shardManager().shardCount());
     }
-
+    
     @Nullable
     @Override
     public GatewayInfo gatewayInfo() {

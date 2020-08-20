@@ -73,7 +73,7 @@ import java.util.function.UnaryOperator;
  * through this interface -- REST access, shard management, some utilities, and
  * more. The main exception to this rule is entities that have convenience
  * methods exposed on their interfaces.<p />
- *
+ * <p>
  * Note that this interface extends {@link AutoCloseable}; this is meant for
  * cases where some relatively-fast blocking operations are desirable, and a
  * long-term catnip instance is not needed. An example of this is doing some
@@ -476,7 +476,7 @@ public interface Catnip extends AutoCloseable {
      * @param guildId Guild to request for.
      */
     default void chunkMembers(@Nonnull final String guildId) {
-        chunkMembers(guildId, "", 0);
+        chunkMembers(guildId, "", 0, null);
     }
     
     /**
@@ -496,7 +496,7 @@ public interface Catnip extends AutoCloseable {
      * @param query   Member names must start with this.
      */
     default void chunkMembers(@Nonnull final String guildId, @Nonnull final String query) {
-        chunkMembers(guildId, query, 0);
+        chunkMembers(guildId, query, 0, null);
     }
     
     /**
@@ -506,7 +506,7 @@ public interface Catnip extends AutoCloseable {
      * @param limit   Maximum number of members to return. 0 for no limit.
      */
     default void chunkMembers(final long guildId, @Nonnegative final int limit) {
-        chunkMembers(Long.toString(guildId), "", limit);
+        chunkMembers(Long.toString(guildId), "", limit, null);
     }
     
     /**
@@ -516,7 +516,7 @@ public interface Catnip extends AutoCloseable {
      * @param limit   Maximum number of members to return. 0 for no limit.
      */
     default void chunkMembers(@Nonnull final String guildId, @Nonnegative final int limit) {
-        chunkMembers(guildId, "", limit);
+        chunkMembers(guildId, "", limit, null);
     }
     
     /**
@@ -527,7 +527,41 @@ public interface Catnip extends AutoCloseable {
      * @param limit   Maximum number of members to return. 0 for no limit.
      */
     default void chunkMembers(final long guildId, @Nonnull final String query, @Nonnegative final int limit) {
-        chunkMembers(Long.toString(guildId), query, limit);
+        chunkMembers(Long.toString(guildId), query, limit, null);
+    }
+    
+    /**
+     * Request guild members for the given guild.
+     *
+     * @param guildId  Guild to request for.
+     * @param nonce    Nonce to use for knowing which chunks came from which request.
+     * @param _useless Differentiates this method from {@link #chunkMembers(String, String)}.
+     *                 Otherwise useless.
+     */
+    default void chunkMembers(@Nonnull final String guildId, @Nonnull final String nonce, final boolean _useless) {
+        chunkMembers(guildId, "", 0, nonce);
+    }
+    
+    /**
+     * Request guild members for the given guild.
+     *
+     * @param guildId Guild to request for.
+     * @param query   Members returned must have a username starting with this.
+     * @param nonce   Nonce to use for knowing which chunks came from which request.
+     */
+    default void chunkMembers(@Nonnull final String guildId, @Nonnull final String query, @Nonnull final String nonce) {
+        chunkMembers(guildId, query, 0, nonce);
+    }
+    
+    /**
+     * Request guild members for the given guild.
+     *
+     * @param guildId Guild to request for.
+     * @param limit   Maximum number of members to return. 0 for no limit.
+     * @param nonce   Nonce to use for knowing which chunks came from which request.
+     */
+    default void chunkMembers(@Nonnull final String guildId, @Nonnegative final int limit, @Nonnull final String nonce) {
+        chunkMembers(guildId, "", limit, nonce);
     }
     
     /**
@@ -536,8 +570,9 @@ public interface Catnip extends AutoCloseable {
      * @param guildId Guild to request for.
      * @param query   Members returned must have a username starting with this.
      * @param limit   Maximum number of members to return. 0 for no limit.
+     * @param nonce   Nonce to use for knowing which chunks came from which request.
      */
-    void chunkMembers(@Nonnull String guildId, @Nonnull String query, @Nonnegative int limit);
+    void chunkMembers(@Nonnull String guildId, @Nonnull String query, @Nonnegative int limit, @Nullable String nonce);
     
     /**
      * Get the presence for the specified shard.
