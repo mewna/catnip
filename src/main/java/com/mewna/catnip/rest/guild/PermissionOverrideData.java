@@ -109,8 +109,8 @@ public class PermissionOverrideData implements JsonConvertible {
         return JsonObject.builder()
                 .value("id", targetId)
                 .value("type", type.key())
-                .value("allow", Permission.from(allow))
-                .value("deny", Permission.from(deny))
+                .value("allow_new", Permission.from(allow))
+                .value("deny_new", Permission.from(deny))
                 .done();
     }
 }

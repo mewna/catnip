@@ -449,8 +449,8 @@ public final class EntityBuilder {
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .type(OverrideType.byKey(data.getString("type")))
-                .allowRaw(data.getNumber("allow", 0L).longValue())
-                .denyRaw(data.getNumber("deny", 0L).longValue())
+                .allowRaw(Long.parseUnsignedLong(data.getString("allow_new", "0")))
+                .denyRaw(Long.parseUnsignedLong(data.getString("deny_new", "0")))
                 .build());
     }
     
@@ -465,7 +465,7 @@ public final class EntityBuilder {
                 .color(data.getInt("color"))
                 .hoist(data.getBoolean("hoist"))
                 .position(data.getInt("position"))
-                .permissionsRaw(data.getNumber("permissions", 0L).longValue())
+                .permissionsRaw(Long.parseUnsignedLong(data.getString("permissions_new", "0")))
                 .managed(data.getBoolean("managed"))
                 .mentionable(data.getBoolean("mentionable"))
                 .build());
