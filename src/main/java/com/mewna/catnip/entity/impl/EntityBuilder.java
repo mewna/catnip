@@ -425,7 +425,7 @@ public final class EntityBuilder {
     @CheckReturnValue
     public Channel createChannel(@Nonnull final JsonObject data) {
         final ChannelType type = ChannelType.byKey(data.getInt("type"));
-        if(type.isGuild()) {
+        if(type.guild()) {
             return createGuildChannel(data);
         } else {
             return createDMChannel(data);
@@ -902,7 +902,7 @@ public final class EntityBuilder {
                 .reactions(toList(data.getArray("reactions"), e -> createReaction(data.getString("guild_id"), e)))
                 .nonce(String.valueOf(data.get("nonce")))
                 .pinned(data.getBoolean("pinned", false))
-                .type(MessageType.byId(data.getInt("type", MessageType.DEFAULT.getId())))
+                .type(MessageType.byId(data.getInt("type", MessageType.DEFAULT.id())))
                 .member(member)
                 .guildIdAsLong(guildId == null ? 0 : Long.parseUnsignedLong(guildId))
                 .webhookIdAsLong(webhookId == null ? 0 : Long.parseUnsignedLong(webhookId))

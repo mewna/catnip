@@ -47,6 +47,7 @@ import java.util.Set;
  * @author amy
  * @since 1/16/20.
  */
+@SuppressWarnings("unused")
 @Accessors(fluent = true)
 public enum GatewayIntent {
     /**

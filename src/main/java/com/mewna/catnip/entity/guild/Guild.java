@@ -1559,13 +1559,13 @@ public interface Guild extends Snowflake {
                 payload.put("region", region);
             }
             if(verificationLevel != null && (guild == null || verificationLevel != guild.verificationLevel())) {
-                payload.put("verification_level", verificationLevel.getKey());
+                payload.put("verification_level", verificationLevel.key());
             }
             if(defaultMessageNotifications != null && (guild == null || defaultMessageNotifications != guild.defaultMessageNotifications())) {
-                payload.put("default_message_notifications", defaultMessageNotifications.getKey());
+                payload.put("default_message_notifications", defaultMessageNotifications.key());
             }
             if(explicitContentFilter != null && (guild == null || explicitContentFilter != guild.explicitContentFilter())) {
-                payload.put("explicit_content_filter", explicitContentFilter.getKey());
+                payload.put("explicit_content_filter", explicitContentFilter.key());
             }
             if(afkChannelId != null && (guild == null || !Objects.equals(afkChannelId, guild.afkChannelId()))) {
                 payload.put("afk_channel_id", afkChannelId);

@@ -337,8 +337,8 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         
         if(closeCode == GatewayCloseCode.INVALID_SEQ.code() || closeCode == GatewayCloseCode.SESSION_TIMEOUT.code()) {
             // These two close codes invalidate your session (and afaik do not send an OP9).
-            catnip.options().sessionManager().clearSeqnum(shardInfo.getId());
-            catnip.options().sessionManager().clearSession(shardInfo.getId());
+            catnip.options().sessionManager().clearSeqnum(shardInfo.id());
+            catnip.options().sessionManager().clearSession(shardInfo.id());
             catnip.dispatchManager().dispatchEvent(Raw.SESSION_INVALIDATED, shardInfo);
         }
         if(closedByClient) {
@@ -476,7 +476,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                     socket.sendClose(4000, "Heartbeat zombie");
                     return;
                 }
-                sendToSocket(basePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().seqnum(shardInfo.getId())));
+                sendToSocket(basePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().seqnum(shardInfo.id())));
                 lastHeartbeat = System.nanoTime();
                 heartbeatAcked = false;
             } else {
@@ -487,7 +487,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         heartbeatTask.set(taskId);
         
         // Check if we can RESUME instead
-        if(catnip.sessionManager().session(shardInfo.getId()) != null && catnip.sessionManager().seqnum(shardInfo.getId()) > 0) {
+        if(catnip.sessionManager().session(shardInfo.id()) != null && catnip.sessionManager().seqnum(shardInfo.id()) > 0) {
             // Some useful notes on how RESUME works, based off of some
             // commentary from Jake in DAPI.
             // tldr, RESUME works as long as you're not trying to RESUME too
@@ -522,13 +522,13 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         }
         
         if(event.get("s") != null) {
-            catnip.sessionManager().seqnum(shardInfo.getId(), event.getInt("s"));
+            catnip.sessionManager().seqnum(shardInfo.id(), event.getInt("s"));
         }
         
         switch(type) {
             case "READY": {
                 lifecycleState = LOGGED_IN;
-                catnip.sessionManager().session(shardInfo.getId(), data.getString("session_id"));
+                catnip.sessionManager().session(shardInfo.id(), data.getString("session_id"));
                 // Reply after IDENTIFY ratelimit
                 catnip.dispatchManager().dispatchEvent(Raw.IDENTIFIED, shardInfo);
                 stateReply(ShardConnectState.READY);
@@ -549,12 +549,12 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         // This allows a buffer to know WHERE an event is coming from, so that
         // it can be accurate in the case of ex. buffering events until a shard
         // has finished booting.
-        event.put("shard", JsonObject.builder().value("id", shardInfo.getId()).value("limit", shardInfo.getLimit()).done());
+        event.put("shard", JsonObject.builder().value("id", shardInfo.id()).value("limit", shardInfo.limit()).done());
         catnip.eventBuffer().buffer(event);
     }
     
     private void handleHeartbeat() {
-        sendToSocket(basePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().seqnum(shardInfo.getId())));
+        sendToSocket(basePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().seqnum(shardInfo.id())));
     }
     
     private void handleHeartbeatAck() {
@@ -572,9 +572,9 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                 catnip.logAdapter().info("Session invalidated (OP 9), clearing shard data and reconnecting");
             }
             
-            catnip.cacheWorker().invalidateShard(shardInfo.getId());
-            catnip.sessionManager().clearSession(shardInfo.getId());
-            catnip.sessionManager().clearSeqnum(shardInfo.getId());
+            catnip.cacheWorker().invalidateShard(shardInfo.id());
+            catnip.sessionManager().clearSession(shardInfo.id());
+            catnip.sessionManager().clearSeqnum(shardInfo.id());
             catnip.dispatchManager().dispatchEvent(Raw.SESSION_INVALIDATED, shardInfo);
             
             closedByClient = true;
@@ -598,7 +598,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     private void addToConnectQueue() {
-        catnip.shardManager().addToConnectQueue(shardInfo.getId());
+        catnip.shardManager().addToConnectQueue(shardInfo.id());
     }
     
     private JsonObject identify() {
@@ -609,8 +609,8 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                 .value("large_threshold", catnip.options().largeThreshold())
                 // .value("intents", GatewayIntent.from(catnip.options().intents()))
                 .array("shard")
-                    .value(shardInfo.getId())
-                    .value(shardInfo.getLimit())
+                    .value(shardInfo.id())
+                    .value(shardInfo.limit())
                 .end()
                 .object("properties")
                     .value("$os", "JVM")
@@ -638,8 +638,8 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         // @formatter:off
         return basePayload(GatewayOp.RESUME, JsonObject.builder()
                 .value("token", catnip.options().token())
-                .value("session_id", catnip.sessionManager().session(shardInfo.getId()))
-                .value("seq", catnip.sessionManager().seqnum(shardInfo.getId()))
+                .value("session_id", catnip.sessionManager().session(shardInfo.id()))
+                .value("seq", catnip.sessionManager().seqnum(shardInfo.id()))
                 .object("properties")
                     .value("$os", "JVM")
                     .value("$browser", "catnip")

@@ -214,7 +214,7 @@ public class RestWebhook extends RestHandler {
             } else {
                 final JsonArray parseList = new JsonArray();
                 for(final MentionParseFlag p : parse) {
-                    parseList.add(p.getName());
+                    parseList.add(p.flagName());
                 }
                 allowedMentions.put("parse", parseList);
                 //If either list is present along with the respective parse option, validation fails. The contains check avoids this.

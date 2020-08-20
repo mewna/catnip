@@ -642,7 +642,7 @@ public class RestGuild extends RestHandler {
         }
         
         if(type != null) {
-            builder.append("action_type", Integer.toString(type.getValue()));
+            builder.append("action_type", Integer.toString(type.value()));
         }
         
         final String query = builder.build();
