@@ -29,6 +29,7 @@ package com.mewna.catnip.rest.handler;
 
 import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
+import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.guild.*;
 import com.mewna.catnip.entity.guild.Guild.GuildEditFields;
@@ -52,8 +53,11 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static com.mewna.catnip.util.JsonUtil.mapObjectContents;
 
@@ -574,13 +578,27 @@ public class RestGuild extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public Single<Integer> getGuildPruneCount(@Nonnull final String guildId, @Nonnegative final int days) {
-        return Single.fromObservable(getGuildPruneCountRaw(guildId, days).map(e -> e.getInt("pruned")));
+        return Single.fromObservable(getGuildPruneCountRaw(guildId, days, List.of()).map(e -> e.getInt("pruned")));
     }
     
     @Nonnull
     @CheckReturnValue
-    public Observable<JsonObject> getGuildPruneCountRaw(@Nonnull final String guildId, @Nonnegative final int days) {
-        final String query = new QueryStringBuilder().append("days", Integer.toString(days)).build();
+    public Single<Integer> getGuildPruneCount(@Nonnull final String guildId, @Nonnegative final int days,
+                                              @Nonnull final Collection<Role> includeRoles) {
+        return Single.fromObservable(getGuildPruneCountRaw(guildId, days, includeRoles).map(e -> e.getInt("pruned")));
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Observable<JsonObject> getGuildPruneCountRaw(@Nonnull final String guildId, @Nonnegative final int days,
+                                                        @Nonnull final Collection<Role> includeRoles) {
+        final var builder = new QueryStringBuilder().append("days", Integer.toString(days));
+        if(!includeRoles.isEmpty()) {
+            builder.append("include_roles", includeRoles.stream()
+                    .map(Snowflake::id)
+                    .collect(Collectors.joining(",")));
+        }
+        final var query = builder.build();
         return catnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_PRUNE_COUNT
                 .withMajorParam(guildId).withQueryString(query), Map.of()))
                 .map(ResponsePayload::object);
