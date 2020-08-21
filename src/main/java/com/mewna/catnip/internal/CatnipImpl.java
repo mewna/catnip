@@ -329,15 +329,8 @@ public class CatnipImpl implements Catnip {
             return fetchGatewayInfo()
                     .map(gateway -> {
                         logAdapter().info("Token validated!");
-<<<<<<< HEAD
-                        parseClientId();
-                        // This is actually needed because generics are dumb
-=======
-                        
                         clientIdAsLong = Catnip.parseIdFromToken(token);
-                        
                         // this is actually needed because generics are dumb
->>>>>>> a837a0627b8fd98257286951b98ab90a09a04015
                         return (Catnip) this;
                     }).doOnError(e -> {
                         logAdapter().warn("Couldn't validate token!", e);
