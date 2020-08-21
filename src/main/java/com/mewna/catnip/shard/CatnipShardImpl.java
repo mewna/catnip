@@ -167,8 +167,8 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             message = null;
         } else if(state == FAILED || state == CANCEL || state == INVALID) {
             catnip.logAdapter().debug("Shard {} stating {}, and no reply possible; manually appending to queue.",
-                    shardInfo.getId(), state);
-            catnip.logAdapter().debug("Shard {} socket open?: {}", shardInfo.getId(), socketOpen);
+                    shardInfo.id(), state);
+            catnip.logAdapter().debug("Shard {} socket open?: {}", shardInfo.id(), socketOpen);
             addToConnectQueue();
         }
     }
