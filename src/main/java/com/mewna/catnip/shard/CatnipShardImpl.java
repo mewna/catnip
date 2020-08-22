@@ -68,6 +68,7 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterOutputStream;
 
 import static com.mewna.catnip.shard.LifecycleState.*;
+import static com.mewna.catnip.shard.ShardConnectState.*;
 
 /**
  * A catnip shard encapsulates a single websocket connection to Discord's
@@ -187,7 +188,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             }
             catnip.dispatchManager().dispatchEvent(Raw.GATEWAY_WEBSOCKET_CONNECTION_FAILED,
                     new GatewayConnectionFailedImpl(shardInfo, t, catnip));
-            stateReply(ShardConnectState.FAILED);
+            stateReply(FAILED);
             return null;
         });
     }
@@ -255,7 +256,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             } catch(final JsonParserException e) {
                 catnip.logAdapter().error("Shard {}: Error parsing payload", shardInfo, e);
                 // TODO
-                stateReply(ShardConnectState.FAILED);
+                stateReply(FAILED);
             } finally {
                 socketInputBuffer.setLength(0);
             }
@@ -284,10 +285,10 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                 handleSocketData(JsonParser.object().from(buffer.toString(StandardCharsets.UTF_8)));
             } catch(final IOException e) {
                 catnip.logAdapter().error("Shard {}: Error decompressing payload", shardInfo, e);
-                disconnectFromSocket(ShardConnectState.FAILED);
+                disconnectFromSocket(FAILED);
             } catch(final JsonParserException e) {
                 catnip.logAdapter().error("Shard {}: Error parsing payload", shardInfo, e);
-                disconnectFromSocket(ShardConnectState.FAILED);
+                disconnectFromSocket(FAILED);
             }
         }
         socket.request(1L);
@@ -306,7 +307,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         if(socketOpen) {
             addToConnectQueue();
         } else {
-            stateReply(ShardConnectState.FAILED);
+            stateReply(FAILED);
         }
     }
     
@@ -369,7 +370,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         if(socketOpen) {
             addToConnectQueue();
         } else {
-            stateReply(ShardConnectState.FAILED);
+            stateReply(FAILED);
         }
         return null;
     }
@@ -404,7 +405,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     
     @Override
     public void disconnect() {
-        disconnectFromSocket(ShardConnectState.CANCEL);
+        disconnectFromSocket(CANCEL);
     }
     
     private void disconnectFromSocket(final ShardConnectState connectState) {
@@ -422,7 +423,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         if(socketOpen) {
             addToConnectQueue();
         } else {
-            stateReply(ShardConnectState.CANCEL);
+            stateReply(CANCEL);
         }
     }
     
@@ -531,14 +532,14 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                 catnip.sessionManager().session(shardInfo.id(), data.getString("session_id"));
                 // Reply after IDENTIFY ratelimit
                 catnip.dispatchManager().dispatchEvent(Raw.IDENTIFIED, shardInfo);
-                stateReply(ShardConnectState.READY);
+                stateReply(READY);
                 break;
             }
             case "RESUMED": {
                 lifecycleState = LOGGED_IN;
                 // RESUME is fine, just reply immediately
                 catnip.dispatchManager().dispatchEvent(Raw.RESUMED, shardInfo);
-                stateReply(ShardConnectState.RESUMED);
+                stateReply(RESUMED);
                 break;
             }
             default: {
@@ -550,7 +551,14 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         // it can be accurate in the case of ex. buffering events until a shard
         // has finished booting.
         event.put("shard", JsonObject.builder().value("id", shardInfo.id()).value("limit", shardInfo.limit()).done());
-        catnip.eventBuffer().buffer(event);
+        try {
+            catnip.eventBuffer().buffer(event);
+        } catch(final Exception e) {
+            catnip.logAdapter().error("Uncaught exception buffering event! Dumping raw event and reconnecting.");
+            catnip.logAdapter().error("Raw event:\n{}", JsonWriter.string(event));
+            catnip.logAdapter().error("Relevant exception:", e);
+            disconnectFromSocket(INVALID);
+        }
     }
     
     private void handleHeartbeat() {
@@ -580,7 +588,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             closedByClient = true;
         }
         
-        stateReply(ShardConnectState.INVALID);
+        stateReply(INVALID);
         
         if(socket != null && socketOpen) {
             socket.sendClose(1000, "Reconnecting...");
