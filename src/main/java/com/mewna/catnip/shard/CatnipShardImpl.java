@@ -552,7 +552,14 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         // it can be accurate in the case of ex. buffering events until a shard
         // has finished booting.
         event.put("shard", JsonObject.builder().value("id", shardInfo.id()).value("limit", shardInfo.limit()).done());
-        catnip.eventBuffer().buffer(event);
+        try {
+            catnip.eventBuffer().buffer(event);
+        } catch(final Exception e) {
+            catnip.logAdapter().error("Uncaught exception buffering event! Dumping raw event and reconnecting.");
+            catnip.logAdapter().error("Raw event:\n{}", JsonWriter.string(event));
+            catnip.logAdapter().error("Relevant exception:", e);
+            disconnectFromSocket(INVALID);
+        }
     }
     
     private void handleHeartbeat() {
