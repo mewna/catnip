@@ -193,7 +193,11 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             }
             catnip.dispatchManager().dispatchEvent(Raw.GATEWAY_WEBSOCKET_CONNECTION_FAILED,
                     new GatewayConnectionFailedImpl(shardInfo, t, catnip));
-            stateReply(FAILED);
+            if(socketOpen) {
+                addToConnectQueue();
+            } else {
+                stateReply(FAILED);
+            }
             return null;
         });
     }
