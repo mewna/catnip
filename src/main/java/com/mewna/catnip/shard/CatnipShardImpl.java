@@ -593,10 +593,10 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             closedByClient = true;
         }
         
-        stateReply(INVALID);
-        
         if(socket != null && socketOpen) {
             socket.sendClose(1000, "Reconnecting...");
+        } else {
+            stateReply(INVALID);
         }
     }
     
@@ -641,6 +641,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         } else if(catnip.options().apiVersion() == 7) {
             data.put("intents", GatewayIntent.from(catnip.options().intents()));
         }
+        //noinspection ConstantConditions
         if(catnip.options().customIdentifyOptions() != null) {
             catnip.options().customIdentifyOptions().forEach(data::put);
         }
