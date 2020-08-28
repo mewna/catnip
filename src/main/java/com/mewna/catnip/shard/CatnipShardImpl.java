@@ -165,6 +165,11 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         if(message != null) {
             message.onSuccess(state);
             message = null;
+        } else if(state == FAILED || state == CANCEL || state == INVALID) {
+            catnip.logAdapter().debug("Shard {} stating {}, and no reply possible; manually appending to queue.",
+                    shardInfo.id(), state);
+            catnip.logAdapter().debug("Shard {} socket open?: {}", shardInfo.id(), socketOpen);
+            addToConnectQueue();
         }
     }
     
@@ -188,7 +193,11 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             }
             catnip.dispatchManager().dispatchEvent(Raw.GATEWAY_WEBSOCKET_CONNECTION_FAILED,
                     new GatewayConnectionFailedImpl(shardInfo, t, catnip));
-            stateReply(FAILED);
+            if(socketOpen) {
+                addToConnectQueue();
+            } else {
+                stateReply(FAILED);
+            }
             return null;
         });
     }
@@ -367,11 +376,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                 }
             }
         }
-        if(socketOpen) {
-            addToConnectQueue();
-        } else {
-            stateReply(FAILED);
-        }
+        stateReply(FAILED);
         return null;
     }
     
@@ -588,10 +593,10 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             closedByClient = true;
         }
         
-        stateReply(INVALID);
-        
         if(socket != null && socketOpen) {
             socket.sendClose(1000, "Reconnecting...");
+        } else {
+            stateReply(INVALID);
         }
     }
     
@@ -636,6 +641,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         } else if(catnip.options().apiVersion() == 7) {
             data.put("intents", GatewayIntent.from(catnip.options().intents()));
         }
+        //noinspection ConstantConditions
         if(catnip.options().customIdentifyOptions() != null) {
             catnip.options().customIdentifyOptions().forEach(data::put);
         }

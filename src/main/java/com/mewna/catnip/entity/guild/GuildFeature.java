@@ -39,6 +39,9 @@ public enum GuildFeature {
     VANITY_URL,
     VERIFIED,
     PARTNERED,
+    /**
+     * Replaced by {@link #DISCOVERABLE}
+     */
     @Deprecated
     LURKABLE,
     COMMERCE,
@@ -49,8 +52,9 @@ public enum GuildFeature {
     ANIMATED_ICON,
     BANNER,
     /**
-     * Replaces {@link #LURKABLE}. See https://github.com/discordapp/discord-api-docs/issues/1117#issuecomment-533757618
+     * Replaced by {@link #COMMUNITY}. See https://github.com/discord/discord-api-docs/pull/1763
      */
+    @Deprecated
     PUBLIC,
     /**
      * See https://github.com/mewna/catnip/issues/392
