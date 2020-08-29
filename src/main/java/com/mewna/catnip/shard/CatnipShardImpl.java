@@ -211,7 +211,9 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         }
         
         final GatewayOp op = GatewayOp.byId(payload.getInt("op"));
-        catnip.logAdapter().trace("Received:\n{}", JsonWriter.string(payload));
+        if(!(DiscordEvent.Raw.PRESENCE_UPDATE.equals(payload.getString("t")))) {
+            catnip.logAdapter().trace("Received:\n{}", JsonWriter.string(payload));
+        }
         switch(op) {
             case HELLO: {
                 handleHello(payload);
