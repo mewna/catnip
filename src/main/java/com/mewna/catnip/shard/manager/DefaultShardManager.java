@@ -115,7 +115,9 @@ public class DefaultShardManager extends AbstractShardManager {
         
         consumers.add(catnip().dispatchManager().<GatewayClosed>createConsumer(Raw.GATEWAY_WEBSOCKET_CLOSED).handler(gatewayClosed -> {
             catnip().logAdapter().info("Shard {} closed, re-queuing...", gatewayClosed.shardInfo().id());
-            addToConnectQueue(gatewayClosed.shardInfo().id());
+            if(!connectQueue.queue().contains(gatewayClosed.shardInfo().id())) {
+                addToConnectQueue(gatewayClosed.shardInfo().id());
+            }
         }));
         
         final Single<GatewayInfo> gatewayInfoCompletableFuture;
@@ -229,6 +231,8 @@ public class DefaultShardManager extends AbstractShardManager {
     
     @Override
     public void addToConnectQueue(@Nonnegative final int shard) {
+        catnip().logAdapter().debug("Queuing shard -> {}, full queue -> {}", shard, connectQueue.queue());
+        catnip().logAdapter().debug("Stacktrace:", new Throwable("Shard queue stacktrace"));
         if(!connectQueue.offer(shard)) {
             catnip().logAdapter().warn("Ignoring duplicate queue for shard {}", shard);
         }

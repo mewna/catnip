@@ -111,6 +111,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     private volatile boolean connected;
     private volatile boolean socketOpen;
     private volatile boolean closedByClient;
+    private volatile boolean needsRequeue = true;
     private WebSocket socket;
     private SingleEmitter<ShardConnectState> message;
     private LifecycleState lifecycleState;
@@ -210,6 +211,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         }
         
         final GatewayOp op = GatewayOp.byId(payload.getInt("op"));
+        catnip.logAdapter().trace("Received:\n{}", JsonWriter.string(payload));
         switch(op) {
             case HELLO: {
                 handleHello(payload);
@@ -428,7 +430,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         if(socketOpen) {
             addToConnectQueue();
         } else {
-            stateReply(CANCEL);
+            stateReply(connectState);
         }
     }
     
@@ -446,7 +448,9 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                     payload = hook.rawGatewaySendHook(shardInfo, payload);
                 }
             }
-            socket.sendText(JsonWriter.string(payload), true);
+            final var json = JsonWriter.string(payload);
+            catnip.logAdapter().trace("Sending payload:\n{}", json);
+            socket.sendText(json, true);
         }
     }
     
@@ -611,7 +615,10 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     private void addToConnectQueue() {
-        catnip.shardManager().addToConnectQueue(shardInfo.id());
+        if(needsRequeue) {
+            needsRequeue = false;
+            catnip.shardManager().addToConnectQueue(shardInfo.id());
+        }
     }
     
     private JsonObject identify() {
