@@ -210,11 +210,9 @@ public class DefaultShardManager extends AbstractShardManager {
                     break;
                 case FAILED:
                     catnip().logAdapter().error("Failed connecting shard {}(/{}), re-queueing...", id, shardCount);
-                    addToConnectQueue(id);
                     break;
                 case INVALID:
                     catnip().logAdapter().error("Invalid session on shard {}(/{}), re-queueing...", id, shardCount);
-                    addToConnectQueue(id);
                     break;
                 case CANCEL:
                     break; // do nothing
