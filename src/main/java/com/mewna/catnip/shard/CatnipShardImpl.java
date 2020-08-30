@@ -163,6 +163,9 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     private void stateReply(@Nonnull final ShardConnectState state) {
+        if(lifecycleState == DEAD) {
+            return;
+        }
         if(message != null) {
             message.onSuccess(state);
             message = null;
@@ -349,8 +352,11 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             catnip.logAdapter().error("Shard {}: Failure closing socket:", shardInfo, e);
         }
         
-        if(closeCode == GatewayCloseCode.INVALID_SEQ.code() || closeCode == GatewayCloseCode.SESSION_TIMEOUT.code()) {
-            // These two close codes invalidate your session (and afaik do not send an OP9).
+        if(closeCode == GatewayCloseCode.INVALID_SEQ.code()
+                || closeCode == GatewayCloseCode.SESSION_TIMEOUT.code()
+                // 1000 invalidates your session
+                || closeCode == 1000) {
+            // These two close codes invalidate your session (and afaik do not send an OP 9).
             catnip.options().sessionManager().clearSeqnum(shardInfo.id());
             catnip.options().sessionManager().clearSession(shardInfo.id());
             catnip.dispatchManager().dispatchEvent(Raw.SESSION_INVALIDATED, shardInfo);
@@ -381,6 +387,8 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             }
         }
         stateReply(FAILED);
+        lifecycleState = DEAD;
+        // TODO: Add lifecycle = DEAD event
         return null;
     }
     
