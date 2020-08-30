@@ -211,7 +211,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         }
         
         final GatewayOp op = GatewayOp.byId(payload.getInt("op"));
-        if(!(DiscordEvent.Raw.PRESENCE_UPDATE.equals(payload.getString("t")))) {
+        if(!DiscordEvent.Raw.PRESENCE_UPDATE.equals(payload.getString("t"))) {
             catnip.logAdapter().trace("Received:\n{}", JsonWriter.string(payload));
         }
         switch(op) {
@@ -611,7 +611,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         if(socket != null) {
             closedByClient = true;
             if(socketOpen) {
-                socket.sendClose(1000, "Reconnecting...");
+                socket.sendClose(4000, "Reconnecting...");
             }
         }
     }
