@@ -114,6 +114,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     private volatile boolean needsRequeue = true;
     private WebSocket socket;
     private SingleEmitter<ShardConnectState> message;
+    @Getter
     private LifecycleState lifecycleState;
     
     public CatnipShardImpl(@Nonnull final Catnip catnip, @Nonnegative final int id, @Nonnegative final int limit,
@@ -395,12 +396,6 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     @Override
     public boolean isConnected() {
         return socket != null && socketOpen;
-    }
-    
-    @Nonnull
-    @Override
-    public LifecycleState lifecycleState() {
-        return lifecycleState;
     }
     
     @Override

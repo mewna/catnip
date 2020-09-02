@@ -168,7 +168,6 @@ public class DefaultShardManager extends AbstractShardManager {
     }
     
     private void startShard(final int id) {
-        undeploy(id);
         catnip().logAdapter().info("Connecting shard {} (queue len {})", id, connectQueue.size());
         
         final CatnipShard catnipShard = new CatnipShardImpl(catnip(), id, shardCount, catnip().options().initialPresence());
@@ -180,13 +179,6 @@ public class DefaultShardManager extends AbstractShardManager {
         } catch(final Exception e) {
             catnip().logAdapter().error("Deploying shard {} failed, re-queueing!", id, e);
             addToConnectQueue(id);
-        }
-    }
-    
-    private void undeploy(final int id) {
-        final CatnipShard shard = shards.remove(id);
-        if(shard != null) {
-            shard.disconnect();
         }
     }
     
@@ -257,7 +249,7 @@ public class DefaultShardManager extends AbstractShardManager {
         
         final int id = connectQueue.peek();
         catnip().logAdapter().debug("Peeked id {} off of connect queue", id);
-    
+        
         if(conditions().isEmpty()) {
             connectNextShard();
         } else {
