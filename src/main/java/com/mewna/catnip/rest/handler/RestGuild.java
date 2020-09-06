@@ -477,13 +477,14 @@ public class RestGuild extends RestHandler {
             return Completable.fromFuture(future);
         }
         
-        final QueryStringBuilder builder = new QueryStringBuilder();
-        builder.append("reason", reason == null ? "" : reason);
-        builder.append("delete-message-days", String.valueOf(deleteMessageDays));
-        final String query = builder.build();
         return Completable.fromObservable(catnip().requester()
-                .queue(new OutboundRequest(Routes.CREATE_GUILD_BAN.withMajorParam(guildId).withQueryString(query),
-                        Map.of("user", userId)).reason(reason).emptyBody(true)));
+                .queue(new OutboundRequest(Routes.CREATE_GUILD_BAN.withMajorParam(guildId),
+                        Map.of("user", userId),
+                        JsonObject.builder()
+                                .value("reason", reason)
+                                .value("delete-message-days", String.valueOf(deleteMessageDays))
+                                .done()
+                ).reason(reason).emptyBody(true)));
     }
     
     @Nonnull
