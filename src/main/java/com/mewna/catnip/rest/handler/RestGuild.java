@@ -469,6 +469,12 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     public Completable createGuildBan(@Nonnull final String guildId, @Nonnull final String userId,
+                                      @Nonnegative final int deleteMessageDays) {
+        return createGuildBan(guildId, userId, null, deleteMessageDays);
+    }
+    
+    @Nonnull
+    public Completable createGuildBan(@Nonnull final String guildId, @Nonnull final String userId,
                                       @Nullable final String reason,
                                       @Nonnegative final int deleteMessageDays) {
         if(deleteMessageDays > 7) {
@@ -481,16 +487,9 @@ public class RestGuild extends RestHandler {
                 .queue(new OutboundRequest(Routes.CREATE_GUILD_BAN.withMajorParam(guildId),
                         Map.of("user", userId),
                         JsonObject.builder()
-                                .value("reason", reason)
                                 .value("delete-message-days", String.valueOf(deleteMessageDays))
                                 .done()
                 ).reason(reason).emptyBody(true)));
-    }
-    
-    @Nonnull
-    public Completable createGuildBan(@Nonnull final String guildId, @Nonnull final String userId,
-                                      @Nonnegative final int deleteMessageDays) {
-        return createGuildBan(guildId, userId, null, deleteMessageDays);
     }
     
     @Nonnull
