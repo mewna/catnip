@@ -488,8 +488,9 @@ public class RestGuild extends RestHandler {
                         Map.of("user", userId),
                         JsonObject.builder()
                                 .value("delete-message-days", String.valueOf(deleteMessageDays))
+                                .value("reason", reason)
                                 .done()
-                ).reason(reason).emptyBody(true)));
+                ).reason(reason)));
     }
     
     @Nonnull
