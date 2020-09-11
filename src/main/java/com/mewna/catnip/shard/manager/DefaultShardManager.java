@@ -115,7 +115,9 @@ public class DefaultShardManager extends AbstractShardManager {
         
         consumers.add(catnip().dispatchManager().<GatewayClosed>createConsumer(Raw.GATEWAY_WEBSOCKET_CLOSED).handler(gatewayClosed -> {
             catnip().logAdapter().info("Shard {} closed, re-queuing...", gatewayClosed.shardInfo().id());
-            addToConnectQueue(gatewayClosed.shardInfo().id());
+            if(!connectQueue.queue().contains(gatewayClosed.shardInfo().id())) {
+                addToConnectQueue(gatewayClosed.shardInfo().id());
+            }
         }));
         
         final Single<GatewayInfo> gatewayInfoCompletableFuture;
@@ -166,7 +168,6 @@ public class DefaultShardManager extends AbstractShardManager {
     }
     
     private void startShard(final int id) {
-        undeploy(id);
         catnip().logAdapter().info("Connecting shard {} (queue len {})", id, connectQueue.size());
         
         final CatnipShard catnipShard = new CatnipShardImpl(catnip(), id, shardCount, catnip().options().initialPresence());
@@ -178,13 +179,6 @@ public class DefaultShardManager extends AbstractShardManager {
         } catch(final Exception e) {
             catnip().logAdapter().error("Deploying shard {} failed, re-queueing!", id, e);
             addToConnectQueue(id);
-        }
-    }
-    
-    private void undeploy(final int id) {
-        final CatnipShard shard = shards.remove(id);
-        if(shard != null) {
-            shard.disconnect();
         }
     }
     
@@ -208,11 +202,9 @@ public class DefaultShardManager extends AbstractShardManager {
                     break;
                 case FAILED:
                     catnip().logAdapter().error("Failed connecting shard {}(/{}), re-queueing...", id, shardCount);
-                    addToConnectQueue(id);
                     break;
                 case INVALID:
                     catnip().logAdapter().error("Invalid session on shard {}(/{}), re-queueing...", id, shardCount);
-                    addToConnectQueue(id);
                     break;
                 case CANCEL:
                     break; // do nothing
@@ -229,6 +221,8 @@ public class DefaultShardManager extends AbstractShardManager {
     
     @Override
     public void addToConnectQueue(@Nonnegative final int shard) {
+        catnip().logAdapter().debug("Queuing shard -> {}, full queue -> {}", shard, connectQueue.queue());
+        catnip().logAdapter().debug("Stacktrace:", new Throwable("Shard queue stacktrace"));
         if(!connectQueue.offer(shard)) {
             catnip().logAdapter().warn("Ignoring duplicate queue for shard {}", shard);
         }
@@ -255,7 +249,7 @@ public class DefaultShardManager extends AbstractShardManager {
         
         final int id = connectQueue.peek();
         catnip().logAdapter().debug("Peeked id {} off of connect queue", id);
-    
+        
         if(conditions().isEmpty()) {
             connectNextShard();
         } else {

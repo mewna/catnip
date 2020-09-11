@@ -39,4 +39,5 @@ public enum LifecycleState {
     RESUMING,
     LOGGED_IN,
     DISCONNECTED,
+    DEAD,
 }

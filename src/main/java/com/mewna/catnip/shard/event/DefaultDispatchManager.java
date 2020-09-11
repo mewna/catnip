@@ -81,7 +81,8 @@ public class DefaultDispatchManager extends AbstractDispatchManager {
                 if(intents.stream()
                         .map(GatewayIntent::events)
                         .flatMap(Collection::stream)
-                        .noneMatch(address::equals)) {
+                        .noneMatch(address::equals)
+                && !address.startsWith("LIFECYCLE")) {
                     catnip().logAdapter().warn("Listening for event `{}`, but current intents disallow this!",
                             address);
                     catnip().logAdapter().warn("If you know what you're doing, you can suppress this message with the `logEventNotInIntentsWarning` option.");

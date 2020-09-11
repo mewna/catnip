@@ -329,9 +329,7 @@ public class CatnipImpl implements Catnip {
             return fetchGatewayInfo()
                     .map(gateway -> {
                         logAdapter().info("Token validated!");
-                        
                         clientIdAsLong = Catnip.parseIdFromToken(token);
-                        
                         // this is actually needed because generics are dumb
                         return (Catnip) this;
                     }).doOnError(e -> {
@@ -360,7 +358,8 @@ public class CatnipImpl implements Catnip {
         cacheWorker().catnip(this);
         options.requester().catnip(this);
         taskScheduler().catnip(this);
-        final List<GatewayIntent> privilegedIntents = options.intents().stream()
+        final List<GatewayIntent> privilegedIntents = options.intents()
+                .stream()
                 .filter(GatewayIntent::privileged)
                 .collect(Collectors.toList());
         if(!options.enableGuildSubscriptions() && options.intents().isEmpty()) {

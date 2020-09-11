@@ -469,6 +469,12 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     public Completable createGuildBan(@Nonnull final String guildId, @Nonnull final String userId,
+                                      @Nonnegative final int deleteMessageDays) {
+        return createGuildBan(guildId, userId, null, deleteMessageDays);
+    }
+    
+    @Nonnull
+    public Completable createGuildBan(@Nonnull final String guildId, @Nonnull final String userId,
                                       @Nullable final String reason,
                                       @Nonnegative final int deleteMessageDays) {
         if(deleteMessageDays > 7) {
@@ -477,19 +483,14 @@ public class RestGuild extends RestHandler {
             return Completable.fromFuture(future);
         }
         
-        final QueryStringBuilder builder = new QueryStringBuilder();
-        builder.append("reason", reason == null ? "" : reason);
-        builder.append("delete-message-days", String.valueOf(deleteMessageDays));
-        final String query = builder.build();
         return Completable.fromObservable(catnip().requester()
-                .queue(new OutboundRequest(Routes.CREATE_GUILD_BAN.withMajorParam(guildId).withQueryString(query),
-                        Map.of("user", userId)).reason(reason).emptyBody(true)));
-    }
-    
-    @Nonnull
-    public Completable createGuildBan(@Nonnull final String guildId, @Nonnull final String userId,
-                                      @Nonnegative final int deleteMessageDays) {
-        return createGuildBan(guildId, userId, null, deleteMessageDays);
+                .queue(new OutboundRequest(Routes.CREATE_GUILD_BAN.withMajorParam(guildId),
+                        Map.of("user", userId),
+                        JsonObject.builder()
+                                .value("delete-message-days", String.valueOf(deleteMessageDays))
+                                .value("reason", reason)
+                                .done()
+                ).reason(reason)));
     }
     
     @Nonnull
