@@ -29,6 +29,9 @@ package com.mewna.catnip.util;
 
 public final class CatnipMeta {
     public static final String VERSION = "${project.version}";
+    public static final String COMMIT = "${git.commit.id}";
+    public static final String COMMIT_SHORT = "${git.commit.id.abbrev}";
+    public static final String COMMIT_MESSAGE = "${git.commit.message.short}";
     
     private CatnipMeta() {
     }
