@@ -202,9 +202,7 @@
                     Force javadoc to ignore things like "unknown tag: implNote"
                     and "no @param for <C>"
                     -->
-                    <additionalOptions>-Xdoclint:none</additionalOptions>
-                    <!-- Solve it being unable to find $JAVA_HOME for me -->
-                    <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
+                    <additionalOptions>-Xdoclint:none -notimestamp</additionalOptions>
                 </configuration>
                 <executions>
                     <execution>
