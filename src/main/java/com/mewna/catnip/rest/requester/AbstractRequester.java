@@ -67,6 +67,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import static com.mewna.catnip.rest.Routes.HttpMethod.DELETE;
 import static com.mewna.catnip.rest.Routes.HttpMethod.GET;
 
 @SuppressWarnings("WeakerAccess")
@@ -176,16 +177,18 @@ public abstract class AbstractRequester implements Requester {
     
     protected void executeHttpRequest(@Nonnull final Route route, @Nullable final BodyPublisher body,
                                       @Nonnull final QueuedRequest request, @Nonnull final String mediaType) {
-        final Builder builder;
         final String apiHostVersion = catnip.options().apiHost() + "/api/v" + catnip.options().apiVersion();
-        
+        final Builder builder = HttpRequest.newBuilder(URI.create(apiHostVersion + route.baseRoute()));
+    
         if(route.method() == GET) {
             // No body
-            builder = HttpRequest.newBuilder(URI.create(apiHostVersion + route.baseRoute())).GET();
+            builder.GET();
+        } else if(route.method() == DELETE) {
+            // Also no body
+            builder.DELETE();
         } else {
             final var fakeBody = request.request.emptyBody();
-            builder = HttpRequest.newBuilder(URI.create(apiHostVersion + route.baseRoute()))
-                    .setHeader("Content-Type", mediaType)
+            builder.setHeader("Content-Type", mediaType)
                     .method(route.method().name(), fakeBody ? BodyPublishers.ofString(" ") : body);
             if(fakeBody) {
                 // If we don't have a body, then the body param is null, which
