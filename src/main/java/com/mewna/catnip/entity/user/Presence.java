@@ -133,6 +133,7 @@ public interface Presence {
         LISTENING(2),
         WATCHING(3),
         CUSTOM_STATUS(4),
+        COMPETING(5),
         ;
         @Getter
         private final int id;
