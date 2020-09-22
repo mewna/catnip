@@ -297,7 +297,7 @@ public final class DispatchEmitter {
                         // catnip-internal key
                         clone.remove("shard");
                         catnip.logAdapter().warn("Received a presence update for a user with a discriminator of '{}', " +
-                                        "but we should never get this. Discriminators should be clamped to [0000, 9999]." +
+                                        "but we should never get this. Discriminators should be clamped to [0001, 9999]." +
                                         "If you report this to Discord, include the following JSON in your report:\n{}",
                                 discrim, JsonUtil.encodePrettily(clone));
                     }
