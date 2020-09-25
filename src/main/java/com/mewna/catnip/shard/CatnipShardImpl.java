@@ -180,7 +180,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     
     @SuppressWarnings("squid:HiddenFieldCheck")
     private void connectSocket(String url) {
-        url += "?v=6&encoding=json";
+        url += "?v=" + catnip.options().apiVersion() + "&encoding=json";
         if(catnip.options().compressionMode() != CompressionMode.NONE) {
             url += "&compress=" + catnip.options().compressionMode().asDiscord();
         }
