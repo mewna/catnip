@@ -650,7 +650,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         // TODO: Hack: Allow not specifying intents for v6 gateway; remove this when intents required!
         if(catnip.options().apiVersion() == 6 && !catnip.options().intents().isEmpty()) {
             data.put("intents", GatewayIntent.from(catnip.options().intents()));
-        } else if(catnip.options().apiVersion() == 7) {
+        } else if(catnip.options().apiVersion() >= 7) {
             data.put("intents", GatewayIntent.from(catnip.options().intents()));
         }
         //noinspection ConstantConditions
