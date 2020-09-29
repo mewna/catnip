@@ -449,8 +449,8 @@ public final class EntityBuilder {
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .type(OverrideType.byKey(data.getString("type")))
-                .allowRaw(Long.parseUnsignedLong(data.getString("allow_new", "0")))
-                .denyRaw(Long.parseUnsignedLong(data.getString("deny_new", "0")))
+                .allowRaw(Long.parseUnsignedLong(data.getString("allow", "0")))
+                .denyRaw(Long.parseUnsignedLong(data.getString("deny", "0")))
                 .build());
     }
     
@@ -465,7 +465,7 @@ public final class EntityBuilder {
                 .color(data.getInt("color"))
                 .hoist(data.getBoolean("hoist"))
                 .position(data.getInt("position"))
-                .permissionsRaw(Long.parseUnsignedLong(data.getString("permissions_new", "0")))
+                .permissionsRaw(Long.parseUnsignedLong(data.getString("permissions", "0")))
                 .managed(data.getBoolean("managed"))
                 .mentionable(data.getBoolean("mentionable"))
                 .tags(createRoleTags(data))
@@ -1068,7 +1068,7 @@ public final class EntityBuilder {
                 .splash(data.getString("splash"))
                 .owned(data.getBoolean("owner", false))
                 .ownerIdAsLong(Long.parseUnsignedLong(data.getString("owner_id")))
-                .permissions(Permission.toSet(data.getNumber("permissions", 0L).longValue()))
+                .permissions(Permission.toSet(Long.parseUnsignedLong(data.getString("permissions", "0"))))
                 .region(data.getString("region"))
                 .afkChannelIdAsLong(afkChannelId == null ? 0 : Long.parseUnsignedLong(afkChannelId))
                 .afkTimeout(data.getInt("afk_timeout", 0))
@@ -1119,7 +1119,7 @@ public final class EntityBuilder {
                 .name(data.getString("name"))
                 .icon(data.getString("icon"))
                 .owned(data.getBoolean("owner", false))
-                .permissions(Permission.toSet(data.getNumber("permissions", 0L).longValue()))
+                .permissions(Permission.toSet(Long.parseUnsignedLong(data.getString("permissions", "0"))))
                 .build());
     }
     
