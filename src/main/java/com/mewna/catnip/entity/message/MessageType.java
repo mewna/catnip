@@ -54,6 +54,7 @@ public enum MessageType {
     GUILD_DISCOVERY_REQUALIFIED(15),
     GUILD_DISCOVERY_GRACE_PERIOD_INITIAL_WARNING(16),
     GUILD_DISCOVERY_GRACE_PERIOD_FINAL_WARNING(17),
+    REPLY(19),
     ;
     @Getter
     private final int id;
