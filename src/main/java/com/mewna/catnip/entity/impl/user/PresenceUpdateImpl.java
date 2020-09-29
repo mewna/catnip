@@ -62,15 +62,8 @@ public class PresenceUpdateImpl implements PresenceUpdate, RequiresCatnip, Times
     private OnlineStatus mobileStatus;
     private OnlineStatus webStatus;
     private OnlineStatus desktopStatus;
-    private String premiumSince;
     
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
-    }
-    
-    @Nullable
-    @Override
-    public OffsetDateTime premiumSince() {
-        return parseTimestamp(premiumSince);
     }
 }

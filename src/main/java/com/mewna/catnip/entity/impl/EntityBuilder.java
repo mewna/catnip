@@ -538,8 +538,6 @@ public final class EntityBuilder {
                 .activities(toList(data.getArray("activities", new JsonArray()), this::createActivity))
                 .idAsLong(Long.parseUnsignedLong(data.getObject("user").getString("id")))
                 .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id")))
-                .roles(toStringSet(data.getArray("roles")))
-                .nick(data.getString("nick"))
                 .mobileStatus(mobileStatusString != null ? OnlineStatus.fromString(mobileStatusString) : null)
                 .webStatus(webStatusString != null ? OnlineStatus.fromString(webStatusString) : null)
                 .desktopStatus(desktopStatusString != null ? OnlineStatus.fromString(desktopStatusString) : null)

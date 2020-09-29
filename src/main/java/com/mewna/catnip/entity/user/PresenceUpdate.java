@@ -41,18 +41,6 @@ import java.util.Set;
  */
 public interface PresenceUpdate extends Presence, GuildEntity, Snowflake {
     /**
-     * @return Roles the user has.
-     */
-    @Nonnull
-    Set<String> roles();
-    
-    /**
-     * @return Nickname of the user.
-     */
-    @Nullable
-    String nick();
-    
-    /**
      * @return Online status reported for the user's mobile device.
      */
     @Nullable
@@ -69,10 +57,4 @@ public interface PresenceUpdate extends Presence, GuildEntity, Snowflake {
      */
     @Nullable
     OnlineStatus desktopStatus();
-    
-    /**
-     * @return When the user started boosting this server.
-     */
-    @Nullable
-    OffsetDateTime premiumSince();
 }
