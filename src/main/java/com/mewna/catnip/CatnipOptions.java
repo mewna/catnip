@@ -98,7 +98,7 @@ public final class CatnipOptions implements CatnipOptionsView, Cloneable {
     private Set<CacheFlag> cacheFlags = EnumSet.noneOf(CacheFlag.class);
     @Nonnull
     private DispatchManager dispatchManager = new DefaultDispatchManager();
-    private boolean chunkMembers = true;
+    private boolean chunkMembers;
     private boolean emitEventObjects = true;
     private boolean enforcePermissions = true;
     @Nullable
