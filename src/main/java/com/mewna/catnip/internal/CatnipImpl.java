@@ -87,11 +87,8 @@ public class CatnipImpl implements Catnip {
     private CatnipOptions options;
     
     public CatnipImpl(@Nonnull final CatnipOptions options) {
+        sanityCheckOptions(options);
         this.options = options;
-        // Check as soon as possible
-        if(options.apiVersion() < 8) {
-            throw new IllegalArgumentException("Minimum required API version is v8!");
-        }
         
         token = options.token();
         logExtensionOverrides = options.logExtensionOverrides();
@@ -115,6 +112,12 @@ public class CatnipImpl implements Catnip {
         }
         if(options.highLatencyThreshold() < 0) {
             throw new IllegalArgumentException("High latency threshold of " + options.highLatencyThreshold() + " not greater than zero!");
+        }
+        if(options.apiVersion() < 8) {
+            throw new IllegalArgumentException("Minimum required API version is v8!");
+        }
+        if(options.intents().isEmpty()) {
+            throw new IllegalArgumentException("Intents are required, but you didn't provide any! Are you *sure* you want a bot that can't do anything?");
         }
     }
     

@@ -40,7 +40,8 @@ import static com.mewna.catnip.rest.Routes.HttpMethod.*;
  * @author amy
  * @since 8/31/18.
  */
-@SuppressWarnings({"StaticVariableOfConcreteClass", "WeakerAccess", "unused"})
+// This is a necessary suppression, fuck off IJ
+@SuppressWarnings({"StaticVariableOfConcreteClass", "WeakerAccess", "unused", "RedundantSuppression"})
 public final class Routes {
     // @formatter:off
     public static final Route GET_GATEWAY_BOT                     = new Route(GET,    "/gateway/bot");
