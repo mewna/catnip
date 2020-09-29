@@ -93,4 +93,19 @@ class RxTaskSchedulerTest {
         tasker.cancel(task1);
         assertEquals(7, test[0]);
     }
+    
+    @Test
+    void taskIdsIncrement() throws InterruptedException {
+        final var mock = mockNip();
+        when(mock.rxScheduler()).thenReturn(scheduler);
+        final TaskScheduler tasker = new RxTaskScheduler();
+        tasker.catnip(mock);
+        final var id = tasker.setTimer(50L, __ -> {});
+        assertEquals(0, id);
+        Thread.sleep(100L);
+        
+        final long id2 = tasker.setTimer(100L, __ -> {});
+        assertEquals(1, id2);
+        Thread.sleep(50L);
+    }
 }
