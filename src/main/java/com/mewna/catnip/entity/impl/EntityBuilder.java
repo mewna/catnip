@@ -1054,7 +1054,6 @@ public final class EntityBuilder {
     @CheckReturnValue
     public Guild createGuild(@Nonnull final JsonObject data) {
         final String afkChannelId = data.getString("afk_channel_id");
-        final String embedChannelId = data.getString("embed_channel_id");
         final String applicationId = data.getString("application_id");
         final String widgetChannelId = data.getString("widget_channel_id");
         final String systemChannelId = data.getString("system_channel_id");
@@ -1072,8 +1071,6 @@ public final class EntityBuilder {
                 .region(data.getString("region"))
                 .afkChannelIdAsLong(afkChannelId == null ? 0 : Long.parseUnsignedLong(afkChannelId))
                 .afkTimeout(data.getInt("afk_timeout", 0))
-                .embedEnabled(data.getBoolean("embed_enabled", false))
-                .embedChannelIdAsLong(embedChannelId == null ? 0 : Long.parseUnsignedLong(embedChannelId))
                 .verificationLevel(VerificationLevel.byKey(data.getInt("verification_level", 0)))
                 .defaultMessageNotifications(NotificationLevel.byKey(data.getInt("default_message_notifications", 0)))
                 .explicitContentFilter(ContentFilterLevel.byKey(data.getInt("explicit_content_filter", 0)))

@@ -215,31 +215,6 @@ public interface Guild extends Snowflake {
     int afkTimeout();
     
     /**
-     * @return Whether the guild embed is enabled.
-     */
-    @CheckReturnValue
-    boolean embedEnabled();
-    
-    /**
-     * @return The channel the guild embed is for, if enabled.
-     */
-    @Nullable
-    @CheckReturnValue
-    default String embedChannelId() {
-        final long id = embedChannelIdAsLong();
-        if(id == 0) {
-            return null;
-        }
-        return Long.toUnsignedString(id);
-    }
-    
-    /**
-     * @return The channel the guild embed is for, if enabled.
-     */
-    @CheckReturnValue
-    long embedChannelIdAsLong();
-    
-    /**
      * @return The verification level set for the guild.
      */
     @Nonnull
