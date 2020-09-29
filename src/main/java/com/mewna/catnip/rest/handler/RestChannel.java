@@ -66,7 +66,7 @@ import static com.mewna.catnip.util.Utils.encodeUTF8;
  * @author amy
  * @since 9/3/18.
  */
-@SuppressWarnings({"unused", "WeakerAccess", "ConstantConditions"})
+@SuppressWarnings({"unused", "WeakerAccess", "ConstantConditions", "RedundantSuppression"})
 public class RestChannel extends RestHandler {
     public RestChannel(final CatnipImpl catnip) {
         super(catnip);
@@ -226,25 +226,48 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     public Observable<JsonObject> editMessageRaw(@Nonnull final String channelId, @Nonnull final String messageId,
-                                                 @Nonnull final MessageOptions messageOptions,
+                                                 @Nonnull final MessageOptions options,
                                                  @SuppressWarnings("TypeMayBeWeakened") @Nonnull final Set<MessageFlag> flags) {
         final JsonObject json = new JsonObject();
-        if(messageOptions.embed() == null && (messageOptions.content() == null || messageOptions.content().isEmpty())) {
+        if(options.embed() == null && (options.content() == null || options.content().isEmpty())) {
             throw new IllegalArgumentException("Can't build a message with no content and no embed!");
         }
-        json.put("content", messageOptions.content());
-        if(messageOptions.embed() != null || messageOptions.override()) {
-            if(messageOptions.embed() == null) {
+        json.put("content", options.content());
+        if(options.embed() != null || options.override()) {
+            if(options.embed() == null) {
                 json.put("embed", null);
             } else {
-                json.put("embed", entityBuilder().embedToJson(messageOptions.embed()));
+                json.put("embed", entityBuilder().embedToJson(options.embed()));
             }
         }
         if(json.get("embed") == null && json.get("content") == null) {
             throw new IllegalArgumentException("Can't build a message with no content and no embed!");
         }
-        if(!flags.isEmpty() || messageOptions.override()) {
+        if(!flags.isEmpty() || options.override()) {
             json.put("flags", MessageFlag.fromSettable(flags));
+        }
+        if(options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
+            final JsonObject allowedMentions = new JsonObject();
+            final EnumSet<MentionParseFlag> parse = options.parseFlags();
+            if(parse == null) {
+                // These act like a whitelist regardless of parse being present.
+                allowedMentions.put("users", options.mentionedUsers());
+                allowedMentions.put("roles", options.mentionedRoles());
+            } else {
+                final JsonArray parseList = new JsonArray();
+                for(final MentionParseFlag p : parse) {
+                    parseList.add(p.name());
+                }
+                allowedMentions.put("parse", parseList);
+                //If either list is present along with the respective parse option, validation fails. The contains check avoids this.
+                if(!parse.contains(MentionParseFlag.USERS)) {
+                    allowedMentions.put("users", options.mentionedUsers());
+                }
+                if(!parse.contains(MentionParseFlag.ROLES)) {
+                    allowedMentions.put("roles", options.mentionedRoles());
+                }
+            }
+            json.put("allowed_mentions", allowedMentions);
         }
         return catnip().requester()
                 .queue(new OutboundRequest(Routes.EDIT_MESSAGE.withMajorParam(channelId),
