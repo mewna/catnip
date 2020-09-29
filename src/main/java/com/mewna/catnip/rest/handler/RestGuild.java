@@ -487,7 +487,7 @@ public class RestGuild extends RestHandler {
                 .queue(new OutboundRequest(Routes.CREATE_GUILD_BAN.withMajorParam(guildId),
                         Map.of("user", userId),
                         JsonObject.builder()
-                                .value("delete-message-days", String.valueOf(deleteMessageDays))
+                                .value("delete_message_days", String.valueOf(deleteMessageDays))
                                 .value("reason", reason)
                                 .done()
                 ).reason(reason)));
