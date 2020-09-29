@@ -150,10 +150,14 @@ public final class EntityBuilder {
                 .build();
     }
     
+    public static <T, R extends T> R staticDelegate(@Nonnull final Catnip catnip, @Nonnull final Class<T> type, @Nonnull final T data) {
+        return catnip.options().entityDelegator().delegate(type, data);
+    }
+    
     @Nonnull
     @CheckReturnValue
-    private <T, R extends T> R delegate(@Nonnull final Class<T> type, @Nonnull final T data) {
-        return catnip.options().entityDelegator().delegate(type, data);
+    public <T, R extends T> R delegate(@Nonnull final Class<T> type, @Nonnull final T data) {
+        return staticDelegate(catnip, type, data);
     }
     
     @Nonnull
