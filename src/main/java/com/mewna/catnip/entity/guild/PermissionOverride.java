@@ -63,19 +63,19 @@ public interface PermissionOverride extends Snowflake {
     }
     
     enum OverrideType {
-        ROLE("role"), MEMBER("member");
+        ROLE(0), MEMBER(1);
         
         @Getter
-        private final String key;
+        private final int key;
         
-        OverrideType(final String key) {
+        OverrideType(final int key) {
             this.key = key;
         }
         
         @Nonnull
-        public static OverrideType byKey(final String key) {
+        public static OverrideType byKey(final int key) {
             for(final OverrideType level : values()) {
-                if(level.key.equals(key)) {
+                if(level.key == key) {
                     return level;
                 }
             }

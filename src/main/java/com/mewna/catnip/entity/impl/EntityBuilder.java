@@ -448,7 +448,7 @@ public final class EntityBuilder {
         return delegate(PermissionOverride.class, PermissionOverrideImpl.builder()
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
-                .type(OverrideType.byKey(data.getString("type")))
+                .type(OverrideType.byKey(data.getInt("type")))
                 .allowRaw(Long.parseUnsignedLong(data.getString("allow", "0")))
                 .denyRaw(Long.parseUnsignedLong(data.getString("deny", "0")))
                 .build());
@@ -1378,7 +1378,7 @@ public final class EntityBuilder {
                 return delegate(OverrideUpdateInfo.class, OverrideUpdateInfoImpl.builder()
                         .catnip(catnip)
                         .overriddenEntityIdAsLong(Long.parseUnsignedLong(data.getString("id")))
-                        .overrideType(OverrideType.byKey(data.getString("type")))
+                        .overrideType(OverrideType.byKey(data.getInt("type")))
                         .roleName(data.getString("role_name"))
                         .build());
             default:
