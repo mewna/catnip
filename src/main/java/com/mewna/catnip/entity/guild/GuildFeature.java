@@ -70,6 +70,7 @@ public enum GuildFeature {
      * majority of guilds shouldn't have this feature.
      */
     RELAY_ENABLED,
+    MEMBER_VERIFICATION_GATE_ENABLED,
     
     /**
      * When no other feature matches.
