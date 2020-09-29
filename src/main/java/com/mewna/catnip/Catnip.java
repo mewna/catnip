@@ -51,10 +51,7 @@ import com.mewna.catnip.util.CatnipOptionsView;
 import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.logging.LogAdapter;
 import com.mewna.catnip.util.scheduler.TaskScheduler;
-import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.core.Scheduler;
-import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.core.*;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.CheckReturnValue;
@@ -85,7 +82,7 @@ import java.util.function.UnaryOperator;
  * @author amy
  * @since 9/3/18.
  */
-@SuppressWarnings({"unused", "OverlyCoupledClass"})
+@SuppressWarnings({"unused", "OverlyCoupledClass", "RedundantSuppression"})
 public interface Catnip extends AutoCloseable {
     /**
      * Create a new catnip instance with the given token.
@@ -363,8 +360,9 @@ public interface Catnip extends AutoCloseable {
      * @return The currently-logged-in user. May be {@code null} if no shards
      * have logged in.
      */
-    @Nullable
-    User selfUser();
+    @Nonnull
+    @CheckReturnValue
+    Maybe<User> selfUser();
     
     /**
      * The ID of this client

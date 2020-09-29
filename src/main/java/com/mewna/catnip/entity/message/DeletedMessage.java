@@ -29,7 +29,9 @@ package com.mewna.catnip.entity.message;
 
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.Channel;
+import com.mewna.catnip.entity.channel.MessageChannel;
 import com.mewna.catnip.entity.guild.GuildEntity;
+import io.reactivex.rxjava3.core.Maybe;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -60,9 +62,14 @@ public interface DeletedMessage extends GuildEntity, Snowflake {
     /**
      * @return The channel entity where it was deleted.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default Channel channel() {
-        return catnip().cache().channel(guildId(), channelId());
+    default Maybe<MessageChannel> channel() {
+        final long guild = guildIdAsLong();
+        if(guild != 0) {
+            return catnip().cache().channel(guild, channelIdAsLong()).map(Channel::asMessageChannel);
+        } else {
+            return catnip().rest().channel().getChannelById(channelId()).map(Channel::asMessageChannel).toMaybe();
+        }
     }
 }

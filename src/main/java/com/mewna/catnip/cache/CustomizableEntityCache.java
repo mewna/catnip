@@ -32,7 +32,6 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.cache.view.NamedCacheView;
 import com.mewna.catnip.entity.channel.GuildChannel;
-import com.mewna.catnip.entity.channel.UserDMChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
@@ -42,7 +41,7 @@ import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.util.rx.RxHelpers;
 import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.core.Maybe;
 
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
@@ -118,8 +117,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Single<Guild> guildAsync(final long id) {
-        return Single.error(new IllegalArgumentException("No entity with id " + id));
+    public Maybe<Guild> guild(final long id) {
+        return Maybe.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -130,8 +129,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Single<User> userAsync(final long id) {
-        return Single.error(new IllegalArgumentException("No entity with id " + id));
+    public Maybe<User> user(final long id) {
+        return Maybe.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -142,8 +141,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Single<Presence> presenceAsync(final long id) {
-        return Single.error(new IllegalArgumentException("No entity with id " + id));
+    public Maybe<Presence> presence(final long id) {
+        return Maybe.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -154,8 +153,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Single<Member> memberAsync(final long guildId, final long id) {
-        return Single.error(new IllegalArgumentException("No entity with id " + id));
+    public Maybe<Member> member(final long guildId, final long id) {
+        return Maybe.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -172,8 +171,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Single<Role> roleAsync(final long guildId, final long id) {
-        return Single.error(new IllegalArgumentException("No entity with id " + id));
+    public Maybe<Role> role(final long guildId, final long id) {
+        return Maybe.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -190,8 +189,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Single<GuildChannel> channelAsync(final long guildId, final long id) {
-        return Single.error(new IllegalArgumentException("No entity with id " + id));
+    public Maybe<GuildChannel> channel(final long guildId, final long id) {
+        return Maybe.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -208,20 +207,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Single<UserDMChannel> dmChannelAsync(final long id) {
-        return Single.error(new IllegalArgumentException("No entity with id " + id));
-    }
-    
-    @Nonnull
-    @Override
-    public CacheView<UserDMChannel> dmChannels() {
-        return CacheView.noop();
-    }
-    
-    @Nonnull
-    @Override
-    public Single<CustomEmoji> emojiAsync(final long guildId, final long id) {
-        return Single.error(new IllegalArgumentException("No entity with id " + id));
+    public Maybe<CustomEmoji> emoji(final long guildId, final long id) {
+        return Maybe.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -238,8 +225,8 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Single<VoiceState> voiceStateAsync(final long guildId, final long id) {
-        return Single.error(new IllegalArgumentException("No entity with id " + id));
+    public Maybe<VoiceState> voiceState(final long guildId, final long id) {
+        return Maybe.error(new IllegalArgumentException("No entity with id " + id));
     }
     
     @Nonnull
@@ -256,7 +243,7 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Nonnull
     @Override
-    public Single<User> selfUserAsync() {
-        return Single.error(new IllegalArgumentException("No entity"));
+    public Maybe<User> selfUser() {
+        return Maybe.error(new IllegalArgumentException("No entity"));
     }
 }

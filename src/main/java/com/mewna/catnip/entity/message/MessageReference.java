@@ -29,6 +29,7 @@ package com.mewna.catnip.entity.message;
 
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.guild.Guild;
+import io.reactivex.rxjava3.core.Maybe;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -69,11 +70,11 @@ public interface MessageReference extends Entity {
      *
      * @return Guild represented by the guild ID.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default Guild guild() {
+    default Maybe<Guild> guild() {
         if(guildId() == null) {
-            return null;
+            return Maybe.empty();
         } else {
             //noinspection ConstantConditions
             return catnip().cache().guild(guildId());

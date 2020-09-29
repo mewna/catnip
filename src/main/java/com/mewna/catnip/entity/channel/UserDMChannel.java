@@ -28,6 +28,7 @@
 package com.mewna.catnip.entity.channel;
 
 import com.mewna.catnip.entity.user.User;
+import io.reactivex.rxjava3.core.Maybe;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -42,7 +43,7 @@ import javax.annotation.Nullable;
 public interface UserDMChannel extends DMChannel {
     @Nullable
     @CheckReturnValue
-    User recipient();
+    Maybe<User> recipient();
     
     @Nonnull
     @CheckReturnValue

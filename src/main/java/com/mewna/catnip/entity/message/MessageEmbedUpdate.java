@@ -28,9 +28,10 @@
 package com.mewna.catnip.entity.message;
 
 import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.MessageChannel;
-import com.mewna.catnip.entity.channel.TextChannel;
 import com.mewna.catnip.entity.guild.Guild;
+import io.reactivex.rxjava3.core.Maybe;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -59,14 +60,14 @@ public interface MessageEmbedUpdate extends Snowflake {
     @CheckReturnValue
     long guildIdAsLong();
     
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default Guild guild() {
-        final long id = guildIdAsLong();
-        if(id == 0) {
-            return null;
+    default Maybe<Guild> guild() {
+        if(guildId() == null) {
+            return Maybe.empty();
         } else {
-            return catnip().cache().guild(id);
+            //noinspection ConstantConditions
+            return catnip().cache().guild(guildId());
         }
     }
     
@@ -79,13 +80,14 @@ public interface MessageEmbedUpdate extends Snowflake {
     @CheckReturnValue
     long channelIdAsLong();
     
+    @Nonnull
     @CheckReturnValue
-    default MessageChannel channel() {
+    default Maybe<MessageChannel> channel() {
         final long guild = guildIdAsLong();
         if(guild != 0) {
-            return (TextChannel) catnip().cache().channel(guild, channelIdAsLong());
+            return catnip().cache().channel(guild, channelIdAsLong()).map(Channel::asMessageChannel);
         } else {
-            return catnip().cache().dmChannel(channelIdAsLong());
+            return catnip().rest().channel().getChannelById(channelId()).map(Channel::asMessageChannel).toMaybe();
         }
     }
     

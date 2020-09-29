@@ -30,17 +30,20 @@ package com.mewna.catnip.entity.misc;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.user.User;
+import io.reactivex.rxjava3.core.Maybe;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author natanbc
  * @since 9/5/18.
  */
+@SuppressWarnings({"unused", "RedundantSuppression"})
 public interface Emoji extends Snowflake {
     /**
      * ID of this emoji, or null if it has no ID.
@@ -183,12 +186,12 @@ public interface Emoji extends Snowflake {
          *
          * @return String representing the ID.
          */
-        @Nullable
+        @Nonnull
         @CheckReturnValue
-        default Guild guild() {
+        default Maybe<Guild> guild() {
             final long id = guildIdAsLong();
             if(id == 0) {
-                return null;
+                return Maybe.empty();
             }
             return catnip().cache().guild(guildIdAsLong());
         }
@@ -296,20 +299,20 @@ public interface Emoji extends Snowflake {
         @Nonnull
         @CheckReturnValue
         default String forMessage() {
-            return name();
+            return Objects.requireNonNull(name());
         }
         
         @Override
         @Nonnull
         @CheckReturnValue
         default String forReaction() {
-            return name();
+            return Objects.requireNonNull(name());
         }
         
         @Override
         @CheckReturnValue
         default boolean is(@Nonnull final String emoji) {
-            return name().equals(emoji);
+            return Objects.requireNonNull(name()).equals(emoji);
         }
     }
     
@@ -376,7 +379,7 @@ public interface Emoji extends Snowflake {
         @Override
         @CheckReturnValue
         default boolean is(@Nonnull final String emoji) {
-            return name().equals(emoji);
+            return Objects.requireNonNull(name()).equals(emoji);
         }
     }
 }

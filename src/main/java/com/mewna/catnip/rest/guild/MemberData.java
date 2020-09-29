@@ -52,7 +52,7 @@ import java.util.*;
 @Setter(onParam_ = @Nonnull, onMethod_ = {@CheckReturnValue, @Nonnull})
 @Accessors(fluent = true, chain = true)
 @NoArgsConstructor
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "RedundantSuppression"})
 public class MemberData {
     @Getter(AccessLevel.NONE)
     private Set<String> roles;
@@ -64,7 +64,7 @@ public class MemberData {
     private Boolean deaf;
     
     private static String voiceChannel(@Nonnull final Member member) {
-        return Optional.ofNullable(member.catnip().cache().voiceState(member.guildId(), member.id()))
+        return Optional.ofNullable(member.catnip().cache().voiceState(member.guildId(), member.id()).blockingGet())
                 .map(VoiceState::channelId).orElse(null);
     }
     

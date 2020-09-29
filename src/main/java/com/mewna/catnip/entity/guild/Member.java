@@ -35,6 +35,7 @@ import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 
 import javax.annotation.CheckReturnValue;
@@ -52,15 +53,15 @@ import java.util.stream.Collectors;
  * @author amy
  * @since 9/4/18.
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "RedundantSuppression"})
 public interface Member extends Mentionable, PermissionHolder {
     /**
      * The user equivalent to this member.
      */
     @Nonnull
     @CheckReturnValue
-    default User user() {
-        return Objects.requireNonNull(catnip().cache().user(idAsLong()), "User not found. It may have been removed from the cache.");
+    default Maybe<User> user() {
+        return catnip().cache().user(idAsLong());
     }
     
     /**
@@ -79,9 +80,9 @@ public interface Member extends Mentionable, PermissionHolder {
      */
     @Nonnull
     @CheckReturnValue
-    default String effectiveName() {
+    default Single<String> effectiveName() {
         final String nick = nick();
-        return nick != null ? nick : user().username();
+        return nick != null ? Single.just(nick) : user().map(User::username).toSingle();
     }
     
     /**
@@ -249,8 +250,8 @@ public interface Member extends Mentionable, PermissionHolder {
      *
      * @return Whether the member owns the guild or not
      */
-    default boolean isOwner() {
-        return guild().owner().equals(this);
+    default Single<Boolean> isOwner() {
+        return guild().map(guild -> guild.ownerIdAsLong() == idAsLong()).toSingle();
     }
     
     /**

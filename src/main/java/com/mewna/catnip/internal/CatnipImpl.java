@@ -48,12 +48,14 @@ import com.mewna.catnip.shard.CatnipShardImpl;
 import com.mewna.catnip.shard.GatewayIntent;
 import com.mewna.catnip.shard.GatewayOp;
 import com.mewna.catnip.util.PermissionUtil;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -189,9 +191,10 @@ public class CatnipImpl implements Catnip {
         return this;
     }
     
-    @Nullable
+    @Nonnull
     @Override
-    public User selfUser() {
+    @CheckReturnValue
+    public Maybe<User> selfUser() {
         return cache().selfUser();
     }
     
@@ -300,30 +303,32 @@ public class CatnipImpl implements Catnip {
     @Override
     public void presence(@Nullable final OnlineStatus status, @Nullable final String game, @Nullable final ActivityType type,
                          @Nullable final String url) {
-        final OnlineStatus stat;
-        if(status != null) {
-            stat = status;
-        } else {
-            final User self = selfUser();
-            if(self != null) {
-                final Presence presence = cache().presence(self.id());
-                stat = presence == null ? OnlineStatus.ONLINE : presence.status();
-            } else {
-                stat = OnlineStatus.ONLINE;
-            }
-        }
-        final Activity activity = game != null
-                ? ActivityImpl.builder()
-                .name(game)
-                .type(type == null ? ActivityType.PLAYING : type)
-                .url(type == ActivityType.STREAMING ? url : null)
-                .build()
-                : null;
-        presence(PresenceImpl.builder()
-                .catnip(this)
-                .status(stat)
-                .activities(activity != null ? List.of(activity) : List.of())
-                .build());
+        //noinspection ResultOfMethodCallIgnored
+        selfUser()
+                .flatMap(self -> {
+                    if(self != null && status == null) {
+                        return cache()
+                                .presence(self.id())
+                                .map(presence -> presence == null ? OnlineStatus.ONLINE : presence.status());
+                    } else {
+                        return Maybe.just(status == null ? OnlineStatus.ONLINE : status);
+                    }
+                })
+                .subscribe(stat -> {
+                    // TODO: Seriously, what the fuck Rx.
+                    final Activity activity = game != null
+                            ? ActivityImpl.builder()
+                            .name(game)
+                            .type(type == null ? ActivityType.PLAYING : type)
+                            .url(type == ActivityType.STREAMING ? url : null)
+                            .build()
+                            : null;
+                    presence(PresenceImpl.builder()
+                            .catnip(this)
+                            .status(stat)
+                            .activities(activity != null ? List.of(activity) : List.of())
+                            .build());
+                });
     }
     
     @Nonnull

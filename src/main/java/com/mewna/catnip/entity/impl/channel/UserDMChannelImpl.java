@@ -31,6 +31,7 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.channel.UserDMChannel;
 import com.mewna.catnip.entity.user.User;
+import io.reactivex.rxjava3.core.Maybe;
 import lombok.*;
 import lombok.experimental.Accessors;
 
@@ -75,9 +76,9 @@ public class UserDMChannelImpl implements UserDMChannel, RequiresCatnip {
         return String.format("UserDMChannel (%s)", recipient());
     }
     
-    @Nullable
+    @Nonnull
     @Override
-    public User recipient() {
+    public Maybe<User> recipient() {
         return catnip.cache().user(userIdAsLong);
     }
 }

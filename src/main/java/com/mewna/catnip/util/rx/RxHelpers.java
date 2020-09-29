@@ -29,11 +29,13 @@ package com.mewna.catnip.util.rx;
 
 import com.mewna.catnip.Catnip;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
@@ -68,5 +70,13 @@ public final class RxHelpers {
         return Completable.fromFuture(CompletableFuture.completedFuture(null))
                 .subscribeOn(catnip.rxScheduler())
                 .observeOn(catnip.rxScheduler());
+    }
+    
+    public static <T> Maybe<T> nullableToMaybe(@Nullable final T nullable) {
+        if(nullable == null) {
+            return Maybe.empty();
+        } else {
+            return Maybe.just(nullable);
+        }
     }
 }

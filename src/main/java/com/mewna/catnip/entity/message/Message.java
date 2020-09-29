@@ -31,7 +31,6 @@ import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.ChannelMention;
 import com.mewna.catnip.entity.channel.MessageChannel;
-import com.mewna.catnip.entity.channel.TextChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
@@ -40,6 +39,8 @@ import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import org.apache.commons.lang3.Validate;
 
@@ -50,7 +51,6 @@ import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * A single message in Discord.
@@ -58,7 +58,7 @@ import java.util.stream.Collectors;
  * @author amy
  * @since 9/4/18.
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "RedundantSuppression"})
 public interface Message extends Snowflake {
     /**
      * The type of message. Use this to tell normal messages from system messages.
@@ -142,14 +142,20 @@ public interface Message extends Snowflake {
      */
     @Nonnull
     @CheckReturnValue
-    default List<Role> mentionedRoles() {
+    default Single<List<Role>> mentionedRoles() {
         if(guildId() == null) {
-            return List.of();
+            return Single.just(List.of());
         }
-        //noinspection ConstantConditions
-        return mentionedRoleIds().stream()
+        @SuppressWarnings("ConstantConditions")
+        final var maybes = mentionedRoleIds().stream()
                 .map(e -> catnip().cache().role(guildId(), e))
-                .collect(Collectors.toList());
+                .toArray(Maybe[]::new);
+        return Observable.fromArray(maybes)
+                .flatMap(maybe -> {
+                    //noinspection unchecked
+                    return ((Maybe<Role>) maybe).toObservable();
+                })
+                .toList();
     }
     
     /**
@@ -226,14 +232,14 @@ public interface Message extends Snowflake {
      * @return The {@link MessageChannel} object representing the channel this
      * message was sent in. Should not be null.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
     default Single<MessageChannel> channel() {
         final long guild = guildIdAsLong();
         if(guild != 0) {
-            return catnip().cache().channelAsync(guild, channelIdAsLong()).map(Channel::asTextChannel);
+            return catnip().cache().channel(guild, channelIdAsLong()).map(Channel::asMessageChannel).toSingle();
         } else {
-            return catnip().rest().channel().getChannelById(channelId()).map(Channel::asTextChannel);
+            return catnip().rest().channel().getChannelById(channelId()).map(Channel::asMessageChannel);
         }
     }
     
@@ -343,12 +349,12 @@ public interface Message extends Snowflake {
      * @return The {@link Guild} object for the guild this message was sent in.
      * Will be null if the message is a DM.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default Guild guild() {
+    default Maybe<Guild> guild() {
         final long id = guildIdAsLong();
         if(id == 0) {
-            return null;
+            return Maybe.empty();
         } else {
             return catnip().cache().guild(id);
         }
@@ -411,12 +417,13 @@ public interface Message extends Snowflake {
     
     @Nonnull
     default Completable delete(@Nullable final String reason) {
-        final User self = catnip().selfUser();
-        if(self != null && !author().id().equals(self.id())) {
-            PermissionUtil.checkPermissions(catnip(), guildId(), channelId(),
-                    Permission.MANAGE_MESSAGES);
-        }
-        return catnip().rest().channel().deleteMessage(channelId(), id(), reason);
+        return Completable.fromMaybe(catnip().selfUser()
+                .filter(self -> !author().id().equals(self.id()))
+                .flatMap(self -> {
+                    PermissionUtil.checkPermissions(catnip(), guildId(), channelId(),
+                            Permission.MANAGE_MESSAGES);
+                    return catnip().rest().channel().deleteMessage(channelId(), id(), reason).toMaybe();
+                }));
     }
     
     @Nonnull

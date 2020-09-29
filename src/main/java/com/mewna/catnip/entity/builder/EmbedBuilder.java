@@ -57,7 +57,7 @@ import java.util.List;
 @Setter(onParam_ = @Nullable, onMethod_ = {@CheckReturnValue, @Nonnull})
 @NoArgsConstructor
 @Accessors(fluent = true, chain = true)
-@SuppressWarnings({"WeakerAccess", "unused"})
+@SuppressWarnings({"WeakerAccess", "unused", "RedundantSuppression"})
 public class EmbedBuilder {
     private final List<Field> fields = new ArrayList<>(25);
     // @formatter:off

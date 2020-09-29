@@ -204,7 +204,7 @@ public final class DispatchEmitter {
             }
             case Raw.GUILD_UPDATE: {
                 final Guild guild = entityBuilder.createGuild(data);
-                catnip.cache().guildAsync(guild.idAsLong())
+                catnip.cache().guild(guild.idAsLong())
                         .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, guild)), e -> cacheErrorLog(type, e));
                 break;
             }
@@ -239,7 +239,7 @@ public final class DispatchEmitter {
             }
             case Raw.GUILD_ROLE_UPDATE: {
                 final Role role = entityBuilder.createRole(data.getString("guild_id"), data.getObject("role"));
-                catnip.cache().roleAsync(role.guildIdAsLong(), role.idAsLong())
+                catnip.cache().role(role.guildIdAsLong(), role.idAsLong())
                         .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, role)), e -> cacheErrorLog(type, e));
                 break;
             }
@@ -267,7 +267,7 @@ public final class DispatchEmitter {
             case Raw.GUILD_MEMBER_UPDATE: {
                 final String guild = data.getString("guild_id");
                 final PartialMember partialMember = entityBuilder.createPartialMember(guild, data);
-                catnip.cache().memberAsync(partialMember.guildIdAsLong(), partialMember.idAsLong())
+                catnip.cache().member(partialMember.guildIdAsLong(), partialMember.idAsLong())
                         .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, partialMember)), e -> cacheErrorLog(type, e));
                 break;
             }
@@ -275,7 +275,7 @@ public final class DispatchEmitter {
             // Users
             case Raw.USER_UPDATE: {
                 final User user = entityBuilder.createUser(data);
-                catnip.cache().selfUserAsync()
+                catnip.cache().selfUser()
                         .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, user)), e -> cacheErrorLog(type, e));
                 break;
             }
@@ -289,20 +289,21 @@ public final class DispatchEmitter {
                             "but we should never get this. If you report this to Discord, include the following " +
                             "JSON in your report:\n{}", JsonUtil.encodePrettily(clone));
                 }
-                final User cachedUser = catnip.cache().user(presence.id());
-                if(cachedUser != null) {
-                    final var discrim = Integer.parseInt(cachedUser.discriminator());
-                    if(discrim < 1 || discrim > 9999) {
-                        final JsonObject clone = new JsonObject(payload);
-                        // catnip-internal key
-                        clone.remove("shard");
-                        catnip.logAdapter().warn("Received a presence update for a user with a discriminator of '{}', " +
-                                        "but we should never get this. Discriminators should be clamped to [0001, 9999]." +
-                                        "If you report this to Discord, include the following JSON in your report:\n{}",
-                                discrim, JsonUtil.encodePrettily(clone));
+                catnip.cache().user(presence.id()).subscribe(cachedUser -> {
+                    if(cachedUser != null) {
+                        final var discrim = Integer.parseInt(cachedUser.discriminator());
+                        if(discrim < 1 || discrim > 9999) {
+                            final JsonObject clone = new JsonObject(payload);
+                            // catnip-internal key
+                            clone.remove("shard");
+                            catnip.logAdapter().warn("Received a presence update for a user with a discriminator of '{}', " +
+                                            "but we should never get this. Discriminators should be clamped to [0001, 9999]." +
+                                            "If you report this to Discord, include the following JSON in your report:\n{}",
+                                    discrim, JsonUtil.encodePrettily(clone));
+                        }
                     }
-                }
-                catnip.cache().presenceAsync(presence.idAsLong())
+                });
+                catnip.cache().presence(presence.idAsLong())
                         .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, presence)), e -> cacheErrorLog(type, e));
                 break;
             }

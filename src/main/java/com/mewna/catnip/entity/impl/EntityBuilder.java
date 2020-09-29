@@ -82,7 +82,7 @@ import static com.mewna.catnip.util.JsonUtil.*;
  * @author natanbc
  * @since 9/2/18.
  */
-@SuppressWarnings({"WeakerAccess", "unused", "OverlyCoupledClass"})
+@SuppressWarnings({"WeakerAccess", "OverlyCoupledClass"})
 public final class EntityBuilder {
     private final Catnip catnip;
     
@@ -93,12 +93,6 @@ public final class EntityBuilder {
     @CheckReturnValue
     private static boolean isInvalid(@Nullable final JsonObject object, @Nonnull final String key) {
         return object == null || !object.containsKey(key);
-    }
-    
-    @Nullable
-    @CheckReturnValue
-    private static OffsetDateTime parseTimestamp(@Nullable final CharSequence raw) {
-        return raw == null ? null : OffsetDateTime.parse(raw);
     }
     
     @Nonnull
@@ -689,15 +683,7 @@ public final class EntityBuilder {
         if(data.getString("joined_at", null) != null) {
             joinedAt = data.getString("joined_at");
         } else {
-            // This will only happen during GUILD_MEMBER_REMOVE afaik, but is this the right solution?
-            final Member cachedMember = catnip.cache().member(guildId, id);
-            if(cachedMember != null && cachedMember.joinedAt() != null) {
-                // Guaranteed not null by preceding if
-                //noinspection ConstantConditions
-                joinedAt = cachedMember.joinedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-            } else {
-                joinedAt = null;
-            }
+            joinedAt = null;
         }
         
         return delegate(Member.class, MemberImpl.builder()
@@ -890,7 +876,7 @@ public final class EntityBuilder {
         final var activity = createMessageActivity(data.getObject("activity"));
         final var application = createMessageApplication(data.getObject("application"));
         final var reference = createMessageReference(data.getObject("message_reference"));
-        final var channelMentions = data.getArray("mention_channels", new JsonArray());
+        final var channelMentions = toList(data.getArray("mention_channels", new JsonArray()), this::createChannelMention);
         
         return delegate(Message.class, MessageImpl.builder()
                 .catnip(catnip)
@@ -918,6 +904,8 @@ public final class EntityBuilder {
                 .activity(activity)
                 .application(application)
                 .flagsRaw(data.getInt("flags", 0))
+                .messageReference(reference)
+                .mentionedChannels(channelMentions)
                 .build());
     }
     
@@ -1309,7 +1297,7 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Resumed createResumed(@Nonnull final JsonObject data) {
+    public Resumed createResumed(@SuppressWarnings({"unused", "RedundantSuppression"}) @Nonnull final JsonObject data) {
         return delegate(Resumed.class, ResumedImpl.builder()
                 .catnip(catnip)
                 .build());

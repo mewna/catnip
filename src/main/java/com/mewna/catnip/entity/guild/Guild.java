@@ -41,6 +41,7 @@ import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.Utils;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import lombok.Getter;
@@ -65,7 +66,7 @@ import java.util.Set;
  * @author natanbc
  * @since 9/6/18
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "RedundantSuppression"})
 public interface Guild extends Snowflake {
     
     int NICKNAME_MAX_LENGTH = 32;
@@ -136,11 +137,9 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @CheckReturnValue
-    default Member selfMember() {
-        return members().getById(
-                Objects.requireNonNull(catnip().selfUser(), "Self user is null. This shouldn't ever happen")
-                        .idAsLong()
-        );
+    default Maybe<Member> selfMember() {
+        return catnip().selfUser().flatMap(user -> catnip().cache().member(idAsLong(),
+                Objects.requireNonNull(user, "Self user is null. This shouldn't ever happen").idAsLong()));
     }
     
     /**
@@ -148,8 +147,8 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     @CheckReturnValue
-    default Member owner() {
-        return members().getById(ownerIdAsLong());
+    default Maybe<Member> owner() {
+        return catnip().cache().member(id(), ownerId());
     }
     
     /**
@@ -481,9 +480,9 @@ public interface Guild extends Snowflake {
      * @return The member object for the user with the given id. May be
      * {@code null} if the user is not a member of the guild.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default Member member(final String id) {
+    default Maybe<Member> member(final String id) {
         return catnip().cache().member(id(), id);
     }
     
@@ -493,9 +492,9 @@ public interface Guild extends Snowflake {
      * @return The member object for the user with the given id. May be
      * {@code null} if the user is not a member of the guild.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default Member member(final long id) {
+    default Maybe<Member> member(final long id) {
         return catnip().cache().member(idAsLong(), id);
     }
     
@@ -505,9 +504,9 @@ public interface Guild extends Snowflake {
      * @return The role object with the given id, or {@code null} if no such
      * role exists.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default Role role(final String id) {
+    default Maybe<Role> role(final String id) {
         return catnip().cache().role(id(), id);
     }
     
@@ -517,9 +516,9 @@ public interface Guild extends Snowflake {
      * @return The role object with the given id, or {@code null} if no such
      * role exists.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default Role role(final long id) {
+    default Maybe<Role> role(final long id) {
         return catnip().cache().role(idAsLong(), id);
     }
     
@@ -528,10 +527,10 @@ public interface Guild extends Snowflake {
      *
      * @return The channel, or {@code null} if it isn't present.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default GuildChannel channel(final String id) {
-        return channels().getById(id);
+    default Maybe<GuildChannel> channel(final String id) {
+        return catnip().cache().channel(id(), id);
     }
     
     /**
@@ -539,7 +538,7 @@ public interface Guild extends Snowflake {
      *
      * @return The channel, or {@code null} if it isn't present.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
     default GuildChannel channel(final long id) {
         return channels().getById(id);
@@ -552,17 +551,10 @@ public interface Guild extends Snowflake {
      *
      * @throws IllegalArgumentException If the channel is not a text channel.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default TextChannel textChannel(final String id) {
-        final GuildChannel channel = channels().getById(id);
-        if(channel == null) {
-            return null;
-        } else if(channel.isText()) {
-            return channel.asTextChannel();
-        } else {
-            throw new IllegalArgumentException(id + " is not a text channel");
-        }
+    default Maybe<TextChannel> textChannel(final String id) {
+        return catnip().cache().channel(id(), id).map(Channel::asTextChannel);
     }
     
     /**
@@ -572,17 +564,10 @@ public interface Guild extends Snowflake {
      *
      * @throws IllegalArgumentException If the channel is not a text channel.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default TextChannel textChannel(final long id) {
-        final GuildChannel channel = channels().getById(id);
-        if(channel == null) {
-            return null;
-        } else if(channel.isText()) {
-            return channel.asTextChannel();
-        } else {
-            throw new IllegalArgumentException(id + " is not a text channel");
-        }
+    default Maybe<TextChannel> textChannel(final long id) {
+        return catnip().cache().channel(idAsLong(), id).map(Channel::asTextChannel);
     }
     
     /**
@@ -590,19 +575,12 @@ public interface Guild extends Snowflake {
      *
      * @return The channel, or {@code null} if it isn't present.
      *
-     * @throws IllegalArgumentException If the channel is not a voicecategory.
+     * @throws IllegalArgumentException If the channel is not a voice channel.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default VoiceChannel voiceChannel(final String id) {
-        final GuildChannel channel = channels().getById(id);
-        if(channel == null) {
-            return null;
-        } else if(channel.isVoice()) {
-            return channel.asVoiceChannel();
-        } else {
-            throw new IllegalArgumentException(id + " is not a voice channel");
-        }
+    default Maybe<VoiceChannel> voiceChannel(final String id) {
+        return catnip().cache().channel(id(), id).map(Channel::asVoiceChannel);
     }
     
     /**
@@ -610,19 +588,12 @@ public interface Guild extends Snowflake {
      *
      * @return The channel, or {@code null} if it isn't present.
      *
-     * @throws IllegalArgumentException If the channel is not a voicecategory.
+     * @throws IllegalArgumentException If the channel is not a voice channel.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default VoiceChannel voiceChannel(final long id) {
-        final GuildChannel channel = channels().getById(id);
-        if(channel == null) {
-            return null;
-        } else if(channel.isVoice()) {
-            return channel.asVoiceChannel();
-        } else {
-            throw new IllegalArgumentException(id + " is not a voice channel");
-        }
+    default Maybe<VoiceChannel> voiceChannel(final long id) {
+        return catnip().cache().channel(idAsLong(), id).map(Channel::asVoiceChannel);
     }
     
     /**
@@ -632,17 +603,10 @@ public interface Guild extends Snowflake {
      *
      * @throws IllegalArgumentException If the channel is not a category.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default Category category(final String id) {
-        final GuildChannel channel = channels().getById(id);
-        if(channel == null) {
-            return null;
-        } else if(channel.isCategory()) {
-            return channel.asCategory();
-        } else {
-            throw new IllegalArgumentException(id + " is not a category");
-        }
+    default Maybe<Category> category(final String id) {
+        return catnip().cache().channel(id(), id).map(Channel::asCategory);
     }
     
     /**
@@ -652,17 +616,10 @@ public interface Guild extends Snowflake {
      *
      * @throws IllegalArgumentException If the channel is not a category.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default Category category(final long id) {
-        final GuildChannel channel = channels().getById(id);
-        if(channel == null) {
-            return null;
-        } else if(channel.isCategory()) {
-            return channel.asCategory();
-        } else {
-            throw new IllegalArgumentException(id + " is not a category");
-        }
+    default Maybe<Category> category(final long id) {
+        return catnip().cache().channel(idAsLong(), id).map(Channel::asCategory);
     }
     
     /**
@@ -670,10 +627,10 @@ public interface Guild extends Snowflake {
      *
      * @return The emoji, or {@code null} if it isn't present.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default CustomEmoji emoji(final String id) {
-        return emojis().getById(id);
+    default Maybe<CustomEmoji> emoji(final String id) {
+        return catnip().cache().emoji(id(), id);
     }
     
     /**
@@ -681,10 +638,10 @@ public interface Guild extends Snowflake {
      *
      * @return The emoji, or {@code null} if it isn't present.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default CustomEmoji emoji(final long id) {
-        return emojis().getById(id);
+    default Maybe<CustomEmoji> emoji(final long id) {
+        return catnip().cache().emoji(idAsLong(), id);
     }
     
     /**
@@ -951,12 +908,20 @@ public interface Guild extends Snowflake {
     default Completable ban(@Nonnull final String userId,
                             @Nullable final String reason,
                             @Nonnegative final int deleteMessageDays) {
-        PermissionUtil.checkPermissions(catnip(), id(), Permission.BAN_MEMBERS);
-        final Member member = catnip().cache().member(id(), userId);
-        if(member != null) {
-            PermissionUtil.checkHierarchy(member, this);
-        }
-        return catnip().rest().guild().createGuildBan(id(), userId, reason, deleteMessageDays);
+        return Completable.fromMaybe(
+                catnip().cache()
+                        .member(id(), userId)
+                        .map(member -> {
+                            if(member == null) {
+                                return Maybe.error(new NullPointerException("No member in " + id() + " with id " + userId));
+                            } else {
+                                PermissionUtil.checkPermissions(catnip(), id(), Permission.BAN_MEMBERS);
+                                PermissionUtil.checkHierarchy(member, this);
+                                return member;
+                            }
+                        })
+                        .map(__ -> catnip().rest().guild().createGuildBan(id(), userId, reason, deleteMessageDays))
+        );
     }
     
     /**
@@ -1112,9 +1077,19 @@ public interface Guild extends Snowflake {
      */
     @Nonnull
     default Completable kick(@Nonnull final String userId, @Nullable final String reason) {
-        PermissionUtil.checkPermissions(catnip(), id(), Permission.KICK_MEMBERS);
-        PermissionUtil.checkHierarchy(Objects.requireNonNull(catnip().cache().member(id(), userId)), this);
-        return catnip().rest().guild().removeGuildMember(id(), userId, reason);
+        return Completable.fromMaybe(
+                catnip().cache().member(id(), userId)
+                        .map(member -> {
+                            if(member == null) {
+                                return Maybe.error(new NullPointerException("No such member in " + id() + " with id " + userId));
+                            } else {
+                                PermissionUtil.checkPermissions(catnip(), id(), Permission.KICK_MEMBERS);
+                                PermissionUtil.checkHierarchy(member, this);
+                                return member;
+                            }
+                        })
+                        .map(__ -> catnip().rest().guild().removeGuildMember(id(), userId, reason))
+        );
     }
     
     /**
@@ -1461,7 +1436,7 @@ public interface Guild extends Snowflake {
         }
     }
     
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "RedundantSuppression"})
     @Getter
     @Setter
     @Accessors(fluent = true)
