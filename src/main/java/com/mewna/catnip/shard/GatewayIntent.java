@@ -32,9 +32,9 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A list of "gateway intents" that tell Discord which events you do and don't
@@ -47,7 +47,6 @@ import java.util.Set;
  * @author amy
  * @since 1/16/20.
  */
-@SuppressWarnings("unused")
 @Accessors(fluent = true)
 public enum GatewayIntent {
     /**
@@ -246,10 +245,14 @@ public enum GatewayIntent {
     )),
     
     ;
+    
     public static final Set<GatewayIntent> ALL_INTENTS = Set.of(values());
-    public static final Set<GatewayIntent> UNPRIVILEGED_INTENTS = Set.of(Arrays.stream(values())
+    public static final Set<GatewayIntent> UNPRIVILEGED_INTENTS = Set.of(ALL_INTENTS.stream()
             .filter(e -> !e.privileged)
             .toArray(GatewayIntent[]::new));
+    public static final Set<String> ALL_INTENT_EVENTS = Set.copyOf(ALL_INTENTS.stream()
+            .flatMap(v -> v.events.stream())
+            .collect(Collectors.toSet()));
     @Getter
     private final int value;
     @Getter
