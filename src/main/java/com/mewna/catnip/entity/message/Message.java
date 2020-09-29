@@ -28,6 +28,7 @@
 package com.mewna.catnip.entity.message;
 
 import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.ChannelMention;
 import com.mewna.catnip.entity.channel.MessageChannel;
 import com.mewna.catnip.entity.channel.TextChannel;
@@ -225,13 +226,14 @@ public interface Message extends Snowflake {
      * @return The {@link MessageChannel} object representing the channel this
      * message was sent in. Should not be null.
      */
+    @Nullable
     @CheckReturnValue
-    default MessageChannel channel() {
+    default Single<MessageChannel> channel() {
         final long guild = guildIdAsLong();
         if(guild != 0) {
-            return (TextChannel) catnip().cache().channel(guild, channelIdAsLong());
+            return catnip().cache().channelAsync(guild, channelIdAsLong()).map(Channel::asTextChannel);
         } else {
-            return catnip().cache().dmChannel(channelIdAsLong());
+            return catnip().rest().channel().getChannelById(channelId()).map(Channel::asTextChannel);
         }
     }
     

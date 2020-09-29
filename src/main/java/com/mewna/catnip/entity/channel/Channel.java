@@ -249,6 +249,16 @@ public interface Channel extends Snowflake {
         return (GroupDMChannel) this;
     }
     
+    @Nonnull
+    @CheckReturnValue
+    default MessageChannel asMessageChannel() {
+        if(isDM()) {
+            return asDMChannel();
+        } else {
+            return asTextChannel();
+        }
+    }
+    
     /**
      * The type of a channel.
      */
