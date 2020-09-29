@@ -200,13 +200,8 @@ public abstract class AbstractRequester implements Requester {
         
         // Required by Discord
         builder.setHeader("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')');
-        // Request more precise ratelimit headers for better timing
-        // NOTE: THIS SHOULD NOT BE CONFIGURABLE BY THE END USER
-        // This is pretty important for getting timing of things like reaction
-        // routes correct, so there's no use for the end-user messing around
-        // with this.
-        // If they REALLY want it, they can write their own requester.
-        builder.setHeader("X-RateLimit-Precision", "millisecond");
+        
+        // As of API v8, `X-Ratelimit-Precision` is no longer respected; the relevant headers are ms-precise by default.
         
         if(request.request().needsToken()) {
             builder.setHeader("Authorization", "Bot " + catnip.options().token());
@@ -275,7 +270,8 @@ public abstract class AbstractRequester implements Requester {
                     throw new IllegalStateException(e);
                 }
             }
-            final long retryAfter = Long.parseLong(retry);
+            // Retry-After is now returned in seconds, so convert to be useful
+            final long retryAfter = TimeUnit.SECONDS.toMillis(Long.parseLong(retry));
             if(Boolean.parseBoolean(headers.firstValue("X-RateLimit-Global").orElse(null))) {
                 catnip.logAdapter().trace("Updating global bucket due to ratelimit.");
                 rateLimiter.updateGlobalRateLimit(System.currentTimeMillis() + timeDifference + retryAfter);
