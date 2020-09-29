@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.entity.user;
 
-import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.impl.user.PresenceImpl;
 import com.mewna.catnip.entity.impl.user.PresenceImpl.ActivityImpl;
 import com.mewna.catnip.entity.misc.Emoji.ActivityEmoji;
@@ -50,7 +49,7 @@ import java.util.Set;
  * @since 9/21/18.
  */
 @SuppressWarnings("unused")
-public interface Presence extends Entity {
+public interface Presence {
     @Nonnull
     @CheckReturnValue
     static Presence of(@Nonnull final OnlineStatus status, @Nullable final Activity activity) {

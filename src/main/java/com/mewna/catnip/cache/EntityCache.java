@@ -38,6 +38,7 @@ import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
 import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Single;
 
 import javax.annotation.Nonnull;
 

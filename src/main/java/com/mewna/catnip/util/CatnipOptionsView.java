@@ -31,7 +31,7 @@ import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
-import com.mewna.catnip.cache.MemoryEntityCache;
+import com.mewna.catnip.cache.SplitMemoryEntityCache;
 import com.mewna.catnip.entity.delegate.EntityDelegator;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.lifecycle.HighWebsocketLatency;
@@ -120,7 +120,7 @@ public interface CatnipOptionsView {
     EventBuffer eventBuffer();
     
     /**
-     * The cache worker for catnip to use. Defaults to {@link MemoryEntityCache}.
+     * The cache worker for catnip to use. Defaults to {@link SplitMemoryEntityCache}.
      * Change this if you want to use your own {@link EntityCacheWorker}.
      */
     @Nonnull
@@ -207,6 +207,14 @@ public interface CatnipOptionsView {
      * the ether basically. If this option is enabled, catnip will capture a
      * stacktrace before REST requests, and make it available to any exceptions
      * thrown by the REST handler.
+     * <p>
+     * NOTE: Capturing stacktraces is <strong>s l o w</strong>. If you have
+     * performance problems around REST requests, you can disable this, at the
+     * cost of losing debuggability. Note that it may be useful to add
+     * <code>-XX:-OmitStackTraceInFastThrow</code> to your JVM flags to ensure
+     * that this doesn't get optimized out.
+     * <p>
+     * TODO: Verify that -XX:-OmitStackTraceInFastThrow isn't needed now.
      */
     boolean captureRestStacktraces();
     

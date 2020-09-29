@@ -30,7 +30,7 @@ package com.mewna.catnip;
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
-import com.mewna.catnip.cache.MemoryEntityCache;
+import com.mewna.catnip.cache.SplitMemoryEntityCache;
 import com.mewna.catnip.entity.delegate.DefaultEntityDelegator;
 import com.mewna.catnip.entity.delegate.EntityDelegator;
 import com.mewna.catnip.entity.serialization.DefaultEntitySerializer;
@@ -93,7 +93,7 @@ public final class CatnipOptions implements CatnipOptionsView, Cloneable {
     @Nonnull
     private EventBuffer eventBuffer = new CachingBuffer();
     @Nonnull
-    private EntityCacheWorker cacheWorker = new MemoryEntityCache();
+    private EntityCacheWorker cacheWorker = new SplitMemoryEntityCache();
     @Nonnull
     private Set<CacheFlag> cacheFlags = EnumSet.noneOf(CacheFlag.class);
     @Nonnull
