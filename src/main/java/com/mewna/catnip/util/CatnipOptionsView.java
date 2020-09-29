@@ -368,7 +368,7 @@ public interface CatnipOptionsView {
      * connecting. Useful for adding support for new features that catnip
      * doesn't yet support. Defaults to {@code null}.
      */
-    @Nonnull
+    @Nullable
     JsonObject customIdentifyOptions();
     
     /**

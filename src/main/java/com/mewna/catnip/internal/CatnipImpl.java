@@ -88,6 +88,10 @@ public class CatnipImpl implements Catnip {
     
     public CatnipImpl(@Nonnull final CatnipOptions options) {
         this.options = options;
+        // Check as soon as possible
+        if(options.apiVersion() < 8) {
+            throw new IllegalArgumentException("Minimum required API version is v8!");
+        }
         
         token = options.token();
         logExtensionOverrides = options.logExtensionOverrides();

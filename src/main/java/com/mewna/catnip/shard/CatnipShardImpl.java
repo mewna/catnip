@@ -83,7 +83,7 @@ import static com.mewna.catnip.shard.ShardConnectState.*;
  * @since 8/31/18.
  */
 @Accessors(fluent = true)
-@SuppressWarnings({"WeakerAccess", "unused"})
+@SuppressWarnings("WeakerAccess")
 public class CatnipShardImpl implements CatnipShard, Listener {
     public static final int ZLIB_SUFFIX = 0x0000FFFF;
     
@@ -104,8 +104,6 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     private volatile boolean heartbeatAcked = true;
     private volatile long lastHeartbeat = -1; //use System.nanoTime() as that is monotonic
     private volatile long lastHeartbeatLatency = -1;
-    private volatile boolean presenceRateLimitRecheckQueued;
-    private volatile boolean sendRateLimitRecheckQueued;
     @Getter
     private volatile List<String> trace = Collections.emptyList();
     private volatile boolean connected;
@@ -272,7 +270,6 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                 handleSocketData(JsonParser.object().from(payload));
             } catch(final JsonParserException e) {
                 catnip.logAdapter().error("Shard {}: Error parsing payload", shardInfo, e);
-                // TODO
                 stateReply(FAILED);
             } finally {
                 socketInputBuffer.setLength(0);
@@ -485,10 +482,10 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             if(socket != null && socketOpen) {
                 if(!heartbeatAcked) {
                     // Zombie
-                    // TODO: Sometimes this doesn't actually close the socket? Why?
                     catnip.logAdapter().warn("Shard {}: Heartbeat zombie, queueing reconnect!", shardInfo);
                     closedByClient = true;
                     socket.sendClose(4000, "Heartbeat zombie");
+                    onClose(socket, 4000, "Heartbeat zombie");
                     return;
                 }
                 sendToSocket(basePayload(GatewayOp.HEARTBEAT, catnip.sessionManager().seqnum(shardInfo.id())));
@@ -632,7 +629,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                 .value("token", catnip.options().token())
                 .value("guild_subscriptions", catnip.options().enableGuildSubscriptions())
                 .value("large_threshold", catnip.options().largeThreshold())
-                // .value("intents", GatewayIntent.from(catnip.options().intents()))
+                .value("intents", GatewayIntent.from(catnip.options().intents()))
                 .array("shard")
                     .value(shardInfo.id())
                     .value(shardInfo.limit())
@@ -647,14 +644,9 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         if(presence != null) {
             data.put("presence", ((PresenceImpl) presence).asPresenceUpdateJson());
         }
-        // TODO: Hack: Allow not specifying intents for v6 gateway; remove this when intents required!
-        if(catnip.options().apiVersion() == 6 && !catnip.options().intents().isEmpty()) {
-            data.put("intents", GatewayIntent.from(catnip.options().intents()));
-        } else if(catnip.options().apiVersion() >= 7) {
-            data.put("intents", GatewayIntent.from(catnip.options().intents()));
-        }
-        //noinspection ConstantConditions
         if(catnip.options().customIdentifyOptions() != null) {
+            // We just checked this IJ, smh
+            //noinspection ConstantConditions
             catnip.options().customIdentifyOptions().forEach(data::put);
         }
         return basePayload(GatewayOp.IDENTIFY, data);
