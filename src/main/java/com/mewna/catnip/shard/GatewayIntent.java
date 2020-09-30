@@ -203,7 +203,6 @@ public enum GatewayIntent {
     
     /**
      * <ul>
-     *     <li>{@link DiscordEvent#CHANNEL_CREATE}</li>
      *     <li>{@link DiscordEvent#MESSAGE_CREATE}</li>
      *     <li>{@link DiscordEvent#MESSAGE_UPDATE}</li>
      *     <li>{@link DiscordEvent#MESSAGE_DELETE}</li>
@@ -211,7 +210,6 @@ public enum GatewayIntent {
      * </ul>
      */
     DIRECT_MESSAGES(1 << 12, false, List.of(
-            Raw.CHANNEL_CREATE,
             Raw.MESSAGE_CREATE,
             Raw.MESSAGE_UPDATE,
             Raw.MESSAGE_DELETE,
