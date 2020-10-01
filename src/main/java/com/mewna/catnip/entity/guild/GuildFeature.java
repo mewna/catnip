@@ -71,6 +71,7 @@ public enum GuildFeature {
      */
     RELAY_ENABLED,
     MEMBER_VERIFICATION_GATE_ENABLED,
+    PREVIEW_ENABLED,
     
     /**
      * When no other feature matches.
