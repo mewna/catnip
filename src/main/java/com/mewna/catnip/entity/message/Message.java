@@ -135,6 +135,16 @@ public interface Message extends Snowflake {
     List<Member> mentionedMembers();
     
     /**
+     * The message that was referenced by this message. Used for inline
+     * replies.
+     *
+     * @return A message reference.
+     */
+    @Nullable
+    @CheckReturnValue
+    MessageReference referencedMessage();
+    
+    /**
      * List of roles @mentioned by this message.
      * <br>All users with these roles will also be mentioned
      *
