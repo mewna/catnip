@@ -289,6 +289,19 @@ public final class DispatchEmitter {
                             "but we should never get this. If you report this to Discord, include the following " +
                             "JSON in your report:\n{}", JsonUtil.encodePrettily(clone));
                 }
+                final User cachedUser = catnip.cache().user(presence.id());
+                if(cachedUser != null) {
+                    final var discrim = Integer.parseInt(cachedUser.discriminator());
+                    if(discrim < 1 || discrim > 9999) {
+                        final JsonObject clone = new JsonObject(payload);
+                        // catnip-internal key
+                        clone.remove("shard");
+                        catnip.logAdapter().warn("Received a presence update for a user with a discriminator of '{}', " +
+                                        "but we should never get this. Discriminators should be clamped to [0001, 9999]." +
+                                        "If you report this to Discord, include the following JSON in your report:\n{}",
+                                discrim, JsonUtil.encodePrettily(clone));
+                    }
+                }
                 catnip.cache().presenceAsync(presence.idAsLong())
                         .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, presence)), e -> cacheErrorLog(type, e));
                 break;
@@ -305,7 +318,6 @@ public final class DispatchEmitter {
             }
             
             // Other
-            
             case Raw.GUILD_MEMBERS_CHUNK: {
                 // End-users don't really have a use for an event here;
                 // anyone who needs this will just be listening on raw

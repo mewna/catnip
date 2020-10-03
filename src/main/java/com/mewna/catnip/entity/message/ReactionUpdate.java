@@ -28,7 +28,10 @@
 package com.mewna.catnip.entity.message;
 
 import com.mewna.catnip.entity.Entity;
+import com.mewna.catnip.entity.channel.Channel;
+import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.misc.Emoji;
+import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -46,11 +49,30 @@ public interface ReactionUpdate extends Entity {
     @Nullable
     String userId();
     
+    @Nullable
+    default User user() {
+        if(userId() != null) {
+            return catnip().cache().user(userId());
+        } else {
+            return null;
+        }
+    }
+    
     /**
      * @return The id of the channel the update is from.
      */
     @Nonnull
     String channelId();
+    
+    @Nonnull
+    @SuppressWarnings("ConstantConditions")
+    default Channel channel() {
+        if(guildId() == null) {
+            return catnip().cache().dmChannel(channelId());
+        } else {
+            return catnip().cache().channel(guildId(), channelId());
+        }
+    }
     
     /**
      * @return The id of the message the update is from.
@@ -63,6 +85,15 @@ public interface ReactionUpdate extends Entity {
      */
     @Nullable
     String guildId();
+    
+    @Nullable
+    default Guild guild() {
+        if(guildId() == null) {
+            return null;
+        } else {
+            return catnip().cache().guild(guildId());
+        }
+    }
     
     /**
      * @return The emoji from the updated reaction.

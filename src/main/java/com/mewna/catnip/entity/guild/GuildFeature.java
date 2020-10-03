@@ -65,6 +65,11 @@ public enum GuildFeature {
     WELCOME_SCREEN_ENABLED,
     ENABLED_DISCOVERABLE_BEFORE,
     COMMUNITY,
+    /**
+     * See https://github.com/discord/discord-api-docs/pull/2038. The vast
+     * majority of guilds shouldn't have this feature.
+     */
+    RELAY_ENABLED,
     
     /**
      * When no other feature matches.
