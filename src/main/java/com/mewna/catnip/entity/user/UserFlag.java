@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.entity.user;
 
-import com.mewna.catnip.entity.message.MessageFlag;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 

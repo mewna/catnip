@@ -29,7 +29,6 @@ package com.mewna.catnip.rest;
 
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.handler.*;
-import io.reactivex.rxjava3.plugins.RxJavaPlugins;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 

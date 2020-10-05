@@ -35,7 +35,6 @@ import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageOptions;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
-import com.mewna.catnip.rest.requester.Requester;
 import com.mewna.catnip.util.PermissionUtil;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
