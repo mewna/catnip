@@ -203,6 +203,16 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public JsonObject referenceToJson(@Nonnull final MessageReference reference) {
+        JsonObject o = new JsonObject();
+        o.put("message_id", reference.messageId());
+        o.put("channel_id", reference.channelId());
+        o.put("guild_id", reference.guildId());
+        return o;
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public Embed createEmbed(final JsonObject data) {
         final JsonObject footerRaw = data.getObject("footer");
         final FooterImpl footer = isInvalid(footerRaw, "text") ? null : FooterImpl.builder()

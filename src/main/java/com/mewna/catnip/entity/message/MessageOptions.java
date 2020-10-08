@@ -83,6 +83,7 @@ public class MessageOptions {
      */
     @Setter(AccessLevel.NONE)
     private EnumSet<MentionParseFlag> parseFlags;
+    
     /**
      * A whitelist of role IDs that gets mentioned by this message. This does <b>NOT</b> get added to constructed {@link Message message} instances.
      * This has no effect if {@link MentionParseFlag#ROLES roles} is present in the {@link #parseFlags() parse} set.
@@ -107,6 +108,7 @@ public class MessageOptions {
     @Setter(AccessLevel.NONE)
     @Getter(AccessLevel.NONE)
     private Set<String> roles;
+    
     /**
      * A whitelist of user IDs that gets mentioned by this message. This does <b>NOT</b> get added to constructed {@link Message message} instances.
      * This has no effect if {@link MentionParseFlag#USERS users} is present in the {@link #parseFlags() parse} set.
@@ -128,6 +130,9 @@ public class MessageOptions {
     @Setter(AccessLevel.NONE)
     @Getter(AccessLevel.NONE)
     private Set<String> users;
+    
+    private MessageReference reference;
+    
     /**
      * Whether or not to forcibly set fields even if they aren't set (read: are null).
      */
@@ -140,12 +145,14 @@ public class MessageOptions {
         parseFlags = options.parseFlags;
         roles = options.roles;
         users = options.users;
+        override = options.override;
+        reference = options.reference;
     }
     
     public MessageOptions(@Nonnull final Message message) {
         content = message.content();
         final List<Embed> embeds = message.embeds();
-        if (!embeds.isEmpty()) {
+        if(!embeds.isEmpty()) {
             embed = embeds.get(0);
         }
     }
@@ -155,7 +162,9 @@ public class MessageOptions {
      * <br><p>The name of the file/attachment is taken from {@link File#getName()}.</p>
      *
      * @param file A <b>non-null, existing, readable</b> {@link File File} instance.
+     *
      * @return Itself.
+     *
      * @see #addFile(String, File)
      */
     @CheckReturnValue
@@ -167,9 +176,12 @@ public class MessageOptions {
     /**
      * Adds a file, used when sending messages. Files are <b>NOT</b> added to constructed {@link Message Message} instances.
      * <br><p>This allows you to specify a custom name for the file, unlike {@link #addFile(File)}.</p>
+     *
      * @param name A <b>not-null</b> name for the file.
      * @param file A <b>not-null, existing, readable</b> {@link File File} instance.
+     *
      * @return Itself.
+     *
      * @see #addFile(File)
      * @see #addFile(String, InputStream)
      */
@@ -193,9 +205,12 @@ public class MessageOptions {
     /**
      * Adds an input stream/file, used when sending messages. Files are <b>NOT</b> added to constructed {@link Message Message} instances.
      * <br><p>This allows you to specify a custom name for the input stream data, unlike {@link #addFile(File)}.</p>
-     * @param name A <b>not-null</b> name for the file.
+     *
+     * @param name   A <b>not-null</b> name for the file.
      * @param stream A <b>not-null, readable</b> {@link InputStream InputStream}.
+     *
      * @return Itself.
+     *
      * @see #addFile(String, File)
      * @see #addFile(String, byte[])
      */
@@ -210,11 +225,29 @@ public class MessageOptions {
     }
     
     /**
+     * Sets the reference on this message. Refference may be null. Used for
+     * things like inline replies.
+     *[
+     * @param reference The nullable reference to set
+     *
+     * @return Itself.
+     */
+    @Nonnull
+    @CheckReturnValue
+    public MessageOptions referenceMessage(@Nullable final MessageReference reference) {
+        this.reference = reference;
+        return this;
+    }
+    
+    /**
      * Adds raw data/a file, used when sending messages. Files are <b>NOT</b> added to constructed {@link Message Message} instances.
      * <br><p>This allows you to specify a custom name for the raw data, unlike {@link #addFile(File)}.</p>
+     *
      * @param name A <b>not-null</b> name for the file.
      * @param data A <b>not-null</b> byte array containing the raw data for the file.
+     *
      * @return Itself.
+     *
      * @see #addFile(String, File)
      * @see #addFile(String, InputStream)
      */
@@ -235,6 +268,7 @@ public class MessageOptions {
     /**
      * Checks to see whether or not this MessageOptions instance has any files attached.
      * <br><p>This should be used over {@code !files().isEmpty()} because it doesn't construct a new list for each read.</p>
+     *
      * @return True or false.
      */
     @CheckReturnValue
@@ -842,12 +876,12 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public Message buildMessage() {
-        if (embed == null && content == null) {
+        if(embed == null && content == null) {
             throw new IllegalStateException("messages must have an embed or text content!");
         }
         final MessageImpl impl = new MessageImpl();
         impl.content(content);
-        if (embed != null) {
+        if(embed != null) {
             impl.embeds(Collections.singletonList(embed));
         } else {
             impl.embeds(Collections.emptyList());

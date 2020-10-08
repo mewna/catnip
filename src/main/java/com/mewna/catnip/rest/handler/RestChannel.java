@@ -148,6 +148,9 @@ public class RestChannel extends RestHandler {
             }
             json.put("allowed_mentions", allowedMentions);
         }
+        if(options.reference() != null) {
+            json.put("message_reference", entityBuilder().referenceToJson(options.reference()));
+        }
         
         final OutboundRequest request = new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), Map.of(), json);
         final List<ImmutablePair<String, byte[]>> buffers = options.files();
