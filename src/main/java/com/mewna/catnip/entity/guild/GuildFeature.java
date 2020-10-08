@@ -71,6 +71,9 @@ public enum GuildFeature {
      */
     RELAY_ENABLED,
     MEMBER_VERIFICATION_GATE_ENABLED,
+    /**
+     * This seems to have reappeared, see https://github.com/DJScias/Discord-Datamining/commit/2ee04565f207b3abf303f2e242a093165728d8d8
+     */
     PREVIEW_ENABLED,
     
     /**
