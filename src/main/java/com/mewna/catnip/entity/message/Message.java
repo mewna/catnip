@@ -463,6 +463,22 @@ public interface Message extends Snowflake {
         return catnip().rest().channel().editMessage(channelId(), id(), options.buildMessage());
     }
     
+    default Single<Message> reply(@Nonnull final String content) {
+        return catnip().rest().channel().sendMessage(channelId(), content);
+    }
+    
+    default Single<Message> reply(@Nonnull final Embed embed) {
+        return catnip().rest().channel().sendMessage(channelId(), embed);
+    }
+    
+    default Single<Message> reply(@Nonnull final Message message) {
+        return catnip().rest().channel().sendMessage(channelId(), message);
+    }
+    
+    default Single<Message> relpy(@Nonnull final MessageOptions options) {
+        return catnip().rest().channel().sendMessage(channelId(), options);
+    }
+    
     default boolean isRickRoll() {
         return content().contains("https://www.youtube.com/watch?v=dQw4w9WgXcQ") || content().contains("https://youtu.be/dQw4w9WgXcQ");
     }
