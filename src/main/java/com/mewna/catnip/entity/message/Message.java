@@ -244,12 +244,12 @@ public interface Message extends Snowflake {
      */
     @Nonnull
     @CheckReturnValue
-    default Single<MessageChannel> channel() {
+    default Maybe<MessageChannel> channel() {
         final long guild = guildIdAsLong();
         if(guild != 0) {
-            return catnip().cache().channel(guild, channelIdAsLong()).map(Channel::asMessageChannel).toSingle();
+            return catnip().cache().channel(guild, channelIdAsLong()).map(Channel::asMessageChannel);
         } else {
-            return catnip().rest().channel().getChannelById(channelId()).map(Channel::asMessageChannel);
+            return catnip().rest().channel().getChannelById(channelId()).map(Channel::asMessageChannel).toMaybe();
         }
     }
     
