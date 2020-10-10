@@ -28,11 +28,10 @@
 package com.mewna.catnip.util.rx;
 
 import com.mewna.catnip.Catnip;
-import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.core.Maybe;
-import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.core.Scheduler;
+import io.reactivex.rxjava3.core.*;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+import org.apache.commons.lang3.tuple.Triple;
+import org.javatuples.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -78,5 +77,203 @@ public final class RxHelpers {
         } else {
             return Maybe.just(nullable);
         }
+    }
+    
+    public static <A, B> Single<Pair<A, B>> resolveMany(@Nonnull final Maybe<A> a,
+                                                        @Nonnull final Maybe<B> b) {
+        return a.flatMap(aa ->
+                b.flatMap(bb ->
+                        Maybe.just(Pair.with(
+                                aa,
+                                bb
+                        )))).toSingle();
+    }
+    
+    public static <A, B, C> Single<Triple<A, B, C>> resolveMany(@Nonnull final Maybe<A> a,
+                                                                @Nonnull final Maybe<B> b,
+                                                                @Nonnull final Maybe<C> c) {
+        return a.flatMap(aa ->
+                b.flatMap(bb ->
+                        c.flatMap(cc ->
+                                Maybe.just(Triple.of(
+                                        aa,
+                                        bb,
+                                        cc
+                                ))))).toSingle();
+    }
+    
+    public static <A, B, C, D> Single<Quartet<A, B, C, D>> resolveMany(@Nonnull final Maybe<A> a,
+                                                                       @Nonnull final Maybe<B> b,
+                                                                       @Nonnull final Maybe<C> c,
+                                                                       @Nonnull final Maybe<D> d) {
+        return a.flatMap(aa ->
+                b.flatMap(bb ->
+                        c.flatMap(cc ->
+                                d.flatMap(dd ->
+                                        Maybe.just(Quartet.with(
+                                                aa,
+                                                bb,
+                                                cc,
+                                                dd)
+                                        ))))).toSingle();
+    }
+    
+    public static <A, B, C, D, E> Single<Quintet<A, B, C, D, E>> resolveMany(@Nonnull final Maybe<A> a,
+                                                                             @Nonnull final Maybe<B> b,
+                                                                             @Nonnull final Maybe<C> c,
+                                                                             @Nonnull final Maybe<D> d,
+                                                                             @Nonnull final Maybe<E> e) {
+        return a.flatMap(aa ->
+                b.flatMap(bb ->
+                        c.flatMap(cc ->
+                                d.flatMap(dd ->
+                                        e.flatMap(ee ->
+                                                Maybe.just(Quintet.with(
+                                                        aa,
+                                                        bb,
+                                                        cc,
+                                                        dd,
+                                                        ee
+                                                ))))))).toSingle();
+    }
+    
+    public static <A, B, C, D, E, F> Single<Sextet<A, B, C, D, E, F>> resolveMany(@Nonnull final Maybe<A> a,
+                                                                                  @Nonnull final Maybe<B> b,
+                                                                                  @Nonnull final Maybe<C> c,
+                                                                                  @Nonnull final Maybe<D> d,
+                                                                                  @Nonnull final Maybe<E> e,
+                                                                                  @Nonnull final Maybe<F> f) {
+        return a.flatMap(aa ->
+                b.flatMap(bb ->
+                        c.flatMap(cc ->
+                                d.flatMap(dd ->
+                                        e.flatMap(ee ->
+                                                f.flatMap(ff ->
+                                                        Maybe.just(Sextet.with(
+                                                                aa,
+                                                                bb,
+                                                                cc,
+                                                                dd,
+                                                                ee,
+                                                                ff
+                                                        )))))))).toSingle();
+    }
+    
+    public static <A, B, C, D, E, F, G> Single<Septet<A, B, C, D, E, F, G>> resolveMany(@Nonnull final Maybe<A> a,
+                                                                                        @Nonnull final Maybe<B> b,
+                                                                                        @Nonnull final Maybe<C> c,
+                                                                                        @Nonnull final Maybe<D> d,
+                                                                                        @Nonnull final Maybe<E> e,
+                                                                                        @Nonnull final Maybe<F> f,
+                                                                                        @Nonnull final Maybe<G> g) {
+        return a.flatMap(aa ->
+                b.flatMap(bb ->
+                        c.flatMap(cc ->
+                                d.flatMap(dd ->
+                                        e.flatMap(ee ->
+                                                f.flatMap(ff ->
+                                                        g.flatMap(gg ->
+                                                                Maybe.just(Septet.with(
+                                                                        aa,
+                                                                        bb,
+                                                                        cc,
+                                                                        dd,
+                                                                        ee,
+                                                                        ff,
+                                                                        gg
+                                                                ))))))))).toSingle();
+    }
+    
+    public static <A, B, C, D, E, F, G, H> Single<Octet<A, B, C, D, E, F, G, H>> resolveMany(@Nonnull final Maybe<A> a,
+                                                                                             @Nonnull final Maybe<B> b,
+                                                                                             @Nonnull final Maybe<C> c,
+                                                                                             @Nonnull final Maybe<D> d,
+                                                                                             @Nonnull final Maybe<E> e,
+                                                                                             @Nonnull final Maybe<F> f,
+                                                                                             @Nonnull final Maybe<G> g,
+                                                                                             @Nonnull final Maybe<H> h) {
+        return a.flatMap(aa ->
+                b.flatMap(bb ->
+                        c.flatMap(cc ->
+                                d.flatMap(dd ->
+                                        e.flatMap(ee ->
+                                                f.flatMap(ff ->
+                                                        g.flatMap(gg ->
+                                                                h.flatMap(hh ->
+                                                                        Maybe.just(Octet.with(
+                                                                                aa,
+                                                                                bb,
+                                                                                cc,
+                                                                                dd,
+                                                                                ee,
+                                                                                ff,
+                                                                                gg,
+                                                                                hh
+                                                                        )))))))))).toSingle();
+    }
+    
+    public static <A, B, C, D, E, F, G, H, I> Single<Ennead<A, B, C, D, E, F, G, H, I>> resolveMany(@Nonnull final Maybe<A> a,
+                                                                                                    @Nonnull final Maybe<B> b,
+                                                                                                    @Nonnull final Maybe<C> c,
+                                                                                                    @Nonnull final Maybe<D> d,
+                                                                                                    @Nonnull final Maybe<E> e,
+                                                                                                    @Nonnull final Maybe<F> f,
+                                                                                                    @Nonnull final Maybe<G> g,
+                                                                                                    @Nonnull final Maybe<H> h,
+                                                                                                    @Nonnull final Maybe<I> i) {
+        return a.flatMap(aa ->
+                b.flatMap(bb ->
+                        c.flatMap(cc ->
+                                d.flatMap(dd ->
+                                        e.flatMap(ee ->
+                                                f.flatMap(ff ->
+                                                        g.flatMap(gg ->
+                                                                h.flatMap(hh ->
+                                                                        i.flatMap(ii ->
+                                                                                Maybe.just(Ennead.with(
+                                                                                        aa,
+                                                                                        bb,
+                                                                                        cc,
+                                                                                        dd,
+                                                                                        ee,
+                                                                                        ff,
+                                                                                        gg,
+                                                                                        hh,
+                                                                                        ii
+                                                                                ))))))))))).toSingle();
+    }
+    
+    public static <A, B, C, D, E, F, G, H, I, J> Single<Decade<A, B, C, D, E, F, G, H, I, J>> resolveMany(@Nonnull final Maybe<A> a,
+                                                                                                          @Nonnull final Maybe<B> b,
+                                                                                                          @Nonnull final Maybe<C> c,
+                                                                                                          @Nonnull final Maybe<D> d,
+                                                                                                          @Nonnull final Maybe<E> e,
+                                                                                                          @Nonnull final Maybe<F> f,
+                                                                                                          @Nonnull final Maybe<G> g,
+                                                                                                          @Nonnull final Maybe<H> h,
+                                                                                                          @Nonnull final Maybe<I> i,
+                                                                                                          @Nonnull final Maybe<J> j) {
+        return a.flatMap(aa ->
+                b.flatMap(bb ->
+                        c.flatMap(cc ->
+                                d.flatMap(dd ->
+                                        e.flatMap(ee ->
+                                                f.flatMap(ff ->
+                                                        g.flatMap(gg ->
+                                                                h.flatMap(hh ->
+                                                                        i.flatMap(ii ->
+                                                                                j.flatMap(jj ->
+                                                                                        Maybe.just(Decade.with(
+                                                                                                aa,
+                                                                                                bb,
+                                                                                                cc,
+                                                                                                dd,
+                                                                                                ee,
+                                                                                                ff,
+                                                                                                gg,
+                                                                                                hh,
+                                                                                                ii,
+                                                                                                jj
+                                                                                        )))))))))))).toSingle();
     }
 }
