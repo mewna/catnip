@@ -73,27 +73,27 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public Single<Message> sendMessage(@Nonnull final String channelId, @Nonnull final String content) {
-        return sendMessage(channelId, new MessageOptions().content(content));
+    public Single<Message> createMessage(@Nonnull final String channelId, @Nonnull final String content) {
+        return createMessage(channelId, new MessageOptions().content(content));
     }
     
     @Nonnull
-    public Single<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Embed embed) {
-        return sendMessage(channelId, new MessageOptions().embed(embed));
+    public Single<Message> createMessage(@Nonnull final String channelId, @Nonnull final Embed embed) {
+        return createMessage(channelId, new MessageOptions().embed(embed));
     }
     
     @Nonnull
-    public Single<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Message message) {
-        return Single.fromObservable(sendMessageRaw(channelId, message).map(entityBuilder()::createMessage));
+    public Single<Message> createMessage(@Nonnull final String channelId, @Nonnull final Message message) {
+        return Single.fromObservable(createMessageRaw(channelId, message).map(entityBuilder()::createMessage));
     }
     
     @Nonnull
-    public Single<Message> sendMessage(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
-        return Single.fromObservable(sendMessageRaw(channelId, options).map(entityBuilder()::createMessage));
+    public Single<Message> createMessage(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
+        return Single.fromObservable(createMessageRaw(channelId, options).map(entityBuilder()::createMessage));
     }
     
     @Nonnull
-    public Observable<JsonObject> sendMessageRaw(@Nonnull final String channelId, @Nonnull final Message message) {
+    public Observable<JsonObject> createMessageRaw(@Nonnull final String channelId, @Nonnull final Message message) {
         final JsonObject json = new JsonObject();
         if(message.content() != null && !message.content().isEmpty()) {
             json.put("content", message.content());
@@ -113,7 +113,7 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public Observable<JsonObject> sendMessageRaw(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
+    public Observable<JsonObject> createMessageRaw(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
         final JsonObject json = new JsonObject();
         if(options.content() != null && !options.content().isEmpty()) {
             json.put("content", options.content());
