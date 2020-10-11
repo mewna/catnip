@@ -63,7 +63,7 @@ final Catnip catnip = Catnip.catnip("your token goes here");
 catnip.observable(DiscordEvent.MESSAGE_CREATE)
     .filter(msg -> msg.content().equals("!ping"))
     .subscribe(msg -> {
-        msg.channel().sendMessage("pong!");
+        msg.reply("pong!");
     }, error -> error.printStackTrace());
 catnip.connect();
 ```
@@ -78,7 +78,7 @@ catnip.observable(DiscordEvent.MESSAGE_CREATE)
         .filter(msg -> msg.content().equals("!ping"))
         .subscribe(msg -> {
             long start = System.currentTimeMillis();
-            msg.channel().sendMessage("pong!")
+            msg.reply("pong!")
                     .subscribe(ping -> {
                         long end = System.currentTimeMillis();
                         ping.edit("pong! (took " + (end - start) + "ms).");
@@ -94,7 +94,7 @@ Catnip.catnipAsync("your token here").subscribe(catnip -> {
     catnip.observable(DiscordEvent.MESSAGE_CREATE)
         .filter(msg -> msg.content().equals("!ping"))
         .subscribe(msg -> {
-            msg.channel().sendMessage("pong!");
+            msg.reply("pong!");
         }, error -> error.printStackTrace());
     catnip.connect();
 });
