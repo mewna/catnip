@@ -464,19 +464,19 @@ public interface Message extends Snowflake {
     }
     
     default Single<Message> reply(@Nonnull final String content) {
-        return catnip().rest().channel().sendMessage(channelId(), content);
+        return catnip().rest().channel().createMessage(channelId(), content);
     }
     
     default Single<Message> reply(@Nonnull final Embed embed) {
-        return catnip().rest().channel().sendMessage(channelId(), embed);
+        return catnip().rest().channel().createMessage(channelId(), embed);
     }
     
     default Single<Message> reply(@Nonnull final Message message) {
-        return catnip().rest().channel().sendMessage(channelId(), message);
+        return catnip().rest().channel().createMessage(channelId(), message);
     }
     
     default Single<Message> reply(@Nonnull final MessageOptions options) {
-        return catnip().rest().channel().sendMessage(channelId(), options);
+        return catnip().rest().channel().createMessage(channelId(), options);
     }
     
     default boolean isRickRoll() {
