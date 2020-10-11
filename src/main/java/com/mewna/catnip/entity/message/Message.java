@@ -475,7 +475,7 @@ public interface Message extends Snowflake {
         return catnip().rest().channel().sendMessage(channelId(), message);
     }
     
-    default Single<Message> relpy(@Nonnull final MessageOptions options) {
+    default Single<Message> reply(@Nonnull final MessageOptions options) {
         return catnip().rest().channel().sendMessage(channelId(), options);
     }
     
