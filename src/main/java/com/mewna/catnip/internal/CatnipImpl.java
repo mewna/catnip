@@ -98,6 +98,7 @@ public class CatnipImpl implements Catnip {
         
         keepaliveThread = new Thread(() -> {
             try {
+                // Whenever it's done, the keepalive thread dies along with the rest of catnip
                 latch.await();
             } catch(final InterruptedException ignored) {
             }
