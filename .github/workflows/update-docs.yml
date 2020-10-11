@@ -13,7 +13,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-java@v1
         with:
-          java-version: "15"
+          java-version: "14"
       - run: bash docs.sh
       - uses: JamesIves/github-pages-deploy-action@3.6.2
         with:
