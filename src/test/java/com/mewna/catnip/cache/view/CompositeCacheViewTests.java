@@ -138,8 +138,8 @@ public class CompositeCacheViewTests {
         final String s = composite(cache1, cache2).reduce("", String::concat, String::concat);
         Assertions.assertEquals(s.length(), "some string".length() + "some other string".length());
         Assertions.assertTrue(
-                s.equals("some string some other string") ||
-                        s.equals("some other string some string")
+                s.equals("some stringsome other string") ||
+                        s.equals("some other stringsome string")
         );
     }
     
@@ -152,8 +152,8 @@ public class CompositeCacheViewTests {
         final String s = composite(cache1, cache2).reduce("", String::concat);
         Assertions.assertEquals(s.length(), "some string".length() + "some other string".length());
         Assertions.assertTrue(
-                s.equals("some string some other string") ||
-                        s.equals("some other string some string")
+                s.equals("some stringsome other string") ||
+                        s.equals("some other stringsome string")
         );
     }
     
@@ -174,8 +174,8 @@ public class CompositeCacheViewTests {
         final String s = maybeS.get();
         Assertions.assertEquals(s.length(), "some string".length() + "some other string".length());
         Assertions.assertTrue(
-                s.equals("some string some other string") ||
-                        s.equals("some other string some string")
+                s.equals("some stringsome other string") ||
+                        s.equals("some other stringsome string")
         );
     }
     

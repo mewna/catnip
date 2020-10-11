@@ -121,8 +121,8 @@ public class DefaultCacheViewTests {
         final String s = cache.reduce("", String::concat, String::concat);
         Assertions.assertEquals(s.length(), "some string".length() + "some other string".length());
         Assertions.assertTrue(
-                s.equals("some string some other string") ||
-                        s.equals("some other string some string")
+                s.equals("some stringsome other string") ||
+                        s.equals("some other stringsome string")
         );
     }
     
@@ -134,8 +134,8 @@ public class DefaultCacheViewTests {
         final String s = cache.reduce("", String::concat);
         Assertions.assertEquals(s.length(), "some string".length() + "some other string".length());
         Assertions.assertTrue(
-                s.equals("some string some other string") ||
-                        s.equals("some other string some string")
+                s.equals("some stringsome other string") ||
+                        s.equals("some other stringsome string")
         );
     }
     
@@ -156,8 +156,8 @@ public class DefaultCacheViewTests {
         final String s = maybeS.get();
         Assertions.assertEquals(s.length(), "some string".length() + "some other string".length());
         Assertions.assertTrue(
-                s.equals("some string some other string") ||
-                        s.equals("some other string some string")
+                s.equals("some stringsome other string") ||
+                        s.equals("some other stringsome string")
         );
     }
     
@@ -276,7 +276,7 @@ public class DefaultCacheViewTests {
         cache.put(456, "some other string");
         Assertions.assertEquals(cache.values().size(), 2);
         Assertions.assertEquals(snapshot2.size(), 1);
-        
+    
         Assertions.assertFalse(snapshot1.contains("some string"));
         Assertions.assertTrue(snapshot2.contains("some string"));
         Assertions.assertFalse(snapshot2.contains("yet another string"));
