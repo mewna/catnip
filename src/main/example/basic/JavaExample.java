@@ -40,7 +40,7 @@ public class JavaExample {
         catnip.observable(DiscordEvent.MESSAGE_CREATE)
                 .filter(msg -> msg.content().equals("!ping"))
                 .forEach(msg -> {
-                    msg.channel().sendMessage("pong!");
+                    msg.reply("pong!");
                 });
         catnip.connect();
     }

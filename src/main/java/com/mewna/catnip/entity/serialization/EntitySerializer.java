@@ -73,7 +73,7 @@ public interface EntitySerializer<T> {
      * serialized with, so as to avoid potential version mismatch errors.
      *
      * @param data The data to deserialize.
-     * @param as   The type of entity to deserialie data into.
+     * @param as   The type of entity to deserialize data into.
      * @param <E>  The type of the target entity.
      *
      * @return The entity deserialized from the given data.

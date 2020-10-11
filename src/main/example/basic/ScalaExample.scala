@@ -36,7 +36,7 @@ object ScalaExample extends App {
   catnip.observable(DiscordEvent.MESSAGE_CREATE)
       .filter((msg: Message) => msg.content() == "!ping")
       .forEach((msg : Message) => {
-        msg.channel().sendMessage("pong!")
+        msg.reply("pong!")
       })
   catnip.connect()
 }

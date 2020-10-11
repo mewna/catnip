@@ -21,6 +21,7 @@ import java.util.*;
  * @since 3/25/2019
  */
 
+@SuppressWarnings("UnusedReturnValue")
 public class MultipartBodyPublisher {
     private final Collection<PartsSpecification> partsSpecificationList = new ArrayList<>();
     @Getter

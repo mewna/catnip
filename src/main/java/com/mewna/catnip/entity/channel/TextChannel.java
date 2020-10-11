@@ -67,8 +67,9 @@ public interface TextChannel extends GuildChannel, MessageChannel, Mentionable {
      *
      * @return The slowmode set on this channel, in seconds.
      */
-    @CheckReturnValue
     @Nonnegative
+    @CheckReturnValue
+    @SuppressWarnings("SameReturnValue")
     int rateLimitPerUser();
     
     @Override

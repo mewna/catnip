@@ -41,7 +41,7 @@ fun main(args: Array<String>) {
     catnip.observable<Message>(DiscordEvent.MessageCreate)
             .filter({ msg -> msg.content() == "!ping" })
             .forEach({ msg ->
-                msg.channel().sendMessage("pong!")
+                msg.reply("pong!")
             })
     catnip.connect()
 }

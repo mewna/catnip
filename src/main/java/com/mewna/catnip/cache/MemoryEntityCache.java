@@ -345,13 +345,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     @SuppressWarnings("SameParameterValue")
     protected <I, T> Maybe<T> or(final I id, @Nonnull final Maybe<T> data, final T def) {
         if(def == null) {
-            return data.flatMap(d -> {
-                if(d == null) {
-                    return Maybe.error(new NullPointerException("No entity for: " + id));
-                } else {
-                    return Maybe.just(d);
-                }
-            });
+            return or(id, data);
         } else {
             return data.map(d -> Objects.requireNonNullElse(d, def));
         }
@@ -360,9 +354,13 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     protected <I, T> Maybe<T> or(final I id, final Maybe<T> data) {
         return data.flatMap(d -> {
             if(d == null) {
-                return Maybe.error(new NullPointerException("No entity for: " + id));
+                return Maybe.<T>error(new NullPointerException("No entity for: " + id))
+                        .observeOn(catnip.rxScheduler())
+                        .subscribeOn(catnip.rxScheduler());
             } else {
-                return Maybe.just(d);
+                return Maybe.just(d)
+                        .observeOn(catnip.rxScheduler())
+                        .subscribeOn(catnip.rxScheduler());
             }
         });
     }
@@ -370,7 +368,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     @Nonnull
     @Override
     public Maybe<Guild> guild(final long id) {
-        return this.or(id, Maybe.just(guildCache(shardId(id)).getById(id)));
+        return or(id, Maybe.just(guildCache(shardId(id)).getById(id)));
     }
     
     @Nonnull

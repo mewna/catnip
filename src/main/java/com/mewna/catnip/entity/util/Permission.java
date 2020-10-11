@@ -72,7 +72,7 @@ public enum Permission {
     MANAGE_WEBHOOKS(0x20000000, true, "Manage Webhooks"),
     MANAGE_EMOJIS(0x40000000, false, "Manage Emojis");
     
-    public static final long ALL = from(Permission.values());
+    public static final long ALL = from(values());
     public static final long NONE = 0;
     @Getter
     private final int value;

@@ -30,10 +30,7 @@ package com.mewna.catnip.entity.user;
 import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.guild.GuildEntity;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.time.OffsetDateTime;
-import java.util.Set;
 
 /**
  * @author natanbc

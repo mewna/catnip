@@ -225,7 +225,7 @@ public class MessageOptions {
     }
     
     /**
-     * Sets the reference on this message. Refference may be null. Used for
+     * Sets the reference on this message. Reference may be null. Used for
      * things like inline replies.
      *[
      * @param reference The nullable reference to set

@@ -288,12 +288,12 @@ public class CachingBuffer extends AbstractBuffer {
     
     @Value
     @Accessors(fluent = true)
-    private final class BufferState {
-        private int id;
-        private final Set<String> awaitedGuilds;
-        private final Map<String, Deque<JsonObject>> guildBuffers = new ConcurrentHashMap<>();
-        private final Map<String, JsonObject> guildCreateCache = new ConcurrentHashMap<>();
-        private final Deque<JsonObject> buffer = new ConcurrentLinkedDeque<>();
+    private class BufferState {
+        int id;
+        Set<String> awaitedGuilds;
+        Map<String, Deque<JsonObject>> guildBuffers = new ConcurrentHashMap<>();
+        Map<String, JsonObject> guildCreateCache = new ConcurrentHashMap<>();
+        Deque<JsonObject> buffer = new ConcurrentLinkedDeque<>();
         
         void awaitGuild(final String id, final JsonObject event) {
             awaitedGuilds.add(id);

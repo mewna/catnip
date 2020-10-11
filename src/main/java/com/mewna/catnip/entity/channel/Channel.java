@@ -52,6 +52,7 @@ public interface Channel extends Snowflake {
      */
     @Nonnull
     @CheckReturnValue
+    @SuppressWarnings("SameReturnValue")
     ChannelType type();
     
     /**

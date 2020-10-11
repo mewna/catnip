@@ -175,6 +175,7 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
         final int fetchCount = state.entitiesToFetch();
         return fetchNext(state, id, fetchCount).compose(data -> {
             final int remaining = state.remaining();
+            // FIXME: This should be non-blocking
             update(state, data.blockingFirst());
             final T last = state.last();
             if(state.done() || remaining - fetchCount != state.remaining() || last == null) {

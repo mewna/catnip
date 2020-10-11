@@ -204,7 +204,7 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public JsonObject referenceToJson(@Nonnull final MessageReference reference) {
-        JsonObject o = new JsonObject();
+        final JsonObject o = new JsonObject();
         o.put("message_id", reference.messageId());
         o.put("channel_id", reference.channelId());
         o.put("guild_id", reference.guildId());
