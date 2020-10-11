@@ -9,5 +9,5 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: "14"
-      - run: ./mvnw clean cobertura:cobertura
+      - run: ./mvnw clean test
       - run: bash <(curl -s https://codecov.io/bash)
