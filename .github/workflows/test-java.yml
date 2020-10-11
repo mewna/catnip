@@ -2,7 +2,7 @@ name: Run all tests
 on: [push]
 
 jobs:
-  test:
+  run-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

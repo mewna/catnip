@@ -31,7 +31,7 @@ No. Use a real build tool like [Maven](https://maven.apache.org/) or [Gradle](ht
 
 ### Javadocs?
 
-[Get them here.](https://mewna.github.io/catnip/docs)
+[Get them here.](https://mewna.github.io/catnip)
 
 ## Features
 
