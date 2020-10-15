@@ -36,6 +36,7 @@ import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageReference;
 import com.mewna.catnip.entity.message.MessageType;
+import com.mewna.catnip.entity.sticker.Sticker;
 import com.mewna.catnip.entity.user.User;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -84,6 +85,7 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
     private int flagsRaw;
     private List<ChannelMention> mentionedChannels;
     private MessageReference referencedMessage;
+    private List<Sticker> stickers;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {

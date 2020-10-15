@@ -35,6 +35,7 @@ import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.misc.Emoji;
+import com.mewna.catnip.entity.sticker.Sticker;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
@@ -311,6 +312,13 @@ public interface Message extends Snowflake {
      */
     @CheckReturnValue
     int flagsRaw();
+    
+    /**
+     * @return The stickers sent with this message.
+     */
+    @Nonnull
+    @CheckReturnValue
+    List<Sticker> stickers();
     
     /**
      * @return The set of flags set on this message.

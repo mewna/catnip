@@ -48,6 +48,7 @@ import com.mewna.catnip.entity.impl.guild.audit.*;
 import com.mewna.catnip.entity.impl.message.*;
 import com.mewna.catnip.entity.impl.message.EmbedImpl.*;
 import com.mewna.catnip.entity.impl.misc.*;
+import com.mewna.catnip.entity.impl.sticker.StickerImpl;
 import com.mewna.catnip.entity.impl.user.*;
 import com.mewna.catnip.entity.impl.user.PresenceImpl.*;
 import com.mewna.catnip.entity.impl.voice.VoiceRegionImpl;
@@ -62,6 +63,8 @@ import com.mewna.catnip.entity.misc.*;
 import com.mewna.catnip.entity.misc.Emoji.ActivityEmoji;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.misc.Emoji.UnicodeEmoji;
+import com.mewna.catnip.entity.sticker.Sticker;
+import com.mewna.catnip.entity.sticker.StickerFormatType;
 import com.mewna.catnip.entity.user.*;
 import com.mewna.catnip.entity.user.Presence.*;
 import com.mewna.catnip.entity.util.Permission;
@@ -860,6 +863,22 @@ public final class EntityBuilder {
                 .channelId(data.getString("channel_id"))
                 .messageId(data.getString("message_id"))
                 .guildId(data.getString("guild_id"))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Sticker createSticker(@Nonnull final JsonObject data) {
+        return delegate(Sticker.class, StickerImpl.builder()
+                .catnip(catnip)
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .packIdAsLong(Long.parseUnsignedLong(data.getString("pack_id")))
+                .name(data.getString("name"))
+                .description(data.getString("description"))
+                .tags(data.has("tags") ? List.of(data.getString("tags").split(",")) : List.of())
+                .asset(data.getString("asset"))
+                .previewAsset(data.getString("preview_asset"))
+                .formatType(StickerFormatType.byId(data.getInt("format_type")))
                 .build());
     }
     
