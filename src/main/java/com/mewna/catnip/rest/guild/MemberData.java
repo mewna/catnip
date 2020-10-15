@@ -32,6 +32,7 @@ import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.user.VoiceState;
+import io.reactivex.rxjava3.core.Single;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -63,21 +64,40 @@ public class MemberData {
     private Boolean mute;
     private Boolean deaf;
     
-    private static String voiceChannel(@Nonnull final Member member) {
+    private static String blockingVoiceChannel(@Nonnull final Member member) {
         return Optional.ofNullable(member.catnip().cache().voiceState(member.guildId(), member.id()).blockingGet())
                 .map(VoiceState::channelId).orElse(null);
     }
     
     @Nonnull
     @CheckReturnValue
-    public static MemberData of(@Nonnull final Member member) {
-        final String voiceChannel = voiceChannel(member);
+    public static Single<MemberData> of(@Nonnull final Member member) {
+        return member.voiceState()
+                .map(state -> new MemberData()
+                        .roles(member.roleIds())
+                        .deaf(state.deaf() || state.selfDeaf())
+                        .mute(state.mute() || state.selfMute())
+                        .nickname(member.nick())
+                        .channelId(state.channelId()))
+                .defaultIfEmpty(new MemberData()
+                        .roles(member.roleIds())
+                        .deaf(false)
+                        .mute(false)
+                        .nickname(member.nick())
+                        .channelId(null)
+                );
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public static MemberData blockingOf(@Nonnull final Member member) {
+        final VoiceState voiceState = member.voiceState().blockingGet();
         return new MemberData()
                 .roles(member.roleIds())
-                .deaf(voiceChannel != null ? member.deaf() : null)
-                .mute(voiceChannel != null ? member.mute() : null)
+                .deaf(voiceState != null ? member.deaf().blockingGet() : null)
+                .mute(voiceState != null ? member.mute().blockingGet() : null)
                 .nickname(member.nick())
-                .channelId(voiceChannel)
+                .channelId(voiceState != null ? voiceState.channelId() : null)
                 ;
     }
     

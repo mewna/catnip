@@ -32,6 +32,7 @@ import com.mewna.catnip.entity.Mentionable;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
 import io.reactivex.rxjava3.core.Completable;
@@ -141,7 +142,9 @@ public interface Member extends Mentionable, PermissionHolder {
      * @return True if muted, false otherwise.
      */
     @CheckReturnValue
-    boolean mute();
+    default Single<Boolean> mute() {
+        return voiceState().map(s -> s.selfMute() || s.mute()).defaultIfEmpty(false);
+    }
     
     /**
      * Whether the user is deafened.
@@ -150,7 +153,17 @@ public interface Member extends Mentionable, PermissionHolder {
      * @return True if deafened, false otherwise.
      */
     @CheckReturnValue
-    boolean deaf();
+    default Single<Boolean> deaf() {
+        return voiceState().map(s -> s.selfDeaf() || s.deaf()).defaultIfEmpty(false);
+    }
+    
+    /**
+     * @return The user's voice state in this guild. May be null.
+     */
+    @CheckReturnValue
+    default Maybe<VoiceState> voiceState() {
+        return guild().map(g -> g.voiceStates().getById(id()));
+    }
     
     /**
      * When the user joined the server last.
