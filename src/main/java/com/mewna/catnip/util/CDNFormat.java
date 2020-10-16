@@ -27,6 +27,8 @@
 
 package com.mewna.catnip.util;
 
+import com.mewna.catnip.entity.sticker.Sticker;
+import com.mewna.catnip.entity.sticker.StickerFormatType;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.ImageType;
 
@@ -115,5 +117,17 @@ public final class CDNFormat {
         return options.buildUrl(
                 String.format("https://cdn.discordapp.com/splashes/%s/%s", id, splash)
         );
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public static String stickerUrl(@Nonnull final Sticker sticker) {
+        // This method is special because stickers are special
+        if(sticker.formatType() == StickerFormatType.LOTTIE) {
+            // TODO: How to handle lottie?
+            throw new UnsupportedOperationException("CDN URLs for lottie stickers are currently unsupported.");
+        }
+        return String.format("https://cdn.discordapp.com/stickers/%s/%s.%s", sticker.packId(), sticker.asset(),
+                sticker.formatType().name().toLowerCase());
     }
 }

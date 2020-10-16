@@ -63,6 +63,7 @@ public enum JsonErrorCode {
     UNKNOWN_BUILD(10030, "Unknown build"),
     UNKNOWN_LOBBY(10031, "Unknown lobby"),
     UNKNOWN_BRANCH(10032, "Unknown branch"),
+    UNKNOWN_STORE_DIRECTORY_LAYOUT(10033, "Unknown store directory layout"),
     UNKNOWN_REDISTRIBUTABLE(10036, "Unknown redistributable"),
     BOTS_CANT_USE(20001, "Bots cannot use this endpoint"),
     ONLY_BOTS_CAN_USE(20002, "Only bots can use this endpoint"),

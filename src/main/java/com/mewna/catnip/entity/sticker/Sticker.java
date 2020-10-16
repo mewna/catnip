@@ -31,7 +31,9 @@ import com.mewna.catnip.entity.partials.Describable;
 import com.mewna.catnip.entity.partials.Nameable;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.partials.Snowflake;
+import com.mewna.catnip.util.CDNFormat;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
@@ -42,21 +44,33 @@ import java.util.List;
  */
 public interface Sticker extends Snowflake, RequiresCatnip, Nameable, Describable {
     @Nonnull
+    @CheckReturnValue
     default String packId() {
         return Long.toUnsignedString(packIdAsLong());
     }
     
+    @CheckReturnValue
     long packIdAsLong();
     
     @Nonnull
+    @CheckReturnValue
     List<String> tags();
     
     @Nonnull
+    @CheckReturnValue
     String asset();
     
     @Nullable
+    @CheckReturnValue
     String previewAsset();
     
     @Nonnull
+    @CheckReturnValue
     StickerFormatType formatType();
+    
+    @Nonnull
+    @CheckReturnValue
+    default String cdnUrl() {
+        return CDNFormat.stickerUrl(this);
+    }
 }
