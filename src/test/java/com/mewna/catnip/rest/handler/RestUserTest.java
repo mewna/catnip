@@ -31,6 +31,8 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.Env;
 import org.junit.jupiter.api.Test;
 
+import javax.annotation.Nonnull;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -38,7 +40,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @since 10/15/20.
  */
 public class RestUserTest {
-    private static final Catnip catnip = Catnip.catnip(Env.TOKEN);
+    private static final Catnip catnip;
+    
+    static {
+        try {
+            catnip = Catnip.catnip(Env.TOKEN);
+        } catch(@Nonnull final Throwable t) {
+            t.printStackTrace();
+            throw new RuntimeException(t);
+        }
+    }
     
     @Test
     public void testUserRoutes() {
