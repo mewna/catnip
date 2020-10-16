@@ -31,8 +31,6 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.Env;
 import org.junit.jupiter.api.Test;
 
-import javax.annotation.Nonnull;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**

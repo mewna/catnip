@@ -10,7 +10,7 @@ jobs:
         with:
           java-version: "14"
       - run: ./mvnw clean test
-        with:
+        env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
           TEST_GUILD: ${{ secrets.TEST_GUILD }}
           TEST_CHANNEL: ${{ secrets.TEST_CHANNEL }}
