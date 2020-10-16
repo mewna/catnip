@@ -127,7 +127,7 @@ public final class CDNFormat {
             // TODO: How to handle lottie?
             throw new UnsupportedOperationException("CDN URLs for lottie stickers are currently unsupported.");
         }
-        return String.format("https://cdn.discordapp.com/stickers/%s/%s.%s", sticker.packId(), sticker.asset(),
+        return String.format("https://cdn.discordapp.com/stickers/%s/%s.%s", sticker.id(), sticker.asset(),
                 sticker.formatType().name().toLowerCase());
     }
 }
