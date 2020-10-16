@@ -28,18 +28,17 @@
 package com.mewna.catnip.rest.handler;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.Env;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author amy
  * @since 10/15/20.
  */
 public class RestGuildTest {
-    private static final Catnip catnip = Catnip.catnip(new CatnipOptions(Env.TOKEN));
+    private static final Catnip catnip = Catnip.catnip(Env.TOKEN);
     
     @Test
     public void testGuildRoutes() {

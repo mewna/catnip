@@ -28,7 +28,6 @@
 package com.mewna.catnip.rest.handler;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.Env;
 
 /**
@@ -36,6 +35,6 @@ import com.mewna.catnip.Env;
  * @since 10/15/20.
  */
 public class RestWebhookTest {
-    private static final Catnip catnip = Catnip.catnip(new CatnipOptions(Env.TOKEN));
+    private static final Catnip catnip = Catnip.catnip(Env.TOKEN);
     // TODO: Implement
 }

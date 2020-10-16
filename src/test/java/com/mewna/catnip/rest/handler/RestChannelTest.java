@@ -28,7 +28,6 @@
 package com.mewna.catnip.rest.handler;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.CatnipOptions;
 import com.mewna.catnip.Env;
 import com.mewna.catnip.rest.ResponseException;
 import org.junit.jupiter.api.Test;
@@ -44,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class RestChannelTest {
     public static final String CAKE = "\uD83C\uDF70";
-    private static final Catnip catnip = Catnip.catnip(new CatnipOptions(Env.TOKEN));
+    private static final Catnip catnip = Catnip.catnip(Env.TOKEN);
     
     @Test
     public void messageRoutesTest() {
