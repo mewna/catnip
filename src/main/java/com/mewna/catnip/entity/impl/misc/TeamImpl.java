@@ -80,4 +80,10 @@ public class TeamImpl implements Team, RequiresCatnip {
     public String toString() {
         return String.format("Team (%s)", name);
     }
+    
+    @Nullable
+    @Override
+    public String iconUrl(@Nonnull final ImageOptions options) {
+        return CDNFormat.teamIconUrl(id(), icon, options);
+    }
 }
