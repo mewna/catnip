@@ -29,7 +29,7 @@ package com.mewna.catnip.rest.handler;
 
 import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.guild.*;
 import com.mewna.catnip.entity.guild.Guild.GuildEditFields;

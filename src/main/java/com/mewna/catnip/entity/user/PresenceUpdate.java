@@ -27,7 +27,7 @@
 
 package com.mewna.catnip.entity.user;
 
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.guild.GuildEntity;
 
 import javax.annotation.Nullable;

@@ -28,9 +28,10 @@
 package com.mewna.catnip.entity.guild;
 
 import com.mewna.catnip.cache.view.CacheView;
-import com.mewna.catnip.entity.Mentionable;
+import com.mewna.catnip.entity.partials.Mentionable;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.channel.GuildChannel;
+import com.mewna.catnip.entity.partials.Permissable;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.entity.util.Permission;
@@ -55,7 +56,7 @@ import java.util.stream.Collectors;
  * @since 9/4/18.
  */
 @SuppressWarnings({"unused", "RedundantSuppression"})
-public interface Member extends Mentionable, PermissionHolder {
+public interface Member extends Mentionable, Permissable {
     /**
      * The user equivalent to this member.
      */

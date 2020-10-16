@@ -27,7 +27,7 @@
 
 package com.mewna.catnip.entity.user;
 
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.partials.Snowflake;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;

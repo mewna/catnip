@@ -1,7 +1,10 @@
 package com.mewna.catnip.entity.misc;
 
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.partials.HasIcon;
+import com.mewna.catnip.entity.partials.Nameable;
+import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.util.ImageOptions;
+import com.mewna.catnip.util.CDNFormat;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -14,13 +17,7 @@ import java.util.List;
  * @author Bowser65
  * @since 06/24/19.
  */
-public interface Team extends Snowflake {
-    /**
-     * @return The name of the team.
-     */
-    @Nonnull
-    String name();
-    
+public interface Team extends Snowflake, Nameable, HasIcon {
     /**
      * The ID of the team owner
      *
@@ -44,30 +41,4 @@ public interface Team extends Snowflake {
      */
     @Nonnull
     List<TeamMember> members();
-    
-    /**
-     * The URL for the team's set icon. Can be null if the user has not set an avatar.
-     *
-     * @param options {@link ImageOptions Image Options}.
-     *
-     * @return String containing the URL to its icon, options considered. Can be null.
-     */
-    @Nullable
-    @CheckReturnValue
-    String iconUrl(@Nonnull final ImageOptions options);
-    
-    /**
-     * The URL for the user's set avatar. Can be null if the user has not set an avatar.
-     *
-     * @return String containing the URL to its icon. Can be null.
-     */
-    @Nullable
-    @CheckReturnValue
-    String iconUrl();
-    
-    /**
-     * @return The hash of the image of the team's icon, if set.
-     */
-    @Nullable
-    String icon();
 }

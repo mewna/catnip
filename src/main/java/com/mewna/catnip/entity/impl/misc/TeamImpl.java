@@ -66,20 +66,6 @@ public class TeamImpl implements Team, RequiresCatnip {
         this.catnip = catnip;
     }
     
-    @Nullable
-    @Override
-    @CheckReturnValue
-    public String iconUrl(@Nonnull final ImageOptions options) {
-        return CDNFormat.teamIconUrl(id(), icon, options);
-    }
-    
-    @Nullable
-    @Override
-    @CheckReturnValue
-    public String iconUrl() {
-        return iconUrl(new ImageOptions().type(null));
-    }
-    
     @Override
     public int hashCode() {
         return Long.hashCode(idAsLong);

@@ -25,12 +25,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.partials;
+
+import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.entity.util.ImageOptions;
+
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
+ * An entity that has an icon.
+ *
  * @author amy
  * @since 10/15/20.
  */
-public interface Nameable {
-    String name();
+public interface HasIcon {
+    /**
+     * @return The icon's hash. May be null, in cases like a user not setting
+     * an avatar, no guild icon, ...
+     */
+    @Nullable
+    @CheckReturnValue
+    String icon();
+    
+    /**
+     * @return The icon's CDN URL. Will be null if {@link #icon()} is null,
+     * except in the case of a {@link User}.
+     */
+    @Nullable
+    @CheckReturnValue
+    default String iconUrl() {
+        return iconUrl(new ImageOptions());
+    }
+    
+    /**
+     * @return The icon's CDN URL, with the specified options applied. Will be
+     * null if {@link #icon()} is null, except in the case of a {@link User}.
+     */
+    @Nullable
+    @CheckReturnValue
+    String iconUrl(@Nonnull ImageOptions options);
 }

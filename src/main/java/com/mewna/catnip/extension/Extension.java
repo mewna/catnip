@@ -29,6 +29,7 @@ package com.mewna.catnip.extension;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
+import com.mewna.catnip.entity.partials.Nameable;
 import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.shard.event.DoubleEventType;
@@ -64,7 +65,7 @@ import java.util.function.UnaryOperator;
  * @since 9/6/18
  */
 @SuppressWarnings({"unused", "UnusedReturnValue", "SameReturnValue"})
-public interface Extension {
+public interface Extension extends Nameable {
     /**
      * The name of this extension. Note that an extension's name is
      * <strong>NOT</strong> guaranteed unique, and so your code should NOT rely

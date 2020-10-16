@@ -32,6 +32,7 @@ package com.mewna.catnip.util;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.guild.*;
+import com.mewna.catnip.entity.partials.Permissable;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 
@@ -46,7 +47,7 @@ public final class PermissionUtil {
     private PermissionUtil() {
     }
     
-    private static long basePermissions(final PermissionHolder holder) {
+    private static long basePermissions(final Permissable holder) {
         final Catnip catnip = holder.catnip();
         final Guild guild = catnip.cache().guild(holder.guildId()).blockingGet();
         // Could be simplified to just Guild.role($.idAsLong()), but custom caches are a thing with nullable guilds.
@@ -67,7 +68,7 @@ public final class PermissionUtil {
         return permissions;
     }
     
-    private static long overridePermissions(final long base, final PermissionHolder holder, final GuildChannel channel) {
+    private static long overridePermissions(final long base, final Permissable holder, final GuildChannel channel) {
         if(Permission.ADMINISTRATOR.isPresent(base)) {
             return Permission.ALL;
         }
@@ -108,11 +109,11 @@ public final class PermissionUtil {
         return null;
     }
     
-    public static long effectivePermissions(@Nonnull final PermissionHolder member) {
+    public static long effectivePermissions(@Nonnull final Permissable member) {
         return basePermissions(member);
     }
     
-    public static long effectivePermissions(@Nonnull final PermissionHolder member, @Nonnull final GuildChannel channel) {
+    public static long effectivePermissions(@Nonnull final Permissable member, @Nonnull final GuildChannel channel) {
         return overridePermissions(basePermissions(member), member, channel);
     }
     

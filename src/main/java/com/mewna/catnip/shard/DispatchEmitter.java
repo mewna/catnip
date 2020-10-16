@@ -31,7 +31,7 @@ import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.PartialMember;
 import com.mewna.catnip.entity.guild.Role;

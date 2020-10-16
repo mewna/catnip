@@ -79,6 +79,18 @@ public final class CDNFormat {
     
     @Nullable
     @CheckReturnValue
+    public static String applicationIconUrl(@Nonnull final String id, @Nullable final String icon, @Nonnull final ImageOptions options) {
+        if(icon == null) {
+            return null;
+        }
+        if(options.type() == ImageType.GIF && !icon.startsWith("a_")) {
+            throw new IllegalArgumentException("Cannot build gif icon URL for non gif application icon!");
+        }
+        return options.buildUrl(String.format("team-icons/%s/%s", id, icon));
+    }
+    
+    @Nullable
+    @CheckReturnValue
     public static String teamIconUrl(@Nonnull final String id, @Nullable final String icon, @Nonnull final ImageOptions options) {
         if(icon == null) {
             return null;

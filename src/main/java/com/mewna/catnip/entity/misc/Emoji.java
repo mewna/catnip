@@ -27,7 +27,8 @@
 
 package com.mewna.catnip.entity.misc;
 
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.partials.NullNameable;
+import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.user.User;
 import io.reactivex.rxjava3.core.Maybe;
@@ -44,7 +45,7 @@ import java.util.Objects;
  * @since 9/5/18.
  */
 @SuppressWarnings({"unused", "RedundantSuppression", "SameReturnValue"})
-public interface Emoji extends Snowflake {
+public interface Emoji extends Snowflake, NullNameable {
     /**
      * ID of this emoji, or null if it has no ID.
      * <br>Always null for {@link #unicode() unicode} emoji.

@@ -30,6 +30,7 @@ package com.mewna.catnip.entity.user;
 import com.mewna.catnip.entity.impl.user.PresenceImpl;
 import com.mewna.catnip.entity.impl.user.PresenceImpl.ActivityImpl;
 import com.mewna.catnip.entity.misc.Emoji.ActivityEmoji;
+import com.mewna.catnip.entity.partials.Nameable;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
@@ -219,7 +220,7 @@ public interface Presence {
         String match();
     }
     
-    interface Activity {
+    interface Activity extends Nameable {
         @Nonnull
         @CheckReturnValue
         static Activity of(@Nonnull final String name, @Nonnull final ActivityType type, @Nullable final String url) {
@@ -246,9 +247,6 @@ public interface Presence {
         static Activity of(@Nonnull final String name, @Nonnull final ActivityType type) {
             return of(name, type, null);
         }
-        
-        @Nonnull
-        String name();
         
         @Nonnull
         ActivityType type();

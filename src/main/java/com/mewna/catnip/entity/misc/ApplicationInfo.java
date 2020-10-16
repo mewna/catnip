@@ -27,7 +27,10 @@
 
 package com.mewna.catnip.entity.misc;
 
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.partials.HasIcon;
+import com.mewna.catnip.entity.partials.Nameable;
+import com.mewna.catnip.entity.partials.NullDescribable;
+import com.mewna.catnip.entity.partials.Snowflake;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -39,25 +42,7 @@ import java.util.List;
  * @author amy
  * @since 10/17/18.
  */
-public interface ApplicationInfo extends Snowflake {
-    /**
-     * @return The application's name.
-     */
-    @Nonnull
-    String name();
-    
-    /**
-     * @return The application's icon.
-     */
-    @Nullable
-    String icon();
-    
-    /**
-     * @return The application's description.
-     */
-    @Nullable
-    String description();
-    
+public interface ApplicationInfo extends Snowflake, Nameable, HasIcon, NullDescribable {
     /**
      * @return A non-{@code null}, possibly-empty list of the application's RPC
      * origins.

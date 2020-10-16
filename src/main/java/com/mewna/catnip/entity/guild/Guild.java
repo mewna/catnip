@@ -30,7 +30,10 @@ package com.mewna.catnip.entity.guild;
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.cache.view.NamedCacheView;
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.partials.HasIcon;
+import com.mewna.catnip.entity.partials.Nameable;
+import com.mewna.catnip.entity.partials.NullDescribable;
+import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.channel.*;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
@@ -67,43 +70,8 @@ import java.util.Set;
  * @since 9/6/18
  */
 @SuppressWarnings({"unused", "RedundantSuppression"})
-public interface Guild extends Snowflake {
-    
+public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
     int NICKNAME_MAX_LENGTH = 32;
-    
-    /**
-     * @return The guild's name.
-     */
-    @Nonnull
-    @CheckReturnValue
-    String name();
-    
-    /**
-     * @return The hash of the guild's icon.
-     */
-    @Nullable
-    @CheckReturnValue
-    String icon();
-    
-    /**
-     * Return the guild's icon's CDN URL with the specified options.
-     *
-     * @param options The options to configure the URL returned.
-     *
-     * @return The CDN URL for the guild's icon.
-     */
-    @Nullable
-    @CheckReturnValue
-    String iconUrl(@Nonnull final ImageOptions options);
-    
-    /**
-     * @return The CDN URL for the guild's icon.
-     */
-    @Nullable
-    @CheckReturnValue
-    default String iconUrl() {
-        return iconUrl(new ImageOptions());
-    }
     
     /**
      * @return The splash image for the guild. May be {@code null}.
@@ -366,13 +334,6 @@ public interface Guild extends Snowflake {
     @Nullable
     @CheckReturnValue
     String vanityUrlCode();
-    
-    /**
-     * @return The guild's description.
-     */
-    @Nullable
-    @CheckReturnValue
-    String description();
     
     /**
      * @return The guild's banner hash.

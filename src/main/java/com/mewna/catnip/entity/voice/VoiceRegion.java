@@ -28,6 +28,7 @@
 package com.mewna.catnip.entity.voice;
 
 import com.mewna.catnip.entity.Entity;
+import com.mewna.catnip.entity.partials.Nameable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -38,20 +39,13 @@ import javax.annotation.Nonnull;
  * @author natanbc
  * @since 9/14/18
  */
-public interface VoiceRegion extends Entity {
+public interface VoiceRegion extends Entity, Nameable {
     /**
      * @return The id of the voice region.
      */
     @Nonnull
     @CheckReturnValue
     String id();
-    
-    /**
-     * @return The name of the voice region.
-     */
-    @Nonnull
-    @CheckReturnValue
-    String name();
     
     /**
      * @return Whether the voice region is VIP-only.

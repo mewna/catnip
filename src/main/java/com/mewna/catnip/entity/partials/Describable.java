@@ -25,12 +25,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.partials;
+
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
 
 /**
+ * An entity that has a description. Description must not be null.
+ *
  * @author amy
  * @since 10/15/20.
  */
 public interface Describable {
+    @Nonnull
+    @CheckReturnValue
     String description();
 }

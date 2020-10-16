@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2020 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,13 +25,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.guild;
+package com.mewna.catnip.entity.partials;
 
-import com.mewna.catnip.entity.partials.Snowflake;
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 
 /**
+ * An entity with a potentially-null name.
+ *
  * @author amy
- * @since 10/4/18.
+ * @since 10/15/20.
  */
-public interface PartialRole extends GuildEntity, Snowflake {
+public interface NullNameable {
+    /**
+     * @return The entity's name. May be null.
+     */
+    @Nullable
+    @CheckReturnValue
+    String name();
 }

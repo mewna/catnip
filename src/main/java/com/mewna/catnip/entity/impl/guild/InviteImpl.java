@@ -182,17 +182,6 @@ public class InviteImpl implements Invite, RequiresCatnip {
             this.catnip = catnip;
         }
         
-        @Nullable
-        @Override
-        public String iconUrl(@Nonnull final ImageOptions options) {
-            return CDNFormat.iconUrl(id(), icon, options);
-        }
-        
-        @Nullable
-        @Override
-        public String splashUrl(@Nonnull final ImageOptions options) {
-            return CDNFormat.splashUrl(id(), splash, options);
-        }
         
         @Override
         public int hashCode() {

@@ -27,8 +27,8 @@
 
 package com.mewna.catnip.entity.user;
 
-import com.mewna.catnip.entity.Mentionable;
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.partials.Mentionable;
+import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;

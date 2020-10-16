@@ -47,7 +47,7 @@ import java.util.List;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryImpl implements Category, RequiresCatnip {
+public class CategoryImpl implements Category, RequiresCatnip  {
     private final ChannelType type = ChannelType.CATEGORY;
     
     private transient Catnip catnip;

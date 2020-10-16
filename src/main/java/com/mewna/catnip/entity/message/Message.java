@@ -27,7 +27,10 @@
 
 package com.mewna.catnip.entity.message;
 
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.partials.Describable;
+import com.mewna.catnip.entity.partials.HasIcon;
+import com.mewna.catnip.entity.partials.Nameable;
+import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.ChannelMention;
 import com.mewna.catnip.entity.channel.MessageChannel;
@@ -603,7 +606,7 @@ public interface Message extends Snowflake {
         String partyId();
     }
     
-    interface MessageApplication {
+    interface MessageApplication extends Nameable, HasIcon, Describable {
         /**
          * @return The application's id.
          */
@@ -617,26 +620,5 @@ public interface Message extends Snowflake {
         @Nullable
         @CheckReturnValue
         String coverImage();
-        
-        /**
-         * @return The application's description.
-         */
-        @Nonnull
-        @CheckReturnValue
-        String description();
-        
-        /**
-         * @return The application's icon id (hash). May be null.
-         */
-        @Nullable
-        @CheckReturnValue
-        String icon();
-        
-        /**
-         * @return The application's name.
-         */
-        @Nonnull
-        @CheckReturnValue
-        String name();
     }
 }

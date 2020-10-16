@@ -27,10 +27,10 @@
 
 package com.mewna.catnip.entity.sticker;
 
-import com.mewna.catnip.entity.Describable;
-import com.mewna.catnip.entity.Nameable;
+import com.mewna.catnip.entity.partials.Describable;
+import com.mewna.catnip.entity.partials.Nameable;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.partials.Snowflake;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

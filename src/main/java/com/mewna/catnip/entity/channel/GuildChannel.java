@@ -33,6 +33,7 @@ import com.mewna.catnip.entity.guild.GuildEntity;
 import com.mewna.catnip.entity.guild.PermissionOverride;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
 import com.mewna.catnip.entity.misc.CreatedInvite;
+import com.mewna.catnip.entity.partials.Nameable;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.rest.guild.PermissionOverrideData;
 import com.mewna.catnip.rest.invite.InviteCreateOptions;
@@ -59,14 +60,7 @@ import java.util.function.Consumer;
  * @since 9/12/18
  */
 @SuppressWarnings("unused")
-public interface GuildChannel extends GuildEntity, Channel {
-    /**
-     * @return The name of the channel.
-     */
-    @Nonnull
-    @CheckReturnValue
-    String name();
-    
+public interface GuildChannel extends GuildEntity, Channel, Nameable {
     /**
      * @return The position of the channel.
      */

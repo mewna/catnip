@@ -27,9 +27,13 @@
 
 package com.mewna.catnip.entity.channel;
 
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.partials.Nameable;
+import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
 import com.mewna.catnip.entity.guild.GuildEntity;
+
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
 
 /**
  * Represents a channel mention in a message. Not all messages will have this,
@@ -39,8 +43,8 @@ import com.mewna.catnip.entity.guild.GuildEntity;
  * @author amy
  * @since 8/19/19.
  */
-public interface ChannelMention extends GuildEntity, Snowflake {
-    String name();
-    
+public interface ChannelMention extends GuildEntity, Snowflake, Nameable {
+    @Nonnull
+    @CheckReturnValue
     ChannelType type();
 }
