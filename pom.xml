@@ -149,6 +149,7 @@
                 <configuration>
                     <source>11</source>
                     <target>11</target>
+                    <useIncrementalCompilation>false</useIncrementalCompilation>
                 </configuration>
                 <version>3.8.1</version>
             </plugin>
@@ -191,7 +192,7 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>generate-sources</phase>
+                        <phase>${delombokPhase}</phase>
                         <goals>
                             <goal>delombok</goal>
                         </goals>
@@ -312,4 +313,31 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <property>
+                    <name>!runtests</name>
+                </property>
+            </activation>
+            <properties>
+                <delombokPhase>generate-sources</delombokPhase>
+                <javadocPhase>jar</javadocPhase>
+            </properties>
+        </profile>
+        <profile>
+            <id>tests</id>
+            <activation>
+                <property>
+                    <name>runtests</name>
+                </property>
+            </activation>
+            <properties>
+                <delombokPhase>none</delombokPhase>
+                <javadocPhase>none</javadocPhase>
+            </properties>
+        </profile>
+    </profiles>
 </project>

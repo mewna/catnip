@@ -27,10 +27,6 @@
 
 package com.mewna.catnip.entity.message;
 
-import com.mewna.catnip.entity.partials.Describable;
-import com.mewna.catnip.entity.partials.HasIcon;
-import com.mewna.catnip.entity.partials.Nameable;
-import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.ChannelMention;
 import com.mewna.catnip.entity.channel.MessageChannel;
@@ -38,6 +34,10 @@ import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.misc.Emoji;
+import com.mewna.catnip.entity.partials.Describable;
+import com.mewna.catnip.entity.partials.HasIcon;
+import com.mewna.catnip.entity.partials.Nameable;
+import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.sticker.Sticker;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
@@ -344,7 +344,8 @@ public interface Message extends Snowflake {
     /**
      * The snowflake ID of the guild this message was sent in.
      *
-     * @return String representing the guild ID. Null if sent in DMs.
+     * @return String representing the guild ID. Null if sent in DMs, or if
+     * fetched/created via REST API.
      */
     @Nullable
     @CheckReturnValue

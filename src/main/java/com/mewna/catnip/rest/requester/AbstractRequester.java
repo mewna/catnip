@@ -36,6 +36,7 @@ import com.mewna.catnip.entity.impl.lifecycle.RestRatelimitHitImpl;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.rest.*;
+import com.mewna.catnip.rest.Routes.HttpMethod;
 import com.mewna.catnip.rest.Routes.Route;
 import com.mewna.catnip.rest.ratelimit.RateLimiter;
 import com.mewna.catnip.shard.LifecycleEvent.Raw;
@@ -305,6 +306,7 @@ public abstract class AbstractRequester implements Requester {
             // We got a 4xx, meaning there's errors. Fail the request with this and move on.
             if(statusCode >= 400) {
                 catnip.logAdapter().trace("Request received an error code ({} >= 400), processing...", statusCode);
+                final var throwable = catnip.options().captureRestStacktraces() ? new RuntimeException("REST error context") : null;
                 if(payload.string() != null && payload.string().startsWith("{")) {
                     // If the payload HAS a body, AND it looks like a JSON object, try to parse it for info
                     final JsonObject response = payload.object();
@@ -314,6 +316,20 @@ public abstract class AbstractRequester implements Requester {
                         // Discord error codes are all >=10000 afaik, so this should be safe.
                         // Note that 0 is a valid JSON error code
                         catnip.logAdapter().trace("Status code 400 + JSON code, creating RestPayloadException...");
+                        
+                        if(code == JsonErrorCode.UNAUTHORIZED) {
+                            if(route.baseRoute().replaceAll("\\d+", ":channel").equalsIgnoreCase(Routes.CREATE_MESSAGE.baseRoute())
+                                    && route.method() == HttpMethod.POST) {
+                                catnip.logAdapter().error("Attempted to send a message without ever connecting to the gateway! " +
+                                        "Please connect to the gateway at least once (ex." +
+                                        "`var catnip = Catnip.catnip(TOKEN); catnip.connect(); Thread.sleep(10_000); catnip.shutdown();`), " +
+                                        "then try again.");
+                            }
+                            // The error-handling stuff below does not apply.
+                            catnip.logAdapter().trace("Rejected (UNAUTHORIZED), returning empty error");
+                            request.future().completeExceptionally(new RestPayloadException(code, Map.of()).initCause(throwable));
+                            return;
+                        }
                         
                         // Error messages in APIv8 are actually useful! :tada:
                         //
@@ -369,8 +385,9 @@ public abstract class AbstractRequester implements Requester {
                         //
                         // See: https://discord.com/developers/docs/reference#error-messages
                         
-                        final Throwable throwable = new RuntimeException("REST error context");
-                        throwable.setStackTrace(request.stacktrace());
+                        if(throwable != null) {
+                            throwable.setStackTrace(request.stacktrace());
+                        }
                         request.future().completeExceptionally(new RestPayloadException(
                                         code,
                                         Map.copyOf(response.getObject("errors"))
@@ -379,15 +396,17 @@ public abstract class AbstractRequester implements Requester {
                     } else {
                         catnip.logAdapter().trace("Status code != 400, creating ResponseException...");
                         final String message = response.getString("message", "No message.");
-                        final Throwable throwable = new RuntimeException("REST error context");
-                        throwable.setStackTrace(request.stacktrace());
+                        if(throwable != null) {
+                            throwable.setStackTrace(request.stacktrace());
+                        }
                         request.future().completeExceptionally(new ResponseException(route.toString(), statusCode, code,
                                 message, response).initCause(throwable));
                     }
                 } else {
                     catnip.logAdapter().trace("Status code != 400 and no JSON body, creating ResponseException...");
-                    final Throwable throwable = new RuntimeException("REST error context");
-                    throwable.setStackTrace(request.stacktrace());
+                    if(throwable != null) {
+                        throwable.setStackTrace(request.stacktrace());
+                    }
                     request.future().completeExceptionally(new ResponseException(route.toString(), statusCode,
                             JsonErrorCode.UNKNOWN_ERROR_CODE, "No message.", null).initCause(throwable));
                 }
