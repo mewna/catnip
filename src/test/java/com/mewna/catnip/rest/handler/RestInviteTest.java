@@ -35,6 +35,6 @@ import com.mewna.catnip.Env;
  * @since 10/15/20.
  */
 public class RestInviteTest {
-    private static final Catnip catnip = Catnip.catnip(Env.TOKEN);
+    private static final Catnip catnip = Catnip.catnip(Env.DISCORD_TOKEN);
     // TODO: Implement
 }

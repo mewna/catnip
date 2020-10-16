@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @since 10/15/20.
  */
 public class RestGuildTest {
-    private static final Catnip catnip = Catnip.catnip(Env.TOKEN);
+    private static final Catnip catnip = Catnip.catnip(Env.DISCORD_TOKEN);
     
     @Test
     public void testGuildRoutes() {

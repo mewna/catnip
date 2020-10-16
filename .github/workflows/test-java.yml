@@ -10,4 +10,11 @@ jobs:
         with:
           java-version: "14"
       - run: ./mvnw clean test
+        with:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          TEST_GUILD: ${{ secrets.TEST_GUILD }}
+          TEST_CHANNEL: ${{ secrets.TEST_CHANNEL }}
+          TEST_GUILD_NAME: ${{ secrets.TEST_GUILD_NAME }}
+          TEST_USER: ${{ secrets.TEST_USER }}
+          TEST_USER_NAME: ${{ secrets.TEST_USER_NAME }}
       - run: bash <(curl -s https://codecov.io/bash)

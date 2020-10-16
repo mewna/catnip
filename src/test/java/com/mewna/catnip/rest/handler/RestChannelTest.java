@@ -43,11 +43,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class RestChannelTest {
     public static final String CAKE = "\uD83C\uDF70";
-    private static final Catnip catnip = Catnip.catnip(Env.TOKEN);
+    private static final Catnip catnip = Catnip.catnip(Env.DISCORD_TOKEN);
     
     @Test
     public void messageRoutesTest() {
-        final var me = Long.toUnsignedString(Catnip.parseIdFromToken(Env.TOKEN));
+        final var me = Long.toUnsignedString(Catnip.parseIdFromToken(Env.DISCORD_TOKEN));
         
         // Message creation
         final var message = catnip.rest().channel().createMessage(Env.TEST_CHANNEL, "test").blockingGet();
@@ -81,7 +81,7 @@ public class RestChannelTest {
     
     @Test
     public void channelRoutesTest() {
-        final var me = Long.toUnsignedString(Catnip.parseIdFromToken(Env.TOKEN));
+        final var me = Long.toUnsignedString(Catnip.parseIdFromToken(Env.DISCORD_TOKEN));
         assertDoesNotThrow(() -> catnip.rest().channel().triggerTypingIndicator(Env.TEST_CHANNEL).blockingAwait(),
                 "triggerTypingIndicator threw");
         final var channel = catnip.rest().channel().getChannelById(Env.TEST_CHANNEL).blockingGet().asGuildChannel();

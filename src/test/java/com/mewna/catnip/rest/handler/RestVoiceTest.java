@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  * @since 10/15/20.
  */
 public class RestVoiceTest {
-    private static final Catnip catnip = Catnip.catnip(Env.TOKEN);
+    private static final Catnip catnip = Catnip.catnip(Env.DISCORD_TOKEN);
     
     @Test
     public void testVoiceRoutes() {

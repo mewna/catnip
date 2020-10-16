@@ -40,16 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @since 10/15/20.
  */
 public class RestUserTest {
-    private static final Catnip catnip;
-    
-    static {
-        try {
-            catnip = Catnip.catnip(Env.TOKEN);
-        } catch(@Nonnull final Throwable t) {
-            t.printStackTrace();
-            throw new RuntimeException(t);
-        }
-    }
+    private static final Catnip catnip = Catnip.catnip(Env.DISCORD_TOKEN);
     
     @Test
     public void testUserRoutes() {

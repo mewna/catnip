@@ -32,7 +32,7 @@ package com.mewna.catnip;
  * @since 10/15/20.
  */
 public interface Env {
-    String TOKEN = System.getenv("DISCORD_TOKEN");
+    String DISCORD_TOKEN = System.getenv("DISCORD_TOKEN");
     String TEST_GUILD = System.getenv("TEST_GUILD");
     String TEST_CHANNEL = System.getenv("TEST_CHANNEL");
     String TEST_GUILD_NAME = System.getenv("TEST_GUILD_NAME");
