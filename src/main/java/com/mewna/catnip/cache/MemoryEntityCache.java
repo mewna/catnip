@@ -53,6 +53,7 @@ import lombok.experimental.Accessors;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Map;
@@ -343,80 +344,78 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     }
     
     @SuppressWarnings("SameParameterValue")
-    protected <I, T> Maybe<T> or(final I id, @Nonnull final Maybe<T> data, final T def) {
+    protected <T> Maybe<T> or(@Nullable final T data, final T def) {
         if(def == null) {
-            return or(id, data);
+            return or(data);
         } else {
-            return data.map(d -> Objects.requireNonNullElse(d, def));
+            return Maybe.just(data == null ? def : data);
         }
     }
     
-    protected <I, T> Maybe<T> or(final I id, final Maybe<T> data) {
-        return data.flatMap(d -> {
-            if(d == null) {
-                return Maybe.<T>error(new NullPointerException("No entity for: " + id))
-                        .observeOn(catnip.rxScheduler())
-                        .subscribeOn(catnip.rxScheduler());
-            } else {
-                return Maybe.just(d)
-                        .observeOn(catnip.rxScheduler())
-                        .subscribeOn(catnip.rxScheduler());
-            }
-        });
+    protected <T> Maybe<T> or(@Nullable final T data) {
+        if(data == null) {
+            return Maybe.<T>empty()
+                    .observeOn(catnip.rxScheduler())
+                    .subscribeOn(catnip.rxScheduler());
+        } else {
+            return Maybe.just(data)
+                    .observeOn(catnip.rxScheduler())
+                    .subscribeOn(catnip.rxScheduler());
+        }
     }
     
     @Nonnull
     @Override
     public Maybe<Guild> guild(final long id) {
-        return or(id, Maybe.just(guildCache(shardId(id)).getById(id)));
+        return or(guildCache(shardId(id)).getById(id));
     }
     
     @Nonnull
     @Override
     public Maybe<User> user(final long id) {
-        return or(id, Maybe.just(users().getById(id)));
+        return or(users().getById(id));
     }
     
     @Nonnull
     @Override
     public Maybe<Presence> presence(final long id) {
-        return or(id, Maybe.just(presences().getById(id)), DEFAULT_PRESENCE);
+        return or(presences().getById(id), DEFAULT_PRESENCE);
     }
     
     @Nonnull
     @Override
     public Maybe<Member> member(final long guildId, final long id) {
-        return or(id, Maybe.just(memberCache.get(guildId).getById(id)));
+        return or(memberCache.get(guildId).getById(id));
     }
     
     @Nonnull
     @Override
     public Maybe<Role> role(final long guildId, final long id) {
-        return or(id, Maybe.just(roles(guildId).getById(id)));
+        return or(roles(guildId).getById(id));
     }
     
     @Nonnull
     @Override
     public Maybe<GuildChannel> channel(final long guildId, final long id) {
-        return or(id, Maybe.just(channels(guildId).getById(id)));
+        return or(channels(guildId).getById(id));
     }
     
     @Nonnull
     @Override
     public Maybe<CustomEmoji> emoji(final long guildId, final long id) {
-        return or(id, Maybe.just(emojis(guildId).getById(id)));
+        return or(emojis(guildId).getById(id));
     }
     
     @Nonnull
     @Override
     public Maybe<VoiceState> voiceState(final long guildId, final long id) {
-        return or(id, Maybe.just(voiceStates(guildId).getById(id)));
+        return or(voiceStates(guildId).getById(id));
     }
     
     @Nonnull
     @Override
     public Maybe<User> selfUser() {
-        return or("self user", Maybe.just(selfUser.get()));
+        return or(selfUser.get());
     }
     
     protected int shardId(final long entityId) {
