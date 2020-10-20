@@ -12,7 +12,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <delombok.output>${project.basedir}/delombok</delombok.output>
 
-        <lombok.version>1.18.12</lombok.version>
+        <lombok.version>1.18.16.0</lombok.version>
         <rxjava.version>3.0.7</rxjava.version>
         <slf4j.version>1.7.30</slf4j.version>
         <commons.lang.version>3.11</commons.lang.version>
@@ -176,7 +176,7 @@
             <plugin>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok-maven-plugin</artifactId>
-                <version>${lombok.version}.0</version>
+                <version>${lombok.version}</version>
                 <configuration>
                     <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
                     <outputDirectory>${delombok.output}</outputDirectory>
