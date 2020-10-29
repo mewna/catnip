@@ -31,6 +31,7 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.Env;
 import com.mewna.catnip.entity.voice.VoiceRegion;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  * @author amy
  * @since 10/15/20.
  */
+@DisabledIfSystemProperty(named = "restTests", matches = "false")
 public class RestVoiceTest {
     private static final Catnip catnip = Catnip.catnip(Env.DISCORD_TOKEN);
     

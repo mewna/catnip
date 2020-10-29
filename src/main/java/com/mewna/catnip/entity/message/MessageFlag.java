@@ -40,11 +40,13 @@ import java.util.Set;
  */
 @Accessors(fluent = true)
 public enum MessageFlag {
-    CROSSPOSTED(0x00000001, false),
-    IS_CROSSPOST(0x00000002, false),
-    SUPPRESS_EMBEDS(0x00000004, true),
-    SOURCE_MESSAGE_DELETED(0x00000008, false),
-    URGENT(0x00000010, false)
+    CROSSPOSTED(1, false),
+    IS_CROSSPOST(1 << 1, false),
+    SUPPRESS_EMBEDS(1 << 2, true),
+    SOURCE_MESSAGE_DELETED(1 << 3, false),
+    URGENT(1 << 4, false),
+    UNKNOWN_1(1 << 5, false),
+    EPHEMERAL(1 << 6, false),
     ;
     
     @Getter

@@ -31,6 +31,7 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.Env;
 import com.mewna.catnip.rest.ResponseException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 
 import java.util.NoSuchElementException;
 
@@ -40,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author amy
  * @since 10/15/20.
  */
+@DisabledIfSystemProperty(named = "restTests", matches = "false")
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class RestChannelTest {
     public static final String CAKE = "\uD83C\uDF70";

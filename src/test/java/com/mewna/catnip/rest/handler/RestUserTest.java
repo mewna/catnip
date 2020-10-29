@@ -30,6 +30,7 @@ package com.mewna.catnip.rest.handler;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.Env;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -37,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @author amy
  * @since 10/15/20.
  */
+@DisabledIfSystemProperty(named = "restTests", matches = "false")
 public class RestUserTest {
     private static final Catnip catnip = Catnip.catnip(Env.DISCORD_TOKEN);
     

@@ -449,44 +449,57 @@ public interface Message extends Snowflake {
     }
     
     @Nonnull
+    @CheckReturnValue
     default Completable delete() {
         return delete(null);
     }
     
     @Nonnull
+    @CheckReturnValue
     default Single<Message> edit(@Nonnull final String content) {
         return catnip().rest().channel().editMessage(channelId(), id(), content);
     }
     
     @Nonnull
+    @CheckReturnValue
     default Single<Message> edit(@Nonnull final Embed embed) {
         return catnip().rest().channel().editMessage(channelId(), id(), embed);
     }
     
     @Nonnull
+    @CheckReturnValue
     default Single<Message> edit(@Nonnull final Message message) {
         Validate.isTrue(message.attachments().isEmpty(), "attachments cannot be edited into messages");
         return catnip().rest().channel().editMessage(channelId(), id(), message);
     }
     
     @Nonnull
+    @CheckReturnValue
     default Single<Message> edit(@Nonnull final MessageOptions options) {
         Validate.isTrue(options.files().isEmpty(), "attachments cannot be edited into messages");
         return catnip().rest().channel().editMessage(channelId(), id(), options.buildMessage());
     }
     
+    @Nonnull
+    @CheckReturnValue
     default Single<Message> reply(@Nonnull final String content) {
         return catnip().rest().channel().createMessage(channelId(), content);
     }
     
+    @Nonnull
+    @CheckReturnValue
     default Single<Message> reply(@Nonnull final Embed embed) {
         return catnip().rest().channel().createMessage(channelId(), embed);
     }
     
+    @Nonnull
+    @CheckReturnValue
     default Single<Message> reply(@Nonnull final Message message) {
         return catnip().rest().channel().createMessage(channelId(), message);
     }
     
+    @Nonnull
+    @CheckReturnValue
     default Single<Message> reply(@Nonnull final MessageOptions options) {
         return catnip().rest().channel().createMessage(channelId(), options);
     }

@@ -131,6 +131,21 @@ public class MessageOptions {
     @Getter(AccessLevel.NONE)
     private Set<String> users;
     
+    /**
+     * A set of flags that can be set on this message. Flags are used for a
+     * number of things, including, but not limited to:
+     * <ol>
+     *     <li>Indicating if a message is crossposted</li>
+     *     <li>Indicating if a message is urgent</li>
+     *     <li>Suppressing embeds on a message</li>
+     * </ol>
+     */
+    @Getter
+    @Setter(AccessLevel.NONE)
+    private Set<MessageFlag> flags;
+    
+    @Getter
+    @Setter(AccessLevel.NONE)
     private MessageReference reference;
     
     /**
@@ -227,7 +242,8 @@ public class MessageOptions {
     /**
      * Sets the reference on this message. Reference may be null. Used for
      * things like inline replies.
-     *[
+     * [
+     *
      * @param reference The nullable reference to set
      *
      * @return Itself.
@@ -236,6 +252,18 @@ public class MessageOptions {
     @CheckReturnValue
     public MessageOptions referenceMessage(@Nullable final MessageReference reference) {
         this.reference = reference;
+        return this;
+    }
+    
+    /**
+     * Set flags on this message. Flags are used for things like embed suppression.
+     *
+     * @param flags The flags to set, or an empty set for none.
+     *
+     * @return Itself.
+     */
+    public MessageOptions withFlags(@Nonnull final Set<MessageFlag> flags) {
+        this.flags = flags;
         return this;
     }
     
