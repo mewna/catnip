@@ -46,14 +46,17 @@ public interface MessageReference extends Entity {
      * @return String representing the message ID.
      */
     @Nullable
+    @CheckReturnValue
     String messageId();
     
     /**
-     * The id of the channel this message reference is from. May not be null.
+     * The id of the channel this message reference is from. May be null in the
+     * case of inline replies.
      *
      * @return String representing the channel ID.
      */
-    @Nonnull
+    @Nullable
+    @CheckReturnValue
     String channelId();
     
     /**

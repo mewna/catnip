@@ -227,8 +227,8 @@ public class RestChannel extends RestHandler {
         if(!options.flags().isEmpty() || options.override()) {
             json.put("flags", MessageFlag.fromSettable(options.flags()));
         }
+        final JsonObject allowedMentions = new JsonObject();
         if(options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
-            final JsonObject allowedMentions = new JsonObject();
             final EnumSet<MentionParseFlag> parse = options.parseFlags();
             if(parse == null) {
                 // These act like a whitelist regardless of parse being present.
@@ -237,7 +237,7 @@ public class RestChannel extends RestHandler {
             } else {
                 final JsonArray parseList = new JsonArray();
                 for(final MentionParseFlag p : parse) {
-                    parseList.add(p.name());
+                    parseList.add(p.flagName());
                 }
                 allowedMentions.put("parse", parseList);
                 //If either list is present along with the respective parse option, validation fails. The contains check avoids this.
@@ -248,6 +248,11 @@ public class RestChannel extends RestHandler {
                     allowedMentions.put("roles", options.mentionedRoles());
                 }
             }
+        }
+        if(options.reference() != null) {
+            allowedMentions.put("replied_user", options.pingReply());
+        }
+        if(!allowedMentions.isEmpty()) {
             json.put("allowed_mentions", allowedMentions);
         }
         return catnip().requester()

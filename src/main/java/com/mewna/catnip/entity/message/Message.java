@@ -55,6 +55,7 @@ import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A single message in Discord.
@@ -140,13 +141,16 @@ public interface Message extends Snowflake {
     
     /**
      * The message that was referenced by this message. Used for inline
-     * replies.
+     * replies. If {@code null}, the message was deleted. If present and not
+     * {@code null}, it is the message that this message is replying to. If not
+     * present and the type is {@link MessageType#REPLY}, the backend couldn't
+     * fetch the relevant message.
      *
      * @return A message reference.
      */
     @Nullable
     @CheckReturnValue
-    MessageReference referencedMessage();
+    Message referencedMessage();
     
     /**
      * List of roles @mentioned by this message.
@@ -156,20 +160,16 @@ public interface Message extends Snowflake {
      */
     @Nonnull
     @CheckReturnValue
-    default Single<List<Role>> mentionedRoles() {
+    default Observable<Role> mentionedRoles() {
         if(guildId() == null) {
-            return Single.just(List.of());
+            return Observable.empty();
         }
-        @SuppressWarnings("ConstantConditions")
-        final var maybes = mentionedRoleIds().stream()
-                .map(e -> catnip().cache().role(guildId(), e))
-                .toArray(Maybe[]::new);
-        return Observable.fromArray(maybes)
-                .flatMap(maybe -> {
-                    //noinspection unchecked
-                    return ((Maybe<Role>) maybe).toObservable();
-                })
-                .toList();
+        //noinspection ConstantConditions
+        return Observable.fromIterable(
+                mentionedRoleIds().stream()
+                        .map(e -> catnip().cache().role(guildId(), e))
+                        .collect(Collectors.toList()))
+                .flatMapMaybe(m -> m);
     }
     
     /**

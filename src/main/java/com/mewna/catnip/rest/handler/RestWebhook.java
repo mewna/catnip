@@ -33,6 +33,7 @@ import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.channel.Webhook.WebhookEditFields;
 import com.mewna.catnip.entity.message.MentionParseFlag;
 import com.mewna.catnip.entity.message.Message;
+import com.mewna.catnip.entity.message.MessageFlag;
 import com.mewna.catnip.entity.message.MessageOptions;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
@@ -203,9 +204,11 @@ public class RestWebhook extends RestHandler {
                 && !options.hasFiles()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
         }
-    
+        if(!options.flags().isEmpty() || options.override()) {
+            builder.value("flags", MessageFlag.fromSettable(options.flags()));
+        }
+        final JsonObject allowedMentions = new JsonObject();
         if(options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
-            final JsonObject allowedMentions = new JsonObject();
             final EnumSet<MentionParseFlag> parse = options.parseFlags();
             if(parse == null) {
                 // These act like a whitelist regardless of parse being present.
@@ -225,6 +228,11 @@ public class RestWebhook extends RestHandler {
                     allowedMentions.put("roles", options.mentionedRoles());
                 }
             }
+        }
+        if(options.reference() != null) {
+            allowedMentions.put("replied_user", options.pingReply());
+        }
+        if(!allowedMentions.isEmpty()) {
             builder.value("allowed_mentions", allowedMentions);
         }
     

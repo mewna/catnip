@@ -78,6 +78,7 @@ public enum MessageFlag {
         }
         return result;
     }
+    
     public static long fromSettable(@Nonnull final Iterable<MessageFlag> flags) {
         long result = 0;
         for(final MessageFlag flag : flags) {

@@ -140,13 +140,21 @@ public class MessageOptions {
      *     <li>Suppressing embeds on a message</li>
      * </ol>
      */
-    @Getter
     @Setter(AccessLevel.NONE)
     private Set<MessageFlag> flags;
     
-    @Getter
+    /**
+     * A reference to the message to reply to. Setting this will make the
+     * message be created as an inline reply.
+     */
     @Setter(AccessLevel.NONE)
     private MessageReference reference;
+    
+    /**
+     * Whether or not the message should ping the person it is replying to.
+     * This is useless if {@link #reference} is not set.
+     */
+    private boolean pingReply;
     
     /**
      * Whether or not to forcibly set fields even if they aren't set (read: are null).
@@ -162,6 +170,8 @@ public class MessageOptions {
         users = options.users;
         override = options.override;
         reference = options.reference;
+        flags = options.flags;
+        pingReply = options.pingReply;
     }
     
     public MessageOptions(@Nonnull final Message message) {

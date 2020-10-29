@@ -84,7 +84,7 @@ public class MessageImpl implements Message, RequiresCatnip, Timestamped {
     private long guildIdAsLong;
     private int flagsRaw;
     private List<ChannelMention> mentionedChannels;
-    private MessageReference referencedMessage;
+    private Message referencedMessage;
     private List<Sticker> stickers;
     
     @Override
