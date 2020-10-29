@@ -14,4 +14,5 @@ delombok/
 /*.java
 /src/main/java/*.java
 /src/main/resources/logback.xml
-/test.sh
+/*.sh
+!/docs.sh
