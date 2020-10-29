@@ -56,6 +56,7 @@ public class RestChannelTest {
         assertEquals(Env.TEST_CHANNEL, message.channelId(), "channels not equal");
         assertEquals("test", message.content(), "contents not equal");
         assertEquals(me, message.author().id(), "author snowflakes not equal");
+        assertNotNull(message.id());
         
         // Message edits
         final var edited = catnip.rest().channel().editMessage(Env.TEST_CHANNEL, message.id(), "test 2").blockingGet();

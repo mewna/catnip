@@ -183,7 +183,7 @@ public class RestChannel extends RestHandler {
     @Nonnull
     public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
                                        @Nonnull final String content) {
-        return editMessage(channelId, messageId, new MessageOptions().content(content).buildMessage());
+        return editMessage(channelId, messageId, new MessageOptions().content(content));
     }
     
     @Nonnull

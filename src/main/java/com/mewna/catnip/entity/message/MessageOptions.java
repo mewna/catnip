@@ -141,7 +141,7 @@ public class MessageOptions {
      * </ol>
      */
     @Setter(AccessLevel.NONE)
-    private Set<MessageFlag> flags;
+    private Set<MessageFlag> flags = Set.of();
     
     /**
      * A reference to the message to reply to. Setting this will make the
