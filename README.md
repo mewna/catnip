@@ -1,3 +1,9 @@
+# WARNING
+
+This branch is for catnip v2. catnip v3 is currently under active development, and is ***strongly***
+recommended to be used. Check out [the v3 PR](https://github.com/mewna/catnip/pull/482) for more
+information on what's changed.
+
 # catnip
 
 [![CircleCI](https://circleci.com/gh/mewna/catnip.svg?style=svg)](https://circleci.com/gh/mewna/catnip)
@@ -13,7 +19,7 @@ catnip is part of the [amyware Discord server](https://discord.gg/yeF2HpP)
 
 Licensed under the [BSD 3-Clause License](https://tldrlegal.com/license/bsd-3-clause-license-(revised)).
 
-## READ THIS
+### READ THIS
 
 catnip v2 requires Java11+, but there is a bug with Java 11 + TLSv1.3 that causes runaway CPU usage.
 To avoid this problem, use Java 12 or later. See https://stackoverflow.com/questions/55298459 and

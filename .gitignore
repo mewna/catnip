@@ -13,3 +13,5 @@ delombok/
 *_pid*.log
 /*.java
 /src/main/java/*.java
+/*.sh
+!/docs.sh
