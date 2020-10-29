@@ -935,6 +935,7 @@ public final class EntityBuilder {
                 .messageReference(reference)
                 .mentionedChannels(channelMentions)
                 .referencedMessage(referencedMessage)
+                .stickers(toList(data.getArray("stickers", new JsonArray()), this::createSticker))
                 .build());
     }
     
