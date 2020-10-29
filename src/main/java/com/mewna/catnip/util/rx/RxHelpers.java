@@ -46,6 +46,7 @@ import java.util.concurrent.ForkJoinPool;
  * @author amy
  * @since 5/18/19.
  */
+@SuppressWarnings("unused")
 public final class RxHelpers {
     public static final ExecutorService FORK_JOIN_POOL = ForkJoinPool.commonPool();
     public static final Scheduler FORK_JOIN_SCHEDULER = Schedulers.from(FORK_JOIN_POOL);
@@ -78,6 +79,8 @@ public final class RxHelpers {
             return Maybe.just(nullable);
         }
     }
+    
+    // Maybe helpers //
     
     public static <A, B> Single<Pair<A, B>> resolveMany(@Nonnull final Maybe<A> a,
                                                         @Nonnull final Maybe<B> b) {
@@ -275,5 +278,205 @@ public final class RxHelpers {
                                                                                                 ii,
                                                                                                 jj
                                                                                         )))))))))))).toSingle();
+    }
+    
+    // Single helpers //
+    
+    public static <A, B> Single<Pair<A, B>> resolveMany(@Nonnull final Single<A> a,
+                                                        @Nonnull final Single<B> b) {
+        return a.flatMap(aa ->
+                b.flatMap(bb ->
+                        Single.just(Pair.with(
+                                aa,
+                                bb
+                        ))));
+    }
+    
+    public static <A, B, C> Single<Triple<A, B, C>> resolveMany(@Nonnull final Single<A> a,
+                                                                @Nonnull final Single<B> b,
+                                                                @Nonnull final Single<C> c) {
+        return a.flatMap(aa ->
+                b.flatMap(bb ->
+                        c.flatMap(cc ->
+                                Single.just(Triple.of(
+                                        aa,
+                                        bb,
+                                        cc
+                                )))));
+    }
+    
+    public static <A, B, C, D> Single<Quartet<A, B, C, D>> resolveMany(@Nonnull final Single<A> a,
+                                                                       @Nonnull final Single<B> b,
+                                                                       @Nonnull final Single<C> c,
+                                                                       @Nonnull final Single<D> d) {
+        return a.flatMap(aa ->
+                b.flatMap(bb ->
+                        c.flatMap(cc ->
+                                d.flatMap(dd ->
+                                        Single.just(Quartet.with(
+                                                aa,
+                                                bb,
+                                                cc,
+                                                dd)
+                                        )))));
+    }
+    
+    public static <A, B, C, D, E> Single<Quintet<A, B, C, D, E>> resolveMany(@Nonnull final Single<A> a,
+                                                                             @Nonnull final Single<B> b,
+                                                                             @Nonnull final Single<C> c,
+                                                                             @Nonnull final Single<D> d,
+                                                                             @Nonnull final Single<E> e) {
+        return a.flatMap(aa ->
+                b.flatMap(bb ->
+                        c.flatMap(cc ->
+                                d.flatMap(dd ->
+                                        e.flatMap(ee ->
+                                                Single.just(Quintet.with(
+                                                        aa,
+                                                        bb,
+                                                        cc,
+                                                        dd,
+                                                        ee
+                                                )))))));
+    }
+    
+    public static <A, B, C, D, E, F> Single<Sextet<A, B, C, D, E, F>> resolveMany(@Nonnull final Single<A> a,
+                                                                                  @Nonnull final Single<B> b,
+                                                                                  @Nonnull final Single<C> c,
+                                                                                  @Nonnull final Single<D> d,
+                                                                                  @Nonnull final Single<E> e,
+                                                                                  @Nonnull final Single<F> f) {
+        return a.flatMap(aa ->
+                b.flatMap(bb ->
+                        c.flatMap(cc ->
+                                d.flatMap(dd ->
+                                        e.flatMap(ee ->
+                                                f.flatMap(ff ->
+                                                        Single.just(Sextet.with(
+                                                                aa,
+                                                                bb,
+                                                                cc,
+                                                                dd,
+                                                                ee,
+                                                                ff
+                                                        ))))))));
+    }
+    
+    public static <A, B, C, D, E, F, G> Single<Septet<A, B, C, D, E, F, G>> resolveMany(@Nonnull final Single<A> a,
+                                                                                        @Nonnull final Single<B> b,
+                                                                                        @Nonnull final Single<C> c,
+                                                                                        @Nonnull final Single<D> d,
+                                                                                        @Nonnull final Single<E> e,
+                                                                                        @Nonnull final Single<F> f,
+                                                                                        @Nonnull final Single<G> g) {
+        return a.flatMap(aa ->
+                b.flatMap(bb ->
+                        c.flatMap(cc ->
+                                d.flatMap(dd ->
+                                        e.flatMap(ee ->
+                                                f.flatMap(ff ->
+                                                        g.flatMap(gg ->
+                                                                Single.just(Septet.with(
+                                                                        aa,
+                                                                        bb,
+                                                                        cc,
+                                                                        dd,
+                                                                        ee,
+                                                                        ff,
+                                                                        gg
+                                                                )))))))));
+    }
+    
+    public static <A, B, C, D, E, F, G, H> Single<Octet<A, B, C, D, E, F, G, H>> resolveMany(@Nonnull final Single<A> a,
+                                                                                             @Nonnull final Single<B> b,
+                                                                                             @Nonnull final Single<C> c,
+                                                                                             @Nonnull final Single<D> d,
+                                                                                             @Nonnull final Single<E> e,
+                                                                                             @Nonnull final Single<F> f,
+                                                                                             @Nonnull final Single<G> g,
+                                                                                             @Nonnull final Single<H> h) {
+        return a.flatMap(aa ->
+                b.flatMap(bb ->
+                        c.flatMap(cc ->
+                                d.flatMap(dd ->
+                                        e.flatMap(ee ->
+                                                f.flatMap(ff ->
+                                                        g.flatMap(gg ->
+                                                                h.flatMap(hh ->
+                                                                        Single.just(Octet.with(
+                                                                                aa,
+                                                                                bb,
+                                                                                cc,
+                                                                                dd,
+                                                                                ee,
+                                                                                ff,
+                                                                                gg,
+                                                                                hh
+                                                                        ))))))))));
+    }
+    
+    public static <A, B, C, D, E, F, G, H, I> Single<Ennead<A, B, C, D, E, F, G, H, I>> resolveMany(@Nonnull final Single<A> a,
+                                                                                                    @Nonnull final Single<B> b,
+                                                                                                    @Nonnull final Single<C> c,
+                                                                                                    @Nonnull final Single<D> d,
+                                                                                                    @Nonnull final Single<E> e,
+                                                                                                    @Nonnull final Single<F> f,
+                                                                                                    @Nonnull final Single<G> g,
+                                                                                                    @Nonnull final Single<H> h,
+                                                                                                    @Nonnull final Single<I> i) {
+        return a.flatMap(aa ->
+                b.flatMap(bb ->
+                        c.flatMap(cc ->
+                                d.flatMap(dd ->
+                                        e.flatMap(ee ->
+                                                f.flatMap(ff ->
+                                                        g.flatMap(gg ->
+                                                                h.flatMap(hh ->
+                                                                        i.flatMap(ii ->
+                                                                                Single.just(Ennead.with(
+                                                                                        aa,
+                                                                                        bb,
+                                                                                        cc,
+                                                                                        dd,
+                                                                                        ee,
+                                                                                        ff,
+                                                                                        gg,
+                                                                                        hh,
+                                                                                        ii
+                                                                                )))))))))));
+    }
+    
+    public static <A, B, C, D, E, F, G, H, I, J> Single<Decade<A, B, C, D, E, F, G, H, I, J>> resolveMany(@Nonnull final Single<A> a,
+                                                                                                          @Nonnull final Single<B> b,
+                                                                                                          @Nonnull final Single<C> c,
+                                                                                                          @Nonnull final Single<D> d,
+                                                                                                          @Nonnull final Single<E> e,
+                                                                                                          @Nonnull final Single<F> f,
+                                                                                                          @Nonnull final Single<G> g,
+                                                                                                          @Nonnull final Single<H> h,
+                                                                                                          @Nonnull final Single<I> i,
+                                                                                                          @Nonnull final Single<J> j) {
+        return a.flatMap(aa ->
+                b.flatMap(bb ->
+                        c.flatMap(cc ->
+                                d.flatMap(dd ->
+                                        e.flatMap(ee ->
+                                                f.flatMap(ff ->
+                                                        g.flatMap(gg ->
+                                                                h.flatMap(hh ->
+                                                                        i.flatMap(ii ->
+                                                                                j.flatMap(jj ->
+                                                                                        Single.just(Decade.with(
+                                                                                                aa,
+                                                                                                bb,
+                                                                                                cc,
+                                                                                                dd,
+                                                                                                ee,
+                                                                                                ff,
+                                                                                                gg,
+                                                                                                hh,
+                                                                                                ii,
+                                                                                                jj
+                                                                                        ))))))))))));
     }
 }
