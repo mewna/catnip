@@ -338,6 +338,8 @@ public final class DispatchEmitter {
     }
     
     private void cacheErrorLog(final String eventType, final Throwable e) {
-        catnip.logAdapter().error("Couldn't fetch previous entity from cache for update event {}:", eventType, e);
+        if(catnip.options().logEntityPresenceWarningOnCustomCache()) {
+            catnip.logAdapter().error("Couldn't fetch previous entity from cache for update event {}:", eventType, e);
+        }
     }
 }

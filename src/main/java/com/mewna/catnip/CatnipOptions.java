@@ -142,6 +142,7 @@ public final class CatnipOptions implements CatnipOptionsView, Cloneable {
     @Nonnull
     private EntityDelegator entityDelegator = new DefaultEntityDelegator();
     private boolean logEventNotInIntentsWarning = true;
+    private boolean logEntityPresenceWarningOnCustomCache = true;
     
     @Override
     public Object clone() {

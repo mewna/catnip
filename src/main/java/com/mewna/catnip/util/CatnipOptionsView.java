@@ -29,9 +29,7 @@ package com.mewna.catnip.util;
 
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.cache.CacheFlag;
-import com.mewna.catnip.cache.EntityCacheWorker;
-import com.mewna.catnip.cache.SplitMemoryEntityCache;
+import com.mewna.catnip.cache.*;
 import com.mewna.catnip.entity.delegate.EntityDelegator;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.lifecycle.HighWebsocketLatency;
@@ -384,4 +382,12 @@ public interface CatnipOptionsView {
      * Defaults to {@code true}.
      */
     boolean logEventNotInIntentsWarning();
+    
+    /**
+     * @return Whether or not to log a warning when an entity is not present
+     * in a {@link CustomizableEntityCache} implementation when it should be.
+     * This is useful for debugging a custom cache, while also hiding potential
+     * errors that may come from {@link NoopEntityCache}.
+     */
+    boolean logEntityPresenceWarningOnCustomCache();
 }
