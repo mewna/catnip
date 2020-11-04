@@ -688,8 +688,10 @@ public final class EntityBuilder {
         final JsonObject userData = data.getObject("user");
         final long guild = Long.parseUnsignedLong(guildId);
         if(userData != null) {
+            final int shards = catnip.shardManager().shardCount();
+            final int shardMod = shards == 0 ? 1 : shards;
             catnip.cacheWorker().bulkCacheUsers(
-                    (int) ((guild >> 22) % catnip.shardManager().shardCount()),
+                    (int) ((guild >> 22) % shardMod),
                     Collections.singletonList(createUser(userData)));
         }
         final String joinedAt;
