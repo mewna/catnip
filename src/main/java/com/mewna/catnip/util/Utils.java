@@ -57,8 +57,8 @@ public final class Utils {
     private Utils() {
     }
     
-    public static void removeIf(@Nonnull final Map<Long, ?> map, @Nonnull final LongPredicate predicate) {
-        map.keySet().removeIf(predicate::test);
+    public static void removeif (@Nonnull final Map<Long, ?> map, @Nonnull final LongPredicate predicate) {
+        map.keySet().removeif (predicate::test);
     }
     
     @Nonnull
@@ -70,20 +70,20 @@ public final class Utils {
     }
     
     public static void validateImageUri(@Nonnull final URI imageUri) {
-        if(!imageUri.getScheme().equals("data")) {
+        if (!imageUri.getScheme().equals("data")) {
             throw new IllegalArgumentException("Only data URIs are supported");
         }
         final String data = imageUri.getSchemeSpecificPart();
         final int endContentType = data.indexOf(';');
-        if(endContentType == -1) {
+        if (endContentType == -1) {
             throw new IllegalArgumentException("Malformed URI: unable to find end of content type");
         }
         final String contentType = data.substring(0, endContentType);
-        if(!VALID_CONTENT_TYPES.contains(contentType.toLowerCase())) {
+        if (!VALID_CONTENT_TYPES.contains(contentType.toLowerCase())) {
             throw new IllegalArgumentException("Content type of " + contentType + " does not match " +
                     "expected values " + VALID_CONTENT_TYPES);
         }
-        if(!data.startsWith("base64,", contentType.length() + 1)) {
+        if (!data.startsWith("base64,", contentType.length() + 1)) {
             throw new IllegalArgumentException("Content not base64 encoded");
         }
     }
@@ -92,7 +92,7 @@ public final class Utils {
     @CheckReturnValue
     public static URI asImageDataUri(@Nonnull final byte[] bytes) {
         final String contentType = probeContentType(bytes, "image/jpeg").toLowerCase();
-        if(!VALID_CONTENT_TYPES.contains(contentType)) {
+        if (!VALID_CONTENT_TYPES.contains(contentType)) {
             throw new IllegalArgumentException("Content type of " + contentType + " does not match " +
                     "expected values " + VALID_CONTENT_TYPES);
         }
@@ -114,7 +114,7 @@ public final class Utils {
     @CheckReturnValue
     public static String probeContentType(@Nonnull final byte[] bytes, @Nonnull final String defaultValue) {
         final String probed = probeContentType(bytes);
-        if(probed == null) {
+        if (probed == null) {
             return defaultValue;
         }
         return probed;
@@ -133,12 +133,12 @@ public final class Utils {
     @CheckReturnValue
     public static boolean containsIgnoreCase(@Nonnull final String str, @Nonnull final String search) {
         final int length = search.length();
-        if(length == 0) {
+        if (length == 0) {
             return true;
         }
         
         for(int i = str.length() - length; i >= 0; i--) {
-            if(str.regionMatches(true, i, search, 0, length)) {
+            if (str.regionMatches(true, i, search, 0, length)) {
                 return true;
             }
         }
@@ -148,7 +148,7 @@ public final class Utils {
     @CheckReturnValue
     public static boolean startsWithIgnoreCase(@Nonnull final String str, @Nonnull final String search) {
         final int length = search.length();
-        if(length == 0 || length > str.length()) {
+        if (length == 0 || length > str.length()) {
             return true;
         }
         return str.regionMatches(true, 0, search, 0, length);
@@ -157,10 +157,10 @@ public final class Utils {
     @CheckReturnValue
     public static boolean endsWithIgnoreCase(@Nonnull final String str, @Nonnull final String search) {
         final int length = search.length();
-        if(length == 0) {
+        if (length == 0) {
             return true;
         }
-        if(length > str.length()) {
+        if (length > str.length()) {
             return false;
         }
         return str.regionMatches(true, str.length() - length, search, 0, length);
@@ -169,7 +169,7 @@ public final class Utils {
     @CheckReturnValue
     public static Pair<String, String> parseWebhook(@Nonnull final String url) {
         final Matcher matcher = WEBHOOK_PATTERN.matcher(url);
-        if(!matcher.find()) {
+        if (!matcher.find()) {
             throw new IllegalArgumentException("The url " + url + " is not a valid Discord webhook.");
         }
         final String id = matcher.group(1);

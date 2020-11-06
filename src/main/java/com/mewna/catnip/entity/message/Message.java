@@ -161,7 +161,7 @@ public interface Message extends Snowflake {
     @Nonnull
     @CheckReturnValue
     default Observable<Role> mentionedRoles() {
-        if(guildId() == null) {
+        if (guildId() == null) {
             return Observable.empty();
         }
         //noinspection ConstantConditions
@@ -250,7 +250,7 @@ public interface Message extends Snowflake {
     @CheckReturnValue
     default Maybe<MessageChannel> channel() {
         final long guild = guildIdAsLong();
-        if(guild != 0) {
+        if (guild != 0) {
             return catnip().cache().channel(guild, channelIdAsLong()).map(Channel::asMessageChannel);
         } else {
             return catnip().rest().channel().getChannelById(channelId()).map(Channel::asMessageChannel).toMaybe();
@@ -351,7 +351,7 @@ public interface Message extends Snowflake {
     @CheckReturnValue
     default String guildId() {
         final long id = guildIdAsLong();
-        if(id == 0) {
+        if (id == 0) {
             return null;
         }
         return Long.toUnsignedString(id);
@@ -375,7 +375,7 @@ public interface Message extends Snowflake {
     @CheckReturnValue
     default Maybe<Guild> guild() {
         final long id = guildIdAsLong();
-        if(id == 0) {
+        if (id == 0) {
             return Maybe.empty();
         } else {
             return catnip().cache().guild(id);
@@ -391,7 +391,7 @@ public interface Message extends Snowflake {
     @CheckReturnValue
     default String webhookId() {
         final long id = webhookIdAsLong();
-        if(id == 0) {
+        if (id == 0) {
             return null;
         }
         return Long.toUnsignedString(id);

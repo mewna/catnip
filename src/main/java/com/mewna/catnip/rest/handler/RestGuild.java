@@ -404,10 +404,10 @@ public class RestGuild extends RestHandler {
         
         final QueryStringBuilder builder = new QueryStringBuilder();
         
-        if(limit > 0) {
+        if (limit > 0) {
             builder.append("limit", Integer.toString(limit));
         }
-        if(after != null && !after.isEmpty()) {
+        if (after != null && !after.isEmpty()) {
             builder.append("after", after);
         }
         
@@ -477,7 +477,7 @@ public class RestGuild extends RestHandler {
     public Completable createGuildBan(@Nonnull final String guildId, @Nonnull final String userId,
                                       @Nullable final String reason,
                                       @Nonnegative final int deleteMessageDays) {
-        if(deleteMessageDays > 7) {
+        if (deleteMessageDays > 7) {
             final CompletableFuture<Void> future = new CompletableFuture<>();
             future.completeExceptionally(new IllegalArgumentException("deleteMessageDays can't be above 7"));
             return Completable.fromFuture(future);
@@ -594,7 +594,7 @@ public class RestGuild extends RestHandler {
     public Observable<JsonObject> getGuildPruneCountRaw(@Nonnull final String guildId, @Nonnegative final int days,
                                                         @Nonnull final Collection<Role> includeRoles) {
         final var builder = new QueryStringBuilder().append("days", Integer.toString(days));
-        if(!includeRoles.isEmpty()) {
+        if (!includeRoles.isEmpty()) {
             builder.append("include_roles", includeRoles.stream()
                     .map(Snowflake::id)
                     .collect(Collectors.joining(",")));
@@ -667,19 +667,19 @@ public class RestGuild extends RestHandler {
         
         final QueryStringBuilder builder = new QueryStringBuilder();
         
-        if(userId != null) {
+        if (userId != null) {
             builder.append("user_id", userId);
         }
         
-        if(beforeEntryId != null) {
+        if (beforeEntryId != null) {
             builder.append("before", beforeEntryId);
         }
         
-        if(limit <= 100 && limit >= 1) {
+        if (limit <= 100 && limit >= 1) {
             builder.append("limit", Integer.toString(limit));
         }
         
-        if(type != null) {
+        if (type != null) {
             builder.append("action_type", Integer.toString(type.value()));
         }
         

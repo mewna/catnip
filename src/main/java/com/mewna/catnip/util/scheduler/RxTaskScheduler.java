@@ -75,7 +75,7 @@ public class RxTaskScheduler extends AbstractTaskScheduler {
     
     @Override
     public boolean cancel(final long id) {
-        if(tasks.containsKey(id)) {
+        if (tasks.containsKey(id)) {
             final var disposable = tasks.get(id);
             tasks.remove(id);
             disposable.dispose();

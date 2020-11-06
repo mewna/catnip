@@ -45,7 +45,7 @@ public interface AuditLogEntry extends Snowflake {
     @CheckReturnValue
     default String targetId() {
         final long id = targetIdAsLong();
-        if(id == 0) {
+        if (id == 0) {
             return null;
         }
         return Long.toUnsignedString(id);

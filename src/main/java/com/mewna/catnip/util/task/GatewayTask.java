@@ -61,12 +61,12 @@ public class GatewayTask<T> extends QueueTask<T> {
     
     @Override
     public synchronized void run() {
-        if(shutdown || queued) {
+        if (shutdown || queued) {
             return;
         }
         while(!queue.isEmpty()) {
-            if(catnip.options().gatewayRatelimiter().checkRatelimit(id, periodMs, limit).left) {
-                if(!queued) {
+            if (catnip.options().gatewayRatelimiter().checkRatelimit(id, periodMs, limit).left) {
+                if (!queued) {
                     queued = true;
                     catnip.taskScheduler().setTimer(1000, __ -> {
                         queued = false;

@@ -112,7 +112,7 @@ public class RestEmoji extends RestHandler {
                                                       @Nullable final String reason) {
         Utils.validateImageUri(imageData);
         final JsonArray rolesArray;
-        if(roles.isEmpty()) {
+        if (roles.isEmpty()) {
             rolesArray = null;
         } else {
             rolesArray = new JsonArray();
@@ -171,7 +171,7 @@ public class RestEmoji extends RestHandler {
                                                       @Nullable final String reason
     ) {
         final JsonArray rolesArray;
-        if(roles.isEmpty()) {
+        if (roles.isEmpty()) {
             rolesArray = null;
         } else {
             rolesArray = new JsonArray();

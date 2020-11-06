@@ -102,7 +102,7 @@ public interface ExtensionManager {
     @Nullable
     default <T extends Extension> T extension(@Nonnull final Class<T> extensionClass) {
         final Set<? extends T> extensions = matchingExtensions(extensionClass);
-        if(extensions.isEmpty()) {
+        if (extensions.isEmpty()) {
             return null;
         } else {
             return extensions.iterator().next();

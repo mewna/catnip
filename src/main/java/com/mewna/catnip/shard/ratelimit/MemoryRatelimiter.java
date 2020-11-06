@@ -43,16 +43,16 @@ public final class MemoryRatelimiter implements Ratelimiter {
     static ImmutablePair<Boolean, Long> checkRatelimitInternal(final Map<String, Bucket> buckets, final String id,
                                                                final long period, final long limit) {
         final long now = System.currentTimeMillis();
-        if(buckets.containsKey(id)) {
+        if (buckets.containsKey(id)) {
             final Bucket bucket = buckets.get(id);
-            if(bucket.resetAt < now) { // handle reset
-                if(bucket.limit != limit) {
+            if (bucket.resetAt < now) { // handle reset
+                if (bucket.limit != limit) {
                     throw new IllegalArgumentException("Bucket " + id + " has limit of " + bucket.limit +
                             ", but is ratelimit-checked with a limit of " + limit);
                 }
                 bucket.remaining = bucket.limit;
                 bucket.resetAt = now + period;
-            } else if(bucket.remaining <= 0) { //no permits available
+            } else if (bucket.remaining <= 0) { //no permits available
                 return ImmutablePair.of(true, 0L);
             }
             bucket.remaining--;

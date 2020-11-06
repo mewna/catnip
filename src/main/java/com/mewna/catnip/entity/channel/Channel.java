@@ -65,7 +65,7 @@ public interface Channel extends Snowflake {
      */
     @Nonnull
     default Single<Channel> delete(@Nullable final String reason) {
-        if(isGuild()) {
+        if (isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.MANAGE_CHANNELS);
         }
@@ -172,7 +172,7 @@ public interface Channel extends Snowflake {
     @Nonnull
     @CheckReturnValue
     default GuildChannel asGuildChannel() {
-        if(!isGuild()) {
+        if (!isGuild()) {
             throw new UnsupportedOperationException("Not a guild channel");
         }
         return (GuildChannel) this;
@@ -184,7 +184,7 @@ public interface Channel extends Snowflake {
     @Nonnull
     @CheckReturnValue
     default TextChannel asTextChannel() {
-        if(!isText()) {
+        if (!isText()) {
             throw new UnsupportedOperationException("Not a text channel");
         }
         return (TextChannel) this;
@@ -196,7 +196,7 @@ public interface Channel extends Snowflake {
     @Nonnull
     @CheckReturnValue
     default VoiceChannel asVoiceChannel() {
-        if(!isVoice()) {
+        if (!isVoice()) {
             throw new UnsupportedOperationException("Not a voice channel");
         }
         return (VoiceChannel) this;
@@ -208,7 +208,7 @@ public interface Channel extends Snowflake {
     @Nonnull
     @CheckReturnValue
     default Category asCategory() {
-        if(!isCategory()) {
+        if (!isCategory()) {
             throw new UnsupportedOperationException("Not a category");
         }
         return (Category) this;
@@ -220,7 +220,7 @@ public interface Channel extends Snowflake {
     @Nonnull
     @CheckReturnValue
     default DMChannel asDMChannel() {
-        if(!isDM()) {
+        if (!isDM()) {
             throw new UnsupportedOperationException("Not a DM channel");
         }
         return (DMChannel) this;
@@ -232,7 +232,7 @@ public interface Channel extends Snowflake {
     @Nonnull
     @CheckReturnValue
     default UserDMChannel asUserDMChannel() {
-        if(!isUserDM()) {
+        if (!isUserDM()) {
             throw new UnsupportedOperationException("Not an user DM channel");
         }
         return (UserDMChannel) this;
@@ -244,7 +244,7 @@ public interface Channel extends Snowflake {
     @Nonnull
     @CheckReturnValue
     default GroupDMChannel asGroupDMChannel() {
-        if(!isGroupDM()) {
+        if (!isGroupDM()) {
             throw new UnsupportedOperationException("Not a group DM channel");
         }
         return (GroupDMChannel) this;
@@ -253,7 +253,7 @@ public interface Channel extends Snowflake {
     @Nonnull
     @CheckReturnValue
     default MessageChannel asMessageChannel() {
-        if(isDM()) {
+        if (isDM()) {
             return asDMChannel();
         } else {
             return asTextChannel();
@@ -308,7 +308,7 @@ public interface Channel extends Snowflake {
         @Nonnull
         public static ChannelType byKey(final int key) {
             for(final ChannelType level : values()) {
-                if(level.key == key) {
+                if (level.key == key) {
                     return level;
                 }
             }

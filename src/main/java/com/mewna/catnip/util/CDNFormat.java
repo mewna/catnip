@@ -54,10 +54,10 @@ public final class CDNFormat {
     @Nullable
     @CheckReturnValue
     public static String avatarUrl(@Nonnull final String id, @Nullable final String avatar, @Nonnull final ImageOptions options) {
-        if(avatar == null) {
+        if (avatar == null) {
             return null;
         }
-        if(options.type() == ImageType.GIF && !avatar.startsWith("a_")) {
+        if (options.type() == ImageType.GIF && !avatar.startsWith("a_")) {
             throw new IllegalArgumentException("Cannot build gif avatar URL for non gif avatar!");
         }
         return options.buildUrl(
@@ -68,10 +68,10 @@ public final class CDNFormat {
     @Nullable
     @CheckReturnValue
     public static String iconUrl(@Nonnull final String id, @Nullable final String icon, @Nonnull final ImageOptions options) {
-        if(icon == null) {
+        if (icon == null) {
             return null;
         }
-        if(options.type() == ImageType.GIF && !icon.startsWith("a_")) {
+        if (options.type() == ImageType.GIF && !icon.startsWith("a_")) {
             throw new IllegalArgumentException("Cannot build gif icon URL for non gif icon!");
         }
         return options.buildUrl(
@@ -82,10 +82,10 @@ public final class CDNFormat {
     @Nullable
     @CheckReturnValue
     public static String applicationIconUrl(@Nonnull final String id, @Nullable final String icon, @Nonnull final ImageOptions options) {
-        if(icon == null) {
+        if (icon == null) {
             return null;
         }
-        if(options.type() == ImageType.GIF && !icon.startsWith("a_")) {
+        if (options.type() == ImageType.GIF && !icon.startsWith("a_")) {
             throw new IllegalArgumentException("Cannot build gif icon URL for non gif application icon!");
         }
         return options.buildUrl(String.format("team-icons/%s/%s", id, icon));
@@ -94,10 +94,10 @@ public final class CDNFormat {
     @Nullable
     @CheckReturnValue
     public static String teamIconUrl(@Nonnull final String id, @Nullable final String icon, @Nonnull final ImageOptions options) {
-        if(icon == null) {
+        if (icon == null) {
             return null;
         }
-        if(options.type() == ImageType.GIF) {
+        if (options.type() == ImageType.GIF) {
             throw new IllegalArgumentException("Team icons may not be GIFs");
         }
         return options.buildUrl(
@@ -108,10 +108,10 @@ public final class CDNFormat {
     @Nullable
     @CheckReturnValue
     public static String splashUrl(@Nonnull final String id, @Nullable final String splash, @Nonnull final ImageOptions options) {
-        if(splash == null) {
+        if (splash == null) {
             return null;
         }
-        if(options.type() == ImageType.GIF) {
+        if (options.type() == ImageType.GIF) {
             throw new IllegalArgumentException("Guild icons may not be GIFs");
         }
         return options.buildUrl(
@@ -123,7 +123,7 @@ public final class CDNFormat {
     @CheckReturnValue
     public static String stickerUrl(@Nonnull final Sticker sticker) {
         // This method is special because stickers are special
-        if(sticker.formatType() == StickerFormatType.LOTTIE) {
+        if (sticker.formatType() == StickerFormatType.LOTTIE) {
             // TODO: How to handle lottie?
             throw new UnsupportedOperationException("CDN URLs for lottie stickers are currently unsupported.");
         }

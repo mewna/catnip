@@ -108,7 +108,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     @CheckReturnValue
     protected Function<Member, String> memberNameFunction() {
         return m -> {
-            if(m.nick() != null) {
+            if (m.nick() != null) {
                 return m.nick();
             }
             // FIXME: THIS IS UNSAFE -- REWRITE CACHE VIEWS AS ASYNC
@@ -345,7 +345,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     
     @SuppressWarnings("SameParameterValue")
     protected <T> Maybe<T> or(@Nullable final T data, final T def) {
-        if(def == null) {
+        if (def == null) {
             return or(data);
         } else {
             return Maybe.just(data == null ? def : data);
@@ -353,7 +353,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     }
     
     protected <T> Maybe<T> or(@Nullable final T data) {
-        if(data == null) {
+        if (data == null) {
             return Maybe.<T>empty()
                     .observeOn(catnip.rxScheduler())
                     .subscribeOn(catnip.rxScheduler());
@@ -448,10 +448,10 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
             case Raw.CHANNEL_CREATE:
             case Raw.CHANNEL_UPDATE: {
                 final Channel channel = entityBuilder.createChannel(payload);
-                if(channel.isGuild()) {
+                if (channel.isGuild()) {
                     final GuildChannel gc = (GuildChannel) channel;
                     channelCache(gc.guildIdAsLong(), false).put(gc.idAsLong(), gc);
-                } else if(channel.isUserDM()) {
+                } else if (channel.isUserDM()) {
                     final UserDMChannel dm = (UserDMChannel) channel;
                     dmChannelCache(shardId).put(dm.idAsLong(), dm);
                 } else {
@@ -464,13 +464,13 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
             }
             case Raw.CHANNEL_DELETE: {
                 final Channel channel = entityBuilder.createChannel(payload);
-                if(channel.isGuild()) {
+                if (channel.isGuild()) {
                     final GuildChannel gc = (GuildChannel) channel;
                     final MutableNamedCacheView<GuildChannel> channels = channelCache(gc.guildIdAsLong(), true);
-                    if(channels != null) {
+                    if (channels != null) {
                         channels.remove(gc.idAsLong());
                     }
-                } else if(channel.isUserDM()) {
+                } else if (channel.isUserDM()) {
                     final UserDMChannel dm = (UserDMChannel) channel;
                     dmChannelCache(shardId).remove(dm.userIdAsLong());
                 } else {
@@ -518,7 +518,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                 final String guild = payload.getString("guild_id");
                 final String role = payload.getString("role_id");
                 final MutableCacheView<Role> cache = roleCache(Long.parseUnsignedLong(guild), true);
-                if(cache != null) {
+                if (cache != null) {
                     cache.remove(Long.parseUnsignedLong(role));
                 }
                 break;
@@ -539,7 +539,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                 final String guild = payload.getString("guild_id");
                 
                 return Completable.fromMaybe(member(guild, id).map(old -> {
-                    if(old != null) {
+                    if (old != null) {
                         @SuppressWarnings("ConstantConditions")
                         final JsonObject data = JsonObject.builder()
                                 .value("user", user)
@@ -563,7 +563,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                 final String guild = payload.getString("guild_id");
                 final String user = payload.getObject("user").getString("id");
                 final MutableCacheView<Member> cache = memberCache(Long.parseUnsignedLong(guild), true);
-                if(cache != null) {
+                if (cache != null) {
                     cache.remove(Long.parseUnsignedLong(user));
                 }
                 break;
@@ -577,7 +577,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
             }
             // Emojis
             case Raw.GUILD_EMOJIS_UPDATE: {
-                if(!catnip.options().cacheFlags().contains(CacheFlag.DROP_EMOJI)) {
+                if (!catnip.options().cacheFlags().contains(CacheFlag.DROP_EMOJI)) {
                     final String guild = payload.getString("guild_id");
                     final JsonArray emojis = payload.getArray("emojis");
                     emojis.stream().map(e -> entityBuilder.createCustomEmoji(guild, (JsonObject) e)).forEach(this::cacheEmoji);
@@ -596,9 +596,9 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                 final JsonObject user = payload.getObject("user");
                 final String id = user.getString("id");
                 return Completable.fromMaybe(user(id).map(old -> {
-                    if(old == null && !catnip.options().chunkMembers() && catnip.options().logUncachedPresenceWhenNotChunking()) {
+                    if (old == null && !catnip.options().chunkMembers() && catnip.options().logUncachedPresenceWhenNotChunking()) {
                         catnip.logAdapter().warn("Received PRESENCE_UPDATE for uncached user {}!?", id);
-                    } else if(old != null) {
+                    } else if (old != null) {
                         // This could potentially update:
                         // - username
                         // - discriminator
@@ -613,11 +613,11 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                                 .done()
                         );
                         userCache(shardId).put(updated.idAsLong(), updated);
-                        if(!catnip.options().cacheFlags().contains(CacheFlag.DROP_GAME_STATUSES)) {
+                        if (!catnip.options().cacheFlags().contains(CacheFlag.DROP_GAME_STATUSES)) {
                             final Presence presence = entityBuilder.createPresence(payload);
                             presenceCache(shardId).put(updated.idAsLong(), presence);
                         }
-                    } else if(catnip.options().chunkMembers()) {
+                    } else if (catnip.options().chunkMembers()) {
                         final String guildId = payload.getString("guild_id", "No guild");
                         catnip.logAdapter().warn("Received PRESENCE_UPDATE for unknown user {} (guild: {})!? (member chunking enabled)",
                                 id, guildId);
@@ -627,7 +627,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
             }
             // Voice
             case Raw.VOICE_STATE_UPDATE: {
-                if(!catnip.options().cacheFlags().contains(CacheFlag.DROP_VOICE_STATES)) {
+                if (!catnip.options().cacheFlags().contains(CacheFlag.DROP_VOICE_STATES)) {
                     final VoiceState state = entityBuilder.createVoiceState(payload);
                     cacheVoiceState(state);
                 }
@@ -640,7 +640,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     
     private void cacheVoiceState(final VoiceState state) {
         final long guild = state.guildIdAsLong();
-        if(guild == 0) {
+        if (guild == 0) {
             catnip.logAdapter().warn("Not caching voice state for {} due to null guild", state.userIdAsLong());
             return;
         }
@@ -688,11 +688,11 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     public void invalidateShard(final int id) {
         final int shardCount = catnip().shardManager().shardCount();
         final LongPredicate predicate = entityId -> (entityId >> 22) % shardCount == id;
-        removeIf(memberCache, predicate);
-        removeIf(roleCache, predicate);
-        removeIf(guildChannelCache, predicate);
-        removeIf(emojiCache, predicate);
-        removeIf(voiceStateCache, predicate);
+        removeif (memberCache, predicate);
+        removeif (roleCache, predicate);
+        removeif (guildChannelCache, predicate);
+        removeif (emojiCache, predicate);
+        removeif (voiceStateCache, predicate);
     }
     
     @Nonnull

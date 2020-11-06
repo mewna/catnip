@@ -137,7 +137,7 @@ public interface User extends Snowflake, Mentionable {
         
         final Member member = guild.members().getById(idAsLong());
         
-        if(member == null) {
+        if (member == null) {
             return username;
         }
         

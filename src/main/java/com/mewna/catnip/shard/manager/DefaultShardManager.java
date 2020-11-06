@@ -106,7 +106,7 @@ public class DefaultShardManager extends AbstractShardManager {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
     public void start() {
-        if(started) {
+        if (started) {
             throw new IllegalStateException("Shard manager is already started!");
         } else {
             started = true;
@@ -115,13 +115,13 @@ public class DefaultShardManager extends AbstractShardManager {
         
         consumers.add(catnip().dispatchManager().<GatewayClosed>createConsumer(Raw.GATEWAY_WEBSOCKET_CLOSED).handler(gatewayClosed -> {
             catnip().logAdapter().info("Shard {} closed, re-queuing...", gatewayClosed.shardInfo().id());
-            if(!connectQueue.queue().contains(gatewayClosed.shardInfo().id())) {
+            if (!connectQueue.queue().contains(gatewayClosed.shardInfo().id())) {
                 addToConnectQueue(gatewayClosed.shardInfo().id());
             }
         }));
         
         final Single<GatewayInfo> gatewayInfoCompletableFuture;
-        if(catnip().gatewayInfo() != null) {
+        if (catnip().gatewayInfo() != null) {
             // If we already have gateway info, eg. from validating the token,
             // then don't bother fetching it a second time
             //noinspection ConstantConditions
@@ -139,20 +139,20 @@ public class DefaultShardManager extends AbstractShardManager {
     private void checkGatewayInfo(final GatewayInfo gatewayInfo) {
         // Do some sanity checks
         final int expectedShardCount;
-        if(shardCount == 0) {
+        if (shardCount == 0) {
             expectedShardCount = gatewayInfo.shards();
         } else {
             expectedShardCount = shardCount;
         }
         
-        if(expectedShardCount > gatewayInfo.remainingSessions()) {
+        if (expectedShardCount > gatewayInfo.remainingSessions()) {
             catnip().logAdapter().warn("{} shards requested, but only {} sessions available. Reset after {}, now is {}.",
                     expectedShardCount, gatewayInfo.remainingSessions(), gatewayInfo.resetAfter(), System.currentTimeMillis());
             catnip().logAdapter().warn("Token reset incoming!");
         }
         
         // Actually start shards
-        if(shardCount == 0) {
+        if (shardCount == 0) {
             shardCount = gatewayInfo.shards();
             catnip().logAdapter().info("Loaded expected shard count: {}", shardCount);
             shardIds.clear();
@@ -186,7 +186,7 @@ public class DefaultShardManager extends AbstractShardManager {
     private void connectShard(final int id) {
         final CatnipShard shard = shards.get(id);
         
-        if(shard == null) {
+        if (shard == null) {
             catnip().logAdapter().error("Cannot find shard {}, re-queueing...", id);
             addToConnectQueue(id);
             return;
@@ -223,7 +223,7 @@ public class DefaultShardManager extends AbstractShardManager {
     public void addToConnectQueue(@Nonnegative final int shard) {
         catnip().logAdapter().debug("Queuing shard -> {}, full queue -> {}", shard, connectQueue.queue());
         catnip().logAdapter().debug("Stacktrace:", new Throwable("Shard queue stacktrace"));
-        if(!connectQueue.offer(shard)) {
+        if (!connectQueue.offer(shard)) {
             catnip().logAdapter().warn("Ignoring duplicate queue for shard {}", shard);
         }
     }
@@ -235,12 +235,12 @@ public class DefaultShardManager extends AbstractShardManager {
     }
     
     private void runConnectQueue() {
-        if(!started) {
+        if (!started) {
             catnip().logAdapter().warn("Shard manager not started, refusing to run connect queue!");
             return;
         }
         
-        if(connectQueue.isEmpty()) {
+        if (connectQueue.isEmpty()) {
             // No shards that we can queue, schedule the task to run again
             // later.
             catnip().taskScheduler().setTimer(1000L, t -> runConnectQueue());
@@ -250,7 +250,7 @@ public class DefaultShardManager extends AbstractShardManager {
         final int id = connectQueue.peek();
         catnip().logAdapter().debug("Peeked id {} off of connect queue", id);
         
-        if(conditions().isEmpty()) {
+        if (conditions().isEmpty()) {
             connectNextShard();
         } else {
             //noinspection ResultOfMethodCallIgnored
@@ -258,7 +258,7 @@ public class DefaultShardManager extends AbstractShardManager {
                     // Yikes
                     data -> Arrays.stream(data).allMatch(e -> e == Boolean.TRUE))
                     .subscribe(res -> {
-                        if(res) {
+                        if (res) {
                             connectNextShard();
                         } else {
                             catnip().logAdapter().debug("Not all shard conditions succeeded, trying again in 1s");

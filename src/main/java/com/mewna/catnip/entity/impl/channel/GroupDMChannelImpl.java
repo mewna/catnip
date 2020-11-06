@@ -62,7 +62,7 @@ public class GroupDMChannelImpl implements GroupDMChannel, RequiresCatnip {
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
         for(final User recipient : recipients) {
-            if(recipient instanceof RequiresCatnip) {
+            if (recipient instanceof RequiresCatnip) {
                 ((RequiresCatnip) recipient).catnip(catnip);
             }
         }

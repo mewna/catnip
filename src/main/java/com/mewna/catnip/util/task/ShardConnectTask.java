@@ -38,7 +38,7 @@ public class ShardConnectTask extends QueueTask<Integer> {
     
     @Override
     public void run() {
-        if(queue.isEmpty()) {
+        if (queue.isEmpty()) {
             return;
         }
         action.accept(queue.poll());

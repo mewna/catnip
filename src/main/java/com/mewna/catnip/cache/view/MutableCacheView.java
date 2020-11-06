@@ -42,7 +42,7 @@ import java.util.function.LongPredicate;
  * @since 12/23/18
  */
 public interface MutableCacheView<T> extends CacheView<T> {
-    void removeIf(@Nonnull LongPredicate predicate);
+    void removeif (@Nonnull LongPredicate predicate);
     
     @Nullable
     @SuppressWarnings("UnusedReturnValue")

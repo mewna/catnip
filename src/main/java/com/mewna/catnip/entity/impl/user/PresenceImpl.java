@@ -71,7 +71,7 @@ public class PresenceImpl implements Presence, RequiresCatnip {
         final var builder = JsonObject.builder()
                 .value("status", status.asString());
         
-        if(status == OnlineStatus.IDLE) {
+        if (status == OnlineStatus.IDLE) {
             builder.value("since", System.currentTimeMillis())
                     .value("afk", true);
         } else {
@@ -79,13 +79,13 @@ public class PresenceImpl implements Presence, RequiresCatnip {
                     .value("afk", false);
         }
         
-        if(!activities.isEmpty()) {
+        if (!activities.isEmpty()) {
             final var activity = activities.get(0);
             builder.object("game")
                     .value("name", activity.name())
                     .value("type", activity.type().id());
             
-            if(activity.url() != null) {
+            if (activity.url() != null) {
                 builder.value("url", activity.url());
             }
             

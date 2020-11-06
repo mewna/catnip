@@ -177,7 +177,7 @@ public class MessageOptions {
     public MessageOptions(@Nonnull final Message message) {
         content = message.content();
         final List<Embed> embeds = message.embeds();
-        if(!embeds.isEmpty()) {
+        if (!embeds.isEmpty()) {
             embed = embeds.get(0);
         }
     }
@@ -214,10 +214,10 @@ public class MessageOptions {
     @Nonnull
     @SuppressWarnings("WeakerAccess")
     public MessageOptions addFile(@Nonnull final String name, @Nonnull final File file) {
-        if(!file.exists()) {
+        if (!file.exists()) {
             throw new IllegalArgumentException("file doesn't exist!");
         }
-        if(!file.canRead()) {
+        if (!file.canRead()) {
             throw new IllegalArgumentException("file cannot be read!");
         }
         try {
@@ -293,10 +293,10 @@ public class MessageOptions {
     @Nonnull
     @SuppressWarnings("WeakerAccess")
     public MessageOptions addFile(@Nonnull final String name, @Nonnull final byte[] data) {
-        if(files == null) {
+        if (files == null) {
             files = new ArrayList<>(10);
         }
-        if(files.size() == 10) {
+        if (files.size() == 10) {
             throw new UnsupportedOperationException("maximum limit of 10 attachments!");
         }
         files.add(new ImmutablePair<>(name, data));
@@ -335,7 +335,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions parseNoMentions() {
-        if(parseFlags == null) {
+        if (parseFlags == null) {
             parseFlags = EnumSet.noneOf(MentionParseFlag.class);
         } else {
             parseFlags.clear();
@@ -400,7 +400,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions parseMentions(final Collection<MentionParseFlag> flags) {
-        if(parseFlags == null) {
+        if (parseFlags == null) {
             parseFlags = EnumSet.copyOf(flags);
         } else {
             parseFlags.addAll(flags);
@@ -418,7 +418,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions parseMentions(final MentionParseFlag... flags) {
-        if(parseFlags == null) {
+        if (parseFlags == null) {
             parseFlags = EnumSet.noneOf(MentionParseFlag.class);
         }
         Collections.addAll(parseFlags, flags);
@@ -448,7 +448,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions parseMention(final MentionParseFlag flag) {
-        if(parseFlags == null) {
+        if (parseFlags == null) {
             parseFlags = EnumSet.of(flag);
         } else {
             parseFlags.add(flag);
@@ -465,7 +465,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions mentionNoUsers() {
-        if(users == null) {
+        if (users == null) {
             users = Collections.emptySet();
         } else {
             users.clear();
@@ -497,7 +497,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions mentionMembers(final Collection<Member> users) {
-        if(this.users == null || this.users == Collections.EMPTY_SET) {
+        if (this.users == null || this.users == Collections.EMPTY_SET) {
             this.users = new HashSet<>();
         }
         for(final Member user : users) {
@@ -517,7 +517,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions mentionMembers(final Member... users) {
-        if(this.users == null || this.users == Collections.EMPTY_SET) {
+        if (this.users == null || this.users == Collections.EMPTY_SET) {
             this.users = new HashSet<>();
         }
         for(final Member user : users) {
@@ -537,7 +537,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions mentionUsers(final Collection<User> users) {
-        if(this.users == null || this.users == Collections.EMPTY_SET) {
+        if (this.users == null || this.users == Collections.EMPTY_SET) {
             this.users = new HashSet<>();
         }
         for(final User user : users) {
@@ -557,7 +557,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions mentionUsers(final User... users) {
-        if(this.users == null || this.users == Collections.EMPTY_SET) {
+        if (this.users == null || this.users == Collections.EMPTY_SET) {
             this.users = new HashSet<>();
         }
         for(final User user : users) {
@@ -578,7 +578,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions mentionUsersById(final Collection<String> users) {
-        if(this.users == null || this.users == Collections.EMPTY_SET) {
+        if (this.users == null || this.users == Collections.EMPTY_SET) {
             this.users = new HashSet<>();
         }
         this.users.addAll(users);
@@ -597,7 +597,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions mentionUsersById(final String... users) {
-        if(this.users == null || this.users == Collections.EMPTY_SET) {
+        if (this.users == null || this.users == Collections.EMPTY_SET) {
             this.users = new HashSet<>();
         }
         Collections.addAll(this.users, users);
@@ -615,7 +615,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions mentionUsersById(final long... users) {
-        if(this.users == null || this.users == Collections.EMPTY_SET) {
+        if (this.users == null || this.users == Collections.EMPTY_SET) {
             this.users = new HashSet<>();
         }
         for(final long user : users) {
@@ -664,7 +664,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions mentionUserById(final String id) {
-        if(users == null || users == Collections.EMPTY_SET) {
+        if (users == null || users == Collections.EMPTY_SET) {
             users = new HashSet<>();
         }
         users.add(id);
@@ -707,7 +707,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions mentionNoRoles() {
-        if(roles == null) {
+        if (roles == null) {
             roles = Collections.emptySet();
         } else {
             roles.clear();
@@ -739,7 +739,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions mentionRoles(final Collection<Role> roles) {
-        if(this.roles == null || this.roles == Collections.EMPTY_SET) {
+        if (this.roles == null || this.roles == Collections.EMPTY_SET) {
             this.roles = new HashSet<>();
         }
         for(final Role role : roles) {
@@ -759,7 +759,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions mentionRoles(final Role... roles) {
-        if(this.roles == null || this.roles == Collections.EMPTY_SET) {
+        if (this.roles == null || this.roles == Collections.EMPTY_SET) {
             this.roles = new HashSet<>();
         }
         for(final Role role : roles) {
@@ -780,7 +780,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions mentionRolesById(final Collection<String> roles) {
-        if(this.roles == null || this.roles == Collections.EMPTY_SET) {
+        if (this.roles == null || this.roles == Collections.EMPTY_SET) {
             this.roles = new HashSet<>();
         }
         this.roles.addAll(roles);
@@ -799,7 +799,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions mentionRolesById(final String... roles) {
-        if(this.roles == null || this.roles == Collections.EMPTY_SET) {
+        if (this.roles == null || this.roles == Collections.EMPTY_SET) {
             this.roles = new HashSet<>();
         }
         Collections.addAll(this.roles, roles);
@@ -817,7 +817,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions mentionRolesById(final long... roles) {
-        if(this.roles == null || this.roles == Collections.EMPTY_SET) {
+        if (this.roles == null || this.roles == Collections.EMPTY_SET) {
             this.roles = new HashSet<>();
         }
         for(final long role : roles) {
@@ -852,7 +852,7 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public MessageOptions mentionRoleById(final String id) {
-        if(roles == null || roles == Collections.EMPTY_SET) {
+        if (roles == null || roles == Collections.EMPTY_SET) {
             roles = new HashSet<>();
         }
         roles.add(id);
@@ -914,12 +914,12 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public Message buildMessage() {
-        if(embed == null && content == null) {
+        if (embed == null && content == null) {
             throw new IllegalStateException("messages must have an embed or text content!");
         }
         final MessageImpl impl = new MessageImpl();
         impl.content(content);
-        if(embed != null) {
+        if (embed != null) {
             impl.embeds(Collections.singletonList(embed));
         } else {
             impl.embeds(Collections.emptyList());

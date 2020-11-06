@@ -42,7 +42,7 @@ public class NoopCacheView<T> implements MutableNamedCacheView<T> {
     public static final MutableNamedCacheView<?> INSTANCE = new NoopCacheView<>();
     
     @Override
-    public void removeIf(@Nonnull final LongPredicate predicate) {
+    public void removeif (@Nonnull final LongPredicate predicate) {
         //noop
     }
     

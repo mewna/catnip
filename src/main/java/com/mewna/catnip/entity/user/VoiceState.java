@@ -54,7 +54,7 @@ public interface VoiceState extends Entity {
     @CheckReturnValue
     default String guildId() {
         final long id = guildIdAsLong();
-        if(id == 0) {
+        if (id == 0) {
             return null;
         }
         return Long.toUnsignedString(id);
@@ -67,7 +67,7 @@ public interface VoiceState extends Entity {
     @CheckReturnValue
     default Maybe<Guild> guild() {
         final long id = guildIdAsLong();
-        if(id == 0) {
+        if (id == 0) {
             return Maybe.empty();
         }
         return catnip().cache().guild(guildIdAsLong());
@@ -86,7 +86,7 @@ public interface VoiceState extends Entity {
     @CheckReturnValue
     default String channelId() {
         final long id = channelIdAsLong();
-        if(id == 0) {
+        if (id == 0) {
             return null;
         }
         return Long.toUnsignedString(id);
@@ -100,7 +100,7 @@ public interface VoiceState extends Entity {
     default @NonNull Maybe<VoiceChannel> channel() {
         final long guildId = guildIdAsLong();
         final long id = channelIdAsLong();
-        if(guildId == 0 || id == 0) {
+        if (guildId == 0 || id == 0) {
             return Maybe.empty();
         }
         return catnip().cache().channel(guildId, id).map(Channel::asVoiceChannel);
@@ -143,7 +143,7 @@ public interface VoiceState extends Entity {
     @CheckReturnValue
     default Maybe<Member> member() {
         final long id = guildIdAsLong();
-        if(id == 0) {
+        if (id == 0) {
             return Maybe.empty();
         }
         return catnip().cache().member(id, userIdAsLong());

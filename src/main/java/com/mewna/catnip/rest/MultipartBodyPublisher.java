@@ -28,7 +28,7 @@ public class MultipartBodyPublisher {
     private final String boundary = UUID.randomUUID().toString();
     
     public BodyPublisher build() {
-        if(partsSpecificationList.isEmpty()) {
+        if (partsSpecificationList.isEmpty()) {
             throw new IllegalStateException("Must have at least one part to build multipart message.");
         }
         addFinalBoundary();
@@ -65,10 +65,10 @@ public class MultipartBodyPublisher {
         protected String filename;
         
         public String toString() {
-            if(type == Type.FINAL_BOUNDARY) {
+            if (type == Type.FINAL_BOUNDARY) {
                 return "--" + boundary + "--";
             }
-            if(type == Type.FILE) {
+            if (type == Type.FILE) {
                 return "--" + boundary + "\r\nContent-Disposition: file; name=" + name + "; filename=" + filename + ";\r\nContent-Type:application/octet-stream\r\n\r\n";
             }
             return "--" + boundary + "\r\nContent-Disposition: form-data; name=" + name + ";\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n";
@@ -86,14 +86,14 @@ public class MultipartBodyPublisher {
         
         @Override
         public boolean hasNext() {
-            if(done) {
+            if (done) {
                 return false;
             }
-            if(!next.isEmpty()) {
+            if (!next.isEmpty()) {
                 return true;
             }
             computeNext();
-            if(next.isEmpty()) {
+            if (next.isEmpty()) {
                 done = true;
                 return false;
             }
@@ -102,19 +102,19 @@ public class MultipartBodyPublisher {
         
         @Override
         public byte[] next() {
-            if(!hasNext()) {
+            if (!hasNext()) {
                 throw new NoSuchElementException();
             }
             return next.remove(0);
         }
         
         private void computeNext() {
-            if(!parts.hasNext()) {
+            if (!parts.hasNext()) {
                 return;
             }
             final var part = parts.next();
             next.add(part.toString().getBytes(StandardCharsets.UTF_8));
-            if(part.type != Type.FINAL_BOUNDARY) {
+            if (part.type != Type.FINAL_BOUNDARY) {
                 next.add(part.value);
                 next.add(new byte[] {'\r', '\n'});
             }

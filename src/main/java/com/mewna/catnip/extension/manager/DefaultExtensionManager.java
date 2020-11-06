@@ -58,12 +58,12 @@ public class DefaultExtensionManager implements ExtensionManager {
     
     @Override
     public ExtensionManager loadExtension(@Nonnull final Extension extension) {
-        if(!loadedExtensions.contains(extension)) {
+        if (!loadedExtensions.contains(extension)) {
             extension.catnip(catnip);
             loadedExtensions.add(extension);
             try {
                 final var completable = extension.onLoaded();
-                if(completable != null) {
+                if (completable != null) {
                     completable.blockingAwait();
                 }
             } catch(final Throwable e) {
@@ -75,12 +75,12 @@ public class DefaultExtensionManager implements ExtensionManager {
     
     @Override
     public ExtensionManager unloadExtension(@Nonnull final Extension extension) {
-        if(loadedExtensions.contains(extension)) {
+        if (loadedExtensions.contains(extension)) {
             loadedExtensions.remove(extension);
             try {
                 extension.listeners().forEach(MessageConsumer::close);
                 final var completable = extension.onUnloaded();
-                if(completable != null) {
+                if (completable != null) {
                     completable.blockingAwait();
                 }
             } catch(final Throwable e) {

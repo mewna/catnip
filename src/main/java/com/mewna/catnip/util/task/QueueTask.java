@@ -56,7 +56,7 @@ public abstract class QueueTask<T> {
     
     public boolean offer(final T item) {
         boolean inserted = false;
-        if(!queue.contains(item)) {
+        if (!queue.contains(item)) {
             queue.add(item);
             inserted = true;
         }

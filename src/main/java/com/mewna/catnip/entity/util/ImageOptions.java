@@ -51,7 +51,7 @@ public class ImageOptions {
     @Nonnull
     @CheckReturnValue
     public ImageOptions type(@Nullable ImageType type) {
-        if(type == null) {
+        if (type == null) {
             type = ImageType.PNG;
         }
         this.type = type;
@@ -60,7 +60,7 @@ public class ImageOptions {
     
     @Nonnull
     @CheckReturnValue
-    public ImageOptions gif() {
+    public ImageOptions gif () {
         return type(ImageType.GIF);
     }
     
@@ -85,13 +85,13 @@ public class ImageOptions {
     @Nonnull
     @CheckReturnValue
     public ImageOptions size(@Nonnegative final int size) {
-        if(size < 16) {
+        if (size < 16) {
             throw new IllegalArgumentException("Size must be greater than or equal to 16");
         }
-        if(size > 2048) {
+        if (size > 2048) {
             throw new IllegalArgumentException("Size must be smaller than or equal to 2048");
         }
-        if(!isPowerOfTwo(size)) {
+        if (!isPowerOfTwo(size)) {
             throw new IllegalArgumentException("Size must be a power of two");
         }
         this.size = size;

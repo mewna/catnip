@@ -57,7 +57,7 @@ public class DefaultRateLimiter implements RateLimiter {
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized(container) {
             catnip.logAdapter().trace("{} remaining requests", container.remaining);
-            if(container.remaining > 0) {
+            if (container.remaining > 0) {
                 container.remaining--;
                 catnip.logAdapter().trace("EXECUTE_NOW");
                 return RxHelpers.completedCompletable(catnip)
@@ -106,7 +106,7 @@ public class DefaultRateLimiter implements RateLimiter {
         final BucketContainer container = buckets.computeIfAbsent(route.ratelimitKey(), __ -> new BucketContainer());
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized(container) {
-            if(!container.queue.isEmpty()) {
+            if (!container.queue.isEmpty()) {
                 queueExecution(container);
             }
         }
@@ -125,14 +125,14 @@ public class DefaultRateLimiter implements RateLimiter {
     }
     
     private void queueExecution(@Nonnull final BucketContainer container) {
-        if(container.timerId != null) {
+        if (container.timerId != null) {
             return;
         }
         container.timerId = catnip.taskScheduler().setTimer(retryAfter(container.reset), __ -> {
             synchronized(container) {
                 container.timerId = null;
                 final long now = System.currentTimeMillis();
-                if(Math.max(container.reset, globalRateLimitReset) < now) {
+                if (Math.max(container.reset, globalRateLimitReset) < now) {
                     container.remaining = container.limit;
                     while(!container.queue.isEmpty() && container.remaining > 0) {
                         container.remaining--;

@@ -58,16 +58,16 @@ public final class JsonUtil {
     @Nonnull
     public static JsonObject stringifySnowflakes(@Nonnull final JsonObject json) {
         json.forEach((key, value) -> {
-            if(key.toLowerCase().contains("idaslong")) {
+            if (key.toLowerCase().contains("idaslong")) {
                 json.put(key, json.getNumber(key).toString());
             } else {
-                if(value instanceof JsonObject) {
+                if (value instanceof JsonObject) {
                     json.put(key, stringifySnowflakes((JsonObject) value));
-                } else if(value instanceof JsonArray) {
+                } else if (value instanceof JsonArray) {
                     final List<Object> array = new ArrayList<>((JsonArray) value);
                     for(int i = 0; i < array.size(); i++) {
                         final Object arrayMember = array.get(i);
-                        if(arrayMember instanceof JsonObject) {
+                        if (arrayMember instanceof JsonObject) {
                             array.set(i, stringifySnowflakes((JsonObject) arrayMember));
                         }
                     }
@@ -93,16 +93,16 @@ public final class JsonUtil {
     @Nonnull
     public static JsonObject destringifySnowflakes(@Nonnull final JsonObject json) {
         json.forEach((key, value) -> {
-            if(key.toLowerCase().contains("idaslong")) {
+            if (key.toLowerCase().contains("idaslong")) {
                 json.put(key, Long.parseLong(json.getString(key)));
             } else {
-                if(value instanceof JsonObject) {
+                if (value instanceof JsonObject) {
                     json.put(key, destringifySnowflakes((JsonObject) value));
-                } else if(value instanceof JsonArray) {
+                } else if (value instanceof JsonArray) {
                     final List<Object> array = new ArrayList<>((JsonArray) value);
                     for(int i = 0; i < array.size(); i++) {
                         final Object arrayMember = array.get(i);
-                        if(arrayMember instanceof JsonObject) {
+                        if (arrayMember instanceof JsonObject) {
                             array.set(i, destringifySnowflakes((JsonObject) arrayMember));
                         }
                     }
@@ -116,12 +116,12 @@ public final class JsonUtil {
     @Nonnull
     @CheckReturnValue
     public static <T> List<T> toList(@Nullable final JsonArray array, @Nonnull final Function<JsonObject, T> mapper) {
-        if(array == null) {
+        if (array == null) {
             return List.of();
         }
         final Collection<T> ret = new ArrayList<>(array.size());
         for(final Object object : array) {
-            if(!(object instanceof JsonObject)) {
+            if (!(object instanceof JsonObject)) {
                 throw new IllegalArgumentException("Expected all values to be JsonObjects, but found " +
                         (object == null ? "null" : object.getClass()));
             }
@@ -133,7 +133,7 @@ public final class JsonUtil {
     @Nonnull
     @CheckReturnValue
     public static <T> List<T> toListFromCache(@Nullable final JsonArray array, @Nonnull final Function<String, T> mapper) {
-        if(array == null) {
+        if (array == null) {
             return List.of();
         }
         final Collection<T> ret = new ArrayList<>(array.size());
@@ -147,7 +147,7 @@ public final class JsonUtil {
     @Nonnull
     @CheckReturnValue
     public static <T> Set<T> toSet(@Nullable final JsonArray array, @Nonnull final Function<JsonObject, T> mapper) {
-        if(array == null) {
+        if (array == null) {
             return Collections.emptySet();
         }
         return Collections.unmodifiableSet(toMutableSet(array, mapper));
@@ -156,12 +156,12 @@ public final class JsonUtil {
     @Nonnull
     @CheckReturnValue
     public static <T> Set<T> toMutableSet(@Nullable final JsonArray array, @Nonnull final Function<JsonObject, T> mapper) {
-        if(array == null) {
+        if (array == null) {
             return new HashSet<>();
         }
         final Set<T> ret = new HashSet<>(array.size());
         for(final Object object : array) {
-            if(!(object instanceof JsonObject)) {
+            if (!(object instanceof JsonObject)) {
                 throw new IllegalArgumentException("Expected all values to be JsonObjects, but found " +
                         (object == null ? "null" : object.getClass()));
             }
@@ -175,20 +175,20 @@ public final class JsonUtil {
     public static <T> Map<String, T> toMap(@Nullable final JsonArray array,
                                            @Nonnull final Function<JsonObject, String> keyFunction,
                                            @Nonnull final Function<JsonObject, T> mapper) {
-        if(array == null) {
+        if (array == null) {
             return Collections.emptyMap();
         }
         
         final Map<String, T> map = new HashMap<>(array.size());
         
         for(final Object object : array) {
-            if(!(object instanceof JsonObject)) {
+            if (!(object instanceof JsonObject)) {
                 throw new IllegalArgumentException("Expected all values to be JsonObjects, but found " +
                         (object == null ? "null" : object.getClass()));
             }
             final JsonObject jsonObject = (JsonObject) object;
             final String key = keyFunction.apply(jsonObject);
-            if(key == null || key.isEmpty()) {
+            if (key == null || key.isEmpty()) {
                 throw new IllegalArgumentException("keyFunction returned null or empty string, which isn't allowed!");
             }
             map.put(key, mapper.apply(jsonObject));
@@ -199,12 +199,12 @@ public final class JsonUtil {
     @Nonnull
     @CheckReturnValue
     public static List<String> toStringList(@Nullable final JsonArray array) {
-        if(array == null) {
+        if (array == null) {
             return List.of();
         }
         final Collection<String> ret = new ArrayList<>(array.size());
         for(final Object object : array) {
-            if(!(object instanceof String)) {
+            if (!(object instanceof String)) {
                 throw new IllegalArgumentException("Expected all values to be strings, but found " +
                         (object == null ? "null" : object.getClass()));
             }
@@ -217,12 +217,12 @@ public final class JsonUtil {
     @CheckReturnValue
     public static <T> List<T> stringListToTypedList(@Nullable final JsonArray array,
                                                     @Nonnull final Function<String, T> mapper) {
-        if(array == null) {
+        if (array == null) {
             return List.of();
         }
         final Collection<T> ret = new ArrayList<>(array.size());
         for(final Object object : array) {
-            if(!(object instanceof String)) {
+            if (!(object instanceof String)) {
                 throw new IllegalArgumentException("Expected all values to be strings, but found " +
                         (object == null ? "null" : object.getClass()));
             }
@@ -234,12 +234,12 @@ public final class JsonUtil {
     @Nonnull
     @CheckReturnValue
     public static Set<String> toStringSet(@Nullable final JsonArray array) {
-        if(array == null) {
+        if (array == null) {
             return Collections.emptySet();
         }
         final Set<String> ret = new HashSet<>(array.size());
         for(final Object object : array) {
-            if(!(object instanceof String)) {
+            if (!(object instanceof String)) {
                 throw new IllegalArgumentException("Expected all values to be strings, but found " +
                         (object == null ? "null" : object.getClass()));
             }
@@ -251,14 +251,14 @@ public final class JsonUtil {
     @Nonnull
     @CheckReturnValue
     public static List<Long> toSnowflakeList(@Nullable final JsonArray array) {
-        if(array == null) {
+        if (array == null) {
             return List.of();
         }
         final Collection<Long> ret = new ArrayList<>(array.size());
         for(final Object object : array) {
-            if(object instanceof Number) {
+            if (object instanceof Number) {
                 ret.add(((Number) object).longValue());
-            } else if(object instanceof String) {
+            } else if (object instanceof String) {
                 try {
                     ret.add(Long.parseUnsignedLong((String) object));
                 } catch(final NumberFormatException e) {
@@ -278,7 +278,7 @@ public final class JsonUtil {
         return array -> {
             final Collection<T> result = new ArrayList<>(array.size());
             for(final Object object : array) {
-                if(!(object instanceof JsonObject)) {
+                if (!(object instanceof JsonObject)) {
                     throw new IllegalArgumentException("Expected array to contain only objects, but found " +
                             (object == null ? "null" : object.getClass())
                     );

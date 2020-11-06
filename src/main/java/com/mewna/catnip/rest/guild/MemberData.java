@@ -111,7 +111,7 @@ public class MemberData {
     @CheckReturnValue
     @SuppressWarnings("TypeMayBeWeakened")
     public MemberData addRole(@Nonnull final Role role) {
-        if(roles == null) {
+        if (roles == null) {
             roles = new HashSet<>();
         }
         roles.add(role.id());
@@ -121,7 +121,7 @@ public class MemberData {
     @Nonnull
     @CheckReturnValue
     public MemberData addRole(@Nonnull final String roleId) {
-        if(roles == null) {
+        if (roles == null) {
             roles = new HashSet<>();
         }
         roles.add(roleId);
@@ -132,7 +132,7 @@ public class MemberData {
     @CheckReturnValue
     @SuppressWarnings("TypeMayBeWeakened")
     public MemberData removeRole(@Nonnull final Role role) {
-        if(roles != null) {
+        if (roles != null) {
             roles.remove(role.id());
         }
         return this;
@@ -141,7 +141,7 @@ public class MemberData {
     @Nonnull
     @CheckReturnValue
     public MemberData removeRole(@Nonnull final String roleId) {
-        if(roles != null) {
+        if (roles != null) {
             roles.remove(roleId);
         }
         return this;
@@ -151,18 +151,18 @@ public class MemberData {
     @CheckReturnValue
     public JsonObject toJson() {
         final JsonObject object = new JsonObject();
-        if(roles != null) {
+        if (roles != null) {
             final JsonArray array = new JsonArray();
             array.addAll(roles);
             object.put("roles", array);
         }
-        if(nickname != null) {
+        if (nickname != null) {
             object.put("nick", nickname);
         }
-        if(mute != null) {
+        if (mute != null) {
             object.put("mute", mute);
         }
-        if(deaf != null) {
+        if (deaf != null) {
             object.put("deaf", deaf);
         }
         object.put("channel_id", channelId);

@@ -69,10 +69,10 @@ public abstract class ChannelData implements JsonConvertible {
     ChannelData(@Nonnegative final int type, @Nullable final String name) {
         this.type = type;
         this.name = name;
-        if(type != 0 && type != 2 && type != 4) {
+        if (type != 0 && type != 2 && type != 4) {
             throw new IllegalArgumentException("Type must be either 0 (text), 2 (voice) or 4 (category)");
         }
-        if(name != null && (name.length() < 2 || name.length() > 100)) {
+        if (name != null && (name.length() < 2 || name.length() > 100)) {
             throw new IllegalArgumentException("Name must have 2-100 characters");
         }
     }
@@ -135,9 +135,9 @@ public abstract class ChannelData implements JsonConvertible {
     @CheckReturnValue
     @SuppressWarnings("TypeMayBeWeakened")
     public static ChannelData of(@Nonnull final GuildChannel channel) {
-        if(channel.isText()) {
+        if (channel.isText()) {
             return of(channel.asTextChannel());
-        } else if(channel.isVoice()) {
+        } else if (channel.isVoice()) {
             return of(channel.asVoiceChannel());
         } else {
             return of(channel.asCategory());
@@ -268,28 +268,28 @@ public abstract class ChannelData implements JsonConvertible {
     public JsonObject toJson() {
         final JsonObject object = new JsonObject();
         object.put("type", type);
-        if(name != null) {
+        if (name != null) {
             object.put("name", name);
         }
-        if(position != null) {
+        if (position != null) {
             object.put("position", position);
         }
-        if(topic != null) {
+        if (topic != null) {
             object.put("topic", topic);
         }
-        if(nsfw != null) {
+        if (nsfw != null) {
             object.put("nsfw", nsfw);
         }
-        if(bitrate != null) {
+        if (bitrate != null) {
             object.put("bitrate", bitrate);
         }
-        if(userLimit != null) {
+        if (userLimit != null) {
             object.put("user_limit", userLimit);
         }
-        if(parentId != null) {
+        if (parentId != null) {
             object.put("parent_id", parentId);
         }
-        if(!overrides.isEmpty()) {
+        if (!overrides.isEmpty()) {
             final JsonArray array = new JsonArray();
             for(final PermissionOverrideData override : overrides.values()) {
                 array.add(override.toJson());

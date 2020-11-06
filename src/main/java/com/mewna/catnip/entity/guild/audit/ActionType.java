@@ -85,7 +85,7 @@ public enum ActionType {
     @CheckReturnValue
     public static ActionType byKey(final int value) {
         for(final ActionType type : values()) {
-            if(type.value == value) {
+            if (type.value == value) {
                 return type;
             }
         }

@@ -53,7 +53,7 @@ public enum MessageActivityType {
     @CheckReturnValue
     public static MessageActivityType byId(final int id) {
         for(final MessageActivityType m : values()) {
-            if(m.id == id) {
+            if (m.id == id) {
                 return m;
             }
         }

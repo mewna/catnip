@@ -50,7 +50,7 @@ public enum StickerFormatType {
     
     public static StickerFormatType byId(@Nonnegative final int id) {
         for(final StickerFormatType value : values()) {
-            if(value.id == id) {
+            if (value.id == id) {
                 return value;
             }
         }

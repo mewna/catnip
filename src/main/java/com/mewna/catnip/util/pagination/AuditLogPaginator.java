@@ -98,13 +98,13 @@ public abstract class AuditLogPaginator extends BasePaginator<AuditLogEntry, Jso
         final JsonArray entries = data.getArray("audit_log_entries");
         
         for(final Object object : entries) {
-            if(!(object instanceof JsonObject)) {
+            if (!(object instanceof JsonObject)) {
                 throw new IllegalArgumentException("Expected all values to be JsonObjects, but found " +
                         (object == null ? "null" : object.getClass()));
             }
             final AuditLogEntry entry = builder.createAuditLogEntry((JsonObject) object, webhooks, users);
             state.update(entry);
-            if(state.done()) {
+            if (state.done()) {
                 return;
             }
         }

@@ -73,7 +73,7 @@ public class SplitMemoryEntityCache extends MemoryEntityCache {
     public Maybe<User> user(final long id) {
         for(final CacheView<User> cache : userCache.values()) {
             final User user = cache.getById(id);
-            if(user != null) {
+            if (user != null) {
                 return Maybe.just(user);
             }
         }
@@ -91,7 +91,7 @@ public class SplitMemoryEntityCache extends MemoryEntityCache {
     public Maybe<Presence> presence(final long id) {
         for(final CacheView<Presence> cache : presenceCache.values()) {
             final Presence presence = cache.getById(id);
-            if(presence != null) {
+            if (presence != null) {
                 return Maybe.just(presence);
             }
         }

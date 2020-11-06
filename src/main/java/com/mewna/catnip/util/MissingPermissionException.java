@@ -54,7 +54,7 @@ public class MissingPermissionException extends RuntimeException {
         while(it.hasNext()) {
             final Permission permission = it.next();
             sb.append(permission.name());
-            if(it.hasNext()) {
+            if (it.hasNext()) {
                 sb.append(", ");
             }
         }

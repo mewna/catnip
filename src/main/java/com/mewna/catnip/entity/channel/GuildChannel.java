@@ -75,7 +75,7 @@ public interface GuildChannel extends GuildEntity, Channel, Nameable {
     @CheckReturnValue
     default String parentId() {
         final long id = parentIdAsLong();
-        if(id == 0) {
+        if (id == 0) {
             return null;
         }
         return Long.toUnsignedString(id);
@@ -245,7 +245,7 @@ public interface GuildChannel extends GuildEntity, Channel, Nameable {
         
         @Nonnull
         public Single<GuildChannel> submit(@Nullable final String reason) {
-            if(channel == null) {
+            if (channel == null) {
                 throw new IllegalStateException("Cannot submit edit without a channel object! Please use RestChannel directly instead");
             }
             return channel.catnip().rest().channel().modifyChannel(channel.id(), this, reason);
@@ -253,7 +253,7 @@ public interface GuildChannel extends GuildEntity, Channel, Nameable {
         
         @Nonnull
         public Single<GuildChannel> submit() {
-            if(channel == null) {
+            if (channel == null) {
                 throw new IllegalStateException("Cannot submit edit without a channel object! Please use RestChannel directly instead");
             }
             return channel.catnip().rest().channel().modifyChannel(channel.id(), this, null);
@@ -263,18 +263,18 @@ public interface GuildChannel extends GuildEntity, Channel, Nameable {
         @CheckReturnValue
         public JsonObject payload() {
             final JsonObject payload = new JsonObject();
-            if(name != null && (channel == null || !Objects.equals(name, channel.name()))) {
+            if (name != null && (channel == null || !Objects.equals(name, channel.name()))) {
                 payload.put("name", name);
             }
-            if(position != null && (channel == null || !Objects.equals(position, channel.position()))) {
+            if (position != null && (channel == null || !Objects.equals(position, channel.position()))) {
                 payload.put("position", position);
             }
-            if(parentId != null && (channel == null || !Objects.equals(parentId, channel.parentId()))) {
+            if (parentId != null && (channel == null || !Objects.equals(parentId, channel.parentId()))) {
                 payload.put("parent_id", parentId);
             }
-            if(overrides != null && !overrides.isEmpty()) {
+            if (overrides != null && !overrides.isEmpty()) {
                 final Map<String, PermissionOverrideData> finalOverrides = new HashMap<>();
-                if(channel != null) {
+                if (channel != null) {
                     channel.overrides().forEach(override -> finalOverrides.put(override.id(), PermissionOverrideData.create(override)));
                 }
                 overrides.forEach(finalOverrides::put);
@@ -282,61 +282,61 @@ public interface GuildChannel extends GuildEntity, Channel, Nameable {
                 finalOverrides.forEach((__, v) -> array.add(v.toJson()));
                 payload.put("permission_overwrites", array);
             }
-            if(channel != null) {
+            if (channel != null) {
                 // TODO: How to handle categories here?
-                if(channel.isText()) {
+                if (channel.isText()) {
                     final TextChannel text = channel.asTextChannel();
-                    if(topic != null && !Objects.equals(topic, text.topic())) {
+                    if (topic != null && !Objects.equals(topic, text.topic())) {
                         payload.put("topic", topic);
                     }
-                    if(nsfw != null && !Objects.equals(nsfw, text.nsfw())) {
+                    if (nsfw != null && !Objects.equals(nsfw, text.nsfw())) {
                         payload.put("nsfw", nsfw);
                     }
-                    if(rateLimitPerUser != null && !Objects.equals(rateLimitPerUser, text.rateLimitPerUser())) {
-                        if(rateLimitPerUser < 0 || rateLimitPerUser > 21600) {
+                    if (rateLimitPerUser != null && !Objects.equals(rateLimitPerUser, text.rateLimitPerUser())) {
+                        if (rateLimitPerUser < 0 || rateLimitPerUser > 21600) {
                             throw new IllegalArgumentException("Attempted to set 'rate_limit_per_user' to an invalid value (" + rateLimitPerUser + "), must be between 0 and 21600.");
                         }
                         payload.put("rate_limit_per_user", rateLimitPerUser);
                     }
-                    if(bitrate != null) {
+                    if (bitrate != null) {
                         throw new IllegalArgumentException("Attempted to set 'bitrate' on a text channel, which doesn't support this!");
                     }
-                    if(userLimit != null) {
+                    if (userLimit != null) {
                         throw new IllegalArgumentException("Attempted to set 'user_limit' on a text channel, which doesn't support this!");
                     }
-                } else if(channel.isVoice()) {
+                } else if (channel.isVoice()) {
                     final VoiceChannel voice = channel.asVoiceChannel();
-                    if(bitrate != null && !Objects.equals(bitrate, voice.bitrate())) {
+                    if (bitrate != null && !Objects.equals(bitrate, voice.bitrate())) {
                         payload.put("bitrate", bitrate);
                     }
-                    if(userLimit != null && !Objects.equals(userLimit, voice.userLimit())) {
+                    if (userLimit != null && !Objects.equals(userLimit, voice.userLimit())) {
                         payload.put("user_limit", userLimit);
                     }
-                    if(topic != null) {
+                    if (topic != null) {
                         throw new IllegalArgumentException("Attempted to set 'topic' on a voice channel, which doesn't support this!");
                     }
-                    if(nsfw != null) {
+                    if (nsfw != null) {
                         throw new IllegalArgumentException("Attempted to set 'nsfw' on a voice channel, which doesn't support this!");
                     }
-                    if(rateLimitPerUser != null) {
+                    if (rateLimitPerUser != null) {
                         throw new IllegalArgumentException("Attempted to set 'rate_limit_per_user' on a voice channel, which doesn't support this!");
                     }
                 }
             } else {
-                if(topic != null) {
+                if (topic != null) {
                     payload.put("topic", topic);
                 }
-                if(nsfw != null) {
+                if (nsfw != null) {
                     payload.put("nsfw", nsfw);
                 }
-                if(bitrate != null) {
+                if (bitrate != null) {
                     payload.put("bitrate", bitrate);
                 }
-                if(userLimit != null) {
+                if (userLimit != null) {
                     payload.put("user_limit", userLimit);
                 }
-                if(rateLimitPerUser != null) {
-                    if(rateLimitPerUser < 0 || rateLimitPerUser > 21600) {
+                if (rateLimitPerUser != null) {
+                    if (rateLimitPerUser < 0 || rateLimitPerUser > 21600) {
                         throw new IllegalArgumentException("Attempted to set 'rate_limit_per_user' to an invalid value (" + rateLimitPerUser + "), must be between 0 and 21600.");
                     }
                     payload.put("rate_limit_per_user", rateLimitPerUser);

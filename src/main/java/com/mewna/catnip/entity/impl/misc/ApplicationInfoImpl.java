@@ -73,7 +73,7 @@ public class ApplicationInfoImpl implements ApplicationInfo, RequiresCatnip {
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
-        if(owner instanceof RequiresCatnip) {
+        if (owner instanceof RequiresCatnip) {
             ((RequiresCatnip) owner).catnip(catnip);
         }
     }

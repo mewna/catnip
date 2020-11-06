@@ -161,7 +161,7 @@ public interface Role extends Mentionable, Comparable<Role>, Permissable, Nameab
     
     @Override
     default int compareTo(@Nonnull final Role o) {
-        if(position() != o.position()) {
+        if (position() != o.position()) {
             return position() - o.position();
         }
         final long creationDiff = (o.idAsLong() >> 22) - (idAsLong() >> 22);

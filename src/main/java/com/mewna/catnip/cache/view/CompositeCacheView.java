@@ -70,7 +70,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
     @Override
     public boolean isEmpty() {
         for(final CacheView<T> c : sources) {
-            if(!c.isEmpty()) {
+            if (!c.isEmpty()) {
                 return false;
             }
         }
@@ -81,7 +81,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
     public T getById(final long id) {
         for(final CacheView<T> c : sources) {
             final T element = c.getById(id);
-            if(element != null) {
+            if (element != null) {
                 return element;
             }
         }
@@ -92,7 +92,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
     public T findAny(@Nonnull final Predicate<? super T> filter) {
         for(final CacheView<T> c : sources) {
             final T element = c.findAny(filter);
-            if(element != null) {
+            if (element != null) {
                 return element;
             }
         }
@@ -152,7 +152,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
         final Iterator<? extends CacheView<T>> it = sources.iterator();
         Optional<T> maybeFirst = Optional.empty();
         while(maybeFirst.isEmpty()) {
-            if(!it.hasNext()) {
+            if (!it.hasNext()) {
                 return Optional.empty();
             }
             maybeFirst = it.next().reduce(accumulator);
@@ -180,7 +180,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
     @Override
     public boolean anyMatch(@Nonnull final Predicate<? super T> predicate) {
         for(final CacheView<T> view : sources) {
-            if(view.anyMatch(predicate)) {
+            if (view.anyMatch(predicate)) {
                 return true;
             }
         }
@@ -190,7 +190,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
     @Override
     public boolean allMatch(@Nonnull final Predicate<? super T> predicate) {
         for(final CacheView<T> view : sources) {
-            if(!view.allMatch(predicate)) {
+            if (!view.allMatch(predicate)) {
                 return false;
             }
         }
@@ -208,7 +208,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
         final Iterator<? extends CacheView<T>> it = sources.iterator();
         Optional<T> maybeFirst = Optional.empty();
         while(maybeFirst.isEmpty()) {
-            if(!it.hasNext()) {
+            if (!it.hasNext()) {
                 return Optional.empty();
             }
             maybeFirst = it.next().min(comparator);
@@ -216,7 +216,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
         T min = maybeFirst.get();
         while(it.hasNext()) {
             final T other = it.next().min(comparator).orElse(null);
-            if(comparator.compare(min, other) > 0) {
+            if (comparator.compare(min, other) > 0) {
                 min = other;
             }
         }
@@ -233,7 +233,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
         final Iterator<? extends CacheView<T>> it = sources.iterator();
         Optional<T> maybeFirst = Optional.empty();
         while(maybeFirst.isEmpty()) {
-            if(!it.hasNext()) {
+            if (!it.hasNext()) {
                 return Optional.empty();
             }
             maybeFirst = it.next().max(comparator);
@@ -241,7 +241,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
         T max = maybeFirst.get();
         while(it.hasNext()) {
             final T other = it.next().max(comparator).orElse(null);
-            if(comparator.compare(max, other) < 0) {
+            if (comparator.compare(max, other) < 0) {
                 max = other;
             }
         }
@@ -338,7 +338,7 @@ public class CompositeCacheView<T> implements CacheView<T> {
         public boolean hasNext() {
             while(current == null || !current.hasNext()) {
                 current = queue.poll();
-                if(current == null) {
+                if (current == null) {
                     return false;
                 }
             }

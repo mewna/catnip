@@ -227,7 +227,7 @@ public interface Webhook extends GuildEntity, Snowflake, NullNameable {
         
         @Nonnull
         public Single<Webhook> submit() {
-            if(webhook == null) {
+            if (webhook == null) {
                 throw new IllegalStateException("Cannot submit edit without a webhook object! Please use RestWebhook directly instead");
             }
             return webhook.catnip().rest().webhook().modifyWebhook(webhook.id(), this);
@@ -237,13 +237,13 @@ public interface Webhook extends GuildEntity, Snowflake, NullNameable {
         @CheckReturnValue
         public JsonObject payload() {
             final JsonObject payload = new JsonObject();
-            if(name != null && (webhook == null || !Objects.equals(name, webhook.name()))) {
+            if (name != null && (webhook == null || !Objects.equals(name, webhook.name()))) {
                 payload.put("name", name);
             }
-            if(avatar != null && (webhook == null || !Objects.equals(avatar, webhook.avatar()))) {
+            if (avatar != null && (webhook == null || !Objects.equals(avatar, webhook.avatar()))) {
                 payload.put("avatar", avatar);
             }
-            if(channelId != null && (webhook == null || !Objects.equals(channelId, webhook.channelId()))) {
+            if (channelId != null && (webhook == null || !Objects.equals(channelId, webhook.channelId()))) {
                 payload.put("channel_id", channelId);
             }
             return payload;

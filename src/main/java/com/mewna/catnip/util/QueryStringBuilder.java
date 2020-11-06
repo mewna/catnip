@@ -51,7 +51,7 @@ public class QueryStringBuilder {
     
     @Nonnull
     public QueryStringBuilder append(@Nonnull final String key, @Nonnull final String value) {
-        if(hasQueryParams) {
+        if (hasQueryParams) {
             sb.append('&').append(key).append('=').append(encode(value));
         } else {
             sb.append('?').append(key).append('=').append(encode(value));

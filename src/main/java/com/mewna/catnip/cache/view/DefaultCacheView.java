@@ -52,12 +52,12 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
     protected final ReadWriteLock lock = new ReentrantReadWriteLock();
     
     @Override
-    public void removeIf(@Nonnull final LongPredicate predicate) {
+    public void removeif (@Nonnull final LongPredicate predicate) {
         lock.writeLock().lock();
         try {
             final LongIterator iterator = map.iterator();
             while(iterator.hasNext()) {
-                if(predicate.test(iterator.nextLong())) {
+                if (predicate.test(iterator.nextLong())) {
                     iterator.remove();
                 }
             }
@@ -136,7 +136,7 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
         lock.readLock().lock();
         try {
             for(final T element : map.values()) {
-                if(filter.test(element)) {
+                if (filter.test(element)) {
                     return element;
                 }
             }
@@ -159,7 +159,7 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
         lock.readLock().lock();
         try {
             for(final T element : map.values()) {
-                if(filter.test(element)) {
+                if (filter.test(element)) {
                     collection.add(element);
                 }
             }
@@ -221,7 +221,7 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
         lock.readLock().lock();
         try {
             final Iterator<T> it = map.values().iterator();
-            if(!it.hasNext()) {
+            if (!it.hasNext()) {
                 return Optional.empty();
             }
             T result = it.next();
@@ -255,7 +255,7 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
         lock.readLock().lock();
         try {
             for(final T element : map.values()) {
-                if(predicate.test(element)) {
+                if (predicate.test(element)) {
                     return true;
                 }
             }
@@ -270,7 +270,7 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
         lock.readLock().lock();
         try {
             for(final T element : map.values()) {
-                if(!predicate.test(element)) {
+                if (!predicate.test(element)) {
                     return false;
                 }
             }
@@ -291,13 +291,13 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
         lock.readLock().lock();
         try {
             final Iterator<T> it = map.values().iterator();
-            if(!it.hasNext()) {
+            if (!it.hasNext()) {
                 return Optional.empty();
             }
             T min = it.next();
             while(it.hasNext()) {
                 final T element = it.next();
-                if(comparator.compare(min, element) > 0) {
+                if (comparator.compare(min, element) > 0) {
                     min = element;
                 }
             }
@@ -313,13 +313,13 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
         lock.readLock().lock();
         try {
             final Iterator<T> it = map.values().iterator();
-            if(!it.hasNext()) {
+            if (!it.hasNext()) {
                 return Optional.empty();
             }
             T max = it.next();
             while(it.hasNext()) {
                 final T element = it.next();
-                if(comparator.compare(max, element) < 0) {
+                if (comparator.compare(max, element) < 0) {
                     max = element;
                 }
             }
@@ -335,7 +335,7 @@ public class DefaultCacheView<T> implements MutableCacheView<T> {
         try {
             long count = 0;
             for(final T element : map.values()) {
-                if(filter.test(element)) {
+                if (filter.test(element)) {
                     count++;
                 }
             }

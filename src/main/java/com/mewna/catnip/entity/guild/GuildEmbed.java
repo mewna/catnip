@@ -53,7 +53,7 @@ public interface GuildEmbed extends RequiresCatnip {
     @CheckReturnValue
     default String channelId() {
         final long id = channelIdAsLong();
-        if(id == 0) {
+        if (id == 0) {
             return null;
         }
         return Long.toUnsignedString(id);

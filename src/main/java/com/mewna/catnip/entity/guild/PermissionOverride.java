@@ -75,7 +75,7 @@ public interface PermissionOverride extends Snowflake {
         @Nonnull
         public static OverrideType byKey(final int key) {
             for(final OverrideType level : values()) {
-                if(level.key == key) {
+                if (level.key == key) {
                     return level;
                 }
             }

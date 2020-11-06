@@ -63,7 +63,7 @@ public enum MessageFlag {
         final Set<MessageFlag> flags = EnumSet.noneOf(MessageFlag.class);
         
         for(final MessageFlag flag : values()) {
-            if((asLong & flag.value) == flag.value) {
+            if ((asLong & flag.value) == flag.value) {
                 flags.add(flag);
             }
         }
@@ -82,7 +82,7 @@ public enum MessageFlag {
     public static long fromSettable(@Nonnull final Iterable<MessageFlag> flags) {
         long result = 0;
         for(final MessageFlag flag : flags) {
-            if(!flag.canBeSet) {
+            if (!flag.canBeSet) {
                 throw new IllegalArgumentException("Message flag " + flag.name() + " can't be set!");
             }
             result |= flag.value;

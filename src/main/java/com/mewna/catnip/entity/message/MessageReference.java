@@ -76,7 +76,7 @@ public interface MessageReference extends Entity {
     @Nonnull
     @CheckReturnValue
     default Maybe<Guild> guild() {
-        if(guildId() == null) {
+        if (guildId() == null) {
             return Maybe.empty();
         } else {
             //noinspection ConstantConditions

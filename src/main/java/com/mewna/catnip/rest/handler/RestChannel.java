@@ -98,14 +98,14 @@ public class RestChannel extends RestHandler {
     @Nonnull
     public Observable<JsonObject> createMessageRaw(@Nonnull final String channelId, @Nonnull final Message message) {
         final JsonObject json = new JsonObject();
-        if(message.content() != null && !message.content().isEmpty()) {
+        if (message.content() != null && !message.content().isEmpty()) {
             json.put("content", message.content());
         }
         final List<Embed> embeds = message.embeds();
-        if(embeds != null && !embeds.isEmpty()) {
+        if (embeds != null && !embeds.isEmpty()) {
             json.put("embed", entityBuilder().embedToJson(embeds.get(0)));
         }
-        if(json.get("embed") == null && json.get("content") == null && message.attachments().isEmpty()) {
+        if (json.get("embed") == null && json.get("content") == null && message.attachments().isEmpty()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no attachments!");
         }
         
@@ -118,20 +118,20 @@ public class RestChannel extends RestHandler {
     @Nonnull
     public Observable<JsonObject> createMessageRaw(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
         final JsonObject json = new JsonObject();
-        if(options.content() != null && !options.content().isEmpty()) {
+        if (options.content() != null && !options.content().isEmpty()) {
             json.put("content", options.content());
         }
-        if(options.embed() != null) {
+        if (options.embed() != null) {
             json.put("embed", entityBuilder().embedToJson(options.embed()));
         }
-        if(json.get("embed") == null && json.get("content") == null && !options.hasFiles()) {
+        if (json.get("embed") == null && json.get("content") == null && !options.hasFiles()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no attachments!");
         }
         
-        if(options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
+        if (options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
             final JsonObject allowedMentions = new JsonObject();
             final EnumSet<MentionParseFlag> parse = options.parseFlags();
-            if(parse == null) {
+            if (parse == null) {
                 // These act like a whitelist regardless of parse being present.
                 allowedMentions.put("users", options.mentionedUsers());
                 allowedMentions.put("roles", options.mentionedRoles());
@@ -142,22 +142,22 @@ public class RestChannel extends RestHandler {
                 }
                 allowedMentions.put("parse", parseList);
                 //If either list is present along with the respective parse option, validation fails. The contains check avoids this.
-                if(!parse.contains(MentionParseFlag.USERS)) {
+                if (!parse.contains(MentionParseFlag.USERS)) {
                     allowedMentions.put("users", options.mentionedUsers());
                 }
-                if(!parse.contains(MentionParseFlag.ROLES)) {
+                if (!parse.contains(MentionParseFlag.ROLES)) {
                     allowedMentions.put("roles", options.mentionedRoles());
                 }
             }
             json.put("allowed_mentions", allowedMentions);
         }
-        if(options.reference() != null) {
+        if (options.reference() != null) {
             json.put("message_reference", entityBuilder().referenceToJson(options.reference()));
         }
         
         final OutboundRequest request = new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), Map.of(), json);
         final List<ImmutablePair<String, byte[]>> buffers = options.files();
-        if(buffers != null && !buffers.isEmpty()) {
+        if (buffers != null && !buffers.isEmpty()) {
             request.buffers(buffers);
         }
         return catnip().requester()
@@ -210,27 +210,27 @@ public class RestChannel extends RestHandler {
     public Observable<JsonObject> editMessageRaw(@Nonnull final String channelId, @Nonnull final String messageId,
                                                  @Nonnull final MessageOptions options) {
         final JsonObject json = new JsonObject();
-        if(options.embed() == null && (options.content() == null || options.content().isEmpty())) {
+        if (options.embed() == null && (options.content() == null || options.content().isEmpty())) {
             throw new IllegalArgumentException("Can't build a message with no content and no embed!");
         }
         json.put("content", options.content());
-        if(options.embed() != null || options.override()) {
-            if(options.embed() == null) {
+        if (options.embed() != null || options.override()) {
+            if (options.embed() == null) {
                 json.put("embed", null);
             } else {
                 json.put("embed", entityBuilder().embedToJson(options.embed()));
             }
         }
-        if(json.get("embed") == null && json.get("content") == null) {
+        if (json.get("embed") == null && json.get("content") == null) {
             throw new IllegalArgumentException("Can't build a message with no content and no embed!");
         }
-        if(!options.flags().isEmpty() || options.override()) {
+        if (!options.flags().isEmpty() || options.override()) {
             json.put("flags", MessageFlag.fromSettable(options.flags()));
         }
         final JsonObject allowedMentions = new JsonObject();
-        if(options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
+        if (options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
             final EnumSet<MentionParseFlag> parse = options.parseFlags();
-            if(parse == null) {
+            if (parse == null) {
                 // These act like a whitelist regardless of parse being present.
                 allowedMentions.put("users", options.mentionedUsers());
                 allowedMentions.put("roles", options.mentionedRoles());
@@ -241,18 +241,18 @@ public class RestChannel extends RestHandler {
                 }
                 allowedMentions.put("parse", parseList);
                 //If either list is present along with the respective parse option, validation fails. The contains check avoids this.
-                if(!parse.contains(MentionParseFlag.USERS)) {
+                if (!parse.contains(MentionParseFlag.USERS)) {
                     allowedMentions.put("users", options.mentionedUsers());
                 }
-                if(!parse.contains(MentionParseFlag.ROLES)) {
+                if (!parse.contains(MentionParseFlag.ROLES)) {
                     allowedMentions.put("roles", options.mentionedRoles());
                 }
             }
         }
-        if(options.reference() != null) {
+        if (options.reference() != null) {
             allowedMentions.put("replied_user", options.pingReply());
         }
-        if(!allowedMentions.isEmpty()) {
+        if (!allowedMentions.isEmpty()) {
             json.put("allowed_mentions", allowedMentions);
         }
         return catnip().requester()
@@ -381,14 +381,14 @@ public class RestChannel extends RestHandler {
                                                  @Nullable final String after, @Nonnegative final int limit) {
         
         final QueryStringBuilder builder = new QueryStringBuilder();
-        if(limit > 0) {
+        if (limit > 0) {
             builder.append("limit", Integer.toString(limit));
         }
-        if(before != null) {
+        if (before != null) {
             builder.append("before", before);
         }
         
-        if(after != null) {
+        if (after != null) {
             builder.append("after", after);
         }
         
@@ -437,19 +437,19 @@ public class RestChannel extends RestHandler {
                                                        @Nonnegative final int limit) {
         final QueryStringBuilder builder = new QueryStringBuilder();
         
-        if(limit > 0) {
+        if (limit > 0) {
             builder.append("limit", Integer.toString(limit));
         }
         
-        if(after != null) {
+        if (after != null) {
             builder.append("after", after);
         }
         
-        if(around != null) {
+        if (around != null) {
             builder.append("around", around);
         }
         
-        if(before != null) {
+        if (before != null) {
             builder.append("before", before);
         }
         

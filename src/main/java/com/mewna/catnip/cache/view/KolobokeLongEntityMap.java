@@ -328,13 +328,13 @@ final class KolobokeLongEntityMap<T>  implements LongEntityMap<T> {
         }
         
         @Override
-        public boolean removeIf(Predicate<? super Long> filter) {
-            return KolobokeLongEntityMap.this.removeIf(filter);
+        public boolean removeif (Predicate<? super Long> filter) {
+            return KolobokeLongEntityMap.this.removeif (filter);
         }
         
         @Override
-        public boolean removeIf(LongPredicate filter) {
-            return KolobokeLongEntityMap.this.removeIf(filter);
+        public boolean removeif (LongPredicate filter) {
+            return KolobokeLongEntityMap.this.removeif (filter);
         }
         
         @Override
@@ -1591,7 +1591,7 @@ final class KolobokeLongEntityMap<T>  implements LongEntityMap<T> {
         }
     }
     
-    public boolean removeIf(Predicate<? super Long> filter) {
+    public boolean removeif (Predicate<? super Long> filter) {
         if (filter == null)
             throw new NullPointerException();
         
@@ -1656,7 +1656,7 @@ final class KolobokeLongEntityMap<T>  implements LongEntityMap<T> {
         return changed;
     }
     
-    public boolean removeIf(LongPredicate filter) {
+    public boolean removeif (LongPredicate filter) {
         if (filter == null)
             throw new NullPointerException();
         
@@ -2446,7 +2446,7 @@ final class KolobokeLongEntityMap<T>  implements LongEntityMap<T> {
         }
         
         @Override
-        public final boolean removeIf(@Nonnull
+        public final boolean removeif (@Nonnull
                                               Predicate<? super Map.Entry<Long, T>> filter) {
             if (filter == null)
                 throw new NullPointerException();
@@ -2978,7 +2978,7 @@ final class KolobokeLongEntityMap<T>  implements LongEntityMap<T> {
         }
         
         @Override
-        public boolean removeIf(Predicate<? super T> filter) {
+        public boolean removeif (Predicate<? super T> filter) {
             if (filter == null)
                 throw new NullPointerException();
             

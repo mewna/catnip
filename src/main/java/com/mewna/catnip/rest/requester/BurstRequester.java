@@ -63,7 +63,7 @@ public class BurstRequester extends AbstractRequester {
         @Override
         public void failedRequest(@Nonnull final QueuedRequest request, @Nonnull final Throwable failureCause) {
             request.failed();
-            if(request.shouldRetry()) {
+            if (request.shouldRetry()) {
                 queueRequest(request);
             } else {
                 requester.catnip.logAdapter().debug("Request {} failed, giving up!", request.request());

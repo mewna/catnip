@@ -53,7 +53,7 @@ public interface ReactionUpdate extends Entity {
     
     @Nonnull
     default Maybe<User> user() {
-        if(userId() != null) {
+        if (userId() != null) {
             //noinspection ConstantConditions
             return catnip().cache().user(userId());
         } else {
@@ -70,7 +70,7 @@ public interface ReactionUpdate extends Entity {
     @Nonnull
     @SuppressWarnings("ConstantConditions")
     default Maybe<MessageChannel> channel() {
-        if(guildId() == null) {
+        if (guildId() == null) {
             return catnip().rest().channel().getChannelById(channelId()).map(Channel::asMessageChannel).toMaybe();
         } else {
             return catnip().cache().channel(guildId(), channelId()).map(Channel::asMessageChannel);
@@ -91,7 +91,7 @@ public interface ReactionUpdate extends Entity {
     
     @Nonnull
     default Maybe<Guild> guild() {
-        if(guildId() == null) {
+        if (guildId() == null) {
             return Maybe.empty();
         } else {
             //noinspection ConstantConditions

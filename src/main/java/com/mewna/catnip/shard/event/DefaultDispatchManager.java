@@ -61,8 +61,8 @@ public class DefaultDispatchManager extends AbstractDispatchManager {
     public void dispatchEvent(final String address, final Object event) {
         final var addressConsumers = consumers.get(address);
         
-        if(addressConsumers != null) {
-            if(worker == null) {
+        if (addressConsumers != null) {
+            if (worker == null) {
                 LOGGER.warn("Please configure the Catnip parent instance before dispatching events.");
                 throw new IllegalStateException("dispatchEvent was called before DefaultDispatchManager was configured.");
             }
@@ -74,11 +74,11 @@ public class DefaultDispatchManager extends AbstractDispatchManager {
     public <T> MessageConsumer<T> createConsumer(final String address) {
         // Nullability concerns are not met during tests
         //noinspection ConstantConditions
-        if(catnip() != null && catnip().options() != null) {
-            if(catnip().options().logEventNotInIntentsWarning() && (catnip().options().apiVersion() > 6
+        if (catnip() != null && catnip().options() != null) {
+            if (catnip().options().logEventNotInIntentsWarning() && (catnip().options().apiVersion() > 6
                     || !catnip().options().intents().isEmpty())) {
                 final var intents = catnip().options().intents();
-                if(GatewayIntent.ALL_INTENT_EVENTS.contains(address)
+                if (GatewayIntent.ALL_INTENT_EVENTS.contains(address)
                         && intents.stream()
                         .map(GatewayIntent::events)
                         .flatMap(Collection::stream)
@@ -110,7 +110,7 @@ public class DefaultDispatchManager extends AbstractDispatchManager {
         
         @SuppressWarnings("unchecked")
         void handle(final Object event) {
-            if(internalHandler != null) {
+            if (internalHandler != null) {
                 internalHandler.accept((T) event);
             }
         }
@@ -148,7 +148,7 @@ public class DefaultDispatchManager extends AbstractDispatchManager {
         public void close() {
             final var addressConsumers = consumers.get(address);
             
-            if(addressConsumers != null) {
+            if (addressConsumers != null) {
                 addressConsumers.remove(this);
             }
         }

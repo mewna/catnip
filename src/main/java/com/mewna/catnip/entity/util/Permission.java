@@ -91,7 +91,7 @@ public enum Permission {
         final Set<Permission> perms = EnumSet.noneOf(Permission.class);
         
         for(final Permission p : values()) {
-            if((asLong & p.value) == p.value) {
+            if ((asLong & p.value) == p.value) {
                 perms.add(p);
             }
         }

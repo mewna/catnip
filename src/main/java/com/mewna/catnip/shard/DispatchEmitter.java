@@ -63,10 +63,10 @@ public final class DispatchEmitter {
     }
     
     public void emit(@Nonnull final String type, @Nonnull final Entity payload) {
-        if(!catnip.options().emitEventObjects()) {
+        if (!catnip.options().emitEventObjects()) {
             return;
         }
-        if(catnip.options().disabledEvents().contains(type)) {
+        if (catnip.options().disabledEvents().contains(type)) {
             return;
         }
         try {
@@ -77,11 +77,11 @@ public final class DispatchEmitter {
     }
     
     public void emit(@Nonnull final JsonObject payload) {
-        if(!catnip.options().emitEventObjects()) {
+        if (!catnip.options().emitEventObjects()) {
             return;
         }
         final String type = payload.getString("t");
-        if(catnip.options().disabledEvents().contains(type)) {
+        if (catnip.options().disabledEvents().contains(type)) {
             return;
         }
         try {
@@ -123,7 +123,7 @@ public final class DispatchEmitter {
                 break;
             }
             case Raw.MESSAGE_UPDATE: {
-                if(data.getObject("author", null) == null) {
+                if (data.getObject("author", null) == null) {
                     // Embeds update, emit the special case
                     catnip.dispatchManager().dispatchEvent(Raw.MESSAGE_EMBEDS_UPDATE,
                             entityBuilder.createMessageEmbedUpdate(data));
@@ -194,7 +194,7 @@ public final class DispatchEmitter {
             case Raw.GUILD_CREATE: {
                 final String id = data.getString("id");
                 final Guild guild = entityBuilder.createGuild(data);
-                if(catnip.isUnavailable(id)) {
+                if (catnip.isUnavailable(id)) {
                     catnip.dispatchManager().dispatchEvent(Raw.GUILD_AVAILABLE, guild);
                     ((CatnipImpl) catnip).markAvailable(id);
                 } else {
@@ -210,7 +210,7 @@ public final class DispatchEmitter {
             }
             case Raw.GUILD_DELETE: {
                 final String id = data.getString("id");
-                if(data.getBoolean("unavailable", false)) {
+                if (data.getBoolean("unavailable", false)) {
                     ((CatnipImpl) catnip).markUnavailable(id);
                     catnip.dispatchManager().dispatchEvent(Raw.GUILD_UNAVAILABLE, entityBuilder.createUnavailableGuild(data));
                 } else {
@@ -281,7 +281,7 @@ public final class DispatchEmitter {
             }
             case Raw.PRESENCE_UPDATE: {
                 final PresenceUpdate presence = entityBuilder.createPresenceUpdate(data);
-                if(presence.status() == OnlineStatus.INVISIBLE) {
+                if (presence.status() == OnlineStatus.INVISIBLE) {
                     final JsonObject clone = new JsonObject(payload);
                     // catnip-internal key
                     clone.remove("shard");
@@ -290,9 +290,9 @@ public final class DispatchEmitter {
                             "JSON in your report:\n{}", JsonUtil.encodePrettily(clone));
                 }
                 catnip.cache().user(presence.id()).subscribe(cachedUser -> {
-                    if(cachedUser != null) {
+                    if (cachedUser != null) {
                         final var discrim = Integer.parseInt(cachedUser.discriminator());
-                        if(discrim < 1 || discrim > 9999) {
+                        if (discrim < 1 || discrim > 9999) {
                             final JsonObject clone = new JsonObject(payload);
                             // catnip-internal key
                             clone.remove("shard");
@@ -338,7 +338,7 @@ public final class DispatchEmitter {
     }
     
     private void cacheErrorLog(final String eventType, final Throwable e) {
-        if(catnip.options().logEntityPresenceWarningOnCustomCache()) {
+        if (catnip.options().logEntityPresenceWarningOnCustomCache()) {
             catnip.logAdapter().error("Couldn't fetch previous entity from cache for update event {}:", eventType, e);
         }
     }

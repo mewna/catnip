@@ -159,22 +159,22 @@ public class CachingBuffer extends AbstractBuffer {
             // See https://github.com/discordapp/discord-api-docs/pull/1307#issuecomment-581561519
             final boolean canChunkViaIntents = catnip().options().intents().isEmpty()
                     || catnip().options().intents().contains(GatewayIntent.GUILD_MEMBERS);
-            if(canChunkViaIntents && catnip().options().chunkMembers() && memberCount > catnip().options().largeThreshold()) {
+            if (canChunkViaIntents && catnip().options().chunkMembers() && memberCount > catnip().options().largeThreshold()) {
                 // Actually send the chunking request
                 catnip().chunkMembers(guild);
                 catnip().taskScheduler().setTimer(catnip().options().memberChunkTimeout(), taskId -> {
-                    if(catnip().shardManager().shard(shardId).lifecycleState() != LifecycleState.LOGGED_IN) {
+                    if (catnip().shardManager().shard(shardId).lifecycleState() != LifecycleState.LOGGED_IN) {
                         catnip().logAdapter().warn("Chunk rerequest task {} for disconnected shard {}, cancelling!",
                                 taskId, shardId);
                         return;
                     }
-                    if(bufferState.guildCreateCache().containsKey(guild)) {
+                    if (bufferState.guildCreateCache().containsKey(guild)) {
                         catnip().logAdapter()
                                 .warn("Didn't recv. member chunks for guild {} in time, re-requesting... " +
                                                 "If you see this a lot, you should probably increase the value of " +
                                                 "CatnipOptions#memberChunkTimeout.",
                                         guild);
-                        if(catnip().options().manualChunkRerequesting()) {
+                        if (catnip().options().manualChunkRerequesting()) {
                             emitter().emit(LifecycleEvent.Raw.MEMBER_CHUNK_REREQUEST,
                                     MemberChunkRerequestImpl.builder()
                                             .catnip(catnip())
@@ -184,7 +184,7 @@ public class CachingBuffer extends AbstractBuffer {
                         } else {
                             catnip().chunkMembers(guild);
                             catnip().taskScheduler().setTimer(catnip().options().memberChunkTimeout(), __ -> {
-                                if(bufferState.guildCreateCache.containsKey(guild)) {
+                                if (bufferState.guildCreateCache.containsKey(guild)) {
                                     catnip().logAdapter()
                                             .warn("Didn't recv. member chunks for guild {} after {}ms even " +
                                                             "after retrying! You should probably " +
@@ -202,7 +202,7 @@ public class CachingBuffer extends AbstractBuffer {
                     emitter().emit(event);
                     bufferState.replayGuild(guild);
                     // Replay all buffered events once we run out
-                    if(bufferState.awaitedGuilds().isEmpty()) {
+                    if (bufferState.awaitedGuilds().isEmpty()) {
                         bufferState.replay();
                     }
                 });
@@ -216,15 +216,15 @@ public class CachingBuffer extends AbstractBuffer {
         final int index = payloadData.getInt("chunk_index");
         final int count = payloadData.getInt("chunk_count");
         
-        if(catnip().options().chunkMembers()) {
+        if (catnip().options().chunkMembers()) {
             final String guild = payloadData.getString("guild_id");
             cacheAndDispatch(eventType, bufferState.id(), event);
             // TODO: I assumed this was zero-based and didn't test. I should test it.
-            if(index == count - 1) {
+            if (index == count - 1) {
                 emitter().emit(bufferState.guildCreate(guild));
                 bufferState.replayGuild(guild);
                 // Replay all buffered events once we run out
-                if(bufferState.awaitedGuilds().isEmpty()) {
+                if (bufferState.awaitedGuilds().isEmpty()) {
                     bufferState.replay();
                 }
             }
@@ -236,8 +236,8 @@ public class CachingBuffer extends AbstractBuffer {
         final String eventType = event.getString("t");
         
         final String guildId = payloadData.getString("guild_id", null);
-        if(guildId != null) {
-            if(bufferState.awaitedGuilds().contains(guildId)) {
+        if (guildId != null) {
+            if (bufferState.awaitedGuilds().contains(guildId)) {
                 // If we have a guild id, and we have a guild being awaited,
                 // buffer the event
                 bufferState.receiveGuildEvent(guildId, event);
@@ -255,7 +255,7 @@ public class CachingBuffer extends AbstractBuffer {
     
     private void cacheAndDispatch(final String type, final int id, final JsonObject event) {
         final JsonObject d = event.getObject("d");
-        if(DELETE_EVENTS.contains(type)) {
+        if (DELETE_EVENTS.contains(type)) {
             // TODO: Will this work always?
             emitter().emit(event);
             maybeCache(type, id, d);
@@ -266,7 +266,7 @@ public class CachingBuffer extends AbstractBuffer {
     }
     
     private Completable maybeCache(final String eventType, final int shardId, final JsonObject data) {
-        if(CACHE_EVENTS.contains(eventType)) {
+        if (CACHE_EVENTS.contains(eventType)) {
             try {
                 return catnip().cacheWorker().updateCache(eventType, shardId, data);
             } catch(final Exception e) {
@@ -312,7 +312,7 @@ public class CachingBuffer extends AbstractBuffer {
         void replayGuild(final String id) {
             awaitedGuilds.remove(id);
             guildCreateCache.remove(id);
-            if(guildBuffers.containsKey(id)) {
+            if (guildBuffers.containsKey(id)) {
                 final Deque<JsonObject> queue = guildBuffers.get(id);
                 queue.forEach(e -> cacheAndDispatch(e.getString("t"), this.id, e));
                 guildBuffers.remove(id);
@@ -325,7 +325,7 @@ public class CachingBuffer extends AbstractBuffer {
                 final JsonObject e = buffer.pop();
                 cacheAndDispatch(e.getString("t"), id, e);
             }
-            if(buffers.values().stream().allMatch(e -> e.buffer.isEmpty())) {
+            if (buffers.values().stream().allMatch(e -> e.buffer.isEmpty())) {
                 // If all buffers are empty, emit an event saying as much
                 emitter().emit(LifecycleEvent.Raw.CHUNKING_DONE, ChunkingDoneImpl.builder().catnip(catnip()).build());
             }

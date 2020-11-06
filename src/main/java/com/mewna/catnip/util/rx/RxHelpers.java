@@ -57,7 +57,7 @@ public final class RxHelpers {
     public static <T> Observable<T> futureToObservable(final CompletableFuture<T> future) {
         return Observable.create(subscriber ->
                 future.whenComplete((result, error) -> {
-                    if(error != null) {
+                    if (error != null) {
                         subscriber.onError(error);
                     } else {
                         subscriber.onNext(result);
@@ -73,7 +73,7 @@ public final class RxHelpers {
     }
     
     public static <T> Maybe<T> nullableToMaybe(@Nullable final T nullable) {
-        if(nullable == null) {
+        if (nullable == null) {
             return Maybe.empty();
         } else {
             return Maybe.just(nullable);

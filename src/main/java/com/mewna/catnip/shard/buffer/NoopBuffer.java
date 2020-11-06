@@ -45,7 +45,7 @@ public class NoopBuffer extends AbstractBuffer {
     
     @Override
     public void buffer(final JsonObject event) {
-        if(!chunkingDoneEmitted) {
+        if (!chunkingDoneEmitted) {
             chunkingDoneEmitted = true;
             emitter().emit(Raw.CHUNKING_DONE, ChunkingDoneImpl.builder().catnip(catnip()).build());
         }

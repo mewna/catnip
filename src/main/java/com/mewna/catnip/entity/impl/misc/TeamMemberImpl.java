@@ -68,7 +68,7 @@ public class TeamMemberImpl implements TeamMember, RequiresCatnip {
     
     @Override
     public boolean equals(final Object obj) {
-        if(obj instanceof TeamMember) {
+        if (obj instanceof TeamMember) {
             final TeamMember member = (TeamMember) obj;
             return member.teamIdAsLong() == teamIdAsLong && member.user().idAsLong() == user.idAsLong();
         }

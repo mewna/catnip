@@ -65,9 +65,9 @@ public class PresenceBuilder {
      */
     public PresenceBuilder(final Presence presence) {
         status = presence.status();
-        if(!presence.activities().isEmpty()) {
+        if (!presence.activities().isEmpty()) {
             final Activity activity = presence.activities().get(0);
-            if(activity != null) {
+            if (activity != null) {
                 type = activity.type();
                 name = activity.name();
                 url = activity.url();

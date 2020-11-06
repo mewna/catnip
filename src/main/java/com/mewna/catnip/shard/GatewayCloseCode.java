@@ -72,7 +72,7 @@ public enum GatewayCloseCode {
     
     public static GatewayCloseCode byId(@Nonnegative final int id) {
         for(final GatewayCloseCode value : values()) {
-            if(value.code == id) {
+            if (value.code == id) {
                 return value;
             }
         }

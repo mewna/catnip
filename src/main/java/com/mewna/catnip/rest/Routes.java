@@ -197,7 +197,7 @@ public final class Routes {
         @Nonnull
         @CheckReturnValue
         public Route withMajorParam(@Nonnull final String value) {
-            if(majorParam == null) {
+            if (majorParam == null) {
                 throw new IllegalStateException("This route takes no major params!");
             }
             final String majorParamString = ':' + majorParam;
@@ -208,7 +208,7 @@ public final class Routes {
         @Nonnull
         @CheckReturnValue
         public Route compile(@Nonnull final String param, @Nonnull final String value) {
-            if(param.equalsIgnoreCase(majorParam)) {
+            if (param.equalsIgnoreCase(majorParam)) {
                 return this;
             }
             return new Route(method, baseRoute.replace(':' + param, value), majorParam, ratelimitKey, requiresMsPrecision);
@@ -231,7 +231,7 @@ public final class Routes {
         
         @Override
         public boolean equals(final Object o) {
-            if(!(o instanceof Route)) {
+            if (!(o instanceof Route)) {
                 return false;
             }
             return baseRoute.equalsIgnoreCase(((Route) o).baseRoute);

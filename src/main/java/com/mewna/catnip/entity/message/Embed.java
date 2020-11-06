@@ -178,7 +178,7 @@ public interface Embed {
         @CheckReturnValue
         public static EmbedType byKey(@Nonnull final String key) {
             for(final EmbedType type : values()) {
-                if(type.key.equals(key)) {
+                if (type.key.equals(key)) {
                     return type;
                 }
             }

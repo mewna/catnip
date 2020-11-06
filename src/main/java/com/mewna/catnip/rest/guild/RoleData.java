@@ -64,7 +64,7 @@ public class RoleData implements JsonConvertible {
     @Nonnull
     @CheckReturnValue
     public static RoleData create(@Nonnegative final int id) {
-        if(id == 0) {
+        if (id == 0) {
             return new PublicRoleData();
         }
         return new RoleData(id);
@@ -133,25 +133,25 @@ public class RoleData implements JsonConvertible {
     @CheckReturnValue
     public JsonObject toJson() {
         final JsonObject object = new JsonObject();
-        if(id >= 0) {
+        if (id >= 0) {
             object.put("id", Integer.toString(id));
         }
-        if(permissions != null) {
+        if (permissions != null) {
             object.put("permissions", permissions);
         }
-        if(name != null) {
+        if (name != null) {
             object.put("name", name);
         }
-        if(color != null) {
+        if (color != null) {
             object.put("color", color & 0xFFFFFF);
         }
-        if(position != null) {
+        if (position != null) {
             object.put("position", position);
         }
-        if(mentionable != null) {
+        if (mentionable != null) {
             object.put("mentionable", mentionable);
         }
-        if(hoisted != null) {
+        if (hoisted != null) {
             object.put("hoisted", hoisted);
         }
         return object;

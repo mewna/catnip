@@ -41,7 +41,7 @@ public enum ImageType {
     @CheckReturnValue
     public static ImageType fromExtension(@Nonnull final String extension) {
         for(final ImageType type : values()) {
-            if(type.fileExtension().equalsIgnoreCase(extension)) {
+            if (type.fileExtension().equalsIgnoreCase(extension)) {
                 return type;
             }
         }

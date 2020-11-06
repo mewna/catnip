@@ -65,7 +65,7 @@ public interface DeletedMessage extends GuildEntity, Snowflake {
     @CheckReturnValue
     default Maybe<MessageChannel> channel() {
         final long guild = guildIdAsLong();
-        if(guild != 0) {
+        if (guild != 0) {
             return catnip().cache().channel(guild, channelIdAsLong()).map(Channel::asMessageChannel);
         } else {
             return catnip().rest().channel().getChannelById(channelId()).map(Channel::asMessageChannel).toMaybe();

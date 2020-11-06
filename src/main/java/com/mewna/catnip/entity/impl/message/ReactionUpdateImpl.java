@@ -57,7 +57,7 @@ public class ReactionUpdateImpl implements ReactionUpdate, RequiresCatnip {
     
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
-        if(emoji instanceof RequiresCatnip) {
+        if (emoji instanceof RequiresCatnip) {
             ((RequiresCatnip) emoji).catnip(catnip);
         }
     }

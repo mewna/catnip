@@ -59,13 +59,13 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     default Single<Message> sendMessage(@Nonnull final String content) {
-        if(isGuild()) {
+        if (isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.SEND_MESSAGES);
         }
         final Single<Message> future = catnip().rest().channel().createMessage(id(), content);
         // Inject guild manually because Discord does not send it in response
-        if(isGuild()) {
+        if (isGuild()) {
             return future.map(msg -> ((MessageImpl) msg).guildIdAsLong(asGuildChannel().guildIdAsLong()));
         }
         return future;
@@ -80,7 +80,7 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     default Single<Message> sendMessage(@Nonnull final Embed embed) {
-        if(isGuild()) {
+        if (isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.SEND_MESSAGES, Permission.EMBED_LINKS);
         }
@@ -96,8 +96,8 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     default Single<Message> sendMessage(@Nonnull final Message message) {
-        if(isGuild()) {
-            if(!message.embeds().isEmpty()) {
+        if (isGuild()) {
+            if (!message.embeds().isEmpty()) {
                 PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                         Permission.SEND_MESSAGES, Permission.EMBED_LINKS);
             } else {
@@ -117,9 +117,9 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     default Single<Message> sendMessage(@Nonnull final MessageOptions options) {
-        if(isGuild()) {
-            if(options.hasFiles()) {
-                if(options.embed() != null) {
+        if (isGuild()) {
+            if (options.hasFiles()) {
+                if (options.embed() != null) {
                     PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                             Permission.SEND_MESSAGES, Permission.ATTACH_FILES, Permission.EMBED_LINKS);
                 } else {
@@ -127,7 +127,7 @@ public interface MessageChannel extends Channel {
                             Permission.SEND_MESSAGES, Permission.ATTACH_FILES);
                 }
             } else {
-                if(options.embed() != null) {
+                if (options.embed() != null) {
                     PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                             Permission.SEND_MESSAGES, Permission.EMBED_LINKS);
                 } else {
@@ -216,7 +216,7 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     default Completable addReaction(@Nonnull final String messageId, @Nonnull final String emoji) {
-        if(isGuild()) {
+        if (isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.ADD_REACTIONS, Permission.READ_MESSAGE_HISTORY);
         }
@@ -233,7 +233,7 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     default Completable addReaction(@Nonnull final String messageId, @Nonnull final Emoji emoji) {
-        if(isGuild()) {
+        if (isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.ADD_REACTIONS, Permission.READ_MESSAGE_HISTORY);
         }
@@ -278,7 +278,7 @@ public interface MessageChannel extends Channel {
     @Nonnull
     default Completable deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId,
                                            @Nonnull final String emoji) {
-        if(isGuild()) {
+        if (isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.MANAGE_MESSAGES);
         }
@@ -297,7 +297,7 @@ public interface MessageChannel extends Channel {
     @Nonnull
     default Completable deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId,
                                            @Nonnull final Emoji emoji) {
-        if(isGuild()) {
+        if (isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.MANAGE_MESSAGES);
         }
@@ -313,7 +313,7 @@ public interface MessageChannel extends Channel {
      */
     @Nonnull
     default Completable bulkRemoveReaction(@Nonnull final String messageId) {
-        if(isGuild()) {
+        if (isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.MANAGE_MESSAGES);
         }
@@ -342,7 +342,7 @@ public interface MessageChannel extends Channel {
     @Nonnull
     @CheckReturnValue
     default Single<Message> fetchMessage(@Nonnull final String messageId) {
-        if(isGuild()) {
+        if (isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.READ_MESSAGE_HISTORY);
         }
@@ -357,7 +357,7 @@ public interface MessageChannel extends Channel {
     @Nonnull
     @CheckReturnValue
     default MessagePaginator fetchMessages() {
-        if(isGuild()) {
+        if (isGuild()) {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.READ_MESSAGE_HISTORY);
         }

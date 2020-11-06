@@ -162,7 +162,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
     @CheckReturnValue
     default String afkChannelId() {
         final long id = afkChannelIdAsLong();
-        if(id == 0) {
+        if (id == 0) {
             return null;
         }
         return Long.toUnsignedString(id);
@@ -223,7 +223,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
     @CheckReturnValue
     default String applicationId() {
         final long id = applicationIdAsLong();
-        if(id == 0) {
+        if (id == 0) {
             return null;
         }
         return Long.toUnsignedString(id);
@@ -248,7 +248,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
     @CheckReturnValue
     default String widgetChannelId() {
         final long id = widgetChannelIdAsLong();
-        if(id == 0) {
+        if (id == 0) {
             return null;
         }
         return Long.toUnsignedString(id);
@@ -268,7 +268,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
     @CheckReturnValue
     default String systemChannelId() {
         final long id = systemChannelIdAsLong();
-        if(id == 0) {
+        if (id == 0) {
             return null;
         }
         return Long.toUnsignedString(id);
@@ -873,7 +873,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
                 catnip().cache()
                         .member(id(), userId)
                         .map(member -> {
-                            if(member == null) {
+                            if (member == null) {
                                 return Maybe.error(new NullPointerException("No member in " + id() + " with id " + userId));
                             } else {
                                 PermissionUtil.checkPermissions(catnip(), id(), Permission.BAN_MEMBERS);
@@ -1041,7 +1041,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
         return Completable.fromMaybe(
                 catnip().cache().member(id(), userId)
                         .map(member -> {
-                            if(member == null) {
+                            if (member == null) {
                                 return Maybe.error(new NullPointerException("No such member in " + id() + " with id " + userId));
                             } else {
                                 PermissionUtil.checkPermissions(catnip(), id(), Permission.KICK_MEMBERS);
@@ -1138,7 +1138,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      */
     @Nonnull
     default Single<String> changeNickName(@Nonnull final String nickname, @Nullable final String reason) {
-        if(nickname.length() > NICKNAME_MAX_LENGTH) {
+        if (nickname.length() > NICKNAME_MAX_LENGTH) {
             throw new IllegalArgumentException("Nickname must not be longer than" + NICKNAME_MAX_LENGTH);
         }
         PermissionUtil.checkPermissions(catnip(), id(), Permission.CHANGE_NICKNAME);
@@ -1251,7 +1251,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
         @Nonnull
         public static NotificationLevel byKey(final int key) {
             for(final NotificationLevel level : values()) {
-                if(level.key == key) {
+                if (level.key == key) {
                     return level;
                 }
             }
@@ -1286,7 +1286,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
         @Nonnull
         public static ContentFilterLevel byKey(final int key) {
             for(final ContentFilterLevel level : values()) {
-                if(level.key == key) {
+                if (level.key == key) {
                     return level;
                 }
             }
@@ -1317,7 +1317,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
         @Nonnull
         public static MFALevel byKey(final int key) {
             for(final MFALevel level : values()) {
-                if(level.key == key) {
+                if (level.key == key) {
                     return level;
                 }
             }
@@ -1361,7 +1361,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
         @Nonnull
         public static VerificationLevel byKey(final int key) {
             for(final VerificationLevel level : values()) {
-                if(level.key == key) {
+                if (level.key == key) {
                     return level;
                 }
             }
@@ -1389,7 +1389,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
         @Nonnull
         public static PremiumTier byKey(final int key) {
             for(final PremiumTier tier : values()) {
-                if(tier.key == key) {
+                if (tier.key == key) {
                     return tier;
                 }
             }
@@ -1425,7 +1425,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
         
         @Nonnull
         public GuildEditFields icon(@Nullable final URI iconData) {
-            if(iconData != null) {
+            if (iconData != null) {
                 Utils.validateImageUri(iconData);
             }
             icon = iconData;
@@ -1439,7 +1439,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
         
         @Nonnull
         public GuildEditFields splash(@Nullable final URI splashData) {
-            if(splashData != null) {
+            if (splashData != null) {
                 Utils.validateImageUri(splashData);
             }
             splash = splashData;
@@ -1453,7 +1453,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
         
         @Nonnull
         public Single<Guild> submit() {
-            if(guild == null) {
+            if (guild == null) {
                 throw new IllegalStateException("Cannot submit edit without a guild object! Please use RestGuild directly instead");
             }
             return guild.catnip().rest().guild().modifyGuild(guild.id(), this);
@@ -1463,37 +1463,37 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
         @CheckReturnValue
         public JsonObject payload() {
             final JsonObject payload = new JsonObject();
-            if(name != null && (guild == null || !Objects.equals(name, guild.name()))) {
+            if (name != null && (guild == null || !Objects.equals(name, guild.name()))) {
                 payload.put("name", name);
             }
-            if(region != null && (guild == null || !Objects.equals(region, guild.region()))) {
+            if (region != null && (guild == null || !Objects.equals(region, guild.region()))) {
                 payload.put("region", region);
             }
-            if(verificationLevel != null && (guild == null || verificationLevel != guild.verificationLevel())) {
+            if (verificationLevel != null && (guild == null || verificationLevel != guild.verificationLevel())) {
                 payload.put("verification_level", verificationLevel.key());
             }
-            if(defaultMessageNotifications != null && (guild == null || defaultMessageNotifications != guild.defaultMessageNotifications())) {
+            if (defaultMessageNotifications != null && (guild == null || defaultMessageNotifications != guild.defaultMessageNotifications())) {
                 payload.put("default_message_notifications", defaultMessageNotifications.key());
             }
-            if(explicitContentFilter != null && (guild == null || explicitContentFilter != guild.explicitContentFilter())) {
+            if (explicitContentFilter != null && (guild == null || explicitContentFilter != guild.explicitContentFilter())) {
                 payload.put("explicit_content_filter", explicitContentFilter.key());
             }
-            if(afkChannelId != null && (guild == null || !Objects.equals(afkChannelId, guild.afkChannelId()))) {
+            if (afkChannelId != null && (guild == null || !Objects.equals(afkChannelId, guild.afkChannelId()))) {
                 payload.put("afk_channel_id", afkChannelId);
             }
-            if(afkTimeout != null && (guild == null || !Objects.equals(afkTimeout, guild.afkTimeout()))) {
+            if (afkTimeout != null && (guild == null || !Objects.equals(afkTimeout, guild.afkTimeout()))) {
                 payload.put("afk_timeout", afkTimeout);
             }
-            if(icon != null) {
+            if (icon != null) {
                 payload.put("icon", icon.toString());
             }
-            if(ownerId != null && (guild == null || !Objects.equals(ownerId, guild.ownerId()))) {
+            if (ownerId != null && (guild == null || !Objects.equals(ownerId, guild.ownerId()))) {
                 payload.put("owner_id", ownerId);
             }
-            if(splash != null) {
+            if (splash != null) {
                 payload.put("splash", splash.toString());
             }
-            if(systemChannelId != null && (guild == null || !Objects.equals(systemChannelId, guild.systemChannelId()))) {
+            if (systemChannelId != null && (guild == null || !Objects.equals(systemChannelId, guild.systemChannelId()))) {
                 payload.put("system_channel_id", systemChannelId);
             }
             return payload;

@@ -63,7 +63,7 @@ public interface TypingUser extends Snowflake {
     @CheckReturnValue
     default String guildId() {
         final long id = guildIdAsLong();
-        if(id == 0) {
+        if (id == 0) {
             return null;
         }
         return Long.toUnsignedString(id);

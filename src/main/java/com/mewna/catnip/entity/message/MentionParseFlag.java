@@ -26,7 +26,7 @@ public enum MentionParseFlag {
     @CheckReturnValue
     public static MentionParseFlag byName(final String flagName) {
         for(final MentionParseFlag m : values()) {
-            if(m.flagName.equals(flagName)) {
+            if (m.flagName.equals(flagName)) {
                 return m;
             }
         }

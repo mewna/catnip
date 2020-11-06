@@ -59,7 +59,7 @@ public class DefaultSessionManager implements SessionManager {
     
     @Override
     public int seqnum(@Nonnegative final int shardId) {
-        if(!seqnums.containsKey(shardId)) {
+        if (!seqnums.containsKey(shardId)) {
             seqnums.put(shardId, 0);
         }
         return seqnums.get(shardId);

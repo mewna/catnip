@@ -142,7 +142,7 @@ public interface Presence {
         @Nonnull
         public static ActivityType byId(@Nonnegative final int id) {
             for(final ActivityType type : values()) {
-                if(type.id == id) {
+                if (type.id == id) {
                     return type;
                 }
             }
@@ -172,7 +172,7 @@ public interface Presence {
         public static Set<ActivityFlag> fromInt(final int flags) {
             final Set<ActivityFlag> set = EnumSet.noneOf(ActivityFlag.class);
             for(final ActivityFlag flag : values()) {
-                if((flags & flag.bits) == flag.bits) {
+                if ((flags & flag.bits) == flag.bits) {
                     set.add(flag);
                 }
             }
@@ -224,14 +224,14 @@ public interface Presence {
         @Nonnull
         @CheckReturnValue
         static Activity of(@Nonnull final String name, @Nonnull final ActivityType type, @Nullable final String url) {
-            if(url == null && type == ActivityType.STREAMING) {
+            if (url == null && type == ActivityType.STREAMING) {
                 throw new IllegalArgumentException("A non-null twitch.tv or youtube.com URL must be specified when the ActivityType == STREAMING!");
             }
-            if(url != null && type != ActivityType.STREAMING) {
+            if (url != null && type != ActivityType.STREAMING) {
                 throw new IllegalArgumentException("You can only specify an URL when the ActivityType == STREAMING!");
             }
-            if(type == ActivityType.STREAMING) {
-                if(!url.startsWith("https://youtube.com/") && !url.startsWith("https://twitch.tv/")) {
+            if (type == ActivityType.STREAMING) {
+                if (!url.startsWith("https://youtube.com/") && !url.startsWith("https://twitch.tv/")) {
                     throw new IllegalArgumentException("A valid twitch.tv or youtube.com URL must be specified when the ActivityType == STREAMING!");
                 }
             }
@@ -260,7 +260,7 @@ public interface Presence {
         @Nullable
         default String applicationId() {
             final long id = applicationIdAsLong();
-            if(id == 0) {
+            if (id == 0) {
                 return null;
             }
             return Long.toUnsignedString(id);

@@ -61,7 +61,7 @@ public class SerialRequester extends AbstractRequester {
         @Override
         public synchronized void queueRequest(@Nonnull final QueuedRequest request) {
             queue.offer(request);
-            if(!executingRequest) {
+            if (!executingRequest) {
                 executingRequest = true;
                 submit();
             }
@@ -70,7 +70,7 @@ public class SerialRequester extends AbstractRequester {
         @Override
         public synchronized void failedRequest(@Nonnull final QueuedRequest request, @Nonnull final Throwable failureCause) {
             request.failed();
-            if(request.shouldRetry()) {
+            if (request.shouldRetry()) {
                 queue.addFirst(request);
                 submit();
             } else {
@@ -83,7 +83,7 @@ public class SerialRequester extends AbstractRequester {
         @Override
         public synchronized void requestDone() {
             final boolean hadItems = !queue.isEmpty();
-            if(hadItems) {
+            if (hadItems) {
                 submit();
             }
             executingRequest = hadItems;
@@ -91,7 +91,7 @@ public class SerialRequester extends AbstractRequester {
         
         private void submit() {
             final QueuedRequest request = queue.poll();
-            if(request == null) {
+            if (request == null) {
                 throw new AssertionError("this should never happen");
             }
             //noinspection ResultOfMethodCallIgnored

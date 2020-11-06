@@ -110,16 +110,16 @@ public class CatnipImpl implements Catnip {
     }
     
     private void sanityCheckOptions(@Nonnull final CatnipOptions options) {
-        if(options.largeThreshold() > 250 || options.largeThreshold() < 50) {
+        if (options.largeThreshold() > 250 || options.largeThreshold() < 50) {
             throw new IllegalArgumentException("Large threshold of " + options.largeThreshold() + " not between 50 and 250!");
         }
-        if(options.highLatencyThreshold() < 0) {
+        if (options.highLatencyThreshold() < 0) {
             throw new IllegalArgumentException("High latency threshold of " + options.highLatencyThreshold() + " not greater than zero!");
         }
-        if(options.apiVersion() < 8) {
+        if (options.apiVersion() < 8) {
             throw new IllegalArgumentException("Minimum required API version is v8!");
         }
-        if(options.intents().isEmpty()) {
+        if (options.intents().isEmpty()) {
             throw new IllegalArgumentException("Intents are required, but you didn't provide any! Are you *sure* you want a bot that can't do anything?");
         }
     }
@@ -127,14 +127,14 @@ public class CatnipImpl implements Catnip {
     @Nonnull
     @Override
     public Catnip injectOptions(@Nonnull final Extension extension, @Nonnull final UnaryOperator<CatnipOptions> optionsPatcher) {
-        if(!extensionManager.matchingExtensions(extension.getClass()).isEmpty()) {
+        if (!extensionManager.matchingExtensions(extension.getClass()).isEmpty()) {
             final CatnipOptions patchedOptions = optionsPatcher.apply((CatnipOptions) options.clone());
             final Map<String, Pair<Object, Object>> diff = diff(patchedOptions);
-            if(!diff.isEmpty()) {
+            if (!diff.isEmpty()) {
                 sanityCheckOptions(patchedOptions);
                 options = patchedOptions;
                 injectSelf();
-                if(logExtensionOverrides) {
+                if (logExtensionOverrides) {
                     diff.forEach((name, patch) -> logAdapter().info("Extension {} updated {} from \"{}\" to \"{}\".",
                             extension.name(), name, patch.getLeft(), patch.getRight()));
                 }
@@ -155,12 +155,12 @@ public class CatnipImpl implements Catnip {
         for(final Field field : patch.getClass().getDeclaredFields()) {
             // Don't compare certain because there's no point; they only get
             // checked / set once at startup and never again.
-            if(!UNPATCHABLE_OPTIONS.contains(field.getName())) {
+            if (!UNPATCHABLE_OPTIONS.contains(field.getName())) {
                 try {
                     field.setAccessible(true);
                     final Object input = field.get(patch);
                     final Object original = field.get(options);
-                    if(!Objects.equals(original, input)) {
+                    if (!Objects.equals(original, input)) {
                         diff.put(field.getName(), ImmutablePair.of(original, input));
                     }
                 } catch(final IllegalAccessException e) {
@@ -288,7 +288,7 @@ public class CatnipImpl implements Catnip {
     @Override
     public void presence(@Nonnull final Presence presence) {
         int shardCount = shardManager().shardCount();
-        if(shardCount == 0) {
+        if (shardCount == 0) {
             shardCount = 1;
         }
         for(int i = 0; i < shardCount; i++) {
@@ -307,7 +307,7 @@ public class CatnipImpl implements Catnip {
         //noinspection ResultOfMethodCallIgnored
         selfUser()
                 .flatMap(self -> {
-                    if(self != null && status == null) {
+                    if (self != null && status == null) {
                         return cache()
                                 .presence(self.id())
                                 .map(presence -> presence == null ? OnlineStatus.ONLINE : presence.status());
@@ -334,11 +334,11 @@ public class CatnipImpl implements Catnip {
     
     @Nonnull
     public Single<Catnip> setup() {
-        if(!startedKeepalive) {
+        if (!startedKeepalive) {
             startedKeepalive = true;
             keepaliveThread.start();
         }
-        if(validateToken) {
+        if (validateToken) {
             return fetchGatewayInfo()
                     .map(gateway -> {
                         logAdapter().info("Token validated!");
@@ -350,7 +350,7 @@ public class CatnipImpl implements Catnip {
                         throw new RuntimeException(e);
                     });
         } else {
-            if(!token.isEmpty()) {
+            if (!token.isEmpty()) {
                 try {
                     clientIdAsLong = Catnip.parseIdFromToken(token);
                 } catch(final IllegalArgumentException e) {
@@ -375,11 +375,11 @@ public class CatnipImpl implements Catnip {
                 .stream()
                 .filter(GatewayIntent::privileged)
                 .collect(Collectors.toList());
-        if(!options.enableGuildSubscriptions() && options.intents().isEmpty()) {
+        if (!options.enableGuildSubscriptions() && options.intents().isEmpty()) {
             logAdapter().warn("Guild subscriptions are disabled and no intents specified!");
             logAdapter().warn("You probably want to use intents instead.");
         }
-        if(!privilegedIntents.isEmpty() && options.logPrivilegedIntentWarning()) {
+        if (!privilegedIntents.isEmpty() && options.logPrivilegedIntentWarning()) {
             // TODO: Check application flags to make sure this is actually a
             //  necessary log -- requires REST request.
             logAdapter().warn("catnip is configured with the following privileged intents: {}", privilegedIntents);
@@ -409,7 +409,7 @@ public class CatnipImpl implements Catnip {
     public Single<GatewayInfo> fetchGatewayInfo() {
         return rest.user().getGatewayBot()
                 .map(g -> {
-                    if(g.valid()) {
+                    if (g.valid()) {
                         gatewayInfo.set(g);
                         return g;
                     } else {

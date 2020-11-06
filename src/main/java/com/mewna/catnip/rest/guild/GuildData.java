@@ -79,7 +79,7 @@ public class GuildData implements JsonConvertible {
     @Nonnull
     public GuildData name(final String name) {
         final String trimmed = name.trim();
-        if(trimmed.length() < 2 || trimmed.length() > 100) {
+        if (trimmed.length() < 2 || trimmed.length() > 100) {
             throw new IllegalArgumentException("Name must have 2-100 characters");
         }
         this.name = trimmed;
@@ -123,7 +123,7 @@ public class GuildData implements JsonConvertible {
     
     @Nonnull
     public GuildData removeRole(@Nonnull final RoleData role) {
-        if(role.publicRole()) {
+        if (role.publicRole()) {
             throw new IllegalArgumentException("Cannot remove public role");
         }
         roles.remove(role);
@@ -132,7 +132,7 @@ public class GuildData implements JsonConvertible {
     
     @Nonnull
     public GuildData removeRole(@Nonnegative final int id) {
-        if(id == 0) {
+        if (id == 0) {
             throw new IllegalArgumentException("Cannot remove public role");
         }
         roles.remove(id);
@@ -200,33 +200,33 @@ public class GuildData implements JsonConvertible {
     public JsonObject toJson() {
         final JsonObject object = new JsonObject();
         object.put("name", name);
-        if(!channels.isEmpty()) {
+        if (!channels.isEmpty()) {
             final JsonArray array = new JsonArray();
             for(final ChannelData data : channels) {
                 array.add(data.toJson());
             }
             object.put("channels", array);
         }
-        if(!roles.isEmpty()) {
+        if (!roles.isEmpty()) {
             final JsonArray array = new JsonArray();
             for(final RoleData data : roles) {
                 array.add(data.toJson());
             }
             object.put("roles", array);
         }
-        if(region != null) {
+        if (region != null) {
             object.put("region", region);
         }
-        if(base64Icon != null) {
+        if (base64Icon != null) {
             object.put("icon", base64Icon);
         }
-        if(verificationLevel != null) {
+        if (verificationLevel != null) {
             object.put("verification_level", verificationLevel.key());
         }
-        if(defaultNotificationLevel != null) {
+        if (defaultNotificationLevel != null) {
             object.put("default_message_notifications", defaultNotificationLevel.key());
         }
-        if(explicitContentFilter != null) {
+        if (explicitContentFilter != null) {
             object.put("explicit_content_filter", explicitContentFilter.key());
         }
         return object;

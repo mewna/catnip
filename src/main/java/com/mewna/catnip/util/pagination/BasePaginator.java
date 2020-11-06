@@ -99,7 +99,7 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
      * @return {@code this}, for chaining calls.
      */
     public P requestSize(@Nonnegative final int requestSize) {
-        if(requestSize > maxRequestSize) {
+        if (requestSize > maxRequestSize) {
             throw new IllegalArgumentException("Request size (" + requestSize +
                     ") greater than maximum request size (" + maxRequestSize + ')');
         }
@@ -178,7 +178,7 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
             // FIXME: This should be non-blocking
             update(state, data.blockingFirst());
             final T last = state.last();
-            if(state.done() || remaining - fetchCount != state.remaining() || last == null) {
+            if (state.done() || remaining - fetchCount != state.remaining() || last == null) {
                 return RxHelpers.futureToObservable(CompletableFuture.completedFuture(VoidHelper.VOID));
             }
             return fetch(idOf.apply(last), state);
@@ -208,7 +208,7 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
         }
         
         public void update(@Nonnull final T entity) {
-            if(done()) {
+            if (done()) {
                 return;
             }
             callbackDone = !callback.accept(entity);

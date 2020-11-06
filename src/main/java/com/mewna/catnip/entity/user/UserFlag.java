@@ -66,7 +66,7 @@ public enum UserFlag {
         final Set<UserFlag> flags = EnumSet.noneOf(UserFlag.class);
         
         for(final UserFlag flag : values()) {
-            if((asLong & flag.value) == flag.value) {
+            if ((asLong & flag.value) == flag.value) {
                 flags.add(flag);
             }
         }

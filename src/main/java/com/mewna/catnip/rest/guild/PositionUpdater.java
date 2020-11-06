@@ -64,7 +64,7 @@ public class PositionUpdater {
     @Nonnull
     @CheckReturnValue
     public PositionUpdater position(@Nonnegative final int position) {
-        if(entityId == null) {
+        if (entityId == null) {
             throw new IllegalStateException("No entity selected!");
         }
         positions.put(entityId, position);
@@ -74,12 +74,12 @@ public class PositionUpdater {
     @Nonnull
     @CheckReturnValue
     public PositionUpdater increment() {
-        if(entityId == null) {
+        if (entityId == null) {
             throw new IllegalStateException("No entity selected");
         }
         // not using computeIfAbsent because extra write needed otherwise
         final Integer old = positions.get(entityId);
-        if(old == null) {
+        if (old == null) {
             positions.put(entityId, positions.size() - 1);
             return this;
         }
@@ -90,11 +90,11 @@ public class PositionUpdater {
     @Nonnull
     @CheckReturnValue
     public PositionUpdater decrement() {
-        if(entityId == null) {
+        if (entityId == null) {
             throw new IllegalStateException("No entity selected!");
         }
         final Integer old = positions.get(entityId);
-        if(old == null) {
+        if (old == null) {
             positions.put(entityId, positions.size() - 1);
             return this;
         }

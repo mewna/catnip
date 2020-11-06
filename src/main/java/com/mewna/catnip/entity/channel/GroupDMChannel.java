@@ -78,7 +78,7 @@ public interface GroupDMChannel extends DMChannel {
     @CheckReturnValue
     default String applicationId() {
         final long id = applicationIdAsLong();
-        if(id == 0) {
+        if (id == 0) {
             return null;
         }
         return Long.toUnsignedString(id);

@@ -128,7 +128,7 @@ public interface Member extends Mentionable, Permissable {
         final List<Role> ordered = new ArrayList<>(roleIds().size());
         for(final String id : roleIds()) {
             final Role role = roles.getById(id);
-            if(role != null) {
+            if (role != null) {
                 ordered.add(role);
             }
         }
@@ -208,8 +208,8 @@ public interface Member extends Mentionable, Permissable {
         final CacheView<Role> cache = catnip().cache().roles(guildId());
         for(final String id : roleIds()) {
             final Role role = cache.getById(id);
-            if(role != null && role.color() != 0) {
-                if(highest == null || role.compareTo(highest) > 0) {
+            if (role != null && role.color() != 0) {
+                if (highest == null || role.compareTo(highest) > 0) {
                     highest = role;
                 }
             }

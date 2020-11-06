@@ -58,7 +58,7 @@ public class PartialMemberImpl implements PartialMember, RequiresCatnip {
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
-        if(user instanceof RequiresCatnip) {
+        if (user instanceof RequiresCatnip) {
             ((RequiresCatnip) user).catnip(catnip);
         }
     }

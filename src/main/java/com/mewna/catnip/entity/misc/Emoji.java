@@ -192,7 +192,7 @@ public interface Emoji extends Snowflake, NullNameable {
         @CheckReturnValue
         default Maybe<Guild> guild() {
             final long id = guildIdAsLong();
-            if(id == 0) {
+            if (id == 0) {
                 return Maybe.empty();
             }
             return catnip().cache().guild(guildIdAsLong());
@@ -210,7 +210,7 @@ public interface Emoji extends Snowflake, NullNameable {
         @CheckReturnValue
         default String guildId() {
             final long id = guildIdAsLong();
-            if(id == 0) {
+            if (id == 0) {
                 return null;
             }
             return Long.toUnsignedString(id);

@@ -185,32 +185,32 @@ public class RestWebhook extends RestHandler {
         
         final var builder = JsonObject.builder();
         
-        if(options.content() != null && !options.content().isEmpty()) {
+        if (options.content() != null && !options.content().isEmpty()) {
             builder.value("content", options.content());
         }
-        if(options.embed() != null) {
+        if (options.embed() != null) {
             builder.array("embeds").value(entityBuilder().embedToJson(options.embed())).end();
         }
-        if(username != null && !username.isEmpty()) {
+        if (username != null && !username.isEmpty()) {
             builder.value("username", username);
         }
-        if(avatarUrl != null && !avatarUrl.isEmpty()) {
+        if (avatarUrl != null && !avatarUrl.isEmpty()) {
             builder.value("avatar_url", avatarUrl);
         }
     
         final JsonObject body = builder.done();
     
-        if(body.get("embeds") == null && body.get("content") == null
+        if (body.get("embeds") == null && body.get("content") == null
                 && !options.hasFiles()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
         }
-        if(!options.flags().isEmpty() || options.override()) {
+        if (!options.flags().isEmpty() || options.override()) {
             builder.value("flags", MessageFlag.fromSettable(options.flags()));
         }
         final JsonObject allowedMentions = new JsonObject();
-        if(options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
+        if (options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
             final EnumSet<MentionParseFlag> parse = options.parseFlags();
-            if(parse == null) {
+            if (parse == null) {
                 // These act like a whitelist regardless of parse being present.
                 allowedMentions.put("users", options.mentionedUsers());
                 allowedMentions.put("roles", options.mentionedRoles());
@@ -221,18 +221,18 @@ public class RestWebhook extends RestHandler {
                 }
                 allowedMentions.put("parse", parseList);
                 //If either list is present along with the respective parse option, validation fails. The contains check avoids this.
-                if(!parse.contains(MentionParseFlag.USERS)) {
+                if (!parse.contains(MentionParseFlag.USERS)) {
                     allowedMentions.put("users", options.mentionedUsers());
                 }
-                if(!parse.contains(MentionParseFlag.ROLES)) {
+                if (!parse.contains(MentionParseFlag.ROLES)) {
                     allowedMentions.put("roles", options.mentionedRoles());
                 }
             }
         }
-        if(options.reference() != null) {
+        if (options.reference() != null) {
             allowedMentions.put("replied_user", options.pingReply());
         }
-        if(!allowedMentions.isEmpty()) {
+        if (!allowedMentions.isEmpty()) {
             builder.value("allowed_mentions", allowedMentions);
         }
     

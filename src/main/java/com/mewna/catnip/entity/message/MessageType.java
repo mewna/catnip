@@ -68,7 +68,7 @@ public enum MessageType {
     @CheckReturnValue
     public static MessageType byId(final int id) {
         for(final MessageType m : values()) {
-            if(m.id == id) {
+            if (m.id == id) {
                 return m;
             }
         }

@@ -99,7 +99,7 @@ public class RestUser extends RestHandler {
     @Nonnull
     public Observable<JsonObject> modifyCurrentUserRaw(@Nullable final String username, @Nullable final URI avatarData) {
         final JsonObject body = new JsonObject();
-        if(avatarData != null) {
+        if (avatarData != null) {
             Utils.validateImageUri(avatarData);
             body.put("avatar", avatarData.toString());
         }
@@ -142,15 +142,15 @@ public class RestUser extends RestHandler {
                                                          @Nonnegative final int limit) {
         final QueryStringBuilder builder = new QueryStringBuilder();
         
-        if(before != null) {
+        if (before != null) {
             builder.append("before", before);
         }
         
-        if(after != null) {
+        if (after != null) {
             builder.append("before", after);
         }
         
-        if(limit <= 100) {
+        if (limit <= 100) {
             builder.append("limit", Integer.toString(limit));
         }
         final String query = builder.build();

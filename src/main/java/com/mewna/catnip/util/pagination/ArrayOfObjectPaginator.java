@@ -51,12 +51,12 @@ public abstract class ArrayOfObjectPaginator<T, P extends ArrayOfObjectPaginator
     @Override
     protected void update(@Nonnull final RequestState<T> state, @Nonnull final JsonArray data) {
         for(final Object object : data) {
-            if(!(object instanceof JsonObject)) {
+            if (!(object instanceof JsonObject)) {
                 throw new IllegalArgumentException("Expected all values to be JsonObjects, but found " +
                         (object == null ? "null" : object.getClass()));
             }
             state.update(mapper.apply((JsonObject) object));
-            if(state.done()) {
+            if (state.done()) {
                 return;
             }
         }

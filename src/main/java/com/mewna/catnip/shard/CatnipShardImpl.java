@@ -154,7 +154,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         catnip.dispatchManager().dispatchEvent(Raw.CONNECTING_TO_GATEWAY, shardInfo);
         
         final GatewayInfo info = catnip.gatewayInfo();
-        if(info != null) {
+        if (info != null) {
             connectSocket(info.url());
         } else {
             catnip.fetchGatewayInfo().subscribe(i -> connectSocket(i.url()));
@@ -162,13 +162,13 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     private void stateReply(@Nonnull final ShardConnectState state) {
-        if(lifecycleState == DEAD) {
+        if (lifecycleState == DEAD) {
             return;
         }
-        if(message != null) {
+        if (message != null) {
             message.onSuccess(state);
             message = null;
-        } else if(state == FAILED || state == CANCEL || state == INVALID) {
+        } else if (state == FAILED || state == CANCEL || state == INVALID) {
             catnip.logAdapter().debug("Shard {} stating {}, and no reply possible; manually appending to queue.",
                     shardInfo.id(), state);
             catnip.logAdapter().debug("Shard {} socket open?: {}", shardInfo.id(), socketOpen);
@@ -179,7 +179,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     @SuppressWarnings("squid:HiddenFieldCheck")
     private void connectSocket(String url) {
         url += "?v=" + catnip.options().apiVersion() + "&encoding=json";
-        if(catnip.options().compressionMode() != CompressionMode.NONE) {
+        if (catnip.options().compressionMode() != CompressionMode.NONE) {
             url += "&compress=" + catnip.options().compressionMode().asDiscord();
         }
         catnip.options().httpClient().newWebSocketBuilder().buildAsync(URI.create(url), this).thenAcceptAsync(ws -> {
@@ -191,12 +191,12 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             lifecycleState = DISCONNECTED;
             socket = null;
             socketOpen = false;
-            if(catnip.options().logLifecycleEvents()) {
+            if (catnip.options().logLifecycleEvents()) {
                 catnip.logAdapter().error("Shard {}: Couldn't connect socket:", shardInfo, t);
             }
             catnip.dispatchManager().dispatchEvent(Raw.GATEWAY_WEBSOCKET_CONNECTION_FAILED,
                     new GatewayConnectionFailedImpl(shardInfo, t, catnip));
-            if(socketOpen) {
+            if (socketOpen) {
                 addToConnectQueue();
             } else {
                 stateReply(FAILED);
@@ -213,7 +213,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         }
         
         final GatewayOp op = GatewayOp.byId(payload.getInt("op"));
-        if(!DiscordEvent.Raw.PRESENCE_UPDATE.equals(payload.getString("t"))) {
+        if (!DiscordEvent.Raw.PRESENCE_UPDATE.equals(payload.getString("t"))) {
             catnip.logAdapter().trace("Received:\n{}", JsonWriter.string(payload));
         }
         switch(op) {
@@ -259,12 +259,12 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     
     @Override
     public CompletionStage<?> onText(final WebSocket webSocket, final CharSequence data, final boolean last) {
-        if(socket == null) {
+        if (socket == null) {
             // Socket is too quick!
             socket = new ReentrantLockWebSocket(webSocket);
             socketOpen = true;
         }
-        if(last) {
+        if (last) {
             try {
                 final var payload = socketInputBuffer.length() > 0 ? socketInputBuffer.append(data).toString() : data.toString();
                 handleSocketData(JsonParser.object().from(payload));
@@ -283,7 +283,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     
     @Override
     public CompletionStage<?> onBinary(final WebSocket webSocket, final ByteBuffer data, final boolean last) {
-        if(socket == null) {
+        if (socket == null) {
             // Socket is too quick!
             socket = new ReentrantLockWebSocket(webSocket);
             socketOpen = true;
@@ -291,7 +291,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         // If we get a packet <4 bytes, then we shouldn't check if it's the zlib suffix
         final boolean isEnd = data.remaining() >= 4 && data.getInt(data.remaining() - 4) == ZLIB_SUFFIX;
         readBuffer.write(data.array(), data.position() + data.arrayOffset(), data.remaining());
-        if(isEnd) {
+        if (isEnd) {
             final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             try(final InflaterOutputStream decompressor = new InflaterOutputStream(buffer, inflater)) {
                 readBuffer.writeTo(decompressor);
@@ -313,12 +313,12 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     public void onError(final WebSocket webSocket, final Throwable error) {
         socket = null;
         socketOpen = false;
-        if(catnip.options().logLifecycleEvents()) {
+        if (catnip.options().logLifecycleEvents()) {
             catnip.logAdapter().error("Shard {}: Couldn't connect socket:", shardInfo, error);
         }
         catnip.dispatchManager().dispatchEvent(Raw.GATEWAY_WEBSOCKET_CONNECTION_FAILED,
                 new GatewayConnectionFailedImpl(shardInfo, error, catnip));
-        if(socketOpen) {
+        if (socketOpen) {
             addToConnectQueue();
         } else {
             stateReply(FAILED);
@@ -337,7 +337,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         final boolean cancel = catnip.taskScheduler().cancel(heartbeatTask.get());
         catnip.logAdapter().debug("Canceled timer task from socket close: {}", cancel);
         catnip.dispatchManager().dispatchEvent(Raw.DISCONNECTED_FROM_GATEWAY, shardInfo);
-        if(catnip.options().logLifecycleEvents()) {
+        if (catnip.options().logLifecycleEvents()) {
             catnip.logAdapter().warn("Shard {}: Socket closing! {} - {}", shardInfo, closeCode, reason);
         }
         try {
@@ -350,7 +350,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             catnip.logAdapter().error("Shard {}: Failure closing socket:", shardInfo, e);
         }
         
-        if(closeCode == GatewayCloseCode.INVALID_SEQ.code()
+        if (closeCode == GatewayCloseCode.INVALID_SEQ.code()
                 || closeCode == GatewayCloseCode.SESSION_TIMEOUT.code()
                 // 1000 invalidates your session
                 || closeCode == 1000) {
@@ -359,26 +359,26 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             catnip.options().sessionManager().clearSession(shardInfo.id());
             catnip.dispatchManager().dispatchEvent(Raw.SESSION_INVALIDATED, shardInfo);
         }
-        if(closedByClient) {
-            if(catnip.options().logLifecycleEvents()) {
+        if (closedByClient) {
+            if (catnip.options().logLifecycleEvents()) {
                 catnip.logAdapter().info("Shard {}: We closed the websocket with code {}", shardInfo, closeCode);
             }
         } else {
-            if(closeCode >= 4000) {
+            if (closeCode >= 4000) {
                 final GatewayCloseCode code = GatewayCloseCode.byId(closeCode);
-                if(code != null) {
-                    if(catnip.options().logLifecycleEvents()) {
+                if (code != null) {
+                    if (catnip.options().logLifecycleEvents()) {
                         catnip.logAdapter().warn("Shard {}: gateway websocket closed with code {}: {}: {}",
                                 shardInfo, closeCode, code.name(), code.message());
                     }
                 } else {
-                    if(catnip.options().logLifecycleEvents()) {
+                    if (catnip.options().logLifecycleEvents()) {
                         catnip.logAdapter().warn("Shard {}: gateway websocket closing with code {}: {}",
                                 shardInfo, closeCode, reason);
                     }
                 }
             } else {
-                if(catnip.options().logLifecycleEvents()) {
+                if (catnip.options().logLifecycleEvents()) {
                     catnip.logAdapter().warn("Shard {}: gateway websocket closing with code {}: {}",
                             shardInfo, closeCode, reason);
                 }
@@ -403,7 +403,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     @Nonnull
     @Override
     public Single<ShardConnectState> connect() {
-        if(connected) {
+        if (connected) {
             return Single.error(new IllegalStateException("Cannot connect shard twice, redeploy it."));
         }
         connected = true;
@@ -420,16 +420,16 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     private void disconnectFromSocket(final ShardConnectState connectState) {
         lifecycleState = DISCONNECTED;
         
-        if(socket != null) {
+        if (socket != null) {
             closedByClient = true;
-            if(socketOpen) {
+            if (socketOpen) {
                 socket.sendClose(4000, "Shutdown");
             }
         }
         heartbeatAcked = true;
         
         catnip.taskScheduler().cancel(heartbeatTask.get());
-        if(socketOpen) {
+        if (socketOpen) {
             addToConnectQueue();
         } else {
             stateReply(connectState);
@@ -444,7 +444,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     
     @Override
     public void sendToSocket(@Nonnull JsonObject payload) {
-        if(socket != null && socketOpen) {
+        if (socket != null && socketOpen) {
             for(final Extension extension : catnip.extensionManager().extensions()) {
                 for(final CatnipHook hook : extension.hooks()) {
                     payload = hook.rawGatewaySendHook(shardInfo, payload);
@@ -479,8 +479,8 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         trace = JsonUtil.toStringList(payload.getArray("_trace"));
         
         final long taskId = catnip.taskScheduler().setInterval(payload.getInt("heartbeat_interval"), timerId -> {
-            if(socket != null && socketOpen) {
-                if(!heartbeatAcked) {
+            if (socket != null && socketOpen) {
+                if (!heartbeatAcked) {
                     // Zombie
                     catnip.logAdapter().warn("Shard {}: Heartbeat zombie, queueing reconnect!", shardInfo);
                     closedByClient = true;
@@ -499,7 +499,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         heartbeatTask.set(taskId);
         
         // Check if we can RESUME instead
-        if(catnip.sessionManager().session(shardInfo.id()) != null && catnip.sessionManager().seqnum(shardInfo.id()) > 0) {
+        if (catnip.sessionManager().session(shardInfo.id()) != null && catnip.sessionManager().seqnum(shardInfo.id()) > 0) {
             // Some useful notes on how RESUME works, based off of some
             // commentary from Jake in DAPI.
             // tldr, RESUME works as long as you're not trying to RESUME too
@@ -520,20 +520,20 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     
     private void handleDispatch(final JsonObject event) {
         // Should be safe to ignore
-        if(event.get("d") instanceof JsonArray) {
+        if (event.get("d") instanceof JsonArray) {
             return;
         }
         final JsonObject data = event.getObject("d");
         final String type = event.getString("t");
         
         // Update trace and seqnum as needed
-        if(data.getArray("_trace", null) != null) {
+        if (data.getArray("_trace", null) != null) {
             trace = JsonUtil.toStringList(data.getArray("_trace"));
         } else {
             trace = Collections.emptyList();
         }
         
-        if(event.get("s") != null) {
+        if (event.get("s") != null) {
             catnip.sessionManager().seqnum(shardInfo.id(), event.getInt("s"));
         }
         
@@ -579,15 +579,15 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     private void handleHeartbeatAck() {
         heartbeatAcked = true;
         lastHeartbeatLatency = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - lastHeartbeat);
-        if(lastHeartbeatLatency > catnip.options().highLatencyThreshold()) {
+        if (lastHeartbeatLatency > catnip.options().highLatencyThreshold()) {
             catnip.dispatchManager().dispatchEvent(Raw.HIGH_WEBSOCKET_LATENCY,
                     new HighWebsocketLatencyImpl(catnip, shardInfo, TimeUnit.NANOSECONDS.toMillis(lastHeartbeatLatency)));
         }
     }
     
     private void handleInvalidSession(final JsonObject event) {
-        if(!event.getBoolean("d")) {
-            if(catnip.options().logLifecycleEvents()) {
+        if (!event.getBoolean("d")) {
+            if (catnip.options().logLifecycleEvents()) {
                 catnip.logAdapter().info("Session invalidated (OP 9), clearing shard data and reconnecting");
             }
             
@@ -599,7 +599,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             closedByClient = true;
         }
         
-        if(socket != null && socketOpen) {
+        if (socket != null && socketOpen) {
             socket.sendClose(1000, "Reconnecting...");
         } else {
             stateReply(INVALID);
@@ -608,16 +608,16 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     
     private void handleReconnectRequest() {
         // Just immediately disconnect
-        if(socket != null) {
+        if (socket != null) {
             closedByClient = true;
-            if(socketOpen) {
+            if (socketOpen) {
                 socket.sendClose(4000, "Reconnecting...");
             }
         }
     }
     
     private void addToConnectQueue() {
-        if(needsRequeue) {
+        if (needsRequeue) {
             needsRequeue = false;
             catnip.shardManager().addToConnectQueue(shardInfo.id());
         }
@@ -641,10 +641,10 @@ public class CatnipShardImpl implements CatnipShard, Listener {
                 .end()
                 .done();
         // @formatter:on
-        if(presence != null) {
+        if (presence != null) {
             data.put("presence", ((PresenceImpl) presence).asPresenceUpdateJson());
         }
-        if(catnip.options().customIdentifyOptions() != null) {
+        if (catnip.options().customIdentifyOptions() != null) {
             // We just checked this IJ, smh
             //noinspection ConstantConditions
             catnip.options().customIdentifyOptions().forEach(data::put);

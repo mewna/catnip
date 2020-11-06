@@ -165,35 +165,35 @@ public final class EntityBuilder {
     public JsonObject embedToJson(final Embed embed) {
         final JsonObject o = new JsonObject();
         final OffsetDateTime timestamp = embed.timestamp(); // to avoid parsing timestamp twice
-        if(timestamp != null) {
+        if (timestamp != null) {
             o.put("timestamp", timestamp.format(DateTimeFormatter.ISO_INSTANT));
         }
         
-        if(embed.title() != null) {
+        if (embed.title() != null) {
             o.put("title", embed.title());
         }
-        if(embed.description() != null) {
+        if (embed.description() != null) {
             o.put("description", embed.description());
         }
-        if(embed.url() != null) {
+        if (embed.url() != null) {
             o.put("url", embed.url());
         }
-        if(embed.color() != null) {
+        if (embed.color() != null) {
             o.put("color", embed.color());
         }
-        if(embed.footer() != null) {
+        if (embed.footer() != null) {
             o.put("footer", embedFooterToJson(embed.footer()));
         }
-        if(embed.image() != null) {
+        if (embed.image() != null) {
             o.put("image", embedImageToJson(embed.image()));
         }
-        if(embed.thumbnail() != null) {
+        if (embed.thumbnail() != null) {
             o.put("thumbnail", embedThumbnailToJson(embed.thumbnail()));
         }
-        if(embed.author() != null) {
+        if (embed.author() != null) {
             o.put("author", embedAuthorToJson(embed.author()));
         }
-        if(!embed.fields().isEmpty()) {
+        if (!embed.fields().isEmpty()) {
             final JsonArray array = new JsonArray();
             for(final Field field : embed.fields()) {
                 array.add(embedFieldToJson(field));
@@ -432,7 +432,7 @@ public final class EntityBuilder {
     @CheckReturnValue
     public Channel createChannel(@Nonnull final JsonObject data) {
         final ChannelType type = ChannelType.byKey(data.getInt("type"));
-        if(type.guild()) {
+        if (type.guild()) {
             return createGuildChannel(data);
         } else {
             return createDMChannel(data);
@@ -554,7 +554,7 @@ public final class EntityBuilder {
     @Nullable
     @CheckReturnValue
     public Activity createActivity(@Nullable final JsonObject data) {
-        if(data == null) {
+        if (data == null) {
             return null;
         } else {
             final String applicationId = data.getString("application_id");
@@ -579,7 +579,7 @@ public final class EntityBuilder {
     @Nullable
     @CheckReturnValue
     public ActivityEmoji createActivityEmoji(@Nullable final JsonObject data) {
-        if(data == null) {
+        if (data == null) {
             return null;
         } else {
             final String id = data.getString("id");
@@ -594,7 +594,7 @@ public final class EntityBuilder {
     @Nullable
     @CheckReturnValue
     public ActivityTimestamps createTimestamps(@Nullable final JsonObject data) {
-        if(data == null) {
+        if (data == null) {
             return null;
         } else {
             // Defend against stringly-typed timestamps.
@@ -627,7 +627,7 @@ public final class EntityBuilder {
     @Nullable
     @CheckReturnValue
     public ActivityParty createParty(@Nullable final JsonObject data) {
-        if(data == null) {
+        if (data == null) {
             return null;
         } else {
             final JsonArray size = data.getArray("size", new JsonArray(Arrays.asList(-1, -1)));
@@ -643,7 +643,7 @@ public final class EntityBuilder {
     @Nullable
     @CheckReturnValue
     public ActivityAssets createAssets(@Nullable final JsonObject data) {
-        if(data == null) {
+        if (data == null) {
             return null;
         } else {
             return delegate(ActivityAssets.class, ActivityAssetsImpl.builder()
@@ -658,7 +658,7 @@ public final class EntityBuilder {
     @Nullable
     @CheckReturnValue
     public ActivitySecrets createSecrets(@Nullable final JsonObject data) {
-        if(data == null) {
+        if (data == null) {
             return null;
         } else {
             return delegate(ActivitySecrets.class, ActivitySecretsImpl.builder()
@@ -687,7 +687,7 @@ public final class EntityBuilder {
     public Member createMember(@Nonnull final String guildId, @Nonnull final String id, @Nonnull final JsonObject data) {
         final JsonObject userData = data.getObject("user");
         final long guild = Long.parseUnsignedLong(guildId);
-        if(userData != null) {
+        if (userData != null) {
             final int shards = catnip.shardManager().shardCount();
             final int shardMod = shards == 0 ? 1 : shards;
             catnip.cacheWorker().bulkCacheUsers(
@@ -695,7 +695,7 @@ public final class EntityBuilder {
                     Collections.singletonList(createUser(userData)));
         }
         final String joinedAt;
-        if(data.getString("joined_at", null) != null) {
+        if (data.getString("joined_at", null) != null) {
             joinedAt = data.getString("joined_at");
         } else {
             joinedAt = null;
@@ -898,7 +898,7 @@ public final class EntityBuilder {
         final JsonObject rawReferencedMessage = data.getObject("referenced_message", null);
     
         final List<Member> mentionedMembers = new ArrayList<>();
-        if(guildId != null) {
+        if (guildId != null) {
             mentionedMembers.addAll(toList(data.getArray("mentions"), o -> createPartialMemberMention(guildId, o)));
         }
         
@@ -944,7 +944,7 @@ public final class EntityBuilder {
     @Nullable
     @CheckReturnValue
     public ChannelMention createChannelMention(@Nullable final JsonObject data) {
-        if(data == null) {
+        if (data == null) {
             return null;
         } else {
             return delegate(ChannelMention.class, ChannelMentionImpl.builder()
@@ -960,7 +960,7 @@ public final class EntityBuilder {
     @Nullable
     @CheckReturnValue
     public MessageActivity createMessageActivity(@Nullable final JsonObject data) {
-        if(data == null) {
+        if (data == null) {
             return null;
         } else {
             return delegate(MessageActivity.class, MessageActivityImpl.builder()
@@ -973,7 +973,7 @@ public final class EntityBuilder {
     @Nullable
     @CheckReturnValue
     public MessageApplication createMessageApplication(@Nullable final JsonObject data) {
-        if(data == null) {
+        if (data == null) {
             return null;
         } else {
             return delegate(MessageApplication.class, MessageApplicationImpl.builder()
@@ -989,7 +989,7 @@ public final class EntityBuilder {
     @Nullable
     @CheckReturnValue
     private MessageReference createMessageReference(@Nullable final JsonObject data) {
-        if(data == null) {
+        if (data == null) {
             return null;
         } else {
             return delegate(MessageReference.class, MessageReferenceImpl.builder()
@@ -1004,7 +1004,7 @@ public final class EntityBuilder {
     @Nullable
     @CheckReturnValue
     private Member createPartialMemberMention(final String guildId, final JsonObject data) {
-        if(data.containsKey("member")) {
+        if (data.containsKey("member")) {
             return createMember(guildId, data.getString("id"), data.getObject("member"));
         } else {
             return null;
@@ -1041,27 +1041,27 @@ public final class EntityBuilder {
         // As we don't store these fields on the guild object itself, we have
         // to update them in the cache
         final String id = data.getString("id"); //optimization
-        if(data.getArray("roles") != null) {
+        if (data.getArray("roles") != null) {
             catnip.cacheWorker().bulkCacheRoles(shardId, toList(data.getArray("roles"),
                     e -> createRole(id, e)));
         }
-        if(data.getArray("channels") != null) {
+        if (data.getArray("channels") != null) {
             catnip.cacheWorker().bulkCacheChannels(shardId, toList(data.getArray("channels"),
                     e -> createGuildChannel(id, e)));
         }
-        if(data.getArray("members") != null) {
+        if (data.getArray("members") != null) {
             catnip.cacheWorker().bulkCacheMembers(shardId, toList(data.getArray("members"),
                     e -> createMember(id, e)));
         }
-        if(data.getArray("emojis") != null) {
+        if (data.getArray("emojis") != null) {
             catnip.cacheWorker().bulkCacheEmoji(shardId, toList(data.getArray("emojis"),
                     e -> createCustomEmoji(id, e)));
         }
-        if(data.getArray("presences") != null) {
+        if (data.getArray("presences") != null) {
             catnip.cacheWorker().bulkCachePresences(shardId, toMap(data.getArray("presences"),
                     o -> o.getObject("user").getString("id"), this::createPresence));
         }
-        if(data.getArray("voice_states") != null) {
+        if (data.getArray("voice_states") != null) {
             catnip.cacheWorker().bulkCacheVoiceStates(shardId, toList(
                     data.getArray("voice_states"), e -> createVoiceState(id, e)));
         }
@@ -1161,7 +1161,7 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public Invite createInvite(@Nonnull final JsonObject data) {
-        if(data.containsKey("uses")) {
+        if (data.containsKey("uses")) {
             return createCreatedInvite(data);
         }
         return delegate(Invite.class, InviteImpl.builder()
@@ -1179,7 +1179,7 @@ public final class EntityBuilder {
     @CheckReturnValue
     public DeletedInvite createDeletedInvite(@Nonnull final JsonObject data) {
         long guildId = 0;
-        if(data.has("guild_id")) {
+        if (data.has("guild_id")) {
             guildId = Long.parseUnsignedLong(data.getString("guild_id"));
         }
         return delegate(DeletedInvite.class, DeletedInviteImpl.builder()
@@ -1491,7 +1491,7 @@ public final class EntityBuilder {
     @CheckReturnValue
     public GatewayInfo createGatewayInfo(@Nonnull final JsonObject data) {
         final JsonObject sessionStartLimit = data.getObject("session_start_limit");
-        if(data.containsKey("shards")) {
+        if (data.containsKey("shards")) {
             // Valid data
             return delegate(GatewayInfo.class, GatewayInfoImpl.builder()
                     .catnip(catnip)

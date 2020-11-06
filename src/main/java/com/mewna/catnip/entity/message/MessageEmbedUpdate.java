@@ -51,7 +51,7 @@ public interface MessageEmbedUpdate extends Snowflake {
     @CheckReturnValue
     default String guildId() {
         final long id = guildIdAsLong();
-        if(id == 0) {
+        if (id == 0) {
             return null;
         }
         return Long.toUnsignedString(id);
@@ -63,7 +63,7 @@ public interface MessageEmbedUpdate extends Snowflake {
     @Nonnull
     @CheckReturnValue
     default Maybe<Guild> guild() {
-        if(guildId() == null) {
+        if (guildId() == null) {
             return Maybe.empty();
         } else {
             //noinspection ConstantConditions
@@ -84,7 +84,7 @@ public interface MessageEmbedUpdate extends Snowflake {
     @CheckReturnValue
     default Maybe<MessageChannel> channel() {
         final long guild = guildIdAsLong();
-        if(guild != 0) {
+        if (guild != 0) {
             return catnip().cache().channel(guild, channelIdAsLong()).map(Channel::asMessageChannel);
         } else {
             return catnip().rest().channel().getChannelById(channelId()).map(Channel::asMessageChannel).toMaybe();

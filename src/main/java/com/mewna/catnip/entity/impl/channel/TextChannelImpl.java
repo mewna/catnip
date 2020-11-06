@@ -66,7 +66,7 @@ public class TextChannelImpl implements TextChannel, RequiresCatnip {
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
         for(final PermissionOverride override : overrides) {
-            if(override instanceof RequiresCatnip) {
+            if (override instanceof RequiresCatnip) {
                 ((RequiresCatnip) override).catnip(catnip);
             }
         }

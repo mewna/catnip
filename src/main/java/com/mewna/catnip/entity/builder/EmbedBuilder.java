@@ -96,11 +96,11 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder timestamp(@Nullable final TemporalAccessor temporal) {
-        if(temporal == null) {
+        if (temporal == null) {
             timestamp = null;
             return this;
         }
-        if(temporal instanceof OffsetDateTime) {
+        if (temporal instanceof OffsetDateTime) {
             timestamp = (OffsetDateTime) temporal;
             return this;
         }
@@ -133,7 +133,7 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder color(@Nullable final Color color) {
-        if(color != null) {
+        if (color != null) {
             // Mask off the alpha bits
             this.color = color.getRGB() & 0x00FFFFFF;
         } else {
@@ -152,7 +152,7 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder color(@Nullable final Integer color) {
-        if(color != null) {
+        if (color != null) {
             // Mask off the alpha bits
             this.color = color & 0x00FFFFFF;
         } else {
@@ -172,7 +172,7 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder footer(@Nullable final String text, @Nullable final String iconUrl) {
-        if(text == null && iconUrl == null) {
+        if (text == null && iconUrl == null) {
             return footer(null);
         } else {
             return footer(new FooterImpl(text, iconUrl, null));
@@ -290,7 +290,7 @@ public class EmbedBuilder {
     @Nonnull
     @CheckReturnValue
     public EmbedBuilder field(@Nonnull final Field field) {
-        if(fields.size() == 25) {
+        if (fields.size() == 25) {
             throw new IllegalStateException("Tried to add an embed field, but we're at the cap (25)!");
         }
         fields.add(field);
@@ -339,60 +339,60 @@ public class EmbedBuilder {
     public Embed build() {
         int len = 0;
         final EmbedImplBuilder builder = EmbedImpl.builder();
-        if(title != null && !title.isEmpty()) {
-            if(title.length() > 256) {
+        if (title != null && !title.isEmpty()) {
+            if (title.length() > 256) {
                 throw new IllegalStateException("Title exceeds 256 characters!");
             }
             len += title.length();
             builder.title(title);
         }
-        if(description != null && !description.isEmpty()) {
-            if(description.length() > 2048) {
+        if (description != null && !description.isEmpty()) {
+            if (description.length() > 2048) {
                 throw new IllegalStateException("Description exceeds 2048 characters!");
             }
             builder.description(description);
             len += description.length();
         }
-        if(url != null && !url.isEmpty()) {
+        if (url != null && !url.isEmpty()) {
             builder.url(url);
         }
-        if(color != null) {
+        if (color != null) {
             builder.color(color);
         }
-        if(timestamp != null) {
+        if (timestamp != null) {
             builder.timestamp(timestamp.format(DateTimeFormatter.ISO_INSTANT));
         }
-        if(footer != null) {
-            if(footer.text().length() > 2048) {
+        if (footer != null) {
+            if (footer.text().length() > 2048) {
                 throw new IllegalStateException("Footer text exceeds 2048 characters!");
             }
             builder.footer(footer);
             len += footer.text().length();
         }
-        if(image != null) {
+        if (image != null) {
             builder.image(image);
         }
-        if(thumbnail != null) {
+        if (thumbnail != null) {
             builder.thumbnail(thumbnail);
         }
-        if(author != null) {
-            if(author.name().length() > 256) {
+        if (author != null) {
+            if (author.name().length() > 256) {
                 throw new IllegalStateException("Author's name exceeds 256 characters!");
             }
             len += author.name().length();
             builder.author(author);
         }
-        if(fields.isEmpty()) {
+        if (fields.isEmpty()) {
             builder.fields(Collections.emptyList());
         } else {
-            if(fields.size() > 25) {
+            if (fields.size() > 25) {
                 throw new IllegalStateException("Tried to add an embed field, but we're at the cap (25)!");
             }
             for(final Field field : fields) {
-                if(field.name().length() > 256) {
+                if (field.name().length() > 256) {
                     throw new IllegalStateException("Field name exceeds 256 characters!");
                 }
-                if(field.value().length() > 1024) {
+                if (field.value().length() > 1024) {
                     throw new IllegalStateException("Field value exceeds 1024 characters!");
                 }
                 len += field.name().length();
@@ -400,7 +400,7 @@ public class EmbedBuilder {
             }
             builder.fields(fields);
         }
-        if(len > 6000) {
+        if (len > 6000) {
             throw new IllegalStateException("Total embed length exceeds 6000 characters!");
         }
         return builder.build();
