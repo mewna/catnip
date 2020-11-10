@@ -169,7 +169,17 @@ public final class DispatchEmitter {
                 break;
             }
             case Raw.CHANNEL_UPDATE: {
-                catnip.dispatchManager().dispatchEvent(type, entityBuilder.createChannel(data));
+                final var channel = entityBuilder.createChannel(data);
+                if(catnip.cacheWorker().canProvidePreviousState(CHANNEL) && channel.isGuild()) {
+                    catnip.cache().channel(channel.asGuildChannel().guildId(), channel.id())
+                            .map(Optional::of)
+                            .defaultIfEmpty(Optional.empty())
+                            .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old.orElse(null), channel)),
+                                    e -> cacheErrorLog(type, e));
+                } else {
+                    // We don't cache DM channels
+                    catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(null, channel));
+                }
                 break;
             }
             case Raw.CHANNEL_DELETE: {

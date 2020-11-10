@@ -52,7 +52,7 @@ import static com.mewna.catnip.shard.event.EventTypeImpl.event;
 public interface DiscordEvent {
     // @formatter:off
     EventType<Channel>                        CHANNEL_CREATE                = event(Raw.CHANNEL_CREATE, Channel.class);
-    EventType<Channel>                        CHANNEL_UPDATE                = event(Raw.CHANNEL_UPDATE, Channel.class);
+    DoubleEventType<Channel, Channel>         CHANNEL_UPDATE                = doubleEvent(Raw.CHANNEL_UPDATE, Channel.class, Channel.class);
     EventType<Channel>                        CHANNEL_DELETE                = event(Raw.CHANNEL_DELETE, Channel.class);
     EventType<ChannelPinsUpdate>              CHANNEL_PINS_UPDATE           = event(Raw.CHANNEL_PINS_UPDATE, ChannelPinsUpdate.class);
     EventType<WebhooksUpdate>                 WEBHOOKS_UPDATE               = event(Raw.WEBHOOKS_UPDATE, WebhooksUpdate.class);
