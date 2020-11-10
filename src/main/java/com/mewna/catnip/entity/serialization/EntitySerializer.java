@@ -48,7 +48,7 @@ public interface EntitySerializer<T> {
      * Serializes the given entity. This method should handle things like
      * converting snowflakes into strings, if the serialization method in use
      * (ex. JSON) doesn't support bigints.<br/>
-     *
+     * <p>
      * It is <strong>strongly</strong> recommended that you add in
      * functionality to determine the catnip version that an entity was
      * serialized with, so as to avoid potential version mismatch errors.
@@ -67,7 +67,7 @@ public interface EntitySerializer<T> {
      * the serialization method in use (ex. JSON) doesn't support bigints; that
      * is, it should effectively undo any data transformations done in
      * {@link #serialize(Entity)}.<br/>
-     *
+     * <p>
      * It is <strong>strongly</strong> recommended that you add in
      * functionality to determine the catnip version that an entity was
      * serialized with, so as to avoid potential version mismatch errors.

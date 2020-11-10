@@ -55,7 +55,9 @@ public interface Requester {
     
     /**
      * Queues a new request to be executed.
+     *
      * @param r The request to execute.
+     *
      * @return An {@link Observable} that emits when the request has completed.
      */
     @Nonnull

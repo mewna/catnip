@@ -52,8 +52,7 @@ public enum UserFlag {
     EARLY_SUPPORTER(1 << 9),
     TEAM_USER(1 << 10),
     SYSTEM(1 << 12),
-    BUG_HUNTER_LEVEL_2(1 << 14)
-    ;
+    BUG_HUNTER_LEVEL_2(1 << 14);
     
     @Getter
     private final int value;

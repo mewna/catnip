@@ -27,9 +27,9 @@
 
 package com.mewna.catnip.entity.misc;
 
+import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.partials.NullNameable;
 import com.mewna.catnip.entity.partials.Snowflake;
-import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.user.User;
 import io.reactivex.rxjava3.core.Maybe;
 
@@ -338,46 +338,46 @@ public interface Emoji extends Snowflake, NullNameable {
         default List<String> roles() {
             return Collections.emptyList();
         }
-    
+        
         @Override
         @Nullable
         @CheckReturnValue
         default User user() {
             return null;
         }
-    
+        
         @Override
         @CheckReturnValue
         default boolean managed() {
             return false;
         }
-    
+        
         @Override
         @CheckReturnValue
         default boolean custom() {
             return false;
         }
-    
+        
         @Override
         @CheckReturnValue
         default boolean requiresColons() {
             return false;
         }
-    
+        
         @Override
         @Nonnull
         @CheckReturnValue
         default String forMessage() {
             return String.format("<%s:%s:%s>", animated() ? "a" : "", name(), id());
         }
-    
+        
         @Override
         @Nonnull
         @CheckReturnValue
         default String forReaction() {
             return String.format("%s:%s", name(), id());
         }
-    
+        
         @Override
         @CheckReturnValue
         default boolean is(@Nonnull final String emoji) {

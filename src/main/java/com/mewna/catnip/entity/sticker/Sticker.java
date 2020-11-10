@@ -27,9 +27,9 @@
 
 package com.mewna.catnip.entity.sticker;
 
+import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.partials.Describable;
 import com.mewna.catnip.entity.partials.Nameable;
-import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.util.CDNFormat;
 

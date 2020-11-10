@@ -197,9 +197,9 @@ public class RestWebhook extends RestHandler {
         if(avatarUrl != null && !avatarUrl.isEmpty()) {
             builder.value("avatar_url", avatarUrl);
         }
-    
+        
         final JsonObject body = builder.done();
-    
+        
         if(body.get("embeds") == null && body.get("content") == null
                 && !options.hasFiles()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
@@ -235,7 +235,7 @@ public class RestWebhook extends RestHandler {
         if(!allowedMentions.isEmpty()) {
             builder.value("allowed_mentions", allowedMentions);
         }
-    
+        
         return catnip().requester().
                 queue(new OutboundRequest(Routes.EXECUTE_WEBHOOK.withMajorParam(webhookId).withQueryString("?wait=true"),
                         Map.of("token", webhookToken), body).needsToken(false)

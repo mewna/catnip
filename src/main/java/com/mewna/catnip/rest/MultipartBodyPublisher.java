@@ -77,8 +77,8 @@ public class MultipartBodyPublisher {
     
     class PartsIterator implements Iterator<byte[]> {
         private final Iterator<PartsSpecification> parts;
-        private boolean done;
         private final List<byte[]> next = new ArrayList<>();
+        private boolean done;
         
         PartsIterator() {
             parts = partsSpecificationList.iterator();

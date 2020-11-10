@@ -30,12 +30,10 @@ package com.mewna.catnip.entity.guild;
 import com.mewna.catnip.entity.partials.HasIcon;
 import com.mewna.catnip.entity.partials.Nameable;
 import com.mewna.catnip.entity.partials.Snowflake;
-import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Set;
 
 /**

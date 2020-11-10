@@ -896,7 +896,7 @@ public final class EntityBuilder {
         final String guildId = data.getString("guild_id");
         final String webhookId = data.getString("webhook_id");
         final JsonObject rawReferencedMessage = data.getObject("referenced_message", null);
-    
+        
         final List<Member> mentionedMembers = new ArrayList<>();
         if(guildId != null) {
             mentionedMembers.addAll(toList(data.getArray("mentions"), o -> createPartialMemberMention(guildId, o)));

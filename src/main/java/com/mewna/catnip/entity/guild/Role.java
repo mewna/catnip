@@ -27,8 +27,8 @@
 
 package com.mewna.catnip.entity.guild;
 
-import com.mewna.catnip.entity.partials.Mentionable;
 import com.mewna.catnip.entity.channel.GuildChannel;
+import com.mewna.catnip.entity.partials.Mentionable;
 import com.mewna.catnip.entity.partials.Nameable;
 import com.mewna.catnip.entity.partials.Permissable;
 import com.mewna.catnip.entity.util.Permission;

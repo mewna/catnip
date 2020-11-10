@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 
 /**
  * @author CircuitRCAY, natanbc
- *
  */
 @SuppressWarnings("UnusedReturnValue")
 public class QueryStringBuilder {
@@ -42,6 +41,28 @@ public class QueryStringBuilder {
     
     private final StringBuilder sb = new StringBuilder();
     private boolean hasQueryParams;
+    
+    private static String encode(@Nonnull final String input) {
+        final StringBuilder resultStr = new StringBuilder();
+        for(final char ch : input.toCharArray()) {
+            if(isUnsafe(ch)) {
+                resultStr.append('%');
+                resultStr.append(toHex(ch / 16));
+                resultStr.append(toHex(ch % 16));
+            } else {
+                resultStr.append(ch);
+            }
+        }
+        return resultStr.toString();
+    }
+    
+    private static char toHex(final int ch) {
+        return (char) (ch < 10 ? '0' + ch : 'A' + ch - 10);
+    }
+    
+    private static boolean isUnsafe(final char ch) {
+        return ch > 128 || UNSAFE_CHARS.indexOf(ch) >= 0;
+    }
     
     @Nonnull
     public QueryStringBuilder append(@Nonnull final String text) {
@@ -75,27 +96,5 @@ public class QueryStringBuilder {
     public QueryStringBuilder prepend(@Nonnull final String url) {
         sb.insert(0, url);
         return this;
-    }
-    
-    private static String encode(@Nonnull final String input) {
-        final StringBuilder resultStr = new StringBuilder();
-        for (final char ch : input.toCharArray()) {
-            if (isUnsafe(ch)) {
-                resultStr.append('%');
-                resultStr.append(toHex(ch / 16));
-                resultStr.append(toHex(ch % 16));
-            } else {
-                resultStr.append(ch);
-            }
-        }
-        return resultStr.toString();
-    }
-    
-    private static char toHex(final int ch) {
-        return (char) (ch < 10 ? '0' + ch : 'A' + ch - 10);
-    }
-    
-    private static boolean isUnsafe(final char ch) {
-        return ch > 128 || UNSAFE_CHARS.indexOf(ch) >= 0;
     }
 }

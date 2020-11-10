@@ -71,7 +71,7 @@ public enum GuildFeature {
      */
     RELAY_ENABLED,
     MEMBER_VERIFICATION_GATE_ENABLED,
-
+    
     /**
      * This seems to have reappeared, see https://github.com/DJScias/Discord-Datamining/commit/2ee04565f207b3abf303f2e242a093165728d8d8
      */
@@ -80,7 +80,8 @@ public enum GuildFeature {
     /**
      * When no other feature matches.
      */
-    UNKNOWN_FEATURE,;
+    UNKNOWN_FEATURE,
+    ;
     
     public static GuildFeature unknownValueOf(final Catnip catnip, final String value) {
         try {

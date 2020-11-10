@@ -29,7 +29,10 @@ package com.mewna.catnip.util;
 
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.cache.*;
+import com.mewna.catnip.cache.CustomizableEntityCache;
+import com.mewna.catnip.cache.EntityCacheWorker;
+import com.mewna.catnip.cache.NoopEntityCache;
+import com.mewna.catnip.cache.SplitMemoryEntityCache;
 import com.mewna.catnip.entity.delegate.EntityDelegator;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.lifecycle.HighWebsocketLatency;

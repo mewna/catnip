@@ -29,13 +29,13 @@ package com.mewna.catnip.rest.handler;
 
 import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
-import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.guild.*;
 import com.mewna.catnip.entity.guild.Guild.GuildEditFields;
 import com.mewna.catnip.entity.guild.audit.ActionType;
 import com.mewna.catnip.entity.guild.audit.AuditLogEntry;
 import com.mewna.catnip.entity.misc.CreatedInvite;
+import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.voice.VoiceRegion;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;

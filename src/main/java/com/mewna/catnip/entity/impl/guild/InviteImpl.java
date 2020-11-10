@@ -182,7 +182,6 @@ public class InviteImpl implements Invite, RequiresCatnip {
             this.catnip = catnip;
         }
         
-        
         @Override
         public int hashCode() {
             return Long.hashCode(idAsLong);

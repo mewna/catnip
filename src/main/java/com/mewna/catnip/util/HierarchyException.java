@@ -20,5 +20,4 @@ public class HierarchyException extends RuntimeException {
     private static String message(final Permissable actor, final Permissable target) {
         return "Could not interact with " + target;
     }
-    
 }

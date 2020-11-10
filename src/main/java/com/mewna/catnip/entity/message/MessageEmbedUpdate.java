@@ -27,10 +27,10 @@
 
 package com.mewna.catnip.entity.message;
 
-import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.MessageChannel;
 import com.mewna.catnip.entity.guild.Guild;
+import com.mewna.catnip.entity.partials.Snowflake;
 import io.reactivex.rxjava3.core.Maybe;
 
 import javax.annotation.CheckReturnValue;

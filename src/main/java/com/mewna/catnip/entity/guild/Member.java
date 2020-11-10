@@ -28,9 +28,9 @@
 package com.mewna.catnip.entity.guild;
 
 import com.mewna.catnip.cache.view.CacheView;
-import com.mewna.catnip.entity.partials.Mentionable;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.channel.GuildChannel;
+import com.mewna.catnip.entity.partials.Mentionable;
 import com.mewna.catnip.entity.partials.Permissable;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
