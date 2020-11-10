@@ -93,6 +93,11 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     private Catnip catnip;
     private EntityBuilder entityBuilder;
     
+    @Override
+    public boolean canProvidePreviousState(@Nonnull final CachedEntityState state) {
+        return true;
+    }
+    
     /**
      * Function used to map members to their name, for named cache views.
      * Used by the default {@link #createMemberCacheView()} and

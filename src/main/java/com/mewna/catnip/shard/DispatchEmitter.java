@@ -31,13 +31,13 @@ import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.PartialMember;
 import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.misc.Ready;
 import com.mewna.catnip.entity.misc.Resumed;
+import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.user.Presence.OnlineStatus;
 import com.mewna.catnip.entity.user.PresenceUpdate;
 import com.mewna.catnip.entity.user.User;
@@ -46,7 +46,9 @@ import com.mewna.catnip.util.JsonUtil;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
+import static com.mewna.catnip.cache.EntityCacheWorker.CachedEntityState.*;
 import static com.mewna.catnip.shard.DiscordEvent.Raw;
 
 /**
@@ -204,8 +206,15 @@ public final class DispatchEmitter {
             }
             case Raw.GUILD_UPDATE: {
                 final Guild guild = entityBuilder.createGuild(data);
-                catnip.cache().guild(guild.idAsLong())
-                        .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, guild)), e -> cacheErrorLog(type, e));
+                if(catnip.cacheWorker().canProvidePreviousState(GUILD)) {
+                    catnip.cache().guild(guild.idAsLong())
+                            .map(Optional::of)
+                            .defaultIfEmpty(Optional.empty())
+                            .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old.orElse(null), guild)),
+                                    e -> cacheErrorLog(type, e));
+                } else {
+                    catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(null, guild));
+                }
                 break;
             }
             case Raw.GUILD_DELETE: {
@@ -239,8 +248,15 @@ public final class DispatchEmitter {
             }
             case Raw.GUILD_ROLE_UPDATE: {
                 final Role role = entityBuilder.createRole(data.getString("guild_id"), data.getObject("role"));
-                catnip.cache().role(role.guildIdAsLong(), role.idAsLong())
-                        .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, role)), e -> cacheErrorLog(type, e));
+                if(catnip.cacheWorker().canProvidePreviousState(ROLE)) {
+                    catnip.cache().role(role.guildIdAsLong(), role.idAsLong())
+                            .map(Optional::of)
+                            .defaultIfEmpty(Optional.empty())
+                            .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old.orElse(null), role)),
+                                    e -> cacheErrorLog(type, e));
+                } else {
+                    catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(null, role));
+                }
                 break;
             }
             case Raw.GUILD_ROLE_DELETE: {
@@ -267,16 +283,30 @@ public final class DispatchEmitter {
             case Raw.GUILD_MEMBER_UPDATE: {
                 final String guild = data.getString("guild_id");
                 final PartialMember partialMember = entityBuilder.createPartialMember(guild, data);
-                catnip.cache().member(partialMember.guildIdAsLong(), partialMember.idAsLong())
-                        .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, partialMember)), e -> cacheErrorLog(type, e));
+                if(catnip.cacheWorker().canProvidePreviousState(MEMBER)) {
+                    catnip.cache().member(partialMember.guildIdAsLong(), partialMember.idAsLong())
+                            .map(Optional::of)
+                            .defaultIfEmpty(Optional.empty())
+                            .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old.orElse(null), partialMember)),
+                                    e -> cacheErrorLog(type, e));
+                } else {
+                    catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(null, partialMember));
+                }
                 break;
             }
             
             // Users
             case Raw.USER_UPDATE: {
                 final User user = entityBuilder.createUser(data);
-                catnip.cache().selfUser()
-                        .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, user)), e -> cacheErrorLog(type, e));
+                if(catnip.cacheWorker().canProvidePreviousState(SELF_USER)) {
+                    catnip.cache().user(user.idAsLong())
+                            .map(Optional::of)
+                            .defaultIfEmpty(Optional.empty())
+                            .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old.orElse(null), user)),
+                                    e -> cacheErrorLog(type, e));
+                } else {
+                    catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(null, user));
+                }
                 break;
             }
             case Raw.PRESENCE_UPDATE: {
@@ -289,22 +319,31 @@ public final class DispatchEmitter {
                             "but we should never get this. If you report this to Discord, include the following " +
                             "JSON in your report:\n{}", JsonUtil.encodePrettily(clone));
                 }
-                catnip.cache().user(presence.id()).subscribe(cachedUser -> {
-                    if(cachedUser != null) {
-                        final var discrim = Integer.parseInt(cachedUser.discriminator());
-                        if(discrim < 1 || discrim > 9999) {
-                            final JsonObject clone = new JsonObject(payload);
-                            // catnip-internal key
-                            clone.remove("shard");
-                            catnip.logAdapter().warn("Received a presence update for a user with a discriminator of '{}', " +
-                                            "but we should never get this. Discriminators should be clamped to [0001, 9999]." +
-                                            "If you report this to Discord, include the following JSON in your report:\n{}",
-                                    discrim, JsonUtil.encodePrettily(clone));
+                if(catnip.cacheWorker().canProvidePreviousState(USER)) {
+                    catnip.cache().user(presence.id()).subscribe(cachedUser -> {
+                        if(cachedUser != null) {
+                            final var discrim = Integer.parseInt(cachedUser.discriminator());
+                            if(discrim < 1 || discrim > 9999) {
+                                final JsonObject clone = new JsonObject(payload);
+                                // catnip-internal key
+                                clone.remove("shard");
+                                catnip.logAdapter().warn("Received a presence update for a user with a discriminator of '{}', " +
+                                                "but we should never get this. Discriminators should be clamped to [0001, 9999]." +
+                                                "If you report this to Discord, include the following JSON in your report:\n{}",
+                                        discrim, JsonUtil.encodePrettily(clone));
+                            }
                         }
-                    }
-                });
-                catnip.cache().presence(presence.idAsLong())
-                        .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old, presence)), e -> cacheErrorLog(type, e));
+                    });
+                }
+                if(catnip.cacheWorker().canProvidePreviousState(PRESENCE)) {
+                    catnip.cache().presence(presence.idAsLong())
+                            .map(Optional::of)
+                            .defaultIfEmpty(Optional.empty())
+                            .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old.orElse(null), presence)),
+                                    e -> cacheErrorLog(type, e));
+                } else {
+                    catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(null, presence));
+                }
                 break;
             }
             

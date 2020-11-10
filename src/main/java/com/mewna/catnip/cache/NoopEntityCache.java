@@ -27,9 +27,15 @@
 
 package com.mewna.catnip.cache;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author amy
  * @since 9/13/18.
  */
 public final class NoopEntityCache extends CustomizableEntityCache {
+    @Override
+    public boolean canProvidePreviousState(@Nonnull final CachedEntityState state) {
+        return false;
+    }
 }

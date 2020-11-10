@@ -83,4 +83,18 @@ public interface EntityCacheWorker extends EntityCache {
     
     @Nonnull
     EntityCache catnip(@Nonnull Catnip catnip);
+    
+    boolean canProvidePreviousState(@Nonnull CachedEntityState state);
+    
+    enum CachedEntityState {
+        GUILD,
+        USER,
+        PRESENCE,
+        MEMBER,
+        ROLE,
+        CHANNEL,
+        EMOJI,
+        VOICE_STATE,
+        SELF_USER,
+    }
 }
