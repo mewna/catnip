@@ -42,6 +42,7 @@ import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.guild.*;
 import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
+import com.mewna.catnip.shard.GatewayIntent;
 import com.mewna.catnip.util.QueryStringBuilder;
 import com.mewna.catnip.util.pagination.AuditLogPaginator;
 import com.mewna.catnip.util.pagination.MemberPaginator;
@@ -378,7 +379,11 @@ public class RestGuild extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public MemberPaginator listGuildMembers(@Nonnull final String guildId) {
-        // TODO: Handle intents here (GUILD_MEMBERS)
+        if(!catnip().options().intents().contains(GatewayIntent.GUILD_MEMBERS)) {
+            throw new IllegalStateException("Access to list guild members is gated on the GUILD_MEMBERS intent. " +
+                    "If you have this intent enabled, add it to your catnip options like this:\n" +
+                    "Catnip.catnip(new CatnipOptions(\"token\").intents(Set.of(GatewayIntent.GUILD_MEMBERS)))");
+        }
         return new MemberPaginator(entityBuilder(), guildId) {
             @Nonnull
             @Override
@@ -418,10 +423,14 @@ public class RestGuild extends RestHandler {
                 .map(ResponsePayload::array);
     }
     
+    @Nonnull
+    @CheckReturnValue
     public Observable<Member> searchGuildMembers(@Nonnull final String guildId, @Nonnull final String query) {
         return searchGuildMembers(guildId, query, 1);
     }
     
+    @Nonnull
+    @CheckReturnValue
     public Observable<Member> searchGuildMembers(@Nonnull final String guildId, @Nonnull final String query,
                                                  @Nonnegative final int limit) {
         return searchGuildMembersRaw(guildId, query, limit)
@@ -429,6 +438,8 @@ public class RestGuild extends RestHandler {
                 .flatMapIterable(e -> e);
     }
     
+    @Nonnull
+    @CheckReturnValue
     public Observable<JsonArray> searchGuildMembersRaw(@Nonnegative final String guildId, @Nonnull final String query,
                                                        @Nonnegative final int limit) {
         return catnip().requester().queue(new OutboundRequest(Routes.SEARCH_GUILD_MEMBERS.withMajorParam(guildId)

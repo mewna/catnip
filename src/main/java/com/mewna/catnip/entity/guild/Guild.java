@@ -30,17 +30,21 @@ package com.mewna.catnip.entity.guild;
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.cache.view.NamedCacheView;
+import com.mewna.catnip.entity.channel.*;
+import com.mewna.catnip.entity.misc.CreatedInvite;
+import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.partials.HasIcon;
 import com.mewna.catnip.entity.partials.Nameable;
 import com.mewna.catnip.entity.partials.NullDescribable;
 import com.mewna.catnip.entity.partials.Snowflake;
-import com.mewna.catnip.entity.channel.*;
-import com.mewna.catnip.entity.misc.CreatedInvite;
-import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.rest.guild.ChannelData;
+import com.mewna.catnip.rest.guild.MemberData;
+import com.mewna.catnip.rest.guild.PositionUpdater;
+import com.mewna.catnip.rest.guild.RoleData;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.Utils;
 import io.reactivex.rxjava3.core.Completable;
@@ -699,6 +703,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the emoji is created.
      */
     @Nonnull
+    @CheckReturnValue
     default Single<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final byte[] image,
                                             @Nonnull final Collection<String> roles, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJIS);
@@ -715,6 +720,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the emoji is created.
      */
     @Nonnull
+    @CheckReturnValue
     default Single<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final byte[] image,
                                             @Nonnull final Collection<String> roles) {
         return createEmoji(name, image, roles, null);
@@ -731,6 +737,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the emoji is created.
      */
     @Nonnull
+    @CheckReturnValue
     default Single<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final URI imageData,
                                             @Nonnull final Collection<String> roles, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJIS);
@@ -747,6 +754,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the emoji is created.
      */
     @Nonnull
+    @CheckReturnValue
     default Single<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final URI imageData,
                                             @Nonnull final Collection<String> roles) {
         return createEmoji(name, imageData, roles, null);
@@ -764,6 +772,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the emoji is modified.
      */
     @Nonnull
+    @CheckReturnValue
     default Single<CustomEmoji> modifyEmoji(@Nonnull final String emojiId, @Nonnull final String name,
                                             @Nonnull final Collection<String> roles, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJIS);
@@ -781,6 +790,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the emoji is modified.
      */
     @Nonnull
+    @CheckReturnValue
     default Single<CustomEmoji> modifyEmoji(@Nonnull final String emojiId, @Nonnull final String name,
                                             @Nonnull final Collection<String> roles) {
         return modifyEmoji(emojiId, name, roles, null);
@@ -795,6 +805,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the emoji is deleted.
      */
     @Nonnull
+    @CheckReturnValue
     default Completable deleteEmoji(@Nonnull final String emojiId, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJIS);
         return catnip().rest().emoji().deleteGuildEmoji(id(), emojiId, reason);
@@ -808,6 +819,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the emoji is deleted.
      */
     @Nonnull
+    @CheckReturnValue
     default Completable deleteEmoji(@Nonnull final String emojiId) {
         return deleteEmoji(emojiId, null);
     }
@@ -818,6 +830,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the guild is left.
      */
     @Nonnull
+    @CheckReturnValue
     default Completable leave() {
         return catnip().rest().user().leaveGuild(id());
     }
@@ -828,6 +841,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the guild is deleted.
      */
     @Nonnull
+    @CheckReturnValue
     default Completable delete() {
         return catnip().rest().guild().deleteGuild(id());
     }
@@ -866,6 +880,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the member got banned
      */
     @Nonnull
+    @CheckReturnValue
     default Completable ban(@Nonnull final String userId,
                             @Nullable final String reason,
                             @Nonnegative final int deleteMessageDays) {
@@ -897,6 +912,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the member got banned
      */
     @Nonnull
+    @CheckReturnValue
     default Completable ban(final long userId,
                             @Nullable final String reason,
                             @Nonnegative final int deleteMessageDays) {
@@ -914,6 +930,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the member got banned
      */
     @Nonnull
+    @CheckReturnValue
     default Completable ban(final long userId,
                             @Nonnegative final int deleteMessageDays) {
         return ban(userId, null, deleteMessageDays);
@@ -931,6 +948,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the member got banned
      */
     @Nonnull
+    @CheckReturnValue
     default Completable ban(@Nonnull final Member member,
                             @Nullable final String reason,
                             @Nonnegative final int deleteMessageDays) {
@@ -948,6 +966,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the ban got removed
      */
     @Nonnull
+    @CheckReturnValue
     default Completable unban(@Nonnull final String userId, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.BAN_MEMBERS);
         return catnip().rest().guild().removeGuildBan(id(), userId, reason);
@@ -963,6 +982,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the ban got removed
      */
     @Nonnull
+    @CheckReturnValue
     default Completable unban(@Nonnull final String userId) {
         return unban(userId, null);
     }
@@ -978,6 +998,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the ban got removed
      */
     @Nonnull
+    @CheckReturnValue
     default Completable unban(final long userId, @Nullable final String reason) {
         return unban(Long.toUnsignedString(userId), reason);
     }
@@ -992,6 +1013,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the ban got removed
      */
     @Nonnull
+    @CheckReturnValue
     default Completable unban(final long userId) {
         return unban(userId, null);
     }
@@ -1007,6 +1029,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the ban got removed
      */
     @Nonnull
+    @CheckReturnValue
     default Completable unban(@Nonnull final User user, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.BAN_MEMBERS);
         return catnip().rest().guild().removeGuildBan(id(), user.id(), reason);
@@ -1022,6 +1045,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the ban got removed
      */
     @Nonnull
+    @CheckReturnValue
     default Completable unban(@Nonnull final User user) {
         return unban(user, null);
     }
@@ -1037,6 +1061,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that is finished when the user got kicked
      */
     @Nonnull
+    @CheckReturnValue
     default Completable kick(@Nonnull final String userId, @Nullable final String reason) {
         return Completable.fromMaybe(
                 catnip().cache().member(id(), userId)
@@ -1063,6 +1088,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that is finished when the user got kicked
      */
     @Nonnull
+    @CheckReturnValue
     default Completable kick(@Nonnull final String userId) {
         return kick(userId, null);
     }
@@ -1078,6 +1104,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that is finished when the user got kicked
      */
     @Nonnull
+    @CheckReturnValue
     default Completable kick(final long userId, @Nullable final String reason) {
         return kick(Long.toUnsignedString(userId), reason);
     }
@@ -1092,6 +1119,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that is finished when the user got kicked
      */
     @Nonnull
+    @CheckReturnValue
     default Completable kick(final long userId) {
         return kick(userId, null);
     }
@@ -1107,6 +1135,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that is finished when the user got kicked
      */
     @Nonnull
+    @CheckReturnValue
     default Completable kick(final Member member, @Nullable final String reason) {
         return kick(member.id(), reason);
     }
@@ -1121,6 +1150,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that is finished when the user got kicked
      */
     @Nonnull
+    @CheckReturnValue
     default Completable kick(final Member member) {
         return kick(member.id(), null);
     }
@@ -1137,12 +1167,132 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @throws IllegalArgumentException If the nickname is longer than {@link Guild#NICKNAME_MAX_LENGTH}
      */
     @Nonnull
+    @CheckReturnValue
     default Single<String> changeNickName(@Nonnull final String nickname, @Nullable final String reason) {
         if(nickname.length() > NICKNAME_MAX_LENGTH) {
             throw new IllegalArgumentException("Nickname must not be longer than" + NICKNAME_MAX_LENGTH);
         }
         PermissionUtil.checkPermissions(catnip(), id(), Permission.CHANGE_NICKNAME);
         return catnip().rest().guild().modifyCurrentUsersNick(id(), nickname, reason);
+    }
+    
+    /**
+     * Modifies the guild member with the specified updates.
+     * Needs {@link Permission#MANAGE_NICKNAMES}, {@link Permission#MANAGE_ROLES},
+     * {@link Permission#MUTE_MEMBERS}, {@link Permission#DEAFEN_MEMBERS},
+     * and {@link Permission#MOVE_MEMBERS}.
+     *
+     * @param member The member to modify.
+     * @param data   The parts of the member to update.
+     *
+     * @return A {@link Completable} that completes when the update is completed.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Completable modifyGuildMember(@Nonnull final Member member, @Nonnull final MemberData data) {
+        return modifyGuildMember(member, data, null);
+    }
+    
+    /**
+     * Modifies the guild member with the specified updates.
+     * Needs {@link Permission#MANAGE_NICKNAMES}, {@link Permission#MANAGE_ROLES},
+     * {@link Permission#MUTE_MEMBERS}, {@link Permission#DEAFEN_MEMBERS},
+     * and {@link Permission#MOVE_MEMBERS}.
+     *
+     * @param member The member to modify.
+     * @param data   The parts of the member to update.
+     * @param reason The audit log reason for the update.
+     *
+     * @return A {@link Completable} that completes when the update is completed.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Completable modifyGuildMember(@Nonnull final Member member, @Nonnull final MemberData data,
+                                          @Nullable final String reason) {
+        // TODO: Fine-grained perms checking would be neat.
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_ROLES, Permission.MANAGE_NICKNAMES,
+                Permission.MUTE_MEMBERS, Permission.DEAFEN_MEMBERS, Permission.MOVE_MEMBERS);
+        return catnip().rest().guild().modifyGuildMember(id(), member.id(), data, reason);
+    }
+    
+    /**
+     * @return A new updater for channels in this guild. See
+     * {@link PositionUpdater} for how to use it.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default PositionUpdater channelPositionUpdater() {
+        return new PositionUpdater(id(), false);
+    }
+    
+    /**
+     * @return A new updater for roles in this guild. See
+     * {@link PositionUpdater} for how to use it.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default PositionUpdater rolePositionUpdater() {
+        return new PositionUpdater(id(), true);
+    }
+    
+    /**
+     * Modifies the positions of channels. See the docs on
+     * {@link PositionUpdater} for how to use it.
+     *
+     * @param updater The position updater.
+     *
+     * @return A {@link Completable} that completes when the update is completed.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Completable modifyChannelPositions(@Nonnull final PositionUpdater updater) {
+        return modifyChannelPositions(updater, null);
+    }
+    
+    /**
+     * Modifies the positions of channels. See the docs on
+     * {@link PositionUpdater} for how to use it.
+     *
+     * @param updater The position updater.
+     * @param reason  The reason for the update.
+     *
+     * @return A {@link Completable} that completes when the update is completed.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Completable modifyChannelPositions(@Nonnull final PositionUpdater updater, @Nullable final String reason) {
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_CHANNELS);
+        return catnip().rest().guild().modifyGuildChannelPositions(updater, reason);
+    }
+    
+    /**
+     * Modifies the positions of roles. See the docs on
+     * {@link PositionUpdater} for how to use it.
+     *
+     * @param updater The position updater.
+     *
+     * @return A {@link Completable} that completes when the update is completed.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Completable modifyRolePositions(@Nonnull final PositionUpdater updater) {
+        return modifyRolePositions(updater, null);
+    }
+    
+    /**
+     * Modifies the positions of roles. See the docs on
+     * {@link PositionUpdater} for how to use it.
+     *
+     * @param updater The position updater.
+     * @param reason  The reason for the update.
+     *
+     * @return A {@link Completable} that completes when the update is completed.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Completable modifyRolePositions(@Nonnull final PositionUpdater updater, @Nullable final String reason) {
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_ROLES);
+        return catnip().rest().guild().modifyGuildRolePositions(updater, reason);
     }
     
     /**
@@ -1173,6 +1323,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the role got added
      */
     @Nonnull
+    @CheckReturnValue
     default Completable addRoleToMember(@Nonnull final Role role, @Nonnull final Member member, @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_ROLES);
         PermissionUtil.checkHierarchy(role, this);
@@ -1190,6 +1341,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the role got added
      */
     @Nonnull
+    @CheckReturnValue
     default Completable addRoleToMember(@Nonnull final Role role, @Nonnull final Member member) {
         return addRoleToMember(role, member, null);
     }
@@ -1206,6 +1358,7 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the role got removed
      */
     @Nonnull
+    @CheckReturnValue
     default Completable removeRoleFromMember(@Nonnull final Role role, @Nonnull final Member member,
                                              @Nullable final String reason) {
         PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_ROLES);
@@ -1224,8 +1377,132 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
      * @return A Observable that completes when the role got removed
      */
     @Nonnull
+    @CheckReturnValue
     default Completable removeRoleFromMember(@Nonnull final Role role, @Nonnull final Member member) {
         return removeRoleFromMember(role, member, null);
+    }
+    
+    /**
+     * Creates a new channel in this guild.
+     *
+     * @param data The data to create the channel with.
+     *
+     * @return A {@link Single} that completes with the created channel.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Single<GuildChannel> createChannel(@Nonnull final ChannelData data) {
+        return createChannel(data, null);
+    }
+    
+    /**
+     * Creates a new channel in this guild.
+     *
+     * @param data   The data to create the channel with.
+     * @param reason The reason for creating the channel.
+     *
+     * @return A {@link Single} that completes with the created channel.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Single<GuildChannel> createChannel(@Nonnull final ChannelData data, @Nullable final String reason) {
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_CHANNELS);
+        return catnip().rest().guild().createGuildChannel(id(), data, reason);
+    }
+    
+    /**
+     * @return A {@link Single} that completes with the embed for this guild.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Single<GuildEmbed> getEmbed() {
+        return catnip().rest().guild().getGuildEmbed(id());
+    }
+    
+    /**
+     * @param channel The channel to invite users to.
+     * @param enabled Whether the embed is enabled.
+     *
+     * @return A {@link Single} that completes with the modified embed.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Single<GuildEmbed> modifyGuildEmbed(@Nonnull final GuildChannel channel, final boolean enabled) {
+        return modifyGuildEmbed(channel, enabled, null);
+    }
+    
+    /**
+     * @param channel The channel to invite users to.
+     * @param enabled Whether the embed is enabled.
+     * @param reason  The reason for the modification.
+     *
+     * @return A {@link Single} that completes with the modified embed.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Single<GuildEmbed> modifyGuildEmbed(@Nonnull final GuildChannel channel, final boolean enabled,
+                                                @Nullable final String reason) {
+        return catnip().rest().guild().modifyGuildEmbed(id(), channel.id(), enabled, reason);
+    }
+    
+    /**
+     * @return The vanity invite for this guild, if any.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Single<CreatedInvite> vanityInvite() {
+        // TODO: This needs to be a Maybe
+        return catnip().rest().guild().getGuildVanityURL(id());
+    }
+    
+    /**
+     * @param data The data to create the role with.
+     *
+     * @return A {@link Single} that completes with the created role.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Single<Role> createRole(@Nonnull final RoleData data) {
+        return createRole(data, null);
+    }
+    
+    /**
+     * @param data   The data to create the role with.
+     * @param reason The reason for creating this role.
+     *
+     * @return A {@link Single} that completes with the created role.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Single<Role> createRole(@Nonnull final RoleData data, @Nullable final String reason) {
+        return catnip().rest().guild().createGuildRole(id(), data, reason);
+    }
+    
+    /**
+     * Searches guild members for a member matching the given query.
+     *
+     * @param query The search query to use
+     *
+     * @return A {@link Maybe} with the member that matches, if any.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Maybe<Member> searchMembers(@Nonnull final String query) {
+        return searchMembers(query, 1).singleElement();
+    }
+    
+    /**
+     * Searches guild members for all members matching the given query.
+     *
+     * @param query The search query to use.
+     * @param limit The maximum number of members to return. Must be 1 <= N <= 100.
+     *
+     * @return An {@link Observable} containing the matched members, if any.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Observable<Member> searchMembers(@Nonnull final String query, @Nonnegative final int limit) {
+        return catnip().rest().guild().searchGuildMembers(id(), query, limit);
     }
     
     /**

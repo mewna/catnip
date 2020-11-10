@@ -185,6 +185,13 @@ public interface GuildChannel extends GuildEntity, Channel, Nameable {
         return new ChannelEditFields(this);
     }
     
+    @Nonnull
+    @CheckReturnValue
+    default Single<Channel> delete() {
+        PermissionUtil.checkPermissions(catnip(), guildId(), id(), Permission.MANAGE_CHANNELS);
+        return catnip().rest().channel().deleteChannel(id()).map(Channel::asGuildChannel);
+    }
+    
     @SuppressWarnings({"unused", "WeakerAccess"})
     @Getter
     @Setter
