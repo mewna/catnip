@@ -125,13 +125,6 @@ public interface CatnipOptionsView {
     EntityCacheWorker cacheWorker();
     
     /**
-     * The set of cache flags for catnip to obey. Used to prevent caching certain
-     * things.
-     */
-    @Nonnull
-    Set<CacheFlag> cacheFlags();
-    
-    /**
      * Manages event dispatching and consumers. Defaults to {@link DefaultDispatchManager}.
      */
     @Nonnull

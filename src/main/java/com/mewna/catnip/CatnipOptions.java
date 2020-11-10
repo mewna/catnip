@@ -28,7 +28,6 @@
 package com.mewna.catnip;
 
 import com.grack.nanojson.JsonObject;
-import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.SplitMemoryEntityCache;
 import com.mewna.catnip.entity.delegate.DefaultEntityDelegator;
@@ -66,7 +65,6 @@ import lombok.experimental.Accessors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.net.http.HttpClient;
-import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -94,8 +92,6 @@ public final class CatnipOptions implements CatnipOptionsView, Cloneable {
     private EventBuffer eventBuffer = new CachingBuffer();
     @Nonnull
     private EntityCacheWorker cacheWorker = new SplitMemoryEntityCache();
-    @Nonnull
-    private Set<CacheFlag> cacheFlags = EnumSet.noneOf(CacheFlag.class);
     @Nonnull
     private DispatchManager dispatchManager = new DefaultDispatchManager();
     private boolean chunkMembers;

@@ -582,11 +582,9 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
             }
             // Emojis
             case Raw.GUILD_EMOJIS_UPDATE: {
-                if(!catnip.options().cacheFlags().contains(CacheFlag.DROP_EMOJI)) {
-                    final String guild = payload.getString("guild_id");
-                    final JsonArray emojis = payload.getArray("emojis");
-                    emojis.stream().map(e -> entityBuilder.createCustomEmoji(guild, (JsonObject) e)).forEach(this::cacheEmoji);
-                }
+                final String guild = payload.getString("guild_id");
+                final JsonArray emojis = payload.getArray("emojis");
+                emojis.stream().map(e -> entityBuilder.createCustomEmoji(guild, (JsonObject) e)).forEach(this::cacheEmoji);
                 break;
             }
             // Currently-logged-in user
@@ -618,10 +616,8 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                                 .done()
                         );
                         userCache(shardId).put(updated.idAsLong(), updated);
-                        if(!catnip.options().cacheFlags().contains(CacheFlag.DROP_GAME_STATUSES)) {
-                            final Presence presence = entityBuilder.createPresence(payload);
-                            presenceCache(shardId).put(updated.idAsLong(), presence);
-                        }
+                        final Presence presence = entityBuilder.createPresence(payload);
+                        presenceCache(shardId).put(updated.idAsLong(), presence);
                     } else if(catnip.options().chunkMembers()) {
                         final String guildId = payload.getString("guild_id", "No guild");
                         catnip.logAdapter().warn("Received PRESENCE_UPDATE for unknown user {} (guild: {})!? (member chunking enabled)",
@@ -632,10 +628,8 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
             }
             // Voice
             case Raw.VOICE_STATE_UPDATE: {
-                if(!catnip.options().cacheFlags().contains(CacheFlag.DROP_VOICE_STATES)) {
-                    final VoiceState state = entityBuilder.createVoiceState(payload);
-                    cacheVoiceState(state);
-                }
+                final VoiceState state = entityBuilder.createVoiceState(payload);
+                cacheVoiceState(state);
                 break;
             }
         }
