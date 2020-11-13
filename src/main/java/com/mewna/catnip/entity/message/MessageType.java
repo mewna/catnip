@@ -56,6 +56,7 @@ public enum MessageType {
     GUILD_DISCOVERY_GRACE_PERIOD_FINAL_WARNING(17),
     THREAD_CREATED(18),
     REPLY(19),
+    INTERACTION(20),
     ;
     @Getter
     private final int id;
