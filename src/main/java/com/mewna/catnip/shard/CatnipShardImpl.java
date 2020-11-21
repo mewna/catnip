@@ -519,6 +519,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
     }
     
     private void handleDispatch(final JsonObject event) {
+        catnip.logAdapter().trace("Handling dispatch");
         // Should be safe to ignore
         if(event.get("d") instanceof JsonArray) {
             return;
@@ -563,6 +564,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         // has finished booting.
         event.put("shard", JsonObject.builder().value("id", shardInfo.id()).value("limit", shardInfo.limit()).done());
         try {
+            catnip.logAdapter().trace("dispatch -> buffer");
             catnip.eventBuffer().buffer(event);
         } catch(final Exception e) {
             catnip.logAdapter().error("Uncaught exception buffering event! Dumping raw event and reconnecting.");

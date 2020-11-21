@@ -240,15 +240,18 @@ public class CachingBuffer extends AbstractBuffer {
             if(bufferState.awaitedGuilds().contains(guildId)) {
                 // If we have a guild id, and we have a guild being awaited,
                 // buffer the event
+                catnip().logAdapter().trace("buffer: still awaiting chunks on {}", guildId);
                 bufferState.receiveGuildEvent(guildId, event);
             } else {
                 // If we're not awaiting the guild, it means that we're done
                 // buffering events for the guild - ie. all member chunks have
                 // been received - and so we can emit
+                catnip().logAdapter().trace("buffer: finished, emitting {}", guildId);
                 cacheAndDispatch(eventType, id, event);
             }
         } else {
             // Emit if the payload has no guild id
+            catnip().logAdapter().trace("buffer: no guild id, emitting");
             cacheAndDispatch(eventType, id, event);
         }
     }
