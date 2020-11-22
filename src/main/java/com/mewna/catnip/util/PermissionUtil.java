@@ -258,7 +258,7 @@ public final class PermissionUtil {
     }
     
     private static void checkGuildEquality(final GuildEntity actor, final GuildEntity target) {
-        if(!actor.guild().equals(target.guild())) {
+        if(actor.guildIdAsLong() != target.guildIdAsLong()) {
             throw new IllegalStateException("Actor and target mus be on the same guild!");
         }
     }
