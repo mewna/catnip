@@ -490,7 +490,7 @@ public interface Message extends Snowflake {
     @CheckReturnValue
     default Single<Message> edit(@Nonnull final MessageOptions options) {
         Validate.isTrue(options.files().isEmpty(), "attachments cannot be edited into messages");
-        return catnip().rest().channel().editMessage(channelId(), id(), options.buildMessage());
+        return catnip().rest().channel().editMessage(channelId(), id(), options);
     }
     
     /**
