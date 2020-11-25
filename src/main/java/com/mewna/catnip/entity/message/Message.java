@@ -33,6 +33,7 @@ import com.mewna.catnip.entity.channel.MessageChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
+import com.mewna.catnip.entity.impl.message.MessageReferenceImpl;
 import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.partials.Describable;
 import com.mewna.catnip.entity.partials.HasIcon;
@@ -406,6 +407,18 @@ public interface Message extends Snowflake {
     long webhookIdAsLong();
     
     /**
+     * @return A reference to this message, usable for ex. quoting.
+     */
+    default MessageReference asReference() {
+        return MessageReferenceImpl.builder()
+                .catnip(catnip())
+                .channelId(channelId())
+                .guildId(guildId())
+                .messageId(id())
+                .build();
+    }
+    
+    /**
      * Adds a reaction to this message.
      * <br>Note: this object will <b>not</b> be updated.
      *
@@ -480,28 +493,112 @@ public interface Message extends Snowflake {
         return catnip().rest().channel().editMessage(channelId(), id(), options.buildMessage());
     }
     
+    /**
+     * Send a message in the same channel as this message. This does <strong>not</strong>
+     * send a reply; see {@link #reply(String)} for that functionality.
+     *
+     * @param content The message data to respond with.
+     *
+     * @return A {@code Single} that completes with the newly-created message.
+     */
     @Nonnull
     @CheckReturnValue
-    default Single<Message> reply(@Nonnull final String content) {
+    default Single<Message> respond(@Nonnull final String content) {
         return catnip().rest().channel().createMessage(channelId(), content);
     }
     
+    /**
+     * Send a message in the same channel as this message. This does <strong>not</strong>
+     * send a reply; see {@link #reply(Embed)} for that functionality.
+     *
+     * @param embed The message data to respond with.
+     *
+     * @return A {@code Single} that completes with the newly-created message.
+     */
     @Nonnull
     @CheckReturnValue
-    default Single<Message> reply(@Nonnull final Embed embed) {
+    default Single<Message> respond(@Nonnull final Embed embed) {
         return catnip().rest().channel().createMessage(channelId(), embed);
     }
     
+    /**
+     * Send a message in the same channel as this message. This does <strong>not</strong>
+     * send a reply; see {@link #reply(Message)} for that functionality.
+     *
+     * @param message The message data to respond with.
+     *
+     * @return A {@code Single} that completes with the newly-created message.
+     */
     @Nonnull
     @CheckReturnValue
-    default Single<Message> reply(@Nonnull final Message message) {
+    default Single<Message> respond(@Nonnull final Message message) {
         return catnip().rest().channel().createMessage(channelId(), message);
     }
     
+    /**
+     * Send a message in the same channel as this message. This does <strong>not</strong>
+     * send a reply; see {@link #reply(MessageOptions)} for that functionality.
+     *
+     * @param options The message data to respond with.
+     *
+     * @return A {@code Single} that completes with the newly-created message.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Single<Message> respond(@Nonnull final MessageOptions options) {
+        return catnip().rest().channel().createMessage(channelId(), options);
+    }
+    
+    /**
+     * Reply to this message. This uses Discord's inline replies feature.
+     *
+     * @param content The message data to reply with.
+     *
+     * @return A {@code Single} that completes with the newly-created message.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Single<Message> reply(@Nonnull final String content) {
+        return reply(new MessageOptions().content(content));
+    }
+    
+    /**
+     * Reply to this message. This uses Discord's inline replies feature.
+     *
+     * @param embed The message data to reply with.
+     *
+     * @return A {@code Single} that completes with the newly-created message.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Single<Message> reply(@Nonnull final Embed embed) {
+        return reply(new MessageOptions().embed(embed));
+    }
+    
+    /**
+     * Reply to this message. This uses Discord's inline replies feature.
+     *
+     * @param message The message data to reply with.
+     *
+     * @return A {@code Single} that completes with the newly-created message.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Single<Message> reply(@Nonnull final Message message) {
+        return reply(new MessageOptions(message));
+    }
+    
+    /**
+     * Reply to this message. This uses Discord's inline replies feature.
+     *
+     * @param options The message data to reply with.
+     *
+     * @return A {@code Single} that completes with the newly-created message.
+     */
     @Nonnull
     @CheckReturnValue
     default Single<Message> reply(@Nonnull final MessageOptions options) {
-        return catnip().rest().channel().createMessage(channelId(), options);
+        return catnip().rest().channel().createMessage(channelId(), options.pingReply(true).referenceMessage(asReference()));
     }
     
     default boolean isRickRoll() {
