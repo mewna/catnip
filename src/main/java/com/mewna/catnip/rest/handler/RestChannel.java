@@ -150,9 +150,7 @@ public class RestChannel extends RestHandler {
                     allowedMentions.put("roles", options.mentionedRoles());
                 }
             }
-            if(options.pingReply()) {
-                allowedMentions.put("replied_user", options.pingReply());
-            }
+            allowedMentions.put("replied_user", options.pingReply());
             json.put("allowed_mentions", allowedMentions);
         }
         if(options.reference() != null) {

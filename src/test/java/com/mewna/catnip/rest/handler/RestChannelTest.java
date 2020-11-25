@@ -29,6 +29,8 @@ package com.mewna.catnip.rest.handler;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.Env;
+import com.mewna.catnip.entity.message.Message;
+import com.mewna.catnip.entity.message.MessageOptions;
 import com.mewna.catnip.rest.ResponseException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
@@ -80,6 +82,39 @@ public class RestChannelTest {
             // exception to be reraised.
             catnip.rest().channel().getMessage(Env.TEST_CHANNEL, message.id()).blockingGet();
         }, "getMessage didn't throw ResponseException");
+        
+        // Inline replies
+        final Message replyTest = catnip.rest().channel().createMessage(Env.TEST_CHANNEL, "test").blockingGet();
+        final Message reply = catnip.rest().channel().createMessage(Env.TEST_CHANNEL,
+                new MessageOptions()
+                        .content("reply test")
+                        .pingReply(true)
+                        .referenceMessage(replyTest.asReference()))
+                .blockingGet();
+        assertTrue(reply.mentionedUsers().stream().anyMatch(u -> u.idAsLong() == replyTest.author().idAsLong()));
+        
+        catnip.rest().channel().deleteMessage(Env.TEST_CHANNEL, replyTest.id()).blockingAwait();
+        catnip.rest().channel().deleteMessage(Env.TEST_CHANNEL, reply.id()).blockingAwait();
+        
+        final Message replyNoPingTest = catnip.rest().channel().createMessage(Env.TEST_CHANNEL, "test").blockingGet();
+        final Message noPingReply = catnip.rest().channel().createMessage(Env.TEST_CHANNEL,
+                new MessageOptions()
+                        .content("reply test")
+                        .pingReply(false)
+                        .referenceMessage(replyNoPingTest.asReference()))
+                .blockingGet();
+        
+        assertTrue(noPingReply.mentionedUsers().isEmpty());
+        catnip.rest().channel().deleteMessage(Env.TEST_CHANNEL, noPingReply.id()).blockingAwait();
+        catnip.rest().channel().deleteMessage(Env.TEST_CHANNEL, replyNoPingTest.id()).blockingAwait();
+        
+        final Message convenienceTestPing = catnip.rest().channel().createMessage(Env.TEST_CHANNEL, "test").blockingGet();
+        final Message conveniencePing = convenienceTestPing.reply("test", true).blockingGet();
+        assertFalse(conveniencePing.mentionedUsers().isEmpty());
+    
+        final Message convenienceTestNoPing = catnip.rest().channel().createMessage(Env.TEST_CHANNEL, "test").blockingGet();
+        final Message convenienceNoPing = convenienceTestNoPing.reply("test", false).blockingGet();
+        assertTrue(convenienceNoPing.mentionedUsers().isEmpty());
     }
     
     @Test
