@@ -495,7 +495,7 @@ public interface Message extends Snowflake {
     
     /**
      * Send a message in the same channel as this message. This does <strong>not</strong>
-     * send a reply; see {@link #reply(String)} for that functionality.
+     * send a reply; see {@link #reply(String, boolean)} for that functionality.
      *
      * @param content The message data to respond with.
      *
@@ -509,7 +509,7 @@ public interface Message extends Snowflake {
     
     /**
      * Send a message in the same channel as this message. This does <strong>not</strong>
-     * send a reply; see {@link #reply(Embed)} for that functionality.
+     * send a reply; see {@link #reply(Embed, boolean)} for that functionality.
      *
      * @param embed The message data to respond with.
      *
@@ -523,7 +523,7 @@ public interface Message extends Snowflake {
     
     /**
      * Send a message in the same channel as this message. This does <strong>not</strong>
-     * send a reply; see {@link #reply(Message)} for that functionality.
+     * send a reply; see {@link #reply(Message, boolean)} for that functionality.
      *
      * @param message The message data to respond with.
      *
@@ -553,39 +553,42 @@ public interface Message extends Snowflake {
      * Reply to this message. This uses Discord's inline replies feature.
      *
      * @param content The message data to reply with.
+     * @param ping    Whether or not the reply should ping the user.
      *
      * @return A {@code Single} that completes with the newly-created message.
      */
     @Nonnull
     @CheckReturnValue
-    default Single<Message> reply(@Nonnull final String content) {
-        return reply(new MessageOptions().content(content));
+    default Single<Message> reply(@Nonnull final String content, final boolean ping) {
+        return reply(new MessageOptions().content(content), ping);
     }
     
     /**
      * Reply to this message. This uses Discord's inline replies feature.
      *
      * @param embed The message data to reply with.
+     * @param ping  Whether or not the reply should ping the user.
      *
      * @return A {@code Single} that completes with the newly-created message.
      */
     @Nonnull
     @CheckReturnValue
-    default Single<Message> reply(@Nonnull final Embed embed) {
-        return reply(new MessageOptions().embed(embed));
+    default Single<Message> reply(@Nonnull final Embed embed, final boolean ping) {
+        return reply(new MessageOptions().embed(embed), ping);
     }
     
     /**
      * Reply to this message. This uses Discord's inline replies feature.
      *
      * @param message The message data to reply with.
+     * @param ping    Whether or not the reply should ping the user.
      *
      * @return A {@code Single} that completes with the newly-created message.
      */
     @Nonnull
     @CheckReturnValue
-    default Single<Message> reply(@Nonnull final Message message) {
-        return reply(new MessageOptions(message));
+    default Single<Message> reply(@Nonnull final Message message, final boolean ping) {
+        return reply(new MessageOptions(message), ping);
     }
     
     /**
@@ -597,8 +600,8 @@ public interface Message extends Snowflake {
      */
     @Nonnull
     @CheckReturnValue
-    default Single<Message> reply(@Nonnull final MessageOptions options) {
-        return catnip().rest().channel().createMessage(channelId(), options.pingReply(true).referenceMessage(asReference()));
+    default Single<Message> reply(@Nonnull final MessageOptions options, final boolean ping) {
+        return catnip().rest().channel().createMessage(channelId(), options.pingReply(ping).referenceMessage(asReference()));
     }
     
     default boolean isRickRoll() {
