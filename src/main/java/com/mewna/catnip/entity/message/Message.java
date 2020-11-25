@@ -537,7 +537,7 @@ public interface Message extends Snowflake {
     
     /**
      * Send a message in the same channel as this message. This does <strong>not</strong>
-     * send a reply; see {@link #reply(MessageOptions)} for that functionality.
+     * send a reply; see {@link #reply(MessageOptions, boolean)} for that functionality.
      *
      * @param options The message data to respond with.
      *

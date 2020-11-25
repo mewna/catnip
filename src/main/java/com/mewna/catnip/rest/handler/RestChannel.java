@@ -128,7 +128,8 @@ public class RestChannel extends RestHandler {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no attachments!");
         }
         
-        if(options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
+        if(options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null
+                || options.reference() != null) {
             final JsonObject allowedMentions = new JsonObject();
             final EnumSet<MentionParseFlag> parse = options.parseFlags();
             if(parse == null) {
@@ -148,6 +149,9 @@ public class RestChannel extends RestHandler {
                 if(!parse.contains(MentionParseFlag.ROLES)) {
                     allowedMentions.put("roles", options.mentionedRoles());
                 }
+            }
+            if(options.pingReply()) {
+                allowedMentions.put("replied_user", options.pingReply());
             }
             json.put("allowed_mentions", allowedMentions);
         }
