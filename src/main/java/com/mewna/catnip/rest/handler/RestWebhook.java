@@ -242,4 +242,98 @@ public class RestWebhook extends RestHandler {
                         .buffers(options.files()))
                 .map(ResponsePayload::object);
     }
+    
+    @Nonnull
+    @CheckReturnValue
+    @SuppressWarnings("unused")
+    public Single<Message> editWebhookMessage(@Nonnull final String webhookId, @Nonnull final String webhookToken,
+                                              @Nonnull final String messageId, @Nonnull final MessageOptions options) {
+        return executeWebhook(webhookId, webhookToken, null, null, options);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    @SuppressWarnings("WeakerAccess")
+    public Single<Message> editWebhookMessage(@Nonnull final String webhookId, @Nonnull final String webhookToken,
+                                              @Nonnull final String messageId, @Nullable final String username,
+                                              @Nullable final String avatarUrl, @Nonnull final MessageOptions options) {
+        return Single.fromObservable(executeWebhookRaw(webhookId, webhookToken, username, avatarUrl, options)
+                .map(entityBuilder()::createMessage));
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    @SuppressWarnings("WeakerAccess")
+    public Observable<JsonObject> editWebhookMessageRaw(@Nonnull final String webhookId, @Nonnull final String webhookToken,
+                                                        @Nonnull final String messageId, @Nullable final String username,
+                                                        @Nullable final String avatarUrl,
+                                                        @Nonnull final MessageOptions options) {
+        
+        final var builder = JsonObject.builder();
+        
+        if(options.content() != null && !options.content().isEmpty()) {
+            builder.value("content", options.content());
+        }
+        if(options.embed() != null) {
+            builder.array("embeds").value(entityBuilder().embedToJson(options.embed())).end();
+        }
+        if(username != null && !username.isEmpty()) {
+            builder.value("username", username);
+        }
+        if(avatarUrl != null && !avatarUrl.isEmpty()) {
+            builder.value("avatar_url", avatarUrl);
+        }
+        
+        final JsonObject body = builder.done();
+        
+        if(body.get("embeds") == null && body.get("content") == null
+                && !options.hasFiles()) {
+            throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
+        }
+        if(!options.flags().isEmpty() || options.override()) {
+            builder.value("flags", MessageFlag.fromSettable(options.flags()));
+        }
+        final JsonObject allowedMentions = new JsonObject();
+        if(options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
+            final EnumSet<MentionParseFlag> parse = options.parseFlags();
+            if(parse == null) {
+                // These act like a whitelist regardless of parse being present.
+                allowedMentions.put("users", options.mentionedUsers());
+                allowedMentions.put("roles", options.mentionedRoles());
+            } else {
+                final JsonArray parseList = new JsonArray();
+                for(final MentionParseFlag p : parse) {
+                    parseList.add(p.flagName());
+                }
+                allowedMentions.put("parse", parseList);
+                //If either list is present along with the respective parse option, validation fails. The contains check avoids this.
+                if(!parse.contains(MentionParseFlag.USERS)) {
+                    allowedMentions.put("users", options.mentionedUsers());
+                }
+                if(!parse.contains(MentionParseFlag.ROLES)) {
+                    allowedMentions.put("roles", options.mentionedRoles());
+                }
+            }
+        }
+        if(options.reference() != null) {
+            allowedMentions.put("replied_user", options.pingReply());
+        }
+        if(!allowedMentions.isEmpty()) {
+            builder.value("allowed_mentions", allowedMentions);
+        }
+        
+        return catnip().requester().
+                queue(new OutboundRequest(Routes.EDIT_WEBHOOK_MESSAGE.withMajorParam(webhookId).withQueryString("?wait=true"),
+                        Map.of("token", webhookToken, "message", messageId), body).needsToken(false)
+                        .buffers(options.files()))
+                .map(ResponsePayload::object);
+    }
+    
+    public Completable deleteWebhookMessage(@Nonnull final String webhookId, @Nonnull final String webhookToken,
+                                            @Nonnull final String messageId) {
+        return Completable.fromObservable(catnip().requester()
+                .queue(new OutboundRequest(Routes.DELETE_WEBHOOK_MESSAGE.withMajorParam(webhookId),
+                        Map.of("token", webhookToken, "message", messageId))
+                        .needsToken(false).emptyBody(true)));
+    }
 }
