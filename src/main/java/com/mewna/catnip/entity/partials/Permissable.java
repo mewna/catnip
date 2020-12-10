@@ -28,7 +28,6 @@
 package com.mewna.catnip.entity.partials;
 
 import com.mewna.catnip.entity.channel.GuildChannel;
-import com.mewna.catnip.entity.guild.GuildEntity;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.util.Permission;

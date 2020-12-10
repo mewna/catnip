@@ -28,6 +28,7 @@
 package com.mewna.catnip.entity.misc;
 
 import com.mewna.catnip.entity.guild.Guild;
+import com.mewna.catnip.entity.partials.GuildEntity;
 import com.mewna.catnip.entity.partials.NullNameable;
 import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.user.User;
@@ -172,7 +173,7 @@ public interface Emoji extends Snowflake, NullNameable {
     @CheckReturnValue
     boolean is(@Nonnull String emoji);
     
-    interface CustomEmoji extends Emoji {
+    interface CustomEmoji extends Emoji, GuildEntity {
         @Override
         @Nonnull
         @CheckReturnValue

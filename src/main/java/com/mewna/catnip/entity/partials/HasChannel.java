@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2020 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,48 +24,17 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.mewna.catnip.entity.guild;
 
-import com.mewna.catnip.entity.Entity;
-import io.reactivex.rxjava3.core.Maybe;
-
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
+package com.mewna.catnip.entity.partials;
 
 /**
- * An entity which is guild-scoped in catnip.
- *
- * @author AdrianTodt
- * @since 1/19/19.
+ * @author amy
+ * @since 12/10/20.
  */
-public interface GuildEntity extends Entity {
-    /**
-     * The id of the guild this entity is from.
-     *
-     * @return String representing the guild ID.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default String guildId() {
-        return Long.toUnsignedString(guildIdAsLong());
-    }
+public interface HasChannel {
+    long channelIdAsLong();
     
-    /**
-     * The id of the guild this entity is from.
-     *
-     * @return Long representing the guild ID.
-     */
-    @CheckReturnValue
-    long guildIdAsLong();
-    
-    /**
-     * The guild this entity is from.
-     *
-     * @return Guild represented by the guild ID.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default Maybe<Guild> guild() {
-        return catnip().cache().guild(guildIdAsLong());
+    default String channelId() {
+        return Long.toUnsignedString(channelIdAsLong());
     }
 }

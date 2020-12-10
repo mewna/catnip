@@ -58,6 +58,10 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -792,5 +796,31 @@ public interface Catnip extends AutoCloseable {
     @Override
     default void close() {
         shutdown();
+    }
+    
+    /**
+     * Validates an ed25519 signature for interactions.
+     *
+     * @return Whether or not the signature is valid.
+     */
+    default boolean validateSignature(@Nonnull final String signature, @Nonnull final String data) {
+        try {
+            final var byteKey = Base64.getDecoder().decode(options().publicKey());
+            // Type explicitly there to avoid IJ warnings
+            final KeySpec pkSpec = new X509EncodedKeySpec(byteKey);
+            final var kf = KeyFactory.getInstance("ed25519");
+            final var publicKey = kf.generatePublic(pkSpec);
+            final var ed25519 = Signature.getInstance("ed25519");
+            ed25519.initVerify(publicKey);
+            return ed25519.verify(signature.getBytes());
+        } catch(final NoSuchAlgorithmException e) {
+            throw new IllegalStateException("Unable to get ed25519 signature provider!", e);
+        } catch(final InvalidKeySpecException e) {
+            throw new IllegalStateException("Unable to create keyspec for public key!", e);
+        } catch(final InvalidKeyException e) {
+            throw new IllegalArgumentException("Invalid public key!", e);
+        } catch(final SignatureException e) {
+            throw new IllegalStateException("Signature improperly initialised!", e);
+        }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2020 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,25 +25,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.guild;
+package com.mewna.catnip.entity.impl.interaction;
 
+import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.partials.HasChannel;
+import com.mewna.catnip.entity.interaction.ApplicationCommandOptionStringChoice;
+import lombok.*;
+import lombok.experimental.Accessors;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 
 /**
- * A guild's embed.
- *
- * @author SamOphis
- * @since 10/18/2018
+ * @author amy
+ * @since 12/10/20.
  */
-@SuppressWarnings("unused")
-public interface GuildEmbed extends RequiresCatnip, HasChannel {
-    /**
-     * @return Whether the embed is enabled.
-     */
-    @CheckReturnValue
-    boolean enabled();
+@Getter
+@Setter
+@Builder
+@Accessors(fluent = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class ApplicationCommandOptionStringChoiceImpl implements ApplicationCommandOptionStringChoice, RequiresCatnip {
+    private transient Catnip catnip;
+    
+    private String name;
+    private String value;
+    
+    @Override
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
+    }
 }

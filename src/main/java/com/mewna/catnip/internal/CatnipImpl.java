@@ -74,7 +74,12 @@ import java.util.stream.Collectors;
 @Getter
 @Accessors(fluent = true, chain = true)
 public class CatnipImpl implements Catnip {
-    private static final List<String> UNPATCHABLE_OPTIONS = List.of("token", "logExtensionOverrides", "validateToken");
+    private static final List<String> UNPATCHABLE_OPTIONS = List.of(
+            "token",
+            "logExtensionOverrides",
+            "validateToken",
+            "publicKey"
+    );
     private final String token;
     private final boolean logExtensionOverrides;
     private final boolean validateToken;

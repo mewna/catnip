@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2020 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,26 +24,48 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package com.mewna.catnip.entity.partials;
 
-package com.mewna.catnip.entity.guild;
-
-import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.partials.HasChannel;
+import com.mewna.catnip.entity.Entity;
+import com.mewna.catnip.entity.guild.Guild;
+import io.reactivex.rxjava3.core.Maybe;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 
 /**
- * A guild's embed.
+ * An entity which is guild-scoped in catnip.
  *
- * @author SamOphis
- * @since 10/18/2018
+ * @author AdrianTodt
+ * @since 1/19/19.
  */
-@SuppressWarnings("unused")
-public interface GuildEmbed extends RequiresCatnip, HasChannel {
+public interface GuildEntity extends Entity {
     /**
-     * @return Whether the embed is enabled.
+     * The id of the guild this entity is from.
+     *
+     * @return String representing the guild ID.
      */
     @CheckReturnValue
-    boolean enabled();
+    default String guildId() {
+        return Long.toUnsignedString(guildIdAsLong());
+    }
+    
+    /**
+     * The id of the guild this entity is from.
+     *
+     * @return Long representing the guild ID.
+     */
+    @CheckReturnValue
+    long guildIdAsLong();
+    
+    /**
+     * The guild this entity is from.
+     *
+     * @return Guild represented by the guild ID.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Maybe<Guild> guild() {
+        return catnip().cache().guild(guildIdAsLong());
+    }
 }

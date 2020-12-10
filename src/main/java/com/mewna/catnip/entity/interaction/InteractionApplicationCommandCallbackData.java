@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2020 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,25 +25,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.guild;
+package com.mewna.catnip.entity.interaction;
 
-import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.partials.HasChannel;
+import com.mewna.catnip.entity.message.Embed;
+import com.mewna.catnip.entity.message.MentionParseFlag;
+import com.mewna.catnip.entity.message.MessageFlag;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Set;
 
 /**
- * A guild's embed.
- *
- * @author SamOphis
- * @since 10/18/2018
+ * @author amy
+ * @since 12/10/20.
  */
-@SuppressWarnings("unused")
-public interface GuildEmbed extends RequiresCatnip, HasChannel {
-    /**
-     * @return Whether the embed is enabled.
-     */
-    @CheckReturnValue
-    boolean enabled();
+public interface InteractionApplicationCommandCallbackData {
+    boolean tts();
+    
+    String content();
+    
+    List<Embed> embeds();
+    
+    Set<MentionParseFlag> allowedMentions();
+    
+    Set<MessageFlag> flags();
 }

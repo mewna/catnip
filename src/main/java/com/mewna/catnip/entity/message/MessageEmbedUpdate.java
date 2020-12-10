@@ -30,6 +30,8 @@ package com.mewna.catnip.entity.message;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.MessageChannel;
 import com.mewna.catnip.entity.guild.Guild;
+import com.mewna.catnip.entity.partials.GuildEntity;
+import com.mewna.catnip.entity.partials.HasChannel;
 import com.mewna.catnip.entity.partials.Snowflake;
 import io.reactivex.rxjava3.core.Maybe;
 
@@ -46,40 +48,7 @@ import java.util.List;
  * @author amy
  * @since 10/9/18.
  */
-public interface MessageEmbedUpdate extends Snowflake {
-    @Nullable
-    @CheckReturnValue
-    default String guildId() {
-        final long id = guildIdAsLong();
-        if(id == 0) {
-            return null;
-        }
-        return Long.toUnsignedString(id);
-    }
-    
-    @CheckReturnValue
-    long guildIdAsLong();
-    
-    @Nonnull
-    @CheckReturnValue
-    default Maybe<Guild> guild() {
-        if(guildId() == null) {
-            return Maybe.empty();
-        } else {
-            //noinspection ConstantConditions
-            return catnip().cache().guild(guildId());
-        }
-    }
-    
-    @Nonnull
-    @CheckReturnValue
-    default String channelId() {
-        return Long.toUnsignedString(channelIdAsLong());
-    }
-    
-    @CheckReturnValue
-    long channelIdAsLong();
-    
+public interface MessageEmbedUpdate extends Snowflake, GuildEntity, HasChannel {
     @Nonnull
     @CheckReturnValue
     default Maybe<MessageChannel> channel() {

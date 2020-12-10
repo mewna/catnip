@@ -182,7 +182,6 @@ public class RestWebhook extends RestHandler {
     public Observable<JsonObject> executeWebhookRaw(@Nonnull final String webhookId, @Nonnull final String webhookToken,
                                                     @Nullable final String username, @Nullable final String avatarUrl,
                                                     @Nonnull final MessageOptions options) {
-        
         final var builder = JsonObject.builder();
         
         if(options.content() != null && !options.content().isEmpty()) {
@@ -268,7 +267,6 @@ public class RestWebhook extends RestHandler {
                                                         @Nonnull final String messageId, @Nullable final String username,
                                                         @Nullable final String avatarUrl,
                                                         @Nonnull final MessageOptions options) {
-        
         final var builder = JsonObject.builder();
         
         if(options.content() != null && !options.content().isEmpty()) {

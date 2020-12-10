@@ -28,6 +28,7 @@
 package com.mewna.catnip.entity.channel;
 
 import com.mewna.catnip.entity.Entity;
+import com.mewna.catnip.entity.partials.HasChannel;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -40,23 +41,7 @@ import java.time.OffsetDateTime;
  * @author amy
  * @since 10/9/18.
  */
-public interface ChannelPinsUpdate extends Entity {
-    /**
-     * @return The id of the channel that pins were updated in. Will never be
-     * {@code null}.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default String channelId() {
-        return Long.toUnsignedString(channelIdAsLong());
-    }
-    
-    /**
-     * @return The id of the channel that pins were updated in.
-     */
-    @CheckReturnValue
-    long channelIdAsLong();
-    
+public interface ChannelPinsUpdate extends Entity, HasChannel {
     /**
      * @return The timestamp of the last pinned message in the channel. May be
      * {@code null}.

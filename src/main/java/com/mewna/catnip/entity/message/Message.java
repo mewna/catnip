@@ -35,10 +35,7 @@ import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.impl.message.MessageReferenceImpl;
 import com.mewna.catnip.entity.misc.Emoji;
-import com.mewna.catnip.entity.partials.Describable;
-import com.mewna.catnip.entity.partials.HasIcon;
-import com.mewna.catnip.entity.partials.Nameable;
-import com.mewna.catnip.entity.partials.Snowflake;
+import com.mewna.catnip.entity.partials.*;
 import com.mewna.catnip.entity.sticker.Sticker;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
@@ -65,7 +62,7 @@ import java.util.stream.Collectors;
  * @since 9/4/18.
  */
 @SuppressWarnings({"unused", "RedundantSuppression"})
-public interface Message extends Snowflake {
+public interface Message extends Snowflake, HasChannel {
     /**
      * The type of message. Use this to tell normal messages from system messages.
      *
@@ -221,25 +218,6 @@ public interface Message extends Snowflake {
     @Nonnull
     @CheckReturnValue
     String content();
-    
-    /**
-     * The snowflake ID of the channel this message was sent in.
-     *
-     * @return String representing the channel ID. Never null.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default String channelId() {
-        return Long.toUnsignedString(channelIdAsLong());
-    }
-    
-    /**
-     * The snowflake ID of the channel this message was sent in.
-     *
-     * @return String representing the channel ID. Never null.
-     */
-    @CheckReturnValue
-    long channelIdAsLong();
     
     /**
      * The channel this message was sent in.

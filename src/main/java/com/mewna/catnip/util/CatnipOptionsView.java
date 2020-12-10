@@ -86,6 +86,14 @@ public interface CatnipOptionsView {
     String token();
     
     /**
+     * The application's public key. Used for interactions (think slash commands).
+     * <p>
+     * May not be overriden by extensions.
+     */
+    @Nullable
+    String publicKey();
+    
+    /**
      * The shard manager for catnip to use. Defaults to {@link DefaultShardManager}.
      */
     @Nonnull

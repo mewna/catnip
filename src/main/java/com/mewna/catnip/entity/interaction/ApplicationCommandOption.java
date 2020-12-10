@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2020 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,25 +25,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.guild;
+package com.mewna.catnip.entity.interaction;
 
-import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.partials.HasChannel;
+import com.grack.nanojson.JsonObject;
+import com.mewna.catnip.entity.partials.Describable;
+import com.mewna.catnip.entity.partials.Nameable;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * A guild's embed.
- *
- * @author SamOphis
- * @since 10/18/2018
+ * @author amy
+ * @since 12/10/20.
  */
-@SuppressWarnings("unused")
-public interface GuildEmbed extends RequiresCatnip, HasChannel {
-    /**
-     * @return Whether the embed is enabled.
-     */
-    @CheckReturnValue
-    boolean enabled();
+public interface ApplicationCommandOption extends Nameable, Describable {
+    ApplicationCommandOptionType type();
+    
+    boolean defaultOption();
+    
+    boolean required();
+    
+    List<ApplicationCommandOptionChoice<?>> choices();
+    
+    List<ApplicationCommandOption> options();
+    
+    default JsonObject toJson() {
+        final var builder = JsonObject.builder();
+        builder.value("type", type().key());
+        builder.value("name", name());
+        builder.value("description", description());
+        builder.value("default", defaultOption());
+        builder.value("required", required());
+        builder.value("choices", choices().stream().map(ApplicationCommandOptionChoice::toJson).collect(Collectors.toList()));
+        builder.value("options", options().stream().map(ApplicationCommandOption::toJson).collect(Collectors.toList()));
+        return builder.done();
+    }
 }

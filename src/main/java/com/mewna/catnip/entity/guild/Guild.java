@@ -33,10 +33,7 @@ import com.mewna.catnip.cache.view.NamedCacheView;
 import com.mewna.catnip.entity.channel.*;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
-import com.mewna.catnip.entity.partials.HasIcon;
-import com.mewna.catnip.entity.partials.Nameable;
-import com.mewna.catnip.entity.partials.NullDescribable;
-import com.mewna.catnip.entity.partials.Snowflake;
+import com.mewna.catnip.entity.partials.*;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.entity.util.ImageOptions;
@@ -74,7 +71,7 @@ import java.util.Set;
  * @since 9/6/18
  */
 @SuppressWarnings({"unused", "RedundantSuppression"})
-public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
+public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon, HasApplication {
     int NICKNAME_MAX_LENGTH = 32;
     
     /**
@@ -219,25 +216,6 @@ public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon {
     @Nonnull
     @CheckReturnValue
     MFALevel mfaLevel();
-    
-    /**
-     * @return The id of the application that created this guild.
-     */
-    @Nullable
-    @CheckReturnValue
-    default String applicationId() {
-        final long id = applicationIdAsLong();
-        if(id == 0) {
-            return null;
-        }
-        return Long.toUnsignedString(id);
-    }
-    
-    /**
-     * @return The id of the application that created this guild.
-     */
-    @CheckReturnValue
-    long applicationIdAsLong();
     
     /**
      * @return Whether or not the guild's widget is enabled.

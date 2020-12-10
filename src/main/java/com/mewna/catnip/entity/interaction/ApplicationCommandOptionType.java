@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2020 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,25 +25,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.guild;
+package com.mewna.catnip.entity.interaction;
 
-import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.partials.HasChannel;
-
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
+import lombok.Getter;
 
 /**
- * A guild's embed.
- *
- * @author SamOphis
- * @since 10/18/2018
+ * @author amy
+ * @since 12/10/20.
  */
-@SuppressWarnings("unused")
-public interface GuildEmbed extends RequiresCatnip, HasChannel {
-    /**
-     * @return Whether the embed is enabled.
-     */
-    @CheckReturnValue
-    boolean enabled();
+@Getter
+public enum ApplicationCommandOptionType {
+    SUB_COMMAND(1),
+    SUB_COMMAND_GROUP(2),
+    STRING(3),
+    INTEGER(4),
+    BOOLEAN(5),
+    USER(6),
+    CHANNEL(7),
+    ROLE(8),
+    ;
+    
+    private final int key;
+    
+    ApplicationCommandOptionType(final int key) {
+        this.key = key;
+    }
+    
+    public static ApplicationCommandOptionType byKey(final int key) {
+        for(final ApplicationCommandOptionType value : values()) {
+            if(value.key == key) {
+                return value;
+            }
+        }
+        throw new IllegalArgumentException("Unknown ApplicationCommandOptionType: " + key);
+    }
 }

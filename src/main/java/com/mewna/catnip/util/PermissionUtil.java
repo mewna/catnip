@@ -32,6 +32,7 @@ package com.mewna.catnip.util;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.guild.*;
+import com.mewna.catnip.entity.partials.GuildEntity;
 import com.mewna.catnip.entity.partials.Permissable;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;

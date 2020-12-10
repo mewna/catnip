@@ -28,6 +28,8 @@
 package com.mewna.catnip.entity.guild;
 
 import com.mewna.catnip.entity.Entity;
+import com.mewna.catnip.entity.partials.GuildEntity;
+import com.mewna.catnip.entity.partials.HasChannel;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -39,45 +41,11 @@ import javax.annotation.Nullable;
  * @author amy
  * @since 4/24/20.
  */
-public interface DeletedInvite extends Entity {
+public interface DeletedInvite extends HasChannel {
     /**
      * @return The code of the invite that was deleted.
      */
     @Nonnull
     @CheckReturnValue
     String code();
-    
-    /**
-     * @return The channel the invite was on.
-     */
-    @CheckReturnValue
-    long channelIdAsLong();
-    
-    /**
-     * @return The channel the invite was on.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default String channelId() {
-        return Long.toUnsignedString(channelIdAsLong());
-    }
-    
-    /**
-     * @return The guild the invite was on.
-     */
-    @CheckReturnValue
-    long guildIdAsLong();
-    
-    /**
-     * @return The guild the invite was for. May be null.
-     */
-    @Nullable
-    @CheckReturnValue
-    default String guildId() {
-        final long id = guildIdAsLong();
-        if(id == 0) {
-            return null;
-        }
-        return Long.toUnsignedString(id);
-    }
 }

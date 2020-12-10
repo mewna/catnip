@@ -27,7 +27,8 @@
 
 package com.mewna.catnip.entity.channel;
 
-import com.mewna.catnip.entity.guild.GuildEntity;
+import com.mewna.catnip.entity.partials.GuildEntity;
+import com.mewna.catnip.entity.partials.HasChannel;
 
 import javax.annotation.CheckReturnValue;
 
@@ -37,22 +38,5 @@ import javax.annotation.CheckReturnValue;
  * @author amy
  * @since 11/10/18.
  */
-public interface WebhooksUpdate extends GuildEntity {
-    /**
-     * @return The id of the channel that webhooks were updated in.
-     */
-    @CheckReturnValue
-    default String channelId() {
-        final long id = channelIdAsLong();
-        if(id == 0) {
-            return null;
-        }
-        return Long.toUnsignedString(id);
-    }
-    
-    /**
-     * @return The id of the channel that webhooks were updated in.
-     */
-    @CheckReturnValue
-    long channelIdAsLong();
+public interface WebhooksUpdate extends GuildEntity, HasChannel {
 }
