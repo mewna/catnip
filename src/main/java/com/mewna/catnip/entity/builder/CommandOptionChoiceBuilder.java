@@ -25,35 +25,50 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.impl.interaction;
+package com.mewna.catnip.entity.builder;
 
-import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.interaction.ApplicationCommandOption;
+import com.mewna.catnip.entity.impl.interaction.ApplicationCommandOptionIntegerChoiceImpl;
+import com.mewna.catnip.entity.impl.interaction.ApplicationCommandOptionStringChoiceImpl;
 import com.mewna.catnip.entity.interaction.ApplicationCommandOptionChoice;
-import com.mewna.catnip.entity.interaction.ApplicationCommandOptionType;
-import lombok.*;
-import lombok.experimental.Accessors;
+import com.mewna.catnip.util.Validators;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 
 /**
  * @author amy
- * @since 12/10/20.
+ * @since 12/11/20.
  */
-@Getter
-@Setter
-@Builder
-@Accessors(fluent = true)
-@NoArgsConstructor
-@AllArgsConstructor
-public class ApplicationCommandOptionImpl implements ApplicationCommandOption {
-    private ApplicationCommandOptionType type;
-    private boolean defaultOption;
-    private boolean required;
-    private List<ApplicationCommandOptionChoice<?>> choices;
-    private List<ApplicationCommandOption> options;
-    private String description;
+public class CommandOptionChoiceBuilder<T> {
     private String name;
+    private T value;
+    
+    public CommandOptionChoiceBuilder<T> name(@Nonnull final String name) {
+        this.name = name;
+        return this;
+    }
+    
+    public CommandOptionChoiceBuilder<T> value(@Nonnull final T value) {
+        this.value = value;
+        return this;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public ApplicationCommandOptionChoice<T> build() {
+        Validators.assertStringLength(name, "name", 3, 32);
+        Validators.assertType(value, new Class[]{String.class, Integer.class}, "data");
+        // TODO: Convert this into instanceof pattern matching when Java 16 comes out
+        if(value instanceof String) {
+            return (ApplicationCommandOptionChoice<T>) ApplicationCommandOptionStringChoiceImpl.builder()
+                    .name(name)
+                    .value((String) value)
+                    .build();
+        } else if(value instanceof Integer) {
+            return (ApplicationCommandOptionChoice<T>) ApplicationCommandOptionIntegerChoiceImpl.builder()
+                    .name(name)
+                    .value((Integer) value)
+                    .build();
+        } else {
+            return Validators.unreachable();
+        }
+    }
 }

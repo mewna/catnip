@@ -1522,7 +1522,6 @@ public final class EntityBuilder {
     @CheckReturnValue
     public ApplicationCommandOption createApplicationCommandOption(@Nonnull final JsonObject data) {
         return delegate(ApplicationCommandOption.class, ApplicationCommandOptionImpl.builder()
-                .catnip(catnip)
                 .name(data.getString("name"))
                 .type(ApplicationCommandOptionType.byKey(data.getInt("type")))
                 .description(data.getString("description"))

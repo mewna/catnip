@@ -45,14 +45,7 @@ import javax.annotation.Nonnull;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApplicationCommandOptionStringChoiceImpl implements ApplicationCommandOptionStringChoice, RequiresCatnip {
-    private transient Catnip catnip;
-    
+public class ApplicationCommandOptionStringChoiceImpl implements ApplicationCommandOptionStringChoice {
     private String name;
     private String value;
-    
-    @Override
-    public void catnip(@Nonnull final Catnip catnip) {
-        this.catnip = catnip;
-    }
 }
