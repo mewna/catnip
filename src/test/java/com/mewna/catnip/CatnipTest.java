@@ -49,10 +49,12 @@ public class CatnipTest {
         });
         
         assertDoesNotThrow(() -> {
-            final var data = "{\"id\":\"787239352152883232\",\"token\":\"aW50ZXJhY3Rpb246Nzg3MjM5MzUyMTUyODgzMjMyOktYcHc0aHI5aVI5YjY1RmV6TFRuRTJ0OVJ5M0pzRm9QTVE4bm5vM21LS0ZUN3lrYzRsTG02SHJJcVJSYVJ5djZnNHRTYVpjd1pJandwSVpUR0V3OVlWSEVBYXlUbFRtRWhxeHZaaUhhWU1pSnMxc0VsOVh6V1lGSWV4a3NKSVlZ\",\"type\":1,\"version\":1}";
+            final var data = """
+                    {"id":"787271007046991882","token":"aW50ZXJhY3Rpb246Nzg3MjcxMDA3MDQ2OTkxODgyOlJWNnZHa1FYM0RxRVdka0hHaGxjQ256MlZSMXE0RUVjdHVZdmtoMFB5Z3RuZnhBQzVybTFickx1YWRQU1JUZ2tsMWtPeVBkYkxPSTAxYkVnMTRHejhHcWt5RG1KclUyeUppZzA4NFNkZlZxZGF3MXdYQldQUVZ0V1NyYXJkdnFQ","type":1,"version":1}
+                    """.strip().trim();
             final var pubkey = "48c85c48446ce9580ccc41427b5dee61d33b3b03e9219cbfadb4e815e59e8e94";
-            final var sig = "d1ddb08ddc2b1bc9fa78e346c518e31381b8c43a7e993bf1ea81649e256770a4b4f5dc1647646ec2328fa1669a32e289510b53f76e687e97f69fe6c8280ac00a";
-            final var ts = "1607762888";
+            final var sig = "25c1272150dbb451dd5ebcf395a85329824ba49672ffc62fe7ec3992eacc6db0c9781f29ac8ca46e861cd11eb89db7febcdb3dd77c428ef22bf5ca854b3c6905";
+            final var ts = "1607770434";
             final var catnip = Catnip.catnip(new CatnipOptions("")
                     .publicKey(pubkey)
                     .validateToken(false));

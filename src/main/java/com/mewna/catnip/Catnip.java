@@ -59,7 +59,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.bouncycastle.asn1.edec.EdECObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.util.Encodable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
@@ -820,8 +819,8 @@ public interface Catnip extends AutoCloseable {
             
             @SuppressWarnings("ConstantConditions")
             final var byteKey = Hex.decodeHex(options().publicKey());
+            final var pki = new SubjectPublicKeyInfo(new AlgorithmIdentifier(EdECObjectIdentifiers.id_Ed25519), byteKey);
             // Type explicitly there to avoid IJ warnings
-            final Encodable pki = new SubjectPublicKeyInfo(new AlgorithmIdentifier(EdECObjectIdentifiers.id_Ed25519), byteKey);
             final KeySpec pkSpec = new X509EncodedKeySpec(pki.getEncoded());
             final var kf = KeyFactory.getInstance("ed25519", CatnipImpl.BOUNCY_CASTLE_PROVIDER);
             final var publicKey = kf.generatePublic(pkSpec);
