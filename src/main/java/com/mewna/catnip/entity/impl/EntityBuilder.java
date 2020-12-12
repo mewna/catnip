@@ -1562,7 +1562,7 @@ public final class EntityBuilder {
                 .type(InteractionType.byKey(data.getInt("type")))
                 .version(data.getInt("version"))
                 .member(data.has("member") ? createMember(data.getString("guild_id"), data.getObject("member")) : null)
-                .data(createApplicationCommandInteractionData(data.getObject("data")))
+                .data(data.has("data") ? createApplicationCommandInteractionData(data.getObject("data")): null)
                 .build());
     }
     
