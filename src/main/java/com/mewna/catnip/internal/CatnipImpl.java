@@ -80,6 +80,7 @@ public class CatnipImpl implements Catnip {
             "validateToken",
             "publicKey"
     );
+    
     private final String token;
     private final boolean logExtensionOverrides;
     private final boolean validateToken;

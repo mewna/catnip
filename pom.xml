@@ -16,6 +16,7 @@
         <rxjava.version>3.0.7</rxjava.version>
         <slf4j.version>1.7.30</slf4j.version>
         <commons.lang.version>3.11</commons.lang.version>
+        <commons.codec.version>1.15</commons.codec.version>
         <jsr305.version>3.0.2</jsr305.version>
         <nanojson.version>1.6</nanojson.version>
 
@@ -115,6 +116,13 @@
             <groupId>org.javatuples</groupId>
             <artifactId>javatuples</artifactId>
             <version>1.2</version>
+        </dependency>
+
+        <!-- Hex encoding/decoding -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>${commons.codec.version}</version>
         </dependency>
 
         <!-- Mockito -->

@@ -52,6 +52,8 @@ import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.logging.LogAdapter;
 import com.mewna.catnip.util.scheduler.TaskScheduler;
 import io.reactivex.rxjava3.core.*;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.CheckReturnValue;
@@ -805,14 +807,20 @@ public interface Catnip extends AutoCloseable {
      */
     default boolean validateSignature(@Nonnull final String signature, @Nonnull final String data) {
         try {
-            final var byteKey = Base64.getDecoder().decode(options().publicKey());
+            if(options().publicKey() == null) {
+                throw new IllegalStateException("cannot validate signature when public key is null!");
+            }
+            
+            @SuppressWarnings("ConstantConditions")
+            final var byteKey = Hex.decodeHex(options().publicKey());
             // Type explicitly there to avoid IJ warnings
             final KeySpec pkSpec = new X509EncodedKeySpec(byteKey);
             final var kf = KeyFactory.getInstance("ed25519");
             final var publicKey = kf.generatePublic(pkSpec);
             final var ed25519 = Signature.getInstance("ed25519");
             ed25519.initVerify(publicKey);
-            return ed25519.verify(signature.getBytes());
+            ed25519.update(data.getBytes());
+            return ed25519.verify(Base64.getDecoder().decode(signature));
         } catch(final NoSuchAlgorithmException e) {
             throw new IllegalStateException("Unable to get ed25519 signature provider!", e);
         } catch(final InvalidKeySpecException e) {
@@ -821,6 +829,8 @@ public interface Catnip extends AutoCloseable {
             throw new IllegalArgumentException("Invalid public key!", e);
         } catch(final SignatureException e) {
             throw new IllegalStateException("Signature improperly initialised!", e);
+        } catch(final DecoderException e) {
+            throw new IllegalStateException("Couldn't decode public key into bytes!", e);
         }
     }
 }
