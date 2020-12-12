@@ -820,8 +820,8 @@ public interface Catnip extends AutoCloseable {
             
             @SuppressWarnings("ConstantConditions")
             final var byteKey = Hex.decodeHex(options().publicKey());
-            final Encodable pki = new SubjectPublicKeyInfo(new AlgorithmIdentifier(EdECObjectIdentifiers.id_Ed25519), byteKey);
             // Type explicitly there to avoid IJ warnings
+            final Encodable pki = new SubjectPublicKeyInfo(new AlgorithmIdentifier(EdECObjectIdentifiers.id_Ed25519), byteKey);
             final KeySpec pkSpec = new X509EncodedKeySpec(pki.getEncoded());
             final var kf = KeyFactory.getInstance("ed25519", CatnipImpl.BOUNCY_CASTLE_PROVIDER);
             final var publicKey = kf.generatePublic(pkSpec);
