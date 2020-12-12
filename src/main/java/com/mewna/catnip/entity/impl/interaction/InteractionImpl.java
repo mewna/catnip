@@ -57,6 +57,7 @@ public class InteractionImpl implements Interaction, RequiresCatnip {
     private long guildIdAsLong;
     private long channelIdAsLong;
     private long idAsLong;
+    private int version;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {

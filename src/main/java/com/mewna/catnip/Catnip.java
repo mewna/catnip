@@ -30,6 +30,7 @@ package com.mewna.catnip;
 import com.mewna.catnip.cache.EntityCache;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.entity.channel.Webhook;
+import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.serialization.EntitySerializer;
 import com.mewna.catnip.entity.user.Presence;
@@ -833,4 +834,13 @@ public interface Catnip extends AutoCloseable {
             throw new IllegalStateException("Couldn't decode public key into bytes!", e);
         }
     }
+    
+    /**
+     * The entity builder used by this catnip instance. This is exposed
+     * publicly so that, if necessary, it can be used to construct entities
+     * from JSON objects as needed.
+     *
+     * @return This catnip instance's {@code EntityBuilder}.
+     */
+    EntityBuilder entityBuilder();
 }

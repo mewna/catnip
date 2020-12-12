@@ -30,6 +30,7 @@ package com.mewna.catnip.internal;
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
+import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.impl.user.PresenceImpl;
 import com.mewna.catnip.entity.impl.user.PresenceImpl.ActivityImpl;
 import com.mewna.catnip.entity.misc.GatewayInfo;
@@ -93,6 +94,7 @@ public class CatnipImpl implements Catnip {
     private boolean startedKeepalive;
     private long clientIdAsLong;
     private CatnipOptions options;
+    private final EntityBuilder entityBuilder = new EntityBuilder(this);
     
     public CatnipImpl(@Nonnull final CatnipOptions options) {
         sanityCheckOptions(options);

@@ -45,10 +45,7 @@ import com.mewna.catnip.entity.impl.guild.InviteImpl.InviteChannelImpl;
 import com.mewna.catnip.entity.impl.guild.InviteImpl.InviteGuildImpl;
 import com.mewna.catnip.entity.impl.guild.InviteImpl.InviterImpl;
 import com.mewna.catnip.entity.impl.guild.audit.*;
-import com.mewna.catnip.entity.impl.interaction.ApplicationCommandImpl;
-import com.mewna.catnip.entity.impl.interaction.ApplicationCommandOptionImpl;
-import com.mewna.catnip.entity.impl.interaction.ApplicationCommandOptionIntegerChoiceImpl;
-import com.mewna.catnip.entity.impl.interaction.ApplicationCommandOptionStringChoiceImpl;
+import com.mewna.catnip.entity.impl.interaction.*;
 import com.mewna.catnip.entity.impl.message.*;
 import com.mewna.catnip.entity.impl.message.EmbedImpl.*;
 import com.mewna.catnip.entity.impl.misc.*;
@@ -1550,5 +1547,43 @@ public final class EntityBuilder {
         } else {
             throw new IllegalArgumentException("Unknown value type: " + innerValue.getClass().getName());
         }
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Interaction createInteraction(@Nonnull final JsonObject data) {
+        return delegate(Interaction.class, InteractionImpl.builder()
+                .catnip(catnip)
+                .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
+                .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id")))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .token(data.getString("token"))
+                .type(InteractionType.byKey(data.getInt("type")))
+                .version(data.getInt("version"))
+                .member(createMember(data.getString("guild_id"), data.getObject("member")))
+                .data(createApplicationCommandInteractionData(data.getObject("data")))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public ApplicationCommandInteractionData createApplicationCommandInteractionData(@Nonnull final JsonObject data) {
+        return delegate(ApplicationCommandInteractionData.class, ApplicationCommandInteractionDataImpl.builder()
+                .catnip(catnip)
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .name(data.getString("name"))
+                .options(toList(data.getArray("options"), this::createApplicationCommandInteractionDataOption))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public ApplicationCommandInteractionDataOption createApplicationCommandInteractionDataOption(@Nonnull final JsonObject data) {
+        return delegate(ApplicationCommandInteractionDataOption.class, ApplicationCommandInteractionDataOptionImpl.builder()
+                .catnip(catnip)
+                .name(data.getString("name"))
+                .options(toList(data.getArray("options"), this::createApplicationCommandInteractionDataOption))
+                .value(ApplicationCommandOptionType.byKey(data.getInt("value")))
+                .build());
     }
 }
