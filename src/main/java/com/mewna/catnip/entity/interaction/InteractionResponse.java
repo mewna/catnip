@@ -27,6 +27,11 @@
 
 package com.mewna.catnip.entity.interaction;
 
+import com.grack.nanojson.JsonObject;
+import com.mewna.catnip.Catnip;
+
+import javax.annotation.Nonnull;
+
 /**
  * @author amy
  * @since 12/10/20.
@@ -35,4 +40,11 @@ public interface InteractionResponse {
     InteractionResponseType type();
     
     InteractionApplicationCommandCallbackData data();
+    
+    default JsonObject toJson(@Nonnull final Catnip catnip) {
+        final var builder = JsonObject.builder();
+        builder.value("type", type().key());
+        builder.value(data().toJson(catnip));
+        return builder.done();
+    }
 }
