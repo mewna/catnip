@@ -1554,6 +1554,7 @@ public final class EntityBuilder {
     public Interaction createInteraction(@Nonnull final JsonObject data) {
         return delegate(Interaction.class, InteractionImpl.builder()
                 .catnip(catnip)
+                // TODO: Nullables
                 .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
                 .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id")))
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))

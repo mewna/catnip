@@ -27,11 +27,7 @@
 
 package com.mewna.catnip;
 
-import org.apache.commons.codec.binary.Hex;
 import org.junit.jupiter.api.Test;
-
-import java.security.*;
-import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -44,18 +40,14 @@ public class CatnipTest {
     @Test
     public void testEd25519Verification() {
         assertDoesNotThrow(() -> {
-            final KeyPair pair = KeyPairGenerator.getInstance("ed25519").generateKeyPair();
-            final PrivateKey priv = pair.getPrivate();
-            final PublicKey pub = pair.getPublic();
+            final var data = "{\"id\":\"787239352152883232\",\"token\":\"aW50ZXJhY3Rpb246Nzg3MjM5MzUyMTUyODgzMjMyOktYcHc0aHI5aVI5YjY1RmV6TFRuRTJ0OVJ5M0pzRm9QTVE4bm5vM21LS0ZUN3lrYzRsTG02SHJJcVJSYVJ5djZnNHRTYVpjd1pJandwSVpUR0V3OVlWSEVBYXlUbFRtRWhxeHZaaUhhWU1pSnMxc0VsOVh6V1lGSWV4a3NKSVlZ\",\"type\":1,\"version\":1}";
+            final var pubkey = "48c85c48446ce9580ccc41427b5dee61d33b3b03e9219cbfadb4e815e59e8e94";
+            final var sig = "d1ddb08ddc2b1bc9fa78e346c518e31381b8c43a7e993bf1ea81649e256770a4b4f5dc1647646ec2328fa1669a32e289510b53f76e687e97f69fe6c8280ac00a";
+            final var ts = "1607762888";
             final var catnip = Catnip.catnip(new CatnipOptions("")
-                    .publicKey(Hex.encodeHexString(pub.getEncoded()))
+                    .publicKey(pubkey)
                     .validateToken(false));
-            final var testData = "o9ilujred4918iiur7o1q38ifjq31eaoidujyoqwaildujolqauiedqo382934112897uwjol";
-            final Signature sig = Signature.getInstance("ed25519");
-            sig.initSign(priv);
-            sig.update(testData.getBytes());
-            final byte[] sign = sig.sign();
-            assertTrue(catnip.validateSignature(Base64.getEncoder().encodeToString(sign), testData));
+            assertTrue(catnip.validateSignature(sig, ts, data));
         });
     }
 }

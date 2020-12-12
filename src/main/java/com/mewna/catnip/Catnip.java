@@ -56,11 +56,17 @@ import io.reactivex.rxjava3.core.*;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.tuple.Pair;
+import org.bouncycastle.asn1.edec.EdECObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.util.Encodable;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
@@ -806,7 +812,7 @@ public interface Catnip extends AutoCloseable {
      *
      * @return Whether or not the signature is valid.
      */
-    default boolean validateSignature(@Nonnull final String signature, @Nonnull final String data) {
+    default boolean validateSignature(@Nonnull final String signature, @Nonnull final String ts, @Nonnull final String data) {
         try {
             if(options().publicKey() == null) {
                 throw new IllegalStateException("cannot validate signature when public key is null!");
@@ -814,14 +820,16 @@ public interface Catnip extends AutoCloseable {
             
             @SuppressWarnings("ConstantConditions")
             final var byteKey = Hex.decodeHex(options().publicKey());
+            final Encodable pki = new SubjectPublicKeyInfo(new AlgorithmIdentifier(EdECObjectIdentifiers.id_Ed25519), byteKey);
             // Type explicitly there to avoid IJ warnings
-            final KeySpec pkSpec = new X509EncodedKeySpec(byteKey);
-            final var kf = KeyFactory.getInstance("ed25519");
+            final KeySpec pkSpec = new X509EncodedKeySpec(pki.getEncoded());
+            final var kf = KeyFactory.getInstance("ed25519", CatnipImpl.BOUNCY_CASTLE_PROVIDER);
             final var publicKey = kf.generatePublic(pkSpec);
-            final var ed25519 = Signature.getInstance("ed25519");
-            ed25519.initVerify(publicKey);
-            ed25519.update(data.getBytes());
-            return ed25519.verify(Base64.getDecoder().decode(signature));
+            final var signedData = Signature.getInstance("ed25519", CatnipImpl.BOUNCY_CASTLE_PROVIDER);
+            signedData.initVerify(publicKey);
+            signedData.update(ts.getBytes(StandardCharsets.UTF_8));
+            signedData.update(data.getBytes(StandardCharsets.UTF_8));
+            return signedData.verify(Hex.decodeHex(signature));
         } catch(final NoSuchAlgorithmException e) {
             throw new IllegalStateException("Unable to get ed25519 signature provider!", e);
         } catch(final InvalidKeySpecException e) {
@@ -832,6 +840,8 @@ public interface Catnip extends AutoCloseable {
             throw new IllegalStateException("Signature improperly initialised!", e);
         } catch(final DecoderException e) {
             throw new IllegalStateException("Couldn't decode public key into bytes!", e);
+        } catch(final IOException e) {
+            throw new IllegalArgumentException("Couldn't encode pubkey into X509!", e);
         }
     }
     

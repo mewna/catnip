@@ -55,12 +55,14 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
+import java.security.Security;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -75,12 +77,17 @@ import java.util.stream.Collectors;
 @Getter
 @Accessors(fluent = true, chain = true)
 public class CatnipImpl implements Catnip {
+    public static final BouncyCastleProvider BOUNCY_CASTLE_PROVIDER = new BouncyCastleProvider();
     private static final List<String> UNPATCHABLE_OPTIONS = List.of(
             "token",
             "logExtensionOverrides",
             "validateToken",
             "publicKey"
     );
+    
+    static {
+        Security.addProvider(BOUNCY_CASTLE_PROVIDER);
+    }
     
     private final String token;
     private final boolean logExtensionOverrides;
