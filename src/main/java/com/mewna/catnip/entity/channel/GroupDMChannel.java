@@ -30,9 +30,11 @@ package com.mewna.catnip.entity.channel;
 import com.mewna.catnip.entity.partials.HasApplication;
 import com.mewna.catnip.entity.partials.HasIcon;
 import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.entity.util.ImageOptions;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -75,5 +77,11 @@ public interface GroupDMChannel extends DMChannel, HasIcon, HasApplication {
     @CheckReturnValue
     default boolean isGroupDM() {
         return true;
+    }
+    
+    @Nullable
+    @Override
+    default String iconUrl(@Nonnull final ImageOptions options) {
+        throw new UnsupportedOperationException("group dm icon url is not supported");
     }
 }

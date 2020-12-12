@@ -1538,7 +1538,6 @@ public final class EntityBuilder {
         final Object innerValue = data.get("value");
         if(innerValue instanceof String) {
             return delegate(ApplicationCommandOptionStringChoice.class, ApplicationCommandOptionStringChoiceImpl.builder()
-                    .catnip(catnip)
                     .name(data.getString("name"))
                     .value(data.getString("value"))
                     .build());
