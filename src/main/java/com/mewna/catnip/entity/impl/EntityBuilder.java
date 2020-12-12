@@ -1571,7 +1571,7 @@ public final class EntityBuilder {
     public ApplicationCommandInteractionData createApplicationCommandInteractionData(@Nonnull final JsonObject data) {
         return delegate(ApplicationCommandInteractionData.class, ApplicationCommandInteractionDataImpl.builder()
                 .catnip(catnip)
-                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id", 0)))
                 .name(data.getString("name"))
                 .options(toList(data.getArray("options"), this::createApplicationCommandInteractionDataOption))
                 .build());
