@@ -27,10 +27,15 @@
 
 package com.mewna.catnip.entity.interaction;
 
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
+import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.MentionParseFlag;
 import com.mewna.catnip.entity.message.MessageFlag;
 
+import javax.annotation.Nonnull;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
@@ -48,4 +53,26 @@ public interface InteractionApplicationCommandCallbackData {
     Set<MentionParseFlag> allowedMentions();
     
     Set<MessageFlag> flags();
+    
+    default JsonObject toJson(@Nonnull final Catnip catnip) {
+        final JsonObject allowedMentions = new JsonObject();
+        if(allowedMentions() != null && !allowedMentions().isEmpty()) {
+            final EnumSet<MentionParseFlag> parse = EnumSet.copyOf(allowedMentions());
+            final JsonArray parseList = new JsonArray();
+            for(final MentionParseFlag p : parse) {
+                parseList.add(p.flagName());
+            }
+            allowedMentions.put("parse", parseList);
+        }
+        
+        final var builder = JsonObject.builder();
+        builder.value("tts", tts());
+        builder.value("content", content());
+        builder.value("embeds", JsonArray.from(embeds().stream()
+                .map(catnip.entityBuilder()::embedToJson)
+                .toArray(Object[]::new)));
+        builder.value("allowed_mentions", allowedMentions);
+        builder.value("flags", MessageFlag.fromSettable(flags()));
+        return builder.done();
+    }
 }

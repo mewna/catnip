@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.impl.interaction;
 
-import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.interaction.InteractionApplicationCommandCallbackData;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.MentionParseFlag;
@@ -36,7 +34,6 @@ import com.mewna.catnip.entity.message.MessageFlag;
 import lombok.*;
 import lombok.experimental.Accessors;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
 
@@ -50,17 +47,10 @@ import java.util.Set;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class InteractionApplicationCommandCallbackDataImpl implements InteractionApplicationCommandCallbackData, RequiresCatnip {
-    private transient Catnip catnip;
-    
+public class InteractionApplicationCommandCallbackDataImpl implements InteractionApplicationCommandCallbackData {
     private boolean tts;
     private String content;
     private List<Embed> embeds;
     private Set<MentionParseFlag> allowedMentions;
     private Set<MessageFlag> flags;
-    
-    @Override
-    public void catnip(@Nonnull final Catnip catnip) {
-        this.catnip = catnip;
-    }
 }

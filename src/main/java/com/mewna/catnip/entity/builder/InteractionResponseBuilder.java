@@ -25,29 +25,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.impl.interaction;
+package com.mewna.catnip.entity.builder;
 
-import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.impl.interaction.InteractionResponseImpl;
 import com.mewna.catnip.entity.interaction.InteractionApplicationCommandCallbackData;
 import com.mewna.catnip.entity.interaction.InteractionResponse;
 import com.mewna.catnip.entity.interaction.InteractionResponseType;
-import lombok.*;
-import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
 
 /**
  * @author amy
- * @since 12/10/20.
+ * @since 12/12/20.
  */
-@Getter
-@Setter
-@Builder
-@Accessors(fluent = true)
-@NoArgsConstructor
-@AllArgsConstructor
-public class InteractionResponseImpl implements InteractionResponse {
+public class InteractionResponseBuilder {
     private InteractionResponseType type;
     private InteractionApplicationCommandCallbackData data;
+    
+    public InteractionResponseBuilder type(@Nonnull final InteractionResponseType type) {
+        this.type = type;
+        return this;
+    }
+    
+    public InteractionResponseBuilder data(@Nonnull final InteractionApplicationCommandCallbackData data) {
+        this.data = data;
+        return this;
+    }
+    
+    public InteractionResponse build() {
+        return InteractionResponseImpl.builder()
+                .type(type)
+                .data(data)
+                .build();
+    }
 }
