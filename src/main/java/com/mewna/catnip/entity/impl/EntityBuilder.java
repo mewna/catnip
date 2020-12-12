@@ -1555,13 +1555,13 @@ public final class EntityBuilder {
         return delegate(Interaction.class, InteractionImpl.builder()
                 .catnip(catnip)
                 // TODO: Nullables
-                .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
-                .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id")))
-                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id", "0")))
+                .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id", "0")))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id", "0")))
                 .token(data.getString("token"))
                 .type(InteractionType.byKey(data.getInt("type")))
                 .version(data.getInt("version"))
-                .member(createMember(data.getString("guild_id"), data.getObject("member")))
+                .member(data.has("member") ? createMember(data.getString("guild_id"), data.getObject("member")) : null)
                 .data(createApplicationCommandInteractionData(data.getObject("data")))
                 .build());
     }

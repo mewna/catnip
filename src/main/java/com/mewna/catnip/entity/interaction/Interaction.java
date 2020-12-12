@@ -33,18 +33,24 @@ import com.mewna.catnip.entity.partials.HasChannel;
 import com.mewna.catnip.entity.partials.Snowflake;
 
 import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * @author amy
  * @since 12/10/20.
  */
 public interface Interaction extends Snowflake, GuildEntity, HasChannel {
+    @Nonnull
     InteractionType type();
     
+    @Nullable
     ApplicationCommandInteractionData data();
     
+    @Nullable
     Member member();
     
+    @Nonnull
     String token();
     
     @Nonnegative
