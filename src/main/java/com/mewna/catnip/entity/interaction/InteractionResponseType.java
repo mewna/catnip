@@ -53,7 +53,7 @@ public enum InteractionResponseType {
     /**
      * Respond with a message, showing the user's input.
      */
-    CHANNEL_MESSAGE_WITHS_OURCE(4),
+    CHANNEL_MESSAGE_WITH_SOURCE(4),
     
     /**
      * ACK a command without sending a message, showing the user's input.
