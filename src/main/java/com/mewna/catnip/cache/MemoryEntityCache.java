@@ -38,7 +38,6 @@ import com.mewna.catnip.entity.channel.UserDMChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
-import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.Presence.OnlineStatus;
@@ -90,7 +89,6 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     protected final AtomicReference<User> selfUser = new AtomicReference<>(null);
     @Getter
     private Catnip catnip;
-    private EntityBuilder entityBuilder;
     
     @Override
     public boolean canProvidePreviousState(@Nonnull final CachedEntityState state) {
@@ -444,14 +442,12 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     public Completable updateCache(@Nonnull final String eventType, @Nonnegative final int shardId, @Nonnull final JsonObject payload) {
         switch(eventType) {
             // Lifecycle
-            case Raw.READY: {
-                selfUser.set(entityBuilder.createUser(payload.getObject("user")));
-                break;
+            case Raw.READY -> {
+                selfUser.set(catnip.entityBuilder().createUser(payload.getObject("user")));
             }
             // Channels
-            case Raw.CHANNEL_CREATE:
-            case Raw.CHANNEL_UPDATE: {
-                final Channel channel = entityBuilder.createChannel(payload);
+            case Raw.CHANNEL_CREATE, Raw.CHANNEL_UPDATE -> {
+                final Channel channel = catnip.entityBuilder().createChannel(payload);
                 if(channel.isGuild()) {
                     final GuildChannel gc = (GuildChannel) channel;
                     channelCache(gc.guildIdAsLong(), false).put(gc.idAsLong(), gc);
@@ -464,10 +460,9 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                             channel.idAsLong(), channel.isCategory(), channel.isDM(), channel.isGroupDM(), channel.isGuild(),
                             channel.isText(), channel.isUserDM(), channel.isVoice());
                 }
-                break;
             }
-            case Raw.CHANNEL_DELETE: {
-                final Channel channel = entityBuilder.createChannel(payload);
+            case Raw.CHANNEL_DELETE -> {
+                final Channel channel = catnip.entityBuilder().createChannel(payload);
                 if(channel.isGuild()) {
                     final GuildChannel gc = (GuildChannel) channel;
                     final MutableNamedCacheView<GuildChannel> channels = channelCache(gc.guildIdAsLong(), true);
@@ -480,20 +475,17 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                 } else {
                     catnip.logAdapter().warn("I don't know how to delete non-guild channel {}!", channel.idAsLong());
                 }
-                break;
             }
             // Guilds
-            case Raw.GUILD_CREATE: {
-                final Guild guild = entityBuilder.createAndCacheGuild(shardId, payload);
+            case Raw.GUILD_CREATE -> {
+                final Guild guild = catnip.entityBuilder().createAndCacheGuild(shardId, payload);
                 guildCache(shardId(guild.idAsLong())).put(guild.idAsLong(), guild);
-                break;
             }
-            case Raw.GUILD_UPDATE: {
-                final Guild guild = entityBuilder.createGuild(payload);
+            case Raw.GUILD_UPDATE -> {
+                final Guild guild = catnip.entityBuilder().createGuild(payload);
                 guildCache(shardId(guild.idAsLong())).put(guild.idAsLong(), guild);
-                break;
             }
-            case Raw.GUILD_DELETE: {
+            case Raw.GUILD_DELETE -> {
                 final long guildId = Long.parseUnsignedLong(payload.getString("id"));
                 guildCache(shardId(guildId)).remove(guildId);
                 deleteMemberCache(guildId);
@@ -501,47 +493,42 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                 deleteChannelCache(guildId);
                 deleteEmojiCache(guildId);
                 deleteVoiceStateCache(guildId);
-                break;
             }
             // Roles
-            case Raw.GUILD_ROLE_CREATE: {
+            case Raw.GUILD_ROLE_CREATE -> {
                 final String guild = payload.getString("guild_id");
                 final JsonObject json = payload.getObject("role");
-                final Role role = entityBuilder.createRole(guild, json);
+                final Role role = catnip.entityBuilder().createRole(guild, json);
                 cacheRole(role);
-                break;
             }
-            case Raw.GUILD_ROLE_UPDATE: {
+            case Raw.GUILD_ROLE_UPDATE -> {
                 final String guild = payload.getString("guild_id");
                 final JsonObject json = payload.getObject("role");
-                final Role role = entityBuilder.createRole(guild, json);
+                final Role role = catnip.entityBuilder().createRole(guild, json);
                 cacheRole(role);
-                break;
             }
-            case Raw.GUILD_ROLE_DELETE: {
+            case Raw.GUILD_ROLE_DELETE -> {
                 final String guild = payload.getString("guild_id");
                 final String role = payload.getString("role_id");
                 final MutableCacheView<Role> cache = roleCache(Long.parseUnsignedLong(guild), true);
                 if(cache != null) {
                     cache.remove(Long.parseUnsignedLong(role));
                 }
-                break;
             }
             // Members
-            case Raw.GUILD_MEMBER_ADD: {
-                final Member member = entityBuilder.createMember(payload.getString("guild_id"), payload);
-                final User user = entityBuilder.createUser(payload.getObject("user"));
+            case Raw.GUILD_MEMBER_ADD -> {
+                final Member member = catnip.entityBuilder().createMember(payload.getString("guild_id"), payload);
+                final User user = catnip.entityBuilder().createUser(payload.getObject("user"));
                 userCache(shardId).put(user.idAsLong(), user);
                 cacheMember(member);
-                break;
             }
-            case Raw.GUILD_MEMBER_UPDATE: {
+            case Raw.GUILD_MEMBER_UPDATE -> {
                 // This doesn't send an object like all the other events, so we build a fake
                 // payload object and create an entity from that
                 final JsonObject user = payload.getObject("user");
                 final String id = user.getString("id");
                 final String guild = payload.getString("guild_id");
-                
+            
                 return Completable.fromMaybe(member(guild, id).map(old -> {
                     if(old != null) {
                         @SuppressWarnings("ConstantConditions")
@@ -555,7 +542,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                                         // If we have an old member cached, this shouldn't be an issue
                                         .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
                                 .done();
-                        final Member member = entityBuilder.createMember(guild, data);
+                        final Member member = catnip.entityBuilder().createMember(guild, data);
                         cacheMember(member);
                     } else {
                         catnip.logAdapter().warn("Got GUILD_MEMBER_UPDATE for {} in {}, but we don't have them cached?!", id, guild);
@@ -563,38 +550,34 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                     return old;
                 }));
             }
-            case Raw.GUILD_MEMBER_REMOVE: {
+            case Raw.GUILD_MEMBER_REMOVE -> {
                 final String guild = payload.getString("guild_id");
                 final String user = payload.getObject("user").getString("id");
                 final MutableCacheView<Member> cache = memberCache(Long.parseUnsignedLong(guild), true);
                 if(cache != null) {
                     cache.remove(Long.parseUnsignedLong(user));
                 }
-                break;
             }
             // Member chunking
-            case Raw.GUILD_MEMBERS_CHUNK: {
+            case Raw.GUILD_MEMBERS_CHUNK -> {
                 final String guild = payload.getString("guild_id");
                 final JsonArray members = payload.getArray("members");
-                members.stream().map(e -> entityBuilder.createMember(guild, (JsonObject) e)).forEach(this::cacheMember);
-                break;
+                members.stream().map(e -> catnip.entityBuilder().createMember(guild, (JsonObject) e)).forEach(this::cacheMember);
             }
             // Emojis
-            case Raw.GUILD_EMOJIS_UPDATE: {
+            case Raw.GUILD_EMOJIS_UPDATE -> {
                 final String guild = payload.getString("guild_id");
                 final JsonArray emojis = payload.getArray("emojis");
-                emojis.stream().map(e -> entityBuilder.createCustomEmoji(guild, (JsonObject) e)).forEach(this::cacheEmoji);
-                break;
+                emojis.stream().map(e -> catnip.entityBuilder().createCustomEmoji(guild, (JsonObject) e)).forEach(this::cacheEmoji);
             }
             // Currently-logged-in user
-            case Raw.USER_UPDATE: {
+            case Raw.USER_UPDATE -> {
                 // Inner payload is always a user object, according to the
                 // docs, so we can just outright replace it.
-                selfUser.set(entityBuilder.createUser(payload));
-                break;
+                selfUser.set(catnip.entityBuilder().createUser(payload));
             }
             // Users
-            case Raw.PRESENCE_UPDATE: {
+            case Raw.PRESENCE_UPDATE -> {
                 final JsonObject user = payload.getObject("user");
                 final String id = user.getString("id");
                 return Completable.fromMaybe(user(id).map(old -> {
@@ -606,7 +589,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                         // - discriminator
                         // - avatar
                         // so we check the existing cache for a user, and update as needed
-                        final User updated = entityBuilder.createUser(JsonObject.builder()
+                        final User updated = catnip.entityBuilder().createUser(JsonObject.builder()
                                 .value("id", id)
                                 .value("bot", old.bot())
                                 .value("username", user.getString("username", old.username()))
@@ -615,7 +598,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                                 .done()
                         );
                         userCache(shardId).put(updated.idAsLong(), updated);
-                        final Presence presence = entityBuilder.createPresence(payload);
+                        final Presence presence = catnip.entityBuilder().createPresence(payload);
                         presenceCache(shardId).put(updated.idAsLong(), presence);
                     } else if(catnip.options().chunkMembers()) {
                         final String guildId = payload.getString("guild_id", "No guild");
@@ -626,10 +609,9 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                 }));
             }
             // Voice
-            case Raw.VOICE_STATE_UPDATE: {
-                final VoiceState state = entityBuilder.createVoiceState(payload);
+            case Raw.VOICE_STATE_UPDATE -> {
+                final VoiceState state = catnip.entityBuilder().createVoiceState(payload);
                 cacheVoiceState(state);
-                break;
             }
         }
         // Default case; most events don't need to have special future cases
@@ -768,7 +750,6 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     @Override
     public EntityCache catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
-        entityBuilder = new EntityBuilder(catnip);
         return this;
     }
 }

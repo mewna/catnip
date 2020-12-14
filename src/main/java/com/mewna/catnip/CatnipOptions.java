@@ -80,6 +80,7 @@ import java.util.concurrent.TimeUnit;
 public final class CatnipOptions implements CatnipOptionsView, Cloneable {
     @Nonnull
     private final String token;
+    private String publicKey;
     @Nonnull
     private ShardManager shardManager = new DefaultShardManager();
     @Nonnull

@@ -120,6 +120,8 @@ public final class Routes {
     public static final Route DELETE_WEBHOOK                      = new Route(DELETE, "/webhooks/:webhook", "webhook");
     public static final Route GET_WEBHOOK_TOKEN                   = new Route(GET,    "/webhooks/:webhook/:token", "webhook");
     public static final Route EXECUTE_WEBHOOK                     = new Route(POST,   "/webhooks/:webhook/:token", "webhook");
+    public static final Route EDIT_WEBHOOK_MESSAGE                = new Route(PATCH,  "/webhooks/:webhook/:token/messages/:message", "webhook");
+    public static final Route DELETE_WEBHOOK_MESSAGE              = new Route(DELETE, "/webhooks/:webhook/:token/messages/:message", "webhook");
     public static final Route DELETE_INVITE                       = new Route(DELETE, "/invites/:invite");
     public static final Route GET_INVITE                          = new Route(GET,    "/invites/:invite");
     public static final Route ACCEPT_INVITE                       = new Route(POST,   "/invites/:invite");
@@ -132,6 +134,20 @@ public final class Routes {
     public static final Route GET_USER                            = new Route(GET,    "/users/:user");
     public static final Route GET_CURRENT_APPLICATION_INFORMATION = new Route(GET,    "/oauth2/applications/@me");
     public static final Route LIST_VOICE_REGIONS                  = new Route(GET,    "/voice/regions");
+    public static final Route CREATE_INTERACTION_INITIAL_RESPONSE = new Route(POST,   "/interactions/:interaction/:interactionToken/callback", "interaction");
+    public static final Route EDIT_INTERACTION_INITIAL_RESPONSE   = new Route(PATCH,  "/webhooks/:interaction/:token/messages/@original");
+    public static final Route DELETE_INTERACTION_INITIAL_RESPONSE = new Route(DELETE, "/webhooks/:interaction/:token/messages/@original");
+    public static final Route CREATE_INTERACTION_FOLLOWUP         = new Route(POST,   "/webhooks/:interaction/:token/messages", "interaction");
+    public static final Route EDIT_INTERACTION_FOLLOWUP           = new Route(PATCH,  "/webhooks/:interaction/:token/messages/:message", "interaction");
+    public static final Route DELETE_INTERACTION_FOLLOWUP         = new Route(DELETE, "/webhooks/:interaction/:token/messages/:message", "interaction");
+    public static final Route GET_GLOBAL_APPLICATION_COMMANDS     = new Route(GET,    "/applications/:application/commands", "application");
+    public static final Route CREATE_GLOBAL_APPLICATION_COMMAND   = new Route(POST,   "/applications/:application/commands", "application");
+    public static final Route EDIT_GLOBAL_APPLICATION_COMMAND     = new Route(PATCH,  "/applications/:application/commands/:command", "application");
+    public static final Route DELETE_GLOBAL_APPLICATION_COMMAND   = new Route(DELETE, "/applications/:application/commands/:command", "application");
+    public static final Route GET_GUILD_APPLICATION_COMMANDS      = new Route(GET,    "/applications/:application/guilds/:guild/commands", "application");
+    public static final Route CREATE_GUILD_APPLICATION_COMMAND    = new Route(POST,   "/applications/:application/guilds/:guild/commands", "application");
+    public static final Route EDIT_GUILD_APPLICATION_COMMAND      = new Route(PATCH,  "/applications/:application/guilds/:guild/commands/:command", "application");
+    public static final Route DELETE_GUILD_APPLICATION_COMMAND    = new Route(DELETE, "/applications/:application/guilds/:guild/commands/:command", "application");
     // @formatter:on
     
     private Routes() {

@@ -27,10 +27,14 @@
 
 package com.mewna.catnip.entity.channel;
 
+import com.mewna.catnip.entity.partials.HasApplication;
+import com.mewna.catnip.entity.partials.HasIcon;
 import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.entity.util.ImageOptions;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -40,19 +44,13 @@ import java.util.List;
  * @since 9/12/18
  */
 @SuppressWarnings("unused")
-public interface GroupDMChannel extends DMChannel {
+public interface GroupDMChannel extends DMChannel, HasIcon, HasApplication {
     /**
      * @return The list of users in the group DM.
      */
     @Nonnull
     @CheckReturnValue
     List<User> recipients();
-    
-    /**
-     * @return The hash for the group DM's icon.
-     */
-    @CheckReturnValue
-    String icon();
     
     /**
      * @return The ID of the user who owns the group DM.
@@ -69,30 +67,6 @@ public interface GroupDMChannel extends DMChannel {
     @CheckReturnValue
     long ownerIdAsLong();
     
-    /**
-     * @return The ID of the application that created the group DM.
-     * May be {@code null}.
-     * <p>
-     * Bots shouldn't ever have this value being null.
-     */
-    @CheckReturnValue
-    default String applicationId() {
-        final long id = applicationIdAsLong();
-        if(id == 0) {
-            return null;
-        }
-        return Long.toUnsignedString(id);
-    }
-    
-    /**
-     * @return The ID of the application that created the group DM.
-     * A value of {@code 0} means this group wasn't created by an application.
-     * <p>
-     * Bots shouldn't ever have this value being 0.
-     */
-    @CheckReturnValue
-    long applicationIdAsLong();
-    
     @Override
     @CheckReturnValue
     default boolean isUserDM() {
@@ -103,5 +77,11 @@ public interface GroupDMChannel extends DMChannel {
     @CheckReturnValue
     default boolean isGroupDM() {
         return true;
+    }
+    
+    @Nullable
+    @Override
+    default String iconUrl(@Nonnull final ImageOptions options) {
+        throw new UnsupportedOperationException("group dm icon url is not supported");
     }
 }

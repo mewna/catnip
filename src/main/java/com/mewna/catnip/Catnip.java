@@ -30,6 +30,7 @@ package com.mewna.catnip;
 import com.mewna.catnip.cache.EntityCache;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.entity.channel.Webhook;
+import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.entity.serialization.EntitySerializer;
 import com.mewna.catnip.entity.user.Presence;
@@ -52,12 +53,23 @@ import com.mewna.catnip.util.Utils;
 import com.mewna.catnip.util.logging.LogAdapter;
 import com.mewna.catnip.util.scheduler.TaskScheduler;
 import io.reactivex.rxjava3.core.*;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.tuple.Pair;
+import org.bouncycastle.asn1.edec.EdECObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -793,4 +805,51 @@ public interface Catnip extends AutoCloseable {
     default void close() {
         shutdown();
     }
+    
+    /**
+     * Validates an ed25519 signature for interactions.
+     *
+     * @return Whether or not the signature is valid.
+     */
+    default boolean validateSignature(@Nonnull final String signature, @Nonnull final String ts, @Nonnull final String data) {
+        try {
+            if(options().publicKey() == null) {
+                throw new IllegalStateException("cannot validate signature when public key is null!");
+            }
+            
+            @SuppressWarnings("ConstantConditions")
+            final var byteKey = Hex.decodeHex(options().publicKey());
+            final var pki = new SubjectPublicKeyInfo(new AlgorithmIdentifier(EdECObjectIdentifiers.id_Ed25519), byteKey);
+            // Type explicitly there to avoid IJ warnings
+            final KeySpec pkSpec = new X509EncodedKeySpec(pki.getEncoded());
+            final var kf = KeyFactory.getInstance("ed25519", CatnipImpl.BOUNCY_CASTLE_PROVIDER);
+            final var publicKey = kf.generatePublic(pkSpec);
+            final var signedData = Signature.getInstance("ed25519", CatnipImpl.BOUNCY_CASTLE_PROVIDER);
+            signedData.initVerify(publicKey);
+            signedData.update(ts.getBytes(StandardCharsets.UTF_8));
+            signedData.update(data.getBytes(StandardCharsets.UTF_8));
+            return signedData.verify(Hex.decodeHex(signature));
+        } catch(final NoSuchAlgorithmException e) {
+            throw new IllegalStateException("Unable to get ed25519 signature provider!", e);
+        } catch(final InvalidKeySpecException e) {
+            throw new IllegalStateException("Unable to create keyspec for public key!", e);
+        } catch(final InvalidKeyException e) {
+            throw new IllegalArgumentException("Invalid public key!", e);
+        } catch(final SignatureException e) {
+            throw new IllegalStateException("Signature improperly initialised!", e);
+        } catch(final DecoderException e) {
+            throw new IllegalStateException("Couldn't decode public key into bytes!", e);
+        } catch(final IOException e) {
+            throw new IllegalArgumentException("Couldn't encode pubkey into X509!", e);
+        }
+    }
+    
+    /**
+     * The entity builder used by this catnip instance. This is exposed
+     * publicly so that, if necessary, it can be used to construct entities
+     * from JSON objects as needed.
+     *
+     * @return This catnip instance's {@code EntityBuilder}.
+     */
+    EntityBuilder entityBuilder();
 }

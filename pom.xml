@@ -16,6 +16,7 @@
         <rxjava.version>3.0.7</rxjava.version>
         <slf4j.version>1.7.30</slf4j.version>
         <commons.lang.version>3.11</commons.lang.version>
+        <commons.codec.version>1.15</commons.codec.version>
         <jsr305.version>3.0.2</jsr305.version>
         <nanojson.version>1.6</nanojson.version>
 
@@ -117,6 +118,25 @@
             <version>1.2</version>
         </dependency>
 
+        <!-- Hex encoding/decoding -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>${commons.codec.version}</version>
+        </dependency>
+
+        <!-- Easy ed25519 -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.67</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>1.67</version>
+        </dependency>
+
         <!-- Mockito -->
         <dependency>
             <groupId>org.mockito</groupId>
@@ -147,8 +167,8 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>15</source>
+                    <target>15</target>
                     <useIncrementalCompilation>false</useIncrementalCompilation>
                 </configuration>
                 <version>3.8.1</version>

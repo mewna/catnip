@@ -28,7 +28,7 @@
 package com.mewna.catnip.entity.channel;
 
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
-import com.mewna.catnip.entity.guild.GuildEntity;
+import com.mewna.catnip.entity.partials.GuildEntity;
 import com.mewna.catnip.entity.partials.Nameable;
 import com.mewna.catnip.entity.partials.Snowflake;
 

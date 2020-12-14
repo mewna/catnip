@@ -32,6 +32,8 @@ import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.VoiceChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
+import com.mewna.catnip.entity.partials.GuildEntity;
+import com.mewna.catnip.entity.partials.HasChannel;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Maybe;
 
@@ -46,52 +48,7 @@ import javax.annotation.Nullable;
  * @since 9/21/18.
  */
 @SuppressWarnings({"unused", "RedundantSuppression"})
-public interface VoiceState extends Entity {
-    /**
-     * @return The id of the guild this voice state is for, if applicable.
-     */
-    @Nullable
-    @CheckReturnValue
-    default String guildId() {
-        final long id = guildIdAsLong();
-        if(id == 0) {
-            return null;
-        }
-        return Long.toUnsignedString(id);
-    }
-    
-    /**
-     * @return The guild this voice state is for, if applicable.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default Maybe<Guild> guild() {
-        final long id = guildIdAsLong();
-        if(id == 0) {
-            return Maybe.empty();
-        }
-        return catnip().cache().guild(guildIdAsLong());
-    }
-    
-    /**
-     * @return The id of the guild this voice state is for, if applicable.
-     */
-    @CheckReturnValue
-    long guildIdAsLong();
-    
-    /**
-     * @return The channel the user is connected to, if applicable.
-     */
-    @Nullable
-    @CheckReturnValue
-    default String channelId() {
-        final long id = channelIdAsLong();
-        if(id == 0) {
-            return null;
-        }
-        return Long.toUnsignedString(id);
-    }
-    
+public interface VoiceState extends GuildEntity, HasChannel {
     /**
      * @return The guild this voice state is for, if applicable.
      */
@@ -105,12 +62,6 @@ public interface VoiceState extends Entity {
         }
         return catnip().cache().channel(guildId, id).map(Channel::asVoiceChannel);
     }
-    
-    /**
-     * @return The channel the user is connected to, if applicable.
-     */
-    @CheckReturnValue
-    long channelIdAsLong();
     
     /**
      * @return The user's id.

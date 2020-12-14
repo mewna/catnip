@@ -28,6 +28,7 @@
 package com.mewna.catnip.entity.guild;
 
 import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.partials.HasChannel;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -39,29 +40,10 @@ import javax.annotation.Nullable;
  * @since 10/18/2018
  */
 @SuppressWarnings("unused")
-public interface GuildEmbed extends RequiresCatnip {
+public interface GuildEmbed extends RequiresCatnip, HasChannel {
     /**
      * @return Whether the embed is enabled.
      */
     @CheckReturnValue
     boolean enabled();
-    
-    /**
-     * @return The id the embed is enabled for. {@code null} if not enabled.
-     */
-    @Nullable
-    @CheckReturnValue
-    default String channelId() {
-        final long id = channelIdAsLong();
-        if(id == 0) {
-            return null;
-        }
-        return Long.toUnsignedString(id);
-    }
-    
-    /**
-     * @return The id the embed is enabled for. {@code 0} if not enabled.
-     */
-    @CheckReturnValue
-    long channelIdAsLong();
 }

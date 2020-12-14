@@ -7,17 +7,11 @@
 
 A Discord API wrapper in Java. Fully async / reactive, built on top of
 [RxJava](http://reactivex.io). catnip tries to map roughly 1:1 to how the Discord 
-API works, both in terms of events and REST methods available.
+API works, both in terms of events and REST methods available. catnip uses Java 15+.
 
-catnip is part of the [amyware Discord server](https://discord.gg/yeF2HpP)
+catnip is part of the [amyware Discord server](https://discord.gg/yeF2HpP).
 
 Licensed under the [BSD 3-Clause License](https://tldrlegal.com/license/bsd-3-clause-license-(revised)).
-
-### READ THIS
-
-catnip v2 requires Java11+, but there is a bug with Java 11 + TLSv1.3 that causes runaway CPU usage.
-To avoid this problem, use Java 12 or later. See https://stackoverflow.com/questions/55298459 and
-https://stackoverflow.com/questions/54485755
 
 ## Installation
 

@@ -45,6 +45,7 @@ import com.mewna.catnip.entity.impl.guild.InviteImpl.InviteChannelImpl;
 import com.mewna.catnip.entity.impl.guild.InviteImpl.InviteGuildImpl;
 import com.mewna.catnip.entity.impl.guild.InviteImpl.InviterImpl;
 import com.mewna.catnip.entity.impl.guild.audit.*;
+import com.mewna.catnip.entity.impl.interaction.*;
 import com.mewna.catnip.entity.impl.message.*;
 import com.mewna.catnip.entity.impl.message.EmbedImpl.*;
 import com.mewna.catnip.entity.impl.misc.*;
@@ -53,6 +54,7 @@ import com.mewna.catnip.entity.impl.user.*;
 import com.mewna.catnip.entity.impl.user.PresenceImpl.*;
 import com.mewna.catnip.entity.impl.voice.VoiceRegionImpl;
 import com.mewna.catnip.entity.impl.voice.VoiceServerUpdateImpl;
+import com.mewna.catnip.entity.interaction.*;
 import com.mewna.catnip.entity.message.*;
 import com.mewna.catnip.entity.message.Embed.*;
 import com.mewna.catnip.entity.message.Message.Attachment;
@@ -393,24 +395,22 @@ public final class EntityBuilder {
     public GuildChannel createGuildChannel(@Nonnull final String guildId, @Nonnull final JsonObject data) {
         final ChannelType type = ChannelType.byKey(data.getInt("type"));
         switch(type) {
-            case TEXT: {
+            case TEXT -> {
                 return createTextChannel(guildId, data);
             }
-            case VOICE: {
+            case VOICE -> {
                 return createVoiceChannel(guildId, data);
             }
-            case CATEGORY: {
+            case CATEGORY -> {
                 return createCategory(guildId, data);
             }
-            case NEWS: {
+            case NEWS -> {
                 return createNewsChannel(guildId, data);
             }
-            case STORE: {
+            case STORE -> {
                 return createStoreChannel(guildId, data);
             }
-            default: {
-                throw new UnsupportedOperationException("Unsupported channel type " + type);
-            }
+            default -> throw new UnsupportedOperationException("Unsupported channel type " + type);
         }
     }
     
@@ -418,14 +418,11 @@ public final class EntityBuilder {
     @CheckReturnValue
     public DMChannel createDMChannel(@Nonnull final JsonObject data) {
         final ChannelType type = ChannelType.byKey(data.getInt("type"));
-        switch(type) {
-            case DM:
-                return createUserDM(data);
-            case GROUP_DM:
-                return createGroupDM(data);
-            default:
-                throw new UnsupportedOperationException("Unsupported channel type " + type);
-        }
+        return switch(type) {
+            case DM -> createUserDM(data);
+            case GROUP_DM -> createGroupDM(data);
+            default -> throw new UnsupportedOperationException("Unsupported channel type " + type);
+        };
     }
     
     @Nonnull
@@ -1349,56 +1346,45 @@ public final class EntityBuilder {
     @Nullable
     @CheckReturnValue
     public OptionalEntryInfo createOptionalEntryInfo(@Nonnull final JsonObject data, @Nonnull final ActionType type) {
-        switch(type) {
-            case MEMBER_PRUNE:
-                return delegate(MemberPruneInfo.class, MemberPruneInfoImpl.builder()
-                        .catnip(catnip)
-                        .deleteMemberDays(data.getInt("delete_member_days"))
-                        .removedMembersCount(data.getInt("members_removed"))
-                        .build());
-            case MEMBER_MOVE:
-                return delegate(MemberMoveInfo.class, MemberMoveInfoImpl.builder()
-                        .catnip(catnip)
-                        .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
-                        .membersMovedCount(Integer.parseUnsignedInt(data.getString("count")))
-                        .build());
-            case MEMBER_DISCONNECT:
-                return delegate(MemberDisconnectInfo.class, MemberDisconnectInfoImpl.builder()
-                        .catnip(catnip)
-                        .membersDisconnectedCount(Integer.parseUnsignedInt(data.getString("count")))
-                        .build());
-            case MESSAGE_DELETE:
-                return delegate(MessageDeleteInfo.class, MessageDeleteInfoImpl.builder()
-                        .catnip(catnip)
-                        .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
-                        .deletedMessagesCount(Integer.parseUnsignedInt(data.getString("count")))
-                        .build());
-            // The data returned for MESSAGE_BULK_DELETE *doesn't* actually follow https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-optional-audit-entry-info
-            // Instead, we're going to just return 'Count' as that is the only option that's present. If you're looking for 'channel_id', use 'target_id' (named targetId() and targetIdAsLong()) in AuditLogEntry.
-            case MESSAGE_BULK_DELETE:
-                return delegate(MessageBulkDeleteInfo.class, MessageBulkDeleteInfoImpl.builder()
-                        .catnip(catnip)
-                        .deletedMessagesCount(Integer.parseUnsignedInt(data.getString("count")))
-                        .build());
-            case MESSAGE_PIN:
-            case MESSAGE_UNPIN:
-                return delegate(MessagePinInfo.class, MessagePinInfoImpl.builder()
-                        .catnip(catnip)
-                        .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
-                        .messageIdAsLong(Long.parseUnsignedLong(data.getString("message_id")))
-                        .build());
-            case CHANNEL_OVERWRITE_CREATE:
-            case CHANNEL_OVERWRITE_UPDATE:
-            case CHANNEL_OVERWRITE_DELETE:
-                return delegate(OverrideUpdateInfo.class, OverrideUpdateInfoImpl.builder()
-                        .catnip(catnip)
-                        .overriddenEntityIdAsLong(Long.parseUnsignedLong(data.getString("id")))
-                        .overrideType(OverrideType.byKey(data.getInt("type")))
-                        .roleName(data.getString("role_name"))
-                        .build());
-            default:
-                return null;
-        }
+        // The data returned for MESSAGE_BULK_DELETE *doesn't* actually follow https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-optional-audit-entry-info
+        // Instead, we're going to just return 'Count' as that is the only option that's present. If you're looking for 'channel_id', use 'target_id' (named targetId() and targetIdAsLong()) in AuditLogEntry.
+        return switch(type) {
+            case MEMBER_PRUNE -> delegate(MemberPruneInfo.class, MemberPruneInfoImpl.builder()
+                    .catnip(catnip)
+                    .deleteMemberDays(data.getInt("delete_member_days"))
+                    .removedMembersCount(data.getInt("members_removed"))
+                    .build());
+            case MEMBER_MOVE -> delegate(MemberMoveInfo.class, MemberMoveInfoImpl.builder()
+                    .catnip(catnip)
+                    .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
+                    .membersMovedCount(Integer.parseUnsignedInt(data.getString("count")))
+                    .build());
+            case MEMBER_DISCONNECT -> delegate(MemberDisconnectInfo.class, MemberDisconnectInfoImpl.builder()
+                    .catnip(catnip)
+                    .membersDisconnectedCount(Integer.parseUnsignedInt(data.getString("count")))
+                    .build());
+            case MESSAGE_DELETE -> delegate(MessageDeleteInfo.class, MessageDeleteInfoImpl.builder()
+                    .catnip(catnip)
+                    .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
+                    .deletedMessagesCount(Integer.parseUnsignedInt(data.getString("count")))
+                    .build());
+            case MESSAGE_BULK_DELETE -> delegate(MessageBulkDeleteInfo.class, MessageBulkDeleteInfoImpl.builder()
+                    .catnip(catnip)
+                    .deletedMessagesCount(Integer.parseUnsignedInt(data.getString("count")))
+                    .build());
+            case MESSAGE_PIN, MESSAGE_UNPIN -> delegate(MessagePinInfo.class, MessagePinInfoImpl.builder()
+                    .catnip(catnip)
+                    .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
+                    .messageIdAsLong(Long.parseUnsignedLong(data.getString("message_id")))
+                    .build());
+            case CHANNEL_OVERWRITE_CREATE, CHANNEL_OVERWRITE_UPDATE, CHANNEL_OVERWRITE_DELETE -> delegate(OverrideUpdateInfo.class, OverrideUpdateInfoImpl.builder()
+                    .catnip(catnip)
+                    .overriddenEntityIdAsLong(Long.parseUnsignedLong(data.getString("id")))
+                    .overrideType(OverrideType.byKey(data.getInt("type")))
+                    .roleName(data.getString("role_name"))
+                    .build());
+            default -> null;
+        };
     }
     
     @Nonnull
@@ -1508,11 +1494,97 @@ public final class EntityBuilder {
                     .catnip(catnip)
                     .valid(false)
                     .url("")
-                    .shards(0)
-                    .totalSessions(0)
-                    .remainingSessions(0)
-                    .resetAfter(0)
+                    .shards(-1)
+                    .totalSessions(-1)
+                    .remainingSessions(-1)
+                    .resetAfter(-1)
                     .build());
         }
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public ApplicationCommand createApplicationCommand(@Nonnull final JsonObject data) {
+        return delegate(ApplicationCommand.class, ApplicationCommandImpl.builder()
+                .catnip(catnip)
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .applicationIdAsLong(Long.parseUnsignedLong(data.getString("application_id")))
+                .description(data.getString("description"))
+                .name(data.getString("name"))
+                .options(toList(data.getArray("options"), this::createApplicationCommandOption))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public ApplicationCommandOption createApplicationCommandOption(@Nonnull final JsonObject data) {
+        return delegate(ApplicationCommandOption.class, ApplicationCommandOptionImpl.builder()
+                .name(data.getString("name"))
+                .type(ApplicationCommandOptionType.byKey(data.getInt("type")))
+                .description(data.getString("description"))
+                .defaultOption(data.getBoolean("default", false))
+                .required(data.getBoolean("required", false))
+                .options(toList(data.getArray("options"), this::createApplicationCommandOption))
+                .choices(toList(data.getArray("choices"), this::createApplicationCommandOptionChoice))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public ApplicationCommandOptionChoice<?> createApplicationCommandOptionChoice(@Nonnull final JsonObject data) {
+        final Object innerValue = data.get("value");
+        if(innerValue instanceof String) {
+            return delegate(ApplicationCommandOptionStringChoice.class, ApplicationCommandOptionStringChoiceImpl.builder()
+                    .name(data.getString("name"))
+                    .value(data.getString("value"))
+                    .build());
+        } else if(innerValue instanceof Integer) {
+            return delegate(ApplicationCommandOptionIntegerChoice.class, ApplicationCommandOptionIntegerChoiceImpl.builder()
+                    .catnip(catnip)
+                    .name(data.getString("name"))
+                    .value(data.getInt("value"))
+                    .build());
+        } else {
+            throw new IllegalArgumentException("Unknown value type: " + innerValue.getClass().getName());
+        }
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Interaction createInteraction(@Nonnull final JsonObject data) {
+        return delegate(Interaction.class, InteractionImpl.builder()
+                .catnip(catnip)
+                // TODO: Nullables
+                .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id", "0")))
+                .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id", "0")))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id", "0")))
+                .token(data.getString("token"))
+                .type(InteractionType.byKey(data.getInt("type")))
+                .version(data.getInt("version"))
+                .member(data.has("member") ? createMember(data.getString("guild_id"), data.getObject("member")) : null)
+                .data(data.has("data") ? createApplicationCommandInteractionData(data.getObject("data")): null)
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public ApplicationCommandInteractionData createApplicationCommandInteractionData(@Nonnull final JsonObject data) {
+        return delegate(ApplicationCommandInteractionData.class, ApplicationCommandInteractionDataImpl.builder()
+                .catnip(catnip)
+                .idAsLong(Long.parseUnsignedLong(data.getString("id", "0")))
+                .name(data.getString("name"))
+                .options(toList(data.getArray("options"), this::createApplicationCommandInteractionDataOption))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public ApplicationCommandInteractionDataOption createApplicationCommandInteractionDataOption(@Nonnull final JsonObject data) {
+        return delegate(ApplicationCommandInteractionDataOption.class, ApplicationCommandInteractionDataOptionImpl.builder()
+                .catnip(catnip)
+                .name(data.getString("name"))
+                .options(toList(data.getArray("options"), this::createApplicationCommandInteractionDataOption))
+                .value(ApplicationCommandOptionType.byKey(data.getInt("value")))
+                .build());
     }
 }
