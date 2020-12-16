@@ -652,7 +652,7 @@ public interface Catnip extends AutoCloseable {
      *
      * @return The message consumer.
      */
-    default <T> MessageConsumer<T> on(@Nonnull final EventType<T> type) {
+    private <T> MessageConsumer<T> on(@Nonnull final EventType<T> type) {
         return dispatchManager().createConsumer(type.key());
     }
     
@@ -666,7 +666,7 @@ public interface Catnip extends AutoCloseable {
      *
      * @return The message consumer.
      */
-    default <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler) {
+    private <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler) {
         return on(type).handler(handler);
     }
     
@@ -714,7 +714,7 @@ public interface Catnip extends AutoCloseable {
      *
      * @return The message consumer.
      */
-    default <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type) {
+    private <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type) {
         return dispatchManager().createConsumer(type.key());
     }
     
@@ -729,7 +729,7 @@ public interface Catnip extends AutoCloseable {
      *
      * @return The message consumer.
      */
-    default <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
+    private <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
                                                   @Nonnull final BiConsumer<T, E> handler) {
         return on(type).handler(m -> handler.accept(m.getLeft(), m.getRight()));
     }
