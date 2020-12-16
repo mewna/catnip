@@ -293,7 +293,14 @@ public interface Channel extends Snowflake {
          * Requires an application with a valid SKU. Not officially announced,
          * but there is some discussion about it in discordapp/discord-api-docs#881.
          */
-        STORE(6, true);
+        STORE(6, true),
+        
+        // TODO: Purpose currently unknown
+        HTTPS_COLON_SLASH_SLASH(10, false),
+        DIS_DOT_GD_SLASH(11, false),
+        THREADS(12, false),
+        
+        ;
         
         @Getter
         private final int key;
