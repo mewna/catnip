@@ -6,7 +6,7 @@ information on what's changed.
 
 # catnip
 
-[![CircleCI](https://circleci.com/gh/mewna/catnip.svg?style=svg)](https://circleci.com/gh/mewna/catnip)
+![Run all tests](https://github.com/mewna/catnip/workflows/Run%20all%20tests/badge.svg)
 [![powered by potato](https://img.shields.io/badge/powered%20by-potato-%23db325c.svg)](https://mewna.com/)
 ![GitHub tag (latest by date)](https://img.shields.io/github/tag-date/mewna/catnip.svg?style=popout)
 ![LGTM Grade](https://img.shields.io/lgtm/grade/java/github/mewna/catnip)
