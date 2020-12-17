@@ -37,6 +37,7 @@ import lombok.Getter;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * A Discord channel. A channel may not be attached to a guild (ex. in the case
@@ -268,26 +269,32 @@ public interface Channel extends Snowflake {
          * A text channel in a guild.
          */
         TEXT(0, true),
+        
         /**
          * A DM with a single user.
          */
         DM(1, false),
+        
         /**
          * A voice channel in a guild.
          */
         VOICE(2, true),
+        
         /**
          * A DM with multiple users.
          */
         GROUP_DM(3, false),
+        
         /**
          * A guild channel category with zero or more child channels.
          */
         CATEGORY(4, true),
+        
         /**
          * A news channel in a guild. See discordapp/discord-api-docs#881
          */
         NEWS(5, true),
+        
         /**
          * A store channel in a guild. Used for literally what it sounds like.
          * Requires an application with a valid SKU. Not officially announced,
@@ -295,10 +302,25 @@ public interface Channel extends Snowflake {
          */
         STORE(6, true),
         
-        // TODO: Purpose currently unknown
-        HTTPS_COLON_SLASH_SLASH(10, false),
-        DIS_DOT_GD_SLASH(11, false),
-        THREADS(12, false),
+        // Note: Channel types 7 -> 9 never really existed in a meaningful form, afaik.
+        
+        /**
+         * A thread in an announcement? channel.
+         * TODO: Verify
+         */
+        ANNOUNCEMENT_THREAD(10, false),
+        
+        /**
+         * A public thread. I imagine this is for guild text channels?
+         * TODO: Verify
+         */
+        PUBLIC_THREAD(11, false),
+        
+        /**
+         * A private thread. I imagine this is for DMs?
+         * TODO: Verify
+         */
+        PRIVATE_THREAD(12, false),
         
         ;
         
@@ -320,6 +342,10 @@ public interface Channel extends Snowflake {
                 }
             }
             throw new IllegalArgumentException("No channel type for key " + key);
+        }
+        
+        public static List<ChannelType> threadableChannelTypes() {
+            return List.of(TEXT, NEWS);
         }
     }
 }

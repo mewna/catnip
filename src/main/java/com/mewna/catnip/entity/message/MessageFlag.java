@@ -45,7 +45,7 @@ public enum MessageFlag {
     SUPPRESS_EMBEDS(1 << 2, true),
     SOURCE_MESSAGE_DELETED(1 << 3, false),
     URGENT(1 << 4, false),
-    UNKNOWN_1(1 << 5, false),
+    HAS_THREAD(1 << 5, false),
     EPHEMERAL(1 << 6, false),
     ;
     
