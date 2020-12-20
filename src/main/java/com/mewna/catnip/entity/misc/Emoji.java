@@ -53,7 +53,7 @@ public interface Emoji extends Snowflake, NullNameable {
      *
      * @return String representing the ID.
      */
-    @Nonnull
+    @Nullable
     @CheckReturnValue
     String id();
     
@@ -256,7 +256,7 @@ public interface Emoji extends Snowflake, NullNameable {
     }
     
     interface UnicodeEmoji extends Emoji {
-        @Nonnull
+        @Nullable
         @Override
         default String id() {
             throw new IllegalStateException("Unicode emojis have no IDs!");
