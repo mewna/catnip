@@ -217,32 +217,13 @@ public class CatnipShardImpl implements CatnipShard, Listener {
             catnip.logAdapter().trace("Received:\n{}", JsonWriter.string(payload));
         }
         switch(op) {
-            case HELLO: {
-                handleHello(payload);
-                break;
-            }
-            case DISPATCH: {
-                handleDispatch(payload);
-                break;
-            }
-            case HEARTBEAT: {
-                handleHeartbeat();
-                break;
-            }
-            case HEARTBEAT_ACK: {
-                handleHeartbeatAck();
-                break;
-            }
-            case INVALID_SESSION: {
-                handleInvalidSession(payload);
-                break;
-            }
-            case RECONNECT: {
-                handleReconnectRequest();
-                break;
-            }
-            default: {
-                break;
+            case HELLO -> handleHello(payload);
+            case DISPATCH -> handleDispatch(payload);
+            case HEARTBEAT -> handleHeartbeat();
+            case HEARTBEAT_ACK -> handleHeartbeatAck();
+            case INVALID_SESSION -> handleInvalidSession(payload);
+            case RECONNECT -> handleReconnectRequest();
+            default -> {
             }
         }
     }
@@ -266,7 +247,7 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         }
         if(last) {
             try {
-                final var payload = socketInputBuffer.length() > 0 ? socketInputBuffer.append(data).toString() : data.toString();
+                final var payload = !socketInputBuffer.isEmpty() ? socketInputBuffer.append(data).toString() : data.toString();
                 handleSocketData(JsonParser.object().from(payload));
             } catch(final JsonParserException e) {
                 catnip.logAdapter().error("Shard {}: Error parsing payload", shardInfo, e);
@@ -537,25 +518,22 @@ public class CatnipShardImpl implements CatnipShard, Listener {
         if(event.get("s") != null) {
             catnip.sessionManager().seqnum(shardInfo.id(), event.getInt("s"));
         }
-        
+    
         switch(type) {
-            case "READY": {
+            case "READY" -> {
                 lifecycleState = LOGGED_IN;
                 catnip.sessionManager().session(shardInfo.id(), data.getString("session_id"));
                 // Reply after IDENTIFY ratelimit
                 catnip.dispatchManager().dispatchEvent(Raw.IDENTIFIED, shardInfo);
                 stateReply(READY);
-                break;
             }
-            case "RESUMED": {
+            case "RESUMED" -> {
                 lifecycleState = LOGGED_IN;
                 // RESUME is fine, just reply immediately
                 catnip.dispatchManager().dispatchEvent(Raw.RESUMED, shardInfo);
                 stateReply(RESUMED);
-                break;
             }
-            default: {
-                break;
+            default -> {
             }
         }
         

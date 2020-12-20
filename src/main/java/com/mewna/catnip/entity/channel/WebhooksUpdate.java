@@ -30,8 +30,6 @@ package com.mewna.catnip.entity.channel;
 import com.mewna.catnip.entity.partials.GuildEntity;
 import com.mewna.catnip.entity.partials.HasChannel;
 
-import javax.annotation.CheckReturnValue;
-
 /**
  * Fired over the event bus when a webhook update event is received.
  *

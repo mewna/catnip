@@ -31,7 +31,6 @@ import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.partials.HasChannel;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 
 /**
  * A guild's embed.

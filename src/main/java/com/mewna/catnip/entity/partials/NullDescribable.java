@@ -36,6 +36,7 @@ import javax.annotation.Nullable;
  * @author amy
  * @since 10/15/20.
  */
+@SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
 public interface NullDescribable {
     /**
      * @return The entity's description. May be null.

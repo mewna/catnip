@@ -38,6 +38,9 @@ import java.util.List;
  * @since 12/11/20.
  */
 public final class Validators {
+    private Validators() {
+    }
+    
     public static void assertStringLength(@Nullable final String toCheck, @Nonnull final String name,
                                           @Nonnegative final int minLen, @Nonnegative final int maxLen) {
         if(toCheck == null) {

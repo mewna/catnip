@@ -31,6 +31,7 @@ package com.mewna.catnip.entity.partials;
  * @author amy
  * @since 12/10/20.
  */
+@SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
 public interface HasChannel {
     long channelIdAsLong();
     

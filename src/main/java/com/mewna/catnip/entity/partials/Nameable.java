@@ -36,6 +36,7 @@ import javax.annotation.Nonnull;
  * @author amy
  * @since 10/15/20.
  */
+@SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
 public interface Nameable {
     @Nonnull
     @CheckReturnValue

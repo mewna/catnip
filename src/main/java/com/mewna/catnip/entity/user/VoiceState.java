@@ -27,10 +27,8 @@
 
 package com.mewna.catnip.entity.user;
 
-import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.VoiceChannel;
-import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.partials.GuildEntity;
 import com.mewna.catnip.entity.partials.HasChannel;

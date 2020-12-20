@@ -27,13 +27,10 @@
 
 package com.mewna.catnip.entity.guild;
 
-import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.partials.GuildEntity;
 import com.mewna.catnip.entity.partials.HasChannel;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Sent when an invite is deleted.

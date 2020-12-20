@@ -34,6 +34,7 @@ import javax.annotation.Nullable;
  * @author amy
  * @since 12/10/20.
  */
+@SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
 public interface HasApplication {
     /**
      * @return The id of the application that this entity belongs to.

@@ -33,8 +33,6 @@ import com.mewna.catnip.entity.partials.Snowflake;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Fired when a user starts typing in a channel.

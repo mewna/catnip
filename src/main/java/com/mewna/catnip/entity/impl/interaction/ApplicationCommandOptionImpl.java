@@ -27,15 +27,12 @@
 
 package com.mewna.catnip.entity.impl.interaction;
 
-import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.interaction.ApplicationCommandOption;
 import com.mewna.catnip.entity.interaction.ApplicationCommandOptionChoice;
 import com.mewna.catnip.entity.interaction.ApplicationCommandOptionType;
 import lombok.*;
 import lombok.experimental.Accessors;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 /**

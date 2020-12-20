@@ -30,7 +30,6 @@ package com.mewna.catnip.entity.guild.audit;
 import com.mewna.catnip.entity.partials.HasChannel;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
 
 /**
  * @author kjp12

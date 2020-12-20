@@ -442,9 +442,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     public Completable updateCache(@Nonnull final String eventType, @Nonnegative final int shardId, @Nonnull final JsonObject payload) {
         switch(eventType) {
             // Lifecycle
-            case Raw.READY -> {
-                selfUser.set(catnip.entityBuilder().createUser(payload.getObject("user")));
-            }
+            case Raw.READY -> selfUser.set(catnip.entityBuilder().createUser(payload.getObject("user")));
             // Channels
             case Raw.CHANNEL_CREATE, Raw.CHANNEL_UPDATE -> {
                 final Channel channel = catnip.entityBuilder().createChannel(payload);
@@ -571,11 +569,9 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                 emojis.stream().map(e -> catnip.entityBuilder().createCustomEmoji(guild, (JsonObject) e)).forEach(this::cacheEmoji);
             }
             // Currently-logged-in user
-            case Raw.USER_UPDATE -> {
-                // Inner payload is always a user object, according to the
-                // docs, so we can just outright replace it.
-                selfUser.set(catnip.entityBuilder().createUser(payload));
-            }
+            case Raw.USER_UPDATE -> // Inner payload is always a user object, according to the
+                    // docs, so we can just outright replace it.
+                    selfUser.set(catnip.entityBuilder().createUser(payload));
             // Users
             case Raw.PRESENCE_UPDATE -> {
                 final JsonObject user = payload.getObject("user");

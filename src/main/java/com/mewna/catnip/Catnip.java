@@ -68,7 +68,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Set;
@@ -820,8 +819,7 @@ public interface Catnip extends AutoCloseable {
             @SuppressWarnings("ConstantConditions")
             final var byteKey = Hex.decodeHex(options().publicKey());
             final var pki = new SubjectPublicKeyInfo(new AlgorithmIdentifier(EdECObjectIdentifiers.id_Ed25519), byteKey);
-            // Type explicitly there to avoid IJ warnings
-            final KeySpec pkSpec = new X509EncodedKeySpec(pki.getEncoded());
+            final var pkSpec = new X509EncodedKeySpec(pki.getEncoded());
             final var kf = KeyFactory.getInstance("ed25519", CatnipImpl.BOUNCY_CASTLE_PROVIDER);
             final var publicKey = kf.generatePublic(pkSpec);
             final var signedData = Signature.getInstance("ed25519", CatnipImpl.BOUNCY_CASTLE_PROVIDER);

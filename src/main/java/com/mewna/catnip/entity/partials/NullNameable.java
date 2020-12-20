@@ -36,6 +36,7 @@ import javax.annotation.Nullable;
  * @author amy
  * @since 10/15/20.
  */
+@SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
 public interface NullNameable {
     /**
      * @return The entity's name. May be null.

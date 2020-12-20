@@ -55,40 +55,35 @@ public class DefaultLogAdapter implements LogAdapter {
         final String formatted = tuple.getMessage();
         if(logger != null) {
             switch(level) {
-                case TRACE: {
+                case TRACE -> {
                     logger.trace(formatted);
                     if(tuple.getThrowable() != null) {
                         logger.trace("Stacktrace: ", tuple.getThrowable());
                     }
-                    break;
                 }
-                case DEBUG: {
+                case DEBUG -> {
                     logger.debug(formatted);
                     if(tuple.getThrowable() != null) {
                         logger.debug("Stacktrace: ", tuple.getThrowable());
                     }
-                    break;
                 }
-                case INFO: {
+                case INFO -> {
                     logger.info(formatted);
                     if(tuple.getThrowable() != null) {
                         logger.info("Stacktrace: ", tuple.getThrowable());
                     }
-                    break;
                 }
-                case WARN: {
+                case WARN -> {
                     logger.warn(formatted);
                     if(tuple.getThrowable() != null) {
                         logger.warn("Stacktrace: ", tuple.getThrowable());
                     }
-                    break;
                 }
-                case ERROR: {
+                case ERROR -> {
                     logger.error(formatted);
                     if(tuple.getThrowable() != null) {
                         logger.error("Stacktrace: ", tuple.getThrowable());
                     }
-                    break;
                 }
             }
         }

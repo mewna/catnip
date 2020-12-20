@@ -99,24 +99,22 @@ public interface Presence {
         @Nonnull
         public static OnlineStatus fromString(@Nonnull final String status) {
             switch(status) {
-                case "online": {
+                case "online" -> {
                     return ONLINE;
                 }
-                case "idle": {
+                case "idle" -> {
                     return IDLE;
                 }
-                case "dnd": {
+                case "dnd" -> {
                     return DND;
                 }
-                case "offline": {
+                case "offline" -> {
                     return OFFLINE;
                 }
-                case "invisible": {
+                case "invisible" -> {
                     return INVISIBLE;
                 }
-                default: {
-                    throw new IllegalArgumentException("Unknown status: " + status);
-                }
+                default -> throw new IllegalArgumentException("Unknown status: " + status);
             }
         }
         
