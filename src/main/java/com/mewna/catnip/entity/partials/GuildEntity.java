@@ -39,25 +39,7 @@ import javax.annotation.Nonnull;
  * @author AdrianTodt
  * @since 1/19/19.
  */
-public interface GuildEntity extends Entity {
-    /**
-     * The id of the guild this entity is from.
-     *
-     * @return String representing the guild ID.
-     */
-    @CheckReturnValue
-    default String guildId() {
-        return Long.toUnsignedString(guildIdAsLong());
-    }
-    
-    /**
-     * The id of the guild this entity is from.
-     *
-     * @return Long representing the guild ID.
-     */
-    @CheckReturnValue
-    long guildIdAsLong();
-    
+public interface GuildEntity extends Entity, HasGuild {
     /**
      * The guild this entity is from.
      *

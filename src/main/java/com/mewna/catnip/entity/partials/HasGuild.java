@@ -25,16 +25,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.interaction;
+package com.mewna.catnip.entity.partials;
 
-import com.mewna.catnip.entity.partials.*;
-
-import java.util.List;
+import javax.annotation.CheckReturnValue;
 
 /**
  * @author amy
- * @since 12/10/20.
+ * @since 12/23/20.
  */
-public interface ApplicationCommand extends Snowflake, Nameable, Describable, HasApplication, HasGuild {
-    List<ApplicationCommandOption> options();
+public interface HasGuild {
+    /**
+     * The id of the guild this entity is from.
+     *
+     * @return String representing the guild ID.
+     */
+    @CheckReturnValue
+    default String guildId() {
+        return Long.toUnsignedString(guildIdAsLong());
+    }
+    
+    /**
+     * The id of the guild this entity is from.
+     *
+     * @return Long representing the guild ID.
+     */
+    @CheckReturnValue
+    long guildIdAsLong();
 }

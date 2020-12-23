@@ -52,6 +52,7 @@ public class ApplicationCommandImpl implements ApplicationCommand, RequiresCatni
     
     private long idAsLong;
     private long applicationIdAsLong;
+    private long guildIdAsLong;
     private String name;
     private String description;
     private List<ApplicationCommandOption> options;

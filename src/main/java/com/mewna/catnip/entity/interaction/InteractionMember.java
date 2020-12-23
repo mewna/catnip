@@ -27,14 +27,16 @@
 
 package com.mewna.catnip.entity.interaction;
 
-import com.mewna.catnip.entity.partials.*;
+import com.mewna.catnip.entity.guild.Member;
+import com.mewna.catnip.entity.util.Permission;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * @author amy
- * @since 12/10/20.
+ * @since 12/23/20.
  */
-public interface ApplicationCommand extends Snowflake, Nameable, Describable, HasApplication, HasGuild {
-    List<ApplicationCommandOption> options();
+public interface InteractionMember extends Member {
+    @Override
+    Set<Permission> permissions();
 }

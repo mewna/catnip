@@ -97,7 +97,7 @@ public final class DispatchEmitter {
         
         switch(type) {
             // Lifecycle
-            case Raw.READY: {
+            case Raw.READY -> {
                 final JsonArray guilds = data.getArray("guilds");
                 // All READY guilds are unavailable, marked available as the gateway
                 // streams them to us
@@ -108,20 +108,15 @@ public final class DispatchEmitter {
                         .forEach(((CatnipImpl) catnip)::markUnavailable);
                 final Ready ready = catnip.entityBuilder().createReady(data);
                 catnip.dispatchManager().dispatchEvent(type, ready);
-                break;
             }
-            case Raw.RESUMED: {
+            case Raw.RESUMED -> {
                 final Resumed resumed = catnip.entityBuilder().createResumed(data);
                 catnip.dispatchManager().dispatchEvent(type, resumed);
-                break;
             }
             
             // Messages
-            case Raw.MESSAGE_CREATE: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createMessage(data));
-                break;
-            }
-            case Raw.MESSAGE_UPDATE: {
+            case Raw.MESSAGE_CREATE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createMessage(data));
+            case Raw.MESSAGE_UPDATE -> {
                 if(data.getObject("author", null) == null) {
                     // Embeds update, emit the special case
                     catnip.dispatchManager().dispatchEvent(Raw.MESSAGE_EMBEDS_UPDATE,
@@ -129,43 +124,18 @@ public final class DispatchEmitter {
                 } else {
                     catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createMessage(data));
                 }
-                break;
             }
-            case Raw.MESSAGE_DELETE: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createDeletedMessage(data));
-                break;
-            }
-            case Raw.MESSAGE_DELETE_BULK: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createBulkDeletedMessages(data));
-                break;
-            }
-            case Raw.TYPING_START: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createTypingUser(data));
-                break;
-            }
-            case Raw.MESSAGE_REACTION_REMOVE_ALL: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createBulkRemovedReactions(data));
-                break;
-            }
-            case Raw.MESSAGE_REACTION_REMOVE: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createReactionUpdate(data));
-                break;
-            }
-            case Raw.MESSAGE_REACTION_ADD: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createReactionUpdate(data));
-                break;
-            }
-            case Raw.MESSAGE_REACTION_REMOVE_EMOJI: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createReactionUpdate(data));
-                break;
-            }
+            case Raw.MESSAGE_DELETE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createDeletedMessage(data));
+            case Raw.MESSAGE_DELETE_BULK -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createBulkDeletedMessages(data));
+            case Raw.TYPING_START -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createTypingUser(data));
+            case Raw.MESSAGE_REACTION_REMOVE_ALL -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createBulkRemovedReactions(data));
+            case Raw.MESSAGE_REACTION_REMOVE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createReactionUpdate(data));
+            case Raw.MESSAGE_REACTION_ADD -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createReactionUpdate(data));
+            case Raw.MESSAGE_REACTION_REMOVE_EMOJI -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createReactionUpdate(data));
             
             // Channels
-            case Raw.CHANNEL_CREATE: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createChannel(data));
-                break;
-            }
-            case Raw.CHANNEL_UPDATE: {
+            case Raw.CHANNEL_CREATE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createChannel(data));
+            case Raw.CHANNEL_UPDATE -> {
                 final var channel = catnip.entityBuilder().createChannel(data);
                 if(catnip.cacheWorker().canProvidePreviousState(CHANNEL) && channel.isGuild()) {
                     catnip.cache().channel(channel.asGuildChannel().guildId(), channel.id())
@@ -177,30 +147,15 @@ public final class DispatchEmitter {
                     // We don't cache DM channels
                     catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(null, channel));
                 }
-                break;
             }
-            case Raw.CHANNEL_DELETE: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createChannel(data));
-                break;
-            }
-            case Raw.CHANNEL_PINS_UPDATE: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createChannelPinsUpdate(data));
-                break;
-            }
-            case Raw.WEBHOOKS_UPDATE: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createWebhooksUpdate(data));
-                break;
-            }
-            case Raw.INVITE_CREATE: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createInvite(data));
-                break;
-            }
-            case Raw.INVITE_DELETE: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createDeletedInvite(data));
-            }
+            case Raw.CHANNEL_DELETE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createChannel(data));
+            case Raw.CHANNEL_PINS_UPDATE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createChannelPinsUpdate(data));
+            case Raw.WEBHOOKS_UPDATE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createWebhooksUpdate(data));
+            case Raw.INVITE_CREATE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createInvite(data));
+            case Raw.INVITE_DELETE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createDeletedInvite(data));
             
             // Guilds
-            case Raw.GUILD_CREATE: {
+            case Raw.GUILD_CREATE -> {
                 final String id = data.getString("id");
                 final Guild guild = catnip.entityBuilder().createGuild(data);
                 if(catnip.isUnavailable(id)) {
@@ -209,9 +164,8 @@ public final class DispatchEmitter {
                 } else {
                     catnip.dispatchManager().dispatchEvent(type, guild);
                 }
-                break;
             }
-            case Raw.GUILD_UPDATE: {
+            case Raw.GUILD_UPDATE -> {
                 final Guild guild = catnip.entityBuilder().createGuild(data);
                 if(catnip.cacheWorker().canProvidePreviousState(GUILD)) {
                     catnip.cache().guild(guild.idAsLong())
@@ -222,9 +176,8 @@ public final class DispatchEmitter {
                 } else {
                     catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(null, guild));
                 }
-                break;
             }
-            case Raw.GUILD_DELETE: {
+            case Raw.GUILD_DELETE -> {
                 final String id = data.getString("id");
                 if(data.getBoolean("unavailable", false)) {
                     ((CatnipImpl) catnip).markUnavailable(id);
@@ -232,28 +185,15 @@ public final class DispatchEmitter {
                 } else {
                     catnip.dispatchManager().dispatchEvent(type, catnip.cache().guild(id));
                 }
-                break;
             }
-            case Raw.GUILD_BAN_ADD: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createGatewayGuildBan(data));
-                break;
-            }
-            case Raw.GUILD_BAN_REMOVE: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createGatewayGuildBan(data));
-                break;
-            }
-            case Raw.GUILD_INTEGRATIONS_UPDATE: {
-                catnip.dispatchManager().dispatchEvent(type, data.getString("guild_id"));
-                break;
-            }
+            case Raw.GUILD_BAN_ADD -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createGatewayGuildBan(data));
+            case Raw.GUILD_BAN_REMOVE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createGatewayGuildBan(data));
+            case Raw.GUILD_INTEGRATIONS_UPDATE -> catnip.dispatchManager().dispatchEvent(type, data.getString("guild_id"));
             
             // Roles
-            case Raw.GUILD_ROLE_CREATE: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createRole(data.getString("guild_id"),
-                        data.getObject("role")));
-                break;
-            }
-            case Raw.GUILD_ROLE_UPDATE: {
+            case Raw.GUILD_ROLE_CREATE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createRole(data.getString("guild_id"),
+                    data.getObject("role")));
+            case Raw.GUILD_ROLE_UPDATE -> {
                 final Role role = catnip.entityBuilder().createRole(data.getString("guild_id"), data.getObject("role"));
                 if(catnip.cacheWorker().canProvidePreviousState(ROLE)) {
                     catnip.cache().role(role.guildIdAsLong(), role.idAsLong())
@@ -264,30 +204,17 @@ public final class DispatchEmitter {
                 } else {
                     catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(null, role));
                 }
-                break;
             }
-            case Raw.GUILD_ROLE_DELETE: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createPartialRole(data.getString("guild_id"),
-                        data.getString("role_id")));
-                break;
-            }
+            case Raw.GUILD_ROLE_DELETE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createPartialRole(data.getString("guild_id"),
+                    data.getString("role_id")));
             
             // Emoji
-            case Raw.GUILD_EMOJIS_UPDATE: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createGuildEmojisUpdate(data));
-                break;
-            }
+            case Raw.GUILD_EMOJIS_UPDATE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createGuildEmojisUpdate(data));
             
             // Members
-            case Raw.GUILD_MEMBER_ADD: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createMember(data.getString("guild_id"), data));
-                break;
-            }
-            case Raw.GUILD_MEMBER_REMOVE: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createMember(data.getString("guild_id"), data));
-                break;
-            }
-            case Raw.GUILD_MEMBER_UPDATE: {
+            case Raw.GUILD_MEMBER_ADD -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createMember(data.getString("guild_id"), data));
+            case Raw.GUILD_MEMBER_REMOVE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createMember(data.getString("guild_id"), data));
+            case Raw.GUILD_MEMBER_UPDATE -> {
                 final String guild = data.getString("guild_id");
                 final PartialMember partialMember = catnip.entityBuilder().createPartialMember(guild, data);
                 if(catnip.cacheWorker().canProvidePreviousState(MEMBER)) {
@@ -299,11 +226,10 @@ public final class DispatchEmitter {
                 } else {
                     catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(null, partialMember));
                 }
-                break;
             }
             
             // Users
-            case Raw.USER_UPDATE: {
+            case Raw.USER_UPDATE -> {
                 final User user = catnip.entityBuilder().createUser(data);
                 if(catnip.cacheWorker().canProvidePreviousState(SELF_USER)) {
                     catnip.cache().user(user.idAsLong())
@@ -314,9 +240,8 @@ public final class DispatchEmitter {
                 } else {
                     catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(null, user));
                 }
-                break;
             }
-            case Raw.PRESENCE_UPDATE: {
+            case Raw.PRESENCE_UPDATE -> {
                 final PresenceUpdate presence = catnip.entityBuilder().createPresenceUpdate(data);
                 if(presence.status() == OnlineStatus.INVISIBLE) {
                     final JsonObject clone = new JsonObject(payload);
@@ -351,35 +276,29 @@ public final class DispatchEmitter {
                 } else {
                     catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(null, presence));
                 }
-                break;
             }
             
             // Voice
-            case Raw.VOICE_STATE_UPDATE: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createVoiceState(data));
-                break;
-            }
-            case Raw.VOICE_SERVER_UPDATE: {
-                catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createVoiceServerUpdate(data));
-                break;
-            }
+            case Raw.VOICE_STATE_UPDATE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createVoiceState(data));
+            case Raw.VOICE_SERVER_UPDATE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createVoiceServerUpdate(data));
+            
+            // Interactions
+            case Raw.INTERACTION_CREATE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createInteraction(data));
+            case Raw.APPLICATION_COMMAND_CREATE,
+                    Raw.APPLICATION_COMMAND_UPDATE,
+                    Raw.APPLICATION_COMMAND_DELETE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createApplicationCommand(data));
             
             // Other
-            case Raw.GUILD_MEMBERS_CHUNK: {
+            case Raw.GUILD_MEMBERS_CHUNK -> {
                 // End-users don't really have a use for an event here;
                 // anyone who needs this will just be listening on raw
                 // ws events anyway
-                break;
             }
-            case Raw.GIFT_CODE_UPDATE: {
+            case Raw.GIFT_CODE_UPDATE -> {
                 // See docs on Raw#GIFT_CODE_UPDATE for why this is here.
-                break;
             }
             
-            default: {
-                catnip.logAdapter().warn("Got unimplemented gateway event: {}", type);
-                break;
-            }
+            default -> catnip.logAdapter().warn("Got unimplemented gateway event: {}", type);
         }
     }
     

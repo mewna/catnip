@@ -31,6 +31,7 @@ import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.ChannelPinsUpdate;
 import com.mewna.catnip.entity.channel.WebhooksUpdate;
 import com.mewna.catnip.entity.guild.*;
+import com.mewna.catnip.entity.interaction.Interaction;
 import com.mewna.catnip.entity.message.*;
 import com.mewna.catnip.entity.misc.Ready;
 import com.mewna.catnip.entity.misc.Resumed;
@@ -89,6 +90,7 @@ public interface DiscordEvent {
     EventType<Resumed>                        RESUMED                       = event(Raw.RESUMED, Resumed.class);
     EventType<TypingUser>                     TYPING_START                  = event(Raw.TYPING_START, TypingUser.class);
     EventType<VoiceState>                     VOICE_STATE_UPDATE            = event(Raw.VOICE_STATE_UPDATE, VoiceState.class);
+    EventType<Interaction>                    INTERACTION_CREATE            = event(Raw.INTERACTION_CREATE, Interaction.class);
     // @formatter:on
     
     /**
@@ -153,6 +155,10 @@ public interface DiscordEvent {
          * See https://github.com/discordapp/discord-api-docs/issues/803
          */
         String GIFT_CODE_UPDATE              = "GIFT_CODE_UPDATE";
+        String INTERACTION_CREATE            = "INTERACTION_CREATE";
+        String APPLICATION_COMMAND_CREATE    = "APPLICATION_COMMAND_CREATE";
+        String APPLICATION_COMMAND_UPDATE    = "APPLICATION_COMMAND_UPDATE";
+        String APPLICATION_COMMAND_DELETE    = "APPLICATION_COMMAND_DELETE";
         // @formatter:on
     }
 }

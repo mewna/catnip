@@ -1509,6 +1509,7 @@ public final class EntityBuilder {
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .applicationIdAsLong(Long.parseUnsignedLong(data.getString("application_id")))
+                .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id", "0")))
                 .description(data.getString("description"))
                 .name(data.getString("name"))
                 .options(toList(data.getArray("options"), this::createApplicationCommandOption))
@@ -1561,7 +1562,7 @@ public final class EntityBuilder {
                 .token(data.getString("token"))
                 .type(InteractionType.byKey(data.getInt("type")))
                 .version(data.getInt("version"))
-                .member(data.has("member") ? createMember(data.getString("guild_id"), data.getObject("member")) : null)
+                .member(data.has("member") ? createInteractionMember(data.getString("guild_id"), data.getObject("member")) : null)
                 .data(data.has("data") ? createApplicationCommandInteractionData(data.getObject("data")): null)
                 .build());
     }
@@ -1585,6 +1586,15 @@ public final class EntityBuilder {
                 .name(data.getString("name"))
                 .options(toList(data.getArray("options"), this::createApplicationCommandInteractionDataOption))
                 .value(ApplicationCommandOptionType.byKey(data.getInt("value")))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public InteractionMember createInteractionMember(@Nonnull final String guildId, @Nonnull final JsonObject data) {
+        return delegate(InteractionMember.class, InteractionMemberImpl.builder()
+                .delegate(createMember(guildId, data))
+                .permissions(Permission.toSet(Long.parseUnsignedLong(data.getString("permissions", "0"))))
                 .build());
     }
 }

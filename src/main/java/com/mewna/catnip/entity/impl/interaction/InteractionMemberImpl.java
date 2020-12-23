@@ -25,16 +25,72 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.interaction;
+package com.mewna.catnip.entity.impl.interaction;
 
-import com.mewna.catnip.entity.partials.*;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.guild.Member;
+import com.mewna.catnip.entity.impl.guild.MemberImpl;
+import com.mewna.catnip.entity.interaction.InteractionMember;
+import com.mewna.catnip.entity.util.Permission;
+import lombok.*;
+import lombok.experimental.Accessors;
 
-import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.time.OffsetDateTime;
+import java.util.Set;
 
 /**
  * @author amy
- * @since 12/10/20.
+ * @since 12/23/20.
  */
-public interface ApplicationCommand extends Snowflake, Nameable, Describable, HasApplication, HasGuild {
-    List<ApplicationCommandOption> options();
+@Getter
+@Setter
+@Builder
+@Accessors(fluent = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class InteractionMemberImpl implements InteractionMember {
+    private Member delegate;
+    private Set<Permission> permissions;
+    
+    @Override
+    public Catnip catnip() {
+        return delegate.catnip();
+    }
+    
+    @Nullable
+    @Override
+    public String nick() {
+        return delegate.nick();
+    }
+    
+    @Nonnull
+    @Override
+    public Set<String> roleIds() {
+        return delegate.roleIds();
+    }
+    
+    @Nullable
+    @Override
+    public OffsetDateTime joinedAt() {
+        return delegate.joinedAt();
+    }
+    
+    @Nullable
+    @Override
+    public OffsetDateTime premiumSince() {
+        return delegate.premiumSince();
+    }
+    
+    @Override
+    public long guildIdAsLong() {
+        return delegate.guildIdAsLong();
+    }
+    
+    @Override
+    public long idAsLong() {
+        return delegate.idAsLong();
+    }
 }
