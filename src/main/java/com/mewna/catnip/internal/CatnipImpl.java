@@ -39,6 +39,7 @@ import com.mewna.catnip.entity.user.Presence.Activity;
 import com.mewna.catnip.entity.user.Presence.ActivityType;
 import com.mewna.catnip.entity.user.Presence.OnlineStatus;
 import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.entity.user.UserFlag;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.DefaultExtensionManager;
@@ -355,11 +356,11 @@ public class CatnipImpl implements Catnip {
         }
         if(validateToken) {
             return fetchGatewayInfo()
-                    .map(gateway -> {
+                    .flatMap(gateway -> {
                         logAdapter().info("Token validated!");
                         clientIdAsLong = Catnip.parseIdFromToken(token);
                         // this is actually needed because generics are dumb
-                        return (Catnip) this;
+                        return checkIntentsAndLog();
                     }).doOnError(e -> {
                         logAdapter().warn("Couldn't validate token!", e);
                         throw new RuntimeException(e);
@@ -374,13 +375,26 @@ public class CatnipImpl implements Catnip {
                 }
             }
             
-            return Single.just(this);
+            return checkIntentsAndLog();
         }
     }
     
     private Single<Catnip> checkIntentsAndLog() {
-        rest.user().getCurrentApplicationInformation();
-        return Single.just(this);
+        return rest.user().getCurrentApplicationInformation().map(info -> {
+            if(!info.flags().contains(UserFlag.GUILD_MEMBERS_INTENT_ENABLED) && options.intents().contains(GatewayIntent.GUILD_MEMBERS)) {
+                logAdapter().error("GUILD_MEMBERS intent passed but is not enabled in the developer dashboard, this will fail!");
+                logAdapter().error("Please go enable those intents first, and THEN try running your bot.");
+                logAdapter().error("Click here to go to the dashboard: https://discord.com/developers/applications/{}",
+                        Catnip.parseIdFromToken(options.token()));
+            }
+            if(!info.flags().contains(UserFlag.GUILD_PRESENCES_INTENT_ENABLED) && options.intents().contains(GatewayIntent.GUILD_PRESENCES)) {
+                logAdapter().error("GUILD_PRESENCES intent passed but is not enabled in the developer dashboard, this will fail!");
+                logAdapter().error("Please go enable those intents first, and THEN try running your bot.");
+                logAdapter().error("Click here to go to the dashboard: https://discord.com/developers/applications/{}",
+                        Catnip.parseIdFromToken(options.token()));
+            }
+            return this;
+        });
     }
     
     private void injectSelf() {
