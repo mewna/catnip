@@ -375,7 +375,7 @@ public class CatnipImpl implements Catnip {
                 }
             }
             
-            return checkIntentsAndLog();
+            return Single.just(this);
         }
     }
     
