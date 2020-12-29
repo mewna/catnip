@@ -378,6 +378,11 @@ public class CatnipImpl implements Catnip {
         }
     }
     
+    private Single<Catnip> checkIntentsAndLog() {
+        rest.user().getCurrentApplicationInformation();
+        return Single.just(this);
+    }
+    
     private void injectSelf() {
         // Inject catnip instance into dependent fields
         dispatchManager().catnip(this);

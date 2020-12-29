@@ -27,14 +27,13 @@
 
 package com.mewna.catnip.entity.misc;
 
-import com.mewna.catnip.entity.partials.HasIcon;
-import com.mewna.catnip.entity.partials.Nameable;
-import com.mewna.catnip.entity.partials.NullDescribable;
-import com.mewna.catnip.entity.partials.Snowflake;
+import com.mewna.catnip.entity.partials.*;
+import com.mewna.catnip.entity.user.UserFlag;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Information about an application.
@@ -42,7 +41,7 @@ import java.util.List;
  * @author amy
  * @since 10/17/18.
  */
-public interface ApplicationInfo extends Snowflake, Nameable, HasIcon, NullDescribable {
+public interface ApplicationInfo extends Snowflake, Nameable, HasIcon, NullDescribable, HasGuild {
     /**
      * @return A non-{@code null}, possibly-empty list of the application's RPC
      * origins.
@@ -72,4 +71,54 @@ public interface ApplicationInfo extends Snowflake, Nameable, HasIcon, NullDescr
      */
     @Nullable
     Team team();
+    
+    /**
+     * If this application is a game sold on Discord, this field will be the
+     * summary field for the store page of its primary SKU.
+     */
+    @Nullable
+    String summary();
+    
+    /**
+     * @return The base64 encoded key for the GameSDK's {@code GetTicket}.
+     */
+    @Nullable
+    String verifyKey();
+    
+    /**
+     * If this application is a game sold on Discord, this field will be the
+     * guild to which it has been linked.
+     */
+    @Nullable
+    @Override
+    default String guildId() {
+        return Long.toUnsignedString(guildIdAsLong());
+    }
+    
+    /**
+     * If this application is a game sold on Discord, this field will be the id
+     * of the "Game SKU" that is created, if exists.
+     */
+    @Nullable
+    String primarySkuId();
+    
+    /**
+     * If this application is a game sold on Discord, this field will be the
+     * URL slug that links to the store page.
+     */
+    @Nullable
+    String slug();
+    
+    /**
+     * If this application is a game sold on Discord, this field will be the
+     * hash of the image on store embeds.
+     */
+    @Nullable
+    String coverImage();
+    
+    /**
+     * @return The application's public flags.
+     */
+    @Nonnull
+    Set<UserFlag> flags();
 }

@@ -1432,6 +1432,13 @@ public final class EntityBuilder {
                 .requiresCodeGrant(data.getBoolean("bot_require_code_grant"))
                 .owner(createApplicationOwner(data.getObject("owner")))
                 .team(team == null ? null : createTeam(team))
+                .summary(data.getString("summary"))
+                .verifyKey(data.getString("verify_key"))
+                .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id", "0")))
+                .primarySkuId(data.getString("primary_sku_id"))
+                .slug(data.getString("slug"))
+                .coverImage(data.getString("cover_image"))
+                .flags(UserFlag.toSet(data.getLong("flags")))
                 .build());
     }
     

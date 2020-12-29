@@ -46,13 +46,19 @@ public enum UserFlag {
     DISCORD_PARTNER(1 << 1),
     HYPESQUAD_EVENTS(1 << 2),
     BUG_HUNTER_LEVEL_1(1 << 3),
+    UNKNOWN_ONE_SHL_FOUR(1 << 4),
+    UNKNOWN_ONE_SHL_FIVE(1 << 5),
     HOUSE_BRAVERY(1 << 6),
     HOUSE_BRILLIANCE(1 << 7),
     HOUSE_BALANCE(1 << 8),
     EARLY_SUPPORTER(1 << 9),
     TEAM_USER(1 << 10),
+    UNKNOWN_BUT_IS_PARTNER_RELATED(1 << 11),
     SYSTEM(1 << 12),
-    BUG_HUNTER_LEVEL_2(1 << 14);
+    GUILD_PRESENCES_INTENT_ENABLED(1 << 13),
+    BUG_HUNTER_LEVEL_2(1 << 14),
+    GUILD_MEMBERS_INTENT_ENABLED(1 << 15),
+    ;
     
     @Getter
     private final int value;
