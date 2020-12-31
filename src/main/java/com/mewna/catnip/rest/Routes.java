@@ -148,6 +148,13 @@ public final class Routes {
     public static final Route CREATE_GUILD_APPLICATION_COMMAND    = new Route(POST,   "/applications/:application/guilds/:guild/commands", "application");
     public static final Route EDIT_GUILD_APPLICATION_COMMAND      = new Route(PATCH,  "/applications/:application/guilds/:guild/commands/:command", "application");
     public static final Route DELETE_GUILD_APPLICATION_COMMAND    = new Route(DELETE, "/applications/:application/guilds/:guild/commands/:command", "application");
+    public static final Route GET_TEMPLATE                        = new Route(GET,    "/guilds/templates/:code");
+    public static final Route CREATE_GUILD_FROM_TEMPLATE          = new Route(POST,   "/guilds/templates/:code");
+    public static final Route GET_GUILD_TEMPLATES                 = new Route(GET,    "/guilds/:guild/templates", "guild");
+    public static final Route CREATE_GUILD_TEMPLATE               = new Route(POST,   "/guilds/:guild/templates", "guild");
+    public static final Route SYNC_GUILD_TEMPLATE                 = new Route(PUT,    "/guilds/:guild/templates/:code", "guild");
+    public static final Route MODIFY_GUILD_TEMPLATE               = new Route(PATCH,  "/guilds/:guild/templates/:code", "guild");
+    public static final Route DELETE_GUILD_TEMPLATE               = new Route(DELETE, "/guilds/:guild/templates/:code", "guild");
     // TODO: Verify these routes
     public static final Route GET_CHANNEL_THREADS                 = new Route(GET,    "/channels/:channel/threads", "channel");
     public static final Route GET_CHANNEL_MESSAGE_THREADS         = new Route(GET,    "/channels/:channel/messages/:message/threads", "channel");

@@ -27,21 +27,22 @@
 
 package com.mewna.catnip.entity.partials;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
+import com.mewna.catnip.entity.Timestamped;
+
+import javax.annotation.Nonnull;
+import java.time.OffsetDateTime;
 
 /**
- * An entity with a nullable description.
- *
  * @author amy
- * @since 10/15/20.
+ * @since 12/31/20.
  */
-@SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
-public interface NullDescribable {
-    /**
-     * @return The entity's description. May be null.
-     */
-    @Nullable
-    @CheckReturnValue
-    String description();
+@FunctionalInterface
+public interface HasUpdatedAt extends Timestamped {
+    @Nonnull
+    String updatedAtString();
+    
+    @Nonnull
+    default OffsetDateTime updatedAt() {
+        return OffsetDateTime.parse(updatedAtString());
+    }
 }

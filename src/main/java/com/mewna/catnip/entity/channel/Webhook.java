@@ -33,7 +33,7 @@ import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageOptions;
 import com.mewna.catnip.entity.partials.HasChannel;
-import com.mewna.catnip.entity.partials.NullNameable;
+import com.mewna.catnip.entity.partials.HasNullableName;
 import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
@@ -57,7 +57,7 @@ import java.util.Objects;
  * @since 9/15/18
  */
 @SuppressWarnings("unused")
-public interface Webhook extends GuildEntity, Snowflake, NullNameable, HasChannel {
+public interface Webhook extends GuildEntity, Snowflake, HasNullableName, HasChannel {
     /**
      * Send a message to this channel with the specified content.
      *

@@ -28,7 +28,7 @@
 package com.mewna.catnip.entity.voice;
 
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.partials.Nameable;
+import com.mewna.catnip.entity.partials.HasName;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -39,7 +39,7 @@ import javax.annotation.Nonnull;
  * @author natanbc
  * @since 9/14/18
  */
-public interface VoiceRegion extends Entity, Nameable {
+public interface VoiceRegion extends Entity, HasName {
     /**
      * @return The id of the voice region.
      */

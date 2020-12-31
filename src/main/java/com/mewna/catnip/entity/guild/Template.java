@@ -25,23 +25,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.partials;
+package com.mewna.catnip.entity.guild;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
+import com.mewna.catnip.entity.partials.HasCreatedAt;
+import com.mewna.catnip.entity.partials.HasName;
+import com.mewna.catnip.entity.partials.HasNullableDescription;
+import com.mewna.catnip.entity.partials.HasUpdatedAt;
+import com.mewna.catnip.entity.user.User;
 
 /**
- * An entity with a potentially-null name.
- *
  * @author amy
- * @since 10/15/20.
+ * @since 12/31/20.
  */
-@SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
-public interface NullNameable {
-    /**
-     * @return The entity's name. May be null.
-     */
-    @Nullable
-    @CheckReturnValue
-    String name();
+public interface Template extends HasName, HasNullableDescription, HasCreatedAt, HasUpdatedAt {
+    String code();
+    
+    int usageCount();
+    
+    long creatorIdAsLong();
+    
+    default String creatorId() {
+        return Long.toUnsignedString(creatorIdAsLong());
+    }
+    
+    User creator();
+    
+    long sourceGuildIdAsLong();
+    
+    default String sourceGuildId() {
+        return Long.toUnsignedString(sourceGuildIdAsLong());
+    }
+    
+    // TODO: Figure out what exactly "partial" means in this case.
+    Guild serializedSourceGuild();
+    
+    boolean dirty();
 }

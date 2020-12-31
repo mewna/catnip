@@ -29,7 +29,7 @@ package com.mewna.catnip.entity.channel;
 
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
 import com.mewna.catnip.entity.partials.GuildEntity;
-import com.mewna.catnip.entity.partials.Nameable;
+import com.mewna.catnip.entity.partials.HasName;
 import com.mewna.catnip.entity.partials.Snowflake;
 
 import javax.annotation.CheckReturnValue;
@@ -43,7 +43,7 @@ import javax.annotation.Nonnull;
  * @author amy
  * @since 8/19/19.
  */
-public interface ChannelMention extends GuildEntity, Snowflake, Nameable {
+public interface ChannelMention extends GuildEntity, Snowflake, HasName {
     @Nonnull
     @CheckReturnValue
     ChannelType type();

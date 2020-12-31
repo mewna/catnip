@@ -31,14 +31,14 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
 /**
- * An entity that has a name. Name must not be null.
+ * An entity that has a description. Description must not be null.
  *
  * @author amy
  * @since 10/15/20.
  */
 @SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
-public interface Nameable {
+public interface HasDescription {
     @Nonnull
     @CheckReturnValue
-    String name();
+    String description();
 }

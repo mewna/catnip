@@ -25,52 +25,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.sticker;
+package com.mewna.catnip.entity.impl.guild;
 
-import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.partials.HasDescription;
-import com.mewna.catnip.entity.partials.HasName;
-import com.mewna.catnip.entity.partials.Snowflake;
-import com.mewna.catnip.util.CDNFormat;
-
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.List;
+import com.mewna.catnip.entity.guild.Guild;
+import com.mewna.catnip.entity.guild.Template;
+import com.mewna.catnip.entity.user.User;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 /**
  * @author amy
- * @since 10/15/20.
+ * @since 12/31/20.
  */
-public interface Sticker extends Snowflake, RequiresCatnip, HasName, HasDescription {
-    @Nonnull
-    @CheckReturnValue
-    default String packId() {
-        return Long.toUnsignedString(packIdAsLong());
-    }
-    
-    @CheckReturnValue
-    long packIdAsLong();
-    
-    @Nonnull
-    @CheckReturnValue
-    List<String> tags();
-    
-    @Nonnull
-    @CheckReturnValue
-    String asset();
-    
-    @Nullable
-    @CheckReturnValue
-    String previewAsset();
-    
-    @Nonnull
-    @CheckReturnValue
-    StickerFormatType formatType();
-    
-    @Nonnull
-    @CheckReturnValue
-    default String cdnUrl() {
-        return CDNFormat.stickerUrl(this);
-    }
+@Getter
+@Setter
+@Builder
+@Accessors(fluent = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class TemplateImpl implements Template {
+    private String code;
+    private String name;
+    private String description;
+    private int usageCount;
+    private long creatorIdAsLong;
+    private User creator;
+    private String createdAtString;
+    private String updatedAtString;
+    private long sourceGuildIdAsLong;
+    private Guild serializedSourceGuild;
+    private boolean dirty;
 }

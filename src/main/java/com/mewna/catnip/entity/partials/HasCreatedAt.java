@@ -25,52 +25,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.sticker;
+package com.mewna.catnip.entity.partials;
 
-import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.partials.HasDescription;
-import com.mewna.catnip.entity.partials.HasName;
-import com.mewna.catnip.entity.partials.Snowflake;
-import com.mewna.catnip.util.CDNFormat;
+import com.mewna.catnip.entity.Timestamped;
 
-import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.List;
+import java.time.OffsetDateTime;
 
 /**
  * @author amy
- * @since 10/15/20.
+ * @since 12/31/20.
  */
-public interface Sticker extends Snowflake, RequiresCatnip, HasName, HasDescription {
+@FunctionalInterface
+public interface HasCreatedAt extends Timestamped {
     @Nonnull
-    @CheckReturnValue
-    default String packId() {
-        return Long.toUnsignedString(packIdAsLong());
-    }
-    
-    @CheckReturnValue
-    long packIdAsLong();
+    String createdAtString();
     
     @Nonnull
-    @CheckReturnValue
-    List<String> tags();
-    
-    @Nonnull
-    @CheckReturnValue
-    String asset();
-    
-    @Nullable
-    @CheckReturnValue
-    String previewAsset();
-    
-    @Nonnull
-    @CheckReturnValue
-    StickerFormatType formatType();
-    
-    @Nonnull
-    @CheckReturnValue
-    default String cdnUrl() {
-        return CDNFormat.stickerUrl(this);
+    default OffsetDateTime createdAt() {
+        return OffsetDateTime.parse(createdAtString());
     }
 }

@@ -30,7 +30,7 @@ package com.mewna.catnip.entity.user;
 import com.mewna.catnip.entity.impl.user.PresenceImpl;
 import com.mewna.catnip.entity.impl.user.PresenceImpl.ActivityImpl;
 import com.mewna.catnip.entity.misc.Emoji.ActivityEmoji;
-import com.mewna.catnip.entity.partials.Nameable;
+import com.mewna.catnip.entity.partials.HasName;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
@@ -218,7 +218,7 @@ public interface Presence {
         String match();
     }
     
-    interface Activity extends Nameable {
+    interface Activity extends HasName {
         @Nonnull
         @CheckReturnValue
         static Activity of(@Nonnull final String name, @Nonnull final ActivityType type, @Nullable final String url) {

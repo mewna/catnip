@@ -1202,7 +1202,7 @@ public final class EntityBuilder {
                 .maxUses(data.getInt("max_uses"))
                 .maxAge(data.getInt("max_age"))
                 .temporary(data.getBoolean("temporary", false))
-                .createdAt(data.getString("created_at"))
+                .createdAtString(data.getString("created_at"))
                 .revoked(data.getBoolean("revoked", false))
                 .build());
     }
@@ -1602,6 +1602,24 @@ public final class EntityBuilder {
         return delegate(InteractionMember.class, InteractionMemberImpl.builder()
                 .delegate(createMember(guildId, data))
                 .permissions(Permission.toSet(Long.parseUnsignedLong(data.getString("permissions", "0"))))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Template createTemplate(@Nonnull final JsonObject data) {
+        return delegate(Template.class, TemplateImpl.builder()
+                .code(data.getString("code"))
+                .name(data.getString("name"))
+                .description(data.getString("description"))
+                .usageCount(data.getInt("usage_count"))
+                .creatorIdAsLong(Long.parseUnsignedLong(data.getString("creator_id")))
+                .creator(createUser(data.getObject("creator")))
+                .createdAtString(data.getString("created_at"))
+                .updatedAtString(data.getString("updated_at"))
+                .sourceGuildIdAsLong(Long.parseUnsignedLong(data.getString("source_guild_id")))
+                .serializedSourceGuild(createGuild(data.getObject("serialized_source_guild")))
+                .dirty(data.getBoolean("is_dirty"))
                 .build());
     }
 }

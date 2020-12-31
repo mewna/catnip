@@ -41,7 +41,7 @@ import java.util.Set;
  * @author amy
  * @since 10/17/18.
  */
-public interface ApplicationInfo extends Snowflake, Nameable, HasIcon, NullDescribable, HasGuild {
+public interface ApplicationInfo extends Snowflake, HasName, HasIcon, HasNullableDescription, HasGuild {
     /**
      * @return A non-{@code null}, possibly-empty list of the application's RPC
      * origins.
