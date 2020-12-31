@@ -25,52 +25,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.sticker;
-
-import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.partials.HasDescription;
-import com.mewna.catnip.entity.partials.HasName;
-import com.mewna.catnip.entity.partials.Snowflake;
-import com.mewna.catnip.util.CDNFormat;
+package com.mewna.catnip.entity.partials;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.List;
 
 /**
+ * An entity that has a name. Name must not be null.
+ *
  * @author amy
  * @since 10/15/20.
  */
-public interface Sticker extends Snowflake, RequiresCatnip, HasName, HasDescription {
+@SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
+public interface HasName {
     @Nonnull
     @CheckReturnValue
-    default String packId() {
-        return Long.toUnsignedString(packIdAsLong());
-    }
-    
-    @CheckReturnValue
-    long packIdAsLong();
-    
-    @Nonnull
-    @CheckReturnValue
-    List<String> tags();
-    
-    @Nonnull
-    @CheckReturnValue
-    String asset();
-    
-    @Nullable
-    @CheckReturnValue
-    String previewAsset();
-    
-    @Nonnull
-    @CheckReturnValue
-    StickerFormatType formatType();
-    
-    @Nonnull
-    @CheckReturnValue
-    default String cdnUrl() {
-        return CDNFormat.stickerUrl(this);
-    }
+    String name();
 }

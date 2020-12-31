@@ -27,7 +27,7 @@
 
 package com.mewna.catnip.entity.interaction;
 
-import com.mewna.catnip.entity.partials.Nameable;
+import com.mewna.catnip.entity.partials.HasName;
 import com.mewna.catnip.entity.partials.Snowflake;
 
 import java.util.List;
@@ -36,6 +36,6 @@ import java.util.List;
  * @author amy
  * @since 12/10/20.
  */
-public interface ApplicationCommandInteractionData extends Snowflake, Nameable {
+public interface ApplicationCommandInteractionData extends Snowflake, HasName {
     List<ApplicationCommandInteractionDataOption> options();
 }

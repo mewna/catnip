@@ -28,14 +28,14 @@
 package com.mewna.catnip.entity.interaction;
 
 import com.grack.nanojson.JsonObject;
-import com.mewna.catnip.entity.partials.Nameable;
+import com.mewna.catnip.entity.partials.HasName;
 
 /**
  * @param <T> The type of this choice. Must be either {@code String} or {@link Integer};
  * @author amy
  * @since 12/10/20.
  */
-public interface ApplicationCommandOptionChoice<T> extends Nameable {
+public interface ApplicationCommandOptionChoice<T> extends HasName {
     T value();
     
     default JsonObject toJson() {

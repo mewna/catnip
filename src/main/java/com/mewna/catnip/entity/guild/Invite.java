@@ -31,7 +31,7 @@ import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
 import com.mewna.catnip.entity.guild.Guild.VerificationLevel;
 import com.mewna.catnip.entity.partials.HasIcon;
-import com.mewna.catnip.entity.partials.Nameable;
+import com.mewna.catnip.entity.partials.HasName;
 import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
@@ -154,7 +154,7 @@ public interface Invite extends Entity {
         String effectiveAvatarUrl();
     }
     
-    interface InviteGuild extends Snowflake, HasIcon, Nameable {
+    interface InviteGuild extends Snowflake, HasIcon, HasName {
         @Nullable
         @CheckReturnValue
         String icon();
@@ -196,7 +196,7 @@ public interface Invite extends Entity {
         }
     }
     
-    interface InviteChannel extends Snowflake, Nameable {
+    interface InviteChannel extends Snowflake, HasName {
         @Nonnull
         @CheckReturnValue
         ChannelType type();

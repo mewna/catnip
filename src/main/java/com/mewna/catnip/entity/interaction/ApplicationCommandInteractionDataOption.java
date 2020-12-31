@@ -27,7 +27,7 @@
 
 package com.mewna.catnip.entity.interaction;
 
-import com.mewna.catnip.entity.partials.Nameable;
+import com.mewna.catnip.entity.partials.HasName;
 
 import java.util.List;
 
@@ -35,7 +35,7 @@ import java.util.List;
  * @author amy
  * @since 12/10/20.
  */
-public interface ApplicationCommandInteractionDataOption extends Nameable {
+public interface ApplicationCommandInteractionDataOption extends HasName {
     ApplicationCommandOptionType value();
     
     List<ApplicationCommandInteractionDataOption> options();

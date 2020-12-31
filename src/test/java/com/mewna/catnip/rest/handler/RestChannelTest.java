@@ -119,7 +119,6 @@ public class RestChannelTest {
     
     @Test
     public void channelRoutesTest() {
-        final var me = Long.toUnsignedString(Catnip.parseIdFromToken(Env.DISCORD_TOKEN));
         assertDoesNotThrow(() -> catnip.rest().channel().triggerTypingIndicator(Env.TEST_CHANNEL).blockingAwait(),
                 "triggerTypingIndicator threw");
         final var channel = catnip.rest().channel().getChannelById(Env.TEST_CHANNEL).blockingGet().asGuildChannel();

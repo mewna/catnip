@@ -35,6 +35,6 @@ import java.util.List;
  * @author amy
  * @since 12/10/20.
  */
-public interface ApplicationCommand extends Snowflake, Nameable, Describable, HasApplication, HasGuild {
+public interface ApplicationCommand extends Snowflake, HasName, HasDescription, HasApplication, HasGuild {
     List<ApplicationCommandOption> options();
 }

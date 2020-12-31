@@ -28,7 +28,7 @@
 package com.mewna.catnip.entity.guild;
 
 import com.mewna.catnip.entity.partials.HasIcon;
-import com.mewna.catnip.entity.partials.Nameable;
+import com.mewna.catnip.entity.partials.HasName;
 import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.util.Permission;
 
@@ -40,7 +40,7 @@ import java.util.Set;
  * @author natanbc
  * @since 10/10/18.
  */
-public interface PartialGuild extends Snowflake, HasIcon, Nameable {
+public interface PartialGuild extends Snowflake, HasIcon, HasName {
     @CheckReturnValue
     boolean owned();
     

@@ -698,7 +698,7 @@ public interface Message extends Snowflake, HasChannel {
         String partyId();
     }
     
-    interface MessageApplication extends Nameable, HasIcon, Describable {
+    interface MessageApplication extends HasName, HasIcon, HasDescription {
         /**
          * @return The application's id.
          */

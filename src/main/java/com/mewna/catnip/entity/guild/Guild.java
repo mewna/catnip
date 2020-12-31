@@ -71,7 +71,7 @@ import java.util.Set;
  * @since 9/6/18
  */
 @SuppressWarnings({"unused", "RedundantSuppression"})
-public interface Guild extends Snowflake, Nameable, NullDescribable, HasIcon, HasApplication {
+public interface Guild extends Snowflake, HasName, HasNullableDescription, HasIcon, HasApplication {
     int NICKNAME_MAX_LENGTH = 32;
     
     /**

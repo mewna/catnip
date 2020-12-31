@@ -28,17 +28,20 @@
 package com.mewna.catnip.entity.partials;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
- * An entity that has a description. Description must not be null.
+ * An entity with a nullable description.
  *
  * @author amy
  * @since 10/15/20.
  */
 @SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
-public interface Describable {
-    @Nonnull
+public interface HasNullableDescription {
+    /**
+     * @return The entity's description. May be null.
+     */
+    @Nullable
     @CheckReturnValue
     String description();
 }

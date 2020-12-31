@@ -28,8 +28,8 @@
 package com.mewna.catnip.entity.interaction;
 
 import com.grack.nanojson.JsonObject;
-import com.mewna.catnip.entity.partials.Describable;
-import com.mewna.catnip.entity.partials.Nameable;
+import com.mewna.catnip.entity.partials.HasDescription;
+import com.mewna.catnip.entity.partials.HasName;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
  * @author amy
  * @since 12/10/20.
  */
-public interface ApplicationCommandOption extends Nameable, Describable {
+public interface ApplicationCommandOption extends HasName, HasDescription {
     ApplicationCommandOptionType type();
     
     boolean defaultOption();
