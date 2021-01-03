@@ -30,7 +30,6 @@ package com.mewna.catnip.util.rx;
 import com.mewna.catnip.Catnip;
 import io.reactivex.rxjava3.core.*;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import org.apache.commons.lang3.tuple.Triple;
 import org.javatuples.*;
 
 import javax.annotation.Nonnull;
@@ -92,13 +91,13 @@ public final class RxHelpers {
                         )))).toSingle();
     }
     
-    public static <A, B, C> Single<Triple<A, B, C>> resolveMany(@Nonnull final Maybe<A> a,
+    public static <A, B, C> Single<Triplet<A, B, C>> resolveMany(@Nonnull final Maybe<A> a,
                                                                 @Nonnull final Maybe<B> b,
                                                                 @Nonnull final Maybe<C> c) {
         return a.flatMap(aa ->
                 b.flatMap(bb ->
                         c.flatMap(cc ->
-                                Maybe.just(Triple.of(
+                                Maybe.just(Triplet.with(
                                         aa,
                                         bb,
                                         cc
@@ -292,13 +291,13 @@ public final class RxHelpers {
                         ))));
     }
     
-    public static <A, B, C> Single<Triple<A, B, C>> resolveMany(@Nonnull final Single<A> a,
+    public static <A, B, C> Single<Triplet<A, B, C>> resolveMany(@Nonnull final Single<A> a,
                                                                 @Nonnull final Single<B> b,
                                                                 @Nonnull final Single<C> c) {
         return a.flatMap(aa ->
                 b.flatMap(bb ->
                         c.flatMap(cc ->
-                                Single.just(Triple.of(
+                                Single.just(Triplet.with(
                                         aa,
                                         bb,
                                         cc
