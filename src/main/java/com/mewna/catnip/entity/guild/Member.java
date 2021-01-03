@@ -331,9 +331,9 @@ public interface Member extends Mentionable, Permissable {
                 catnip().cache().role(guildId(), roleId),
                 catnip().cache().member(guildId(), memberId)
         ).flatMapCompletable(triple -> {
-            final var guild = triple.getLeft();
-            final var role = triple.getMiddle();
-            final var member = triple.getRight();
+            final var guild = triple.getValue0();
+            final var role = triple.getValue1();
+            final var member = triple.getValue2();
             PermissionUtil.checkHierarchy(role, guild);
             PermissionUtil.checkHierarchy(member, guild);
             return catnip().rest().guild().addGuildMemberRole(guildId(), memberId, roleId, reason);
@@ -394,9 +394,9 @@ public interface Member extends Mentionable, Permissable {
                 catnip().cache().role(guildId(), roleId),
                 catnip().cache().member(guildId(), memberId)
         ).flatMapCompletable(triple -> {
-            final var guild = triple.getLeft();
-            final var role = triple.getMiddle();
-            final var member = triple.getRight();
+            final var guild = triple.getValue0();
+            final var role = triple.getValue1();
+            final var member = triple.getValue2();
             PermissionUtil.checkHierarchy(role, guild);
             PermissionUtil.checkHierarchy(member, guild);
             return catnip().rest().guild().removeGuildMemberRole(guildId(), memberId, roleId, reason);
