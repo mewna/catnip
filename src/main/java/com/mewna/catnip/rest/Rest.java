@@ -53,6 +53,8 @@ public class Rest {
     private final RestVoice voice;
     @Getter
     private final RestWebhook webhook;
+    @Getter
+    private final RestInteraction interaction;
     
     public Rest(final CatnipImpl catnip) {
         channel = new RestChannel(catnip);
@@ -62,5 +64,6 @@ public class Rest {
         invite = new RestInvite(catnip);
         voice = new RestVoice(catnip);
         webhook = new RestWebhook(catnip);
+        interaction = new RestInteraction(catnip);
     }
 }
