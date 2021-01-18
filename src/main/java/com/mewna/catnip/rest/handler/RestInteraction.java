@@ -39,6 +39,7 @@ import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
+import com.mewna.catnip.util.JsonUtil;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
@@ -215,13 +216,15 @@ public class RestInteraction extends RestHandler {
     // Global commands
     
     public Observable<ApplicationCommand> getGlobalApplicationCommands() {
-        return getGlobalApplicationCommandsRaw().map(entityBuilder()::createApplicationCommand);
+        return getGlobalApplicationCommandsRaw()
+                .map(e -> JsonUtil.mapObjectContents(entityBuilder()::createApplicationCommand).apply(e))
+                .flatMapIterable(e -> e);
     }
     
-    public Observable<JsonObject> getGlobalApplicationCommandsRaw() {
+    public Observable<JsonArray> getGlobalApplicationCommandsRaw() {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_GLOBAL_APPLICATION_COMMANDS.withMajorParam(catnip().clientId()),
                 Map.of()))
-                .map(ResponsePayload::object);
+                .map(ResponsePayload::array);
     }
     
     public Single<ApplicationCommand> createGlobalApplicationCommand(@Nonnull final String name, @Nonnull final String description,
@@ -261,13 +264,15 @@ public class RestInteraction extends RestHandler {
     
     // Guild commands
     public Observable<ApplicationCommand> getGuildApplicationCommands(@Nonnull final String guildId) {
-        return getGuildApplicationCommandsRaw(guildId).map(entityBuilder()::createApplicationCommand);
+        return getGuildApplicationCommandsRaw(guildId)
+                .map(e -> JsonUtil.mapObjectContents(entityBuilder()::createApplicationCommand).apply(e))
+                .flatMapIterable(e -> e);
     }
     
-    public Observable<JsonObject> getGuildApplicationCommandsRaw(@Nonnull final String guildId) {
+    public Observable<JsonArray> getGuildApplicationCommandsRaw(@Nonnull final String guildId) {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_APPLICATION_COMMANDS.withMajorParam(catnip().clientId()),
                 Map.of("guild", guildId)))
-                .map(ResponsePayload::object);
+                .map(ResponsePayload::array);
     }
     
     public Single<ApplicationCommand> createGuildApplicationCommand(@Nonnull final String guildId, @Nonnull final String name,
