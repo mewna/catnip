@@ -44,13 +44,13 @@ public class BitwiseTest {
     @Test
     public void testAll() {
         final Permission[] perms = values();
-        final int expected = 2147483647;
-        int total = 0;
+        final long expected = 4294967295L;
+        long total = 0;
         
         for(final Permission p : perms) {
             total |= p.value();
         }
-        
+    
         assertEquals(expected, total);
     }
     
