@@ -70,7 +70,9 @@ public enum Permission {
     MANAGE_NICKNAMES(0x08000000, false, "Manage Nicknames"),
     MANAGE_ROLES(0x10000000, true, "Manage Roles"),
     MANAGE_WEBHOOKS(0x20000000, true, "Manage Webhooks"),
-    MANAGE_EMOJIS(0x40000000, false, "Manage Emojis");
+    MANAGE_EMOJIS(0x40000000, false, "Manage Emojis"),
+    USE_APPLICATION_COMMANDS(0x80000000, false, "Use Slash Commands"),
+    ;
     
     public static final long ALL = from(values());
     public static final long NONE = 0;
