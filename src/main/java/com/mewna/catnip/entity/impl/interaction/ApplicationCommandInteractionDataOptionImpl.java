@@ -51,7 +51,8 @@ public class ApplicationCommandInteractionDataOptionImpl implements ApplicationC
     private transient Catnip catnip;
     
     private String name;
-    private ApplicationCommandOptionType value;
+    private ApplicationCommandOptionType type;
+    private Object value;
     private List<ApplicationCommandInteractionDataOption> options;
     
     @Override

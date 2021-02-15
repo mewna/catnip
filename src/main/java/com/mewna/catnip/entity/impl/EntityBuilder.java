@@ -1592,7 +1592,8 @@ public final class EntityBuilder {
                 .catnip(catnip)
                 .name(data.getString("name"))
                 .options(toList(data.getArray("options"), this::createApplicationCommandInteractionDataOption))
-                .value(ApplicationCommandOptionType.byKey(data.getInt("value")))
+                .type(ApplicationCommandOptionType.byKey(data.getInt("type")))
+                .value(data.get("value"))
                 .build());
     }
     
