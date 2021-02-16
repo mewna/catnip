@@ -52,7 +52,7 @@ public class ApplicationCommandInteractionDataOptionImpl implements ApplicationC
     
     private String name;
     private ApplicationCommandOptionType type;
-    private Object value;
+    private String value;
     private List<ApplicationCommandInteractionDataOption> options;
     
     @Override

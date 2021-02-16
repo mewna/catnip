@@ -38,8 +38,7 @@ import java.util.List;
 public interface ApplicationCommandInteractionDataOption extends HasName {
     
     ApplicationCommandOptionType type();
-    Object value();
-    
+    String value();
     
     List<ApplicationCommandInteractionDataOption> options();
 }

@@ -1593,7 +1593,7 @@ public final class EntityBuilder {
                 .name(data.getString("name"))
                 .options(toList(data.getArray("options"), this::createApplicationCommandInteractionDataOption))
                 .type(ApplicationCommandOptionType.byKey(data.getInt("type")))
-                .value(data.get("value"))
+                .value(data.getString("value"))
                 .build());
     }
     
