@@ -30,6 +30,7 @@ package com.mewna.catnip.entity.impl.interaction;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.interaction.ApplicationCommandInteractionDataOption;
+import com.mewna.catnip.entity.interaction.ApplicationCommandOptionChoice;
 import com.mewna.catnip.entity.interaction.ApplicationCommandOptionType;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -51,7 +52,8 @@ public class ApplicationCommandInteractionDataOptionImpl implements ApplicationC
     private transient Catnip catnip;
     
     private String name;
-    private ApplicationCommandOptionType value;
+    private ApplicationCommandOptionType type;
+    private ApplicationCommandOptionChoice<?> value;
     private List<ApplicationCommandInteractionDataOption> options;
     
     @Override
