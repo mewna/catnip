@@ -23,7 +23,7 @@
         <koloboke-impl.version>1.0.0</koloboke-impl.version>
 
         <junit.version>5.7.1</junit.version>
-        <mockito.version>3.7.7</mockito.version>
+        <mockito.version>3.8.0</mockito.version>
         <logback.version>1.2.3</logback.version>
         <javautil.version>1.34.0</javautil.version>
     </properties>
