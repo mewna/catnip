@@ -15,7 +15,7 @@
         <lombok.version>1.18.16</lombok.version>
         <rxjava.version>3.0.10</rxjava.version>
         <slf4j.version>1.7.30</slf4j.version>
-        <commons.lang.version>3.11</commons.lang.version>
+        <commons.lang.version>3.12.0</commons.lang.version>
         <commons.codec.version>1.15</commons.codec.version>
         <jsr305.version>3.0.2</jsr305.version>
         <nanojson.version>1.7</nanojson.version>
