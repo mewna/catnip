@@ -29,9 +29,11 @@ package com.mewna.catnip.entity.message;
 
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.channel.Channel;
+import com.mewna.catnip.entity.channel.MessageChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
+import io.reactivex.rxjava3.core.Maybe;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -49,12 +51,13 @@ public interface ReactionUpdate extends Entity {
     @Nullable
     String userId();
     
-    @Nullable
-    default User user() {
+    @Nonnull
+    default Maybe<User> user() {
         if(userId() != null) {
+            //noinspection ConstantConditions
             return catnip().cache().user(userId());
         } else {
-            return null;
+            return Maybe.empty();
         }
     }
     
@@ -66,11 +69,11 @@ public interface ReactionUpdate extends Entity {
     
     @Nonnull
     @SuppressWarnings("ConstantConditions")
-    default Channel channel() {
+    default Maybe<MessageChannel> channel() {
         if(guildId() == null) {
-            return catnip().cache().dmChannel(channelId());
+            return catnip().rest().channel().getChannelById(channelId()).map(Channel::asMessageChannel).toMaybe();
         } else {
-            return catnip().cache().channel(guildId(), channelId());
+            return catnip().cache().channel(guildId(), channelId()).map(Channel::asMessageChannel);
         }
     }
     
@@ -86,11 +89,12 @@ public interface ReactionUpdate extends Entity {
     @Nullable
     String guildId();
     
-    @Nullable
-    default Guild guild() {
+    @Nonnull
+    default Maybe<Guild> guild() {
         if(guildId() == null) {
-            return null;
+            return Maybe.empty();
         } else {
+            //noinspection ConstantConditions
             return catnip().cache().guild(guildId());
         }
     }

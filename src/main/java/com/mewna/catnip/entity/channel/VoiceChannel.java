@@ -43,7 +43,7 @@ public interface VoiceChannel extends GuildChannel {
     int bitrate();
     
     /**
-     * @return The maxmium number of users allowed in this voice channel at
+     * @return The maximum number of users allowed in this voice channel at
      * once.
      */
     @CheckReturnValue

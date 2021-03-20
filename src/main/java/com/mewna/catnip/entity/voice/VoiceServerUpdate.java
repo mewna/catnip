@@ -27,7 +27,7 @@
 
 package com.mewna.catnip.entity.voice;
 
-import com.mewna.catnip.entity.guild.GuildEntity;
+import com.mewna.catnip.entity.partials.GuildEntity;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

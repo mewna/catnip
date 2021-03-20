@@ -50,7 +50,7 @@ public abstract class AbstractShardManager implements ShardManager {
     @Getter
     @Setter
     private Catnip catnip;
-
+    
     @Override
     public ShardManager addCondition(@Nonnull final ShardCondition condition) {
         conditions.add(condition);

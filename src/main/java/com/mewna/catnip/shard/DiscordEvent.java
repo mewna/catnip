@@ -31,6 +31,7 @@ import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.ChannelPinsUpdate;
 import com.mewna.catnip.entity.channel.WebhooksUpdate;
 import com.mewna.catnip.entity.guild.*;
+import com.mewna.catnip.entity.interaction.Interaction;
 import com.mewna.catnip.entity.message.*;
 import com.mewna.catnip.entity.misc.Ready;
 import com.mewna.catnip.entity.misc.Resumed;
@@ -52,7 +53,7 @@ import static com.mewna.catnip.shard.event.EventTypeImpl.event;
 public interface DiscordEvent {
     // @formatter:off
     EventType<Channel>                        CHANNEL_CREATE                = event(Raw.CHANNEL_CREATE, Channel.class);
-    EventType<Channel>                        CHANNEL_UPDATE                = event(Raw.CHANNEL_UPDATE, Channel.class);
+    DoubleEventType<Channel, Channel>         CHANNEL_UPDATE                = doubleEvent(Raw.CHANNEL_UPDATE, Channel.class, Channel.class);
     EventType<Channel>                        CHANNEL_DELETE                = event(Raw.CHANNEL_DELETE, Channel.class);
     EventType<ChannelPinsUpdate>              CHANNEL_PINS_UPDATE           = event(Raw.CHANNEL_PINS_UPDATE, ChannelPinsUpdate.class);
     EventType<WebhooksUpdate>                 WEBHOOKS_UPDATE               = event(Raw.WEBHOOKS_UPDATE, WebhooksUpdate.class);
@@ -89,6 +90,7 @@ public interface DiscordEvent {
     EventType<Resumed>                        RESUMED                       = event(Raw.RESUMED, Resumed.class);
     EventType<TypingUser>                     TYPING_START                  = event(Raw.TYPING_START, TypingUser.class);
     EventType<VoiceState>                     VOICE_STATE_UPDATE            = event(Raw.VOICE_STATE_UPDATE, VoiceState.class);
+    EventType<Interaction>                    INTERACTION_CREATE            = event(Raw.INTERACTION_CREATE, Interaction.class);
     // @formatter:on
     
     /**
@@ -153,6 +155,10 @@ public interface DiscordEvent {
          * See https://github.com/discordapp/discord-api-docs/issues/803
          */
         String GIFT_CODE_UPDATE              = "GIFT_CODE_UPDATE";
+        String INTERACTION_CREATE            = "INTERACTION_CREATE";
+        String APPLICATION_COMMAND_CREATE    = "APPLICATION_COMMAND_CREATE";
+        String APPLICATION_COMMAND_UPDATE    = "APPLICATION_COMMAND_UPDATE";
+        String APPLICATION_COMMAND_DELETE    = "APPLICATION_COMMAND_DELETE";
         // @formatter:on
     }
 }

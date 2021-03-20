@@ -41,7 +41,7 @@ class GroovyExample {
         catnip.observable(DiscordEvent.MESSAGE_CREATE)
             .filter(msg -> msg.content() == "!ping")
         .forEach({ msg ->
-            msg.channel().sendMessage("!ping")
+            msg.reply("!ping")
         })
         catnip.connect()
     }

@@ -55,7 +55,7 @@ public interface Ready extends Entity {
     User user();
     
     /**
-     * @return The list of guild snowflakes for the guidls that this shard is
+     * @return The list of guild snowflakes for the guilds that this shard is
      * in.
      */
     @Nonnull

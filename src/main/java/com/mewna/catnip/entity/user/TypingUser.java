@@ -27,12 +27,12 @@
 
 package com.mewna.catnip.entity.user;
 
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.partials.GuildEntity;
+import com.mewna.catnip.entity.partials.HasChannel;
+import com.mewna.catnip.entity.partials.Snowflake;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Fired when a user starts typing in a channel.
@@ -40,41 +40,7 @@ import javax.annotation.Nullable;
  * @author amy
  * @since 10/6/18.
  */
-public interface TypingUser extends Snowflake {
-    /**
-     * @return The id of the channel being typed in.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default String channelId() {
-        return Long.toUnsignedString(channelIdAsLong());
-    }
-    
-    /**
-     * @return The id of the channel being typed in.
-     */
-    @CheckReturnValue
-    long channelIdAsLong();
-    
-    /**
-     * @return The id of the guild being typed in, if applicable.
-     */
-    @Nullable
-    @CheckReturnValue
-    default String guildId() {
-        final long id = guildIdAsLong();
-        if(id == 0) {
-            return null;
-        }
-        return Long.toUnsignedString(id);
-    }
-    
-    /**
-     * @return The id of the guild being typed in, if applicable.
-     */
-    @CheckReturnValue
-    long guildIdAsLong();
-    
+public interface TypingUser extends GuildEntity, Snowflake, HasChannel {
     /**
      * @return The time the typing started at.
      */

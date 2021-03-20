@@ -29,10 +29,11 @@ package com.mewna.catnip.entity.channel;
 
 import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
-import com.mewna.catnip.entity.guild.GuildEntity;
+import com.mewna.catnip.entity.partials.GuildEntity;
 import com.mewna.catnip.entity.guild.PermissionOverride;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
 import com.mewna.catnip.entity.misc.CreatedInvite;
+import com.mewna.catnip.entity.partials.HasName;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.rest.guild.PermissionOverrideData;
 import com.mewna.catnip.rest.invite.InviteCreateOptions;
@@ -59,14 +60,7 @@ import java.util.function.Consumer;
  * @since 9/12/18
  */
 @SuppressWarnings("unused")
-public interface GuildChannel extends GuildEntity, Channel {
-    /**
-     * @return The name of the channel.
-     */
-    @Nonnull
-    @CheckReturnValue
-    String name();
-    
+public interface GuildChannel extends GuildEntity, Channel, HasName {
     /**
      * @return The position of the channel.
      */
@@ -189,6 +183,13 @@ public interface GuildChannel extends GuildEntity, Channel {
     default ChannelEditFields edit() {
         PermissionUtil.checkPermissions(catnip(), guildId(), id(), Permission.MANAGE_CHANNELS);
         return new ChannelEditFields(this);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    default Single<Channel> delete() {
+        PermissionUtil.checkPermissions(catnip(), guildId(), id(), Permission.MANAGE_CHANNELS);
+        return catnip().rest().channel().deleteChannel(id()).map(Channel::asGuildChannel);
     }
     
     @SuppressWarnings({"unused", "WeakerAccess"})

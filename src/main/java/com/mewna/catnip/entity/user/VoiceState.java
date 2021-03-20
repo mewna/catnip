@@ -27,15 +27,17 @@
 
 package com.mewna.catnip.entity.user;
 
-import com.mewna.catnip.entity.Entity;
+import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.VoiceChannel;
-import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
+import com.mewna.catnip.entity.partials.GuildEntity;
+import com.mewna.catnip.entity.partials.HasChannel;
+import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Maybe;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Objects;
 
 /**
  * A user's voice state.
@@ -43,72 +45,21 @@ import java.util.Objects;
  * @author amy
  * @since 9/21/18.
  */
-public interface VoiceState extends Entity {
-    /**
-     * @return The id of the guild this voice state is for, if applicable.
-     */
-    @Nullable
-    @CheckReturnValue
-    default String guildId() {
-        final long id = guildIdAsLong();
-        if(id == 0) {
-            return null;
-        }
-        return Long.toUnsignedString(id);
-    }
-    
+@SuppressWarnings({"unused", "RedundantSuppression"})
+public interface VoiceState extends GuildEntity, HasChannel {
     /**
      * @return The guild this voice state is for, if applicable.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default Guild guild() {
-        final long id = guildIdAsLong();
-        if(id == 0) {
-            return null;
-        }
-        return catnip().cache().guild(guildIdAsLong());
-    }
-    
-    /**
-     * @return The id of the guild this voice state is for, if applicable.
-     */
-    @CheckReturnValue
-    long guildIdAsLong();
-    
-    /**
-     * @return The channel the user is connected to, if applicable.
-     */
-    @Nullable
-    @CheckReturnValue
-    default String channelId() {
-        final long id = channelIdAsLong();
-        if(id == 0) {
-            return null;
-        }
-        return Long.toUnsignedString(id);
-    }
-    
-    /**
-     * @return The guild this voice state is for, if applicable.
-     */
-    @Nullable
-    @CheckReturnValue
-    default VoiceChannel channel() {
+    default @NonNull Maybe<VoiceChannel> channel() {
         final long guildId = guildIdAsLong();
         final long id = channelIdAsLong();
         if(guildId == 0 || id == 0) {
-            return null;
+            return Maybe.empty();
         }
-        return Objects.requireNonNull(catnip().cache().channel(guildId, id),
-                "Channel not found. It may have been removed from the cache").asVoiceChannel();
+        return catnip().cache().channel(guildId, id).map(Channel::asVoiceChannel);
     }
-    
-    /**
-     * @return The channel the user is connected to, if applicable.
-     */
-    @CheckReturnValue
-    long channelIdAsLong();
     
     /**
      * @return The user's id.
@@ -130,20 +81,19 @@ public interface VoiceState extends Entity {
      */
     @Nonnull
     @CheckReturnValue
-    default User user() {
-        return Objects.requireNonNull(catnip().cache().user(userIdAsLong()),
-                "User not found. It may have been removed from the cache");
+    default Maybe<User> user() {
+        return catnip().cache().user(userIdAsLong());
     }
     
     /**
      * @return The guild member who owns the voice state.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default Member member() {
+    default Maybe<Member> member() {
         final long id = guildIdAsLong();
         if(id == 0) {
-            return null;
+            return Maybe.empty();
         }
         return catnip().cache().member(id, userIdAsLong());
     }

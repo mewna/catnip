@@ -27,7 +27,7 @@
 
 package com.mewna.catnip.entity.channel;
 
-import com.mewna.catnip.entity.Mentionable;
+import com.mewna.catnip.entity.partials.Mentionable;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
 import io.reactivex.rxjava3.core.Observable;
@@ -67,8 +67,9 @@ public interface TextChannel extends GuildChannel, MessageChannel, Mentionable {
      *
      * @return The slowmode set on this channel, in seconds.
      */
-    @CheckReturnValue
     @Nonnegative
+    @CheckReturnValue
+    @SuppressWarnings("SameReturnValue")
     int rateLimitPerUser();
     
     @Override

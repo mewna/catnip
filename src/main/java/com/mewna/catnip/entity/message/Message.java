@@ -27,18 +27,22 @@
 
 package com.mewna.catnip.entity.message;
 
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.ChannelMention;
 import com.mewna.catnip.entity.channel.MessageChannel;
-import com.mewna.catnip.entity.channel.TextChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
+import com.mewna.catnip.entity.impl.message.MessageReferenceImpl;
 import com.mewna.catnip.entity.misc.Emoji;
+import com.mewna.catnip.entity.partials.*;
+import com.mewna.catnip.entity.sticker.Sticker;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import org.apache.commons.lang3.Validate;
 
@@ -57,8 +61,8 @@ import java.util.stream.Collectors;
  * @author amy
  * @since 9/4/18.
  */
-@SuppressWarnings("unused")
-public interface Message extends Snowflake {
+@SuppressWarnings({"unused", "RedundantSuppression"})
+public interface Message extends Snowflake, HasChannel {
     /**
      * The type of message. Use this to tell normal messages from system messages.
      *
@@ -134,6 +138,19 @@ public interface Message extends Snowflake {
     List<Member> mentionedMembers();
     
     /**
+     * The message that was referenced by this message. Used for inline
+     * replies. If {@code null}, the message was deleted. If present and not
+     * {@code null}, it is the message that this message is replying to. If not
+     * present and the type is {@link MessageType#REPLY}, the backend couldn't
+     * fetch the relevant message.
+     *
+     * @return A message reference.
+     */
+    @Nullable
+    @CheckReturnValue
+    Message referencedMessage();
+    
+    /**
      * List of roles @mentioned by this message.
      * <br>All users with these roles will also be mentioned
      *
@@ -141,14 +158,16 @@ public interface Message extends Snowflake {
      */
     @Nonnull
     @CheckReturnValue
-    default List<Role> mentionedRoles() {
+    default Observable<Role> mentionedRoles() {
         if(guildId() == null) {
-            return List.of();
+            return Observable.empty();
         }
         //noinspection ConstantConditions
-        return mentionedRoleIds().stream()
-                .map(e -> catnip().cache().role(guildId(), e))
-                .collect(Collectors.toList());
+        return Observable.fromIterable(
+                mentionedRoleIds().stream()
+                        .map(e -> catnip().cache().role(guildId(), e))
+                        .collect(Collectors.toList()))
+                .flatMapMaybe(m -> m);
     }
     
     /**
@@ -201,37 +220,19 @@ public interface Message extends Snowflake {
     String content();
     
     /**
-     * The snowflake ID of the channel this message was sent in.
-     *
-     * @return String representing the channel ID. Never null.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default String channelId() {
-        return Long.toUnsignedString(channelIdAsLong());
-    }
-    
-    /**
-     * The snowflake ID of the channel this message was sent in.
-     *
-     * @return String representing the channel ID. Never null.
-     */
-    @CheckReturnValue
-    long channelIdAsLong();
-    
-    /**
      * The channel this message was sent in.
      *
      * @return The {@link MessageChannel} object representing the channel this
      * message was sent in. Should not be null.
      */
+    @Nonnull
     @CheckReturnValue
-    default MessageChannel channel() {
+    default Maybe<MessageChannel> channel() {
         final long guild = guildIdAsLong();
         if(guild != 0) {
-            return (TextChannel) catnip().cache().channel(guild, channelIdAsLong());
+            return catnip().cache().channel(guild, channelIdAsLong()).map(Channel::asMessageChannel);
         } else {
-            return catnip().cache().dmChannel(channelIdAsLong());
+            return catnip().rest().channel().getChannelById(channelId()).map(Channel::asMessageChannel).toMaybe();
         }
     }
     
@@ -295,6 +296,13 @@ public interface Message extends Snowflake {
     int flagsRaw();
     
     /**
+     * @return The stickers sent with this message.
+     */
+    @Nonnull
+    @CheckReturnValue
+    List<Sticker> stickers();
+    
+    /**
      * @return The set of flags set on this message.
      */
     @Nonnull
@@ -315,7 +323,8 @@ public interface Message extends Snowflake {
     /**
      * The snowflake ID of the guild this message was sent in.
      *
-     * @return String representing the guild ID. Null if sent in DMs.
+     * @return String representing the guild ID. Null if sent in DMs, or if
+     * fetched/created via REST API.
      */
     @Nullable
     @CheckReturnValue
@@ -341,12 +350,12 @@ public interface Message extends Snowflake {
      * @return The {@link Guild} object for the guild this message was sent in.
      * Will be null if the message is a DM.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default Guild guild() {
+    default Maybe<Guild> guild() {
         final long id = guildIdAsLong();
         if(id == 0) {
-            return null;
+            return Maybe.empty();
         } else {
             return catnip().cache().guild(id);
         }
@@ -374,6 +383,18 @@ public interface Message extends Snowflake {
      */
     @CheckReturnValue
     long webhookIdAsLong();
+    
+    /**
+     * @return A reference to this message, usable for ex. quoting.
+     */
+    default MessageReference asReference() {
+        return MessageReferenceImpl.builder()
+                .catnip(catnip())
+                .channelId(channelId())
+                .guildId(guildId())
+                .messageId(id())
+                .build();
+    }
     
     /**
      * Adds a reaction to this message.
@@ -409,39 +430,156 @@ public interface Message extends Snowflake {
     
     @Nonnull
     default Completable delete(@Nullable final String reason) {
-        final User self = catnip().selfUser();
-        if(self != null && !author().id().equals(self.id())) {
-            PermissionUtil.checkPermissions(catnip(), guildId(), channelId(),
-                    Permission.MANAGE_MESSAGES);
-        }
-        return catnip().rest().channel().deleteMessage(channelId(), id(), reason);
+        return Completable.fromMaybe(catnip().selfUser()
+                .filter(self -> !author().id().equals(self.id()))
+                .flatMap(self -> {
+                    PermissionUtil.checkPermissions(catnip(), guildId(), channelId(),
+                            Permission.MANAGE_MESSAGES);
+                    return catnip().rest().channel().deleteMessage(channelId(), id(), reason).toMaybe();
+                }));
     }
     
     @Nonnull
+    @CheckReturnValue
     default Completable delete() {
         return delete(null);
     }
     
     @Nonnull
+    @CheckReturnValue
     default Single<Message> edit(@Nonnull final String content) {
         return catnip().rest().channel().editMessage(channelId(), id(), content);
     }
     
     @Nonnull
+    @CheckReturnValue
     default Single<Message> edit(@Nonnull final Embed embed) {
         return catnip().rest().channel().editMessage(channelId(), id(), embed);
     }
     
     @Nonnull
+    @CheckReturnValue
     default Single<Message> edit(@Nonnull final Message message) {
         Validate.isTrue(message.attachments().isEmpty(), "attachments cannot be edited into messages");
         return catnip().rest().channel().editMessage(channelId(), id(), message);
     }
     
     @Nonnull
+    @CheckReturnValue
     default Single<Message> edit(@Nonnull final MessageOptions options) {
         Validate.isTrue(options.files().isEmpty(), "attachments cannot be edited into messages");
-        return catnip().rest().channel().editMessage(channelId(), id(), options.buildMessage());
+        return catnip().rest().channel().editMessage(channelId(), id(), options);
+    }
+    
+    /**
+     * Send a message in the same channel as this message. This does <strong>not</strong>
+     * send a reply; see {@link #reply(String, boolean)} for that functionality.
+     *
+     * @param content The message data to respond with.
+     *
+     * @return A {@code Single} that completes with the newly-created message.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Single<Message> respond(@Nonnull final String content) {
+        return catnip().rest().channel().createMessage(channelId(), content);
+    }
+    
+    /**
+     * Send a message in the same channel as this message. This does <strong>not</strong>
+     * send a reply; see {@link #reply(Embed, boolean)} for that functionality.
+     *
+     * @param embed The message data to respond with.
+     *
+     * @return A {@code Single} that completes with the newly-created message.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Single<Message> respond(@Nonnull final Embed embed) {
+        return catnip().rest().channel().createMessage(channelId(), embed);
+    }
+    
+    /**
+     * Send a message in the same channel as this message. This does <strong>not</strong>
+     * send a reply; see {@link #reply(Message, boolean)} for that functionality.
+     *
+     * @param message The message data to respond with.
+     *
+     * @return A {@code Single} that completes with the newly-created message.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Single<Message> respond(@Nonnull final Message message) {
+        return catnip().rest().channel().createMessage(channelId(), message);
+    }
+    
+    /**
+     * Send a message in the same channel as this message. This does <strong>not</strong>
+     * send a reply; see {@link #reply(MessageOptions, boolean)} for that functionality.
+     *
+     * @param options The message data to respond with.
+     *
+     * @return A {@code Single} that completes with the newly-created message.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Single<Message> respond(@Nonnull final MessageOptions options) {
+        return catnip().rest().channel().createMessage(channelId(), options);
+    }
+    
+    /**
+     * Reply to this message. This uses Discord's inline replies feature.
+     *
+     * @param content The message data to reply with.
+     * @param ping    Whether or not the reply should ping the user.
+     *
+     * @return A {@code Single} that completes with the newly-created message.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Single<Message> reply(@Nonnull final String content, final boolean ping) {
+        return reply(new MessageOptions().content(content), ping);
+    }
+    
+    /**
+     * Reply to this message. This uses Discord's inline replies feature.
+     *
+     * @param embed The message data to reply with.
+     * @param ping  Whether or not the reply should ping the user.
+     *
+     * @return A {@code Single} that completes with the newly-created message.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Single<Message> reply(@Nonnull final Embed embed, final boolean ping) {
+        return reply(new MessageOptions().embed(embed), ping);
+    }
+    
+    /**
+     * Reply to this message. This uses Discord's inline replies feature.
+     *
+     * @param message The message data to reply with.
+     * @param ping    Whether or not the reply should ping the user.
+     *
+     * @return A {@code Single} that completes with the newly-created message.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Single<Message> reply(@Nonnull final Message message, final boolean ping) {
+        return reply(new MessageOptions(message), ping);
+    }
+    
+    /**
+     * Reply to this message. This uses Discord's inline replies feature.
+     *
+     * @param options The message data to reply with.
+     *
+     * @return A {@code Single} that completes with the newly-created message.
+     */
+    @Nonnull
+    @CheckReturnValue
+    default Single<Message> reply(@Nonnull final MessageOptions options, final boolean ping) {
+        return catnip().rest().channel().createMessage(channelId(), options.pingReply(ping).referenceMessage(asReference()));
     }
     
     default boolean isRickRoll() {
@@ -560,7 +698,7 @@ public interface Message extends Snowflake {
         String partyId();
     }
     
-    interface MessageApplication {
+    interface MessageApplication extends HasName, HasIcon, HasDescription {
         /**
          * @return The application's id.
          */
@@ -574,26 +712,5 @@ public interface Message extends Snowflake {
         @Nullable
         @CheckReturnValue
         String coverImage();
-        
-        /**
-         * @return The application's description.
-         */
-        @Nonnull
-        @CheckReturnValue
-        String description();
-        
-        /**
-         * @return The application's icon id (hash). May be null.
-         */
-        @Nullable
-        @CheckReturnValue
-        String icon();
-        
-        /**
-         * @return The application's name.
-         */
-        @Nonnull
-        @CheckReturnValue
-        String name();
     }
 }

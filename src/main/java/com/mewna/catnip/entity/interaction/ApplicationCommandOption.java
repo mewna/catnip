@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2020 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,49 +24,40 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.mewna.catnip.entity.guild;
 
-import com.mewna.catnip.entity.Entity;
+package com.mewna.catnip.entity.interaction;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
-import java.util.Objects;
+import com.grack.nanojson.JsonObject;
+import com.mewna.catnip.entity.partials.HasDescription;
+import com.mewna.catnip.entity.partials.HasName;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * An entity which is guild-scoped in catnip.
- *
- * @author AdrianTodt
- * @since 1/19/19.
+ * @author amy
+ * @since 12/10/20.
  */
-public interface GuildEntity extends Entity {
-    /**
-     * The id of the guild this entity is from.
-     *
-     * @return String representing the guild ID.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default String guildId() {
-        return Long.toUnsignedString(guildIdAsLong());
-    }
+public interface ApplicationCommandOption extends HasName, HasDescription {
+    ApplicationCommandOptionType type();
     
-    /**
-     * The id of the guild this entity is from.
-     *
-     * @return Long representing the guild ID.
-     */
-    @CheckReturnValue
-    long guildIdAsLong();
+    boolean defaultOption();
     
-    /**
-     * The guild this entity is from.
-     *
-     * @return Guild represented by the guild ID.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default Guild guild() {
-        return Objects.requireNonNull(catnip().cache().guild(guildIdAsLong()),
-                "Guild not found. It may have been removed from the cache");
+    boolean required();
+    
+    List<ApplicationCommandOptionChoice<?>> choices();
+    
+    List<ApplicationCommandOption> options();
+    
+    default JsonObject toJson() {
+        final var builder = JsonObject.builder();
+        builder.value("type", type().key());
+        builder.value("name", name());
+        builder.value("description", description());
+        builder.value("default", defaultOption());
+        builder.value("required", required());
+        builder.value("choices", choices().stream().map(ApplicationCommandOptionChoice::toJson).collect(Collectors.toList()));
+        builder.value("options", options().stream().map(ApplicationCommandOption::toJson).collect(Collectors.toList()));
+        return builder.done();
     }
 }

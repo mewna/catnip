@@ -27,13 +27,15 @@
 
 package com.mewna.catnip.entity.message;
 
-import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.Channel;
-import com.mewna.catnip.entity.guild.GuildEntity;
+import com.mewna.catnip.entity.channel.MessageChannel;
+import com.mewna.catnip.entity.partials.GuildEntity;
+import com.mewna.catnip.entity.partials.HasChannel;
+import com.mewna.catnip.entity.partials.Snowflake;
+import io.reactivex.rxjava3.core.Maybe;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Fired when a message is deleted.
@@ -41,28 +43,18 @@ import javax.annotation.Nullable;
  * @author amy
  * @since 10/4/18.
  */
-public interface DeletedMessage extends GuildEntity, Snowflake {
-    /**
-     * @return The id of the channel where it was deleted.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default String channelId() {
-        return Long.toUnsignedString(channelIdAsLong());
-    }
-    
-    /**
-     * @return The id of the channel where it was deleted.
-     */
-    @CheckReturnValue
-    long channelIdAsLong();
-    
+public interface DeletedMessage extends GuildEntity, Snowflake, HasChannel {
     /**
      * @return The channel entity where it was deleted.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default Channel channel() {
-        return catnip().cache().channel(guildId(), channelId());
+    default Maybe<MessageChannel> channel() {
+        final long guild = guildIdAsLong();
+        if(guild != 0) {
+            return catnip().cache().channel(guild, channelIdAsLong()).map(Channel::asMessageChannel);
+        } else {
+            return catnip().rest().channel().getChannelById(channelId()).map(Channel::asMessageChannel).toMaybe();
+        }
     }
 }

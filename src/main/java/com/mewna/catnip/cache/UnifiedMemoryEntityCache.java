@@ -34,9 +34,10 @@ import com.mewna.catnip.cache.view.NamedCacheView;
 import com.mewna.catnip.entity.channel.UserDMChannel;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.util.rx.RxHelpers;
+import io.reactivex.rxjava3.core.Maybe;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class UnifiedMemoryEntityCache extends MemoryEntityCache {
     @SuppressWarnings("WeakerAccess")
@@ -61,10 +62,10 @@ public class UnifiedMemoryEntityCache extends MemoryEntityCache {
         return presenceCache;
     }
     
-    @Nullable
+    @Nonnull
     @Override
-    public User user(final long id) {
-        return userCache.getById(id);
+    public Maybe<User> user(final long id) {
+        return RxHelpers.nullableToMaybe(userCache.getById(id));
     }
     
     @Nonnull
@@ -73,27 +74,15 @@ public class UnifiedMemoryEntityCache extends MemoryEntityCache {
         return userCache;
     }
     
-    @Nullable
+    @Nonnull
     @Override
-    public Presence presence(final long id) {
-        return presenceCache.getById(id);
+    public Maybe<Presence> presence(final long id) {
+        return RxHelpers.nullableToMaybe(presenceCache.getById(id));
     }
     
     @Nonnull
     @Override
     public CacheView<Presence> presences() {
         return presenceCache;
-    }
-    
-    @Nullable
-    @Override
-    public UserDMChannel dmChannel(final long id) {
-        return dmChannelCache.getById(id);
-    }
-    
-    @Nonnull
-    @Override
-    public CacheView<UserDMChannel> dmChannels() {
-        return dmChannelCache;
     }
 }

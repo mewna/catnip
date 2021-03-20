@@ -27,8 +27,10 @@
 
 package com.mewna.catnip.entity.guild;
 
-import com.mewna.catnip.entity.Mentionable;
 import com.mewna.catnip.entity.channel.GuildChannel;
+import com.mewna.catnip.entity.partials.Mentionable;
+import com.mewna.catnip.entity.partials.HasName;
+import com.mewna.catnip.entity.partials.Permissable;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
 
@@ -44,15 +46,7 @@ import java.util.Set;
  * @since 9/4/18.
  */
 @SuppressWarnings("unused")
-public interface Role extends Mentionable, Comparable<Role>, PermissionHolder {
-    /**
-     * The name of the role. Not unique
-     *
-     * @return String containing the role name.
-     */
-    @Nonnull
-    String name();
-    
+public interface Role extends Mentionable, Comparable<Role>, Permissable, HasName {
     /**
      * Integer representation of the role color.
      * <br>To use this, you must convert the integer to base-16, hex, format.

@@ -34,6 +34,7 @@ import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 /**
  * @author natanbc
@@ -63,7 +64,7 @@ public class UnicodeEmojiImpl implements UnicodeEmoji, RequiresCatnip {
     
     @Override
     public boolean equals(final Object obj) {
-        return obj instanceof UnicodeEmoji && ((UnicodeEmoji) obj).name().equals(name);
+        return obj instanceof UnicodeEmoji && Objects.requireNonNull(((UnicodeEmoji) obj).name()).equals(name);
     }
     
     @Override

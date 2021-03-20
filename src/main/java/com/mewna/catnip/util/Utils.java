@@ -43,7 +43,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
 import java.util.function.LongPredicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -123,7 +125,7 @@ public final class Utils {
     @Nullable
     @CheckReturnValue
     public static String probeContentType(@Nonnull final byte[] bytes) {
-        try(final ByteArrayInputStream stream = new ByteArrayInputStream(bytes);) {
+        try(final ByteArrayInputStream stream = new ByteArrayInputStream(bytes)) {
             return URLConnection.guessContentTypeFromStream(stream);
         } catch(final IOException e) {
             return null;

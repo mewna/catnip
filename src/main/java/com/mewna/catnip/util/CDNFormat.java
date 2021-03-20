@@ -27,6 +27,8 @@
 
 package com.mewna.catnip.util;
 
+import com.mewna.catnip.entity.sticker.Sticker;
+import com.mewna.catnip.entity.sticker.StickerFormatType;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.ImageType;
 
@@ -79,6 +81,18 @@ public final class CDNFormat {
     
     @Nullable
     @CheckReturnValue
+    public static String applicationIconUrl(@Nonnull final String id, @Nullable final String icon, @Nonnull final ImageOptions options) {
+        if(icon == null) {
+            return null;
+        }
+        if(options.type() == ImageType.GIF && !icon.startsWith("a_")) {
+            throw new IllegalArgumentException("Cannot build gif icon URL for non gif application icon!");
+        }
+        return options.buildUrl(String.format("team-icons/%s/%s", id, icon));
+    }
+    
+    @Nullable
+    @CheckReturnValue
     public static String teamIconUrl(@Nonnull final String id, @Nullable final String icon, @Nonnull final ImageOptions options) {
         if(icon == null) {
             return null;
@@ -103,5 +117,17 @@ public final class CDNFormat {
         return options.buildUrl(
                 String.format("https://cdn.discordapp.com/splashes/%s/%s", id, splash)
         );
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public static String stickerUrl(@Nonnull final Sticker sticker) {
+        // This method is special because stickers are special
+        if(sticker.formatType() == StickerFormatType.LOTTIE) {
+            // TODO: How to handle lottie?
+            throw new UnsupportedOperationException("CDN URLs for lottie stickers are currently unsupported.");
+        }
+        return String.format("https://cdn.discordapp.com/stickers/%s/%s.%s", sticker.id(), sticker.asset(),
+                sticker.formatType().name().toLowerCase());
     }
 }

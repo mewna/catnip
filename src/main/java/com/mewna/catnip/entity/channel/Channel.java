@@ -27,7 +27,7 @@
 
 package com.mewna.catnip.entity.channel;
 
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
 import io.reactivex.rxjava3.core.Observable;
@@ -37,6 +37,7 @@ import lombok.Getter;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * A Discord channel. A channel may not be attached to a guild (ex. in the case
@@ -52,6 +53,7 @@ public interface Channel extends Snowflake {
      */
     @Nonnull
     @CheckReturnValue
+    @SuppressWarnings("SameReturnValue")
     ChannelType type();
     
     /**
@@ -249,6 +251,16 @@ public interface Channel extends Snowflake {
         return (GroupDMChannel) this;
     }
     
+    @Nonnull
+    @CheckReturnValue
+    default MessageChannel asMessageChannel() {
+        if(isDM()) {
+            return asDMChannel();
+        } else {
+            return asTextChannel();
+        }
+    }
+    
     /**
      * The type of a channel.
      */
@@ -257,32 +269,60 @@ public interface Channel extends Snowflake {
          * A text channel in a guild.
          */
         TEXT(0, true),
+        
         /**
          * A DM with a single user.
          */
         DM(1, false),
+        
         /**
          * A voice channel in a guild.
          */
         VOICE(2, true),
+        
         /**
          * A DM with multiple users.
          */
         GROUP_DM(3, false),
+        
         /**
          * A guild channel category with zero or more child channels.
          */
         CATEGORY(4, true),
+        
         /**
          * A news channel in a guild. See discordapp/discord-api-docs#881
          */
         NEWS(5, true),
+        
         /**
          * A store channel in a guild. Used for literally what it sounds like.
          * Requires an application with a valid SKU. Not officially announced,
          * but there is some discussion about it in discordapp/discord-api-docs#881.
          */
-        STORE(6, true);
+        STORE(6, true),
+        
+        // Note: Channel types 7 -> 9 never really existed in a meaningful form, afaik.
+        
+        /**
+         * A thread in an announcement? channel.
+         * TODO: Verify
+         */
+        ANNOUNCEMENT_THREAD(10, false),
+        
+        /**
+         * A public thread. I imagine this is for guild text channels?
+         * TODO: Verify
+         */
+        PUBLIC_THREAD(11, false),
+        
+        /**
+         * A private thread. I imagine this is for DMs?
+         * TODO: Verify
+         */
+        PRIVATE_THREAD(12, false),
+        
+        ;
         
         @Getter
         private final int key;
@@ -302,6 +342,10 @@ public interface Channel extends Snowflake {
                 }
             }
             throw new IllegalArgumentException("No channel type for key " + key);
+        }
+        
+        public static List<ChannelType> threadableChannelTypes() {
+            return List.of(TEXT, NEWS);
         }
     }
 }

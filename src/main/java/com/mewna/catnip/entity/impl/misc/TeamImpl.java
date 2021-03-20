@@ -36,7 +36,6 @@ import com.mewna.catnip.util.CDNFormat;
 import lombok.*;
 import lombok.experimental.Accessors;
 
-import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
@@ -66,20 +65,6 @@ public class TeamImpl implements Team, RequiresCatnip {
         this.catnip = catnip;
     }
     
-    @Nullable
-    @Override
-    @CheckReturnValue
-    public String iconUrl(@Nonnull final ImageOptions options) {
-        return CDNFormat.teamIconUrl(id(), icon, options);
-    }
-    
-    @Nullable
-    @Override
-    @CheckReturnValue
-    public String iconUrl() {
-        return iconUrl(new ImageOptions().type(null));
-    }
-    
     @Override
     public int hashCode() {
         return Long.hashCode(idAsLong);
@@ -93,5 +78,11 @@ public class TeamImpl implements Team, RequiresCatnip {
     @Override
     public String toString() {
         return String.format("Team (%s)", name);
+    }
+    
+    @Nullable
+    @Override
+    public String iconUrl(@Nonnull final ImageOptions options) {
+        return CDNFormat.teamIconUrl(id(), icon, options);
     }
 }

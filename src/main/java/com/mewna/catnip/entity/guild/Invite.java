@@ -28,11 +28,14 @@
 package com.mewna.catnip.entity.guild;
 
 import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.Channel.ChannelType;
 import com.mewna.catnip.entity.guild.Guild.VerificationLevel;
+import com.mewna.catnip.entity.partials.HasIcon;
+import com.mewna.catnip.entity.partials.HasName;
+import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.CDNFormat;
 import com.mewna.catnip.util.PermissionUtil;
 import io.reactivex.rxjava3.core.Single;
 
@@ -151,11 +154,7 @@ public interface Invite extends Entity {
         String effectiveAvatarUrl();
     }
     
-    interface InviteGuild extends Snowflake {
-        @Nonnull
-        @CheckReturnValue
-        String name();
-        
+    interface InviteGuild extends Snowflake, HasIcon, HasName {
         @Nullable
         @CheckReturnValue
         String icon();
@@ -174,30 +173,30 @@ public interface Invite extends Entity {
         
         @Nullable
         @CheckReturnValue
-        String iconUrl(@Nonnull ImageOptions options);
-        
-        @Nullable
-        @CheckReturnValue
-        default String iconUrl() {
-            return iconUrl(new ImageOptions());
+        default String iconUrl(@Nonnull final ImageOptions options) {
+            return CDNFormat.iconUrl(id(), icon(), options);
         }
         
         @Nullable
         @CheckReturnValue
-        String splashUrl(@Nonnull ImageOptions options);
+        default String splashUrl(@Nonnull final ImageOptions options) {
+            return CDNFormat.splashUrl(id(), splash(), options);
+        }
         
         @Nullable
         @CheckReturnValue
         default String splashUrl() {
             return splashUrl(new ImageOptions());
         }
+        
+        @Nullable
+        @CheckReturnValue
+        default String iconUrl() {
+            return iconUrl(new ImageOptions());
+        }
     }
     
-    interface InviteChannel extends Snowflake {
-        @Nonnull
-        @CheckReturnValue
-        String name();
-        
+    interface InviteChannel extends Snowflake, HasName {
         @Nonnull
         @CheckReturnValue
         ChannelType type();

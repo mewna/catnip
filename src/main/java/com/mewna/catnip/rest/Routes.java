@@ -40,7 +40,8 @@ import static com.mewna.catnip.rest.Routes.HttpMethod.*;
  * @author amy
  * @since 8/31/18.
  */
-@SuppressWarnings({"StaticVariableOfConcreteClass", "WeakerAccess"})
+// This is a necessary suppression, fuck off IJ
+@SuppressWarnings({"StaticVariableOfConcreteClass", "WeakerAccess", "unused", "RedundantSuppression"})
 public final class Routes {
     // @formatter:off
     public static final Route GET_GATEWAY_BOT                     = new Route(GET,    "/gateway/bot");
@@ -119,6 +120,8 @@ public final class Routes {
     public static final Route DELETE_WEBHOOK                      = new Route(DELETE, "/webhooks/:webhook", "webhook");
     public static final Route GET_WEBHOOK_TOKEN                   = new Route(GET,    "/webhooks/:webhook/:token", "webhook");
     public static final Route EXECUTE_WEBHOOK                     = new Route(POST,   "/webhooks/:webhook/:token", "webhook");
+    public static final Route EDIT_WEBHOOK_MESSAGE                = new Route(PATCH,  "/webhooks/:webhook/:token/messages/:message", "webhook");
+    public static final Route DELETE_WEBHOOK_MESSAGE              = new Route(DELETE, "/webhooks/:webhook/:token/messages/:message", "webhook");
     public static final Route DELETE_INVITE                       = new Route(DELETE, "/invites/:invite");
     public static final Route GET_INVITE                          = new Route(GET,    "/invites/:invite");
     public static final Route ACCEPT_INVITE                       = new Route(POST,   "/invites/:invite");
@@ -131,6 +134,30 @@ public final class Routes {
     public static final Route GET_USER                            = new Route(GET,    "/users/:user");
     public static final Route GET_CURRENT_APPLICATION_INFORMATION = new Route(GET,    "/oauth2/applications/@me");
     public static final Route LIST_VOICE_REGIONS                  = new Route(GET,    "/voice/regions");
+    public static final Route CREATE_INTERACTION_INITIAL_RESPONSE = new Route(POST,   "/interactions/:interaction/:interactionToken/callback", "interaction");
+    public static final Route EDIT_INTERACTION_INITIAL_RESPONSE   = new Route(PATCH,  "/webhooks/:interaction/:token/messages/@original");
+    public static final Route DELETE_INTERACTION_INITIAL_RESPONSE = new Route(DELETE, "/webhooks/:interaction/:token/messages/@original");
+    public static final Route CREATE_INTERACTION_FOLLOWUP         = new Route(POST,   "/webhooks/:interaction/:token/messages", "interaction");
+    public static final Route EDIT_INTERACTION_FOLLOWUP           = new Route(PATCH,  "/webhooks/:interaction/:token/messages/:message", "interaction");
+    public static final Route DELETE_INTERACTION_FOLLOWUP         = new Route(DELETE, "/webhooks/:interaction/:token/messages/:message", "interaction");
+    public static final Route GET_GLOBAL_APPLICATION_COMMANDS     = new Route(GET,    "/applications/:application/commands", "application");
+    public static final Route CREATE_GLOBAL_APPLICATION_COMMAND   = new Route(POST,   "/applications/:application/commands", "application");
+    public static final Route EDIT_GLOBAL_APPLICATION_COMMAND     = new Route(PATCH,  "/applications/:application/commands/:command", "application");
+    public static final Route DELETE_GLOBAL_APPLICATION_COMMAND   = new Route(DELETE, "/applications/:application/commands/:command", "application");
+    public static final Route GET_GUILD_APPLICATION_COMMANDS      = new Route(GET,    "/applications/:application/guilds/:guild/commands", "application");
+    public static final Route CREATE_GUILD_APPLICATION_COMMAND    = new Route(POST,   "/applications/:application/guilds/:guild/commands", "application");
+    public static final Route EDIT_GUILD_APPLICATION_COMMAND      = new Route(PATCH,  "/applications/:application/guilds/:guild/commands/:command", "application");
+    public static final Route DELETE_GUILD_APPLICATION_COMMAND    = new Route(DELETE, "/applications/:application/guilds/:guild/commands/:command", "application");
+    public static final Route GET_TEMPLATE                        = new Route(GET,    "/guilds/templates/:code");
+    public static final Route CREATE_GUILD_FROM_TEMPLATE          = new Route(POST,   "/guilds/templates/:code");
+    public static final Route GET_GUILD_TEMPLATES                 = new Route(GET,    "/guilds/:guild/templates", "guild");
+    public static final Route CREATE_GUILD_TEMPLATE               = new Route(POST,   "/guilds/:guild/templates", "guild");
+    public static final Route SYNC_GUILD_TEMPLATE                 = new Route(PUT,    "/guilds/:guild/templates/:code", "guild");
+    public static final Route MODIFY_GUILD_TEMPLATE               = new Route(PATCH,  "/guilds/:guild/templates/:code", "guild");
+    public static final Route DELETE_GUILD_TEMPLATE               = new Route(DELETE, "/guilds/:guild/templates/:code", "guild");
+    // TODO: Verify these routes
+    public static final Route GET_CHANNEL_THREADS                 = new Route(GET,    "/channels/:channel/threads", "channel");
+    public static final Route GET_CHANNEL_MESSAGE_THREADS         = new Route(GET,    "/channels/:channel/messages/:message/threads", "channel");
     // @formatter:on
     
     private Routes() {

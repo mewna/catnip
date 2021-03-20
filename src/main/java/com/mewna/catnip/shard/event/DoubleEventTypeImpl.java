@@ -48,14 +48,8 @@ public class DoubleEventTypeImpl<T, E> implements DoubleEventType<T, E> {
     private final Class<T> left;
     private final Class<E> right;
     
-    @Nonnull
-    @Override
-    public Pair<Class<T>, Class<E>> payloadClasses() {
-        return ImmutablePair.of(left, right);
-    }
-    
     public static <T, E> DoubleEventType<T, E> doubleEvent(@Nonnull final String key, @Nonnull final Class<T> left,
-                                              @Nonnull final Class<E> right) {
+                                                           @Nonnull final Class<E> right) {
         return new DoubleEventTypeImpl<>(key, left, right);
     }
     
@@ -68,5 +62,11 @@ public class DoubleEventTypeImpl<T, E> implements DoubleEventType<T, E> {
                 throw new UnsupportedOperationException("Event " + key + " is not implemented");
             }
         };
+    }
+    
+    @Nonnull
+    @Override
+    public Pair<Class<T>, Class<E>> payloadClasses() {
+        return ImmutablePair.of(left, right);
     }
 }

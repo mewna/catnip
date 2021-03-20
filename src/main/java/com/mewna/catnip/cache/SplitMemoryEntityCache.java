@@ -31,9 +31,9 @@ import com.mewna.catnip.cache.view.*;
 import com.mewna.catnip.entity.channel.UserDMChannel;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
+import io.reactivex.rxjava3.core.Maybe;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -68,16 +68,16 @@ public class SplitMemoryEntityCache extends MemoryEntityCache {
         return presenceCache.computeIfAbsent(shardId, __ -> createPresenceCacheView());
     }
     
-    @Nullable
+    @Nonnull
     @Override
-    public User user(final long id) {
+    public Maybe<User> user(final long id) {
         for(final CacheView<User> cache : userCache.values()) {
             final User user = cache.getById(id);
             if(user != null) {
-                return user;
+                return Maybe.just(user);
             }
         }
-        return null;
+        return Maybe.empty();
     }
     
     @Nonnull
@@ -86,39 +86,21 @@ public class SplitMemoryEntityCache extends MemoryEntityCache {
         return new CompositeNamedCacheView<>(userCache.values(), User::username);
     }
     
-    @Nullable
+    @Nonnull
     @Override
-    public Presence presence(final long id) {
+    public Maybe<Presence> presence(final long id) {
         for(final CacheView<Presence> cache : presenceCache.values()) {
             final Presence presence = cache.getById(id);
             if(presence != null) {
-                return presence;
+                return Maybe.just(presence);
             }
         }
-        return null;
+        return Maybe.empty();
     }
     
     @Nonnull
     @Override
     public CacheView<Presence> presences() {
         return new CompositeCacheView<>(presenceCache.values());
-    }
-    
-    @Nullable
-    @Override
-    public UserDMChannel dmChannel(final long id) {
-        for(final CacheView<UserDMChannel> cache : dmChannelCache.values()) {
-            final UserDMChannel channel = cache.getById(id);
-            if(channel != null) {
-                return channel;
-            }
-        }
-        return null;
-    }
-    
-    @Nonnull
-    @Override
-    public CacheView<UserDMChannel> dmChannels() {
-        return new CompositeCacheView<>(dmChannelCache.values());
     }
 }

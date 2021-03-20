@@ -47,7 +47,7 @@ import java.time.OffsetDateTime;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreatedInviteImpl implements CreatedInvite, RequiresCatnip, Timestamped {
+public class CreatedInviteImpl implements CreatedInvite, RequiresCatnip {
     private transient Catnip catnip;
     
     private String code;
@@ -60,16 +60,11 @@ public class CreatedInviteImpl implements CreatedInvite, RequiresCatnip, Timesta
     private int maxUses;
     private int maxAge;
     private boolean temporary;
-    private String createdAt;
+    private String createdAtString;
     private boolean revoked;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
-    }
-    
-    @Nonnull
-    public OffsetDateTime createdAt() {
-        return parseTimestamp(createdAt);
     }
 }

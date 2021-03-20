@@ -45,8 +45,10 @@ public interface MutableCacheView<T> extends CacheView<T> {
     void removeIf(@Nonnull LongPredicate predicate);
     
     @Nullable
+    @SuppressWarnings("UnusedReturnValue")
     T put(long key, @Nonnull T value);
     
     @Nullable
+    @SuppressWarnings("UnusedReturnValue")
     T remove(final long key);
 }

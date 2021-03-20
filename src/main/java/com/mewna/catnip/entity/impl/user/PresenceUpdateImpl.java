@@ -35,8 +35,6 @@ import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -62,15 +60,8 @@ public class PresenceUpdateImpl implements PresenceUpdate, RequiresCatnip, Times
     private OnlineStatus mobileStatus;
     private OnlineStatus webStatus;
     private OnlineStatus desktopStatus;
-    private String premiumSince;
     
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
-    }
-    
-    @Nullable
-    @Override
-    public OffsetDateTime premiumSince() {
-        return parseTimestamp(premiumSince);
     }
 }

@@ -27,12 +27,13 @@
 
 package com.mewna.catnip.entity.user;
 
-import com.mewna.catnip.entity.Mentionable;
-import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
+import com.mewna.catnip.entity.partials.Mentionable;
+import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.util.ImageOptions;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 
 import javax.annotation.CheckReturnValue;
@@ -46,7 +47,7 @@ import java.util.Set;
  * @author amy
  * @since 9/4/18
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "RedundantSuppression"})
 public interface User extends Snowflake, Mentionable {
     /**
      * Whether the user's avatar is animated.
@@ -197,9 +198,9 @@ public interface User extends Snowflake, Mentionable {
     /**
      * @return The user's presence, or {@code null} if no presence is cached.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default Presence presence() {
+    default Maybe<Presence> presence() {
         return catnip().cache().presence(id());
     }
     

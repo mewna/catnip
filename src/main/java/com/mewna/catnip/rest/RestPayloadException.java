@@ -27,22 +27,25 @@
 
 package com.mewna.catnip.rest;
 
-import java.util.List;
+import lombok.Getter;
+
+import javax.annotation.Nonnull;
 import java.util.Map;
 
 /**
  * @author amy
  * @since 1/17/19.
  */
+@Getter
 public class RestPayloadException extends Exception {
-    private final Map<String, List<String>> failures;
+    @Nonnull
+    private final JsonErrorCode code;
+    @Nonnull
+    private final Map<String, ?> errorInfo;
     
-    public RestPayloadException(final Map<String, List<String>> failures) {
+    public RestPayloadException(@Nonnull final JsonErrorCode code, @Nonnull final Map<String, ?> errorInfo) {
         super((String) null);
-        this.failures = Map.copyOf(failures);
-    }
-    
-    public final Map<String, List<String>> failures() {
-        return failures;
+        this.code = code;
+        this.errorInfo = Map.copyOf(errorInfo);
     }
 }

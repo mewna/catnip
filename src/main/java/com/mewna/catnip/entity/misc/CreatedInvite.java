@@ -28,6 +28,7 @@
 package com.mewna.catnip.entity.misc;
 
 import com.mewna.catnip.entity.guild.Invite;
+import com.mewna.catnip.entity.partials.HasCreatedAt;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
@@ -37,7 +38,7 @@ import java.time.OffsetDateTime;
  * @author natanbc
  * @since 9/14/18
  */
-public interface CreatedInvite extends Invite {
+public interface CreatedInvite extends Invite, HasCreatedAt {
     @Nonnegative
     int uses();
     
@@ -47,9 +48,6 @@ public interface CreatedInvite extends Invite {
     int maxAge();
     
     boolean temporary();
-    
-    @Nonnull
-    OffsetDateTime createdAt();
     
     boolean revoked();
 }

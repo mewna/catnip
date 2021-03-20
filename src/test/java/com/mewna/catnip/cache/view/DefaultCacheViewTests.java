@@ -50,7 +50,7 @@ public class DefaultCacheViewTests {
     
     @Test
     public void isEmpty() {
-        final DefaultCacheView<String> cache = new DefaultCacheView<>();
+        final CacheView<String> cache = new DefaultCacheView<>();
         Assertions.assertTrue(cache.isEmpty());
     }
     
@@ -141,7 +141,7 @@ public class DefaultCacheViewTests {
     
     @Test
     public void reduce3Empty() {
-        final DefaultCacheView<String> cache = new DefaultCacheView<>();
+        final CacheView<String> cache = new DefaultCacheView<>();
         final Optional<String> maybeS = cache.reduce(String::concat);
         Assertions.assertFalse(maybeS.isPresent());
     }
@@ -171,7 +171,7 @@ public class DefaultCacheViewTests {
     
     @Test
     public void anyMatchEmpty() {
-        final DefaultCacheView<String> cache = new DefaultCacheView<>();
+        final CacheView<String> cache = new DefaultCacheView<>();
         Assertions.assertFalse(cache.anyMatch("some string"::equals));
     }
     
@@ -185,7 +185,7 @@ public class DefaultCacheViewTests {
     
     @Test
     public void allMatchEmpty() {
-        final DefaultCacheView<String> cache = new DefaultCacheView<>();
+        final CacheView<String> cache = new DefaultCacheView<>();
         Assertions.assertTrue(cache.allMatch("some string"::equals));
     }
     
@@ -199,7 +199,7 @@ public class DefaultCacheViewTests {
     
     @Test
     public void noneMatchEmpty() {
-        final DefaultCacheView<String> cache = new DefaultCacheView<>();
+        final CacheView<String> cache = new DefaultCacheView<>();
         Assertions.assertTrue(cache.noneMatch("some string"::equals));
     }
     

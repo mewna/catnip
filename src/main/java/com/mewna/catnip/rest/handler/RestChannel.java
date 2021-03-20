@@ -57,7 +57,10 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
 
 import static com.mewna.catnip.util.JsonUtil.mapObjectContents;
 import static com.mewna.catnip.util.Utils.encodeUTF8;
@@ -66,34 +69,34 @@ import static com.mewna.catnip.util.Utils.encodeUTF8;
  * @author amy
  * @since 9/3/18.
  */
-@SuppressWarnings({"unused", "WeakerAccess", "ConstantConditions"})
+@SuppressWarnings({"unused", "WeakerAccess", "ConstantConditions", "RedundantSuppression"})
 public class RestChannel extends RestHandler {
     public RestChannel(final CatnipImpl catnip) {
         super(catnip);
     }
     
     @Nonnull
-    public Single<Message> sendMessage(@Nonnull final String channelId, @Nonnull final String content) {
-        return sendMessage(channelId, new MessageOptions().content(content));
+    public Single<Message> createMessage(@Nonnull final String channelId, @Nonnull final String content) {
+        return createMessage(channelId, new MessageOptions().content(content));
     }
     
     @Nonnull
-    public Single<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Embed embed) {
-        return sendMessage(channelId, new MessageOptions().embed(embed));
+    public Single<Message> createMessage(@Nonnull final String channelId, @Nonnull final Embed embed) {
+        return createMessage(channelId, new MessageOptions().embed(embed));
     }
     
     @Nonnull
-    public Single<Message> sendMessage(@Nonnull final String channelId, @Nonnull final Message message) {
-        return Single.fromObservable(sendMessageRaw(channelId, message).map(entityBuilder()::createMessage));
+    public Single<Message> createMessage(@Nonnull final String channelId, @Nonnull final Message message) {
+        return Single.fromObservable(createMessageRaw(channelId, message).map(entityBuilder()::createMessage));
     }
     
     @Nonnull
-    public Single<Message> sendMessage(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
-        return Single.fromObservable(sendMessageRaw(channelId, options).map(entityBuilder()::createMessage));
+    public Single<Message> createMessage(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
+        return Single.fromObservable(createMessageRaw(channelId, options).map(entityBuilder()::createMessage));
     }
     
     @Nonnull
-    public Observable<JsonObject> sendMessageRaw(@Nonnull final String channelId, @Nonnull final Message message) {
+    public Observable<JsonObject> createMessageRaw(@Nonnull final String channelId, @Nonnull final Message message) {
         final JsonObject json = new JsonObject();
         if(message.content() != null && !message.content().isEmpty()) {
             json.put("content", message.content());
@@ -113,7 +116,7 @@ public class RestChannel extends RestHandler {
     }
     
     @Nonnull
-    public Observable<JsonObject> sendMessageRaw(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
+    public Observable<JsonObject> createMessageRaw(@Nonnull final String channelId, @Nonnull final MessageOptions options) {
         final JsonObject json = new JsonObject();
         if(options.content() != null && !options.content().isEmpty()) {
             json.put("content", options.content());
@@ -125,7 +128,8 @@ public class RestChannel extends RestHandler {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no attachments!");
         }
         
-        if(options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
+        if(options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null
+                || options.reference() != null) {
             final JsonObject allowedMentions = new JsonObject();
             final EnumSet<MentionParseFlag> parse = options.parseFlags();
             if(parse == null) {
@@ -146,7 +150,11 @@ public class RestChannel extends RestHandler {
                     allowedMentions.put("roles", options.mentionedRoles());
                 }
             }
+            allowedMentions.put("replied_user", options.pingReply());
             json.put("allowed_mentions", allowedMentions);
+        }
+        if(options.reference() != null) {
+            json.put("message_reference", entityBuilder().referenceToJson(options.reference()));
         }
         
         final OutboundRequest request = new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), Map.of(), json);
@@ -177,13 +185,7 @@ public class RestChannel extends RestHandler {
     @Nonnull
     public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
                                        @Nonnull final String content) {
-        return editMessage(channelId, messageId, new MessageOptions().content(content).buildMessage());
-    }
-    
-    @Nonnull
-    public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
-                                       @Nonnull final String content, @Nonnull final Set<MessageFlag> flags) {
-        return editMessage(channelId, messageId, new MessageOptions().content(content), flags);
+        return editMessage(channelId, messageId, new MessageOptions().content(content));
     }
     
     @Nonnull
@@ -194,58 +196,69 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
-                                       @Nonnull final Embed embed, @Nonnull final Set<MessageFlag> flags) {
-        return editMessage(channelId, messageId, new MessageOptions().embed(embed), flags);
-    }
-    
-    @Nonnull
-    public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
                                        @Nonnull final MessageOptions message) {
-        return editMessage(channelId, messageId, message, Set.of());
-    }
-    
-    @Nonnull
-    public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
-                                       @Nonnull final MessageOptions message, @Nonnull final Set<MessageFlag> flags) {
-        return Single.fromObservable(editMessageRaw(channelId, messageId, message, flags)
+        return Single.fromObservable(editMessageRaw(channelId, messageId, message)
                 .map(entityBuilder()::createMessage));
     }
     
     @Nonnull
     public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
                                        @Nonnull final Message message) {
-        return editMessage(channelId, messageId, message, Set.of());
-    }
-    
-    @Nonnull
-    public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
-                                       @Nonnull final Message message, @Nonnull final Set<MessageFlag> flags) {
-        return Single.fromObservable(editMessageRaw(channelId, messageId, new MessageOptions(message), flags)
+        return Single.fromObservable(editMessageRaw(channelId, messageId, new MessageOptions(message))
                 .map(entityBuilder()::createMessage));
     }
     
     @Nonnull
     public Observable<JsonObject> editMessageRaw(@Nonnull final String channelId, @Nonnull final String messageId,
-                                                 @Nonnull final MessageOptions messageOptions,
-                                                 @SuppressWarnings("TypeMayBeWeakened") @Nonnull final Set<MessageFlag> flags) {
+                                                 @Nonnull final MessageOptions options) {
         final JsonObject json = new JsonObject();
-        if(messageOptions.embed() == null && (messageOptions.content() == null || messageOptions.content().isEmpty())) {
+        if(options.embed() == null && (options.content() == null || options.content().isEmpty())) {
             throw new IllegalArgumentException("Can't build a message with no content and no embed!");
         }
-        json.put("content", messageOptions.content());
-        if(messageOptions.embed() != null || messageOptions.override()) {
-            if(messageOptions.embed() == null) {
+        json.put("content", options.content());
+        if(options.embed() != null || options.override()) {
+            if(options.embed() == null) {
                 json.put("embed", null);
             } else {
-                json.put("embed", entityBuilder().embedToJson(messageOptions.embed()));
+                json.put("embed", entityBuilder().embedToJson(options.embed()));
             }
         }
         if(json.get("embed") == null && json.get("content") == null) {
             throw new IllegalArgumentException("Can't build a message with no content and no embed!");
         }
-        if(!flags.isEmpty() || messageOptions.override()) {
-            json.put("flags", MessageFlag.fromSettable(flags));
+        if(!options.flags().isEmpty() || options.override()) {
+            json.put("flags", MessageFlag.fromSettable(options.flags()));
         }
+    
+        if(options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null
+                || options.reference() != null) {
+            final JsonObject allowedMentions = new JsonObject();
+            final EnumSet<MentionParseFlag> parse = options.parseFlags();
+            if(parse == null) {
+                // These act like a whitelist regardless of parse being present.
+                allowedMentions.put("users", options.mentionedUsers());
+                allowedMentions.put("roles", options.mentionedRoles());
+            } else {
+                final JsonArray parseList = new JsonArray();
+                for(final MentionParseFlag p : parse) {
+                    parseList.add(p.name());
+                }
+                allowedMentions.put("parse", parseList);
+                //If either list is present along with the respective parse option, validation fails. The contains check avoids this.
+                if(!parse.contains(MentionParseFlag.USERS)) {
+                    allowedMentions.put("users", options.mentionedUsers());
+                }
+                if(!parse.contains(MentionParseFlag.ROLES)) {
+                    allowedMentions.put("roles", options.mentionedRoles());
+                }
+            }
+            allowedMentions.put("replied_user", options.pingReply());
+            json.put("allowed_mentions", allowedMentions);
+        }
+        if(options.reference() != null) {
+            json.put("message_reference", entityBuilder().referenceToJson(options.reference()));
+        }
+        
         return catnip().requester()
                 .queue(new OutboundRequest(Routes.EDIT_MESSAGE.withMajorParam(channelId),
                         Map.of("message", messageId), json))
@@ -331,7 +344,7 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     public Completable deleteEmojiReaction(@Nonnull final String channelId, @Nonnull final String messageId,
-                                         @Nonnull final String emoji) {
+                                           @Nonnull final String emoji) {
         return Completable.fromObservable(catnip().requester()
                 .queue(new OutboundRequest(Routes.DELETE_EMOJI_REACTIONS.withMajorParam(channelId),
                         Map.of("message", messageId, "emojis", encodeUTF8(emoji))).emptyBody(true)));
@@ -339,7 +352,7 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     public Completable deleteEmojiReaction(@Nonnull final String channelId, @Nonnull final String messageId,
-                                         @Nonnull final Emoji emoji) {
+                                           @Nonnull final Emoji emoji) {
         return deleteOwnReaction(channelId, messageId, emoji.forReaction());
     }
     

@@ -32,11 +32,16 @@ import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.misc.ApplicationInfo;
 import com.mewna.catnip.entity.misc.ApplicationOwner;
 import com.mewna.catnip.entity.misc.Team;
+import com.mewna.catnip.entity.user.UserFlag;
+import com.mewna.catnip.entity.util.ImageOptions;
+import com.mewna.catnip.util.CDNFormat;
 import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author amy
@@ -60,6 +65,19 @@ public class ApplicationInfoImpl implements ApplicationInfo, RequiresCatnip {
     private boolean requiresCodeGrant;
     private ApplicationOwner owner;
     private Team team;
+    private String summary;
+    private String verifyKey;
+    private long guildIdAsLong;
+    private String primarySkuId;
+    private String slug;
+    private String coverImage;
+    private Set<UserFlag> flags;
+    
+    @Nullable
+    @Override
+    public String iconUrl(@Nonnull final ImageOptions options) {
+        return CDNFormat.applicationIconUrl(id(), icon, options);
+    }
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {

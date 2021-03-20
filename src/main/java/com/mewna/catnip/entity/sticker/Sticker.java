@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2020 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,47 +25,52 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.sticker;
 
-import com.mewna.catnip.util.Utils;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.partials.HasDescription;
+import com.mewna.catnip.entity.partials.HasName;
+import com.mewna.catnip.entity.partials.Snowflake;
+import com.mewna.catnip.util.CDNFormat;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import java.time.OffsetDateTime;
+import javax.annotation.Nullable;
+import java.util.List;
 
 /**
- * A subset of entities that have an ID attached.
- *
- * @author natanbc
- * @since 5/9/18.
+ * @author amy
+ * @since 10/15/20.
  */
-public interface Snowflake extends Entity {
-    /**
-     * The ID of this snowflake.
-     *
-     * @return String representing the ID.
-     */
-    @CheckReturnValue
-    default String id() {
-        return Long.toUnsignedString(idAsLong());
-    }
-    
-    /**
-     * The ID of this snowflake, as a long.
-     *
-     * @return Long representing the ID.
-     */
-    @CheckReturnValue
-    long idAsLong();
-    
-    /**
-     * The time this snowflake was generated.
-     *
-     * @return OffsetDateTime representing when this snowflake was generated.
-     */
+public interface Sticker extends Snowflake, RequiresCatnip, HasName, HasDescription {
     @Nonnull
     @CheckReturnValue
-    default OffsetDateTime creationTime() {
-        return Utils.creationTimeOf(idAsLong());
+    default String packId() {
+        return Long.toUnsignedString(packIdAsLong());
+    }
+    
+    @CheckReturnValue
+    long packIdAsLong();
+    
+    @Nonnull
+    @CheckReturnValue
+    List<String> tags();
+    
+    @Nonnull
+    @CheckReturnValue
+    String asset();
+    
+    @Nullable
+    @CheckReturnValue
+    String previewAsset();
+    
+    @Nonnull
+    @CheckReturnValue
+    StickerFormatType formatType();
+    
+    @Nonnull
+    @CheckReturnValue
+    default String cdnUrl() {
+        return CDNFormat.stickerUrl(this);
     }
 }

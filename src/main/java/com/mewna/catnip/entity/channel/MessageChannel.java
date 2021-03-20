@@ -63,7 +63,7 @@ public interface MessageChannel extends Channel {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.SEND_MESSAGES);
         }
-        final Single<Message> future = catnip().rest().channel().sendMessage(id(), content);
+        final Single<Message> future = catnip().rest().channel().createMessage(id(), content);
         // Inject guild manually because Discord does not send it in response
         if(isGuild()) {
             return future.map(msg -> ((MessageImpl) msg).guildIdAsLong(asGuildChannel().guildIdAsLong()));
@@ -84,7 +84,7 @@ public interface MessageChannel extends Channel {
             PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                     Permission.SEND_MESSAGES, Permission.EMBED_LINKS);
         }
-        return catnip().rest().channel().sendMessage(id(), embed);
+        return catnip().rest().channel().createMessage(id(), embed);
     }
     
     /**
@@ -105,7 +105,7 @@ public interface MessageChannel extends Channel {
                         Permission.SEND_MESSAGES);
             }
         }
-        return catnip().rest().channel().sendMessage(id(), message);
+        return catnip().rest().channel().createMessage(id(), message);
     }
     
     /**
@@ -136,7 +136,7 @@ public interface MessageChannel extends Channel {
                 }
             }
         }
-        return catnip().rest().channel().sendMessage(id(), options);
+        return catnip().rest().channel().createMessage(id(), options);
     }
     
     /**

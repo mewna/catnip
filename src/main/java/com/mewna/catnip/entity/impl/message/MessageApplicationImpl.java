@@ -28,8 +28,13 @@
 package com.mewna.catnip.entity.impl.message;
 
 import com.mewna.catnip.entity.message.Message.MessageApplication;
+import com.mewna.catnip.entity.util.ImageOptions;
+import com.mewna.catnip.util.CDNFormat;
 import lombok.*;
 import lombok.experimental.Accessors;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * @author amy
@@ -42,9 +47,16 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MessageApplicationImpl implements MessageApplication {
+    // TODO: Probably? want to be storing this as a long
     private String id;
     private String coverImage;
     private String description;
     private String icon;
     private String name;
+    
+    @Nullable
+    @Override
+    public String iconUrl(@Nonnull final ImageOptions options) {
+        return CDNFormat.applicationIconUrl(id, icon, options);
+    }
 }

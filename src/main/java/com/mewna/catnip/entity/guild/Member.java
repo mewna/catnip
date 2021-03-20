@@ -28,13 +28,17 @@
 package com.mewna.catnip.entity.guild;
 
 import com.mewna.catnip.cache.view.CacheView;
-import com.mewna.catnip.entity.Mentionable;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.channel.GuildChannel;
+import com.mewna.catnip.entity.partials.Mentionable;
+import com.mewna.catnip.entity.partials.Permissable;
 import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.util.PermissionUtil;
+import com.mewna.catnip.util.rx.RxHelpers;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 
 import javax.annotation.CheckReturnValue;
@@ -52,15 +56,15 @@ import java.util.stream.Collectors;
  * @author amy
  * @since 9/4/18.
  */
-@SuppressWarnings("unused")
-public interface Member extends Mentionable, PermissionHolder {
+@SuppressWarnings({"unused", "RedundantSuppression"})
+public interface Member extends Mentionable, Permissable {
     /**
      * The user equivalent to this member.
      */
     @Nonnull
     @CheckReturnValue
-    default User user() {
-        return Objects.requireNonNull(catnip().cache().user(idAsLong()), "User not found. It may have been removed from the cache.");
+    default Maybe<User> user() {
+        return catnip().cache().user(idAsLong());
     }
     
     /**
@@ -79,9 +83,9 @@ public interface Member extends Mentionable, PermissionHolder {
      */
     @Nonnull
     @CheckReturnValue
-    default String effectiveName() {
+    default Single<String> effectiveName() {
         final String nick = nick();
-        return nick != null ? nick : user().username();
+        return nick != null ? Single.just(nick) : user().map(User::username).toSingle();
     }
     
     /**
@@ -140,7 +144,9 @@ public interface Member extends Mentionable, PermissionHolder {
      * @return True if muted, false otherwise.
      */
     @CheckReturnValue
-    boolean mute();
+    default Single<Boolean> mute() {
+        return voiceState().map(s -> s.selfMute() || s.mute()).defaultIfEmpty(false);
+    }
     
     /**
      * Whether the user is deafened.
@@ -149,7 +155,17 @@ public interface Member extends Mentionable, PermissionHolder {
      * @return True if deafened, false otherwise.
      */
     @CheckReturnValue
-    boolean deaf();
+    default Single<Boolean> deaf() {
+        return voiceState().map(s -> s.selfDeaf() || s.deaf()).defaultIfEmpty(false);
+    }
+    
+    /**
+     * @return The user's voice state in this guild. May be null.
+     */
+    @CheckReturnValue
+    default Maybe<VoiceState> voiceState() {
+        return guild().map(g -> g.voiceStates().getById(id()));
+    }
     
     /**
      * When the user joined the server last.
@@ -249,8 +265,8 @@ public interface Member extends Mentionable, PermissionHolder {
      *
      * @return Whether the member owns the guild or not
      */
-    default boolean isOwner() {
-        return guild().owner().equals(this);
+    default Single<Boolean> isOwner() {
+        return guild().map(guild -> guild.ownerIdAsLong() == idAsLong()).toSingle();
     }
     
     /**
@@ -259,98 +275,131 @@ public interface Member extends Mentionable, PermissionHolder {
     @Nonnull
     @CheckReturnValue
     default String asMention() {
-        return nick() != null ? "<@!" + id() + '>' : "<@" + id() + '>';
+        return nick() != null ? "<@!" + id() + '>' : "<@" + id() + '>' ;
     }
     
     /**
      * @param role The role to add.
+     * @param target The member to add the role to.
      *
      * @return A {@code Completable} that completes when the role is added.
      */
     @Nonnull
     @CheckReturnValue
-    default Completable addRole(@Nonnull final Role role) {
-        return addRole(role.id());
+    default Completable addRole(@Nonnull final Role role, @Nonnull final Member target) {
+        return addRole(role, target, null);
     }
     
     /**
      * @param roleId The id of the role to add.
+     * @param memberId The id of the member to add the role to.
      *
      * @return A {@code Completable} that completes when the role is added.
      */
     @Nonnull
     @CheckReturnValue
-    default Completable addRole(@Nonnull final String roleId) {
-        return addRole(roleId, null);
+    default Completable addRole(@Nonnull final String roleId, @Nonnull final String memberId) {
+        return addRole(roleId, memberId, null);
     }
     
     /**
      * @param role   The role to add.
+     *            @param target The member to add the role to.
      * @param reason The reason for adding the role.
      *
      * @return A {@code Completable} that completes when the role is added.
      */
     @Nonnull
     @CheckReturnValue
-    default Completable addRole(@Nonnull final Role role, @Nullable final String reason) {
-        return addRole(role.id(), reason);
+    default Completable addRole(@Nonnull final Role role, @Nonnull final Member target, @Nullable final String reason) {
+        return addRole(role.id(), target.id(), reason);
     }
     
     /**
      * @param roleId The id of the role to add.
+     *              @param memberId The id of the member to add the role to.
      * @param reason The reason for adding the role.
      *
      * @return A {@code Completable} that completes when the role is added.
      */
     @Nonnull
     @CheckReturnValue
-    default Completable addRole(@Nonnull final String roleId, @Nullable final String reason) {
-        return catnip().rest().guild().addGuildMemberRole(guildId(), id(), roleId, reason);
+    default Completable addRole(@Nonnull final String roleId, @Nonnull final String memberId, @Nullable final String reason) {
+        PermissionUtil.checkPermissions(catnip(), guildId(), Permission.MANAGE_ROLES);
+        return RxHelpers.resolveMany(
+                guild(),
+                catnip().cache().role(guildId(), roleId),
+                catnip().cache().member(guildId(), memberId)
+        ).flatMapCompletable(triple -> {
+            final var guild = triple.getValue0();
+            final var role = triple.getValue1();
+            final var member = triple.getValue2();
+            PermissionUtil.checkHierarchy(role, guild);
+            PermissionUtil.checkHierarchy(member, guild);
+            return catnip().rest().guild().addGuildMemberRole(guildId(), memberId, roleId, reason);
+        });
     }
     
     /**
      * @param role The role to remove.
+     *             @param member The member to remove from.
      *
      * @return A {@code Completable} that completes when the role is removed.
      */
     @Nonnull
     @CheckReturnValue
-    default Completable removeRole(@Nonnull final Role role) {
-        return removeRole(role.id());
+    default Completable removeRole(@Nonnull final Role role, @Nonnull final Member member) {
+        return removeRole(role, member, null);
     }
     
     /**
      * @param roleId The id of the role to remove.
+     * @param memberId The id of the member to remove from.
      *
      * @return A {@code Completable} that completes when the role is removed.
      */
     @Nonnull
     @CheckReturnValue
-    default Completable removeRole(@Nonnull final String roleId) {
-        return catnip().rest().guild().removeGuildMemberRole(guildId(), id(), roleId);
+    default Completable removeRole(@Nonnull final String roleId, @Nonnull final String memberId) {
+        return catnip().rest().guild().removeGuildMemberRole(guildId(), memberId, roleId);
     }
     
     /**
      * @param role   The role to remove.
+     * @param member The member to remove from.
      * @param reason The reason for removing the role.
      *
      * @return A {@code Completable} that completes when the role is removed.
      */
     @Nonnull
     @CheckReturnValue
-    default Completable removeRole(@Nonnull final Role role, @Nullable final String reason) {
-        return removeRole(role.id(), reason);
+    default Completable removeRole(@Nonnull final Role role, @Nonnull final Member member, @Nullable final String reason) {
+        return removeRole(role.id(), member.id(), reason);
     }
     
     /**
      * @param roleId The id of the role to remove.
+     *               @param memberId The id of the member to remove from.
      * @param reason The reason for removing the role.
      *
      * @return A {@code Completable} that completes when the role is removed.
      */
     @Nonnull
     @CheckReturnValue
-    default Completable removeRole(@Nonnull final String roleId, @Nullable final String reason) {
-        return catnip().rest().guild().removeGuildMemberRole(guildId(), id(), roleId, reason);
+    default Completable removeRole(@Nonnull final String roleId, @Nonnull final String memberId, @Nullable final String reason) {
+    
+        PermissionUtil.checkPermissions(catnip(), guildId(), Permission.MANAGE_ROLES);
+        return RxHelpers.resolveMany(
+                guild(),
+                catnip().cache().role(guildId(), roleId),
+                catnip().cache().member(guildId(), memberId)
+        ).flatMapCompletable(triple -> {
+            final var guild = triple.getValue0();
+            final var role = triple.getValue1();
+            final var member = triple.getValue2();
+            PermissionUtil.checkHierarchy(role, guild);
+            PermissionUtil.checkHierarchy(member, guild);
+            return catnip().rest().guild().removeGuildMemberRole(guildId(), memberId, roleId, reason);
+        });
     }
 }

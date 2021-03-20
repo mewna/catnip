@@ -30,7 +30,6 @@ package com.mewna.catnip.cache;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.cache.view.NamedCacheView;
 import com.mewna.catnip.entity.channel.GuildChannel;
-import com.mewna.catnip.entity.channel.UserDMChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
@@ -38,11 +37,9 @@ import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.user.Presence;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
-import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.core.Maybe;
 
-import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * If you're looking to implement your own caching system, you want
@@ -51,7 +48,6 @@ import javax.annotation.Nullable;
  * @author amy
  * @since 9/13/18.
  */
-@SuppressWarnings("unused")
 public interface EntityCache {
     /**
      * Get the guild with the specified ID. May be {@code null}.
@@ -60,8 +56,8 @@ public interface EntityCache {
      *
      * @return The guild, or {@code null} if it isn't cached.
      */
-    @Nullable
-    default Guild guild(@Nonnull final String id) {
+    @Nonnull
+    default Maybe<Guild> guild(@Nonnull final String id) {
         return guild(Long.parseUnsignedLong(id));
     }
     
@@ -72,21 +68,8 @@ public interface EntityCache {
      *
      * @return The guild, or {@code null} if it isn't cached.
      */
-    @Nullable
-    default Guild guild(final long id) {
-        return guildAsync(id).blockingGet();
-    }
-    
-    /**
-     * Get the guild with the specified id asynchronously.
-     *
-     * @param id The id of the guild to fetch.
-     *
-     * @return A future that completes with a possibly-{@code null} guild.
-     */
     @Nonnull
-    @CheckReturnValue
-    Single<Guild> guildAsync(final long id);
+    Maybe<Guild> guild(final long id);
     
     /**
      * @return A view of the current guild cache. Updates to the cache will update this view.
@@ -101,8 +84,8 @@ public interface EntityCache {
      *
      * @return The user, or {@code null} if it isn't cached.
      */
-    @Nullable
-    default User user(@Nonnull final String id) {
+    @Nonnull
+    default Maybe<User> user(@Nonnull final String id) {
         return user(Long.parseUnsignedLong(id));
     }
     
@@ -113,21 +96,8 @@ public interface EntityCache {
      *
      * @return The user, or {@code null} if it isn't cached.
      */
-    @Nullable
-    default User user(final long id) {
-        return userAsync(id).blockingGet();
-    }
-    
-    /**
-     * Get the user with the specified id asynchronously.
-     *
-     * @param id The id of the user to fetch.
-     *
-     * @return A future that completes with a possibly-{@code null} user.
-     */
     @Nonnull
-    @CheckReturnValue
-    Single<User> userAsync(final long id);
+    Maybe<User> user(final long id);
     
     /**
      * @return A view of the current user cache. Updates to the cache will update this view.
@@ -143,8 +113,8 @@ public interface EntityCache {
      *
      * @return The user's presence, or {@code null} if it isn't cached.
      */
-    @Nullable
-    default Presence presence(@Nonnull final String id) {
+    @Nonnull
+    default Maybe<Presence> presence(@Nonnull final String id) {
         return presence(Long.parseUnsignedLong(id));
     }
     
@@ -156,21 +126,8 @@ public interface EntityCache {
      *
      * @return The user's presence, or {@code null} if it isn't cached.
      */
-    @Nullable
-    default Presence presence(final long id) {
-        return presenceAsync(id).blockingGet();
-    }
-    
-    /**
-     * Get the presence with the specified id asynchronously.
-     *
-     * @param id The id of the presence to fetch.
-     *
-     * @return A future that completes with a possibly-{@code null} presence.
-     */
     @Nonnull
-    @CheckReturnValue
-    Single<Presence> presenceAsync(long id);
+    Maybe<Presence> presence(final long id);
     
     /**
      * @return A view of the current presence cache. Updates to the cache will update this view.
@@ -187,8 +144,8 @@ public interface EntityCache {
      *
      * @return The member, or {@code null} if it isn't cached.
      */
-    @Nullable
-    default Member member(@Nonnull final String guildId, @Nonnull final String id) {
+    @Nonnull
+    default Maybe<Member> member(@Nonnull final String guildId, @Nonnull final String id) {
         return member(Long.parseUnsignedLong(guildId), Long.parseUnsignedLong(id));
     }
     
@@ -201,22 +158,8 @@ public interface EntityCache {
      *
      * @return The member, or {@code null} if it isn't cached.
      */
-    @Nullable
-    default Member member(final long guildId, final long id) {
-        return memberAsync(guildId, id).blockingGet();
-    }
-    
-    /**
-     * Get the member with the specified id asynchronously.
-     *
-     * @param guildId The id of the guild the member is in.
-     * @param id      The id of the member to fetch.
-     *
-     * @return A future that completes with a possibly-{@code null} member.
-     */
     @Nonnull
-    @CheckReturnValue
-    Single<Member> memberAsync(long guildId, long id);
+    Maybe<Member> member(final long guildId, final long id);
     
     /**
      * Get all members for the guild with the given ID.
@@ -258,8 +201,8 @@ public interface EntityCache {
      *
      * @return The role, or {@code null} if it isn't cached.
      */
-    @Nullable
-    default Role role(@Nonnull final String guildId, @Nonnull final String id) {
+    @Nonnull
+    default Maybe<Role> role(@Nonnull final String guildId, @Nonnull final String id) {
         return role(Long.parseUnsignedLong(guildId), Long.parseUnsignedLong(id));
     }
     
@@ -272,22 +215,8 @@ public interface EntityCache {
      *
      * @return The role, or {@code null} if it isn't cached.
      */
-    @Nullable
-    default Role role(final long guildId, final long id) {
-        return roleAsync(guildId, id).blockingGet();
-    }
-    
-    /**
-     * Get the role with the specified id asynchronously.
-     *
-     * @param guildId The id of the guild that owns the role.
-     * @param id      The id of the role to fetch.
-     *
-     * @return A future that completes with a possibly-{@code null} role.
-     */
     @Nonnull
-    @CheckReturnValue
-    Single<Role> roleAsync(long guildId, long id);
+    Maybe<Role> role(final long guildId, final long id);
     
     /**
      * Get all roles for the guild with the given ID.
@@ -329,8 +258,8 @@ public interface EntityCache {
      *
      * @return The channel, or {@code null} if it isn't cached.
      */
-    @Nullable
-    default GuildChannel channel(@Nonnull final String guildId, @Nonnull final String id) {
+    @Nonnull
+    default Maybe<GuildChannel> channel(@Nonnull final String guildId, @Nonnull final String id) {
         return channel(Long.parseUnsignedLong(guildId), Long.parseUnsignedLong(id));
     }
     
@@ -343,22 +272,8 @@ public interface EntityCache {
      *
      * @return The channel, or {@code null} if it isn't cached.
      */
-    @Nullable
-    default GuildChannel channel(final long guildId, final long id) {
-        return channelAsync(guildId, id).blockingGet();
-    }
-    
-    /**
-     * Get the guild channel with the specified id asynchronously.
-     *
-     * @param guildId The id of the guild that owns the channel.
-     * @param id      The id of the guild channel to fetch.
-     *
-     * @return A future that completes with a possibly-{@code null} channel.
-     */
     @Nonnull
-    @CheckReturnValue
-    Single<GuildChannel> channelAsync(long guildId, long id);
+    Maybe<GuildChannel> channel(final long guildId, final long id);
     
     /**
      * Get all channels for the guild with the given ID.
@@ -392,50 +307,6 @@ public interface EntityCache {
     NamedCacheView<GuildChannel> channels();
     
     /**
-     * Get the DM channel with the given ID. May be {@code null}.
-     *
-     * @param id Recipient (user) ID of the channel.
-     *
-     * @return The channel, or {@code null} if it isn't cached.
-     */
-    @Nullable
-    default UserDMChannel dmChannel(@Nonnull final String id) {
-        return dmChannel(Long.parseUnsignedLong(id));
-    }
-    
-    /**
-     * Get the DM channel with the given ID. May be {@code null}.
-     *
-     * @param id Recipient (user) ID of the channel.
-     *
-     * @return The channel, or {@code null} if it isn't cached.
-     */
-    @Nullable
-    default UserDMChannel dmChannel(final long id) {
-        return dmChannelAsync(id).blockingGet();
-    }
-    
-    /**
-     * Get the dm channel with the specified id asynchronously.
-     *
-     * @param id The id of the dm channel to fetch.
-     *
-     * @return A future that completes with a possibly-{@code null} dm channel.
-     */
-    @Nonnull
-    @CheckReturnValue
-    Single<UserDMChannel> dmChannelAsync(long id);
-    
-    /**
-     * Get all DM channels cached in this entity cache.
-     *
-     * @return A view of all the current DM channel caches. Updates to the caches or
-     * additions/removals (of guilds) will update this view.
-     */
-    @Nonnull
-    CacheView<UserDMChannel> dmChannels();
-    
-    /**
      * Get the custom emojis with the given ID from the guild with the given ID.
      * May be {@code null},
      *
@@ -444,8 +315,8 @@ public interface EntityCache {
      *
      * @return The custom emojis, or {@code null} if it isn't cached.
      */
-    @Nullable
-    default CustomEmoji emoji(@Nonnull final String guildId, @Nonnull final String id) {
+    @Nonnull
+    default Maybe<CustomEmoji> emoji(@Nonnull final String guildId, @Nonnull final String id) {
         return emoji(Long.parseUnsignedLong(guildId), Long.parseUnsignedLong(id));
     }
     
@@ -458,23 +329,8 @@ public interface EntityCache {
      *
      * @return The custom emojis, or {@code null} if it isn't cached.
      */
-    @Nullable
-    default CustomEmoji emoji(final long guildId, final long id) {
-        return emojiAsync(guildId, id).blockingGet();
-    }
-    
-    /**
-     * Get the custom emoji with the specified id asynchronously.
-     *
-     * @param guildId The id of the guild that owns the emoji.
-     * @param id      The id of the custom emoji to fetch.
-     *
-     * @return A future that completes with a possibly-{@code null} custom
-     * emoji.
-     */
     @Nonnull
-    @CheckReturnValue
-    Single<CustomEmoji> emojiAsync(long guildId, long id);
+    Maybe<CustomEmoji> emoji(final long guildId, final long id);
     
     /**
      * Get all custom emojis for the guild with the given ID.
@@ -511,32 +367,6 @@ public interface EntityCache {
      * Get the voice state for the user with the given ID, possibly in the
      * guild with the given ID. May be {@code null}.
      *
-     * @param guildId The ID of the guild the voice state is from.
-     * @param id      The ID of the user whose voice state is desired.
-     *
-     * @return The requested voice state, or {@code null} if it isn't cached.
-     */
-    @Nullable
-    default VoiceState voiceState(final long guildId, final long id) {
-        return voiceStateAsync(guildId, id).blockingGet();
-    }
-    
-    /**
-     * Get the voice state with the specified id asynchronously.
-     *
-     * @param guildId The id of the guild for the voice state.
-     * @param id      The id of the voice state to fetch.
-     *
-     * @return A future that completes with a possibly-{@code null} voice state.
-     */
-    @Nonnull
-    @CheckReturnValue
-    Single<VoiceState> voiceStateAsync(long guildId, long id);
-    
-    /**
-     * Get the voice state for the user with the given ID, possibly in the
-     * guild with the given ID. May be {@code null}.
-     *
      * @param guildId The ID of the guild the voice state is from. May not be
      *                {@code null}
      * @param id      The ID of the user whose voice state is desired. May not
@@ -544,10 +374,22 @@ public interface EntityCache {
      *
      * @return The requested voice state, or {@code null} if it isn't cached.
      */
-    @Nullable
-    default VoiceState voiceState(@Nonnull final String guildId, @Nonnull final String id) {
+    @Nonnull
+    default Maybe<VoiceState> voiceState(@Nonnull final String guildId, @Nonnull final String id) {
         return voiceState(Long.parseUnsignedLong(guildId), Long.parseUnsignedLong(id));
     }
+    
+    /**
+     * Get the voice state for the user with the given ID, possibly in the
+     * guild with the given ID. May be {@code null}.
+     *
+     * @param guildId The ID of the guild the voice state is from.
+     * @param id      The ID of the user whose voice state is desired.
+     *
+     * @return The requested voice state, or {@code null} if it isn't cached.
+     */
+    @Nonnull
+    Maybe<VoiceState> voiceState(final long guildId, final long id);
     
     /**
      * Get all voice states for the guild with the given ID.
@@ -584,18 +426,6 @@ public interface EntityCache {
      * @return The currently-logged-in user. May be {@code null} if no shards
      * have logged in.
      */
-    @Nullable
-    default User selfUser() {
-        return selfUserAsync().blockingGet();
-    }
-    
-    /**
-     * Get the currently-logged-in user.
-     * *
-     *
-     * @return A future that completes with a possibly-{@code null} user.
-     */
     @Nonnull
-    @CheckReturnValue
-    Single<User> selfUserAsync();
+    Maybe<User> selfUser();
 }

@@ -28,14 +28,15 @@
 package com.mewna.catnip.entity.channel;
 
 import com.grack.nanojson.JsonObject;
-import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.entity.guild.GuildEntity;
+import com.mewna.catnip.entity.partials.GuildEntity;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageOptions;
+import com.mewna.catnip.entity.partials.HasChannel;
+import com.mewna.catnip.entity.partials.HasNullableName;
+import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
-import com.mewna.catnip.rest.requester.Requester;
 import com.mewna.catnip.util.PermissionUtil;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
@@ -56,7 +57,7 @@ import java.util.Objects;
  * @since 9/15/18
  */
 @SuppressWarnings("unused")
-public interface Webhook extends GuildEntity, Snowflake {
+public interface Webhook extends GuildEntity, Snowflake, HasNullableName, HasChannel {
     /**
      * Send a message to this channel with the specified content.
      *
@@ -139,33 +140,11 @@ public interface Webhook extends GuildEntity, Snowflake {
     }
     
     /**
-     * @return The id of the channel this webhook is for.
-     */
-    @Nonnull
-    @CheckReturnValue
-    default String channelId() {
-        return Long.toUnsignedString(channelIdAsLong());
-    }
-    
-    /**
-     * @return The id of the channel this webhook is for.
-     */
-    @CheckReturnValue
-    long channelIdAsLong();
-    
-    /**
      * @return The user that created this webhook.
      */
     @Nullable
     @CheckReturnValue
     User user();
-    
-    /**
-     * @return The name of this webhook.
-     */
-    @Nullable
-    @CheckReturnValue
-    String name();
     
     /**
      * @return The default avatar of the webhook.

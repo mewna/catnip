@@ -29,6 +29,7 @@ package com.mewna.catnip.entity.message;
 
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.guild.Guild;
+import io.reactivex.rxjava3.core.Maybe;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -45,14 +46,17 @@ public interface MessageReference extends Entity {
      * @return String representing the message ID.
      */
     @Nullable
+    @CheckReturnValue
     String messageId();
     
     /**
-     * The id of the channel this message reference is from. May not be null.
+     * The id of the channel this message reference is from. May be null in the
+     * case of inline replies.
      *
      * @return String representing the channel ID.
      */
-    @Nonnull
+    @Nullable
+    @CheckReturnValue
     String channelId();
     
     /**
@@ -69,11 +73,11 @@ public interface MessageReference extends Entity {
      *
      * @return Guild represented by the guild ID.
      */
-    @Nullable
+    @Nonnull
     @CheckReturnValue
-    default Guild guild() {
+    default Maybe<Guild> guild() {
         if(guildId() == null) {
-            return null;
+            return Maybe.empty();
         } else {
             //noinspection ConstantConditions
             return catnip().cache().guild(guildId());

@@ -28,7 +28,6 @@
 package com.mewna.catnip;
 
 import com.grack.nanojson.JsonObject;
-import com.mewna.catnip.cache.CacheFlag;
 import com.mewna.catnip.cache.EntityCacheWorker;
 import com.mewna.catnip.cache.SplitMemoryEntityCache;
 import com.mewna.catnip.entity.delegate.DefaultEntityDelegator;
@@ -66,7 +65,6 @@ import lombok.experimental.Accessors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.net.http.HttpClient;
-import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -82,6 +80,7 @@ import java.util.concurrent.TimeUnit;
 public final class CatnipOptions implements CatnipOptionsView, Cloneable {
     @Nonnull
     private final String token;
+    private String publicKey;
     @Nonnull
     private ShardManager shardManager = new DefaultShardManager();
     @Nonnull
@@ -95,10 +94,8 @@ public final class CatnipOptions implements CatnipOptionsView, Cloneable {
     @Nonnull
     private EntityCacheWorker cacheWorker = new SplitMemoryEntityCache();
     @Nonnull
-    private Set<CacheFlag> cacheFlags = EnumSet.noneOf(CacheFlag.class);
-    @Nonnull
     private DispatchManager dispatchManager = new DefaultDispatchManager();
-    private boolean chunkMembers = true;
+    private boolean chunkMembers;
     private boolean emitEventObjects = true;
     private boolean enforcePermissions = true;
     @Nullable
@@ -133,16 +130,16 @@ public final class CatnipOptions implements CatnipOptionsView, Cloneable {
     private EntitySerializer<?> entitySerializer = new DefaultEntitySerializer();
     @Nonnull
     private String apiHost = "https://discord.com";
-    private int apiVersion = 6;
-    // TODO: Default to unprivileged-only
+    private int apiVersion = 8;
     @Nonnull
-    private Set<GatewayIntent> intents = Set.of(); // GatewayIntent.UNPRIVILEGED_INTENTS;
+    private Set<GatewayIntent> intents = GatewayIntent.UNPRIVILEGED_INTENTS;
     private boolean logPrivilegedIntentWarning = true;
     @Nullable
     private JsonObject customIdentifyOptions;
     @Nonnull
     private EntityDelegator entityDelegator = new DefaultEntityDelegator();
     private boolean logEventNotInIntentsWarning = true;
+    private boolean logEntityPresenceWarningOnCustomCache = true;
     
     @Override
     public Object clone() {

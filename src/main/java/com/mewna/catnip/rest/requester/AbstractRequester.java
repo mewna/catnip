@@ -27,15 +27,16 @@
 
 package com.mewna.catnip.rest.requester;
 
-import com.grack.nanojson.*;
+import com.grack.nanojson.JsonObject;
+import com.grack.nanojson.JsonParser;
+import com.grack.nanojson.JsonParserException;
+import com.grack.nanojson.JsonWriter;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.impl.lifecycle.RestRatelimitHitImpl;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.hook.CatnipHook;
-import com.mewna.catnip.rest.MultipartBodyPublisher;
-import com.mewna.catnip.rest.ResponseException;
-import com.mewna.catnip.rest.ResponsePayload;
-import com.mewna.catnip.rest.RestPayloadException;
+import com.mewna.catnip.rest.*;
+import com.mewna.catnip.rest.Routes.HttpMethod;
 import com.mewna.catnip.rest.Routes.Route;
 import com.mewna.catnip.rest.ratelimit.RateLimiter;
 import com.mewna.catnip.shard.LifecycleEvent.Raw;
@@ -62,8 +63,11 @@ import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.OptionalLong;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -179,7 +183,7 @@ public abstract class AbstractRequester implements Requester {
                                       @Nonnull final QueuedRequest request, @Nonnull final String mediaType) {
         final String apiHostVersion = catnip.options().apiHost() + "/api/v" + catnip.options().apiVersion();
         final Builder builder = HttpRequest.newBuilder(URI.create(apiHostVersion + route.baseRoute()));
-    
+        
         if(route.method() == GET) {
             // No body
             builder.GET();
@@ -200,13 +204,8 @@ public abstract class AbstractRequester implements Requester {
         
         // Required by Discord
         builder.setHeader("User-Agent", "DiscordBot (https://github.com/mewna/catnip, " + CatnipMeta.VERSION + ')');
-        // Request more precise ratelimit headers for better timing
-        // NOTE: THIS SHOULD NOT BE CONFIGURABLE BY THE END USER
-        // This is pretty important for getting timing of things like reaction
-        // routes correct, so there's no use for the end-user messing around
-        // with this.
-        // If they REALLY want it, they can write their own requester.
-        builder.setHeader("X-RateLimit-Precision", "millisecond");
+        
+        // As of API v8, `X-Ratelimit-Precision` is no longer respected; the relevant headers are ms-precise by default.
         
         if(request.request().needsToken()) {
             builder.setHeader("Authorization", "Bot " + catnip.options().token());
@@ -222,11 +221,10 @@ public abstract class AbstractRequester implements Requester {
         catnip.options().httpClient().sendAsync(builder.build(), BodyHandlers.ofString())
                 .thenAccept(res -> {
                     final int code = res.statusCode();
-                    final String message = "Unavailable to due Java's HTTP client.";
                     final long requestEnd = System.nanoTime();
                     
                     catnip.rxScheduler().scheduleDirect(() ->
-                            handleResponse(route, code, message, requestEnd, res.body(), res.headers(), request));
+                            handleResponse(route, code, requestEnd, res.body(), res.headers(), request));
                 })
                 .exceptionally(e -> {
                     request.bucket.failedRequest(request, e);
@@ -235,7 +233,6 @@ public abstract class AbstractRequester implements Requester {
     }
     
     protected void handleResponse(@Nonnull final Route route, final int statusCode,
-                                  @SuppressWarnings("SameParameterValue") @Nonnull final String statusMessage,
                                   final long requestEnd, final String body, final HttpHeaders headers,
                                   @Nonnull final QueuedRequest request) {
         final String dateHeader = headers.firstValue("Date").orElse(null);
@@ -275,7 +272,8 @@ public abstract class AbstractRequester implements Requester {
                     throw new IllegalStateException(e);
                 }
             }
-            final long retryAfter = Long.parseLong(retry);
+            // Retry-After is now returned in seconds, so convert to be useful
+            final long retryAfter = TimeUnit.SECONDS.toMillis(Long.parseLong(retry));
             if(Boolean.parseBoolean(headers.firstValue("X-RateLimit-Global").orElse(null))) {
                 catnip.logAdapter().trace("Updating global bucket due to ratelimit.");
                 rateLimiter.updateGlobalRateLimit(System.currentTimeMillis() + timeDifference + retryAfter);
@@ -308,49 +306,109 @@ public abstract class AbstractRequester implements Requester {
             // We got a 4xx, meaning there's errors. Fail the request with this and move on.
             if(statusCode >= 400) {
                 catnip.logAdapter().trace("Request received an error code ({} >= 400), processing...", statusCode);
+                final var throwable = catnip.options().captureRestStacktraces() ? new RuntimeException("REST error context") : null;
                 if(payload.string() != null && payload.string().startsWith("{")) {
                     // If the payload HAS a body, AND it looks like a JSON object, try to parse it for info
                     final JsonObject response = payload.object();
-                    if(statusCode == 400 && response.getInt("code", -1) > 1000) {
-                        // 1000 was just the easiest number to check to skip over http error codes
-                        // Discord error codes are all >=10000 afaik, so this should be safe?
+                    final var code = JsonErrorCode.byCode(catnip, response.getInt("code", -1));
+                    if(statusCode == 400 && (code.code() == 0 || code.code() >= 10_000)) {
+                        // 1000 was just the easiest number to check to skip over http error codes.
+                        // Discord error codes are all >=10000 afaik, so this should be safe.
+                        // Note that 0 is a valid JSON error code
                         catnip.logAdapter().trace("Status code 400 + JSON code, creating RestPayloadException...");
-                        final Map<String, List<String>> failures = new HashMap<>();
-                        response.forEach((key, value) -> {
-                            if(value instanceof JsonArray) {
-                                final JsonArray arr = (JsonArray) value;
-                                final List<String> errorStrings = new ArrayList<>();
-                                arr.stream().map(element -> (String) element).forEach(errorStrings::add);
-                                failures.put(key, errorStrings);
-                            } else if(value instanceof Integer) {
-                                failures.put(key, List.of(String.valueOf(value)));
-                            } else if(value instanceof String) {
-                                failures.put(key, List.of((String) value));
-                            } else {
-                                // If we don't know what it is, just stringify it and log a warning so that people can tell us
-                                catnip.logAdapter().warn("Got unknown error response type: {} (Please report this!)",
-                                        value.getClass().getName());
-                                failures.put(key, List.of(String.valueOf(value)));
+                        
+                        if(code == JsonErrorCode.UNAUTHORIZED) {
+                            if(route.baseRoute().replaceAll("\\d+", ":channel").equalsIgnoreCase(Routes.CREATE_MESSAGE.baseRoute())
+                                    && route.method() == HttpMethod.POST) {
+                                catnip.logAdapter().error("Attempted to send a message without ever connecting to the gateway! " +
+                                        "Please connect to the gateway at least once (ex." +
+                                        "`var catnip = Catnip.catnip(TOKEN); catnip.connect(); Thread.sleep(10_000); catnip.shutdown();`), " +
+                                        "then try again.");
                             }
-                        });
-                        final Throwable throwable = new RuntimeException("REST error context");
-                        throwable.setStackTrace(request.stacktrace());
-                        request.future().completeExceptionally(new RestPayloadException(failures).initCause(throwable));
+                            // The error-handling stuff below does not apply.
+                            catnip.logAdapter().trace("Rejected (UNAUTHORIZED), returning empty error");
+                            request.future().completeExceptionally(new RestPayloadException(code, Map.of()).initCause(throwable));
+                            return;
+                        }
+                        
+                        // Error messages in APIv8 are actually useful! :tada:
+                        //
+                        // There's 3 fields we care about:
+                        // - `code`: The JSON error code. See JsonErrorCode.java
+                        // - `message`: Probably just says "Invalid Form Body" or something like that,
+                        //              but I don't want to just assume
+                        // - `errors`: The interesting one!
+                        //
+                        // The object `errors` will contain a list of keys that contained incorrect data.
+                        // For a given key:
+                        // - If it's an object:
+                        //   You get back an object that looks like this:
+                        //   ```
+                        //   {
+                        //     "_errors": [
+                        //       {
+                        //         "code": "BASE_TYPE_REQUIRED",
+                        //         "message": "This field is required"
+                        //       }
+                        //     ]
+                        //   }
+                        //   ```
+                        // - If it's an array:
+                        //   You get back an object that looks like this:
+                        //   ```
+                        //   {
+                        //     "0": {
+                        //       "inner_key": {
+                        //         "_errors": {
+                        //           "code": "BASE_TYPE_CHOICES",
+                        //           "message": "Value must be one of (0, 1, 2, 3, 4, 5)
+                        //         }
+                        //       }
+                        //     }
+                        //   }
+                        //   ```
+                        //
+                        // So when creating the RestPayloadException, we try to be useful:
+                        // - The specific JSON error code is added to the resulting exception. This wasn't present
+                        //   before catnip v3, so hopefully this makes it a little more usable
+                        // - Each error key is effectively just directly added to a map. Trying to parse everything
+                        //   out into a specialised set of data structures just doesn't feel worth it,
+                        //   especially since Discord refuses to document all the inner error codes/messages
+                        //
+                        // Thus, """error handling""" is just raising an exception here and letting the
+                        // API consumer bother parsing through the map or whatever.
+                        //
+                        // IDEALLY this will never have to happen. We should be providing a correct-enough
+                        // interface to the REST API -- especially via convenience methods etc -- that an end
+                        // user won't generally run into this. This is much more useful for, say, adding support
+                        // for a new API route and debugging it.
+                        //
+                        // See: https://discord.com/developers/docs/reference#error-messages
+                        
+                        if(throwable != null) {
+                            throwable.setStackTrace(request.stacktrace());
+                        }
+                        request.future().completeExceptionally(new RestPayloadException(
+                                        code,
+                                        Map.copyOf(response.getObject("errors"))
+                                ).initCause(throwable)
+                        );
                     } else {
                         catnip.logAdapter().trace("Status code != 400, creating ResponseException...");
                         final String message = response.getString("message", "No message.");
-                        final int code = response.getInt("code", -1);
-                        final Throwable throwable = new RuntimeException("REST error context");
-                        throwable.setStackTrace(request.stacktrace());
-                        request.future().completeExceptionally(new ResponseException(route.toString(), statusCode,
-                                statusMessage, code, message, response).initCause(throwable));
+                        if(throwable != null) {
+                            throwable.setStackTrace(request.stacktrace());
+                        }
+                        request.future().completeExceptionally(new ResponseException(route.toString(), statusCode, code,
+                                message, response).initCause(throwable));
                     }
                 } else {
                     catnip.logAdapter().trace("Status code != 400 and no JSON body, creating ResponseException...");
-                    final Throwable throwable = new RuntimeException("REST error context");
-                    throwable.setStackTrace(request.stacktrace());
+                    if(throwable != null) {
+                        throwable.setStackTrace(request.stacktrace());
+                    }
                     request.future().completeExceptionally(new ResponseException(route.toString(), statusCode,
-                            statusMessage, -1, "No message.", null).initCause(throwable));
+                            JsonErrorCode.UNKNOWN_ERROR_CODE, "No message.", null).initCause(throwable));
                 }
             } else {
                 catnip.logAdapter().trace("Successfully completed request future.");

@@ -27,31 +27,16 @@
 
 package com.mewna.catnip.entity.user;
 
-import com.mewna.catnip.entity.Snowflake;
-import com.mewna.catnip.entity.guild.GuildEntity;
+import com.mewna.catnip.entity.partials.GuildEntity;
+import com.mewna.catnip.entity.partials.Snowflake;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.time.OffsetDateTime;
-import java.util.Set;
 
 /**
  * @author natanbc
  * @since 12/14/18
  */
 public interface PresenceUpdate extends Presence, GuildEntity, Snowflake {
-    /**
-     * @return Roles the user has.
-     */
-    @Nonnull
-    Set<String> roles();
-    
-    /**
-     * @return Nickname of the user.
-     */
-    @Nullable
-    String nick();
-    
     /**
      * @return Online status reported for the user's mobile device.
      */
@@ -69,10 +54,4 @@ public interface PresenceUpdate extends Presence, GuildEntity, Snowflake {
      */
     @Nullable
     OnlineStatus desktopStatus();
-    
-    /**
-     * @return When the user started boosting this server.
-     */
-    @Nullable
-    OffsetDateTime premiumSince();
 }

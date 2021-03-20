@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.mewna.catnip</groupId>
     <artifactId>catnip</artifactId>
-    <version>2.1.1</version>
+    <version>3.0.0</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <delombok.output>${project.basedir}/delombok</delombok.output>
 
-        <lombok.version>1.18.12</lombok.version>
+        <lombok.version>1.18.16</lombok.version>
         <rxjava.version>3.0.10</rxjava.version>
         <slf4j.version>1.7.30</slf4j.version>
         <commons.lang.version>3.11</commons.lang.version>
+        <commons.codec.version>1.15</commons.codec.version>
         <jsr305.version>3.0.2</jsr305.version>
         <nanojson.version>1.7</nanojson.version>
 
@@ -110,6 +111,32 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Super simple n=[1,10] tuples -->
+        <dependency>
+            <groupId>org.javatuples</groupId>
+            <artifactId>javatuples</artifactId>
+            <version>1.2</version>
+        </dependency>
+
+        <!-- Hex encoding/decoding -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>${commons.codec.version}</version>
+        </dependency>
+
+        <!-- Easy ed25519 -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.67</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>1.67</version>
+        </dependency>
+
         <!-- Mockito -->
         <dependency>
             <groupId>org.mockito</groupId>
@@ -140,8 +167,9 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>15</source>
+                    <target>15</target>
+                    <useIncrementalCompilation>false</useIncrementalCompilation>
                 </configuration>
                 <version>3.8.1</version>
             </plugin>
@@ -184,7 +212,7 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>generate-sources</phase>
+                        <phase>${delombokPhase}</phase>
                         <goals>
                             <goal>delombok</goal>
                         </goals>
@@ -282,6 +310,54 @@
                     <dotGitDirectory>${project.basedir}/../../.git</dotGitDirectory>
                 </configuration>
             </plugin>
+
+            <!-- codecov bullshit -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.6</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <property>
+                    <name>!runtests</name>
+                </property>
+            </activation>
+            <properties>
+                <delombokPhase>generate-sources</delombokPhase>
+                <javadocPhase>jar</javadocPhase>
+            </properties>
+        </profile>
+        <profile>
+            <id>tests</id>
+            <activation>
+                <property>
+                    <name>runtests</name>
+                </property>
+            </activation>
+            <properties>
+                <delombokPhase>none</delombokPhase>
+                <javadocPhase>none</javadocPhase>
+            </properties>
+        </profile>
+    </profiles>
 </project>

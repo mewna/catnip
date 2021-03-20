@@ -30,6 +30,7 @@ package com.mewna.catnip.internal;
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
+import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.impl.user.PresenceImpl;
 import com.mewna.catnip.entity.impl.user.PresenceImpl.ActivityImpl;
 import com.mewna.catnip.entity.misc.GatewayInfo;
@@ -38,6 +39,7 @@ import com.mewna.catnip.entity.user.Presence.Activity;
 import com.mewna.catnip.entity.user.Presence.ActivityType;
 import com.mewna.catnip.entity.user.Presence.OnlineStatus;
 import com.mewna.catnip.entity.user.User;
+import com.mewna.catnip.entity.user.UserFlag;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.extension.Extension;
 import com.mewna.catnip.extension.manager.DefaultExtensionManager;
@@ -48,16 +50,20 @@ import com.mewna.catnip.shard.CatnipShardImpl;
 import com.mewna.catnip.shard.GatewayIntent;
 import com.mewna.catnip.shard.GatewayOp;
 import com.mewna.catnip.util.PermissionUtil;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
+import java.security.Security;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -72,7 +78,18 @@ import java.util.stream.Collectors;
 @Getter
 @Accessors(fluent = true, chain = true)
 public class CatnipImpl implements Catnip {
-    private static final List<String> UNPATCHABLE_OPTIONS = List.of("token", "logExtensionOverrides", "validateToken");
+    public static final BouncyCastleProvider BOUNCY_CASTLE_PROVIDER = new BouncyCastleProvider();
+    private static final List<String> UNPATCHABLE_OPTIONS = List.of(
+            "token",
+            "logExtensionOverrides",
+            "validateToken",
+            "publicKey"
+    );
+    
+    static {
+        Security.addProvider(BOUNCY_CASTLE_PROVIDER);
+    }
+    
     private final String token;
     private final boolean logExtensionOverrides;
     private final boolean validateToken;
@@ -85,8 +102,10 @@ public class CatnipImpl implements Catnip {
     private boolean startedKeepalive;
     private long clientIdAsLong;
     private CatnipOptions options;
+    private final EntityBuilder entityBuilder = new EntityBuilder(this);
     
     public CatnipImpl(@Nonnull final CatnipOptions options) {
+        sanityCheckOptions(options);
         this.options = options;
         
         token = options.token();
@@ -95,6 +114,7 @@ public class CatnipImpl implements Catnip {
         
         keepaliveThread = new Thread(() -> {
             try {
+                // Whenever it's done, the keepalive thread dies along with the rest of catnip
                 latch.await();
             } catch(final InterruptedException ignored) {
             }
@@ -111,6 +131,12 @@ public class CatnipImpl implements Catnip {
         }
         if(options.highLatencyThreshold() < 0) {
             throw new IllegalArgumentException("High latency threshold of " + options.highLatencyThreshold() + " not greater than zero!");
+        }
+        if(options.apiVersion() < 8) {
+            throw new IllegalArgumentException("Minimum required API version is v8!");
+        }
+        if(options.intents().isEmpty()) {
+            throw new IllegalArgumentException("Intents are required, but you didn't provide any! Are you *sure* you want a bot that can't do anything?");
         }
     }
     
@@ -182,9 +208,10 @@ public class CatnipImpl implements Catnip {
         return this;
     }
     
-    @Nullable
+    @Nonnull
     @Override
-    public User selfUser() {
+    @CheckReturnValue
+    public Maybe<User> selfUser() {
         return cache().selfUser();
     }
     
@@ -293,30 +320,32 @@ public class CatnipImpl implements Catnip {
     @Override
     public void presence(@Nullable final OnlineStatus status, @Nullable final String game, @Nullable final ActivityType type,
                          @Nullable final String url) {
-        final OnlineStatus stat;
-        if(status != null) {
-            stat = status;
-        } else {
-            final User self = selfUser();
-            if(self != null) {
-                final Presence presence = cache().presence(self.id());
-                stat = presence == null ? OnlineStatus.ONLINE : presence.status();
-            } else {
-                stat = OnlineStatus.ONLINE;
-            }
-        }
-        final Activity activity = game != null
-                ? ActivityImpl.builder()
-                .name(game)
-                .type(type == null ? ActivityType.PLAYING : type)
-                .url(type == ActivityType.STREAMING ? url : null)
-                .build()
-                : null;
-        presence(PresenceImpl.builder()
-                .catnip(this)
-                .status(stat)
-                .activities(activity != null ? List.of(activity) : List.of())
-                .build());
+        //noinspection ResultOfMethodCallIgnored
+        selfUser()
+                .flatMap(self -> {
+                    if(self != null && status == null) {
+                        return cache()
+                                .presence(self.id())
+                                .map(presence -> presence == null ? OnlineStatus.ONLINE : presence.status());
+                    } else {
+                        return Maybe.just(status == null ? OnlineStatus.ONLINE : status);
+                    }
+                })
+                .subscribe(stat -> {
+                    // TODO: Seriously, what the fuck Rx.
+                    final Activity activity = game != null
+                            ? ActivityImpl.builder()
+                            .name(game)
+                            .type(type == null ? ActivityType.PLAYING : type)
+                            .url(type == ActivityType.STREAMING ? url : null)
+                            .build()
+                            : null;
+                    presence(PresenceImpl.builder()
+                            .catnip(this)
+                            .status(stat)
+                            .activities(activity != null ? List.of(activity) : List.of())
+                            .build());
+                });
     }
     
     @Nonnull
@@ -327,11 +356,11 @@ public class CatnipImpl implements Catnip {
         }
         if(validateToken) {
             return fetchGatewayInfo()
-                    .map(gateway -> {
+                    .flatMap(gateway -> {
                         logAdapter().info("Token validated!");
                         clientIdAsLong = Catnip.parseIdFromToken(token);
                         // this is actually needed because generics are dumb
-                        return (Catnip) this;
+                        return checkIntentsAndLog();
                     }).doOnError(e -> {
                         logAdapter().warn("Couldn't validate token!", e);
                         throw new RuntimeException(e);
@@ -348,6 +377,24 @@ public class CatnipImpl implements Catnip {
             
             return Single.just(this);
         }
+    }
+    
+    private Single<Catnip> checkIntentsAndLog() {
+        return rest.user().getCurrentApplicationInformation().map(info -> {
+            if(!info.flags().contains(UserFlag.GUILD_MEMBERS_INTENT_ENABLED) && options.intents().contains(GatewayIntent.GUILD_MEMBERS)) {
+                logAdapter().error("GUILD_MEMBERS intent passed but is not enabled in the developer dashboard, this will fail!");
+                logAdapter().error("Please go enable those intents first, and THEN try running your bot.");
+                logAdapter().error("Click here to go to the dashboard: https://discord.com/developers/applications/{}",
+                        Catnip.parseIdFromToken(options.token()));
+            }
+            if(!info.flags().contains(UserFlag.GUILD_PRESENCES_INTENT_ENABLED) && options.intents().contains(GatewayIntent.GUILD_PRESENCES)) {
+                logAdapter().error("GUILD_PRESENCES intent passed but is not enabled in the developer dashboard, this will fail!");
+                logAdapter().error("Please go enable those intents first, and THEN try running your bot.");
+                logAdapter().error("Click here to go to the dashboard: https://discord.com/developers/applications/{}",
+                        Catnip.parseIdFromToken(options.token()));
+            }
+            return this;
+        });
     }
     
     private void injectSelf() {

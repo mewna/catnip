@@ -30,6 +30,7 @@ package com.mewna.catnip.entity.user;
 import com.mewna.catnip.entity.impl.user.PresenceImpl;
 import com.mewna.catnip.entity.impl.user.PresenceImpl.ActivityImpl;
 import com.mewna.catnip.entity.misc.Emoji.ActivityEmoji;
+import com.mewna.catnip.entity.partials.HasName;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
@@ -98,24 +99,22 @@ public interface Presence {
         @Nonnull
         public static OnlineStatus fromString(@Nonnull final String status) {
             switch(status) {
-                case "online": {
+                case "online" -> {
                     return ONLINE;
                 }
-                case "idle": {
+                case "idle" -> {
                     return IDLE;
                 }
-                case "dnd": {
+                case "dnd" -> {
                     return DND;
                 }
-                case "offline": {
+                case "offline" -> {
                     return OFFLINE;
                 }
-                case "invisible": {
+                case "invisible" -> {
                     return INVISIBLE;
                 }
-                default: {
-                    throw new IllegalArgumentException("Unknown status: " + status);
-                }
+                default -> throw new IllegalArgumentException("Unknown status: " + status);
             }
         }
         
@@ -219,7 +218,7 @@ public interface Presence {
         String match();
     }
     
-    interface Activity {
+    interface Activity extends HasName {
         @Nonnull
         @CheckReturnValue
         static Activity of(@Nonnull final String name, @Nonnull final ActivityType type, @Nullable final String url) {
@@ -246,9 +245,6 @@ public interface Presence {
         static Activity of(@Nonnull final String name, @Nonnull final ActivityType type) {
             return of(name, type, null);
         }
-        
-        @Nonnull
-        String name();
         
         @Nonnull
         ActivityType type();

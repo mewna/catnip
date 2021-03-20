@@ -70,13 +70,21 @@ public enum GuildFeature {
      * majority of guilds shouldn't have this feature.
      */
     RELAY_ENABLED,
+    /**
+     * This is a part of membership screening, see https://github.com/discord/discord-api-docs/pull/2396
+     */
     MEMBER_VERIFICATION_GATE_ENABLED,
+    /**
+     * <s>This seems to have reappeared, see
+     * https://github.com/DJScias/Discord-Datamining/commit/2ee04565f207b3abf303f2e242a093165728d8d8</s><br/>
+     * This is a part of membership screening, see https://github.com/discord/discord-api-docs/pull/2396
+     */
     PREVIEW_ENABLED,
-    
     /**
      * When no other feature matches.
      */
-    UNKNOWN_FEATURE,;
+    UNKNOWN_FEATURE,
+    ;
     
     public static GuildFeature unknownValueOf(final Catnip catnip, final String value) {
         try {

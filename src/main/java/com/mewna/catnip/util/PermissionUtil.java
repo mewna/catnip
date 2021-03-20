@@ -32,6 +32,8 @@ package com.mewna.catnip.util;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.guild.*;
+import com.mewna.catnip.entity.partials.GuildEntity;
+import com.mewna.catnip.entity.partials.Permissable;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.util.Permission;
 
@@ -41,17 +43,20 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
+@SuppressWarnings("ConstantConditions")
 public final class PermissionUtil {
     private PermissionUtil() {
     }
     
-    private static long basePermissions(final PermissionHolder holder) {
+    private static long basePermissions(final Permissable holder) {
         final Catnip catnip = holder.catnip();
-        final Guild guild = catnip.cache().guild(holder.guildId());
-        final Role publicRole = catnip.cache().role(holder.guildId(), holder.guildId()); //Could be simplified to just Guild.role($.idAsLong()), but custom caches are a thing with nullable guilds.
+        final Guild guild = catnip.cache().guild(holder.guildId()).blockingGet();
+        // Could be simplified to just Guild.role($.idAsLong()), but custom caches are a thing with nullable guilds.
+        final Role publicRole = catnip.cache().role(holder.guildId(), holder.guildId()).blockingGet();
         if(guild == null || publicRole == null || guild.ownerId().equals(holder.id())) {
             return Permission.ALL;
         }
+        
         long permissions = publicRole.permissionsRaw();
         if(holder instanceof Member) {
             for(final Role role : ((Member) holder).orderedRoles()) {
@@ -64,7 +69,7 @@ public final class PermissionUtil {
         return permissions;
     }
     
-    private static long overridePermissions(final long base, final PermissionHolder holder, final GuildChannel channel) {
+    private static long overridePermissions(final long base, final Permissable holder, final GuildChannel channel) {
         if(Permission.ADMINISTRATOR.isPresent(base)) {
             return Permission.ALL;
         }
@@ -105,11 +110,11 @@ public final class PermissionUtil {
         return null;
     }
     
-    public static long effectivePermissions(@Nonnull final PermissionHolder member) {
+    public static long effectivePermissions(@Nonnull final Permissable member) {
         return basePermissions(member);
     }
     
-    public static long effectivePermissions(@Nonnull final PermissionHolder member, @Nonnull final GuildChannel channel) {
+    public static long effectivePermissions(@Nonnull final Permissable member, @Nonnull final GuildChannel channel) {
         return overridePermissions(basePermissions(member), member, channel);
     }
     
@@ -118,11 +123,11 @@ public final class PermissionUtil {
         if(!catnip.options().enforcePermissions() || guildId == null) {
             return;
         }
-        final User me = catnip.selfUser();
+        final User me = catnip.selfUser().blockingGet();
         if(me == null) {
             return;
         }
-        final Member self = catnip.cache().member(guildId, me.id());
+        final Member self = catnip.cache().member(guildId, me.id()).blockingGet();
         if(self == null) {
             return;
         }
@@ -139,12 +144,12 @@ public final class PermissionUtil {
         if(!catnip.options().enforcePermissions() || guildId == null || channelId == null) {
             return;
         }
-        final User me = catnip.selfUser();
+        final User me = catnip.selfUser().blockingGet();
         if(me == null) {
             return;
         }
-        final Member self = catnip.cache().member(guildId, me.id());
-        final GuildChannel channel = catnip.cache().channel(guildId, channelId);
+        final Member self = catnip.cache().member(guildId, me.id()).blockingGet();
+        final GuildChannel channel = catnip.cache().channel(guildId, channelId).blockingGet();
         if(self == null || channel == null) {
             return;
         }
@@ -157,14 +162,16 @@ public final class PermissionUtil {
     }
     
     public static void checkHierarchy(@Nonnull final Member target, @Nonnull final Guild guild) {
-        if(!guild.selfMember().canInteract(target)) {
-            throw new HierarchyException(guild.selfMember(), target);
+        final Member self = guild.selfMember().blockingGet();
+        if(!self.canInteract(target)) {
+            throw new HierarchyException(self, target);
         }
     }
     
     public static void checkHierarchy(@Nonnull final Role target, @Nonnull final Guild guild) {
-        if(!guild.selfMember().canInteract(target)) {
-            throw new HierarchyException(guild.selfMember(), target);
+        final Member self = guild.selfMember().blockingGet();
+        if(!self.canInteract(target)) {
+            throw new HierarchyException(self, target);
         }
     }
     
@@ -179,14 +186,14 @@ public final class PermissionUtil {
      * @throws IllegalStateException If the actor is not on the same guild as the target
      */
     public static boolean canInteract(@Nonnull final Member actor, @Nonnull final Member target) {
-        if(actor.isOwner()) {
+        if(actor.isOwner().blockingGet()) {
             return true;
         }
-        if(target.isOwner()) {
+        if(target.isOwner().blockingGet()) {
             return false;
         }
         if(actor.orderedRoles().isEmpty()) {
-            return actor.isOwner();
+            return actor.isOwner().blockingGet();
         }
         return canInteract(actor.orderedRoles(Collections.reverseOrder()).iterator().next(), target);
     }
@@ -204,7 +211,7 @@ public final class PermissionUtil {
     public static boolean canInteract(@Nonnull final Role actor, @Nonnull final Member target) {
         checkGuildEquality(actor, target);
         // Nobody can interact with the owner
-        if(target.isOwner()) {
+        if(target.isOwner().blockingGet()) {
             return false;
         }
         if(target.orderedRoles().isEmpty()) {
@@ -226,11 +233,11 @@ public final class PermissionUtil {
     public static boolean canInteract(@Nonnull final Member actor, @Nonnull final Role target) {
         checkGuildEquality(actor, target);
         // Owner has any permission event if he has not a single role
-        if(actor.isOwner()) {
+        if(actor.isOwner().blockingGet()) {
             return true;
         }
         if(actor.orderedRoles().isEmpty()) {
-            return actor.isOwner();
+            return actor.isOwner().blockingGet();
         }
         // Check if the highest role of the actor is higher than the role of the target
         return canInteract(actor.orderedRoles(Comparator.reverseOrder()).iterator().next(), target);
@@ -252,7 +259,7 @@ public final class PermissionUtil {
     }
     
     private static void checkGuildEquality(final GuildEntity actor, final GuildEntity target) {
-        if(!actor.guild().equals(target.guild())) {
+        if(actor.guildIdAsLong() != target.guildIdAsLong()) {
             throw new IllegalStateException("Actor and target mus be on the same guild!");
         }
     }

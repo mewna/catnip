@@ -27,7 +27,7 @@
 
 package com.mewna.catnip.entity.guild.audit;
 
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.user.User;
 
 import javax.annotation.CheckReturnValue;

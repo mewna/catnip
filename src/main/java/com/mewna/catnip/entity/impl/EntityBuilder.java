@@ -45,13 +45,16 @@ import com.mewna.catnip.entity.impl.guild.InviteImpl.InviteChannelImpl;
 import com.mewna.catnip.entity.impl.guild.InviteImpl.InviteGuildImpl;
 import com.mewna.catnip.entity.impl.guild.InviteImpl.InviterImpl;
 import com.mewna.catnip.entity.impl.guild.audit.*;
+import com.mewna.catnip.entity.impl.interaction.*;
 import com.mewna.catnip.entity.impl.message.*;
 import com.mewna.catnip.entity.impl.message.EmbedImpl.*;
 import com.mewna.catnip.entity.impl.misc.*;
+import com.mewna.catnip.entity.impl.sticker.StickerImpl;
 import com.mewna.catnip.entity.impl.user.*;
 import com.mewna.catnip.entity.impl.user.PresenceImpl.*;
 import com.mewna.catnip.entity.impl.voice.VoiceRegionImpl;
 import com.mewna.catnip.entity.impl.voice.VoiceServerUpdateImpl;
+import com.mewna.catnip.entity.interaction.*;
 import com.mewna.catnip.entity.message.*;
 import com.mewna.catnip.entity.message.Embed.*;
 import com.mewna.catnip.entity.message.Message.Attachment;
@@ -62,6 +65,8 @@ import com.mewna.catnip.entity.misc.*;
 import com.mewna.catnip.entity.misc.Emoji.ActivityEmoji;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.misc.Emoji.UnicodeEmoji;
+import com.mewna.catnip.entity.sticker.Sticker;
+import com.mewna.catnip.entity.sticker.StickerFormatType;
 import com.mewna.catnip.entity.user.*;
 import com.mewna.catnip.entity.user.Presence.*;
 import com.mewna.catnip.entity.util.Permission;
@@ -82,7 +87,7 @@ import static com.mewna.catnip.util.JsonUtil.*;
  * @author natanbc
  * @since 9/2/18.
  */
-@SuppressWarnings({"WeakerAccess", "unused", "OverlyCoupledClass"})
+@SuppressWarnings({"WeakerAccess", "OverlyCoupledClass"})
 public final class EntityBuilder {
     private final Catnip catnip;
     
@@ -93,12 +98,6 @@ public final class EntityBuilder {
     @CheckReturnValue
     private static boolean isInvalid(@Nullable final JsonObject object, @Nonnull final String key) {
         return object == null || !object.containsKey(key);
-    }
-    
-    @Nullable
-    @CheckReturnValue
-    private static OffsetDateTime parseTimestamp(@Nullable final CharSequence raw) {
-        return raw == null ? null : OffsetDateTime.parse(raw);
     }
     
     @Nonnull
@@ -204,6 +203,16 @@ public final class EntityBuilder {
             o.put("fields", array);
         }
         
+        return o;
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public JsonObject referenceToJson(@Nonnull final MessageReference reference) {
+        final JsonObject o = new JsonObject();
+        o.put("message_id", reference.messageId());
+        o.put("channel_id", reference.channelId());
+        o.put("guild_id", reference.guildId());
         return o;
     }
     
@@ -386,24 +395,22 @@ public final class EntityBuilder {
     public GuildChannel createGuildChannel(@Nonnull final String guildId, @Nonnull final JsonObject data) {
         final ChannelType type = ChannelType.byKey(data.getInt("type"));
         switch(type) {
-            case TEXT: {
+            case TEXT -> {
                 return createTextChannel(guildId, data);
             }
-            case VOICE: {
+            case VOICE -> {
                 return createVoiceChannel(guildId, data);
             }
-            case CATEGORY: {
+            case CATEGORY -> {
                 return createCategory(guildId, data);
             }
-            case NEWS: {
+            case NEWS -> {
                 return createNewsChannel(guildId, data);
             }
-            case STORE: {
+            case STORE -> {
                 return createStoreChannel(guildId, data);
             }
-            default: {
-                throw new UnsupportedOperationException("Unsupported channel type " + type);
-            }
+            default -> throw new UnsupportedOperationException("Unsupported channel type " + type);
         }
     }
     
@@ -411,14 +418,11 @@ public final class EntityBuilder {
     @CheckReturnValue
     public DMChannel createDMChannel(@Nonnull final JsonObject data) {
         final ChannelType type = ChannelType.byKey(data.getInt("type"));
-        switch(type) {
-            case DM:
-                return createUserDM(data);
-            case GROUP_DM:
-                return createGroupDM(data);
-            default:
-                throw new UnsupportedOperationException("Unsupported channel type " + type);
-        }
+        return switch(type) {
+            case DM -> createUserDM(data);
+            case GROUP_DM -> createGroupDM(data);
+            default -> throw new UnsupportedOperationException("Unsupported channel type " + type);
+        };
     }
     
     @Nonnull
@@ -448,9 +452,9 @@ public final class EntityBuilder {
         return delegate(PermissionOverride.class, PermissionOverrideImpl.builder()
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
-                .type(OverrideType.byKey(data.getString("type")))
-                .allowRaw(Long.parseUnsignedLong(data.getString("allow_new", "0")))
-                .denyRaw(Long.parseUnsignedLong(data.getString("deny_new", "0")))
+                .type(OverrideType.byKey(data.getInt("type")))
+                .allowRaw(Long.parseUnsignedLong(data.getString("allow", "0")))
+                .denyRaw(Long.parseUnsignedLong(data.getString("deny", "0")))
                 .build());
     }
     
@@ -465,7 +469,7 @@ public final class EntityBuilder {
                 .color(data.getInt("color"))
                 .hoist(data.getBoolean("hoist"))
                 .position(data.getInt("position"))
-                .permissionsRaw(Long.parseUnsignedLong(data.getString("permissions_new", "0")))
+                .permissionsRaw(Long.parseUnsignedLong(data.getString("permissions", "0")))
                 .managed(data.getBoolean("managed"))
                 .mentionable(data.getBoolean("mentionable"))
                 .tags(createRoleTags(data))
@@ -538,8 +542,6 @@ public final class EntityBuilder {
                 .activities(toList(data.getArray("activities", new JsonArray()), this::createActivity))
                 .idAsLong(Long.parseUnsignedLong(data.getObject("user").getString("id")))
                 .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id")))
-                .roles(toStringSet(data.getArray("roles")))
-                .nick(data.getString("nick"))
                 .mobileStatus(mobileStatusString != null ? OnlineStatus.fromString(mobileStatusString) : null)
                 .webStatus(webStatusString != null ? OnlineStatus.fromString(webStatusString) : null)
                 .desktopStatus(desktopStatusString != null ? OnlineStatus.fromString(desktopStatusString) : null)
@@ -683,23 +685,17 @@ public final class EntityBuilder {
         final JsonObject userData = data.getObject("user");
         final long guild = Long.parseUnsignedLong(guildId);
         if(userData != null) {
+            final int shards = catnip.shardManager().shardCount();
+            final int shardMod = shards == 0 ? 1 : shards;
             catnip.cacheWorker().bulkCacheUsers(
-                    (int) ((guild >> 22) % catnip.shardManager().shardCount()),
+                    (int) ((guild >> 22) % shardMod),
                     Collections.singletonList(createUser(userData)));
         }
         final String joinedAt;
         if(data.getString("joined_at", null) != null) {
             joinedAt = data.getString("joined_at");
         } else {
-            // This will only happen during GUILD_MEMBER_REMOVE afaik, but is this the right solution?
-            final Member cachedMember = catnip.cache().member(guildId, id);
-            if(cachedMember != null && cachedMember.joinedAt() != null) {
-                // Guaranteed not null by preceding if
-                //noinspection ConstantConditions
-                joinedAt = cachedMember.joinedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-            } else {
-                joinedAt = null;
-            }
+            joinedAt = null;
         }
         
         return delegate(Member.class, MemberImpl.builder()
@@ -710,9 +706,6 @@ public final class EntityBuilder {
                 .roleIds(toStringSet(data.getArray("roles")))
                 .joinedAt(joinedAt)
                 .premiumSince(data.getString("premium_since", null))
-                // If not present, it's probably(?) safe to assume not
-                .deaf(data.getBoolean("deaf", false))
-                .mute(data.getBoolean("mute", false))
                 .build());
     }
     
@@ -874,6 +867,22 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
+    public Sticker createSticker(@Nonnull final JsonObject data) {
+        return delegate(Sticker.class, StickerImpl.builder()
+                .catnip(catnip)
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .packIdAsLong(Long.parseUnsignedLong(data.getString("pack_id")))
+                .name(data.getString("name"))
+                .description(data.getString("description"))
+                .tags(data.has("tags") ? List.of(data.getString("tags").split(",")) : List.of())
+                .asset(data.getString("asset"))
+                .previewAsset(data.getString("preview_asset"))
+                .formatType(StickerFormatType.byId(data.getInt("format_type")))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public Message createMessage(@Nonnull final JsonObject data) {
         final User author = createUser(data.getObject("author"));
         
@@ -883,6 +892,7 @@ public final class EntityBuilder {
         
         final String guildId = data.getString("guild_id");
         final String webhookId = data.getString("webhook_id");
+        final JsonObject rawReferencedMessage = data.getObject("referenced_message", null);
         
         final List<Member> mentionedMembers = new ArrayList<>();
         if(guildId != null) {
@@ -892,7 +902,8 @@ public final class EntityBuilder {
         final var activity = createMessageActivity(data.getObject("activity"));
         final var application = createMessageApplication(data.getObject("application"));
         final var reference = createMessageReference(data.getObject("message_reference"));
-        final var channelMentions = data.getArray("mention_channels", new JsonArray());
+        final var referencedMessage = rawReferencedMessage == null ? null : createMessage(rawReferencedMessage);
+        final var channelMentions = toList(data.getArray("mention_channels", new JsonArray()), this::createChannelMention);
         
         return delegate(Message.class, MessageImpl.builder()
                 .catnip(catnip)
@@ -920,6 +931,10 @@ public final class EntityBuilder {
                 .activity(activity)
                 .application(application)
                 .flagsRaw(data.getInt("flags", 0))
+                .messageReference(reference)
+                .mentionedChannels(channelMentions)
+                .referencedMessage(referencedMessage)
+                .stickers(toList(data.getArray("stickers", new JsonArray()), this::createSticker))
                 .build());
     }
     
@@ -1054,7 +1069,6 @@ public final class EntityBuilder {
     @CheckReturnValue
     public Guild createGuild(@Nonnull final JsonObject data) {
         final String afkChannelId = data.getString("afk_channel_id");
-        final String embedChannelId = data.getString("embed_channel_id");
         final String applicationId = data.getString("application_id");
         final String widgetChannelId = data.getString("widget_channel_id");
         final String systemChannelId = data.getString("system_channel_id");
@@ -1068,12 +1082,10 @@ public final class EntityBuilder {
                 .splash(data.getString("splash"))
                 .owned(data.getBoolean("owner", false))
                 .ownerIdAsLong(Long.parseUnsignedLong(data.getString("owner_id")))
-                .permissions(Permission.toSet(data.getNumber("permissions", 0L).longValue()))
+                .permissions(Permission.toSet(Long.parseUnsignedLong(data.getString("permissions", "0"))))
                 .region(data.getString("region"))
                 .afkChannelIdAsLong(afkChannelId == null ? 0 : Long.parseUnsignedLong(afkChannelId))
                 .afkTimeout(data.getInt("afk_timeout", 0))
-                .embedEnabled(data.getBoolean("embed_enabled", false))
-                .embedChannelIdAsLong(embedChannelId == null ? 0 : Long.parseUnsignedLong(embedChannelId))
                 .verificationLevel(VerificationLevel.byKey(data.getInt("verification_level", 0)))
                 .defaultMessageNotifications(NotificationLevel.byKey(data.getInt("default_message_notifications", 0)))
                 .explicitContentFilter(ContentFilterLevel.byKey(data.getInt("explicit_content_filter", 0)))
@@ -1119,7 +1131,7 @@ public final class EntityBuilder {
                 .name(data.getString("name"))
                 .icon(data.getString("icon"))
                 .owned(data.getBoolean("owner", false))
-                .permissions(Permission.toSet(data.getNumber("permissions", 0L).longValue()))
+                .permissions(Permission.toSet(Long.parseUnsignedLong(data.getString("permissions", "0"))))
                 .build());
     }
     
@@ -1190,7 +1202,7 @@ public final class EntityBuilder {
                 .maxUses(data.getInt("max_uses"))
                 .maxAge(data.getInt("max_age"))
                 .temporary(data.getBoolean("temporary", false))
-                .createdAt(data.getString("created_at"))
+                .createdAtString(data.getString("created_at"))
                 .revoked(data.getBoolean("revoked", false))
                 .build());
     }
@@ -1314,7 +1326,7 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Resumed createResumed(@Nonnull final JsonObject data) {
+    public Resumed createResumed(@SuppressWarnings({"unused", "RedundantSuppression"}) @Nonnull final JsonObject data) {
         return delegate(Resumed.class, ResumedImpl.builder()
                 .catnip(catnip)
                 .build());
@@ -1334,56 +1346,45 @@ public final class EntityBuilder {
     @Nullable
     @CheckReturnValue
     public OptionalEntryInfo createOptionalEntryInfo(@Nonnull final JsonObject data, @Nonnull final ActionType type) {
-        switch(type) {
-            case MEMBER_PRUNE:
-                return delegate(MemberPruneInfo.class, MemberPruneInfoImpl.builder()
-                        .catnip(catnip)
-                        .deleteMemberDays(data.getInt("delete_member_days"))
-                        .removedMembersCount(data.getInt("members_removed"))
-                        .build());
-            case MEMBER_MOVE:
-                return delegate(MemberMoveInfo.class, MemberMoveInfoImpl.builder()
-                        .catnip(catnip)
-                        .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
-                        .membersMovedCount(Integer.parseUnsignedInt(data.getString("count")))
-                        .build());
-            case MEMBER_DISCONNECT:
-                return delegate(MemberDisconnectInfo.class, MemberDisconnectInfoImpl.builder()
-                        .catnip(catnip)
-                        .membersDisconnectedCount(Integer.parseUnsignedInt(data.getString("count")))
-                        .build());
-            case MESSAGE_DELETE:
-                return delegate(MessageDeleteInfo.class, MessageDeleteInfoImpl.builder()
-                        .catnip(catnip)
-                        .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
-                        .deletedMessagesCount(Integer.parseUnsignedInt(data.getString("count")))
-                        .build());
-            // The data returned for MESSAGE_BULK_DELETE *doesn't* actually follow https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-optional-audit-entry-info
-            // Instead, we're going to just return 'Count' as that is the only option that's present. If you're looking for 'channel_id', use 'target_id' (named targetId() and targetIdAsLong()) in AuditLogEntry.
-            case MESSAGE_BULK_DELETE:
-                return delegate(MessageBulkDeleteInfo.class, MessageBulkDeleteInfoImpl.builder()
-                        .catnip(catnip)
-                        .deletedMessagesCount(Integer.parseUnsignedInt(data.getString("count")))
-                        .build());
-            case MESSAGE_PIN:
-            case MESSAGE_UNPIN:
-                return delegate(MessagePinInfo.class, MessagePinInfoImpl.builder()
-                        .catnip(catnip)
-                        .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
-                        .messageIdAsLong(Long.parseUnsignedLong(data.getString("message_id")))
-                        .build());
-            case CHANNEL_OVERWRITE_CREATE:
-            case CHANNEL_OVERWRITE_UPDATE:
-            case CHANNEL_OVERWRITE_DELETE:
-                return delegate(OverrideUpdateInfo.class, OverrideUpdateInfoImpl.builder()
-                        .catnip(catnip)
-                        .overriddenEntityIdAsLong(Long.parseUnsignedLong(data.getString("id")))
-                        .overrideType(OverrideType.byKey(data.getString("type")))
-                        .roleName(data.getString("role_name"))
-                        .build());
-            default:
-                return null;
-        }
+        // The data returned for MESSAGE_BULK_DELETE *doesn't* actually follow https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-optional-audit-entry-info
+        // Instead, we're going to just return 'Count' as that is the only option that's present. If you're looking for 'channel_id', use 'target_id' (named targetId() and targetIdAsLong()) in AuditLogEntry.
+        return switch(type) {
+            case MEMBER_PRUNE -> delegate(MemberPruneInfo.class, MemberPruneInfoImpl.builder()
+                    .catnip(catnip)
+                    .deleteMemberDays(data.getInt("delete_member_days"))
+                    .removedMembersCount(data.getInt("members_removed"))
+                    .build());
+            case MEMBER_MOVE -> delegate(MemberMoveInfo.class, MemberMoveInfoImpl.builder()
+                    .catnip(catnip)
+                    .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
+                    .membersMovedCount(Integer.parseUnsignedInt(data.getString("count")))
+                    .build());
+            case MEMBER_DISCONNECT -> delegate(MemberDisconnectInfo.class, MemberDisconnectInfoImpl.builder()
+                    .catnip(catnip)
+                    .membersDisconnectedCount(Integer.parseUnsignedInt(data.getString("count")))
+                    .build());
+            case MESSAGE_DELETE -> delegate(MessageDeleteInfo.class, MessageDeleteInfoImpl.builder()
+                    .catnip(catnip)
+                    .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
+                    .deletedMessagesCount(Integer.parseUnsignedInt(data.getString("count")))
+                    .build());
+            case MESSAGE_BULK_DELETE -> delegate(MessageBulkDeleteInfo.class, MessageBulkDeleteInfoImpl.builder()
+                    .catnip(catnip)
+                    .deletedMessagesCount(Integer.parseUnsignedInt(data.getString("count")))
+                    .build());
+            case MESSAGE_PIN, MESSAGE_UNPIN -> delegate(MessagePinInfo.class, MessagePinInfoImpl.builder()
+                    .catnip(catnip)
+                    .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id")))
+                    .messageIdAsLong(Long.parseUnsignedLong(data.getString("message_id")))
+                    .build());
+            case CHANNEL_OVERWRITE_CREATE, CHANNEL_OVERWRITE_UPDATE, CHANNEL_OVERWRITE_DELETE -> delegate(OverrideUpdateInfo.class, OverrideUpdateInfoImpl.builder()
+                    .catnip(catnip)
+                    .overriddenEntityIdAsLong(Long.parseUnsignedLong(data.getString("id")))
+                    .overrideType(OverrideType.byKey(data.getInt("type")))
+                    .roleName(data.getString("role_name"))
+                    .build());
+            default -> null;
+        };
     }
     
     @Nonnull
@@ -1431,6 +1432,13 @@ public final class EntityBuilder {
                 .requiresCodeGrant(data.getBoolean("bot_require_code_grant"))
                 .owner(createApplicationOwner(data.getObject("owner")))
                 .team(team == null ? null : createTeam(team))
+                .summary(data.getString("summary"))
+                .verifyKey(data.getString("verify_key"))
+                .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id", "0")))
+                .primarySkuId(data.getString("primary_sku_id"))
+                .slug(data.getString("slug"))
+                .coverImage(data.getString("cover_image"))
+                .flags(UserFlag.toSet(data.getLong("flags")))
                 .build());
     }
     
@@ -1493,11 +1501,126 @@ public final class EntityBuilder {
                     .catnip(catnip)
                     .valid(false)
                     .url("")
-                    .shards(0)
-                    .totalSessions(0)
-                    .remainingSessions(0)
-                    .resetAfter(0)
+                    .shards(-1)
+                    .totalSessions(-1)
+                    .remainingSessions(-1)
+                    .resetAfter(-1)
                     .build());
         }
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public ApplicationCommand createApplicationCommand(@Nonnull final JsonObject data) {
+        return delegate(ApplicationCommand.class, ApplicationCommandImpl.builder()
+                .catnip(catnip)
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .applicationIdAsLong(Long.parseUnsignedLong(data.getString("application_id")))
+                .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id", "0")))
+                .description(data.getString("description"))
+                .name(data.getString("name"))
+                .options(toList(data.getArray("options"), this::createApplicationCommandOption))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public ApplicationCommandOption createApplicationCommandOption(@Nonnull final JsonObject data) {
+        return delegate(ApplicationCommandOption.class, ApplicationCommandOptionImpl.builder()
+                .name(data.getString("name"))
+                .type(ApplicationCommandOptionType.byKey(data.getInt("type")))
+                .description(data.getString("description"))
+                .defaultOption(data.getBoolean("default", false))
+                .required(data.getBoolean("required", false))
+                .options(toList(data.getArray("options"), this::createApplicationCommandOption))
+                .choices(toList(data.getArray("choices"), this::createApplicationCommandOptionChoice))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public ApplicationCommandOptionChoice<?> createApplicationCommandOptionChoice(@Nonnull final JsonObject data) {
+        final Object innerValue = data.get("value");
+        if(innerValue instanceof String) {
+            return delegate(ApplicationCommandOptionStringChoice.class, ApplicationCommandOptionStringChoiceImpl.builder()
+                    .name(data.getString("name"))
+                    .value(data.getString("value"))
+                    .build());
+        } else if(innerValue instanceof Integer) {
+            return delegate(ApplicationCommandOptionIntegerChoice.class, ApplicationCommandOptionIntegerChoiceImpl.builder()
+                    .catnip(catnip)
+                    .name(data.getString("name"))
+                    .value(data.getInt("value"))
+                    .build());
+        } else {
+            throw new IllegalArgumentException("Unknown value type: " + innerValue.getClass().getName());
+        }
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Interaction createInteraction(@Nonnull final JsonObject data) {
+        return delegate(Interaction.class, InteractionImpl.builder()
+                .catnip(catnip)
+                // TODO: Nullables
+                .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id", "0")))
+                .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id", "0")))
+                .idAsLong(Long.parseUnsignedLong(data.getString("id", "0")))
+                .token(data.getString("token"))
+                .type(InteractionType.byKey(data.getInt("type")))
+                .version(data.getInt("version"))
+                .member(data.has("member") ? createInteractionMember(data.getString("guild_id"), data.getObject("member")) : null)
+                .data(data.has("data") ? createApplicationCommandInteractionData(data.getObject("data")): null)
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public ApplicationCommandInteractionData createApplicationCommandInteractionData(@Nonnull final JsonObject data) {
+        return delegate(ApplicationCommandInteractionData.class, ApplicationCommandInteractionDataImpl.builder()
+                .catnip(catnip)
+                .idAsLong(Long.parseUnsignedLong(data.getString("id", "0")))
+                .name(data.getString("name"))
+                .options(toList(data.getArray("options"), this::createApplicationCommandInteractionDataOption))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public ApplicationCommandInteractionDataOption createApplicationCommandInteractionDataOption(@Nonnull final JsonObject data) {
+        return delegate(ApplicationCommandInteractionDataOption.class, ApplicationCommandInteractionDataOptionImpl.builder()
+                .catnip(catnip)
+                .name(data.getString("name"))
+                .options(toList(data.getArray("options"), this::createApplicationCommandInteractionDataOption))
+                .type(ApplicationCommandOptionType.byKey(data.getInt("type")))
+                .value(createApplicationCommandOptionChoice(data))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public InteractionMember createInteractionMember(@Nonnull final String guildId, @Nonnull final JsonObject data) {
+        return delegate(InteractionMember.class, InteractionMemberImpl.builder()
+                .delegate(createMember(guildId, data))
+                .permissions(Permission.toSet(Long.parseUnsignedLong(data.getString("permissions", "0"))))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Template createTemplate(@Nonnull final JsonObject data) {
+        return delegate(Template.class, TemplateImpl.builder()
+                .code(data.getString("code"))
+                .name(data.getString("name"))
+                .description(data.getString("description"))
+                .usageCount(data.getInt("usage_count"))
+                .creatorIdAsLong(Long.parseUnsignedLong(data.getString("creator_id")))
+                .creator(createUser(data.getObject("creator")))
+                .createdAtString(data.getString("created_at"))
+                .updatedAtString(data.getString("updated_at"))
+                .sourceGuildIdAsLong(Long.parseUnsignedLong(data.getString("source_guild_id")))
+                .serializedSourceGuild(createGuild(data.getObject("serialized_source_guild")))
+                .dirty(data.getBoolean("is_dirty"))
+                .build());
     }
 }

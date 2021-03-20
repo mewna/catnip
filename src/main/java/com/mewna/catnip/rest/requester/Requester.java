@@ -55,7 +55,9 @@ public interface Requester {
     
     /**
      * Queues a new request to be executed.
+     *
      * @param r The request to execute.
+     *
      * @return An {@link Observable} that emits when the request has completed.
      */
     @Nonnull
@@ -110,7 +112,7 @@ public interface Requester {
             this(route, params, array);
             this.reason = reason;
         }
-        
+    
         @Override
         public String toString() {
             return String.format("OutboundRequest (%s, %s, object=%s, array=%s, buffers=%s, reason=%s)",

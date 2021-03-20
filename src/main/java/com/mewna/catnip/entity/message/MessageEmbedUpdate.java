@@ -27,14 +27,15 @@
 
 package com.mewna.catnip.entity.message;
 
-import com.mewna.catnip.entity.Snowflake;
+import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.MessageChannel;
-import com.mewna.catnip.entity.channel.TextChannel;
-import com.mewna.catnip.entity.guild.Guild;
+import com.mewna.catnip.entity.partials.GuildEntity;
+import com.mewna.catnip.entity.partials.HasChannel;
+import com.mewna.catnip.entity.partials.Snowflake;
+import io.reactivex.rxjava3.core.Maybe;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -45,47 +46,15 @@ import java.util.List;
  * @author amy
  * @since 10/9/18.
  */
-public interface MessageEmbedUpdate extends Snowflake {
-    @Nullable
-    @CheckReturnValue
-    default String guildId() {
-        final long id = guildIdAsLong();
-        if(id == 0) {
-            return null;
-        }
-        return Long.toUnsignedString(id);
-    }
-    
-    @CheckReturnValue
-    long guildIdAsLong();
-    
-    @Nullable
-    @CheckReturnValue
-    default Guild guild() {
-        final long id = guildIdAsLong();
-        if(id == 0) {
-            return null;
-        } else {
-            return catnip().cache().guild(id);
-        }
-    }
-    
+public interface MessageEmbedUpdate extends Snowflake, GuildEntity, HasChannel {
     @Nonnull
     @CheckReturnValue
-    default String channelId() {
-        return Long.toUnsignedString(channelIdAsLong());
-    }
-    
-    @CheckReturnValue
-    long channelIdAsLong();
-    
-    @CheckReturnValue
-    default MessageChannel channel() {
+    default Maybe<MessageChannel> channel() {
         final long guild = guildIdAsLong();
         if(guild != 0) {
-            return (TextChannel) catnip().cache().channel(guild, channelIdAsLong());
+            return catnip().cache().channel(guild, channelIdAsLong()).map(Channel::asMessageChannel);
         } else {
-            return catnip().cache().dmChannel(channelIdAsLong());
+            return catnip().rest().channel().getChannelById(channelId()).map(Channel::asMessageChannel).toMaybe();
         }
     }
     

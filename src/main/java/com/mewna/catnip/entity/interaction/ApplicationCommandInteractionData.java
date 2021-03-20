@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2020 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,27 +25,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.cache;
+package com.mewna.catnip.entity.interaction;
+
+import com.mewna.catnip.entity.partials.HasName;
+import com.mewna.catnip.entity.partials.Snowflake;
+
+import java.util.List;
 
 /**
- * Flags that control how catnip caches entities.
- *
  * @author amy
- * @since 9/21/18.
+ * @since 12/10/20.
  */
-public enum CacheFlag {
-    /**
-     * Don't cache any custom emojis from guilds.
-     */
-    DROP_EMOJI,
-    /**
-     * Don't cache user voice states. Don't set this flag if you need ex. to
-     * know if a user is in a voice channel.
-     */
-    DROP_VOICE_STATES,
-    /**
-     * Don't cache any game statuses from presences. Set this cache flag if you
-     * need to save memory.
-     */
-    DROP_GAME_STATUSES,
+public interface ApplicationCommandInteractionData extends Snowflake, HasName {
+    List<ApplicationCommandInteractionDataOption> options();
 }

@@ -36,7 +36,7 @@ import javax.annotation.Nonnull;
  * Delegated entities allow for all sorts of useful things! Consider the
  * following:
  * <code>
- *     final CustomUser user = (CustomUser) catnip.cache().user("snowflake");
+ * final CustomUser user = (CustomUser) catnip.cache().user("snowflake");
  * </code>
  * By implementing an entity delegator, you can use your custom entity class
  * ANYWHERE, as long as you implement this interface! The intent of an entity
@@ -49,10 +49,12 @@ import javax.annotation.Nonnull;
 public interface EntityDelegator {
     /**
      * Delegates the provided entity.
+     *
      * @param type The type of the entity being delegated.
      * @param data The entity to delegate.
-     * @param <T> The type of entity being delegated.
-     * @param <R> The entity delegate. Must be a subclass of {@code T}.
+     * @param <T>  The type of entity being delegated.
+     * @param <R>  The entity delegate. Must be a subclass of {@code T}.
+     *
      * @return The delegated entity.
      */
     <T, R extends T> R delegate(@Nonnull Class<T> type, @Nonnull T data);

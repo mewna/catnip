@@ -1,29 +1,18 @@
-# WARNING
-
-This branch is for catnip v2. catnip v3 is currently under active development, and is ***strongly***
-recommended to be used. Check out [the v3 PR](https://github.com/mewna/catnip/pull/482) for more
-information on what's changed.
-
 # catnip
 
-[![CircleCI](https://circleci.com/gh/mewna/catnip.svg?style=svg)](https://circleci.com/gh/mewna/catnip)
+![Github Actions -- tests](https://github.com/mewna/catnip/workflows/Run%20all%20tests/badge.svg)
+![Github Actions -- docs](https://github.com/mewna/catnip/workflows/Build%20docs/badge.svg)
 [![powered by potato](https://img.shields.io/badge/powered%20by-potato-%23db325c.svg)](https://mewna.com/)
 ![GitHub tag (latest by date)](https://img.shields.io/github/tag-date/mewna/catnip.svg?style=popout)
 ![LGTM Grade](https://img.shields.io/lgtm/grade/java/github/mewna/catnip)
 
 A Discord API wrapper in Java. Fully async / reactive, built on top of
 [RxJava](http://reactivex.io). catnip tries to map roughly 1:1 to how the Discord 
-API works, both in terms of events and REST methods available.
+API works, both in terms of events and REST methods available. catnip uses Java 15+.
 
-catnip is part of the [amyware Discord server](https://discord.gg/yeF2HpP)
+catnip is part of the [amyware Discord server](https://discord.gg/yeF2HpP).
 
 Licensed under the [BSD 3-Clause License](https://tldrlegal.com/license/bsd-3-clause-license-(revised)).
-
-### READ THIS
-
-catnip v2 requires Java11+, but there is a bug with Java 11 + TLSv1.3 that causes runaway CPU usage.
-To avoid this problem, use Java 12 or later. See https://stackoverflow.com/questions/55298459 and
-https://stackoverflow.com/questions/54485755
 
 ## Installation
 
@@ -69,7 +58,7 @@ final Catnip catnip = Catnip.catnip("your token goes here");
 catnip.observable(DiscordEvent.MESSAGE_CREATE)
     .filter(msg -> msg.content().equals("!ping"))
     .subscribe(msg -> {
-        msg.channel().sendMessage("pong!");
+        msg.reply("pong!");
     }, error -> error.printStackTrace());
 catnip.connect();
 ```
@@ -84,7 +73,7 @@ catnip.observable(DiscordEvent.MESSAGE_CREATE)
         .filter(msg -> msg.content().equals("!ping"))
         .subscribe(msg -> {
             long start = System.currentTimeMillis();
-            msg.channel().sendMessage("pong!")
+            msg.reply("pong!")
                     .subscribe(ping -> {
                         long end = System.currentTimeMillis();
                         ping.edit("pong! (took " + (end - start) + "ms).");
@@ -100,7 +89,7 @@ Catnip.catnipAsync("your token here").subscribe(catnip -> {
     catnip.observable(DiscordEvent.MESSAGE_CREATE)
         .filter(msg -> msg.content().equals("!ping"))
         .subscribe(msg -> {
-            msg.channel().sendMessage("pong!");
+            msg.reply("pong!");
         }, error -> error.printStackTrace());
     catnip.connect();
 });

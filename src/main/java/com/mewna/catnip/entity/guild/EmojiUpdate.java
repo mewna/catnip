@@ -28,6 +28,7 @@
 package com.mewna.catnip.entity.guild;
 
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
+import com.mewna.catnip.entity.partials.GuildEntity;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;

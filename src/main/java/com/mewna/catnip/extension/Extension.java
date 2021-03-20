@@ -29,6 +29,7 @@ package com.mewna.catnip.extension;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.CatnipOptions;
+import com.mewna.catnip.entity.partials.HasName;
 import com.mewna.catnip.extension.hook.CatnipHook;
 import com.mewna.catnip.extension.manager.ExtensionManager;
 import com.mewna.catnip.shard.event.DoubleEventType;
@@ -63,8 +64,8 @@ import java.util.function.UnaryOperator;
  * @author amy
  * @since 9/6/18
  */
-@SuppressWarnings({"unused", "UnusedReturnValue"})
-public interface Extension {
+@SuppressWarnings({"unused", "UnusedReturnValue", "SameReturnValue"})
+public interface Extension extends HasName {
     /**
      * The name of this extension. Note that an extension's name is
      * <strong>NOT</strong> guaranteed unique, and so your code should NOT rely
@@ -162,28 +163,6 @@ public interface Extension {
     }
     
     /**
-     * Add a consumer for the specified event type.
-     *
-     * @param type The type of event to listen on.
-     * @param <T>  The object type of event being listened on.
-     *
-     * @return The message consumer.
-     */
-    <T> MessageConsumer<T> on(@Nonnull final EventType<T> type);
-    
-    /**
-     * Add a consumer for the specified event type with the given handler
-     * callback.
-     *
-     * @param type    The type of event to listen on.
-     * @param handler The handler for the event object.
-     * @param <T>     The object type of event being listened on.
-     *
-     * @return The message consumer.
-     */
-    <T> MessageConsumer<T> on(@Nonnull final EventType<T> type, @Nonnull final Consumer<T> handler);
-    
-    /**
      * Add a reactive stream handler for events of the given type. Can be
      * disposed of with {@link Observable#unsubscribeOn(Scheduler)}. The
      * {@code scheduler} argument can be created with
@@ -212,32 +191,6 @@ public interface Extension {
      * @return The flowable.
      */
     <T> Flowable<T> flowable(@Nonnull final EventType<T> type);
-    
-    /**
-     * Add a consumer for the specified event type with the given handler
-     * callback.
-     *
-     * @param type The type of event to listen on.
-     * @param <T>  The first object type of event being listened on.
-     * @param <E>  The second object type of event being listened on.
-     *
-     * @return The message consumer.
-     */
-    <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type);
-    
-    /**
-     * Add a consumer for the specified event type with the given handler
-     * callback.
-     *
-     * @param type    The type of event to listen on.
-     * @param handler The handler for the event object.
-     * @param <T>     The first object type of event being listened on.
-     * @param <E>     The second object type of event being listened on.
-     *
-     * @return The message consumer.
-     */
-    <T, E> MessageConsumer<Pair<T, E>> on(@Nonnull final DoubleEventType<T, E> type,
-                                          @Nonnull final BiConsumer<T, E> handler);
     
     /**
      * Add a reactive stream handler for events of the given type. Can be

@@ -29,8 +29,9 @@ package com.mewna.catnip.util;
 
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.cache.CacheFlag;
+import com.mewna.catnip.cache.CustomizableEntityCache;
 import com.mewna.catnip.cache.EntityCacheWorker;
+import com.mewna.catnip.cache.NoopEntityCache;
 import com.mewna.catnip.cache.SplitMemoryEntityCache;
 import com.mewna.catnip.entity.delegate.EntityDelegator;
 import com.mewna.catnip.entity.guild.Guild;
@@ -85,6 +86,14 @@ public interface CatnipOptionsView {
     String token();
     
     /**
+     * The application's public key. Used for interactions (think slash commands).
+     * <p>
+     * May not be overriden by extensions.
+     */
+    @Nullable
+    String publicKey();
+    
+    /**
      * The shard manager for catnip to use. Defaults to {@link DefaultShardManager}.
      */
     @Nonnull
@@ -125,13 +134,6 @@ public interface CatnipOptionsView {
      */
     @Nonnull
     EntityCacheWorker cacheWorker();
-    
-    /**
-     * The set of cache flags for catnip to obey. Used to prevent caching certain
-     * things.
-     */
-    @Nonnull
-    Set<CacheFlag> cacheFlags();
     
     /**
      * Manages event dispatching and consumers. Defaults to {@link DefaultDispatchManager}.
@@ -368,7 +370,7 @@ public interface CatnipOptionsView {
      * connecting. Useful for adding support for new features that catnip
      * doesn't yet support. Defaults to {@code null}.
      */
-    @Nonnull
+    @Nullable
     JsonObject customIdentifyOptions();
     
     /**
@@ -384,4 +386,12 @@ public interface CatnipOptionsView {
      * Defaults to {@code true}.
      */
     boolean logEventNotInIntentsWarning();
+    
+    /**
+     * @return Whether or not to log a warning when an entity is not present
+     * in a {@link CustomizableEntityCache} implementation when it should be.
+     * This is useful for debugging a custom cache, while also hiding potential
+     * errors that may come from {@link NoopEntityCache}.
+     */
+    boolean logEntityPresenceWarningOnCustomCache();
 }

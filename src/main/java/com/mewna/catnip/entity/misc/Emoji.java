@@ -27,21 +27,26 @@
 
 package com.mewna.catnip.entity.misc;
 
-import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.guild.Guild;
+import com.mewna.catnip.entity.partials.GuildEntity;
+import com.mewna.catnip.entity.partials.HasNullableName;
+import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.user.User;
+import io.reactivex.rxjava3.core.Maybe;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author natanbc
  * @since 9/5/18.
  */
-public interface Emoji extends Snowflake {
+@SuppressWarnings({"unused", "RedundantSuppression", "SameReturnValue"})
+public interface Emoji extends Snowflake, HasNullableName {
     /**
      * ID of this emoji, or null if it has no ID.
      * <br>Always null for {@link #unicode() unicode} emoji.
@@ -116,6 +121,7 @@ public interface Emoji extends Snowflake {
      *
      * @return True if this emoji is custom, false otherwise.
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     @CheckReturnValue
     boolean custom();
     
@@ -167,7 +173,7 @@ public interface Emoji extends Snowflake {
     @CheckReturnValue
     boolean is(@Nonnull String emoji);
     
-    interface CustomEmoji extends Emoji {
+    interface CustomEmoji extends Emoji, GuildEntity {
         @Override
         @Nonnull
         @CheckReturnValue
@@ -183,12 +189,12 @@ public interface Emoji extends Snowflake {
          *
          * @return String representing the ID.
          */
-        @Nullable
+        @Nonnull
         @CheckReturnValue
-        default Guild guild() {
+        default Maybe<Guild> guild() {
             final long id = guildIdAsLong();
             if(id == 0) {
-                return null;
+                return Maybe.empty();
             }
             return catnip().cache().guild(guildIdAsLong());
         }
@@ -250,6 +256,7 @@ public interface Emoji extends Snowflake {
     }
     
     interface UnicodeEmoji extends Emoji {
+        @Nullable
         @Override
         default String id() {
             throw new IllegalStateException("Unicode emojis have no IDs!");
@@ -296,20 +303,20 @@ public interface Emoji extends Snowflake {
         @Nonnull
         @CheckReturnValue
         default String forMessage() {
-            return name();
+            return Objects.requireNonNull(name());
         }
         
         @Override
         @Nonnull
         @CheckReturnValue
         default String forReaction() {
-            return name();
+            return Objects.requireNonNull(name());
         }
         
         @Override
         @CheckReturnValue
         default boolean is(@Nonnull final String emoji) {
-            return name().equals(emoji);
+            return Objects.requireNonNull(name()).equals(emoji);
         }
     }
     
@@ -320,8 +327,8 @@ public interface Emoji extends Snowflake {
      * {@code id}, {@code animated}, and {@code name}.
      */
     interface ActivityEmoji extends Emoji {
+        @Nonnull
         @Override
-        @Nullable
         @CheckReturnValue
         default String id() {
             return idAsLong() != 0 ? Long.toUnsignedString(idAsLong()) : null;
@@ -333,50 +340,50 @@ public interface Emoji extends Snowflake {
         default List<String> roles() {
             return Collections.emptyList();
         }
-    
+        
         @Override
         @Nullable
         @CheckReturnValue
         default User user() {
             return null;
         }
-    
+        
         @Override
         @CheckReturnValue
         default boolean managed() {
             return false;
         }
-    
+        
         @Override
         @CheckReturnValue
         default boolean custom() {
             return false;
         }
-    
+        
         @Override
         @CheckReturnValue
         default boolean requiresColons() {
             return false;
         }
-    
+        
         @Override
         @Nonnull
         @CheckReturnValue
         default String forMessage() {
             return String.format("<%s:%s:%s>", animated() ? "a" : "", name(), id());
         }
-    
+        
         @Override
         @Nonnull
         @CheckReturnValue
         default String forReaction() {
             return String.format("%s:%s", name(), id());
         }
-    
+        
         @Override
         @CheckReturnValue
         default boolean is(@Nonnull final String emoji) {
-            return name().equals(emoji);
+            return Objects.requireNonNull(name()).equals(emoji);
         }
     }
 }

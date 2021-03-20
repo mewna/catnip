@@ -60,7 +60,7 @@ public interface TaskScheduler extends RequiresCatnip {
     /**
      * Schedules a new task to be run on an interval.
      *
-     * @param ms   Interval, in millseconds, between task runs.
+     * @param ms   Interval, in milliseconds, between task runs.
      * @param task The task to be run.
      *
      * @return The id of the task to be run. Used for cancellations.

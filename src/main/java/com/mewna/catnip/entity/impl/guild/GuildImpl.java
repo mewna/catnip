@@ -68,8 +68,6 @@ public class GuildImpl implements Guild, RequiresCatnip, Timestamped {
     private String region;
     private long afkChannelIdAsLong;
     private int afkTimeout;
-    private boolean embedEnabled;
-    private long embedChannelIdAsLong;
     private VerificationLevel verificationLevel;
     private NotificationLevel defaultMessageNotifications;
     private ContentFilterLevel explicitContentFilter;

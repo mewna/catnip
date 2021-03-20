@@ -57,7 +57,7 @@ import java.util.List;
 @Setter(onParam_ = @Nullable, onMethod_ = {@CheckReturnValue, @Nonnull})
 @NoArgsConstructor
 @Accessors(fluent = true, chain = true)
-@SuppressWarnings({"WeakerAccess", "unused"})
+@SuppressWarnings({"WeakerAccess", "unused", "RedundantSuppression"})
 public class EmbedBuilder {
     private final List<Field> fields = new ArrayList<>(25);
     // @formatter:off
@@ -90,8 +90,10 @@ public class EmbedBuilder {
      * will be converted to one if possible.
      *
      * @param temporal A {@link TemporalAccessor} to set.
-     * @throws DateTimeException If the {@link TemporalAccessor} cannot be converted to an {@link OffsetDateTime}.
+     *
      * @return Itself.
+     *
+     * @throws DateTimeException If the {@link TemporalAccessor} cannot be converted to an {@link OffsetDateTime}.
      */
     @Nonnull
     @CheckReturnValue
@@ -299,10 +301,12 @@ public class EmbedBuilder {
     
     /**
      * Replaces the field associated with a specific index with a new field more efficiently.
-     * @param index The <b>non-negative and under-25</b> index of the field to replace.
-     * @param name The <b>non-null</b> name of the new field.
-     * @param value The <b>non-null</b> value of the new field.
+     *
+     * @param index  The <b>non-negative and under-25</b> index of the field to replace.
+     * @param name   The <b>non-null</b> name of the new field.
+     * @param value  The <b>non-null</b> value of the new field.
      * @param inline Whether or not the field should be inline.
+     *
      * @return Itself.
      */
     @Nonnull
@@ -313,10 +317,13 @@ public class EmbedBuilder {
     
     /**
      * Replaces the field associated with a specific index with a new field more efficiently.
+     *
      * @param index The <b>non-negative and under-25</b> index of the field to replace.
      * @param field The <b>non-null</b> {@link Field field} instance.
-     * @throws IndexOutOfBoundsException If the field index is smaller than 0, larger than 24 or larger or equal to the amount of fields added.
+     *
      * @return Itself.
+     *
+     * @throws IndexOutOfBoundsException If the field index is smaller than 0, larger than 24 or larger or equal to the amount of fields added.
      */
     
     @Nonnull
@@ -324,7 +331,7 @@ public class EmbedBuilder {
     public EmbedBuilder replaceAtIndex(@Nonnegative final int index, @Nonnull final Field field) {
         // index < 0 SHOULDN'T be true, but users can't be trusted...
         //noinspection ConstantConditions
-        if (index < 0 || index > 24 || index >= fields.size()) {
+        if(index < 0 || index > 24 || index >= fields.size()) {
             throw new IndexOutOfBoundsException("Tried to set a field with an out-of-bounds index!");
         }
         fields.set(index, field);

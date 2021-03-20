@@ -29,23 +29,25 @@ package com.mewna.catnip.rest.handler;
 
 import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
-import com.mewna.catnip.entity.Snowflake;
 import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.guild.*;
 import com.mewna.catnip.entity.guild.Guild.GuildEditFields;
 import com.mewna.catnip.entity.guild.audit.ActionType;
 import com.mewna.catnip.entity.guild.audit.AuditLogEntry;
 import com.mewna.catnip.entity.misc.CreatedInvite;
+import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.voice.VoiceRegion;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes;
 import com.mewna.catnip.rest.guild.*;
 import com.mewna.catnip.rest.requester.Requester.OutboundRequest;
+import com.mewna.catnip.shard.GatewayIntent;
 import com.mewna.catnip.util.QueryStringBuilder;
 import com.mewna.catnip.util.pagination.AuditLogPaginator;
 import com.mewna.catnip.util.pagination.MemberPaginator;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 
@@ -378,7 +380,11 @@ public class RestGuild extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public MemberPaginator listGuildMembers(@Nonnull final String guildId) {
-        // TODO: Handle intents here (GUILD_MEMBERS)
+        if(!catnip().options().intents().contains(GatewayIntent.GUILD_MEMBERS)) {
+            throw new IllegalStateException("Access to list guild members is gated on the GUILD_MEMBERS intent. " +
+                    "If you have this intent enabled, add it to your catnip options like this:\n" +
+                    "Catnip.catnip(new CatnipOptions(\"token\").intents(Set.of(GatewayIntent.GUILD_MEMBERS)))");
+        }
         return new MemberPaginator(entityBuilder(), guildId) {
             @Nonnull
             @Override
@@ -418,10 +424,14 @@ public class RestGuild extends RestHandler {
                 .map(ResponsePayload::array);
     }
     
+    @Nonnull
+    @CheckReturnValue
     public Observable<Member> searchGuildMembers(@Nonnull final String guildId, @Nonnull final String query) {
         return searchGuildMembers(guildId, query, 1);
     }
     
+    @Nonnull
+    @CheckReturnValue
     public Observable<Member> searchGuildMembers(@Nonnull final String guildId, @Nonnull final String query,
                                                  @Nonnegative final int limit) {
         return searchGuildMembersRaw(guildId, query, limit)
@@ -429,6 +439,8 @@ public class RestGuild extends RestHandler {
                 .flatMapIterable(e -> e);
     }
     
+    @Nonnull
+    @CheckReturnValue
     public Observable<JsonArray> searchGuildMembersRaw(@Nonnegative final String guildId, @Nonnull final String query,
                                                        @Nonnegative final int limit) {
         return catnip().requester().queue(new OutboundRequest(Routes.SEARCH_GUILD_MEMBERS.withMajorParam(guildId)
@@ -448,8 +460,7 @@ public class RestGuild extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public Observable<JsonArray> getGuildBansRaw(@Nonnull final String guildId) {
-        return catnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BANS.withMajorParam(guildId),
-                Map.of()))
+        return catnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_BANS.withMajorParam(guildId), Map.of()))
                 .map(ResponsePayload::array);
     }
     
@@ -487,7 +498,7 @@ public class RestGuild extends RestHandler {
                 .queue(new OutboundRequest(Routes.CREATE_GUILD_BAN.withMajorParam(guildId),
                         Map.of("user", userId),
                         JsonObject.builder()
-                                .value("delete-message-days", String.valueOf(deleteMessageDays))
+                                .value("delete_message_days", String.valueOf(deleteMessageDays))
                                 .value("reason", reason)
                                 .done()
                 ).reason(reason)));
@@ -632,8 +643,7 @@ public class RestGuild extends RestHandler {
     @Nonnull
     @CheckReturnValue
     public Observable<JsonArray> getGuildVoiceRegionsRaw(@Nonnull final String guildId) {
-        return catnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_VOICE_REGIONS.withQueryString(guildId),
-                Map.of()))
+        return catnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_VOICE_REGIONS.withQueryString(guildId), Map.of()))
                 .map(ResponsePayload::array);
     }
     
@@ -684,8 +694,118 @@ public class RestGuild extends RestHandler {
         }
         
         final String query = builder.build();
-        return catnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_AUDIT_LOG.withMajorParam(guildId).withQueryString(query),
-                Map.of()))
+        return catnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_AUDIT_LOG.withMajorParam(guildId)
+                .withQueryString(query), Map.of()))
                 .map(ResponsePayload::object);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Maybe<Template> getTemplate(@Nonnull final String code) {
+        return Maybe.fromObservable(getTemplateRaw(code).map(entityBuilder()::createTemplate));
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Observable<JsonObject> getTemplateRaw(@Nonnull final String code) {
+        return catnip().requester().queue(new OutboundRequest(Routes.GET_TEMPLATE, Map.of("code", code)))
+                .map(ResponsePayload::object);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Single<Guild> createGuildFromTemplate(@Nonnull final String code, @Nonnull final String name,
+                                                 @Nullable final String icon) {
+        return Single.fromObservable(createGuildFromTemplateRaw(code, name, icon).map(entityBuilder()::createGuild));
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Observable<JsonObject> createGuildFromTemplateRaw(@Nonnull final String code, @Nonnull final String name,
+                                                             @Nullable final String icon) {
+        final var builder = JsonObject.builder();
+        builder.value("name", name);
+        if(icon != null) {
+            builder.value("icon", icon);
+        }
+        return catnip().requester().queue(new OutboundRequest(Routes.CREATE_GUILD_FROM_TEMPLATE, Map.of("code", code))
+                .object(builder.done())).map(ResponsePayload::object);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Observable<Template> getGuildTemplates(@Nonnull final String guildId) {
+        return getGuildTemplatesRaw(guildId)
+                .map(e -> mapObjectContents(entityBuilder()::createTemplate).apply(e))
+                .flatMapIterable(e -> e);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Observable<JsonArray> getGuildTemplatesRaw(@Nonnull final String guildId) {
+        return catnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_TEMPLATES.withMajorParam(guildId), Map.of()))
+                .map(ResponsePayload::array);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Single<Template> createGuildTemplate(@Nonnull final String guildId) {
+        return Single.fromObservable(createGuildTemplateRaw(guildId).map(entityBuilder()::createTemplate));
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Observable<JsonObject> createGuildTemplateRaw(@Nonnull final String guildId) {
+        return catnip().requester().queue(new OutboundRequest(Routes.CREATE_GUILD_TEMPLATE.withMajorParam(guildId), Map.of()))
+                .map(ResponsePayload::object);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Single<Template> syncGuildTemplate(@Nonnull final String guildId, @Nonnull final String code) {
+        return Single.fromObservable(syncGuildTemplateRaw(guildId, code).map(entityBuilder()::createTemplate));
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Observable<JsonObject> syncGuildTemplateRaw(@Nonnull final String guildId, @Nonnull final String code) {
+        return catnip().requester().queue(new OutboundRequest(Routes.SYNC_GUILD_TEMPLATE.withMajorParam(guildId),
+                Map.of("code", code))).map(ResponsePayload::object);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Single<Template> modifyGuildTemplate(@Nonnull final String guildId, @Nonnull final String code,
+                                                @Nullable final String name, @Nullable final String description) {
+        return Single.fromObservable(modifyGuildTemplateRaw(guildId, code, name, description).map(entityBuilder()::createTemplate));
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Observable<JsonObject> modifyGuildTemplateRaw(@Nonnull final String guildId, @Nonnull final String code,
+                                                         @Nullable final String name, @Nullable final String description) {
+        final var builder = JsonObject.builder();
+        if(name != null) {
+            builder.value("name", name);
+        }
+        if(description != null) {
+            builder.value("description", description);
+        }
+        return catnip().requester().queue(new OutboundRequest(Routes.MODIFY_GUILD_TEMPLATE.withMajorParam(guildId),
+                Map.of("code", code)).object(builder.done()))
+                .map(ResponsePayload::object);
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Single<Template> deleteGuildTemplate(@Nonnull final String guildId, @Nonnull final String code) {
+        return Single.fromObservable(deleteGuildTemplateRaw(guildId, code).map(entityBuilder()::createTemplate));
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public Observable<JsonObject> deleteGuildTemplateRaw(@Nonnull final String guildId, @Nonnull final String code) {
+        return catnip().requester().queue(new OutboundRequest(Routes.DELETE_GUILD_TEMPLATE.withMajorParam(guildId),
+                Map.of("code", code))).map(ResponsePayload::object);
     }
 }

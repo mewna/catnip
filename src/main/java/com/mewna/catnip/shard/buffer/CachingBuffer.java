@@ -103,27 +103,15 @@ public class CachingBuffer extends AbstractBuffer {
         final JsonObject d = event.getObject("d");
         final BufferState bufferState = buffers.get(id);
         switch(type) {
-            case Raw.READY: {
-                handleReady(id, event);
-                // In theory, we shouldn't need `bufferState != null` checks
-                // beyond this point. The default vert.x event bus is
-                // single-threaded, and #handleReady will already insert a
-                // BufferState into the mappings for us.
-                break;
-            }
-            case Raw.GUILD_CREATE: {
-                handleGuildCreate(bufferState, event);
-                break;
-            }
-            case Raw.GUILD_MEMBERS_CHUNK: {
-                handleGuildMemberChunk(bufferState, event);
-                break;
-            }
-            default: {
-                // Buffer and replay later
-                handleEvent(id, bufferState, event);
-                break;
-            }
+            case Raw.READY -> // In theory, we shouldn't need `bufferState != null` checks
+                    // beyond this point. The default vert.x event bus is
+                    // single-threaded, and #handleReady will already insert a
+                    // BufferState into the mappings for us.
+                    handleReady(id, event);
+            case Raw.GUILD_CREATE -> handleGuildCreate(bufferState, event);
+            case Raw.GUILD_MEMBERS_CHUNK -> handleGuildMemberChunk(bufferState, event);
+            default -> // Buffer and replay later
+                    handleEvent(id, bufferState, event);
         }
     }
     
@@ -240,15 +228,18 @@ public class CachingBuffer extends AbstractBuffer {
             if(bufferState.awaitedGuilds().contains(guildId)) {
                 // If we have a guild id, and we have a guild being awaited,
                 // buffer the event
+                catnip().logAdapter().trace("buffer: still awaiting chunks on {}", guildId);
                 bufferState.receiveGuildEvent(guildId, event);
             } else {
                 // If we're not awaiting the guild, it means that we're done
                 // buffering events for the guild - ie. all member chunks have
                 // been received - and so we can emit
+                catnip().logAdapter().trace("buffer: finished, emitting {}", guildId);
                 cacheAndDispatch(eventType, id, event);
             }
         } else {
             // Emit if the payload has no guild id
+            catnip().logAdapter().trace("buffer: no guild id, emitting");
             cacheAndDispatch(eventType, id, event);
         }
     }
@@ -288,12 +279,12 @@ public class CachingBuffer extends AbstractBuffer {
     
     @Value
     @Accessors(fluent = true)
-    private final class BufferState {
-        private int id;
-        private final Set<String> awaitedGuilds;
-        private final Map<String, Deque<JsonObject>> guildBuffers = new ConcurrentHashMap<>();
-        private final Map<String, JsonObject> guildCreateCache = new ConcurrentHashMap<>();
-        private final Deque<JsonObject> buffer = new ConcurrentLinkedDeque<>();
+    private class BufferState {
+        int id;
+        Set<String> awaitedGuilds;
+        Map<String, Deque<JsonObject>> guildBuffers = new ConcurrentHashMap<>();
+        Map<String, JsonObject> guildCreateCache = new ConcurrentHashMap<>();
+        Deque<JsonObject> buffer = new ConcurrentLinkedDeque<>();
         
         void awaitGuild(final String id, final JsonObject event) {
             awaitedGuilds.add(id);

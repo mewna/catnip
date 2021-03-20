@@ -27,23 +27,15 @@
 
 package com.mewna.catnip.entity.guild.audit;
 
+import com.mewna.catnip.entity.partials.HasChannel;
+
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
 
 /**
  * @author kjp12
  * @since March 18th, 2020
  */
-public interface MemberMoveInfo extends OptionalEntryInfo {
-    @Nonnull
-    @CheckReturnValue
-    default String channelId() {
-        return Long.toUnsignedString(channelIdAsLong());
-    }
-    
-    @CheckReturnValue
-    long channelIdAsLong();
-    
+public interface MemberMoveInfo extends OptionalEntryInfo, HasChannel {
     @CheckReturnValue
     int membersMovedCount();
 }
