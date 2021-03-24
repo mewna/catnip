@@ -13,9 +13,9 @@
         <delombok.output>${project.basedir}/delombok</delombok.output>
 
         <lombok.version>1.18.16</lombok.version>
-        <rxjava.version>3.0.10</rxjava.version>
+        <rxjava.version>3.0.11</rxjava.version>
         <slf4j.version>1.7.30</slf4j.version>
-        <commons.lang.version>3.11</commons.lang.version>
+        <commons.lang.version>3.12.0</commons.lang.version>
         <commons.codec.version>1.15</commons.codec.version>
         <jsr305.version>3.0.2</jsr305.version>
         <nanojson.version>1.7</nanojson.version>
@@ -24,7 +24,7 @@
         <koloboke-impl.version>1.0.0</koloboke-impl.version>
 
         <junit.version>5.7.1</junit.version>
-        <mockito.version>3.7.7</mockito.version>
+        <mockito.version>3.8.0</mockito.version>
         <logback.version>1.2.3</logback.version>
         <javautil.version>1.34.0</javautil.version>
     </properties>
@@ -129,12 +129,12 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.67</version>
+            <version>1.68</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk15on</artifactId>
-            <version>1.67</version>
+            <version>1.68</version>
         </dependency>
 
         <!-- Mockito -->
@@ -292,7 +292,7 @@
             <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
-                <version>4.0.3</version>
+                <version>4.0.4</version>
                 <executions>
                     <execution>
                         <id>get-the-git-infos</id>
