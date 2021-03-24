@@ -1218,9 +1218,12 @@ public final class EntityBuilder {
                 .build());
     }
     
-    @Nonnull
+    @Nullable
     @CheckReturnValue
-    public InviteGuild createInviteGuild(@Nonnull final JsonObject data) {
+    public InviteGuild createInviteGuild(@Nullable final JsonObject data) {
+        if(data == null) {
+            return null;
+        }
         return delegate(InviteGuild.class, InviteGuildImpl.builder()
                 .catnip(catnip)
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))

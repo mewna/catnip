@@ -70,7 +70,7 @@ public interface Invite extends Entity {
     /**
      * @return The guild the invite is for.
      */
-    @Nonnull
+    @Nullable
     @CheckReturnValue
     InviteGuild guild();
     
