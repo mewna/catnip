@@ -50,14 +50,16 @@ public interface ApplicationCommandOption extends HasName, HasDescription {
     List<ApplicationCommandOption> options();
     
     default JsonObject toJson() {
+        final var choices = choices() != null ? choices() : List.of();
+        final var options = options() != null ? options() : List.of();
         final var builder = JsonObject.builder();
         builder.value("type", type().key());
         builder.value("name", name());
         builder.value("description", description());
         builder.value("default", defaultOption());
         builder.value("required", required());
-        builder.value("choices", choices().stream().map(ApplicationCommandOptionChoice::toJson).collect(Collectors.toList()));
-        builder.value("options", options().stream().map(ApplicationCommandOption::toJson).collect(Collectors.toList()));
+        builder.value("choices", choices);
+        builder.value("options", options);
         return builder.done();
     }
 }

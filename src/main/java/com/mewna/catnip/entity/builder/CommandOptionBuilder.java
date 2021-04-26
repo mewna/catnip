@@ -88,8 +88,8 @@ public class CommandOptionBuilder {
     public ApplicationCommandOption build() {
         Validators.assertStringLength(name, "name", 3, 32);
         Validators.assertStringLength(description, "description", 1, 100);
-        Validators.assertListSize(options, "options", 0, 10);
-        Validators.assertListSize(choices, "choices", 0, 10);
+        Validators.assertListSize(options, "options", 0, 25);
+        Validators.assertListSize(choices, "choices", 0, 25);
         return ApplicationCommandOptionImpl.builder()
                 .type(type)
                 .choices(choices)

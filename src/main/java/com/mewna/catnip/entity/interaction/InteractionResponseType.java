@@ -43,11 +43,13 @@ public enum InteractionResponseType {
     /**
      * ACK a command without sending a message, eating the user's input.
      */
+    @Deprecated
     ACKNOWLEDGE(2),
     
     /**
      * Respond with a message, eating the user's input.
      */
+    @Deprecated
     CHANNEL_MESSAGE(3),
     
     /**

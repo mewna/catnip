@@ -46,7 +46,7 @@ public enum MessageFlag {
     SOURCE_MESSAGE_DELETED(1 << 3, false),
     URGENT(1 << 4, false),
     HAS_THREAD(1 << 5, false),
-    EPHEMERAL(1 << 6, false),
+    EPHEMERAL(1 << 6, true),
     ;
     
     @Getter

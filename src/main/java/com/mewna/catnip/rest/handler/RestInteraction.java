@@ -31,6 +31,7 @@ import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.interaction.ApplicationCommand;
 import com.mewna.catnip.entity.interaction.ApplicationCommandOption;
+import com.mewna.catnip.entity.interaction.InteractionResponseType;
 import com.mewna.catnip.entity.message.MentionParseFlag;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageFlag;
@@ -64,38 +65,40 @@ public class RestInteraction extends RestHandler {
     
     // Initial response
     
-    public Single<Message> createInteractionInitialResponse(@Nonnull final String interactionId,
+    public Completable createInteractionInitialResponse(@Nonnull final InteractionResponseType type,
+                                                            @Nonnull final String interactionId,
                                                             @Nonnull final String interactionToken,
                                                             @Nonnull final MessageOptions options) {
-        return createInteractionInitialResponse(interactionId, interactionToken, null, null, options);
+        return createInteractionInitialResponse(type, interactionId, interactionToken, null, null, options);
     }
     
-    public Single<Message> createInteractionInitialResponse(@Nonnull final String interactionId,
+    public Completable createInteractionInitialResponse(@Nonnull final InteractionResponseType type,
+                                                            @Nonnull final String interactionId,
                                                             @Nonnull final String interactionToken,
                                                             @Nullable final String username,
                                                             @Nonnull final MessageOptions options) {
-        return createInteractionInitialResponse(interactionId, interactionToken, username, null, options);
+        return createInteractionInitialResponse(type, interactionId, interactionToken, username, null, options);
     }
     
-    public Single<Message> createInteractionInitialResponse(@Nonnull final String interactionId,
+    public Completable createInteractionInitialResponse(@Nonnull final InteractionResponseType type,
+                                                            @Nonnull final String interactionId,
                                                             @Nonnull final String interactionToken,
                                                             @Nullable final String username, @Nullable final String avatarUrl,
                                                             @Nonnull final MessageOptions options) {
-        return Single.fromObservable(createInteractionInitialResponseRaw(interactionId, interactionToken, username, avatarUrl,
-                options).map(entityBuilder()::createMessage));
+        return createInteractionInitialResponseRaw(type, interactionId, interactionToken, username, avatarUrl, options);
     }
     
-    public Observable<JsonObject> createInteractionInitialResponseRaw(@Nonnull final String interactionId,
+    public Completable createInteractionInitialResponseRaw(@Nonnull final InteractionResponseType type,
+                                                                      @Nonnull final String interactionId,
                                                                       @Nonnull final String interactionToken,
                                                                       @Nullable final String username,
                                                                       @Nullable final String avatarUrl,
                                                                       @Nonnull final MessageOptions options) {
-        final var body = createSendBody(username, avatarUrl, options);
-        return catnip().requester().
+        final var body = createSendBody(type, username, avatarUrl, options);
+        return Completable.fromObservable(catnip().requester().
                 queue(new OutboundRequest(Routes.CREATE_INTERACTION_INITIAL_RESPONSE.withMajorParam(interactionId)
                         .withQueryString("?wait=true"), Map.of("token", interactionToken), body).needsToken(false)
-                        .buffers(options.files()))
-                .map(ResponsePayload::object);
+                        .buffers(options.files())));
     }
     
     public Single<Message> editInteractionInitialResponse(@Nonnull final String interactionId,
@@ -124,7 +127,7 @@ public class RestInteraction extends RestHandler {
                                                                     @Nullable final String username,
                                                                     @Nullable final String avatarUrl,
                                                                     @Nonnull final MessageOptions options) {
-        final var body = createSendBody(username, avatarUrl, options);
+        final var body = createSendBody(null, username, avatarUrl, options);
         return catnip().requester().
                 queue(new OutboundRequest(Routes.EDIT_INTERACTION_INITIAL_RESPONSE.withMajorParam(interactionId)
                         .withQueryString("?wait=true"), Map.of("token", interactionToken), body).buffers(options.files()))
@@ -140,33 +143,37 @@ public class RestInteraction extends RestHandler {
     
     // Follow-ups
     
-    public Single<Message> createInteractionFollowup(@Nonnull final String interactionId,
+    public Single<Message> createInteractionFollowup(@Nonnull final InteractionResponseType type,
+                                                     @Nonnull final String interactionId,
                                                      @Nonnull final String interactionToken,
                                                      @Nonnull final MessageOptions options) {
-        return createInteractionFollowup(interactionId, interactionToken, null, null, options);
+        return createInteractionFollowup(type, interactionId, interactionToken, null, null, options);
     }
     
-    public Single<Message> createInteractionFollowup(@Nonnull final String interactionId,
+    public Single<Message> createInteractionFollowup(@Nonnull final InteractionResponseType type,
+                                                     @Nonnull final String interactionId,
                                                      @Nonnull final String interactionToken,
                                                      @Nullable final String username,
                                                      @Nonnull final MessageOptions options) {
-        return createInteractionFollowup(interactionId, interactionToken, username, null, options);
+        return createInteractionFollowup(type, interactionId, interactionToken, username, null, options);
     }
     
-    public Single<Message> createInteractionFollowup(@Nonnull final String interactionId,
+    public Single<Message> createInteractionFollowup(@Nonnull final InteractionResponseType type,
+                                                     @Nonnull final String interactionId,
                                                      @Nonnull final String interactionToken,
                                                      @Nullable final String username, @Nullable final String avatarUrl,
                                                      @Nonnull final MessageOptions options) {
-        return Single.fromObservable(createInteractionFollowupRaw(interactionId, interactionToken, username, avatarUrl, options)
+        return Single.fromObservable(createInteractionFollowupRaw(type, interactionId, interactionToken, username, avatarUrl, options)
                 .map(entityBuilder()::createMessage));
     }
     
-    public Observable<JsonObject> createInteractionFollowupRaw(@Nonnull final String interactionId,
+    public Observable<JsonObject> createInteractionFollowupRaw(@Nonnull final InteractionResponseType type,
+                                                               @Nonnull final String interactionId,
                                                                @Nonnull final String interactionToken,
                                                                @Nullable final String username,
                                                                @Nullable final String avatarUrl,
                                                                @Nonnull final MessageOptions options) {
-        final var body = createSendBody(username, avatarUrl, options);
+        final var body = createSendBody(type, username, avatarUrl, options);
         return catnip().requester().
                 queue(new OutboundRequest(Routes.CREATE_INTERACTION_FOLLOWUP.withMajorParam(interactionId)
                         .withQueryString("?wait=true"), Map.of("token", interactionToken), body).needsToken(false)
@@ -197,7 +204,7 @@ public class RestInteraction extends RestHandler {
                                                              @Nonnull final String messageId, @Nullable final String username,
                                                              @Nullable final String avatarUrl,
                                                              @Nonnull final MessageOptions options) {
-        final var body = createSendBody(username, avatarUrl, options);
+        final var body = createSendBody(null, username, avatarUrl, options);
         return catnip().requester().
                 queue(new OutboundRequest(Routes.EDIT_INTERACTION_FOLLOWUP.withMajorParam(interactionId)
                         .withQueryString("?wait=true"), Map.of("token", interactionToken, "message", messageId), body)
@@ -261,7 +268,6 @@ public class RestInteraction extends RestHandler {
                         Map.of("command", commandId))));
     }
     
-    
     // Guild commands
     public Observable<ApplicationCommand> getGuildApplicationCommands(@Nonnull final String guildId) {
         return getGuildApplicationCommandsRaw(guildId)
@@ -277,14 +283,14 @@ public class RestInteraction extends RestHandler {
     
     public Single<ApplicationCommand> createGuildApplicationCommand(@Nonnull final String guildId, @Nonnull final String name,
                                                                     @Nonnull final String description,
-                                                                     @Nonnull final Collection<ApplicationCommandOption> options) {
+                                                                    @Nonnull final Collection<ApplicationCommandOption> options) {
         return Single.fromObservable(createGuildApplicationCommandRaw(guildId, name, description, options)
                 .map(entityBuilder()::createApplicationCommand));
     }
     
     public Observable<JsonObject> createGuildApplicationCommandRaw(@Nonnull final String guildId, @Nonnull final String name,
                                                                    @Nonnull final String description,
-                                                                    @Nonnull final Collection<ApplicationCommandOption> options) {
+                                                                   @Nonnull final Collection<ApplicationCommandOption> options) {
         final var body = createCommandBody(name, description, options);
         return catnip().requester().queue(new OutboundRequest(Routes.CREATE_GUILD_APPLICATION_COMMAND
                 .withMajorParam(catnip().clientId()), Map.of("guild", guildId)).object(body)).map(ResponsePayload::object);
@@ -292,19 +298,20 @@ public class RestInteraction extends RestHandler {
     
     public Single<ApplicationCommand> editGuildApplicationCommand(@Nonnull final String guildId, @Nonnull final String name,
                                                                   @Nonnull final String description,
-                                                                   @Nonnull final String commandId,
-                                                                   @Nonnull final Collection<ApplicationCommandOption> options) {
+                                                                  @Nonnull final String commandId,
+                                                                  @Nonnull final Collection<ApplicationCommandOption> options) {
         return Single.fromObservable(editGuildApplicationCommandRaw(guildId, name, description, commandId, options)
                 .map(entityBuilder()::createApplicationCommand));
     }
     
     public Observable<JsonObject> editGuildApplicationCommandRaw(@Nonnull final String guildId, @Nonnull final String name,
                                                                  @Nonnull final String description,
-                                                                  @Nonnull final String commandId,
-                                                                  @Nonnull final Collection<ApplicationCommandOption> options) {
+                                                                 @Nonnull final String commandId,
+                                                                 @Nonnull final Collection<ApplicationCommandOption> options) {
         final var body = createCommandBody(name, description, options);
         return catnip().requester().queue(new OutboundRequest(Routes.EDIT_GUILD_APPLICATION_COMMAND
-                .withMajorParam(catnip().clientId()), Map.of("guild", guildId, "command", commandId)).object(body)).map(ResponsePayload::object);
+                .withMajorParam(catnip().clientId()), Map.of("guild", guildId, "command", commandId)).object(body))
+                .map(ResponsePayload::object);
     }
     
     public Completable deleteGuildApplicationCommand(@Nonnull final String guildId, @Nonnull final String commandId) {
@@ -313,58 +320,68 @@ public class RestInteraction extends RestHandler {
                         Map.of("guild", guildId, "command", commandId))));
     }
     
-    private JsonObject createSendBody(@Nullable final String username, @Nullable final String avatarUrl, @Nonnull final MessageOptions options) {
+    private JsonObject createSendBody(@Nullable final InteractionResponseType type, @Nullable final String username,
+                                      @Nullable final String avatarUrl, @Nonnull final MessageOptions options) {
         final var builder = JsonObject.builder();
-        
-        if(options.content() != null && !options.content().isEmpty()) {
-            builder.value("content", options.content());
-        }
-        if(options.embed() != null) {
-            builder.array("embeds").value(entityBuilder().embedToJson(options.embed())).end();
-        }
-        if(username != null && !username.isEmpty()) {
-            builder.value("username", username);
-        }
-        if(avatarUrl != null && !avatarUrl.isEmpty()) {
-            builder.value("avatar_url", avatarUrl);
+        if(type != null) {
+            builder.value("type", type.key());
         }
         
-        final JsonObject body = builder.done();
-        
-        if(body.get("embeds") == null && body.get("content") == null
-                && !options.hasFiles()) {
-            throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
-        }
-        if(!options.flags().isEmpty() || options.override()) {
-            builder.value("flags", MessageFlag.fromSettable(options.flags()));
-        }
-        final JsonObject allowedMentions = new JsonObject();
-        if(options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
-            final EnumSet<MentionParseFlag> parse = options.parseFlags();
-            if(parse == null) {
-                // These act like a whitelist regardless of parse being present.
-                allowedMentions.put("users", options.mentionedUsers());
-                allowedMentions.put("roles", options.mentionedRoles());
-            } else {
-                final JsonArray parseList = new JsonArray();
-                for(final MentionParseFlag p : parse) {
-                    parseList.add(p.flagName());
-                }
-                allowedMentions.put("parse", parseList);
-                //If either list is present along with the respective parse option, validation fails. The contains check avoids this.
-                if(!parse.contains(MentionParseFlag.USERS)) {
+        {
+            final var innerBuilder = JsonObject.builder();
+            if(options.content() != null && !options.content().isEmpty()) {
+                innerBuilder.value("content", options.content());
+            }
+            if(options.embed() != null) {
+                innerBuilder.array("embeds").value(entityBuilder().embedToJson(options.embed())).end();
+            }
+            if(username != null && !username.isEmpty()) {
+                innerBuilder.value("username", username);
+            }
+            if(avatarUrl != null && !avatarUrl.isEmpty()) {
+                innerBuilder.value("avatar_url", avatarUrl);
+            }
+            
+            final JsonObject body = innerBuilder.done();
+            
+            if(body.get("embeds") == null && body.get("content") == null
+                    && !options.hasFiles()) {
+                throw new IllegalArgumentException("Can't build a message with no content, no embeds and no files!");
+            }
+            if(!options.flags().isEmpty() || options.override()) {
+                innerBuilder.value("flags", MessageFlag.fromSettable(options.flags()));
+            }
+            final JsonObject allowedMentions = new JsonObject();
+            if(options.parseFlags() != null || options.mentionedUsers() != null || options.mentionedRoles() != null) {
+                final EnumSet<MentionParseFlag> parse = options.parseFlags();
+                if(parse == null) {
+                    // These act like a whitelist regardless of parse being present.
                     allowedMentions.put("users", options.mentionedUsers());
-                }
-                if(!parse.contains(MentionParseFlag.ROLES)) {
                     allowedMentions.put("roles", options.mentionedRoles());
+                } else {
+                    final JsonArray parseList = new JsonArray();
+                    for(final MentionParseFlag p : parse) {
+                        parseList.add(p.flagName());
+                    }
+                    allowedMentions.put("parse", parseList);
+                    // If either list is present along with the respective parse option, validation fails.
+                    // The contains check avoids this.
+                    if(!parse.contains(MentionParseFlag.USERS)) {
+                        allowedMentions.put("users", options.mentionedUsers());
+                    }
+                    if(!parse.contains(MentionParseFlag.ROLES)) {
+                        allowedMentions.put("roles", options.mentionedRoles());
+                    }
                 }
             }
-        }
-        if(options.reference() != null) {
-            allowedMentions.put("replied_user", options.pingReply());
-        }
-        if(!allowedMentions.isEmpty()) {
-            builder.value("allowed_mentions", allowedMentions);
+            if(options.reference() != null) {
+                allowedMentions.put("replied_user", options.pingReply());
+            }
+            if(!allowedMentions.isEmpty()) {
+                innerBuilder.value("allowed_mentions", allowedMentions);
+            }
+            
+            builder.value("data", innerBuilder.done());
         }
         
         return builder.done();
