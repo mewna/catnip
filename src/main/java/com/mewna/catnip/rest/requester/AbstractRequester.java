@@ -390,7 +390,9 @@ public abstract class AbstractRequester implements Requester {
                         }
                         request.future().completeExceptionally(new RestPayloadException(
                                         code,
-                                        Map.copyOf(response.getObject("errors"))
+                                        response.getObject("errors") != null
+                                                ? Map.copyOf(response.getObject("errors"))
+                                                : Map.of()
                                 ).initCause(throwable)
                         );
                     } else {
