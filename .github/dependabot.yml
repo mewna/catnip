@@ -1,0 +1,32 @@
+version: 2
+updates:
+- package-ecosystem: maven
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: com.cedarsoftware:java-util
+    versions:
+    - "> 1.34.0"
+  - dependency-name: com.squareup.okhttp3:okhttp
+    versions:
+    - "> 3.14.2"
+  - dependency-name: io.vertx:vertx-core
+    versions:
+    - "> 3.8.0"
+  - dependency-name: io.vertx:vertx-rx-java2
+    versions:
+    - "> 3.8.0"
+  - dependency-name: org.projectlombok:lombok-maven-plugin
+    versions:
+    - 1.18.18.0
+    - 1.18.18.0.0
+    - 1.18.20.0
+    - 1.18.20.0.0
+  - dependency-name: org.projectlombok:lombok
+    versions:
+    - 1.18.18
+    - 1.18.18.0
+    - 1.18.20
+    - 1.18.20.0
