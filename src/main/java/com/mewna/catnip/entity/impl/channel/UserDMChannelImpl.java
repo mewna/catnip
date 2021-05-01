@@ -28,7 +28,6 @@
 package com.mewna.catnip.entity.impl.channel;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.channel.UserDMChannel;
 import com.mewna.catnip.entity.user.User;
 import io.reactivex.rxjava3.core.Maybe;
@@ -47,7 +46,7 @@ import javax.annotation.Nonnull;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDMChannelImpl implements UserDMChannel, RequiresCatnip {
+public class UserDMChannelImpl implements UserDMChannel {
     private final ChannelType type = ChannelType.DM;
     
     private transient Catnip catnip;
@@ -79,5 +78,10 @@ public class UserDMChannelImpl implements UserDMChannel, RequiresCatnip {
     @Override
     public Maybe<User> recipient() {
         return catnip.cache().user(userIdAsLong);
+    }
+    
+    @Override
+    public long ownerIdAsLong() {
+        throw new UnsupportedOperationException("Not currently needed for user DMs");
     }
 }
