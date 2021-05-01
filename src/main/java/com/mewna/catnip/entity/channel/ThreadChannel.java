@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,44 +27,71 @@
 
 package com.mewna.catnip.entity.channel;
 
+import com.mewna.catnip.entity.partials.HasJoinedAt;
 import com.mewna.catnip.entity.partials.HasOwner;
+import com.mewna.catnip.entity.partials.HasUser;
+import com.mewna.catnip.entity.partials.Snowflake;
 
-import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.time.OffsetDateTime;
+import java.util.EnumSet;
 
 /**
- * A DM channel. May be a group DM or a single user DM.
- *
- * @author natanbc
- * @since 9/12/18
+ * @author amy
+ * @since 5/1/21.
  */
-public interface DMChannel extends MessageChannel, HasOwner {
+public interface ThreadChannel extends TextChannel, HasOwner {
+    int messageCount();
+    
+    int memberCount();
+    
+    ThreadMember member();
+    
+    ThreadMetadata metadata();
+    
+    /**
+     * @return The ID of the user that created this thread.
+     */
+    @Nonnull
     @Override
-    @CheckReturnValue
-    default boolean isDM() {
-        return true;
+    default String ownerId() {
+        return HasOwner.super.ownerId();
     }
     
+    /**
+     * @return The ID of the {@link TextChannel} that contains this thread.
+     */
+    @Nullable
     @Override
-    @CheckReturnValue
-    default boolean isGuild() {
-        return false;
+    default String parentId() {
+        return TextChannel.super.parentId();
     }
     
-    @Override
-    @CheckReturnValue
-    default boolean isText() {
-        return false;
+    enum ThreadFlags {}
+    
+    interface ThreadMember extends Snowflake, HasUser, HasJoinedAt {
+        default EnumSet<ThreadFlags> flags() {
+            return EnumSet.noneOf(ThreadFlags.class);
+        }
     }
     
-    @Override
-    @CheckReturnValue
-    default boolean isVoice() {
-        return false;
-    }
-    
-    @Override
-    @CheckReturnValue
-    default boolean isCategory() {
-        return false;
+    interface ThreadMetadata {
+        boolean locked();
+        
+        boolean archived();
+        
+        long archiverIdAsLong();
+        
+        default String archiverId() {
+            return Long.toUnsignedString(archiverIdAsLong());
+        }
+        
+        OffsetDateTime archiveTimestamp();
+        
+        /**
+         * Can currently only be set to: 60, 1440, 4320, 10080.
+         */
+        int autoArchiveDuration();
     }
 }
