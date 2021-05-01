@@ -306,22 +306,18 @@ public interface Channel extends Snowflake {
         
         /**
          * A thread in an announcement? channel.
-         * TODO: Verify
          */
-        ANNOUNCEMENT_THREAD(10, false),
+        NEWS_THREAD(10, false),
         
         /**
-         * A public thread. I imagine this is for guild text channels?
-         * TODO: Verify
+         * A public thread.
          */
         PUBLIC_THREAD(11, false),
         
         /**
-         * A private thread. I imagine this is for DMs?
-         * TODO: Verify
+         * A private thread.
          */
         PRIVATE_THREAD(12, false),
-        
         ;
         
         @Getter
