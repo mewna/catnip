@@ -130,7 +130,7 @@ public final class CatnipOptions implements CatnipOptionsView, Cloneable {
     private EntitySerializer<?> entitySerializer = new DefaultEntitySerializer();
     @Nonnull
     private String apiHost = "https://discord.com";
-    private int apiVersion = 8;
+    private int apiVersion = 9;
     @Nonnull
     private Set<GatewayIntent> intents = GatewayIntent.UNPRIVILEGED_INTENTS;
     private boolean logPrivilegedIntentWarning = true;
