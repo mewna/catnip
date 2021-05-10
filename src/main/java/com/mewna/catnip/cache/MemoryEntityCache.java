@@ -34,6 +34,7 @@ import com.mewna.catnip.cache.view.*;
 import com.mewna.catnip.entity.builder.PresenceBuilder;
 import com.mewna.catnip.entity.channel.Channel;
 import com.mewna.catnip.entity.channel.GuildChannel;
+import com.mewna.catnip.entity.channel.ThreadChannel.ThreadMember;
 import com.mewna.catnip.entity.channel.UserDMChannel;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
@@ -85,6 +86,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     protected final Map<Long, MutableNamedCacheView<CustomEmoji>> emojiCache = new ConcurrentHashMap<>();
     @SuppressWarnings("WeakerAccess")
     protected final Map<Long, MutableCacheView<VoiceState>> voiceStateCache = new ConcurrentHashMap<>();
+    protected final MutableCacheView<ThreadMember> threadMemberCache = new DefaultCacheView<>();
     @SuppressWarnings("WeakerAccess")
     protected final AtomicReference<User> selfUser = new AtomicReference<>(null);
     @Getter
@@ -345,6 +347,10 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
         voiceStateCache.remove(guildId);
     }
     
+    protected void deleteThreadCache(final long guildId) {
+        threadMemberCache.remove(guildId);
+    }
+    
     @SuppressWarnings("SameParameterValue")
     protected <T> Maybe<T> or(@Nullable final T data, final T def) {
         if(def == null) {
@@ -412,6 +418,12 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     @Override
     public Maybe<VoiceState> voiceState(final long guildId, final long id) {
         return or(voiceStates(guildId).getById(id));
+    }
+    
+    @Nonnull
+    @Override
+    public Maybe<ThreadMember> threadMember(final long id) {
+        return or(threadMemberCache.getById(id));
     }
     
     @Nonnull
@@ -491,6 +503,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                 deleteChannelCache(guildId);
                 deleteEmojiCache(guildId);
                 deleteVoiceStateCache(guildId);
+                deleteThreadCache(guildId);
             }
             // Roles
             case Raw.GUILD_ROLE_CREATE -> {
@@ -526,7 +539,7 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
                 final JsonObject user = payload.getObject("user");
                 final String id = user.getString("id");
                 final String guild = payload.getString("guild_id");
-            
+                
                 return Completable.fromMaybe(member(guild, id).map(old -> {
                     if(old != null) {
                         @SuppressWarnings("ConstantConditions")
@@ -661,6 +674,11 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     }
     
     @Override
+    public void bulkCacheThreadMembers(final int shardId, @Nonnull final Collection<ThreadMember> threadMembers) {
+        threadMembers.forEach(m -> threadMemberCache.put(m.userIdAsLong(), m));
+    }
+    
+    @Override
     public void invalidateShard(final int id) {
         final int shardCount = catnip().shardManager().shardCount();
         final LongPredicate predicate = entityId -> (entityId >> 22) % shardCount == id;
@@ -727,6 +745,12 @@ public abstract class MemoryEntityCache implements EntityCacheWorker {
     @Override
     public NamedCacheView<CustomEmoji> emojis() {
         return new CompositeNamedCacheView<>(emojiCache.values(), CustomEmoji::name);
+    }
+    
+    @Nonnull
+    @Override
+    public CacheView<ThreadMember> threadMembers() {
+        return threadMemberCache;
     }
     
     @Nonnull

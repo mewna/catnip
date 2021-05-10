@@ -92,7 +92,7 @@ import static com.mewna.catnip.util.JsonUtil.*;
  * @author natanbc
  * @since 9/2/18.
  */
-@SuppressWarnings({"WeakerAccess", "OverlyCoupledClass"})
+@SuppressWarnings({"WeakerAccess", "OverlyCoupledClass", "DuplicatedCode"})
 public final class EntityBuilder {
     private final Catnip catnip;
     
@@ -414,6 +414,9 @@ public final class EntityBuilder {
             }
             case STORE -> {
                 return createStoreChannel(guildId, data);
+            }
+            case NEWS_THREAD, PUBLIC_THREAD, PRIVATE_THREAD -> {
+                return createThreadChannel(guildId, data);
             }
             default -> throw new UnsupportedOperationException("Unsupported channel type " + type);
         }
@@ -1064,8 +1067,10 @@ public final class EntityBuilder {
                     o -> o.getObject("user").getString("id"), this::createPresence));
         }
         if(data.getArray("voice_states") != null) {
-            catnip.cacheWorker().bulkCacheVoiceStates(shardId, toList(
-                    data.getArray("voice_states"), e -> createVoiceState(id, e)));
+            catnip.cacheWorker().bulkCacheVoiceStates(shardId, toList(data.getArray("voice_states"), e -> createVoiceState(id, e)));
+        }
+        if(data.getArray("threads") != null) {
+            catnip.cacheWorker().bulkCacheChannels(shardId, toList(data.getArray("threads"), e -> createThreadChannel(id, e)));
         }
         return createGuild(data);
     }
@@ -1659,7 +1664,7 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public ThreadChannel createThreadChannel(@Nonnull final JsonObject data) {
+    public ThreadChannel createThreadChannel(@Nonnull final String guildId, @Nonnull final JsonObject data) {
         final var parentId = data.getString("parent_id");
         return delegate(ThreadChannel.class, ThreadChannelImpl.builder()
                 .catnip(catnip)
@@ -1667,7 +1672,7 @@ public final class EntityBuilder {
                 .idAsLong(Long.parseUnsignedLong(data.getString("id")))
                 .ownerIdAsLong(Long.parseUnsignedLong(data.getString("owner_id")))
                 .name(data.getString("name"))
-                .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id")))
+                .guildIdAsLong(Long.parseUnsignedLong(guildId))
                 .position(data.getInt("position", -1))
                 .parentIdAsLong(parentId == null ? 0 : Long.parseUnsignedLong(parentId))
                 .overrides(toList(data.getArray("permission_overwrites"), this::createPermissionOverride))
@@ -1695,12 +1700,48 @@ public final class EntityBuilder {
     @Nonnull
     @CheckReturnValue
     public ThreadMetadata createThreadMetadata(@Nonnull final JsonObject data) {
-        return delegate(ThreadMetadataImpl.class, ThreadMetadataImpl.builder()
+        return delegate(ThreadMetadata.class, ThreadMetadataImpl.builder()
                 .archived(data.getBoolean("archived"))
                 .archiveTimestamp(data.getString("archive_timestamp"))
                 .autoArchiveDuration(data.getInt("auto_archive_duration"))
                 .locked(data.getBoolean("locked"))
                 .archiverIdAsLong(Long.parseUnsignedLong(data.getString("archiver_id")))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public DeletedThread createDeletedThread(@Nonnull final JsonObject data) {
+        return delegate(DeletedThread.class, DeletedThreadImpl.builder()
+                .catnip(catnip)
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id")))
+                .parentIdAsLong(Long.parseUnsignedLong(data.getString("parent_id")))
+                .type(ChannelType.byKey(data.getInt("id")))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public ThreadListSync createThreadListSync(@Nonnull final JsonObject data) {
+        final var guildId = data.getString("guild_id");
+        return delegate(ThreadListSync.class, ThreadListSyncImpl.builder()
+                .guildIdAsLong(Long.parseUnsignedLong(guildId))
+                .channelIds(toStringList(data.getArray("channel_ids", new JsonArray())))
+                .threads(toList(data.getArray("threads"), e -> createThreadChannel(guildId, e)))
+                .members(toList(data.getArray("members"), this::createThreadMember))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public ThreadMembersUpdate createThreadMembersUpdate(@Nonnull final JsonObject data) {
+        return delegate(ThreadMembersUpdate.class, ThreadMembersUpdateImpl.builder()
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id")))
+                .memberCount(data.getInt("member_count"))
+                .addedMembers(toList(data.getArray("added_members", new JsonArray()), this::createThreadMember))
+                .removedMembers(toStringList(data.getArray("removed_members", new JsonArray())))
                 .build());
     }
 }

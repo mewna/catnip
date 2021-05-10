@@ -90,7 +90,7 @@ public final class DispatchEmitter {
         }
     }
     
-    @SuppressWarnings({"DuplicateBranchesInSwitch", "ResultOfMethodCallIgnored"})
+    @SuppressWarnings({"DuplicateBranchesInSwitch", "ResultOfMethodCallIgnored", "DuplicatedCode"})
     private void emit0(@Nonnull final JsonObject payload) {
         final String type = payload.getString("t");
         final JsonObject data = payload.getObject("d");
@@ -227,6 +227,25 @@ public final class DispatchEmitter {
                     catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(null, partialMember));
                 }
             }
+            
+            // Threads
+            case Raw.THREAD_CREATE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createThreadChannel(data.getString("guild_id"), data));
+            case Raw.THREAD_UPDATE -> {
+                final var channel = catnip.entityBuilder().createThreadChannel(data.getString("guild_id"), data);
+                if(catnip.cacheWorker().canProvidePreviousState(CHANNEL)) {
+                    catnip.cache().member(channel.guildIdAsLong(), channel.idAsLong())
+                            .map(Optional::of)
+                            .defaultIfEmpty(Optional.empty())
+                            .subscribe(old -> catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(old.orElse(null), channel)),
+                                    e -> cacheErrorLog(type, e));
+                } else {
+                    catnip.dispatchManager().dispatchEvent(type, ImmutablePair.of(null, channel));
+                }
+            }
+            case Raw.THREAD_DELETE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createDeletedThread(data));
+            case Raw.THREAD_LIST_SYNC -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createThreadListSync(data));
+            case Raw.THREAD_MEMBER_UPDATE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createThreadMember(data));
+            case Raw.THREAD_MEMBERS_UPDATE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createThreadMembersUpdate(data));
             
             // Users
             case Raw.USER_UPDATE -> {
