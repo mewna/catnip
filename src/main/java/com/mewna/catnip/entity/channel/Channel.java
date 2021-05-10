@@ -307,17 +307,17 @@ public interface Channel extends Snowflake {
         /**
          * A thread in an announcement? channel.
          */
-        NEWS_THREAD(10, false),
+        NEWS_THREAD(10, true),
         
         /**
          * A public thread.
          */
-        PUBLIC_THREAD(11, false),
+        PUBLIC_THREAD(11, true),
         
         /**
          * A private thread.
          */
-        PRIVATE_THREAD(12, false),
+        PRIVATE_THREAD(12, true),
         ;
         
         @Getter
