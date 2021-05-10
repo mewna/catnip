@@ -1655,7 +1655,7 @@ public final class EntityBuilder {
                 .rateLimitPerUser(data.getInt("rate_limit_per_user", 0))
                 .messageCount(data.getInt("message_count"))
                 .memberCount(data.getInt("member_count"))
-                .member(createThreadMember(data.getObject("member")))
+                .member(data.has("member") ? createThreadMember(data.getObject("member")) : null)
                 .metadata(createThreadMetadata(data.getObject("thread_metadata")))
                 .build());
     }
@@ -1679,7 +1679,7 @@ public final class EntityBuilder {
                 .archiveTimestamp(data.getString("archive_timestamp"))
                 .autoArchiveDuration(data.getInt("auto_archive_duration"))
                 .locked(data.getBoolean("locked"))
-                .archiverIdAsLong(Long.parseUnsignedLong(data.getString("archiver_id")))
+                .archiverIdAsLong(Long.parseUnsignedLong(data.getString("archiver_id", "0")))
                 .build());
     }
     
