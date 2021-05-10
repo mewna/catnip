@@ -44,6 +44,7 @@ import static com.mewna.catnip.rest.Routes.HttpMethod.*;
 @SuppressWarnings({"StaticVariableOfConcreteClass", "WeakerAccess", "unused", "RedundantSuppression"})
 public final class Routes {
     // @formatter:off
+<<<<<<< HEAD
     public static final Route GET_GATEWAY_BOT                     = new Route(GET,    "/gateway/bot");
     public static final Route DELETE_CHANNEL                      = new Route(DELETE, "/channels/:channel", "channel");
     public static final Route GET_CHANNEL                         = new Route(GET,    "/channels/:channel", "channel");
@@ -155,9 +156,17 @@ public final class Routes {
     public static final Route SYNC_GUILD_TEMPLATE                 = new Route(PUT,    "/guilds/:guild/templates/:code", "guild");
     public static final Route MODIFY_GUILD_TEMPLATE               = new Route(PATCH,  "/guilds/:guild/templates/:code", "guild");
     public static final Route DELETE_GUILD_TEMPLATE               = new Route(DELETE, "/guilds/:guild/templates/:code", "guild");
-    // TODO: Verify these routes
-    public static final Route GET_CHANNEL_THREADS                 = new Route(GET,    "/channels/:channel/threads", "channel");
-    public static final Route GET_CHANNEL_MESSAGE_THREADS         = new Route(GET,    "/channels/:channel/messages/:message/threads", "channel");
+    public static final Route START_PUBLIC_THREAD                  = new Route(POST,   "/channels/:channel/messages/:message/threads", "channel");
+    public static final Route START_PRIVATE_THREAD                 = new Route(POST,   "/channels/:channel/threads", "channel");
+    public static final Route JOIN_THREAD                          = new Route(PUT,    "/channels/:channel/thread-members/@me", "channel");
+    public static final Route ADD_USER_TO_THREAD                   = new Route(PUT,    "/channels/:channel/thread-members/:user", "channel");
+    public static final Route LEAVE_THREAD                         = new Route(DELETE, "/channels/:channel/thread-members/@me", "channel");
+    public static final Route REMOVE_USER_FROM_THREAD              = new Route(DELETE, "/channels/:channel/thread-members/:user", "channel");
+    public static final Route LIST_THREAD_MEMBERS                  = new Route(GET,    "/channels/:channel/thread-members", "channel");
+    public static final Route LIST_ACTIVE_THREADS                  = new Route(GET,    "/channels/:channel/threads/active", "channel");
+    public static final Route LIST_PUBLIC_ARCHIVED_THREADS         = new Route(GET,    "/channels/:channel/threads/archived/public", "channel");
+    public static final Route LIST_PRIVATE_ARCHIVED_THREADS        = new Route(GET,    "/channels/:channel/threads/archived/private", "channel");
+    public static final Route LIST_JOINED_PRIVATE_ARCHIVED_THREADS = new Route(GET,    "/channels/:channel/users/@me/threads/archived/private", "channel");
     // @formatter:on
     
     private Routes() {
