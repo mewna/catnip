@@ -32,6 +32,8 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.cache.view.NamedCacheView;
 import com.mewna.catnip.entity.channel.GuildChannel;
+import com.mewna.catnip.entity.channel.ThreadChannel;
+import com.mewna.catnip.entity.channel.ThreadChannel.ThreadMember;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
@@ -77,42 +79,47 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     
     @Override
     public void bulkCacheUsers(final int shardId, @Nonnull final Collection<User> users) {
-        //noop
+        // noop
     }
     
     @Override
     public void bulkCacheChannels(final int shardId, @Nonnull final Collection<GuildChannel> channels) {
-        //noop
+        // noop
     }
     
     @Override
     public void bulkCacheRoles(final int shardId, @Nonnull final Collection<Role> roles) {
-        //noop
+        // noop
     }
     
     @Override
     public void bulkCacheMembers(final int shardId, @Nonnull final Collection<Member> members) {
-        //noop
+        // noop
     }
     
     @Override
     public void bulkCacheEmoji(final int shardId, @Nonnull final Collection<CustomEmoji> emoji) {
-        //noop
+        // noop
     }
     
     @Override
     public void bulkCachePresences(final int shardId, @Nonnull final Map<String, Presence> presences) {
-        //noop
+        // noop
     }
     
     @Override
     public void bulkCacheVoiceStates(final int shardId, @Nonnull final Collection<VoiceState> voiceStates) {
-        //noop
+        // noop
+    }
+    
+    @Override
+    public void bulkCacheThreadMembers(final int shardId, @Nonnull final Collection<ThreadMember> threadMembers) {
+        // noop
     }
     
     @Override
     public void invalidateShard(final int id) {
-        //noop
+        // noop
     }
     
     @Nonnull
@@ -245,5 +252,23 @@ public abstract class CustomizableEntityCache implements EntityCacheWorker {
     @Override
     public Maybe<User> selfUser() {
         return Maybe.error(new IllegalArgumentException("No entity"));
+    }
+    
+    @Nonnull
+    @Override
+    public Maybe<ThreadMember> threadMember(@Nonnull final String id) {
+        return Maybe.error(new IllegalArgumentException("No entity"));
+    }
+    
+    @Nonnull
+    @Override
+    public Maybe<ThreadMember> threadMember(final long id) {
+        return Maybe.error(new IllegalArgumentException("No entity"));
+    }
+    
+    @Nonnull
+    @Override
+    public CacheView<ThreadMember> threadMembers() {
+        return CacheView.noop();
     }
 }
