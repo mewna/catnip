@@ -318,6 +318,11 @@ public interface Channel extends Snowflake {
          * A private thread.
          */
         PRIVATE_THREAD(12, true),
+    
+        /**
+         * A stage channel.
+         */
+        STAGE(13, true),
         ;
         
         @Getter
