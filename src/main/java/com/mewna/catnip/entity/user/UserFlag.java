@@ -58,6 +58,9 @@ public enum UserFlag {
     GUILD_PRESENCES_INTENT_ENABLED(1 << 13),
     BUG_HUNTER_LEVEL_2(1 << 14),
     GUILD_MEMBERS_INTENT_ENABLED(1 << 15),
+    VERIFIED_BOT(1 << 16),
+    VERIFIED_BOT_DEVELOPER(1 << 17),
+    DISCORD_CERTIFIED_MODERATOR(1 << 18),
     ;
     
     @Getter
