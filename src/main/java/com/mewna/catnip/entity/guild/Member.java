@@ -164,7 +164,7 @@ public interface Member extends Mentionable, Permissable {
      */
     @CheckReturnValue
     default Maybe<VoiceState> voiceState() {
-        return guild().map(g -> g.voiceStates().getById(id()));
+        return guild().mapOptional(g -> Optional.ofNullable(g.voiceStates().getById(id())));
     }
     
     /**
