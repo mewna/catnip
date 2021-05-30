@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,37 +25,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.builder;
+package com.mewna.catnip.entity.impl.message.component;
 
-import com.mewna.catnip.entity.impl.interaction.InteractionResponseImpl;
-import com.mewna.catnip.entity.interaction.InteractionApplicationCommandCallbackData;
-import com.mewna.catnip.entity.interaction.InteractionResponse;
-import com.mewna.catnip.entity.interaction.InteractionResponseType;
+import com.mewna.catnip.entity.message.component.ActionRow;
+import com.mewna.catnip.entity.message.component.MessageComponent;
+import lombok.*;
+import lombok.experimental.Accessors;
 
-import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * @author amy
- * @since 12/12/20.
+ * @since 5/30/21.
  */
-public class InteractionResponseBuilder {
-    private InteractionResponseType type;
-    private InteractionApplicationCommandCallbackData data;
-    
-    public InteractionResponseBuilder type(@Nonnull final InteractionResponseType type) {
-        this.type = type;
-        return this;
-    }
-    
-    public InteractionResponseBuilder data(@Nonnull final InteractionApplicationCommandCallbackData data) {
-        this.data = data;
-        return this;
-    }
-    
-    public InteractionResponse build() {
-        return InteractionResponseImpl.builder()
-                .type(type)
-                .data(data)
-                .build();
-    }
+@Getter
+@Setter
+@Accessors(fluent = true)
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ActionRowImpl implements ActionRow {
+    private List<MessageComponent> components;
 }

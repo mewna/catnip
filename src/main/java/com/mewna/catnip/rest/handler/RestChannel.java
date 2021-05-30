@@ -36,6 +36,7 @@ import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.guild.PermissionOverride;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
 import com.mewna.catnip.entity.message.*;
+import com.mewna.catnip.entity.message.component.MessageComponent;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.user.User;
@@ -61,6 +62,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.mewna.catnip.util.JsonUtil.mapObjectContents;
 import static com.mewna.catnip.util.Utils.encodeUTF8;
@@ -156,7 +158,10 @@ public class RestChannel extends RestHandler {
         if(options.reference() != null) {
             json.put("message_reference", entityBuilder().referenceToJson(options.reference()));
         }
-        
+        if(!options.components().isEmpty()) {
+            json.put("components", new JsonArray(options.components().stream().map(MessageComponent::toJson).collect(Collectors.toList())));
+        }
+    
         final OutboundRequest request = new OutboundRequest(Routes.CREATE_MESSAGE.withMajorParam(channelId), Map.of(), json);
         final List<ImmutablePair<String, byte[]>> buffers = options.files();
         if(buffers != null && !buffers.isEmpty()) {
@@ -257,6 +262,9 @@ public class RestChannel extends RestHandler {
         }
         if(options.reference() != null) {
             json.put("message_reference", entityBuilder().referenceToJson(options.reference()));
+        }
+        if(!options.components().isEmpty()) {
+            json.put("components", new JsonArray(options.components().stream().map(MessageComponent::toJson).collect(Collectors.toList())));
         }
         
         return catnip().requester()

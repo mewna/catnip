@@ -27,7 +27,7 @@
 // We disable the formatter on this class so that it doesn't get hecked up.
 // Autoformatter has no idea how to handle this class correctly.
 // @formatter:off
-
+// @formatter:off
 
 package com.mewna.catnip.cache.view;
 

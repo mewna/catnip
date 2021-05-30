@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,34 +25,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.interaction;
+package com.mewna.catnip.entity.message.component;
 
-import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.entity.partials.GuildEntity;
-import com.mewna.catnip.entity.partials.HasChannel;
-import com.mewna.catnip.entity.partials.Snowflake;
-
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import com.grack.nanojson.JsonObject;
+import lombok.Getter;
+import org.bouncycastle.asn1.cms.OtherRecipientInfo;
 
 /**
  * @author amy
- * @since 12/10/20.
+ * @since 5/30/21.
  */
-public interface Interaction<T> extends Snowflake, GuildEntity, HasChannel {
-    @Nonnull
-    InteractionType type();
+public interface MessageComponent {
+    MessageComponentType type();
     
-    @Nullable
-    T data();
+    JsonObject toJson();
     
-    @Nullable
-    Member member();
+    enum MessageComponentType {
+        ACTION_ROW(1),
+        BUTTON(2),
+        ;
+        
+        @Getter
+        private final int id;
     
-    @Nonnull
-    String token();
+        MessageComponentType(final int id) {
+            this.id = id;
+        }
     
-    @Nonnegative
-    int version();
+        public static MessageComponentType byKey(final int key) {
+            for(final var value : values()) {
+                if(value.id == key) {
+                    return value;
+                }
+            }
+            throw new IllegalArgumentException("Unknown MessageComponentType: " + key);
+        }
+    }
 }

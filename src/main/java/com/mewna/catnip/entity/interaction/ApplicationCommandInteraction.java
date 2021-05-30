@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,32 +27,9 @@
 
 package com.mewna.catnip.entity.interaction;
 
-import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.entity.partials.GuildEntity;
-import com.mewna.catnip.entity.partials.HasChannel;
-import com.mewna.catnip.entity.partials.Snowflake;
-
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 /**
  * @author amy
- * @since 12/10/20.
+ * @since 5/30/21.
  */
-public interface Interaction<T> extends Snowflake, GuildEntity, HasChannel {
-    @Nonnull
-    InteractionType type();
-    
-    @Nullable
-    T data();
-    
-    @Nullable
-    Member member();
-    
-    @Nonnull
-    String token();
-    
-    @Nonnegative
-    int version();
+public interface ApplicationCommandInteraction extends Interaction<ApplicationCommandInteractionData> {
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,34 +25,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.interaction;
+package com.mewna.catnip.entity.message.component;
 
-import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.entity.partials.GuildEntity;
-import com.mewna.catnip.entity.partials.HasChannel;
-import com.mewna.catnip.entity.partials.Snowflake;
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
 
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author amy
- * @since 12/10/20.
+ * @since 5/30/21.
  */
-public interface Interaction<T> extends Snowflake, GuildEntity, HasChannel {
-    @Nonnull
-    InteractionType type();
+public interface ActionRow extends MessageComponent {
+    @Override
+    default MessageComponentType type() {
+        return MessageComponentType.ACTION_ROW;
+    }
     
-    @Nullable
-    T data();
+    List<MessageComponent> components();
     
-    @Nullable
-    Member member();
-    
-    @Nonnull
-    String token();
-    
-    @Nonnegative
-    int version();
+    @Override
+    default JsonObject toJson() {
+        final var o = new JsonObject();
+        o.put("type", type().id());
+        o.put("components", new JsonArray(components().stream().map(MessageComponent::toJson).collect(Collectors.toList())));
+        return o;
+    }
 }

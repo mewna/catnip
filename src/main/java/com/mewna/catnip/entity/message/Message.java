@@ -34,6 +34,8 @@ import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.impl.message.MessageReferenceImpl;
+import com.mewna.catnip.entity.message.component.ActionRow;
+import com.mewna.catnip.entity.message.component.MessageComponent;
 import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.partials.*;
 import com.mewna.catnip.entity.sticker.Sticker;
@@ -319,6 +321,14 @@ public interface Message extends Snowflake, HasChannel {
     @Nonnull
     @CheckReturnValue
     List<ChannelMention> mentionedChannels();
+    
+    /**
+     * @return All components attached to this message. Top-level components
+     * must be {@link ActionRow}s.
+     */
+    @Nonnull
+    @CheckReturnValue
+    List<MessageComponent> components();
     
     /**
      * The snowflake ID of the guild this message was sent in.

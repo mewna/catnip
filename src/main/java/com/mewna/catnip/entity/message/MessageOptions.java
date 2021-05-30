@@ -30,6 +30,8 @@ package com.mewna.catnip.entity.message;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.impl.message.MessageImpl;
+import com.mewna.catnip.entity.message.component.ActionRow;
+import com.mewna.catnip.entity.message.component.MessageComponent;
 import com.mewna.catnip.entity.user.User;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -161,6 +163,8 @@ public class MessageOptions {
      */
     private boolean override;
     
+    private List<MessageComponent> components = new ArrayList<>();
+    
     public MessageOptions(@Nonnull final MessageOptions options) {
         content = options.content;
         embed = options.embed;
@@ -172,6 +176,7 @@ public class MessageOptions {
         reference = options.reference;
         flags = options.flags;
         pingReply = options.pingReply;
+        components = options.components;
     }
     
     public MessageOptions(@Nonnull final Message message) {
@@ -180,6 +185,7 @@ public class MessageOptions {
         if(!embeds.isEmpty()) {
             embed = embeds.get(0);
         }
+        components = new ArrayList<>(message.components());
     }
     
     /**
@@ -900,6 +906,22 @@ public class MessageOptions {
         parseFlags = null;
         roles = null;
         users = null;
+        components.clear();
+        return this;
+    }
+    
+    /**
+     * Adds the specified row to the message. Currently, only
+     * {@link ActionRow}s can be top-level components.
+     *
+     * @param component The component to add.
+     *
+     * @return Itself.
+     */
+    @Nonnull
+    @CheckReturnValue
+    public MessageOptions addComponent(@SuppressWarnings("TypeMayBeWeakened") @Nonnull final ActionRow component) {
+        components.add(component);
         return this;
     }
     
