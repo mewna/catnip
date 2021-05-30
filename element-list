@@ -3,6 +3,8 @@ com.mewna.catnip.cache
 com.mewna.catnip.cache.view
 com.mewna.catnip.entity
 com.mewna.catnip.entity.builder
+com.mewna.catnip.entity.builder.command
+com.mewna.catnip.entity.builder.component
 com.mewna.catnip.entity.channel
 com.mewna.catnip.entity.delegate
 com.mewna.catnip.entity.guild
@@ -14,6 +16,7 @@ com.mewna.catnip.entity.impl.guild.audit
 com.mewna.catnip.entity.impl.interaction
 com.mewna.catnip.entity.impl.lifecycle
 com.mewna.catnip.entity.impl.message
+com.mewna.catnip.entity.impl.message.component
 com.mewna.catnip.entity.impl.misc
 com.mewna.catnip.entity.impl.sticker
 com.mewna.catnip.entity.impl.user
@@ -21,6 +24,7 @@ com.mewna.catnip.entity.impl.voice
 com.mewna.catnip.entity.interaction
 com.mewna.catnip.entity.lifecycle
 com.mewna.catnip.entity.message
+com.mewna.catnip.entity.message.component
 com.mewna.catnip.entity.misc
 com.mewna.catnip.entity.partials
 com.mewna.catnip.entity.serialization
