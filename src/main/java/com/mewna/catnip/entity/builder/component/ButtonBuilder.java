@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,34 +25,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.interaction;
+package com.mewna.catnip.entity.builder.component;
 
-import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.entity.partials.GuildEntity;
-import com.mewna.catnip.entity.partials.HasChannel;
-import com.mewna.catnip.entity.partials.Snowflake;
-
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import com.mewna.catnip.entity.impl.message.component.ButtonImpl;
+import com.mewna.catnip.entity.message.component.Button;
+import com.mewna.catnip.entity.message.component.Button.ButtonStyle;
+import com.mewna.catnip.entity.misc.Emoji;
+import lombok.Setter;
 
 /**
  * @author amy
- * @since 12/10/20.
+ * @since 5/30/21.
  */
-public interface Interaction<T> extends Snowflake, GuildEntity, HasChannel {
-    @Nonnull
-    InteractionType type();
+@Setter
+public class ButtonBuilder {
+    private ButtonStyle style;
+    private String label;
+    private Emoji emoji;
+    private String customId;
+    private String url;
+    private boolean disabled;
     
-    @Nullable
-    T data();
-    
-    @Nullable
-    Member member();
-    
-    @Nonnull
-    String token();
-    
-    @Nonnegative
-    int version();
+    public Button build() {
+        if(style == null) {
+            throw new IllegalStateException("Buttons must have a style");
+        }
+        if(url != null && customId != null) {
+            throw new IllegalStateException("Buttons must have a url or a custom id, not both");
+        }
+        if(label != null && label.length() > 80) {
+            throw new IllegalStateException("Button labels must be at most 80 characters");
+        }
+        if(customId != null && customId.length() > 100) {
+            throw new IllegalStateException("Button custom ids must be at most 100 characters");
+        }
+        return new ButtonImpl(style, label, emoji, customId, url, disabled);
+    }
 }

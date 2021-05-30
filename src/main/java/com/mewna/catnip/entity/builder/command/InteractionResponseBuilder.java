@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,34 +25,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.interaction;
+package com.mewna.catnip.entity.builder.command;
 
-import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.entity.partials.GuildEntity;
-import com.mewna.catnip.entity.partials.HasChannel;
-import com.mewna.catnip.entity.partials.Snowflake;
+import com.mewna.catnip.entity.impl.interaction.InteractionResponseImpl;
+import com.mewna.catnip.entity.interaction.InteractionApplicationCommandCallbackData;
+import com.mewna.catnip.entity.interaction.InteractionResponse;
+import com.mewna.catnip.entity.interaction.InteractionResponseType;
 
-import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * @author amy
- * @since 12/10/20.
+ * @since 12/12/20.
  */
-public interface Interaction<T> extends Snowflake, GuildEntity, HasChannel {
-    @Nonnull
-    InteractionType type();
+public class InteractionResponseBuilder {
+    private InteractionResponseType type;
+    private InteractionApplicationCommandCallbackData data;
     
-    @Nullable
-    T data();
+    public InteractionResponseBuilder type(@Nonnull final InteractionResponseType type) {
+        this.type = type;
+        return this;
+    }
     
-    @Nullable
-    Member member();
+    public InteractionResponseBuilder data(@Nonnull final InteractionApplicationCommandCallbackData data) {
+        this.data = data;
+        return this;
+    }
     
-    @Nonnull
-    String token();
-    
-    @Nonnegative
-    int version();
+    public InteractionResponse build() {
+        return InteractionResponseImpl.builder()
+                .type(type)
+                .data(data)
+                .build();
+    }
 }

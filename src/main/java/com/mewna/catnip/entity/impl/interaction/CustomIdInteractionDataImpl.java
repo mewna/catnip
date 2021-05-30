@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,34 +25,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.interaction;
+package com.mewna.catnip.entity.impl.interaction;
 
-import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.entity.partials.GuildEntity;
-import com.mewna.catnip.entity.partials.HasChannel;
-import com.mewna.catnip.entity.partials.Snowflake;
-
-import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import com.mewna.catnip.entity.interaction.CustomIdInteractionData;
+import com.mewna.catnip.entity.message.component.MessageComponent.MessageComponentType;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 /**
  * @author amy
- * @since 12/10/20.
+ * @since 5/30/21.
  */
-public interface Interaction<T> extends Snowflake, GuildEntity, HasChannel {
-    @Nonnull
-    InteractionType type();
-    
-    @Nullable
-    T data();
-    
-    @Nullable
-    Member member();
-    
-    @Nonnull
-    String token();
-    
-    @Nonnegative
-    int version();
+@Getter
+@Setter
+@Builder
+@Accessors(fluent = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class CustomIdInteractionDataImpl implements CustomIdInteractionData {
+    private MessageComponentType componentType;
+    private String customId;
 }

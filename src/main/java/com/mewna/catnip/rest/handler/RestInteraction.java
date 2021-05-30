@@ -36,6 +36,7 @@ import com.mewna.catnip.entity.message.MentionParseFlag;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageFlag;
 import com.mewna.catnip.entity.message.MessageOptions;
+import com.mewna.catnip.entity.message.component.MessageComponent;
 import com.mewna.catnip.internal.CatnipImpl;
 import com.mewna.catnip.rest.ResponsePayload;
 import com.mewna.catnip.rest.Routes;
@@ -176,7 +177,7 @@ public class RestInteraction extends RestHandler {
         final var body = createSendBody(type, username, avatarUrl, options);
         return catnip().requester().
                 queue(new OutboundRequest(Routes.CREATE_INTERACTION_FOLLOWUP.withMajorParam(interactionId)
-                        .withQueryString("?wait=true"), Map.of("token", interactionToken), body).needsToken(false)
+                        .withQueryString("?wait=true"), Map.of("interaction", interactionId, "token", interactionToken), body).needsToken(false)
                         .buffers(options.files()))
                 .map(ResponsePayload::object);
     }
@@ -379,6 +380,9 @@ public class RestInteraction extends RestHandler {
             }
             if(!allowedMentions.isEmpty()) {
                 innerBuilder.value("allowed_mentions", allowedMentions);
+            }
+            if(!options.components().isEmpty()) {
+                innerBuilder.value("components", new JsonArray(options.components().stream().map(MessageComponent::toJson).collect(Collectors.toList())));
             }
             
             builder.value("data", innerBuilder.done());

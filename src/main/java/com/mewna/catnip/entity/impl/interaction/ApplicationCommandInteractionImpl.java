@@ -25,50 +25,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.builder;
+package com.mewna.catnip.entity.impl.interaction;
 
-import com.mewna.catnip.entity.impl.interaction.ApplicationCommandOptionIntegerChoiceImpl;
-import com.mewna.catnip.entity.impl.interaction.ApplicationCommandOptionStringChoiceImpl;
-import com.mewna.catnip.entity.interaction.ApplicationCommandOptionChoice;
-import com.mewna.catnip.util.Validators;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.guild.Member;
+import com.mewna.catnip.entity.interaction.ApplicationCommandInteraction;
+import com.mewna.catnip.entity.interaction.ApplicationCommandInteractionData;
+import com.mewna.catnip.entity.interaction.Interaction;
+import com.mewna.catnip.entity.interaction.InteractionType;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
 
 /**
  * @author amy
- * @since 12/11/20.
+ * @since 12/10/20.
  */
-public class CommandOptionChoiceBuilder<T> {
-    private String name;
-    private T value;
+@Getter
+@Setter
+@Builder
+@Accessors(fluent = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class ApplicationCommandInteractionImpl implements ApplicationCommandInteraction, RequiresCatnip {
+    private transient Catnip catnip;
+    private InteractionType type;
+    private ApplicationCommandInteractionData data;
+    private Member member;
+    private String token;
+    private long guildIdAsLong;
+    private long channelIdAsLong;
+    private long idAsLong;
+    private int version;
     
-    public CommandOptionChoiceBuilder<T> name(@Nonnull final String name) {
-        this.name = name;
-        return this;
-    }
-    
-    public CommandOptionChoiceBuilder<T> value(@Nonnull final T value) {
-        this.value = value;
-        return this;
-    }
-    
-    @SuppressWarnings("unchecked")
-    public ApplicationCommandOptionChoice<T> build() {
-        Validators.assertStringLength(name, "name", 3, 32);
-        Validators.assertType(value, new Class[]{String.class, Integer.class}, "data");
-        // TODO: Convert this into instanceof pattern matching when Java 16 comes out
-        if(value instanceof String) {
-            return (ApplicationCommandOptionChoice<T>) ApplicationCommandOptionStringChoiceImpl.builder()
-                    .name(name)
-                    .value((String) value)
-                    .build();
-        } else if(value instanceof Integer) {
-            return (ApplicationCommandOptionChoice<T>) ApplicationCommandOptionIntegerChoiceImpl.builder()
-                    .name(name)
-                    .value((Integer) value)
-                    .build();
-        } else {
-            return Validators.unreachable();
-        }
+    @Override
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
     }
 }

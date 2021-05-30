@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,34 +25,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.interaction;
+package com.mewna.catnip.entity.builder.component;
 
-import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.entity.partials.GuildEntity;
-import com.mewna.catnip.entity.partials.HasChannel;
-import com.mewna.catnip.entity.partials.Snowflake;
+import com.mewna.catnip.entity.impl.message.component.ActionRowImpl;
+import com.mewna.catnip.entity.message.component.ActionRow;
+import com.mewna.catnip.entity.message.component.MessageComponent;
 
-import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author amy
- * @since 12/10/20.
+ * @since 5/30/21.
  */
-public interface Interaction<T> extends Snowflake, GuildEntity, HasChannel {
-    @Nonnull
-    InteractionType type();
+public class ActionRowBuilder {
+    private final List<MessageComponent> components = new ArrayList<>();
     
-    @Nullable
-    T data();
+    public ActionRowBuilder addComponent(@Nonnull final MessageComponent component) {
+        if(component instanceof ActionRow) {
+            throw new IllegalStateException("Action rows may not contain action rows");
+        }
+        components.add(component);
+        return this;
+    }
     
-    @Nullable
-    Member member();
-    
-    @Nonnull
-    String token();
-    
-    @Nonnegative
-    int version();
+    public ActionRow build() {
+        if(components.size() > 5) {
+            throw new IllegalStateException("Action rows cannot contain more than 5 components");
+        }
+        return new ActionRowImpl().components(components);
+    }
 }

@@ -61,6 +61,7 @@ import com.mewna.catnip.entity.message.Message.Attachment;
 import com.mewna.catnip.entity.message.Message.MessageActivity;
 import com.mewna.catnip.entity.message.Message.MessageApplication;
 import com.mewna.catnip.entity.message.Message.Reaction;
+import com.mewna.catnip.entity.message.component.MessageComponent.MessageComponentType;
 import com.mewna.catnip.entity.misc.*;
 import com.mewna.catnip.entity.misc.Emoji.ActivityEmoji;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
@@ -1562,19 +1563,44 @@ public final class EntityBuilder {
     
     @Nonnull
     @CheckReturnValue
-    public Interaction createInteraction(@Nonnull final JsonObject data) {
-        return delegate(Interaction.class, InteractionImpl.builder()
-                .catnip(catnip)
-                // TODO: Nullables
-                .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id", "0")))
-                .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id", "0")))
-                .idAsLong(Long.parseUnsignedLong(data.getString("id", "0")))
-                .token(data.getString("token"))
-                .type(InteractionType.byKey(data.getInt("type")))
-                .version(data.getInt("version"))
-                .member(data.has("member") ? createInteractionMember(data.getString("guild_id"), data.getObject("member")) : null)
-                .data(data.has("data") ? createApplicationCommandInteractionData(data.getObject("data")): null)
-                .build());
+    public Interaction<?> createInteraction(@Nonnull final JsonObject data) {
+        final var type = InteractionType.byKey(data.getInt("type"));
+        switch(type) {
+            case APPLICATION_COMMAND -> {
+                return delegate(Interaction.class, ApplicationCommandInteractionImpl.builder()
+                        .catnip(catnip)
+                        // TODO: Nullables
+                        .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id", "0")))
+                        .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id", "0")))
+                        .idAsLong(Long.parseUnsignedLong(data.getString("id", "0")))
+                        .token(data.getString("token"))
+                        .type(type)
+                        .version(data.getInt("version"))
+                        .member(data.has("member") ? createInteractionMember(data.getString("guild_id"), data.getObject("member")) : null)
+                        .data(data.has("data") ? createApplicationCommandInteractionData(data.getObject("data")) : null)
+                        .build());
+            }
+            case MESSAGE_COMPONENT -> {
+                return delegate(Interaction.class, ButtonInteractionImpl.builder()
+                        .catnip(catnip)
+                        // TODO: Nullables
+                        .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id", "0")))
+                        .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id", "0")))
+                        .idAsLong(Long.parseUnsignedLong(data.getString("id", "0")))
+                        .token(data.getString("token"))
+                        .type(type)
+                        .version(data.getInt("version"))
+                        .member(data.has("member") ? createInteractionMember(data.getString("guild_id"), data.getObject("member")) : null)
+                        .data(data.has("data") ? new CustomIdInteractionDataImpl(
+                                MessageComponentType.byKey(data.getObject("data").getInt("component_type")),
+                                data.getObject("data").getString("custom_id")
+                        ) : null)
+                        .build());
+            }
+            default -> {
+                throw new IllegalArgumentException("Unknown InteractionType for creation: " + type);
+            }
+        }
     }
     
     @Nonnull
