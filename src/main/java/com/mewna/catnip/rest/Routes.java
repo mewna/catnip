@@ -44,7 +44,6 @@ import static com.mewna.catnip.rest.Routes.HttpMethod.*;
 @SuppressWarnings({"StaticVariableOfConcreteClass", "WeakerAccess", "unused", "RedundantSuppression"})
 public final class Routes {
     // @formatter:off
-<<<<<<< HEAD
     public static final Route GET_GATEWAY_BOT                     = new Route(GET,    "/gateway/bot");
     public static final Route DELETE_CHANNEL                      = new Route(DELETE, "/channels/:channel", "channel");
     public static final Route GET_CHANNEL                         = new Route(GET,    "/channels/:channel", "channel");
