@@ -13,7 +13,7 @@
         <delombok.output>${project.basedir}/delombok</delombok.output>
 
         <lombok.version>1.18.20</lombok.version>
-        <rxjava.version>3.0.12</rxjava.version>
+        <rxjava.version>3.0.13</rxjava.version>
         <slf4j.version>1.7.30</slf4j.version>
         <commons.lang.version>3.12.0</commons.lang.version>
         <commons.codec.version>1.15</commons.codec.version>
@@ -23,8 +23,8 @@
         <koloboke-compile.version>0.5.1</koloboke-compile.version>
         <koloboke-impl.version>1.0.0</koloboke-impl.version>
 
-        <junit.version>5.7.1</junit.version>
-        <mockito.version>3.9.0</mockito.version>
+        <junit.version>5.7.2</junit.version>
+        <mockito.version>3.11.1</mockito.version>
         <logback.version>1.2.3</logback.version>
         <javautil.version>1.34.0</javautil.version>
     </properties>
@@ -129,12 +129,12 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.68</version>
+            <version>1.69</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk15on</artifactId>
-            <version>1.68</version>
+            <version>1.69</version>
         </dependency>
 
         <!-- Mockito -->
@@ -223,7 +223,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.3.0</version>
                 <configuration>
                     <sourcepath>${delombok.output}</sourcepath>
                     <!--
@@ -292,7 +292,7 @@
             <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
-                <version>4.0.4</version>
+                <version>4.0.5</version>
                 <executions>
                     <execution>
                         <id>get-the-git-infos</id>
@@ -315,7 +315,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.6</version>
+                <version>0.8.7</version>
                 <executions>
                     <execution>
                         <goals>
