@@ -29,10 +29,10 @@ package com.mewna.catnip.entity.impl.misc;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.misc.ApplicationFlag;
 import com.mewna.catnip.entity.misc.ApplicationInfo;
 import com.mewna.catnip.entity.misc.ApplicationOwner;
 import com.mewna.catnip.entity.misc.Team;
-import com.mewna.catnip.entity.user.UserFlag;
 import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.util.CDNFormat;
 import lombok.*;
@@ -71,7 +71,7 @@ public class ApplicationInfoImpl implements ApplicationInfo, RequiresCatnip {
     private String primarySkuId;
     private String slug;
     private String coverImage;
-    private Set<UserFlag> flags;
+    private Set<ApplicationFlag> flags;
     
     @Nullable
     @Override
