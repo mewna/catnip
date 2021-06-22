@@ -381,13 +381,13 @@ public class CatnipImpl implements Catnip {
     
     private Single<Catnip> checkIntentsAndLog() {
         return rest.user().getCurrentApplicationInformation().map(info -> {
-            if(!info.flags().contains(ApplicationFlag.GUILD_MEMBERS_INTENT_ENABLED) && options.intents().contains(GatewayIntent.GUILD_MEMBERS)) {
+            if(!info.flags().contains(ApplicationFlag.GATEWAY_GUILD_MEMBERS) && options.intents().contains(GatewayIntent.GUILD_MEMBERS)) {
                 logAdapter().error("GUILD_MEMBERS intent passed but is not enabled in the developer dashboard, this will fail!");
                 logAdapter().error("Please go enable those intents first, and THEN try running your bot.");
                 logAdapter().error("Click here to go to the dashboard: https://discord.com/developers/applications/{}",
                         Catnip.parseIdFromToken(options.token()));
             }
-            if(!info.flags().contains(ApplicationFlag.GUILD_PRESENCES_INTENT_ENABLED) && options.intents().contains(GatewayIntent.GUILD_PRESENCES)) {
+            if(!info.flags().contains(ApplicationFlag.GATEWAY_GUILD_MEMBERS) && options.intents().contains(GatewayIntent.GUILD_PRESENCES)) {
                 logAdapter().error("GUILD_PRESENCES intent passed but is not enabled in the developer dashboard, this will fail!");
                 logAdapter().error("Please go enable those intents first, and THEN try running your bot.");
                 logAdapter().error("Click here to go to the dashboard: https://discord.com/developers/applications/{}",
