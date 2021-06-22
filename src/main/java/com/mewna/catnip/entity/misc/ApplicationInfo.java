@@ -28,7 +28,7 @@
 package com.mewna.catnip.entity.misc;
 
 import com.mewna.catnip.entity.partials.*;
-import com.mewna.catnip.entity.user.UserFlag;
+import com.mewna.catnip.entity.misc.ApplicationFlag;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -120,5 +120,5 @@ public interface ApplicationInfo extends Snowflake, HasName, HasIcon, HasNullabl
      * @return The application's public flags.
      */
     @Nonnull
-    Set<UserFlag> flags();
+    Set<ApplicationFlag> flags();
 }
