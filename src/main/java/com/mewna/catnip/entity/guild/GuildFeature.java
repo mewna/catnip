@@ -80,6 +80,12 @@ public enum GuildFeature {
      * This is a part of membership screening, see https://github.com/discord/discord-api-docs/pull/2396
      */
     PREVIEW_ENABLED,
+    TICKETED_EVENTS_ENABLED,
+    MONETIZATION_ENABLED,
+    MORE_STICKERS,
+    THREE_DAY_THREAD_ARCHIVE,
+    SEVEN_DAY_THREAD_ARCHIVE,
+    PRIVATE_THREADS
     /**
      * When no other feature matches.
      */
