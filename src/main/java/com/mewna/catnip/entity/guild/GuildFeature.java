@@ -85,7 +85,7 @@ public enum GuildFeature {
     MORE_STICKERS,
     THREE_DAY_THREAD_ARCHIVE,
     SEVEN_DAY_THREAD_ARCHIVE,
-    PRIVATE_THREADS
+    PRIVATE_THREADS,
     /**
      * When no other feature matches.
      */
