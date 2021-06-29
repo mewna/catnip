@@ -35,7 +35,7 @@ import com.mewna.catnip.Catnip;
  */
 public enum GuildFeature {
     /**
-     * Needs {Guild#PremiumTier TIER_1}
+     * Needs {@link Guild#PremiumTier TIER_1}
      */
     INVITE_SPLASH,
     /**
@@ -43,7 +43,7 @@ public enum GuildFeature {
      */
     VIP_REGIONS,
     /**
-     * Needs {Guild#PremiumTier TIER_3} or {@link #PARTNERED} or {@link #VERIFIED}
+     * Needs {@link Guild#PremiumTier TIER_3} or {@link #PARTNERED} or {@link #VERIFIED}
      */
     VANITY_URL,
     VERIFIED,
@@ -65,11 +65,11 @@ public enum GuildFeature {
     @Deprecated
     FEATURABLE,
     /**
-     * Needs {Guild#PremiumTier TIER_1}, {@link #PARTNERED} or {@link #VERIFIED}
+     * Needs {@link Guild#PremiumTier TIER_1}, {@link #PARTNERED} or {@link #VERIFIED}
      */
     ANIMATED_ICON,
     /**
-     * Needs {Guild#PremiumTier TIER_2}, {@link #PARTNERED} or {@link #VERIFIED}
+     * Needs {@link Guild#PremiumTier TIER_2}, {@link #PARTNERED} or {@link #VERIFIED}
      */
     BANNER,
     /**
@@ -112,15 +112,15 @@ public enum GuildFeature {
     MONETIZATION_ENABLED,
     MORE_STICKERS,
     /**
-     * Needs {Guild#PremiumTier TIER_1}
+     * Needs {@link Guild#PremiumTier TIER_1}
      */
     THREE_DAY_THREAD_ARCHIVE,
     /**
-     * Needs {Guild#PremiumTier TIER_2}
+     * Needs {@link Guild#PremiumTier TIER_2}
      */
     SEVEN_DAY_THREAD_ARCHIVE,
     /**
-     * Needs {Guild#PremiumTier TIER_2}
+     * Needs {@link Guild#PremiumTier TIER_2}
      */
     PRIVATE_THREADS,
     /**
