@@ -124,6 +124,11 @@ public enum GuildFeature {
      */
     PRIVATE_THREADS,
     /**
+     * Feature Flag for lib test guilds (temporary flag)
+     */
+    THREADS_ENABLED_TESTING,
+    THREADS_ENABLED,
+    /**
      * When no other feature matches.
      */
     UNKNOWN_FEATURE,
