@@ -65,7 +65,7 @@ public enum GuildFeature {
     @Deprecated
     FEATURABLE,
     /**
-     * Needs Guildguild#PremiumTier TIER_1}, {@link #PARTNERED} or {@link #VERIFIED}
+     * Needs {Guild#PremiumTier TIER_1}, {@link #PARTNERED} or {@link #VERIFIED}
      */
     ANIMATED_ICON,
     /**
