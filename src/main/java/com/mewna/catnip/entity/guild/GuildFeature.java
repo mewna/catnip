@@ -43,7 +43,7 @@ public enum GuildFeature {
      */
     VIP_REGIONS,
     /**
-     * Needs {@link Guild#PremiumTier TIER_3} or {@link #PARTNERED} or {@link #VERIFIED}
+     * Needs {@link Guild#PremiumTier TIER_3}, {@link #PARTNERED} or {@link #VERIFIED}
      */
     VANITY_URL,
     VERIFIED,
@@ -58,7 +58,7 @@ public enum GuildFeature {
      */
     COMMERCE,
     /**
-     * Needs developer application license on account or bound to guild or alternative {@link #COMMUNITY}
+     * Needs developer application license on account, bound to guild or {@link #COMMUNITY}
      */
     NEWS,
     DISCOVERABLE,
@@ -106,7 +106,7 @@ public enum GuildFeature {
      */
     PREVIEW_ENABLED,
     /**
-     * Needs {@link #MONETIZATION_ENABLED} & valid payout informations on developer team
+     * Needs {@link #MONETIZATION_ENABLED} and valid payout informations on developer team
      */
     TICKETED_EVENTS_ENABLED,
     MONETIZATION_ENABLED,
