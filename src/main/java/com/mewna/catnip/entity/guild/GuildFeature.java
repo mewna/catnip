@@ -35,15 +35,15 @@ import com.mewna.catnip.Catnip;
  */
 public enum GuildFeature {
     /**
-     * Needs premium tier 1-3
+     * Needs {Guild#PremiumTier TIER_1}
      */
     INVITE_SPLASH,
     /**
-     * Needs PARTNERED or VERIFIED
+     * Needs {@link #PARTNERED} or {@link #VERIFIED}
      */
     VIP_REGIONS,
     /**
-     * Needs premium tier 3 or PARTNERED or VERIFIED
+     * Needs {Guild#PremiumTier TIER_3} or {@link #PARTNERED} or {@link #VERIFIED}
      */
     VANITY_URL,
     VERIFIED,
@@ -58,18 +58,18 @@ public enum GuildFeature {
      */
     COMMERCE,
     /**
-     * Needs developer application license on account or bound to guild or alternative COMMUNITY
+     * Needs developer application license on account or bound to guild or alternative {@link #COMMUNITY}
      */
     NEWS,
     DISCOVERABLE,
     @Deprecated
     FEATURABLE,
     /**
-     * Needs premium tier 1-3 or PARTNERED or VERIFIED
+     * Needs Guildguild#PremiumTier TIER_1}, {@link #PARTNERED} or {@link #VERIFIED}
      */
     ANIMATED_ICON,
     /**
-     * Needs premium tier 2 or PARTNERED or VERIFIED
+     * Needs {Guild#PremiumTier TIER_2}, {@link #PARTNERED} or {@link #VERIFIED}
      */
     BANNER,
     /**
@@ -84,7 +84,7 @@ public enum GuildFeature {
     MEMBER_LIST_DISABLED,
     PUBLIC_DISABLED,
     /**
-     * Needs COMMUNITY
+     * Needs {@link #COMMUNITY}
      */
     WELCOME_SCREEN_ENABLED,
     ENABLED_DISCOVERABLE_BEFORE,
@@ -96,7 +96,7 @@ public enum GuildFeature {
     RELAY_ENABLED,
     /**
      * This is a part of membership screening, see https://github.com/discord/discord-api-docs/pull/2396
-     * Needs COMMUNITY
+     * Needs {@link #COMMUNITY}
      */
     MEMBER_VERIFICATION_GATE_ENABLED,
     /**
@@ -106,21 +106,21 @@ public enum GuildFeature {
      */
     PREVIEW_ENABLED,
     /**
-     * Needs MONETIZATION_ENABLED & valid payout informations on developer team
+     * Needs {@link #MONETIZATION_ENABLED} & valid payout informations on developer team
      */
     TICKETED_EVENTS_ENABLED,
     MONETIZATION_ENABLED,
     MORE_STICKERS,
     /**
-     * Needs premium tier 1
+     * Needs {Guild#PremiumTier TIER_1}
      */
     THREE_DAY_THREAD_ARCHIVE,
     /**
-     * Needs premium tier 2
+     * Needs {Guild#PremiumTier TIER_2}
      */
     SEVEN_DAY_THREAD_ARCHIVE,
     /**
-     * Needs premium tier 2
+     * Needs {Guild#PremiumTier TIER_2}
      */
     PRIVATE_THREADS,
     /**
