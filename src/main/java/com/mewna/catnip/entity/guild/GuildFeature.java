@@ -34,8 +34,17 @@ import com.mewna.catnip.Catnip;
  * @since 8/19/19.
  */
 public enum GuildFeature {
+    /**
+     * Needs premium tier 1-3
+     */
     INVITE_SPLASH,
+    /**
+     * Needs PARTNERED or VERIFIED
+     */
     VIP_REGIONS,
+    /**
+     * Needs premium tier 3 or PARTNERED or VERIFIED
+     */
     VANITY_URL,
     VERIFIED,
     PARTNERED,
@@ -44,12 +53,24 @@ public enum GuildFeature {
      */
     @Deprecated
     LURKABLE,
+    /**
+     * Needs developer application license bound to guild
+     */
     COMMERCE,
+    /**
+     * Needs developer application license on account or bound to guild or alternative COMMUNITY
+     */
     NEWS,
     DISCOVERABLE,
     @Deprecated
     FEATURABLE,
+    /**
+     * Needs premium tier 1-3 or PARTNERED or VERIFIED
+     */
     ANIMATED_ICON,
+    /**
+     * Needs premium tier 2 or PARTNERED or VERIFIED
+     */
     BANNER,
     /**
      * Replaced by {@link #COMMUNITY}. See https://github.com/discord/discord-api-docs/pull/1763
@@ -62,6 +83,9 @@ public enum GuildFeature {
     @Deprecated
     MEMBER_LIST_DISABLED,
     PUBLIC_DISABLED,
+    /**
+     * Needs COMMUNITY
+     */
     WELCOME_SCREEN_ENABLED,
     ENABLED_DISCOVERABLE_BEFORE,
     COMMUNITY,
@@ -72,6 +96,7 @@ public enum GuildFeature {
     RELAY_ENABLED,
     /**
      * This is a part of membership screening, see https://github.com/discord/discord-api-docs/pull/2396
+     * Needs COMMUNITY
      */
     MEMBER_VERIFICATION_GATE_ENABLED,
     /**
@@ -80,11 +105,23 @@ public enum GuildFeature {
      * This is a part of membership screening, see https://github.com/discord/discord-api-docs/pull/2396
      */
     PREVIEW_ENABLED,
+    /**
+     * Needs MONETIZATION_ENABLED & valid payout informations on developer team
+     */
     TICKETED_EVENTS_ENABLED,
     MONETIZATION_ENABLED,
     MORE_STICKERS,
+    /**
+     * Needs premium tier 1
+     */
     THREE_DAY_THREAD_ARCHIVE,
+    /**
+     * Needs premium tier 2
+     */
     SEVEN_DAY_THREAD_ARCHIVE,
+    /**
+     * Needs premium tier 2
+     */
     PRIVATE_THREADS,
     /**
      * When no other feature matches.
