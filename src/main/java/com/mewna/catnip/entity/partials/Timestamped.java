@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,8 +25,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity;
+package com.mewna.catnip.entity.partials;
 
+import lombok.Getter;
+
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 
@@ -39,5 +42,48 @@ import java.time.OffsetDateTime;
 public interface Timestamped {
     default OffsetDateTime parseTimestamp(@Nullable final CharSequence raw) {
         return raw == null ? null : OffsetDateTime.parse(raw);
+    }
+    
+    default String asDiscordTimestamp(@Nonnull final OffsetDateTime time, @Nonnull final TimestampStyle style) {
+        return String.format("<t:%s:%s>", time.toEpochSecond(), style.code);
+    }
+    
+    enum TimestampStyle {
+        /**
+         * Example: {@code 16:20}
+         */
+        SHORT("t"),
+        /**
+         * Example: {@code 16:20:30}
+         */
+        LONG("T"),
+        /**
+         * Example: {@code 20/04/2021}
+         */
+        SHORT_DATE("d"),
+        /**
+         * Example: {@code 20 April 2021}
+         */
+        LONG_DATE("D"),
+        /**
+         * Example: {@code 20 April 2021 16:20}
+         */
+        SHORT_DATE_TIME("f"),
+        /**
+         * Example: {@code Tuesday, 20 April 2021 16:20}
+         */
+        LONG_DATE_TIME("F"),
+        /**
+         * Example: {@code 2 months ago}
+         */
+        RELATIVE("R"),
+        ;
+        
+        @Getter
+        private final String code;
+    
+        TimestampStyle(final String code) {
+            this.code = code;
+        }
     }
 }

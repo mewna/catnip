@@ -29,13 +29,11 @@ package com.mewna.catnip.entity.impl.misc;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.Timestamped;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
-import java.time.OffsetDateTime;
 
 /**
  * @author natanbc

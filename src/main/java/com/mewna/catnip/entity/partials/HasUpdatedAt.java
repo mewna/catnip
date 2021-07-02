@@ -27,8 +27,6 @@
 
 package com.mewna.catnip.entity.partials;
 
-import com.mewna.catnip.entity.Timestamped;
-
 import javax.annotation.Nonnull;
 import java.time.OffsetDateTime;
 
@@ -44,5 +42,10 @@ public interface HasUpdatedAt extends Timestamped {
     @Nonnull
     default OffsetDateTime updatedAt() {
         return OffsetDateTime.parse(updatedAtString());
+    }
+    
+    @Nonnull
+    default String updatedAtTimestamp(@Nonnull final TimestampStyle style) {
+        return asDiscordTimestamp(updatedAt(), style);
     }
 }

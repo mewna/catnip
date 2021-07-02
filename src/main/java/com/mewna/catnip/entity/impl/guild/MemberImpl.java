@@ -29,7 +29,7 @@ package com.mewna.catnip.entity.impl.guild;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.Timestamped;
+import com.mewna.catnip.entity.partials.Timestamped;
 import com.mewna.catnip.entity.guild.Member;
 import lombok.*;
 import lombok.experimental.Accessors;

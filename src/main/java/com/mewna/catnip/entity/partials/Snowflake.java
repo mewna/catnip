@@ -40,7 +40,7 @@ import java.time.OffsetDateTime;
  * @author natanbc
  * @since 5/9/18.
  */
-public interface Snowflake extends Entity {
+public interface Snowflake extends Entity, Timestamped {
     /**
      * The ID of this snowflake.
      *
@@ -69,5 +69,10 @@ public interface Snowflake extends Entity {
     @CheckReturnValue
     default OffsetDateTime creationTime() {
         return Utils.creationTimeOf(idAsLong());
+    }
+    
+    @Nonnull
+    default String creationTimestamp(@Nonnull final TimestampStyle style) {
+        return asDiscordTimestamp(creationTime(), style);
     }
 }

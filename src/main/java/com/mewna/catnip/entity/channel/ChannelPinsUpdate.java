@@ -29,8 +29,11 @@ package com.mewna.catnip.entity.channel;
 
 import com.mewna.catnip.entity.Entity;
 import com.mewna.catnip.entity.partials.HasChannel;
+import com.mewna.catnip.entity.partials.Timestamped;
+import com.mewna.catnip.entity.partials.Timestamped.TimestampStyle;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.OffsetDateTime;
 

@@ -29,7 +29,7 @@ package com.mewna.catnip.entity.impl.message;
 
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.Timestamped;
+import com.mewna.catnip.entity.partials.Timestamped;
 import com.mewna.catnip.entity.channel.ChannelMention;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.message.Embed;
