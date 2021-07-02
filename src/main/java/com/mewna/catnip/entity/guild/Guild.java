@@ -690,7 +690,7 @@ public interface Guild extends Snowflake, HasName, HasNullableDescription, HasIc
     @CheckReturnValue
     default Single<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final byte[] image,
                                             @Nonnull final Collection<String> roles, @Nullable final String reason) {
-        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJIS);
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJIS_AND_STICKERS);
         return catnip().rest().emoji().createGuildEmoji(id(), name, image, roles, reason);
     }
     
@@ -724,7 +724,7 @@ public interface Guild extends Snowflake, HasName, HasNullableDescription, HasIc
     @CheckReturnValue
     default Single<CustomEmoji> createEmoji(@Nonnull final String name, @Nonnull final URI imageData,
                                             @Nonnull final Collection<String> roles, @Nullable final String reason) {
-        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJIS);
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJIS_AND_STICKERS);
         return catnip().rest().emoji().createGuildEmoji(id(), name, imageData, roles, reason);
     }
     
@@ -759,7 +759,7 @@ public interface Guild extends Snowflake, HasName, HasNullableDescription, HasIc
     @CheckReturnValue
     default Single<CustomEmoji> modifyEmoji(@Nonnull final String emojiId, @Nonnull final String name,
                                             @Nonnull final Collection<String> roles, @Nullable final String reason) {
-        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJIS);
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJIS_AND_STICKERS);
         return catnip().rest().emoji().modifyGuildEmoji(id(), emojiId, name, roles, reason);
     }
     
@@ -791,7 +791,7 @@ public interface Guild extends Snowflake, HasName, HasNullableDescription, HasIc
     @Nonnull
     @CheckReturnValue
     default Completable deleteEmoji(@Nonnull final String emojiId, @Nullable final String reason) {
-        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJIS);
+        PermissionUtil.checkPermissions(catnip(), id(), Permission.MANAGE_EMOJIS_AND_STICKERS);
         return catnip().rest().emoji().deleteGuildEmoji(id(), emojiId, reason);
     }
     
