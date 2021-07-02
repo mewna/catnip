@@ -28,9 +28,9 @@
 package com.mewna.catnip.entity.impl.channel;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.Timestamped;
 import com.mewna.catnip.entity.channel.ThreadChannel;
 import com.mewna.catnip.entity.guild.PermissionOverride;
+import com.mewna.catnip.entity.partials.Timestamped;
 import lombok.*;
 import lombok.experimental.Accessors;
 
