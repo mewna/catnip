@@ -27,7 +27,7 @@
 
 package com.mewna.catnip.entity.impl.message;
 
-import com.mewna.catnip.entity.Timestamped;
+import com.mewna.catnip.entity.partials.Timestamped;
 import com.mewna.catnip.entity.message.Embed;
 import lombok.*;
 import lombok.experimental.Accessors;

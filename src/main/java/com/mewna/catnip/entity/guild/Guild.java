@@ -34,6 +34,7 @@ import com.mewna.catnip.entity.channel.*;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.partials.*;
+import com.mewna.catnip.entity.partials.Timestamped.TimestampStyle;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
 import com.mewna.catnip.entity.util.ImageOptions;
@@ -279,6 +280,11 @@ public interface Guild extends Snowflake, HasName, HasNullableDescription, HasIc
      */
     @CheckReturnValue
     OffsetDateTime joinedAt();
+    
+    @Nonnull
+    default String joinedAtTimestamp(@Nonnull final TimestampStyle style) {
+        return asDiscordTimestamp(joinedAt(), style);
+    }
     
     /**
      * @return Whether or not this guild is considered "large."

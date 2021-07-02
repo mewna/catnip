@@ -34,8 +34,17 @@ import com.mewna.catnip.Catnip;
  * @since 8/19/19.
  */
 public enum GuildFeature {
+    /**
+     * Needs {@link Guild#PremiumTier TIER_1}
+     */
     INVITE_SPLASH,
+    /**
+     * Needs {@link #PARTNERED} or {@link #VERIFIED}
+     */
     VIP_REGIONS,
+    /**
+     * Needs {@link Guild#PremiumTier TIER_3}, {@link #PARTNERED} or {@link #VERIFIED}
+     */
     VANITY_URL,
     VERIFIED,
     PARTNERED,
@@ -44,12 +53,24 @@ public enum GuildFeature {
      */
     @Deprecated
     LURKABLE,
+    /**
+     * Needs developer application license bound to guild
+     */
     COMMERCE,
+    /**
+     * Needs developer application license on account, bound to guild or {@link #COMMUNITY}
+     */
     NEWS,
     DISCOVERABLE,
     @Deprecated
     FEATURABLE,
+    /**
+     * Needs {@link Guild#PremiumTier TIER_1}, {@link #PARTNERED} or {@link #VERIFIED}
+     */
     ANIMATED_ICON,
+    /**
+     * Needs {@link Guild#PremiumTier TIER_2}, {@link #PARTNERED} or {@link #VERIFIED}
+     */
     BANNER,
     /**
      * Replaced by {@link #COMMUNITY}. See https://github.com/discord/discord-api-docs/pull/1763
@@ -62,6 +83,9 @@ public enum GuildFeature {
     @Deprecated
     MEMBER_LIST_DISABLED,
     PUBLIC_DISABLED,
+    /**
+     * Needs {@link #COMMUNITY}
+     */
     WELCOME_SCREEN_ENABLED,
     ENABLED_DISCOVERABLE_BEFORE,
     COMMUNITY,
@@ -72,6 +96,7 @@ public enum GuildFeature {
     RELAY_ENABLED,
     /**
      * This is a part of membership screening, see https://github.com/discord/discord-api-docs/pull/2396
+     * Needs {@link #COMMUNITY}
      */
     MEMBER_VERIFICATION_GATE_ENABLED,
     /**
@@ -80,6 +105,29 @@ public enum GuildFeature {
      * This is a part of membership screening, see https://github.com/discord/discord-api-docs/pull/2396
      */
     PREVIEW_ENABLED,
+    /**
+     * Needs {@link #MONETIZATION_ENABLED} and valid payout informations on developer team
+     */
+    TICKETED_EVENTS_ENABLED,
+    MONETIZATION_ENABLED,
+    MORE_STICKERS,
+    /**
+     * Needs {@link Guild#PremiumTier TIER_1}
+     */
+    THREE_DAY_THREAD_ARCHIVE,
+    /**
+     * Needs {@link Guild#PremiumTier TIER_2}
+     */
+    SEVEN_DAY_THREAD_ARCHIVE,
+    /**
+     * Needs {@link Guild#PremiumTier TIER_2}
+     */
+    PRIVATE_THREADS,
+    /**
+     * Feature Flag for lib test guilds (temporary flag)
+     */
+    THREADS_ENABLED_TESTING,
+    THREADS_ENABLED,
     /**
      * When no other feature matches.
      */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2020 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,30 +25,49 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.channel;
+package com.mewna.catnip.entity.misc;
 
-import com.mewna.catnip.entity.Entity;
-import com.mewna.catnip.entity.partials.HasChannel;
-import com.mewna.catnip.entity.partials.Timestamped;
-import com.mewna.catnip.entity.partials.Timestamped.TimestampStyle;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.time.OffsetDateTime;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
- * Fired over the event bus when a channel's pins are updated.
+ * The flags that can be on a application.
  *
- * @author amy
- * @since 10/9/18.
+ * @author lulalaby
+ * @since 6/22/21.
  */
-public interface ChannelPinsUpdate extends Entity, HasChannel {
-    /**
-     * @return The timestamp of the last pinned message in the channel. May be
-     * {@code null}.
-     */
-    @Nullable
-    @CheckReturnValue
-    OffsetDateTime lastPinTimestamp();
+@Accessors(fluent = true)
+public enum ApplicationFlag {
+    MANAGED_EMOJI(1 << 2),
+    GROUP_DM_CREATE(1 << 5),
+    RPC_HAS_CONNECTED(1 << 11),
+    GATEWAY_PRESENCE(1 << 12),
+    GATEWAY_PRESENCE_LIMITED(1 << 13),
+    GATEWAY_GUILD_MEMBERS(1 << 14),
+    GATEWAY_GUILD_MEMBERS_LIMITED(1 << 15),
+    VERIFICATION_PENDING_GUILD_LIMIT(1 << 16),
+    EMBEDDED(1 << 17),
+    ;
+    
+    @Getter
+    private final int value;
+    
+    ApplicationFlag(final int value) {
+        this.value = value;
+    }
+    
+    public static Set<ApplicationFlag> toSet(final long asLong) {
+        final Set<ApplicationFlag> flags = EnumSet.noneOf(ApplicationFlag.class);
+        
+        for(final ApplicationFlag flag : values()) {
+            if((asLong & flag.value) == flag.value) {
+                flags.add(flag);
+            }
+        }
+        
+        return flags;
+    }
 }

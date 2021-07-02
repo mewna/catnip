@@ -1451,7 +1451,7 @@ public final class EntityBuilder {
                 .primarySkuId(data.getString("primary_sku_id"))
                 .slug(data.getString("slug"))
                 .coverImage(data.getString("cover_image"))
-                .flags(UserFlag.toSet(data.getLong("flags")))
+                .flags(ApplicationFlag.toSet(data.getLong("flags")))
                 .build());
     }
     
@@ -1606,9 +1606,7 @@ public final class EntityBuilder {
                         ) : null)
                         .build());
             }
-            default -> {
-                throw new IllegalArgumentException("Unknown InteractionType for creation: " + type);
-            }
+            default -> throw new IllegalArgumentException("Unknown InteractionType for creation: " + type);
         }
     }
     
