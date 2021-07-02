@@ -79,7 +79,7 @@ public class ThreadChannelImpl implements ThreadChannel {
     @Accessors(fluent = true)
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class ThreadMemberImpl implements ThreadMember, Timestamped {
+    public static class ThreadMemberImpl implements ThreadMember {
         private transient Catnip catnip;
         
         private long idAsLong;
