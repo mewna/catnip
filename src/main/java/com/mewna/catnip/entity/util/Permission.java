@@ -71,7 +71,8 @@ public enum Permission {
     MANAGE_ROLES(1L << 28, true, "Manage Roles"),
     MANAGE_WEBHOOKS(1L << 29, true, "Manage Webhooks"),
     MANAGE_EMOJIS_AND_STICKERS(1L << 30, false, "Manage Emojis & Stickers"),
-    MANAGE_EVENTS(1L << 32, false, "Manage Guild Events"), // This permission is still an experiment, but will come soon
+    USE_APPLICATION_COMMANDS(1L << 31, false, "Use Slash Commands"),
+    MANAGE_EVENTS(1L << 33, false, "Manage Guild Events"), // This permission is still an experiment, but will come soon
     ;
     
     public static final long ALL = from(values());
