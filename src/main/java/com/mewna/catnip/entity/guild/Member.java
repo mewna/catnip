@@ -30,6 +30,7 @@ package com.mewna.catnip.entity.guild;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.entity.channel.DMChannel;
 import com.mewna.catnip.entity.channel.GuildChannel;
+import com.mewna.catnip.entity.partials.HasJoinedAt;
 import com.mewna.catnip.entity.partials.Mentionable;
 import com.mewna.catnip.entity.partials.Permissable;
 import com.mewna.catnip.entity.user.User;
@@ -57,7 +58,7 @@ import java.util.stream.Collectors;
  * @since 9/4/18.
  */
 @SuppressWarnings({"unused", "RedundantSuppression"})
-public interface Member extends Mentionable, Permissable {
+public interface Member extends Mentionable, Permissable, HasJoinedAt {
     /**
      * The user equivalent to this member.
      */
@@ -178,6 +179,7 @@ public interface Member extends Mentionable, Permissable {
      * @return The {@link OffsetDateTime date and time} the member joined the guild.
      */
     @Nullable
+    @Override
     @CheckReturnValue
     OffsetDateTime joinedAt();
     

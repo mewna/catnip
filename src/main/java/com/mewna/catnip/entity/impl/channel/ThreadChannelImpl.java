@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,17 +28,20 @@
 package com.mewna.catnip.entity.impl.channel;
 
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.channel.UserDMChannel;
-import com.mewna.catnip.entity.user.User;
-import io.reactivex.rxjava3.core.Maybe;
+import com.mewna.catnip.entity.channel.ThreadChannel;
+import com.mewna.catnip.entity.guild.PermissionOverride;
+import com.mewna.catnip.entity.partials.Timestamped;
 import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
- * @author natanbc
- * @since 9/12/18
+ * @author amy
+ * @since 5/1/21.
  */
 @Getter
 @Setter
@@ -46,42 +49,71 @@ import javax.annotation.Nonnull;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDMChannelImpl implements UserDMChannel {
-    private final ChannelType type = ChannelType.DM;
-    
+public class ThreadChannelImpl implements ThreadChannel {
     private transient Catnip catnip;
     
+    private ChannelType type;
     private long idAsLong;
-    private long userIdAsLong;
+    private String name;
+    private long guildIdAsLong;
+    private int position;
+    private long parentIdAsLong;
+    private List<PermissionOverride> overrides;
+    private String topic;
+    private boolean nsfw;
+    private int rateLimitPerUser;
+    private int messageCount;
+    private int memberCount;
+    private ThreadMember member;
+    private ThreadMetadata metadata;
+    private long ownerIdAsLong;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;
     }
     
-    @Override
-    public int hashCode() {
-        return Long.hashCode(idAsLong);
+    @Getter
+    @Setter
+    @Builder
+    @Accessors(fluent = true)
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ThreadMemberImpl implements ThreadMember {
+        private transient Catnip catnip;
+        
+        private long idAsLong;
+        private long userIdAsLong;
+        private String joinedAt;
+        
+        @Override
+        public void catnip(@Nonnull final Catnip catnip) {
+            this.catnip = catnip;
+        }
+        
+        @Nullable
+        @Override
+        public OffsetDateTime joinedAt() {
+            return parseTimestamp(joinedAt);
+        }
     }
     
-    @Override
-    public boolean equals(final Object obj) {
-        return obj instanceof UserDMChannel && ((UserDMChannel) obj).idAsLong() == idAsLong;
-    }
-    
-    @Override
-    public String toString() {
-        return String.format("UserDMChannel (%s)", recipient());
-    }
-    
-    @Nonnull
-    @Override
-    public Maybe<User> recipient() {
-        return catnip.cache().user(userIdAsLong);
-    }
-    
-    @Override
-    public long ownerIdAsLong() {
-        throw new UnsupportedOperationException("Not currently needed for user DMs");
+    @Getter
+    @Setter
+    @Builder
+    @Accessors(fluent = true)
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ThreadMetadataImpl implements ThreadMetadata, Timestamped {
+        private boolean locked;
+        private boolean archived;
+        private long archiverIdAsLong;
+        private String archiveTimestamp;
+        private int autoArchiveDuration;
+        
+        @Override
+        public OffsetDateTime archiveTimestamp() {
+            return parseTimestamp(archiveTimestamp);
+        }
     }
 }

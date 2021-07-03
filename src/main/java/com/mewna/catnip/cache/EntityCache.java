@@ -30,6 +30,7 @@ package com.mewna.catnip.cache;
 import com.mewna.catnip.cache.view.CacheView;
 import com.mewna.catnip.cache.view.NamedCacheView;
 import com.mewna.catnip.entity.channel.GuildChannel;
+import com.mewna.catnip.entity.channel.ThreadChannel.ThreadMember;
 import com.mewna.catnip.entity.guild.Guild;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
@@ -305,6 +306,17 @@ public interface EntityCache {
      */
     @Nonnull
     NamedCacheView<GuildChannel> channels();
+    
+    @Nonnull
+    default Maybe<ThreadMember> threadMember(@Nonnull final String id) {
+        return threadMember(Long.parseUnsignedLong(id));
+    }
+    
+    @Nonnull
+    Maybe<ThreadMember> threadMember(final long id);
+    
+    @Nonnull
+    CacheView<ThreadMember> threadMembers();
     
     /**
      * Get the custom emojis with the given ID from the guild with the given ID.

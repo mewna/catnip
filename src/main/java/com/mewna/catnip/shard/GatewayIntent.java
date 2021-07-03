@@ -27,7 +27,6 @@
 
 package com.mewna.catnip.shard;
 
-import com.mewna.catnip.shard.DiscordEvent.Raw;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -35,6 +34,8 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.mewna.catnip.shard.DiscordEvent.Raw.*;
 
 /**
  * A list of "gateway intents" that tell Discord which events you do and don't
@@ -66,15 +67,21 @@ public enum GatewayIntent {
      */
     @SuppressWarnings("PointlessBitwiseExpression")
     GUILDS(1 << 0, false, List.of(
-            Raw.GUILD_CREATE,
-            Raw.GUILD_DELETE,
-            Raw.GUILD_ROLE_CREATE,
-            Raw.GUILD_ROLE_UPDATE,
-            Raw.GUILD_ROLE_DELETE,
-            Raw.CHANNEL_CREATE,
-            Raw.CHANNEL_UPDATE,
-            Raw.CHANNEL_DELETE,
-            Raw.CHANNEL_PINS_UPDATE
+            GUILD_CREATE,
+            GUILD_DELETE,
+            GUILD_ROLE_CREATE,
+            GUILD_ROLE_UPDATE,
+            GUILD_ROLE_DELETE,
+            CHANNEL_CREATE,
+            CHANNEL_UPDATE,
+            CHANNEL_DELETE,
+            CHANNEL_PINS_UPDATE,
+            THREAD_CREATE,
+            THREAD_UPDATE,
+            THREAD_DELETE,
+            THREAD_LIST_SYNC,
+            THREAD_MEMBER_UPDATE,
+            THREAD_MEMBERS_UPDATE
     )),
     
     /**
@@ -85,9 +92,10 @@ public enum GatewayIntent {
      * </ul>
      */
     GUILD_MEMBERS(1 << 1, true, List.of(
-            Raw.GUILD_MEMBER_ADD,
-            Raw.GUILD_MEMBER_UPDATE,
-            Raw.GUILD_MEMBER_REMOVE
+            GUILD_MEMBER_ADD,
+            GUILD_MEMBER_UPDATE,
+            GUILD_MEMBER_REMOVE,
+            THREAD_MEMBERS_UPDATE
     )),
     
     /**
@@ -97,8 +105,8 @@ public enum GatewayIntent {
      * </ul>
      */
     GUILD_BANS(1 << 2, false, List.of(
-            Raw.GUILD_BAN_ADD,
-            Raw.GUILD_BAN_REMOVE
+            GUILD_BAN_ADD,
+            GUILD_BAN_REMOVE
     )),
     
     /**
@@ -107,7 +115,7 @@ public enum GatewayIntent {
      * </ul>
      */
     GUILD_EMOJIS(1 << 3, false, List.of(
-            Raw.GUILD_EMOJIS_UPDATE
+            GUILD_EMOJIS_UPDATE
     )),
     
     /**
@@ -116,7 +124,7 @@ public enum GatewayIntent {
      * </ul>
      */
     GUILD_INTEGRATIONS(1 << 4, false, List.of(
-            Raw.GUILD_INTEGRATIONS_UPDATE
+            GUILD_INTEGRATIONS_UPDATE
     )),
     
     /**
@@ -125,7 +133,7 @@ public enum GatewayIntent {
      * </ul>
      */
     GUILD_WEBHOOKS(1 << 5, false, List.of(
-            Raw.WEBHOOKS_UPDATE
+            WEBHOOKS_UPDATE
     )),
     
     /**
@@ -136,8 +144,8 @@ public enum GatewayIntent {
      * Note that these events are currently undocumented!
      */
     GUILD_INVITES(1 << 6, false, List.of(
-            Raw.INVITE_CREATE,
-            Raw.INVITE_DELETE
+            INVITE_CREATE,
+            INVITE_DELETE
     )),
     
     /**
@@ -146,7 +154,7 @@ public enum GatewayIntent {
      * </ul>
      */
     GUILD_VOICE_STATES(1 << 7, false, List.of(
-            Raw.VOICE_STATE_UPDATE
+            VOICE_STATE_UPDATE
     )),
     
     /**
@@ -157,7 +165,7 @@ public enum GatewayIntent {
      * <strong>This is a privileged intent.</strong>
      */
     GUILD_PRESENCES(1 << 8, true, List.of(
-            Raw.PRESENCE_UPDATE
+            PRESENCE_UPDATE
     )),
     
     /**
@@ -169,10 +177,10 @@ public enum GatewayIntent {
      * </ul>
      */
     GUILD_MESSAGES(1 << 9, false, List.of(
-            Raw.MESSAGE_CREATE,
-            Raw.MESSAGE_UPDATE,
-            Raw.MESSAGE_DELETE,
-            Raw.MESSAGE_DELETE_BULK
+            MESSAGE_CREATE,
+            MESSAGE_UPDATE,
+            MESSAGE_DELETE,
+            MESSAGE_DELETE_BULK
     )),
     
     /**
@@ -184,10 +192,10 @@ public enum GatewayIntent {
      * </ul>
      */
     GUILD_MESSAGE_REACTIONS(1 << 10, false, List.of(
-            Raw.MESSAGE_REACTION_ADD,
-            Raw.MESSAGE_REACTION_REMOVE,
-            Raw.MESSAGE_REACTION_REMOVE_ALL,
-            Raw.MESSAGE_REACTION_REMOVE_EMOJI
+            MESSAGE_REACTION_ADD,
+            MESSAGE_REACTION_REMOVE,
+            MESSAGE_REACTION_REMOVE_ALL,
+            MESSAGE_REACTION_REMOVE_EMOJI
     )),
     
     /**
@@ -198,7 +206,7 @@ public enum GatewayIntent {
      * guilds only.</strong>
      */
     GUILD_MESSAGE_TYPING(1 << 11, false, List.of(
-            Raw.TYPING_START
+            TYPING_START
     )),
     
     /**
@@ -210,10 +218,10 @@ public enum GatewayIntent {
      * </ul>
      */
     DIRECT_MESSAGES(1 << 12, false, List.of(
-            Raw.MESSAGE_CREATE,
-            Raw.MESSAGE_UPDATE,
-            Raw.MESSAGE_DELETE,
-            Raw.CHANNEL_PINS_UPDATE
+            MESSAGE_CREATE,
+            MESSAGE_UPDATE,
+            MESSAGE_DELETE,
+            CHANNEL_PINS_UPDATE
     )),
     
     /**
@@ -225,10 +233,10 @@ public enum GatewayIntent {
      * </ul>
      */
     DIRECT_MESSAGE_REACTIONS(1 << 13, false, List.of(
-            Raw.MESSAGE_REACTION_ADD,
-            Raw.MESSAGE_REACTION_REMOVE,
-            Raw.MESSAGE_REACTION_REMOVE_ALL,
-            Raw.MESSAGE_REACTION_REMOVE_EMOJI
+            MESSAGE_REACTION_ADD,
+            MESSAGE_REACTION_REMOVE,
+            MESSAGE_REACTION_REMOVE_ALL,
+            MESSAGE_REACTION_REMOVE_EMOJI
     )),
     
     /**
@@ -239,7 +247,7 @@ public enum GatewayIntent {
      * direct messages only.</strong>
      */
     DIRECT_MESSAGE_TYPING(1 << 14, false, List.of(
-            Raw.TYPING_START
+            TYPING_START
     )),
     
     ;

@@ -30,6 +30,7 @@ package com.mewna.catnip.cache;
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.channel.GuildChannel;
+import com.mewna.catnip.entity.channel.ThreadChannel.ThreadMember;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
@@ -78,6 +79,8 @@ public interface EntityCacheWorker extends EntityCache {
     void bulkCachePresences(@Nonnegative int shardId, @Nonnull Map<String, Presence> presences);
     
     void bulkCacheVoiceStates(@Nonnegative int shardId, @Nonnull Collection<VoiceState> voiceStates);
+    
+    void bulkCacheThreadMembers(@Nonnegative int shardId, @Nonnull Collection<ThreadMember> threadMembers);
     
     void invalidateShard(@Nonnegative int id);
     

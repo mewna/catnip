@@ -30,6 +30,8 @@ package com.mewna.catnip.rest.handler;
 import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.channel.GuildChannel;
+import com.mewna.catnip.entity.channel.ThreadChannel;
+import com.mewna.catnip.entity.channel.ThreadChannel.ThreadMember;
 import com.mewna.catnip.entity.guild.*;
 import com.mewna.catnip.entity.guild.Guild.GuildEditFields;
 import com.mewna.catnip.entity.guild.audit.ActionType;
@@ -807,5 +809,104 @@ public class RestGuild extends RestHandler {
     public Observable<JsonObject> deleteGuildTemplateRaw(@Nonnull final String guildId, @Nonnull final String code) {
         return catnip().requester().queue(new OutboundRequest(Routes.DELETE_GUILD_TEMPLATE.withMajorParam(guildId),
                 Map.of("code", code))).map(ResponsePayload::object);
+    }
+    
+    public Single<ThreadChannel> startPublicThread(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                   @Nonnull final String name, @Nonnegative final int autoArchiveDuration) {
+        return Single.fromObservable(startPublicThreadRaw(channelId, messageId, name, autoArchiveDuration))
+                .map(o -> entityBuilder().createThreadChannel(o.getString("guild_id"), o));
+    }
+    
+    public Observable<JsonObject> startPublicThreadRaw(@Nonnull final String channelId, @Nonnull final String messageId,
+                                                       @Nonnull final String name, @Nonnegative final int autoArchiveDuration) {
+        final var body = new JsonObject();
+        body.put("name", name);
+        body.put("auto_archive_duration", autoArchiveDuration);
+        return catnip().requester().queue(new OutboundRequest(Routes.START_PUBLIC_THREAD.withMajorParam(channelId),
+                Map.of("message", messageId)).object(body)).map(ResponsePayload::object);
+    }
+    
+    public Single<ThreadChannel> startPrivateThread(@Nonnull final String channelId, @Nonnull final String name,
+                                                    @Nonnegative final int autoArchiveDuration) {
+        return Single.fromObservable(startPrivateThreadRaw(channelId, name, autoArchiveDuration))
+                .map(o -> entityBuilder().createThreadChannel(o.getString("guild_id"), o));
+    }
+    
+    public Observable<JsonObject> startPrivateThreadRaw(@Nonnull final String channelId, @Nonnull final String name,
+                                                        @Nonnegative final int autoArchiveDuration) {
+        final var body = new JsonObject();
+        body.put("name", name);
+        body.put("auto_archive_duration", autoArchiveDuration);
+        return catnip().requester().queue(new OutboundRequest(Routes.START_PRIVATE_THREAD.withMajorParam(channelId), Map.of())
+                .object(body)).map(ResponsePayload::object);
+    }
+    
+    public Completable joinThread(@Nonnull final String threadId) {
+        return Completable.fromObservable(catnip().requester().queue(new OutboundRequest(Routes.JOIN_THREAD
+                .withMajorParam(threadId), Map.of()).emptyBody(true))
+                .map(ResponsePayload::object));
+    }
+    
+    public Completable addUserToThread(@Nonnull final String threadId, @Nonnull final String userId) {
+        return Completable.fromObservable(catnip().requester().queue(new OutboundRequest(Routes.ADD_USER_TO_THREAD
+                .withMajorParam(threadId), Map.of("user", userId)).emptyBody(true))
+                .map(ResponsePayload::object));
+    }
+    
+    public Completable leaveThread(@Nonnull final String threadId) {
+        return Completable.fromObservable(catnip().requester().queue(new OutboundRequest(Routes.LEAVE_THREAD
+                .withMajorParam(threadId), Map.of()).emptyBody(true))
+                .map(ResponsePayload::object));
+    }
+    
+    public Completable removeUserFromThread(@Nonnull final String threadId, @Nonnull final String userId) {
+        return Completable.fromObservable(catnip().requester().queue(new OutboundRequest(Routes.REMOVE_USER_FROM_THREAD
+                .withMajorParam(threadId), Map.of("user", userId)).emptyBody(true))
+                .map(ResponsePayload::object));
+    }
+    
+    public Observable<ThreadMember> listThreadMembers(@Nonnull final String threadId) {
+        return listThreadMembersRaw(threadId).map(entityBuilder()::createThreadMember);
+    }
+    
+    public Observable<JsonObject> listThreadMembersRaw(@Nonnull final String threadId) {
+        return catnip().requester().queue(new OutboundRequest(Routes.LIST_THREAD_MEMBERS.withMajorParam(threadId), Map.of()))
+                .map(ResponsePayload::object);
+    }
+    
+    public Observable<ThreadChannel> listActiveThreads(@Nonnull final String threadId) {
+        return listActiveThreadsRaw(threadId).map(e -> entityBuilder().createThreadChannel(e.getString("guild_id"), e));
+    }
+    
+    public Observable<JsonObject> listActiveThreadsRaw(@Nonnull final String threadId) {
+        return catnip().requester().queue(new OutboundRequest(Routes.LIST_ACTIVE_THREADS.withMajorParam(threadId), Map.of()))
+                .map(ResponsePayload::object);
+    }
+    
+    public Observable<ThreadChannel> listPublicArchivedThreads(@Nonnull final String threadId) {
+        return listPublicArchivedThreadsRaw(threadId).map(e -> entityBuilder().createThreadChannel(e.getString("guild_id"), e));
+    }
+    
+    public Observable<JsonObject> listPublicArchivedThreadsRaw(@Nonnull final String threadId) {
+        return catnip().requester().queue(new OutboundRequest(Routes.LIST_PUBLIC_ARCHIVED_THREADS.withMajorParam(threadId), Map.of()))
+                .map(ResponsePayload::object);
+    }
+    
+    public Observable<ThreadChannel> listPrivateArchivedThreads(@Nonnull final String threadId) {
+        return listPrivateArchivedThreadsRaw(threadId).map(e -> entityBuilder().createThreadChannel(e.getString("guild_id"), e));
+    }
+    
+    public Observable<JsonObject> listPrivateArchivedThreadsRaw(@Nonnull final String threadId) {
+        return catnip().requester().queue(new OutboundRequest(Routes.LIST_PRIVATE_ARCHIVED_THREADS.withMajorParam(threadId), Map.of()))
+                .map(ResponsePayload::object);
+    }
+    
+    public Observable<ThreadChannel> listJoinedPrivateArchivedThreads(@Nonnull final String threadId) {
+        return listJoinedPrivateArchivedThreadsRaw(threadId).map(e -> entityBuilder().createThreadChannel(e.getString("guild_id"), e));
+    }
+    
+    public Observable<JsonObject> listJoinedPrivateArchivedThreadsRaw(@Nonnull final String threadId) {
+        return catnip().requester().queue(new OutboundRequest(Routes.LIST_JOINED_PRIVATE_ARCHIVED_THREADS.withMajorParam(threadId), Map.of()))
+                .map(ResponsePayload::object);
     }
 }

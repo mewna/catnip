@@ -27,6 +27,8 @@
 
 package com.mewna.catnip.entity.channel;
 
+import com.mewna.catnip.entity.partials.HasOwner;
+
 import javax.annotation.CheckReturnValue;
 
 /**
@@ -35,7 +37,7 @@ import javax.annotation.CheckReturnValue;
  * @author natanbc
  * @since 9/12/18
  */
-public interface DMChannel extends MessageChannel {
+public interface DMChannel extends MessageChannel, HasOwner {
     @Override
     @CheckReturnValue
     default boolean isDM() {

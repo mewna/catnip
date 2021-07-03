@@ -110,6 +110,10 @@ public enum JsonErrorCode {
     INVALID_FORM_BODY(50035, "Invalid form body (returned for both application/json and multipart/form-data bodies), or invalid Content-Type provided"),
     INVITE_TO_GUILD_WITHOUT_BOT(50036, "An invite was accepted to a guild the application's bot is not in"),
     INVALID_API_VERSION(50041, "Invalid API version provided"),
+    CANT_OPERATE_ON_ARCHIVED_THREAD(50083, "Tried to perform an operation on an archived thread, such as editing a message or adding a user to the thread"),
+    INVALID_THREAD_NOTIFICATION_SETTINGS(50084, "Invalid thread notification settings"),
+    BEFORE_THREAD_CREATION_DATE(50085, "before value is earlier than the thread creation date"),
+    TWO_FACTOR_AUTH_REQUIRED(60003, "Two factor is required for this operation"),
     REACTION_BLOCKED(90001, "Reaction was blocked"),
     API_RESOURCE_OVERLOADED(130000, "API resource is currently overloaded. Try again a little later"),
     ;
