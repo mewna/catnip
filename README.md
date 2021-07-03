@@ -31,23 +31,23 @@ No. Use a real build tool like [Maven](https://maven.apache.org/) or [Gradle](ht
 ## Features
 
 - Automatic sharding
-- Very customizable - you can write [extensions](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/extension/Extension.java)
-  for the library, as well as [options](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/CatnipOptions.java)
+- Very customizable - you can write [extensions](https://github.com/mewna/catnip/blob/mistress/src/main/java/com/mewna/catnip/extension/Extension.java)
+  for the library, as well as [options](https://github.com/mewna/catnip/blob/mistress/src/main/java/com/mewna/catnip/CatnipOptions.java)
   for most anything you could want to change. See `EXTENSIONS.md` for more.
 - Modular - REST / shards can be used independently. See `MODULAR_USAGE.md` for more.
-- Customizable caching - Can run with [no cache](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/cache/NoopEntityCache.java),
-  [partial caching](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/cache/CacheFlag.java),
-  or [write your own cache handler](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/cache/EntityCacheWorker.java).
+- Customizable caching - Can run with [no cache](https://github.com/mewna/catnip/blob/mistress/src/main/java/com/mewna/catnip/cache/NoopEntityCache.java),
+  [partial caching](https://github.com/mewna/catnip/blob/mistress/src/main/java/com/mewna/catnip/cache/CacheFlag.java),
+  or [write your own cache handler](https://github.com/mewna/catnip/blob/mistress/src/main/java/com/mewna/catnip/cache/EntityCacheWorker.java).
   See `CACHING.md` for more.
 - Asynchronous cache accesses.
 - You can disable individual events.
 - You can disable all events, and handle gateway events directly.
 - Customizable ratelimit/session data handling - wanna store your 
-  [sessions/seqnums](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/shard/session/SessionManager.java) 
-  and [REST ratelimit data](https://github.com/mewna/catnip/tree/master/src/main/java/com/mewna/catnip/rest/ratelimit)
-  in Redis, but [gateway ratelimits](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/shard/ratelimit/Ratelimiter.java)
+  [sessions/seqnums](https://github.com/mewna/catnip/blob/mistress/src/main/java/com/mewna/catnip/shard/session/SessionManager.java) 
+  and [REST ratelimit data](https://github.com/mewna/catnip/tree/mistress/src/main/java/com/mewna/catnip/rest/ratelimit)
+  in Redis, but [gateway ratelimits](https://github.com/mewna/catnip/blob/mistress/src/main/java/com/mewna/catnip/shard/ratelimit/Ratelimiter.java)
   in memory? You can do that!
-- [Customizable shard management](https://github.com/mewna/catnip/blob/master/src/main/java/com/mewna/catnip/shard/manager/ShardManager.java)
+- [Customizable shard management](https://github.com/mewna/catnip/blob/mistress/src/main/java/com/mewna/catnip/shard/manager/ShardManager.java)
 
 ## Basic usage
 
@@ -95,7 +95,7 @@ Catnip.catnipAsync("your token here").subscribe(catnip -> {
 });
 ```
 
-Also check out the [examples](https://github.com/mewna/catnip/tree/master/src/main/example/basic) for Kotlin and Scala usage.
+Also check out the [examples](https://github.com/mewna/catnip/tree/mistress/src/main/example/basic) for Kotlin and Scala usage.
 
 ### A note on Observable#subscribe vs. Observable#forEach
 
