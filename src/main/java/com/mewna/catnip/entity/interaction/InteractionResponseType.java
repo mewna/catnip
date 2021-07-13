@@ -61,6 +61,16 @@ public enum InteractionResponseType {
      * ACK a command without sending a message, showing the user's input.
      */
     ACK_WITH_SOURCE(5),
+    
+    /**
+     * For components, ACK an interaction and edit the original message later; the user does not see a loading state
+     */
+    DEFERRED_UPDATE_MESSAGE(6),
+    
+    /**
+     * For components, edit the message the component was attached to
+     */
+    UPDATE_MESSAGE(7),
     ;
     
     private final int key;
