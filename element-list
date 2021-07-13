@@ -14,6 +14,8 @@ com.mewna.catnip.entity.impl.channel
 com.mewna.catnip.entity.impl.guild
 com.mewna.catnip.entity.impl.guild.audit
 com.mewna.catnip.entity.impl.interaction
+com.mewna.catnip.entity.impl.interaction.command
+com.mewna.catnip.entity.impl.interaction.component
 com.mewna.catnip.entity.impl.lifecycle
 com.mewna.catnip.entity.impl.message
 com.mewna.catnip.entity.impl.message.component
@@ -22,6 +24,8 @@ com.mewna.catnip.entity.impl.sticker
 com.mewna.catnip.entity.impl.user
 com.mewna.catnip.entity.impl.voice
 com.mewna.catnip.entity.interaction
+com.mewna.catnip.entity.interaction.command
+com.mewna.catnip.entity.interaction.component
 com.mewna.catnip.entity.lifecycle
 com.mewna.catnip.entity.message
 com.mewna.catnip.entity.message.component
