@@ -29,7 +29,6 @@ package com.mewna.catnip.entity.message.component;
 
 import com.grack.nanojson.JsonObject;
 import lombok.Getter;
-import org.bouncycastle.asn1.cms.OtherRecipientInfo;
 
 /**
  * @author amy
@@ -43,15 +42,16 @@ public interface MessageComponent {
     enum MessageComponentType {
         ACTION_ROW(1),
         BUTTON(2),
+        SELECT(3),
         ;
         
         @Getter
         private final int id;
-    
+        
         MessageComponentType(final int id) {
             this.id = id;
         }
-    
+        
         public static MessageComponentType byKey(final int key) {
             for(final var value : values()) {
                 if(value.id == key) {

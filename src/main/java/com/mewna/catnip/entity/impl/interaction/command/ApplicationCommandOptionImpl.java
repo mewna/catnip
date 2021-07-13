@@ -25,11 +25,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.interaction;
+package com.mewna.catnip.entity.impl.interaction.command;
+
+import com.mewna.catnip.entity.interaction.command.ApplicationCommandOption;
+import com.mewna.catnip.entity.interaction.command.ApplicationCommandOptionChoice;
+import com.mewna.catnip.entity.interaction.command.ApplicationCommandOptionType;
+import lombok.*;
+import lombok.experimental.Accessors;
+
+import java.util.List;
 
 /**
  * @author amy
- * @since 5/30/21.
+ * @since 12/10/20.
  */
-public interface ApplicationCommandInteraction extends Interaction<ApplicationCommandInteractionData> {
+@Getter
+@Setter
+@Builder
+@Accessors(fluent = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class ApplicationCommandOptionImpl implements ApplicationCommandOption {
+    private ApplicationCommandOptionType type;
+    private boolean defaultOption;
+    private boolean required;
+    private List<ApplicationCommandOptionChoice<?>> choices;
+    private List<ApplicationCommandOption> options;
+    private String description;
+    private String name;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,25 +25,44 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.impl.interaction;
+package com.mewna.catnip.entity.builder.component;
 
-import com.mewna.catnip.entity.interaction.InteractionApplicationCommandCallbackData;
-import com.mewna.catnip.entity.interaction.InteractionResponse;
-import com.mewna.catnip.entity.interaction.InteractionResponseType;
-import lombok.*;
-import lombok.experimental.Accessors;
+import com.mewna.catnip.entity.impl.message.component.SelectImpl;
+import com.mewna.catnip.entity.impl.message.component.SelectImpl.SelectOptionImpl;
+import com.mewna.catnip.entity.message.component.Select;
+import com.mewna.catnip.entity.message.component.Select.SelectOption;
+import com.mewna.catnip.entity.misc.Emoji;
+import lombok.Setter;
+
+import java.util.List;
 
 /**
  * @author amy
- * @since 12/10/20.
+ * @since 7/12/21.
  */
-@Getter
 @Setter
-@Builder
-@Accessors(fluent = true)
-@NoArgsConstructor
-@AllArgsConstructor
-public class InteractionResponseImpl implements InteractionResponse {
-    private InteractionResponseType type;
-    private InteractionApplicationCommandCallbackData data;
+public class SelectBuilder {
+    private List<SelectOption> options;
+    private String placeholder;
+    private int minValues;
+    private int maxValues;
+    private boolean disabled;
+    private String customId;
+    
+    public Select build() {
+        return new SelectImpl(options, placeholder, minValues, maxValues, disabled, customId);
+    }
+    
+    @Setter
+    public static class SelectOptionBuilder {
+        private String label;
+        private String value;
+        private String description;
+        private Emoji emoji;
+        private boolean isDefault;
+        
+        public SelectOption build() {
+            return new SelectOptionImpl(label, value, description, emoji, isDefault);
+        }
+    }
 }

@@ -27,9 +27,9 @@
 
 package com.mewna.catnip.entity.builder.command;
 
-import com.mewna.catnip.entity.impl.interaction.ApplicationCommandOptionIntegerChoiceImpl;
-import com.mewna.catnip.entity.impl.interaction.ApplicationCommandOptionStringChoiceImpl;
-import com.mewna.catnip.entity.interaction.ApplicationCommandOptionChoice;
+import com.mewna.catnip.entity.impl.interaction.command.ApplicationCommandOptionIntegerChoiceImpl;
+import com.mewna.catnip.entity.impl.interaction.command.ApplicationCommandOptionStringChoiceImpl;
+import com.mewna.catnip.entity.interaction.command.ApplicationCommandOptionChoice;
 import com.mewna.catnip.util.Validators;
 
 import javax.annotation.Nonnull;

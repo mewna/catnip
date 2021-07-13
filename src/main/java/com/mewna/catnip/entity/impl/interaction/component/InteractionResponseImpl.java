@@ -25,22 +25,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.impl.interaction;
+package com.mewna.catnip.entity.impl.interaction.component;
 
-import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.entity.interaction.ButtonInteraction;
-import com.mewna.catnip.entity.interaction.CustomIdInteractionData;
-import com.mewna.catnip.entity.interaction.InteractionType;
+import com.mewna.catnip.entity.interaction.command.InteractionApplicationCommandCallbackData;
+import com.mewna.catnip.entity.interaction.InteractionResponse;
+import com.mewna.catnip.entity.interaction.InteractionResponseType;
 import lombok.*;
 import lombok.experimental.Accessors;
 
-import javax.annotation.Nonnull;
-
 /**
  * @author amy
- * @since 5/30/21.
+ * @since 12/10/20.
  */
 @Getter
 @Setter
@@ -48,19 +43,7 @@ import javax.annotation.Nonnull;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ButtonInteractionImpl implements ButtonInteraction, RequiresCatnip {
-    private transient Catnip catnip;
-    private InteractionType type;
-    private CustomIdInteractionData data;
-    private Member member;
-    private String token;
-    private long guildIdAsLong;
-    private long channelIdAsLong;
-    private long idAsLong;
-    private int version;
-    
-    @Override
-    public void catnip(@Nonnull final Catnip catnip) {
-        this.catnip = catnip;
-    }
+public class InteractionResponseImpl implements InteractionResponse {
+    private InteractionResponseType type;
+    private InteractionApplicationCommandCallbackData data;
 }

@@ -27,11 +27,15 @@
 
 package com.mewna.catnip.entity.misc;
 
+import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.guild.Guild;
+import com.mewna.catnip.entity.impl.misc.CustomEmojiImpl;
+import com.mewna.catnip.entity.impl.misc.UnicodeEmojiImpl;
 import com.mewna.catnip.entity.partials.GuildEntity;
 import com.mewna.catnip.entity.partials.HasNullableName;
 import com.mewna.catnip.entity.partials.Snowflake;
 import com.mewna.catnip.entity.user.User;
+import com.vdurmont.emoji.EmojiManager;
 import io.reactivex.rxjava3.core.Maybe;
 
 import javax.annotation.CheckReturnValue;
@@ -47,6 +51,29 @@ import java.util.Objects;
  */
 @SuppressWarnings({"unused", "RedundantSuppression", "SameReturnValue"})
 public interface Emoji extends Snowflake, HasNullableName {
+    @Nonnull
+    @SuppressWarnings("ClassReferencesSubclass")
+    static UnicodeEmoji fromUnicode(@Nonnull final Catnip catnip, @Nonnull final String unicode) {
+        if(!EmojiManager.isEmoji(unicode)) {
+            throw new IllegalArgumentException("String '" + unicode + "' is not an emoji!");
+        }
+        return new UnicodeEmojiImpl(catnip, unicode, true);
+    }
+    
+    @Nonnull
+    @SuppressWarnings("ClassReferencesSubclass")
+    static CustomEmoji fromString(@Nonnull final Catnip catnip, @Nonnull final String name, @Nonnull final String id,
+                                  final boolean animated) {
+        if(name.length() < 2 || name.length() > 32) {
+            throw new IllegalArgumentException("Name must be between 2 and 32 characters (got '" + name + "')");
+        }
+        if(!id.matches("\\d+")) {
+            throw new IllegalArgumentException("String '" + id + "' is not a valid snowflake");
+        }
+        return new CustomEmojiImpl(catnip, Long.parseUnsignedLong(id), 0L, name, List.of(), null,
+                true, false, animated);
+    }
+    
     /**
      * ID of this emoji, or null if it has no ID.
      * <br>Always null for {@link #unicode() unicode} emoji.
@@ -54,6 +81,7 @@ public interface Emoji extends Snowflake, HasNullableName {
      * @return String representing the ID.
      */
     @Nullable
+    @SuppressWarnings("NullableProblems")
     @CheckReturnValue
     String id();
     

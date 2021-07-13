@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,38 +25,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.interaction;
+package com.mewna.catnip.entity.impl.interaction.command;
 
-import lombok.Getter;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.interaction.command.ApplicationCommandInteractionDataOption;
+import com.mewna.catnip.entity.interaction.command.ApplicationCommandOptionChoice;
+import com.mewna.catnip.entity.interaction.command.ApplicationCommandOptionType;
+import lombok.*;
+import lombok.experimental.Accessors;
+
+import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * @author amy
  * @since 12/10/20.
  */
 @Getter
-public enum ApplicationCommandOptionType {
-    SUB_COMMAND(1),
-    SUB_COMMAND_GROUP(2),
-    STRING(3),
-    INTEGER(4),
-    BOOLEAN(5),
-    USER(6),
-    CHANNEL(7),
-    ROLE(8),
-    ;
+@Setter
+@Builder
+@Accessors(fluent = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class ApplicationCommandInteractionDataOptionImpl implements ApplicationCommandInteractionDataOption, RequiresCatnip {
+    private transient Catnip catnip;
     
-    private final int key;
+    private String name;
+    private ApplicationCommandOptionType type;
+    private ApplicationCommandOptionChoice<?> value;
+    private List<ApplicationCommandInteractionDataOption> options;
     
-    ApplicationCommandOptionType(final int key) {
-        this.key = key;
-    }
-    
-    public static ApplicationCommandOptionType byKey(final int key) {
-        for(final ApplicationCommandOptionType value : values()) {
-            if(value.key == key) {
-                return value;
-            }
-        }
-        throw new IllegalArgumentException("Unknown ApplicationCommandOptionType: " + key);
+    @Override
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
     }
 }

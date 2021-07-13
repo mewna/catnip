@@ -25,37 +25,57 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.builder.command;
+package com.mewna.catnip.entity.impl.interaction.component;
 
-import com.mewna.catnip.entity.impl.interaction.component.InteractionResponseImpl;
-import com.mewna.catnip.entity.interaction.command.InteractionApplicationCommandCallbackData;
-import com.mewna.catnip.entity.interaction.InteractionResponse;
-import com.mewna.catnip.entity.interaction.InteractionResponseType;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.guild.Member;
+import com.mewna.catnip.entity.interaction.InteractionType;
+import com.mewna.catnip.entity.interaction.component.SelectInteraction;
+import com.mewna.catnip.entity.interaction.component.SelectInteractionData;
+import com.mewna.catnip.entity.message.component.MessageComponent.MessageComponentType;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * @author amy
- * @since 12/12/20.
+ * @since 7/12/21.
  */
-public class InteractionResponseBuilder {
-    private InteractionResponseType type;
-    private InteractionApplicationCommandCallbackData data;
+@Getter
+@Setter
+@Accessors(fluent = true)
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class SelectInteractionImpl implements SelectInteraction, RequiresCatnip {
+    private transient Catnip catnip;
     
-    public InteractionResponseBuilder type(@Nonnull final InteractionResponseType type) {
-        this.type = type;
-        return this;
+    private InteractionType type;
+    private SelectInteractionData data;
+    private Member member;
+    private String token;
+    private int version;
+    private long channelIdAsLong;
+    private long guildIdAsLong;
+    private long idAsLong;
+    
+    @Override
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
     }
     
-    public InteractionResponseBuilder data(@Nonnull final InteractionApplicationCommandCallbackData data) {
-        this.data = data;
-        return this;
-    }
-    
-    public InteractionResponse build() {
-        return InteractionResponseImpl.builder()
-                .type(type)
-                .data(data)
-                .build();
+    @Getter
+    @Setter
+    @Accessors(fluent = true)
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SelectInteractionDataImpl implements SelectInteractionData {
+        private MessageComponentType componentType;
+        private String customId;
+        private List<String> values;
     }
 }

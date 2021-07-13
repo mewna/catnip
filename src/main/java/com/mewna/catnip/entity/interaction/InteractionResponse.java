@@ -29,6 +29,7 @@ package com.mewna.catnip.entity.interaction;
 
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.interaction.command.InteractionApplicationCommandCallbackData;
 
 import javax.annotation.Nonnull;
 

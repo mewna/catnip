@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,11 +25,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.interaction;
+package com.mewna.catnip.entity.interaction.command;
+
+import com.mewna.catnip.entity.interaction.Interaction;
 
 /**
  * @author amy
- * @since 12/10/20.
+ * @since 5/30/21.
  */
-public interface ApplicationCommandOptionIntegerChoice extends ApplicationCommandOptionChoice<Integer> {
+public interface ApplicationCommandInteraction extends Interaction<ApplicationCommandInteractionData> {
 }

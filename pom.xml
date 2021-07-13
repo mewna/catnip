@@ -22,6 +22,7 @@
 
         <koloboke-compile.version>0.5.1</koloboke-compile.version>
         <koloboke-impl.version>1.0.0</koloboke-impl.version>
+        <emoji-java.version>5.1.1</emoji-java.version>
 
         <junit.version>5.7.2</junit.version>
         <mockito.version>3.11.2</mockito.version>
@@ -135,6 +136,13 @@
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk15on</artifactId>
             <version>1.69</version>
+        </dependency>
+
+        <!-- Emoji detection for creation -->
+        <dependency>
+            <groupId>com.vdurmont</groupId>
+            <artifactId>emoji-java</artifactId>
+            <version>${emoji-java.version}</version>
         </dependency>
 
         <!-- Mockito -->

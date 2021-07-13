@@ -25,37 +25,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.builder.command;
+package com.mewna.catnip.entity.interaction.command;
 
-import com.mewna.catnip.entity.impl.interaction.component.InteractionResponseImpl;
-import com.mewna.catnip.entity.interaction.command.InteractionApplicationCommandCallbackData;
-import com.mewna.catnip.entity.interaction.InteractionResponse;
-import com.mewna.catnip.entity.interaction.InteractionResponseType;
-
-import javax.annotation.Nonnull;
+import lombok.Getter;
 
 /**
  * @author amy
- * @since 12/12/20.
+ * @since 12/10/20.
  */
-public class InteractionResponseBuilder {
-    private InteractionResponseType type;
-    private InteractionApplicationCommandCallbackData data;
+@Getter
+public enum ApplicationCommandOptionType {
+    SUB_COMMAND(1),
+    SUB_COMMAND_GROUP(2),
+    STRING(3),
+    INTEGER(4),
+    BOOLEAN(5),
+    USER(6),
+    CHANNEL(7),
+    ROLE(8),
+    ;
     
-    public InteractionResponseBuilder type(@Nonnull final InteractionResponseType type) {
-        this.type = type;
-        return this;
+    private final int key;
+    
+    ApplicationCommandOptionType(final int key) {
+        this.key = key;
     }
     
-    public InteractionResponseBuilder data(@Nonnull final InteractionApplicationCommandCallbackData data) {
-        this.data = data;
-        return this;
-    }
-    
-    public InteractionResponse build() {
-        return InteractionResponseImpl.builder()
-                .type(type)
-                .data(data)
-                .build();
+    public static ApplicationCommandOptionType byKey(final int key) {
+        for(final ApplicationCommandOptionType value : values()) {
+            if(value.key == key) {
+                return value;
+            }
+        }
+        throw new IllegalArgumentException("Unknown ApplicationCommandOptionType: " + key);
     }
 }

@@ -25,37 +25,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.builder.command;
-
-import com.mewna.catnip.entity.impl.interaction.component.InteractionResponseImpl;
-import com.mewna.catnip.entity.interaction.command.InteractionApplicationCommandCallbackData;
-import com.mewna.catnip.entity.interaction.InteractionResponse;
-import com.mewna.catnip.entity.interaction.InteractionResponseType;
-
-import javax.annotation.Nonnull;
+package com.mewna.catnip.entity.partials;
 
 /**
+ * Used for message components.
+ *
  * @author amy
- * @since 12/12/20.
+ * @since 7/12/21.
  */
-public class InteractionResponseBuilder {
-    private InteractionResponseType type;
-    private InteractionApplicationCommandCallbackData data;
-    
-    public InteractionResponseBuilder type(@Nonnull final InteractionResponseType type) {
-        this.type = type;
-        return this;
-    }
-    
-    public InteractionResponseBuilder data(@Nonnull final InteractionApplicationCommandCallbackData data) {
-        this.data = data;
-        return this;
-    }
-    
-    public InteractionResponse build() {
-        return InteractionResponseImpl.builder()
-                .type(type)
-                .data(data)
-                .build();
-    }
+public interface HasCustomId {
+    String customId();
 }
