@@ -135,8 +135,8 @@ public final class Routes {
     public static final Route GET_CURRENT_APPLICATION_INFORMATION = new Route(GET,    "/oauth2/applications/@me");
     public static final Route LIST_VOICE_REGIONS                  = new Route(GET,    "/voice/regions");
     public static final Route CREATE_INTERACTION_INITIAL_RESPONSE = new Route(POST,   "/interactions/:interaction/:token/callback", "interaction");
-    public static final Route EDIT_INTERACTION_INITIAL_RESPONSE   = new Route(PATCH,  "/webhooks/:interaction/:token/messages/@original");
-    public static final Route DELETE_INTERACTION_INITIAL_RESPONSE = new Route(DELETE, "/webhooks/:interaction/:token/messages/@original");
+    public static final Route EDIT_INTERACTION_INITIAL_RESPONSE   = new Route(PATCH,  "/webhooks/:interaction/:token/messages/@original", "interaction");
+    public static final Route DELETE_INTERACTION_INITIAL_RESPONSE = new Route(DELETE, "/webhooks/:interaction/:token/messages/@original", "interaction");
     public static final Route CREATE_INTERACTION_FOLLOWUP         = new Route(POST,   "/webhooks/:interaction/:token", "interaction");
     public static final Route EDIT_INTERACTION_FOLLOWUP           = new Route(PATCH,  "/webhooks/:interaction/:token/messages/:message", "interaction");
     public static final Route DELETE_INTERACTION_FOLLOWUP         = new Route(DELETE, "/webhooks/:interaction/:token/messages/:message", "interaction");
