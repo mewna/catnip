@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,54 +25,42 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.interaction;
+package com.mewna.catnip.entity.impl.interaction.component;
 
-import com.grack.nanojson.JsonArray;
-import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.message.Embed;
-import com.mewna.catnip.entity.message.MentionParseFlag;
-import com.mewna.catnip.entity.message.MessageFlag;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.guild.Member;
+import com.mewna.catnip.entity.interaction.component.ButtonInteraction;
+import com.mewna.catnip.entity.interaction.CustomIdInteractionData;
+import com.mewna.catnip.entity.interaction.InteractionType;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author amy
- * @since 12/10/20.
+ * @since 5/30/21.
  */
-public interface InteractionApplicationCommandCallbackData {
-    boolean tts();
+@Getter
+@Setter
+@Builder
+@Accessors(fluent = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class ButtonInteractionImpl implements ButtonInteraction, RequiresCatnip {
+    private transient Catnip catnip;
+    private InteractionType type;
+    private CustomIdInteractionData data;
+    private Member member;
+    private String token;
+    private long guildIdAsLong;
+    private long channelIdAsLong;
+    private long idAsLong;
+    private int version;
     
-    String content();
-    
-    List<Embed> embeds();
-    
-    Set<MentionParseFlag> allowedMentions();
-    
-    Set<MessageFlag> flags();
-    
-    default JsonObject toJson(@Nonnull final Catnip catnip) {
-        final JsonObject allowedMentions = new JsonObject();
-        if(allowedMentions() != null && !allowedMentions().isEmpty()) {
-            final EnumSet<MentionParseFlag> parse = EnumSet.copyOf(allowedMentions());
-            final JsonArray parseList = new JsonArray();
-            for(final MentionParseFlag p : parse) {
-                parseList.add(p.flagName());
-            }
-            allowedMentions.put("parse", parseList);
-        }
-        
-        final var builder = JsonObject.builder();
-        builder.value("tts", tts());
-        builder.value("content", content());
-        builder.value("embeds", JsonArray.from(embeds().stream()
-                .map(catnip.entityBuilder()::embedToJson)
-                .toArray(Object[]::new)));
-        builder.value("allowed_mentions", allowedMentions);
-        builder.value("flags", MessageFlag.fromSettable(flags()));
-        return builder.done();
+    @Override
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
     }
 }

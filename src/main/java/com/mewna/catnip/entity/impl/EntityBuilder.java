@@ -49,7 +49,12 @@ import com.mewna.catnip.entity.impl.guild.InviteImpl.InviteChannelImpl;
 import com.mewna.catnip.entity.impl.guild.InviteImpl.InviteGuildImpl;
 import com.mewna.catnip.entity.impl.guild.InviteImpl.InviterImpl;
 import com.mewna.catnip.entity.impl.guild.audit.*;
-import com.mewna.catnip.entity.impl.interaction.*;
+import com.mewna.catnip.entity.impl.interaction.CustomIdInteractionDataImpl;
+import com.mewna.catnip.entity.impl.interaction.InteractionMemberImpl;
+import com.mewna.catnip.entity.impl.interaction.command.*;
+import com.mewna.catnip.entity.impl.interaction.component.ButtonInteractionImpl;
+import com.mewna.catnip.entity.impl.interaction.component.SelectInteractionImpl;
+import com.mewna.catnip.entity.impl.interaction.component.SelectInteractionImpl.SelectInteractionDataImpl;
 import com.mewna.catnip.entity.impl.message.*;
 import com.mewna.catnip.entity.impl.message.EmbedImpl.*;
 import com.mewna.catnip.entity.impl.misc.*;
@@ -58,7 +63,12 @@ import com.mewna.catnip.entity.impl.user.*;
 import com.mewna.catnip.entity.impl.user.PresenceImpl.*;
 import com.mewna.catnip.entity.impl.voice.VoiceRegionImpl;
 import com.mewna.catnip.entity.impl.voice.VoiceServerUpdateImpl;
-import com.mewna.catnip.entity.interaction.*;
+import com.mewna.catnip.entity.interaction.CustomIdInteractionData;
+import com.mewna.catnip.entity.interaction.Interaction;
+import com.mewna.catnip.entity.interaction.InteractionMember;
+import com.mewna.catnip.entity.interaction.InteractionType;
+import com.mewna.catnip.entity.interaction.command.*;
+import com.mewna.catnip.entity.interaction.component.SelectInteractionData;
 import com.mewna.catnip.entity.message.*;
 import com.mewna.catnip.entity.message.Embed.*;
 import com.mewna.catnip.entity.message.Message.Attachment;
@@ -1590,21 +1600,56 @@ public final class EntityBuilder {
                         .build());
             }
             case MESSAGE_COMPONENT -> {
-                return delegate(Interaction.class, ButtonInteractionImpl.builder()
-                        .catnip(catnip)
-                        // TODO: Nullables
-                        .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id", "0")))
-                        .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id", "0")))
-                        .idAsLong(Long.parseUnsignedLong(data.getString("id", "0")))
-                        .token(data.getString("token"))
-                        .type(type)
-                        .version(data.getInt("version"))
-                        .member(data.has("member") ? createInteractionMember(data.getString("guild_id"), data.getObject("member")) : null)
-                        .data(data.has("data") ? new CustomIdInteractionDataImpl(
+                CustomIdInteractionData customIdInteractionData = null;
+                MessageComponentType componentType = null;
+                if(data.has("data")) {
+                    componentType = MessageComponentType.byKey(data.getObject("data").getInt("component_type"));
+                    switch(componentType) {
+                        case BUTTON -> customIdInteractionData = new CustomIdInteractionDataImpl(
                                 MessageComponentType.byKey(data.getObject("data").getInt("component_type")),
-                                data.getObject("data").getString("custom_id")
-                        ) : null)
-                        .build());
+                                data.getObject("data").getString("custom_id"));
+                        case SELECT -> customIdInteractionData = new SelectInteractionDataImpl(
+                                MessageComponentType.byKey(data.getObject("data").getInt("component_type")),
+                                data.getObject("data").getString("custom_id"),
+                                toStringList(data.getObject("data").getArray("values")));
+                        default -> throw new IllegalArgumentException("Unknown ComponentType for reaction: " + data.getObject("data").getInt("component_type"));
+                    }
+                }
+                if(componentType == null) {
+                    throw new IllegalStateException("Component interaction may not have null component type");
+                }
+                
+                switch(componentType) {
+                    case BUTTON -> {
+                        return delegate(Interaction.class, ButtonInteractionImpl.builder()
+                                .catnip(catnip)
+                                // TODO: Nullables
+                                .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id", "0")))
+                                .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id", "0")))
+                                .idAsLong(Long.parseUnsignedLong(data.getString("id", "0")))
+                                .token(data.getString("token"))
+                                .type(type)
+                                .version(data.getInt("version"))
+                                .member(data.has("member") ? createInteractionMember(data.getString("guild_id"), data.getObject("member")) : null)
+                                .data(customIdInteractionData)
+                                .build());
+                    }
+                    case SELECT -> {
+                        return delegate(Interaction.class, SelectInteractionImpl.builder()
+                                .catnip(catnip)
+                                // TODO: Nullables
+                                .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id", "0")))
+                                .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id", "0")))
+                                .idAsLong(Long.parseUnsignedLong(data.getString("id", "0")))
+                                .token(data.getString("token"))
+                                .type(type)
+                                .version(data.getInt("version"))
+                                .member(data.has("member") ? createInteractionMember(data.getString("guild_id"), data.getObject("member")) : null)
+                                .data((SelectInteractionData) customIdInteractionData)
+                                .build());
+                    }
+                    default -> throw new IllegalArgumentException("Unknown ComponentType for reaction: " + data.getObject("data").getInt("component_type"));
+                }
             }
             default -> throw new IllegalArgumentException("Unknown InteractionType for creation: " + type);
         }

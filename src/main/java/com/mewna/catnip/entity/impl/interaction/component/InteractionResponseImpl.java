@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,15 +25,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.impl.interaction;
+package com.mewna.catnip.entity.impl.interaction.component;
 
-import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.interaction.ApplicationCommandOptionIntegerChoice;
+import com.mewna.catnip.entity.interaction.command.InteractionApplicationCommandCallbackData;
+import com.mewna.catnip.entity.interaction.InteractionResponse;
+import com.mewna.catnip.entity.interaction.InteractionResponseType;
 import lombok.*;
 import lombok.experimental.Accessors;
-
-import javax.annotation.Nonnull;
 
 /**
  * @author amy
@@ -45,14 +43,7 @@ import javax.annotation.Nonnull;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApplicationCommandOptionIntegerChoiceImpl implements ApplicationCommandOptionIntegerChoice, RequiresCatnip {
-    private transient Catnip catnip;
-    
-    private String name;
-    private Integer value;
-    
-    @Override
-    public void catnip(@Nonnull final Catnip catnip) {
-        this.catnip = catnip;
-    }
+public class InteractionResponseImpl implements InteractionResponse {
+    private InteractionResponseType type;
+    private InteractionApplicationCommandCallbackData data;
 }

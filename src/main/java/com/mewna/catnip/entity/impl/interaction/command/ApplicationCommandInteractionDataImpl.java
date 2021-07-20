@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,14 +25,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.impl.interaction;
+package com.mewna.catnip.entity.impl.interaction.command;
 
-import com.mewna.catnip.entity.interaction.ApplicationCommandOption;
-import com.mewna.catnip.entity.interaction.ApplicationCommandOptionChoice;
-import com.mewna.catnip.entity.interaction.ApplicationCommandOptionType;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.interaction.command.ApplicationCommandInteractionData;
+import com.mewna.catnip.entity.interaction.command.ApplicationCommandInteractionDataOption;
 import lombok.*;
 import lombok.experimental.Accessors;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
@@ -45,12 +47,15 @@ import java.util.List;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApplicationCommandOptionImpl implements ApplicationCommandOption {
-    private ApplicationCommandOptionType type;
-    private boolean defaultOption;
-    private boolean required;
-    private List<ApplicationCommandOptionChoice<?>> choices;
-    private List<ApplicationCommandOption> options;
-    private String description;
+public class ApplicationCommandInteractionDataImpl implements ApplicationCommandInteractionData, RequiresCatnip {
+    private transient Catnip catnip;
+    
+    private long idAsLong;
     private String name;
+    private List<ApplicationCommandInteractionDataOption> options;
+    
+    @Override
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
+    }
 }

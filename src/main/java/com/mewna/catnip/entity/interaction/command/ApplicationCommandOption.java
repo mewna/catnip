@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,43 +25,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.impl.interaction;
+package com.mewna.catnip.entity.interaction.command;
 
-import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.entity.interaction.ApplicationCommandInteraction;
-import com.mewna.catnip.entity.interaction.ApplicationCommandInteractionData;
-import com.mewna.catnip.entity.interaction.Interaction;
-import com.mewna.catnip.entity.interaction.InteractionType;
-import lombok.*;
-import lombok.experimental.Accessors;
+import com.grack.nanojson.JsonObject;
+import com.mewna.catnip.entity.partials.HasDescription;
+import com.mewna.catnip.entity.partials.HasName;
 
-import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * @author amy
  * @since 12/10/20.
  */
-@Getter
-@Setter
-@Builder
-@Accessors(fluent = true)
-@NoArgsConstructor
-@AllArgsConstructor
-public class ApplicationCommandInteractionImpl implements ApplicationCommandInteraction, RequiresCatnip {
-    private transient Catnip catnip;
-    private InteractionType type;
-    private ApplicationCommandInteractionData data;
-    private Member member;
-    private String token;
-    private long guildIdAsLong;
-    private long channelIdAsLong;
-    private long idAsLong;
-    private int version;
+public interface ApplicationCommandOption extends HasName, HasDescription {
+    ApplicationCommandOptionType type();
     
-    @Override
-    public void catnip(@Nonnull final Catnip catnip) {
-        this.catnip = catnip;
+    boolean defaultOption();
+    
+    boolean required();
+    
+    List<ApplicationCommandOptionChoice<?>> choices();
+    
+    List<ApplicationCommandOption> options();
+    
+    default JsonObject toJson() {
+        final var choices = choices() != null ? choices() : List.of();
+        final var options = options() != null ? options() : List.of();
+        final var builder = JsonObject.builder();
+        builder.value("type", type().key());
+        builder.value("name", name());
+        builder.value("description", description());
+        builder.value("default", defaultOption());
+        builder.value("required", required());
+        builder.value("choices", choices);
+        builder.value("options", options);
+        return builder.done();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,11 +25,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.interaction;
+package com.mewna.catnip.entity.impl.interaction.command;
+
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.interaction.command.ApplicationCommand;
+import com.mewna.catnip.entity.interaction.command.ApplicationCommandOption;
+import lombok.*;
+import lombok.experimental.Accessors;
+
+import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * @author amy
  * @since 12/10/20.
  */
-public interface ApplicationCommandOptionStringChoice extends ApplicationCommandOptionChoice<String> {
+@Getter
+@Setter
+@Builder
+@Accessors(fluent = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class ApplicationCommandImpl implements ApplicationCommand, RequiresCatnip {
+    private transient Catnip catnip;
+    
+    private long idAsLong;
+    private long applicationIdAsLong;
+    private long guildIdAsLong;
+    private String name;
+    private String description;
+    private List<ApplicationCommandOption> options;
+    
+    @Override
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
+    }
 }

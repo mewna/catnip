@@ -25,14 +25,44 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.interaction;
+package com.mewna.catnip.entity.impl.message.component;
 
+import com.mewna.catnip.entity.message.component.Select;
+import com.mewna.catnip.entity.misc.Emoji;
 import lombok.*;
 import lombok.experimental.Accessors;
 
+import java.util.List;
+
 /**
  * @author amy
- * @since 5/30/21.
+ * @since 7/12/21.
  */
-public interface ButtonInteraction extends Interaction<CustomIdInteractionData> {
+@Getter
+@Setter
+@Accessors(fluent = true)
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class SelectImpl implements Select {
+    private List<SelectOption> options;
+    private String placeholder;
+    private int minValues;
+    private int maxValues;
+    private boolean disabled;
+    private String customId;
+    
+    @Getter
+    @Setter
+    @Accessors(fluent = true)
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SelectOptionImpl implements SelectOption {
+        private String label;
+        private String value;
+        private String description;
+        private Emoji emoji;
+        private boolean isDefault;
+    }
 }

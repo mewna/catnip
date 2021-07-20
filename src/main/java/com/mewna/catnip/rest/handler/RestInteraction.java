@@ -29,8 +29,8 @@ package com.mewna.catnip.rest.handler;
 
 import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
-import com.mewna.catnip.entity.interaction.ApplicationCommand;
-import com.mewna.catnip.entity.interaction.ApplicationCommandOption;
+import com.mewna.catnip.entity.interaction.command.ApplicationCommand;
+import com.mewna.catnip.entity.interaction.command.ApplicationCommandOption;
 import com.mewna.catnip.entity.interaction.InteractionResponseType;
 import com.mewna.catnip.entity.message.MentionParseFlag;
 import com.mewna.catnip.entity.message.Message;

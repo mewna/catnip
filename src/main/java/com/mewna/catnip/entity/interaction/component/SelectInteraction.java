@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,23 +25,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.interaction;
+package com.mewna.catnip.entity.interaction.component;
 
-import com.grack.nanojson.JsonObject;
-import com.mewna.catnip.entity.partials.HasName;
+import com.mewna.catnip.entity.interaction.Interaction;
 
 /**
- * @param <T> The type of this choice. Must be either {@code String} or {@link Integer};
  * @author amy
- * @since 12/10/20.
+ * @since 7/12/21.
  */
-public interface ApplicationCommandOptionChoice<T> extends HasName {
-    T value();
-    
-    default JsonObject toJson() {
-        final var builder = JsonObject.builder();
-        builder.value("name", name());
-        builder.value("value", value());
-        return builder.done();
-    }
+public interface SelectInteraction extends Interaction<SelectInteractionData> {
 }

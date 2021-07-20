@@ -27,8 +27,8 @@
 
 package com.mewna.catnip.entity.builder.command;
 
-import com.mewna.catnip.entity.impl.interaction.InteractionApplicationCommandCallbackDataImpl;
-import com.mewna.catnip.entity.interaction.InteractionApplicationCommandCallbackData;
+import com.mewna.catnip.entity.impl.interaction.command.InteractionApplicationCommandCallbackDataImpl;
+import com.mewna.catnip.entity.interaction.command.InteractionApplicationCommandCallbackData;
 import com.mewna.catnip.entity.message.Embed;
 import com.mewna.catnip.entity.message.MentionParseFlag;
 import com.mewna.catnip.entity.message.MessageFlag;

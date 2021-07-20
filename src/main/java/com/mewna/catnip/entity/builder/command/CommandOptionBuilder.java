@@ -27,10 +27,10 @@
 
 package com.mewna.catnip.entity.builder.command;
 
-import com.mewna.catnip.entity.impl.interaction.ApplicationCommandOptionImpl;
-import com.mewna.catnip.entity.interaction.ApplicationCommandOption;
-import com.mewna.catnip.entity.interaction.ApplicationCommandOptionChoice;
-import com.mewna.catnip.entity.interaction.ApplicationCommandOptionType;
+import com.mewna.catnip.entity.impl.interaction.command.ApplicationCommandOptionImpl;
+import com.mewna.catnip.entity.interaction.command.ApplicationCommandOption;
+import com.mewna.catnip.entity.interaction.command.ApplicationCommandOptionChoice;
+import com.mewna.catnip.entity.interaction.command.ApplicationCommandOptionType;
 import com.mewna.catnip.util.Validators;
 
 import javax.annotation.Nonnull;

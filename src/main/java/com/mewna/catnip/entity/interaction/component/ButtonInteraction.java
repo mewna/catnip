@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,37 +25,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.impl.interaction;
+package com.mewna.catnip.entity.interaction.component;
 
-import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.interaction.ApplicationCommandInteractionData;
-import com.mewna.catnip.entity.interaction.ApplicationCommandInteractionDataOption;
+import com.mewna.catnip.entity.interaction.CustomIdInteractionData;
+import com.mewna.catnip.entity.interaction.Interaction;
 import lombok.*;
 import lombok.experimental.Accessors;
 
-import javax.annotation.Nonnull;
-import java.util.List;
-
 /**
  * @author amy
- * @since 12/10/20.
+ * @since 5/30/21.
  */
-@Getter
-@Setter
-@Builder
-@Accessors(fluent = true)
-@NoArgsConstructor
-@AllArgsConstructor
-public class ApplicationCommandInteractionDataImpl implements ApplicationCommandInteractionData, RequiresCatnip {
-    private transient Catnip catnip;
-    
-    private long idAsLong;
-    private String name;
-    private List<ApplicationCommandInteractionDataOption> options;
-    
-    @Override
-    public void catnip(@Nonnull final Catnip catnip) {
-        this.catnip = catnip;
-    }
+public interface ButtonInteraction extends Interaction<CustomIdInteractionData> {
 }

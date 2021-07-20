@@ -25,37 +25,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.builder.command;
+package com.mewna.catnip.entity.impl.interaction.command;
 
-import com.mewna.catnip.entity.impl.interaction.component.InteractionResponseImpl;
-import com.mewna.catnip.entity.interaction.command.InteractionApplicationCommandCallbackData;
-import com.mewna.catnip.entity.interaction.InteractionResponse;
-import com.mewna.catnip.entity.interaction.InteractionResponseType;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.interaction.command.ApplicationCommandOptionIntegerChoice;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
 
 /**
  * @author amy
- * @since 12/12/20.
+ * @since 12/10/20.
  */
-public class InteractionResponseBuilder {
-    private InteractionResponseType type;
-    private InteractionApplicationCommandCallbackData data;
+@Getter
+@Setter
+@Builder
+@Accessors(fluent = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class ApplicationCommandOptionIntegerChoiceImpl implements ApplicationCommandOptionIntegerChoice, RequiresCatnip {
+    private transient Catnip catnip;
     
-    public InteractionResponseBuilder type(@Nonnull final InteractionResponseType type) {
-        this.type = type;
-        return this;
-    }
+    private String name;
+    private Integer value;
     
-    public InteractionResponseBuilder data(@Nonnull final InteractionApplicationCommandCallbackData data) {
-        this.data = data;
-        return this;
-    }
-    
-    public InteractionResponse build() {
-        return InteractionResponseImpl.builder()
-                .type(type)
-                .data(data)
-                .build();
+    @Override
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
     }
 }

@@ -27,73 +27,94 @@
 
 package com.mewna.catnip.entity.message.component;
 
+import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
 import com.mewna.catnip.entity.misc.Emoji;
 import com.mewna.catnip.entity.misc.Emoji.CustomEmoji;
 import com.mewna.catnip.entity.misc.Emoji.UnicodeEmoji;
 import com.mewna.catnip.entity.partials.HasCustomId;
-import lombok.Getter;
+
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author amy
- * @since 5/30/21.
+ * @since 7/12/21.
  */
-public interface Button extends MessageComponent, HasCustomId {
+public interface Select extends MessageComponent, HasCustomId {
     @Override
     default MessageComponentType type() {
-        return MessageComponentType.BUTTON;
+        return MessageComponentType.SELECT;
     }
     
-    ButtonStyle style();
+    @Nonnull
+    List<SelectOption> options();
     
-    String label();
+    @Nullable
+    String placeholder();
     
-    Emoji emoji();
+    @Nonnegative
+    int minValues();
     
-    String url();
+    @Nonnegative
+    int maxValues();
     
     boolean disabled();
     
     @Override
     default JsonObject toJson() {
-        JsonObject emojiObject = null;
-        if(emoji() != null) {
-            emojiObject = new JsonObject();
-            if(emoji() instanceof UnicodeEmoji) {
-                final var uni = (UnicodeEmoji) emoji();
-                emojiObject.put("name", uni.name());
-            } else if(emoji() instanceof CustomEmoji) {
-                final var custom = (CustomEmoji) emoji();
-                emojiObject.put("id", custom.id());
-                emojiObject.put("name", custom.name());
-                emojiObject.put("animated", custom.animated());
-            }
-        }
-        
-        final var o = new JsonObject();
+        final JsonObject o = new JsonObject();
         o.put("type", type().id());
-        o.put("style", style().id());
-        o.put("label", label());
-        o.put("emoji", emojiObject);
         o.put("custom_id", customId());
-        o.put("url", url());
+        o.put("options", new JsonArray(options().stream().map(SelectOption::toJson).collect(Collectors.toList())));
+        o.put("placeholder", placeholder());
+        o.put("min_values", minValues());
+        o.put("max_values", maxValues());
         o.put("disabled", disabled());
         return o;
     }
     
-    enum ButtonStyle {
-        PRIMARY(1),
-        SECONDARY(2),
-        SUCCESS(3),
-        DANGER(4),
-        LINK(5),
-        ;
+    interface SelectOption {
+        @Nonnull
+        String label();
         
-        @Getter
-        private final int id;
+        @Nonnull
+        String value();
         
-        ButtonStyle(final int id) {
-            this.id = id;
+        @Nullable
+        String description();
+        
+        @Nullable
+        Emoji emoji();
+        
+        boolean isDefault();
+        
+        @SuppressWarnings("ConstantConditions")
+        default JsonObject toJson() {
+            JsonObject emojiObject = null;
+            if(emoji() != null) {
+                emojiObject = new JsonObject();
+                if(emoji() instanceof UnicodeEmoji) {
+                    final var uni = (UnicodeEmoji) emoji();
+                    emojiObject.put("name", uni.name());
+                } else if(emoji() instanceof CustomEmoji) {
+                    final var custom = (CustomEmoji) emoji();
+                    emojiObject.put("id", custom.id());
+                    emojiObject.put("name", custom.name());
+                    emojiObject.put("animated", custom.animated());
+                }
+            }
+            
+            final var o = new JsonObject();
+            o.put("label", label());
+            o.put("value", value());
+            o.put("emoji", emojiObject);
+            o.put("description", description());
+            o.put("default", isDefault());
+            return o;
         }
     }
 }

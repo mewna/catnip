@@ -25,37 +25,54 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.builder.command;
+package com.mewna.catnip.entity.interaction.command;
 
-import com.mewna.catnip.entity.impl.interaction.component.InteractionResponseImpl;
-import com.mewna.catnip.entity.interaction.command.InteractionApplicationCommandCallbackData;
-import com.mewna.catnip.entity.interaction.InteractionResponse;
-import com.mewna.catnip.entity.interaction.InteractionResponseType;
+import com.grack.nanojson.JsonArray;
+import com.grack.nanojson.JsonObject;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.message.Embed;
+import com.mewna.catnip.entity.message.MentionParseFlag;
+import com.mewna.catnip.entity.message.MessageFlag;
 
 import javax.annotation.Nonnull;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author amy
- * @since 12/12/20.
+ * @since 12/10/20.
  */
-public class InteractionResponseBuilder {
-    private InteractionResponseType type;
-    private InteractionApplicationCommandCallbackData data;
+public interface InteractionApplicationCommandCallbackData {
+    boolean tts();
     
-    public InteractionResponseBuilder type(@Nonnull final InteractionResponseType type) {
-        this.type = type;
-        return this;
-    }
+    String content();
     
-    public InteractionResponseBuilder data(@Nonnull final InteractionApplicationCommandCallbackData data) {
-        this.data = data;
-        return this;
-    }
+    List<Embed> embeds();
     
-    public InteractionResponse build() {
-        return InteractionResponseImpl.builder()
-                .type(type)
-                .data(data)
-                .build();
+    Set<MentionParseFlag> allowedMentions();
+    
+    Set<MessageFlag> flags();
+    
+    default JsonObject toJson(@Nonnull final Catnip catnip) {
+        final JsonObject allowedMentions = new JsonObject();
+        if(allowedMentions() != null && !allowedMentions().isEmpty()) {
+            final EnumSet<MentionParseFlag> parse = EnumSet.copyOf(allowedMentions());
+            final JsonArray parseList = new JsonArray();
+            for(final MentionParseFlag p : parse) {
+                parseList.add(p.flagName());
+            }
+            allowedMentions.put("parse", parseList);
+        }
+        
+        final var builder = JsonObject.builder();
+        builder.value("tts", tts());
+        builder.value("content", content());
+        builder.value("embeds", JsonArray.from(embeds().stream()
+                .map(catnip.entityBuilder()::embedToJson)
+                .toArray(Object[]::new)));
+        builder.value("allowed_mentions", allowedMentions);
+        builder.value("flags", MessageFlag.fromSettable(flags()));
+        return builder.done();
     }
 }

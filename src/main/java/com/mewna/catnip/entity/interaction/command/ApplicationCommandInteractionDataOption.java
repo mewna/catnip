@@ -25,42 +25,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.impl.interaction;
+package com.mewna.catnip.entity.interaction.command;
 
-import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.RequiresCatnip;
-import com.mewna.catnip.entity.guild.Member;
-import com.mewna.catnip.entity.interaction.ButtonInteraction;
-import com.mewna.catnip.entity.interaction.CustomIdInteractionData;
-import com.mewna.catnip.entity.interaction.InteractionType;
-import lombok.*;
-import lombok.experimental.Accessors;
+import com.mewna.catnip.entity.partials.HasName;
 
-import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * @author amy
- * @since 5/30/21.
+ * @since 12/10/20.
  */
-@Getter
-@Setter
-@Builder
-@Accessors(fluent = true)
-@NoArgsConstructor
-@AllArgsConstructor
-public class ButtonInteractionImpl implements ButtonInteraction, RequiresCatnip {
-    private transient Catnip catnip;
-    private InteractionType type;
-    private CustomIdInteractionData data;
-    private Member member;
-    private String token;
-    private long guildIdAsLong;
-    private long channelIdAsLong;
-    private long idAsLong;
-    private int version;
+public interface ApplicationCommandInteractionDataOption extends HasName {
+    ApplicationCommandOptionType type();
+    ApplicationCommandOptionChoice<?> value();
     
-    @Override
-    public void catnip(@Nonnull final Catnip catnip) {
-        this.catnip = catnip;
-    }
+    List<ApplicationCommandInteractionDataOption> options();
 }
