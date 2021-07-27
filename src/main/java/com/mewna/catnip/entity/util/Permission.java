@@ -71,8 +71,12 @@ public enum Permission {
     MANAGE_ROLES(1L << 28, true, "Manage Roles"),
     MANAGE_WEBHOOKS(1L << 29, true, "Manage Webhooks"),
     MANAGE_EMOJIS_AND_STICKERS(1L << 30, false, "Manage Emojis & Stickers"),
-    USE_APPLICATION_COMMANDS(1L << 31, false, "Use Slash Commands"),
+    USE_APPLICATION_COMMANDS(1L << 31, true, "Use Slash Commands"),
+    REQUEST_TO_SPEAK(1L << 32L, true, "Request To Speak"),
     MANAGE_EVENTS(1L << 33, false, "Manage Guild Events"), // This permission is still an experiment, but will come soon
+    MANAGE_THREADS(1L << 34, true, "Manage Threads"),
+    USE_PUBLIC_THREADS(1L << 35, true, "Use Public Threads"),
+    USE_PRIVATE_THREADS(1L << 36, true, "Use Private Threads"),
     ;
     
     public static final long ALL = from(values());

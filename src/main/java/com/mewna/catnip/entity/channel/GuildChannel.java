@@ -34,6 +34,7 @@ import com.mewna.catnip.entity.guild.PermissionOverride;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
 import com.mewna.catnip.entity.misc.CreatedInvite;
 import com.mewna.catnip.entity.partials.HasName;
+import com.mewna.catnip.entity.partials.HasParentChannel;
 import com.mewna.catnip.entity.util.Permission;
 import com.mewna.catnip.rest.guild.PermissionOverrideData;
 import com.mewna.catnip.rest.invite.InviteCreateOptions;
@@ -60,33 +61,12 @@ import java.util.function.Consumer;
  * @since 9/12/18
  */
 @SuppressWarnings("unused")
-public interface GuildChannel extends GuildEntity, Channel, HasName {
+public interface GuildChannel extends GuildEntity, Channel, HasName, HasParentChannel {
     /**
      * @return The position of the channel.
      */
     @CheckReturnValue
     int position();
-    
-    /**
-     * @return The id of the {@link Category} that is the parent of this
-     * channel. May be {@code null}.
-     */
-    @Nullable
-    @CheckReturnValue
-    default String parentId() {
-        final long id = parentIdAsLong();
-        if(id == 0) {
-            return null;
-        }
-        return Long.toUnsignedString(id);
-    }
-    
-    /**
-     * @return The id of the {@link Category} that is the parent of this
-     * channel. A value of {@code 0} means no parent.
-     */
-    @CheckReturnValue
-    long parentIdAsLong();
     
     /**
      * @return The permission overrides set on this channel. Will never be

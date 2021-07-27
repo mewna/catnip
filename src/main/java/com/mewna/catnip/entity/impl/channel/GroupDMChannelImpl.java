@@ -47,7 +47,7 @@ import java.util.List;
 @Accessors(fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class GroupDMChannelImpl implements GroupDMChannel, RequiresCatnip {
+public class GroupDMChannelImpl implements GroupDMChannel {
     private final ChannelType type = ChannelType.GROUP_DM;
     
     private transient Catnip catnip;

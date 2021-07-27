@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,55 +25,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.message;
+package com.mewna.catnip.entity.impl.channel;
 
-import lombok.Getter;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.channel.Channel.ChannelType;
+import com.mewna.catnip.entity.channel.DeletedThread;
+import lombok.*;
+import lombok.experimental.Accessors;
 
-import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
 /**
  * @author amy
- * @since 9/4/18.
+ * @since 5/9/21.
  */
-public enum MessageType {
-    DEFAULT(0),
-    RECIPIENT_ADD(1),
-    RECIPIENT_REMOVE(2),
-    CALL(3),
-    CHANNEL_NAME_CHANGE(4),
-    CHANNEL_ICON_CHANGE(5),
-    CHANNEL_PINNED_MESSAGE(6),
-    GUILD_MEMBER_JOIN(7),
-    USER_PREMIUM_GUILD_SUBSCRIPTION(8),
-    USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1(9),
-    USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2(10),
-    USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3(11),
-    CHANNEL_FOLLOW_ADD(12),
-    GUILD_DISCOVERY_DISQUALIFIED(14),
-    GUILD_DISCOVERY_REQUALIFIED(15),
-    GUILD_DISCOVERY_GRACE_PERIOD_INITIAL_WARNING(16),
-    GUILD_DISCOVERY_GRACE_PERIOD_FINAL_WARNING(17),
-    THREAD_CREATED(18),
-    REPLY(19),
-    INTERACTION(20),
-    THREAD_STARTER_MESSAGE(21),
-    ;
-    @Getter
-    private final int id;
+@Getter
+@Setter
+@Builder
+@Accessors(fluent = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class DeletedThreadImpl implements DeletedThread, RequiresCatnip {
+    private transient Catnip catnip;
     
-    MessageType(final int id) {
-        this.id = id;
-    }
+    private ChannelType type;
+    private long idAsLong;
+    private long guildIdAsLong;
+    private long parentIdAsLong;
     
-    @Nonnull
-    @CheckReturnValue
-    public static MessageType byId(final int id) {
-        for(final MessageType m : values()) {
-            if(m.id == id) {
-                return m;
-            }
-        }
-        throw new IllegalArgumentException("No such MessageType: " + id);
+    @Override
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
     }
 }

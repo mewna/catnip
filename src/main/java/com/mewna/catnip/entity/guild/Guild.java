@@ -72,7 +72,7 @@ import java.util.Set;
  * @since 9/6/18
  */
 @SuppressWarnings({"unused", "RedundantSuppression"})
-public interface Guild extends Snowflake, HasName, HasNullableDescription, HasIcon, HasApplication, Timestamped {
+public interface Guild extends Snowflake, HasName, HasNullableDescription, HasIcon, HasApplication, HasOwner {
     int NICKNAME_MAX_LENGTH = 32;
     
     /**
@@ -113,14 +113,23 @@ public interface Guild extends Snowflake, HasName, HasNullableDescription, HasIc
     }
     
     /**
-     * @return The guild owner of the guild.
+     * @return The owner of the guild.
+     */
+    @Nonnull
+    @Override
+    @CheckReturnValue
+    default Maybe<User> owner() {
+        return catnip().cache().user(ownerId());
+    }
+    
+    /**
+     * @return The {@link Member} of the guild's owner.
      */
     @Nonnull
     @CheckReturnValue
-    default Maybe<Member> owner() {
+    default Maybe<Member> ownerMember() {
         return catnip().cache().member(id(), ownerId());
     }
-    
     /**
      * @return Whether the guild is owned by the current user.
      */

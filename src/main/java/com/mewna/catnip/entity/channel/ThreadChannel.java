@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 amy, All rights reserved.
+ * Copyright (c) 2021 amy, All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,63 +25,73 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.impl.channel;
+package com.mewna.catnip.entity.channel;
 
-import com.mewna.catnip.Catnip;
-import com.mewna.catnip.entity.channel.UserDMChannel;
-import com.mewna.catnip.entity.user.User;
-import io.reactivex.rxjava3.core.Maybe;
-import lombok.*;
-import lombok.experimental.Accessors;
+import com.mewna.catnip.entity.partials.HasJoinedAt;
+import com.mewna.catnip.entity.partials.HasOwner;
+import com.mewna.catnip.entity.partials.HasUser;
+import com.mewna.catnip.entity.partials.Snowflake;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.time.OffsetDateTime;
+import java.util.EnumSet;
 
 /**
- * @author natanbc
- * @since 9/12/18
+ * @author amy
+ * @since 5/1/21.
  */
-@Getter
-@Setter
-@Builder
-@Accessors(fluent = true)
-@NoArgsConstructor
-@AllArgsConstructor
-public class UserDMChannelImpl implements UserDMChannel {
-    private final ChannelType type = ChannelType.DM;
+public interface ThreadChannel extends TextChannel, HasOwner {
+    int messageCount();
     
-    private transient Catnip catnip;
+    int memberCount();
     
-    private long idAsLong;
-    private long userIdAsLong;
+    ThreadMember member();
     
-    @Override
-    public void catnip(@Nonnull final Catnip catnip) {
-        this.catnip = catnip;
-    }
+    ThreadMetadata metadata();
     
-    @Override
-    public int hashCode() {
-        return Long.hashCode(idAsLong);
-    }
-    
-    @Override
-    public boolean equals(final Object obj) {
-        return obj instanceof UserDMChannel && ((UserDMChannel) obj).idAsLong() == idAsLong;
-    }
-    
-    @Override
-    public String toString() {
-        return String.format("UserDMChannel (%s)", recipient());
-    }
-    
+    /**
+     * @return The ID of the user that created this thread.
+     */
     @Nonnull
     @Override
-    public Maybe<User> recipient() {
-        return catnip.cache().user(userIdAsLong);
+    default String ownerId() {
+        return HasOwner.super.ownerId();
     }
     
+    /**
+     * @return The ID of the {@link TextChannel} that contains this thread.
+     */
+    @Nullable
     @Override
-    public long ownerIdAsLong() {
-        throw new UnsupportedOperationException("Not currently needed for user DMs");
+    default String parentId() {
+        return TextChannel.super.parentId();
+    }
+    
+    enum ThreadFlags {}
+    
+    interface ThreadMember extends Snowflake, HasUser, HasJoinedAt {
+        default EnumSet<ThreadFlags> flags() {
+            return EnumSet.noneOf(ThreadFlags.class);
+        }
+    }
+    
+    interface ThreadMetadata {
+        boolean locked();
+        
+        boolean archived();
+        
+        long archiverIdAsLong();
+        
+        default String archiverId() {
+            return Long.toUnsignedString(archiverIdAsLong());
+        }
+        
+        OffsetDateTime archiveTimestamp();
+        
+        /**
+         * Can currently only be set to: 60, 1440, 4320, 10080.
+         */
+        int autoArchiveDuration();
     }
 }
