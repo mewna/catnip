@@ -44,6 +44,7 @@ public enum ApplicationCommandOptionType {
     CHANNEL(7),
     ROLE(8),
     MENTIONABLE(9),
+    NUMBER(10),
     ;
     
     private final int key;
