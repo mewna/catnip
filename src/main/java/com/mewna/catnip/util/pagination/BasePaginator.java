@@ -27,7 +27,7 @@
 
 package com.mewna.catnip.util.pagination;
 
-import com.mewna.catnip.util.VoidHelper;
+import com.mewna.catnip.util.UnitHelper;
 import com.mewna.catnip.util.rx.RxHelpers;
 import io.reactivex.rxjava3.core.Observable;
 
@@ -179,7 +179,7 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
             data.blockingSubscribe(entity -> update(state, entity));
             final T last = state.last();
             if(state.done() || remaining - fetchCount != state.remaining() || last == null) {
-                return RxHelpers.futureToObservable(CompletableFuture.completedFuture(VoidHelper.VOID));
+                return RxHelpers.futureToObservable(CompletableFuture.completedFuture(UnitHelper.UNIT));
             }
             return fetch(idOf.apply(last), state);
         });

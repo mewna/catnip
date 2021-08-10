@@ -27,37 +27,29 @@
 
 package com.mewna.catnip.util;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-
 /**
  * A horrible, ugly, no-good, very-bad hack, but it's necessary. In the
  * pagination classes (used for ex. batch message pagination), we have a
  * situation where we compose observables in a chain, then terminate by
- * returning an empty Observable&lt;Void&gt;. The problem with this is that we
- * can't just shove a {@code null} into it, as that's illegal in Rx2 operators
+ * returning an empty Observable&lt;Unit&gt;. The problem with this is that we
+ * can't just shove a {@code null} into it, as that's illegal in Rx3 operators
  * because reasons. Returning a Completable isn't an option either because it's
- * really a {@code Observable<T> | Observable<Void>} return type, for reasons
- * I'd rather not try and work out since I didn't write that code. To get
- * around this issue, we do the horrible, awful hack of instantiating a Void
- * and storing it for use in those cases.
+ * really a {@code Observable<T> | Observable<Unit>} return type, for reasons
+ * I'd rather not try and work out since I didn't write that code.
  *
  * @author amy
  * @since 3/8/20.
  */
-public final class VoidHelper {
-    public static final Void VOID;
+public final class UnitHelper {
+    @SuppressWarnings("StaticVariableOfConcreteClass")
+    public static final Unit UNIT = new Unit();
     
-    static {
-        try {
-            final Constructor<Void> constructor = Void.class.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            VOID = constructor.newInstance();
-        } catch(final NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+    private UnitHelper() {
     }
     
-    private VoidHelper() {
+    @SuppressWarnings("Singleton")
+    public static final class Unit {
+        private Unit() {
+        }
     }
 }
