@@ -13,7 +13,7 @@
         <delombok.output>${project.basedir}/delombok</delombok.output>
 
         <lombok.version>1.18.20</lombok.version>
-        <rxjava.version>3.0.13</rxjava.version>
+        <rxjava.version>3.1.0</rxjava.version>
         <slf4j.version>1.7.32</slf4j.version>
         <commons.lang.version>3.12.0</commons.lang.version>
         <commons.codec.version>1.15</commons.codec.version>
