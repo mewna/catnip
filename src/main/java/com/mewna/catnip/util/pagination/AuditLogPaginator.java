@@ -35,6 +35,8 @@ import com.mewna.catnip.entity.guild.audit.AuditLogEntry;
 import com.mewna.catnip.entity.impl.EntityBuilder;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.util.JsonUtil;
+import com.mewna.catnip.util.UnitHelper;
+import com.mewna.catnip.util.UnitHelper.Unit;
 import io.reactivex.rxjava3.core.Observable;
 
 import javax.annotation.Nonnull;
@@ -81,7 +83,7 @@ public abstract class AuditLogPaginator extends BasePaginator<AuditLogEntry, Jso
     
     @Nonnull
     @Override
-    protected Observable<Void> fetch(@Nonnull final PaginationCallback<AuditLogEntry> action) {
+    protected Observable<Unit> fetch(@Nonnull final PaginationCallback<AuditLogEntry> action) {
         return fetch(null, new RequestState<>(limit, requestSize, action)
                 .extra("user", userId)
                 .extra("type", type)

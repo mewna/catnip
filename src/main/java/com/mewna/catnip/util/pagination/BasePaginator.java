@@ -28,6 +28,7 @@
 package com.mewna.catnip.util.pagination;
 
 import com.mewna.catnip.util.UnitHelper;
+import com.mewna.catnip.util.UnitHelper.Unit;
 import com.mewna.catnip.util.rx.RxHelpers;
 import io.reactivex.rxjava3.core.Observable;
 
@@ -138,7 +139,7 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
      * @return A completion stage representing the end of the iteration.
      */
     @Nonnull
-    public Observable<Void> forEach(@Nonnull final Consumer<T> action) {
+    public Observable<Unit> forEach(@Nonnull final Consumer<T> action) {
         return fetchWhile(e -> {
             action.accept(e);
             return true;
@@ -159,19 +160,19 @@ public abstract class BasePaginator<T, J, P extends BasePaginator<T, J, P>> {
      * @return A completion stage representing the end of the iteration.
      */
     @Nonnull
-    public Observable<Void> fetchWhile(@Nonnull final PaginationCallback<T> callback) {
+    public Observable<Unit> fetchWhile(@Nonnull final PaginationCallback<T> callback) {
         return fetch(callback);
     }
     
     @Nonnull
     @CheckReturnValue
-    protected Observable<Void> fetch(@Nonnull final PaginationCallback<T> action) {
+    protected Observable<Unit> fetch(@Nonnull final PaginationCallback<T> action) {
         return fetch(null, new RequestState<>(limit, requestSize, action));
     }
     
     @Nonnull
     @CheckReturnValue
-    protected Observable<Void> fetch(@Nullable final String id, @Nonnull final RequestState<T> state) {
+    protected Observable<Unit> fetch(@Nullable final String id, @Nonnull final RequestState<T> state) {
         final int fetchCount = state.entitiesToFetch();
         return fetchNext(state, id, fetchCount).compose(data -> {
             final int remaining = state.remaining();
