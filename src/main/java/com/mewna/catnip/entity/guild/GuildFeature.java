@@ -28,6 +28,7 @@
 package com.mewna.catnip.entity.guild;
 
 import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.guild.Guild.PremiumTier;
 
 /**
  * @author amy
@@ -112,15 +113,15 @@ public enum GuildFeature {
     MONETIZATION_ENABLED,
     MORE_STICKERS,
     /**
-     * Needs {@link Guild#PremiumTier TIER_1}
+     * Needs {@link PremiumTier TIER_1}
      */
     THREE_DAY_THREAD_ARCHIVE,
     /**
-     * Needs {@link Guild#PremiumTier TIER_2}
+     * Needs {@link PremiumTier TIER_2}
      */
     SEVEN_DAY_THREAD_ARCHIVE,
     /**
-     * Needs {@link Guild#PremiumTier TIER_2}
+     * Needs {@link PremiumTier TIER_2}
      */
     PRIVATE_THREADS,
     /**
@@ -128,6 +129,7 @@ public enum GuildFeature {
      */
     THREADS_ENABLED_TESTING,
     THREADS_ENABLED,
+    ROLE_ICONS,
     /**
      * When no other feature matches.
      */
