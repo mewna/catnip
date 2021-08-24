@@ -359,8 +359,8 @@ public class CatnipImpl implements Catnip {
                     .flatMap(gateway -> {
                         logAdapter().info("Token validated!");
                         clientIdAsLong = Catnip.parseIdFromToken(token);
-                        // this is actually needed because generics are dumb
-                        return checkIntentsAndLog();
+                        // return checkIntentsAndLog();
+                        return Single.just((Catnip) this);
                     }).doOnError(e -> {
                         logAdapter().warn("Couldn't validate token!", e);
                         throw new RuntimeException(e);
