@@ -81,15 +81,15 @@ public class CachingBuffer extends AbstractBuffer {
             Raw.VOICE_STATE_UPDATE
     );
     
-    private static final Set<String> DELETE_EVENTS = Set.of(
+    private static final Set<String> FIRE_BEFORE_CACHING = Set.of(
             // Channels
-            Raw.CHANNEL_DELETE,
+            Raw.CHANNEL_UPDATE, Raw.CHANNEL_DELETE,
             // Guilds
-            Raw.GUILD_DELETE,
+            Raw.GUILD_UPDATE, Raw.GUILD_DELETE,
             // Roles
-            Raw.GUILD_ROLE_DELETE,
+            Raw.GUILD_ROLE_UPDATE, Raw.GUILD_ROLE_DELETE,
             // Members
-            Raw.GUILD_MEMBER_REMOVE
+            Raw.GUILD_MEMBER_UPDATE, Raw.GUILD_MEMBER_REMOVE
     );
     
     private final Map<Integer, BufferState> buffers = new ConcurrentHashMap<>();
@@ -246,10 +246,11 @@ public class CachingBuffer extends AbstractBuffer {
     
     private void cacheAndDispatch(final String type, final int id, final JsonObject event) {
         final JsonObject d = event.getObject("d");
-        if(DELETE_EVENTS.contains(type)) {
+        if(FIRE_BEFORE_CACHING.contains(type)) {
             // TODO: Will this work always?
             emitter().emit(event);
-            maybeCache(type, id, d);
+            // TODO: Make this not be blocking
+            maybeCache(type, id, d).blockingSubscribe();
         } else {
             //noinspection ResultOfMethodCallIgnored
             maybeCache(type, id, d).subscribe(() -> emitter().emit(event));
