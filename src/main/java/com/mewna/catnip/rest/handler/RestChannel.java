@@ -263,7 +263,7 @@ public class RestChannel extends RestHandler {
         if(options.reference() != null) {
             json.put("message_reference", entityBuilder().referenceToJson(options.reference()));
         }
-        if(!options.components().isEmpty()) {
+        if(!options.components().isEmpty() || options.override()) {
             json.put("components", new JsonArray(options.components().stream().map(MessageComponent::toJson).collect(Collectors.toList())));
         }
         
