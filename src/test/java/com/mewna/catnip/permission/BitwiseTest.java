@@ -44,7 +44,7 @@ public class BitwiseTest {
     @Test
     public void testAll() {
         final Permission[] perms = values();
-        final long expected = 137438953471L;
+        final long expected = 549755813887L;
         long total = 0;
         
         for(final Permission p : perms) {
