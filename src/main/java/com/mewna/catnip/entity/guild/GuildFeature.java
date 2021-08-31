@@ -131,6 +131,10 @@ public enum GuildFeature {
     THREADS_ENABLED,
     ROLE_ICONS,
     /**
+     * Guild uses new thread permissions (temporary flag)
+     */
+    NEW_THREAD_PERMISSIONS,
+    /**
      * When no other feature matches.
      */
     UNKNOWN_FEATURE,
