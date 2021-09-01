@@ -1,5 +1,8 @@
 name: Run all tests
-on: [push]
+on:
+  push:
+    branches:
+      - mistress
 
 jobs:
   run-tests:
