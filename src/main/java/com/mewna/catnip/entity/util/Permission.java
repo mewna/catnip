@@ -89,6 +89,7 @@ public enum Permission {
     CREATE_PRIVATE_THREADS(1L << 36, true, "Create Private Threads"),
     USE_EXTERNAL_STICKERS(1L << 37, true, "Use External Stickers"),
     SEND_MESSAGES_IN_THREADS(1L << 38, true, "Send Messages in Threads"),
+    START_EMBEDDED_ACTIVITIES(1L << 39, true, "Start Embedded Activities"),
     ;
     
     public static final long ALL = from(values());
