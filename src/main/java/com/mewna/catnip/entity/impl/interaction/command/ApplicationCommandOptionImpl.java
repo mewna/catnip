@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.entity.impl.interaction.command;
 
+import com.mewna.catnip.entity.channel.Channel.ChannelType;
 import com.mewna.catnip.entity.interaction.command.ApplicationCommandOption;
 import com.mewna.catnip.entity.interaction.command.ApplicationCommandOptionChoice;
 import com.mewna.catnip.entity.interaction.command.ApplicationCommandOptionType;
@@ -51,6 +52,7 @@ public class ApplicationCommandOptionImpl implements ApplicationCommandOption {
     private boolean required;
     private List<ApplicationCommandOptionChoice<?>> choices;
     private List<ApplicationCommandOption> options;
+    private List<ChannelType> channelTypes;
     private String description;
     private String name;
 }

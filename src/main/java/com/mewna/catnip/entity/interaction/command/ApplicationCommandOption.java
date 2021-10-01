@@ -28,6 +28,7 @@
 package com.mewna.catnip.entity.interaction.command;
 
 import com.grack.nanojson.JsonObject;
+import com.mewna.catnip.entity.channel.Channel.ChannelType;
 import com.mewna.catnip.entity.partials.HasDescription;
 import com.mewna.catnip.entity.partials.HasName;
 
@@ -47,10 +48,13 @@ public interface ApplicationCommandOption extends HasName, HasDescription {
     List<ApplicationCommandOptionChoice<?>> choices();
     
     List<ApplicationCommandOption> options();
+
+    List<ChannelType> channelTypes();
     
     default JsonObject toJson() {
         final var choices = choices() != null ? choices() : List.of();
         final var options = options() != null ? options() : List.of();
+        final var channelTypes = channelTypes() != null ? channelTypes() : List.<ChannelType>of();
         final var builder = JsonObject.builder();
         builder.value("type", type().key());
         builder.value("name", name());
@@ -59,6 +63,11 @@ public interface ApplicationCommandOption extends HasName, HasDescription {
         builder.value("required", required());
         builder.value("choices", choices);
         builder.value("options", options);
+        final var channelTypesJson = builder.array("channel_types");
+        for(final var type : channelTypes) {
+            channelTypesJson.value(type.key());
+        }
+        channelTypesJson.end();
         return builder.done();
     }
 }
