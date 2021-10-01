@@ -135,6 +135,10 @@ public enum GuildFeature {
      */
     NEW_THREAD_PERMISSIONS,
     /**
+     * Guild has enabled role subscriptions
+     */
+    ROLE_SUBSCRIPTIONS_ENABLED,
+    /**
      * When no other feature matches.
      */
     UNKNOWN_FEATURE,
