@@ -1,10 +1,5 @@
 before_install:
-  - curl -s "https://get.sdkman.io" | bash
-  - source "$HOME/.sdkman/bin/sdkman-init.sh"
-  - sdk version
-  - sdk update
-  - sdk install java 17-open
-  - sdk default java 17-open
-  - sdk current java
+  - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+  - source install-jdk.sh --feature 17
 install:
   - bash -c "mvn clean install -DskipTests -Dlombok.delombok.skip=true"
