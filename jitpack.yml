@@ -1,8 +1,5 @@
 before_install:
-  - wget -O install.sh https://github.com/shyiko/jabba/raw/master/install.sh
-  - JABBA_VERSION="latest" bash ./install.sh
-  - source ~/.jabba/jabba.sh
-  - jabba install openjdk@1.15
-  - jabba use openjdk@1.15
+  - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+  - source install-jdk.sh --feature 16
 install:
   - bash -c "mvn clean install -DskipTests -Dlombok.delombok.skip=true"
