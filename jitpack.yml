@@ -2,6 +2,7 @@ before_install:
   - curl -s "https://get.sdkman.io" | bash
   - source "$HOME/.sdkman/bin/sdkman-init.sh"
   - sdk version
+  - sdk update
   - sdk install java 17-open
   - sdk default java 17-open
   - sdk current java
