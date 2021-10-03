@@ -1,6 +1,7 @@
-#before_install:
-#  - curl -sL https://github.com/shyiko/jabba/raw/master/install.sh | bash && . ~/.jabba/jabba.sh
-#  - jabba install openjdk@1.17
-#  - jabba use openjdk@1.17
+before_install:
+  - curl -s "https://get.sdkman.io" | bash
+  - source "$HOME/.sdkman/bin/sdkman-init.sh"
+  - sdk version
+  - sdk install java 17-open
 install:
   - mvn clean install -DskipTests -Dlombok.delombok.skip=true
