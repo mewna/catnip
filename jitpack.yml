@@ -3,5 +3,7 @@ before_install:
   - source "$HOME/.sdkman/bin/sdkman-init.sh"
   - sdk version
   - sdk install java 17-open
+  - sdk default java 17-open
+  - sdk current java
 install:
   - mvn clean install -DskipTests -Dlombok.delombok.skip=true
