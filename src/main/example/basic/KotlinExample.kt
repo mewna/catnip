@@ -40,8 +40,8 @@ fun main(args: Array<String>) {
     val catnip: com.mewna.catnip.Catnip = Catnip.catnip("your token here")
     catnip.observable<Message>(DiscordEvent.MessageCreate)
             .filter({ msg -> msg.content() == "!ping" })
-            .forEach({ msg ->
-                msg.reply("pong!")
+            .subscribe({ msg ->
+                msg.respond("pong!")
             })
     catnip.connect()
 }

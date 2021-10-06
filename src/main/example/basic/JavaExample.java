@@ -39,8 +39,8 @@ public class JavaExample {
         Catnip catnip = Catnip.catnip("your token goes here");
         catnip.observable(DiscordEvent.MESSAGE_CREATE)
                 .filter(msg -> msg.content().equals("!ping"))
-                .forEach(msg -> {
-                    msg.reply("pong!");
+                .subscribe(msg -> {
+                    msg.respond("pong!");
                 });
         catnip.connect();
     }

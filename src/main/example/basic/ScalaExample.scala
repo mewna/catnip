@@ -35,8 +35,8 @@ object ScalaExample extends App {
   private val catnip = Catnip.catnip("your token here")
   catnip.observable(DiscordEvent.MESSAGE_CREATE)
       .filter((msg: Message) => msg.content() == "!ping")
-      .forEach((msg : Message) => {
-        msg.reply("pong!")
+      .subscribe((msg: Message) => {
+        msg.respond("pong!")
       })
   catnip.connect()
 }

@@ -40,8 +40,8 @@ class GroovyExample {
 
         catnip.observable(DiscordEvent.MESSAGE_CREATE)
             .filter(msg -> msg.content() == "!ping")
-        .forEach({ msg ->
-            msg.reply("!ping")
+        .subscribe({ msg ->
+            msg.respond("!ping")
         })
         catnip.connect()
     }
