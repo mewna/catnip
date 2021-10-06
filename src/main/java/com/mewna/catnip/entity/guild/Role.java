@@ -31,11 +31,14 @@ import com.mewna.catnip.entity.channel.GuildChannel;
 import com.mewna.catnip.entity.partials.Mentionable;
 import com.mewna.catnip.entity.partials.HasName;
 import com.mewna.catnip.entity.partials.Permissable;
+import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.CDNFormat;
 import com.mewna.catnip.util.PermissionUtil;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Set;
 
@@ -127,6 +130,22 @@ public interface Role extends Mentionable, Comparable<Role>, Permissable, HasNam
     @Nonnull
     @CheckReturnValue
     RoleTags tags();
+    
+    /**
+     * This role's icon hash. Use with {@link CDNFormat#roleIconUrl(String, String, ImageOptions)}.
+     * This property is only non-nullable if the guild has the
+     * {@link GuildFeature#ROLE_ICONS} feature.
+     */
+    @Nullable
+    @CheckReturnValue
+    String icon();
+    
+    /**
+     * @see #icon()
+     */
+    @Nullable
+    @CheckReturnValue
+    String unicodeEmoji();
     
     /**
      * @return A mention for this role that can be sent in a message.

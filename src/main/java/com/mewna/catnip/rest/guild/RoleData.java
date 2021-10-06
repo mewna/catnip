@@ -55,6 +55,8 @@ public class RoleData implements JsonConvertible {
     private Integer position;
     private Boolean mentionable;
     private Boolean hoisted;
+    private String unicodeEmoji;
+    // TODO: Support icon uploads somehow
     
     public RoleData(@Nonnegative final int id) {
         this.id = id;
@@ -128,6 +130,12 @@ public class RoleData implements JsonConvertible {
         return permissions(updater.applyAsLong(permissions == null ? 0 : permissions));
     }
     
+    @Nonnull
+    public RoleData unicodeEmoji(@Nonnull final String emoji) {
+        unicodeEmoji = emoji;
+        return this;
+    }
+    
     @Override
     @Nonnull
     @CheckReturnValue
@@ -153,6 +161,9 @@ public class RoleData implements JsonConvertible {
         }
         if(hoisted != null) {
             object.put("hoisted", hoisted);
+        }
+        if(unicodeEmoji != null) {
+            object.put("unicode_emoji", unicodeEmoji);
         }
         return object;
     }

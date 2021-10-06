@@ -27,6 +27,7 @@
 
 package com.mewna.catnip.util;
 
+import com.mewna.catnip.entity.guild.Role;
 import com.mewna.catnip.entity.sticker.Sticker;
 import com.mewna.catnip.entity.sticker.StickerFormatType;
 import com.mewna.catnip.entity.util.ImageOptions;
@@ -129,5 +130,12 @@ public final class CDNFormat {
         }
         return String.format("https://cdn.discordapp.com/stickers/%s/%s.%s", sticker.id(), sticker.asset(),
                 sticker.formatType().name().toLowerCase());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public static String roleIconUrl(@Nonnull final String roleId, @Nonnull final String iconHash,
+                                     @Nonnull final ImageOptions options) {
+        return options.buildUrl(String.format("https://cdn.discordapp.com/role-icons/%s/%s", roleId, iconHash));
     }
 }

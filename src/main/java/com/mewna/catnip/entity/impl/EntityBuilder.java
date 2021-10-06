@@ -491,6 +491,8 @@ public final class EntityBuilder {
                 .managed(data.getBoolean("managed"))
                 .mentionable(data.getBoolean("mentionable"))
                 .tags(createRoleTags(data))
+                .icon(data.getString("icon"))
+                .unicodeEmoji(data.getString("unicode_emoji"))
                 .build());
     }
     

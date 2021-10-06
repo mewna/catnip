@@ -59,6 +59,8 @@ public class RoleImpl implements Role, RequiresCatnip {
     private boolean managed;
     private boolean mentionable;
     private RoleTags tags;
+    private String icon;
+    private String unicodeEmoji;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
