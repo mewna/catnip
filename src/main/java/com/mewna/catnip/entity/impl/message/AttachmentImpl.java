@@ -55,6 +55,7 @@ public class AttachmentImpl implements Attachment, RequiresCatnip {
     private String proxyUrl;
     private int height;
     private int width;
+    private boolean ephemeral;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {

@@ -848,6 +848,7 @@ public final class EntityBuilder {
                 .proxyUrl(data.getString("proxy_url"))
                 .height(data.getInt("height", -1))
                 .width(data.getInt("width", -1))
+                .ephemeral(data.getBoolean("ephemeral", false))
                 .build());
     }
     

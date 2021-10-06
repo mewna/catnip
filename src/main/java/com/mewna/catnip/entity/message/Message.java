@@ -662,6 +662,17 @@ public interface Message extends Snowflake, HasChannel {
         default boolean image() {
             return height() > 0 && width() > 0;
         }
+    
+        /**
+         * Indicates whether or not this attachment is ephemeral. Ephemeral
+         * attachments are automatically removed after a set period of time,
+         * the duration of which is unfortunately not documented. Ephemeral
+         * attachments are guaranteed to exist for at least as long as their
+         * containing message exists.
+         *
+         * @return Whether this attachment is ephemeral.
+         */
+        boolean ephemeral();
     }
     
     interface Reaction {
