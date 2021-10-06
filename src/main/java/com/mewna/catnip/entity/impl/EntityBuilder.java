@@ -527,6 +527,8 @@ public final class EntityBuilder {
                 .avatar(data.getString("avatar", null))
                 .bot(data.getBoolean("bot", false))
                 .publicFlags(UserFlag.toSet(data.getInt("public_flags", 0)))
+                .accentColor(data.getInt("accent_color", 0))
+                .banner(data.getString("banner", null))
                 .build());
     }
     

@@ -48,7 +48,8 @@ import java.util.Set;
  * @since 9/4/18
  */
 @SuppressWarnings({"unused", "RedundantSuppression"})
-public interface User extends Snowflake, Mentionable {
+public interface
+User extends Snowflake, Mentionable {
     /**
      * Whether the user's avatar is animated.
      *
@@ -194,6 +195,19 @@ public interface User extends Snowflake, Mentionable {
     @Nonnull
     @CheckReturnValue
     Set<UserFlag> publicFlags();
+    
+    /**
+     * @return The user's profile accent colour.
+     */
+    @CheckReturnValue
+    int accentColor();
+    
+    /**
+     * @return The hash of the user's banner if it exists
+     */
+    @Nullable
+    @CheckReturnValue
+    String banner();
     
     /**
      * @return The user's presence, or {@code null} if no presence is cached.

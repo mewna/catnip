@@ -63,6 +63,8 @@ public class UserImpl implements User, RequiresCatnip {
     private String avatar;
     private boolean bot;
     private Set<UserFlag> publicFlags;
+    private int accentColor;
+    private String banner;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {
