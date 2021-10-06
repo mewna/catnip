@@ -134,4 +134,15 @@ public class ApplicationOwnerImpl implements ApplicationOwner, RequiresCatnip {
                 String.format("Team (%s)", idAsLong) :
                 String.format("User (%s#%s)", username, discriminator);
     }
+    
+    @Nullable
+    @Override
+    public String banner() {
+        return null;
+    }
+    
+    @Override
+    public int accentColor() {
+        return 0;
+    }
 }
