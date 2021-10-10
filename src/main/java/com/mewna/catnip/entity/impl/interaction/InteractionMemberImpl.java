@@ -93,4 +93,10 @@ public class InteractionMemberImpl implements InteractionMember {
     public long idAsLong() {
         return delegate.idAsLong();
     }
+    
+    @Nullable
+    @Override
+    public String avatarHash() {
+        return delegate.avatarHash();
+    }
 }
