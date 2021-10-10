@@ -35,7 +35,9 @@ import com.mewna.catnip.entity.partials.Mentionable;
 import com.mewna.catnip.entity.partials.Permissable;
 import com.mewna.catnip.entity.user.User;
 import com.mewna.catnip.entity.user.VoiceState;
+import com.mewna.catnip.entity.util.ImageOptions;
 import com.mewna.catnip.entity.util.Permission;
+import com.mewna.catnip.util.CDNFormat;
 import com.mewna.catnip.util.PermissionUtil;
 import com.mewna.catnip.util.rx.RxHelpers;
 import io.reactivex.rxjava3.core.Completable;
@@ -195,6 +197,23 @@ public interface Member extends Mentionable, Permissable, HasJoinedAt {
     @Nullable
     @CheckReturnValue
     OffsetDateTime premiumSince();
+    
+    /**
+     * @return The hash of the user's per-guild avatar.
+     */
+    @Nullable
+    @CheckReturnValue
+    String avatarHash();
+    
+    @Nullable
+    @CheckReturnValue
+    default String avatarUrl(@Nonnull final ImageOptions options) {
+        if(avatarHash() == null) {
+            return null;
+        }
+        //noinspection ConstantConditions
+        return CDNFormat.guildAvatarUrl(guildId(), id(), avatarHash(), options);
+    }
     
     /**
      * The member's color, as shown in the official Discord Client, or {@code null} if they have no roles with a color.

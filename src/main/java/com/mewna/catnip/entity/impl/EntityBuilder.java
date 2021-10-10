@@ -728,6 +728,7 @@ public final class EntityBuilder {
                 .roleIds(toStringSet(data.getArray("roles")))
                 .joinedAt(joinedAt)
                 .premiumSince(data.getString("premium_since", null))
+                .avatarHash(data.getString("avatar"))
                 .build());
     }
     

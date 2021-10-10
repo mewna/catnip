@@ -58,6 +58,7 @@ public class MemberImpl implements Member, RequiresCatnip, Timestamped {
     private Set<String> roleIds;
     private String joinedAt;
     private String premiumSince;
+    private String avatarHash;
     
     @Nonnull
     @Override

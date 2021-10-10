@@ -138,4 +138,11 @@ public final class CDNFormat {
                                      @Nonnull final ImageOptions options) {
         return options.buildUrl(String.format("https://cdn.discordapp.com/role-icons/%s/%s", roleId, iconHash));
     }
+    
+    @Nonnull
+    @CheckReturnValue
+    public static String guildAvatarUrl(@Nonnull final String guildId, @Nonnull final String userId,
+                                        @Nonnull final String hash, @Nonnull final ImageOptions options) {
+        return options.buildUrl(String.format("https://cdn.discordapp.com/guilds/%s/%s/%s", guildId, userId, hash));
+    }
 }
