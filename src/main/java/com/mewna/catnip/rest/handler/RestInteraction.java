@@ -49,10 +49,7 @@ import io.reactivex.rxjava3.core.Single;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -405,6 +402,11 @@ public class RestInteraction extends RestHandler {
     private JsonObject createCommandBody(@Nonnull final ApplicationCommandType type, @Nonnull final String name,
                                          @Nonnull final String description, @Nonnull final Collection<ApplicationCommandOption> options) {
         final var builder = JsonObject.builder();
+        if(type == ApplicationCommandType.CHAT_INPUT) {
+            if(!name.matches("^[\\w-]{1,32}$") || !name.toLowerCase(Locale.ROOT).equals(name)) {
+                throw new IllegalArgumentException("Name must match ^[\\w-]{1,32}$ and must be lowercase!");
+            }
+        }
         builder.value("name", name);
         builder.value("description", description);
         builder.value("type", type.id());
