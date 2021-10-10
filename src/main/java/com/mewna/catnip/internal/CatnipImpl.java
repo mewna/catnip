@@ -77,7 +77,7 @@ import java.util.stream.Collectors;
  */
 @Getter
 @Accessors(fluent = true, chain = true)
-public class CatnipImpl implements Catnip {
+public final class CatnipImpl implements Catnip {
     public static final BouncyCastleProvider BOUNCY_CASTLE_PROVIDER = new BouncyCastleProvider();
     private static final List<String> UNPATCHABLE_OPTIONS = List.of(
             "token",
@@ -136,7 +136,11 @@ public class CatnipImpl implements Catnip {
             throw new IllegalArgumentException("Minimum required API version is v8!");
         }
         if(options.intents().isEmpty()) {
-            throw new IllegalArgumentException("Intents are required, but you didn't provide any! Are you *sure* you want a bot that can't do anything?");
+            if(options.iReallyWantToStartTheBotWithNoIntents()) {
+                logAdapter().warn("Starting with no intents!");
+            } else {
+                throw new IllegalArgumentException("Intents are required, but you didn't provide any! Are you *sure* you want a bot that can't do anything?");
+            }
         }
     }
     

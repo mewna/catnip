@@ -394,4 +394,10 @@ public interface CatnipOptionsView {
      * errors that may come from {@link NoopEntityCache}.
      */
     boolean logEntityPresenceWarningOnCustomCache();
+    
+    /**
+     * @return Whether or not you can initialise a {@link Catnip} instance with
+     * no intents.
+     */
+    boolean iReallyWantToStartTheBotWithNoIntents();
 }
