@@ -29,9 +29,10 @@ package com.mewna.catnip.rest.handler;
 
 import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
+import com.mewna.catnip.entity.interaction.InteractionResponseType;
 import com.mewna.catnip.entity.interaction.command.ApplicationCommand;
 import com.mewna.catnip.entity.interaction.command.ApplicationCommandOption;
-import com.mewna.catnip.entity.interaction.InteractionResponseType;
+import com.mewna.catnip.entity.interaction.command.ApplicationCommandType;
 import com.mewna.catnip.entity.message.MentionParseFlag;
 import com.mewna.catnip.entity.message.Message;
 import com.mewna.catnip.entity.message.MessageFlag;
@@ -67,34 +68,34 @@ public class RestInteraction extends RestHandler {
     // Initial response
     
     public Completable createInteractionInitialResponse(@Nonnull final InteractionResponseType type,
-                                                            @Nonnull final String interactionId,
-                                                            @Nonnull final String interactionToken,
-                                                            @Nonnull final MessageOptions options) {
+                                                        @Nonnull final String interactionId,
+                                                        @Nonnull final String interactionToken,
+                                                        @Nonnull final MessageOptions options) {
         return createInteractionInitialResponse(type, interactionId, interactionToken, null, null, options);
     }
     
     public Completable createInteractionInitialResponse(@Nonnull final InteractionResponseType type,
-                                                            @Nonnull final String interactionId,
-                                                            @Nonnull final String interactionToken,
-                                                            @Nullable final String username,
-                                                            @Nonnull final MessageOptions options) {
+                                                        @Nonnull final String interactionId,
+                                                        @Nonnull final String interactionToken,
+                                                        @Nullable final String username,
+                                                        @Nonnull final MessageOptions options) {
         return createInteractionInitialResponse(type, interactionId, interactionToken, username, null, options);
     }
     
     public Completable createInteractionInitialResponse(@Nonnull final InteractionResponseType type,
-                                                            @Nonnull final String interactionId,
-                                                            @Nonnull final String interactionToken,
-                                                            @Nullable final String username, @Nullable final String avatarUrl,
-                                                            @Nonnull final MessageOptions options) {
+                                                        @Nonnull final String interactionId,
+                                                        @Nonnull final String interactionToken,
+                                                        @Nullable final String username, @Nullable final String avatarUrl,
+                                                        @Nonnull final MessageOptions options) {
         return createInteractionInitialResponseRaw(type, interactionId, interactionToken, username, avatarUrl, options);
     }
     
     public Completable createInteractionInitialResponseRaw(@Nonnull final InteractionResponseType type,
-                                                                      @Nonnull final String interactionId,
-                                                                      @Nonnull final String interactionToken,
-                                                                      @Nullable final String username,
-                                                                      @Nullable final String avatarUrl,
-                                                                      @Nonnull final MessageOptions options) {
+                                                           @Nonnull final String interactionId,
+                                                           @Nonnull final String interactionToken,
+                                                           @Nullable final String username,
+                                                           @Nullable final String avatarUrl,
+                                                           @Nonnull final MessageOptions options) {
         final var body = createSendBody(type, username, avatarUrl, options);
         return Completable.fromObservable(catnip().requester().
                 queue(new OutboundRequest(Routes.CREATE_INTERACTION_INITIAL_RESPONSE.withMajorParam(interactionId)
@@ -231,34 +232,38 @@ public class RestInteraction extends RestHandler {
     
     public Observable<JsonArray> getGlobalApplicationCommandsRaw() {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_GLOBAL_APPLICATION_COMMANDS.withMajorParam(catnip().clientId()),
-                Map.of()))
+                        Map.of()))
                 .map(ResponsePayload::array);
     }
     
-    public Single<ApplicationCommand> createGlobalApplicationCommand(@Nonnull final String name, @Nonnull final String description,
+    public Single<ApplicationCommand> createGlobalApplicationCommand(@Nonnull final ApplicationCommandType type,
+                                                                     @Nonnull final String name, @Nonnull final String description,
                                                                      @Nonnull final Collection<ApplicationCommandOption> options) {
-        return Single.fromObservable(createGlobalApplicationCommandRaw(name, description, options)
+        return Single.fromObservable(createGlobalApplicationCommandRaw(type, name, description, options)
                 .map(entityBuilder()::createApplicationCommand));
     }
     
-    public Observable<JsonObject> createGlobalApplicationCommandRaw(@Nonnull final String name, @Nonnull final String description,
+    public Observable<JsonObject> createGlobalApplicationCommandRaw(@Nonnull final ApplicationCommandType type,
+                                                                    @Nonnull final String name, @Nonnull final String description,
                                                                     @Nonnull final Collection<ApplicationCommandOption> options) {
-        final JsonObject body = createCommandBody(name, description, options);
+        final JsonObject body = createCommandBody(type, name, description, options);
         return catnip().requester().queue(new OutboundRequest(Routes.CREATE_GLOBAL_APPLICATION_COMMAND
                 .withMajorParam(catnip().clientId()), Map.of()).object(body)).map(ResponsePayload::object);
     }
     
-    public Single<ApplicationCommand> editGlobalApplicationCommand(@Nonnull final String name, @Nonnull final String description,
+    public Single<ApplicationCommand> editGlobalApplicationCommand(@Nonnull final ApplicationCommandType type,
+                                                                   @Nonnull final String name, @Nonnull final String description,
                                                                    @Nonnull final String commandId,
                                                                    @Nonnull final Collection<ApplicationCommandOption> options) {
-        return Single.fromObservable(editGlobalApplicationCommandRaw(name, description, commandId, options)
+        return Single.fromObservable(editGlobalApplicationCommandRaw(type, name, description, commandId, options)
                 .map(entityBuilder()::createApplicationCommand));
     }
     
-    public Observable<JsonObject> editGlobalApplicationCommandRaw(@Nonnull final String name, @Nonnull final String description,
+    public Observable<JsonObject> editGlobalApplicationCommandRaw(@Nonnull final ApplicationCommandType type,
+                                                                  @Nonnull final String name, @Nonnull final String description,
                                                                   @Nonnull final String commandId,
                                                                   @Nonnull final Collection<ApplicationCommandOption> options) {
-        final var body = createCommandBody(name, description, options);
+        final var body = createCommandBody(type, name, description, options);
         return catnip().requester().queue(new OutboundRequest(Routes.EDIT_GLOBAL_APPLICATION_COMMAND
                 .withMajorParam(catnip().clientId()), Map.of("command", commandId)).object(body)).map(ResponsePayload::object);
     }
@@ -278,40 +283,44 @@ public class RestInteraction extends RestHandler {
     
     public Observable<JsonArray> getGuildApplicationCommandsRaw(@Nonnull final String guildId) {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_GUILD_APPLICATION_COMMANDS.withMajorParam(catnip().clientId()),
-                Map.of("guild", guildId)))
+                        Map.of("guild", guildId)))
                 .map(ResponsePayload::array);
     }
     
-    public Single<ApplicationCommand> createGuildApplicationCommand(@Nonnull final String guildId, @Nonnull final String name,
+    public Single<ApplicationCommand> createGuildApplicationCommand(@Nonnull final ApplicationCommandType type,
+                                                                    @Nonnull final String guildId, @Nonnull final String name,
                                                                     @Nonnull final String description,
                                                                     @Nonnull final Collection<ApplicationCommandOption> options) {
-        return Single.fromObservable(createGuildApplicationCommandRaw(guildId, name, description, options)
+        return Single.fromObservable(createGuildApplicationCommandRaw(type, guildId, name, description, options)
                 .map(entityBuilder()::createApplicationCommand));
     }
     
-    public Observable<JsonObject> createGuildApplicationCommandRaw(@Nonnull final String guildId, @Nonnull final String name,
+    public Observable<JsonObject> createGuildApplicationCommandRaw(@Nonnull final ApplicationCommandType type,
+                                                                   @Nonnull final String guildId, @Nonnull final String name,
                                                                    @Nonnull final String description,
                                                                    @Nonnull final Collection<ApplicationCommandOption> options) {
-        final var body = createCommandBody(name, description, options);
+        final var body = createCommandBody(type, name, description, options);
         return catnip().requester().queue(new OutboundRequest(Routes.CREATE_GUILD_APPLICATION_COMMAND
                 .withMajorParam(catnip().clientId()), Map.of("guild", guildId)).object(body)).map(ResponsePayload::object);
     }
     
-    public Single<ApplicationCommand> editGuildApplicationCommand(@Nonnull final String guildId, @Nonnull final String name,
+    public Single<ApplicationCommand> editGuildApplicationCommand(@Nonnull final ApplicationCommandType type,
+                                                                  @Nonnull final String guildId, @Nonnull final String name,
                                                                   @Nonnull final String description,
                                                                   @Nonnull final String commandId,
                                                                   @Nonnull final Collection<ApplicationCommandOption> options) {
-        return Single.fromObservable(editGuildApplicationCommandRaw(guildId, name, description, commandId, options)
+        return Single.fromObservable(editGuildApplicationCommandRaw(type, guildId, name, description, commandId, options)
                 .map(entityBuilder()::createApplicationCommand));
     }
     
-    public Observable<JsonObject> editGuildApplicationCommandRaw(@Nonnull final String guildId, @Nonnull final String name,
+    public Observable<JsonObject> editGuildApplicationCommandRaw(@Nonnull final ApplicationCommandType type,
+                                                                 @Nonnull final String guildId, @Nonnull final String name,
                                                                  @Nonnull final String description,
                                                                  @Nonnull final String commandId,
                                                                  @Nonnull final Collection<ApplicationCommandOption> options) {
-        final var body = createCommandBody(name, description, options);
+        final var body = createCommandBody(type, name, description, options);
         return catnip().requester().queue(new OutboundRequest(Routes.EDIT_GUILD_APPLICATION_COMMAND
-                .withMajorParam(catnip().clientId()), Map.of("guild", guildId, "command", commandId)).object(body))
+                        .withMajorParam(catnip().clientId()), Map.of("guild", guildId, "command", commandId)).object(body))
                 .map(ResponsePayload::object);
     }
     
@@ -393,11 +402,12 @@ public class RestInteraction extends RestHandler {
         return builder.done();
     }
     
-    private JsonObject createCommandBody(@Nonnull final String name, @Nonnull final String description,
-                                         @Nonnull final Collection<ApplicationCommandOption> options) {
+    private JsonObject createCommandBody(@Nonnull final ApplicationCommandType type, @Nonnull final String name,
+                                         @Nonnull final String description, @Nonnull final Collection<ApplicationCommandOption> options) {
         final var builder = JsonObject.builder();
         builder.value("name", name);
         builder.value("description", description);
+        builder.value("type", type.id());
         if(!options.isEmpty()) {
             final List<JsonObject> optionJson = options.stream()
                     .map(ApplicationCommandOption::toJson)
