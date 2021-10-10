@@ -562,7 +562,7 @@ public interface Message extends Snowflake, HasChannel {
     @Nonnull
     @CheckReturnValue
     default Single<Message> reply(@Nonnull final Embed embed, final boolean ping) {
-        return reply(new MessageOptions().embed(embed), ping);
+        return reply(new MessageOptions().addEmbed(embed), ping);
     }
     
     /**

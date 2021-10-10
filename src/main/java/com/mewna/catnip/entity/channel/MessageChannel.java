@@ -119,7 +119,7 @@ public interface MessageChannel extends Channel {
     default Single<Message> sendMessage(@Nonnull final MessageOptions options) {
         if(isGuild()) {
             if(options.hasFiles()) {
-                if(options.embed() != null) {
+                if(!options.embeds().isEmpty()) {
                     PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                             Permission.SEND_MESSAGES, Permission.ATTACH_FILES, Permission.EMBED_LINKS);
                 } else {
@@ -127,7 +127,7 @@ public interface MessageChannel extends Channel {
                             Permission.SEND_MESSAGES, Permission.ATTACH_FILES);
                 }
             } else {
-                if(options.embed() != null) {
+                if(!options.embeds().isEmpty()) {
                     PermissionUtil.checkPermissions(catnip(), asGuildChannel().guildId(), id(),
                             Permission.SEND_MESSAGES, Permission.EMBED_LINKS);
                 } else {

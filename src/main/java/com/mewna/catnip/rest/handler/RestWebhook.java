@@ -187,8 +187,8 @@ public class RestWebhook extends RestHandler {
         if(options.content() != null && !options.content().isEmpty()) {
             builder.value("content", options.content());
         }
-        if(options.embed() != null) {
-            builder.array("embeds").value(entityBuilder().embedToJson(options.embed())).end();
+        if(!options.embeds().isEmpty()) {
+            builder.array("embeds").value(new JsonArray(options.embeds().stream().map(e -> entityBuilder().embedToJson(e)).toList())).end();
         }
         if(username != null && !username.isEmpty()) {
             builder.value("username", username);
@@ -272,8 +272,8 @@ public class RestWebhook extends RestHandler {
         if(options.content() != null && !options.content().isEmpty()) {
             builder.value("content", options.content());
         }
-        if(options.embed() != null) {
-            builder.array("embeds").value(entityBuilder().embedToJson(options.embed())).end();
+        if(!options.embeds().isEmpty()) {
+            builder.array("embeds").value(new JsonArray(options.embeds().stream().map(e -> entityBuilder().embedToJson(e)).toList())).end();
         }
         if(username != null && !username.isEmpty()) {
             builder.value("username", username);

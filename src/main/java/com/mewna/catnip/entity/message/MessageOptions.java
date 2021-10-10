@@ -62,7 +62,8 @@ import java.util.*;
 @SuppressWarnings("unused")
 public class MessageOptions {
     private String content;
-    private Embed embed;
+    @Setter(AccessLevel.NONE)
+    private List<Embed> embeds = new ArrayList<>(10);
     
     @Setter(AccessLevel.NONE)
     private List<ImmutablePair<String, byte[]>> files;
@@ -167,7 +168,7 @@ public class MessageOptions {
     
     public MessageOptions(@Nonnull final MessageOptions options) {
         content = options.content;
-        embed = options.embed;
+        embeds = options.embeds;
         files = options.files;
         parseFlags = options.parseFlags;
         roles = options.roles;
@@ -183,7 +184,7 @@ public class MessageOptions {
         content = message.content();
         final List<Embed> embeds = message.embeds();
         if(!embeds.isEmpty()) {
-            embed = embeds.get(0);
+            this.embeds = new ArrayList<>(embeds);
         }
         components = new ArrayList<>(message.components());
     }
@@ -901,12 +902,22 @@ public class MessageOptions {
     @Nonnull
     public MessageOptions clear() {
         content = null;
-        embed = null;
+        embeds = null;
         files = null;
         parseFlags = null;
         roles = null;
         users = null;
         components.clear();
+        return this;
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public MessageOptions addEmbed(@Nonnull final Embed embed) {
+        if(embeds.size() == 10) {
+            throw new UnsupportedOperationException("maximum limit of 10 embeds!");
+        }
+        embeds.add(embed);
         return this;
     }
     
@@ -936,16 +947,12 @@ public class MessageOptions {
     @CheckReturnValue
     @Nonnull
     public Message buildMessage() {
-        if(embed == null && content == null) {
+        if(embeds.isEmpty() && content == null) {
             throw new IllegalStateException("messages must have an embed or text content!");
         }
         final MessageImpl impl = new MessageImpl();
         impl.content(content);
-        if(embed != null) {
-            impl.embeds(Collections.singletonList(embed));
-        } else {
-            impl.embeds(Collections.emptyList());
-        }
+        impl.embeds(embeds);
         return impl;
     }
 }

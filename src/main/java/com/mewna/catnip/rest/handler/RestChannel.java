@@ -84,7 +84,7 @@ public class RestChannel extends RestHandler {
     
     @Nonnull
     public Single<Message> createMessage(@Nonnull final String channelId, @Nonnull final Embed embed) {
-        return createMessage(channelId, new MessageOptions().embed(embed));
+        return createMessage(channelId, new MessageOptions().addEmbed(embed));
     }
     
     @Nonnull
@@ -105,9 +105,9 @@ public class RestChannel extends RestHandler {
         }
         final List<Embed> embeds = message.embeds();
         if(embeds != null && !embeds.isEmpty()) {
-            json.put("embed", entityBuilder().embedToJson(embeds.get(0)));
+            json.put("embeds", new JsonArray(message.embeds().stream().map(e -> entityBuilder().embedToJson(e)).toList()));
         }
-        if(json.get("embed") == null && json.get("content") == null && message.attachments().isEmpty()) {
+        if(json.get("embeds") == null && json.get("content") == null && message.attachments().isEmpty()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no attachments!");
         }
         
@@ -123,10 +123,10 @@ public class RestChannel extends RestHandler {
         if(options.content() != null && !options.content().isEmpty()) {
             json.put("content", options.content());
         }
-        if(options.embed() != null) {
-            json.put("embed", entityBuilder().embedToJson(options.embed()));
+        if(!options.embeds().isEmpty()) {
+            json.put("embeds", new JsonArray(options.embeds().stream().map(e -> entityBuilder().embedToJson(e)).toList()));
         }
-        if(json.get("embed") == null && json.get("content") == null && !options.hasFiles()) {
+        if(json.get("embeds") == null && json.get("content") == null && !options.hasFiles()) {
             throw new IllegalArgumentException("Can't build a message with no content, no embeds and no attachments!");
         }
         
@@ -196,7 +196,7 @@ public class RestChannel extends RestHandler {
     @Nonnull
     public Single<Message> editMessage(@Nonnull final String channelId, @Nonnull final String messageId,
                                        @Nonnull final Embed embed) {
-        return editMessage(channelId, messageId, new MessageOptions().embed(embed));
+        return editMessage(channelId, messageId, new MessageOptions().addEmbed(embed));
     }
     
     @Nonnull
@@ -217,18 +217,16 @@ public class RestChannel extends RestHandler {
     public Observable<JsonObject> editMessageRaw(@Nonnull final String channelId, @Nonnull final String messageId,
                                                  @Nonnull final MessageOptions options) {
         final JsonObject json = new JsonObject();
-        if(options.embed() == null && (options.content() == null || options.content().isEmpty())) {
+        if(options.embeds().isEmpty() && (options.content() == null || options.content().isEmpty())) {
             throw new IllegalArgumentException("Can't build a message with no content and no embed!");
         }
         json.put("content", options.content());
-        if(options.embed() != null || options.override()) {
-            if(options.embed() == null) {
-                json.put("embed", null);
-            } else {
-                json.put("embed", entityBuilder().embedToJson(options.embed()));
-            }
+        if(options.embeds().isEmpty() && options.override()) {
+            json.put("embeds", null);
+        } else {
+            json.put("embeds", new JsonArray(options.embeds().stream().map(e -> entityBuilder().embedToJson(e)).toList()));
         }
-        if(json.get("embed") == null && json.get("content") == null) {
+        if(json.get("embeds") == null && json.get("content") == null) {
             throw new IllegalArgumentException("Can't build a message with no content and no embed!");
         }
         if(!options.flags().isEmpty() || options.override()) {

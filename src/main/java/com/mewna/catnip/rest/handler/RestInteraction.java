@@ -333,8 +333,10 @@ public class RestInteraction extends RestHandler {
             if(options.content() != null && !options.content().isEmpty()) {
                 innerBuilder.value("content", options.content());
             }
-            if(options.embed() != null) {
-                innerBuilder.array("embeds").value(entityBuilder().embedToJson(options.embed())).end();
+            if(!options.embeds().isEmpty()) {
+                innerBuilder.array("embeds");
+                options.embeds().stream().map(e -> entityBuilder().embedToJson(e)).forEach(innerBuilder::value);
+                innerBuilder.end();
             }
             if(username != null && !username.isEmpty()) {
                 innerBuilder.value("username", username);

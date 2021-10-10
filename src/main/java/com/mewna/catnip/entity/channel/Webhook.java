@@ -121,7 +121,7 @@ public interface Webhook extends GuildEntity, Snowflake, HasNullableName, HasCha
     @Nonnull
     default Single<Message> executeWebhook(@Nonnull final Embed embed,
                                            @Nullable final String username, @Nullable final String avatarUrl) {
-        return executeWebhook(new MessageOptions().embed(embed), username, avatarUrl);
+        return executeWebhook(new MessageOptions().addEmbed(embed), username, avatarUrl);
     }
     
     /**
