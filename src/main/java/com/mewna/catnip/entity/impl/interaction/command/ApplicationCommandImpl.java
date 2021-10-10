@@ -56,6 +56,7 @@ public class ApplicationCommandImpl implements ApplicationCommand, RequiresCatni
     private String name;
     private String description;
     private List<ApplicationCommandOption> options;
+    private long versionAsLong;
     
     @Override
     public void catnip(@Nonnull final Catnip catnip) {

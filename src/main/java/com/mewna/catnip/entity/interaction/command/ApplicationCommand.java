@@ -29,6 +29,7 @@ package com.mewna.catnip.entity.interaction.command;
 
 import com.mewna.catnip.entity.partials.*;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
@@ -36,5 +37,13 @@ import java.util.List;
  * @since 12/10/20.
  */
 public interface ApplicationCommand extends Snowflake, HasName, HasDescription, HasApplication, HasGuild {
+    @Nonnull
     List<ApplicationCommandOption> options();
+    
+    @Nonnull
+    default String version() {
+        return Long.toUnsignedString(versionAsLong());
+    }
+    
+    long versionAsLong();
 }

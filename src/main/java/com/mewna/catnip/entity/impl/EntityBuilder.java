@@ -1548,6 +1548,7 @@ public final class EntityBuilder {
                 .description(data.getString("description"))
                 .name(data.getString("name"))
                 .options(toList(data.getArray("options"), this::createApplicationCommandOption))
+                .versionAsLong(Long.parseUnsignedLong(data.getString("version")))
                 .build());
     }
     

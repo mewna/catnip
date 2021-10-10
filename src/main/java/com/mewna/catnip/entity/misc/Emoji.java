@@ -80,7 +80,7 @@ public interface Emoji extends Snowflake, HasNullableName {
      *
      * @return String representing the ID.
      */
-    @Nullable
+    @Nonnull
     @SuppressWarnings("NullableProblems")
     @CheckReturnValue
     String id();
@@ -284,7 +284,7 @@ public interface Emoji extends Snowflake, HasNullableName {
     }
     
     interface UnicodeEmoji extends Emoji {
-        @Nullable
+        @Nonnull
         @Override
         default String id() {
             throw new IllegalStateException("Unicode emojis have no IDs!");
