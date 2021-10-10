@@ -440,13 +440,12 @@ public interface Message extends Snowflake, HasChannel {
     
     @Nonnull
     default Completable delete(@Nullable final String reason) {
-        return Completable.fromMaybe(catnip().selfUser()
-                .filter(self -> !author().id().equals(self.id()))
-                .flatMap(self -> {
-                    PermissionUtil.checkPermissions(catnip(), guildId(), channelId(),
-                            Permission.MANAGE_MESSAGES);
-                    return catnip().rest().channel().deleteMessage(channelId(), id(), reason).toMaybe();
-                }));
+        return Completable.fromMaybe(catnip().selfUser().flatMap(self -> {
+            if(!author().id().equals(self.id())) {
+                PermissionUtil.checkPermissions(catnip(), guildId(), channelId(), Permission.MANAGE_MESSAGES);
+            }
+            return catnip().rest().channel().deleteMessage(channelId(), id(), reason).toMaybe();
+        }));
     }
     
     @Nonnull
