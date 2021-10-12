@@ -139,6 +139,10 @@ public enum GuildFeature {
      */
     ROLE_SUBSCRIPTIONS_ENABLED,
     /**
+     * See https://github.com/mewna/catnip/issues/613.
+     */    
+    ANIMATED_BANNER,
+    /**
      * When no other feature matches.
      */
     UNKNOWN_FEATURE,
