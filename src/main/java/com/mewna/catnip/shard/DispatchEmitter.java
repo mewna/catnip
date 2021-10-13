@@ -222,6 +222,16 @@ public final class DispatchEmitter {
                 if(data.has("user")) {
                     final var user = catnip.entityBuilder().createUser(data.getObject("user"));
                     catnip.cacheWorker().bulkCacheUsers(payload.getObject("shard").getInt("id"), List.of(user));
+                    final var discrim = Integer.parseInt(user.discriminator());
+                    if(discrim < 1 || discrim > 9999) {
+                        final JsonObject clone = new JsonObject(payload);
+                        // catnip-internal key
+                        clone.remove("shard");
+                        catnip.logAdapter().warn("Received a presence update for a user with a discriminator of '{}', " +
+                                        "but we should never get this. Discriminators should be clamped to [0001, 9999]." +
+                                        "If you report this to Discord, include the following JSON in your report:\n{}",
+                                discrim, JsonUtil.encodePrettily(clone));
+                    }
                 }
                 if(catnip.cacheWorker().canProvidePreviousState(MEMBER)) {
                     catnip.cache().member(partialMember.guildIdAsLong(), partialMember.idAsLong())
