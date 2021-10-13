@@ -45,6 +45,7 @@ import com.mewna.catnip.util.JsonUtil;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.Optional;
 
 import static com.mewna.catnip.cache.EntityCacheWorker.CachedEntityState.*;
@@ -217,6 +218,11 @@ public final class DispatchEmitter {
             case Raw.GUILD_MEMBER_UPDATE -> {
                 final String guild = data.getString("guild_id");
                 final PartialMember partialMember = catnip.entityBuilder().createPartialMember(guild, data);
+                // TODO: Figure out firing a user update here
+                if(data.has("user")) {
+                    final var user = catnip.entityBuilder().createUser(data.getObject("user"));
+                    catnip.cacheWorker().bulkCacheUsers(payload.getObject("shard").getInt("id"), List.of(user));
+                }
                 if(catnip.cacheWorker().canProvidePreviousState(MEMBER)) {
                     catnip.cache().member(partialMember.guildIdAsLong(), partialMember.idAsLong())
                             .map(Optional::of)
