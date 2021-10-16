@@ -8,7 +8,7 @@
 
 A Discord API wrapper in Java. Fully async / reactive, built on top of
 [RxJava](http://reactivex.io). catnip tries to map roughly 1:1 to how the Discord 
-API works, both in terms of events and REST methods available. catnip uses Java 15+.
+API works, both in terms of events and REST methods available. catnip uses Java 17+.
 
 catnip is part of the [amyware Discord server](https://discord.gg/yeF2HpP).
 
