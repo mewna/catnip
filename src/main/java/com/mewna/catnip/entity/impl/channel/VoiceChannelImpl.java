@@ -35,6 +35,7 @@ import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -84,5 +85,11 @@ public class VoiceChannelImpl implements VoiceChannel, RequiresCatnip {
     @Override
     public String toString() {
         return String.format("VoiceChannel (%s)", name);
+    }
+    
+    @Nullable
+    @Override
+    public String topic() {
+        return null;
     }
 }

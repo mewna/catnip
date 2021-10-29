@@ -142,6 +142,9 @@ public enum GuildFeature {
      * See https://github.com/mewna/catnip/issues/613.
      */    
     ANIMATED_BANNER,
+    MEMBER_PROFILES,
+    TEXT_IN_VOICE_ENABLED,
+    PREMIUM_TIER_3_OVERRIDE,
     /**
      * When no other feature matches.
      */

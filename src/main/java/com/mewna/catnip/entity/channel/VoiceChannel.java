@@ -28,6 +28,7 @@
 package com.mewna.catnip.entity.channel;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 
 /**
  * A voice channel in a guild.
@@ -35,7 +36,7 @@ import javax.annotation.CheckReturnValue;
  * @author natanbc
  * @since 9/12/18
  */
-public interface VoiceChannel extends GuildChannel {
+public interface VoiceChannel extends TextChannel {
     /**
      * @return The bitrate of this channel. Will be from 8 to 96.
      */
@@ -75,5 +76,28 @@ public interface VoiceChannel extends GuildChannel {
     @CheckReturnValue
     default boolean isCategory() {
         return false;
+    }
+    
+    /**
+     * Voice channels will never have a topic.
+     *
+     * @return {@code null}
+     */
+    @Nullable
+    @Override
+    default String topic() {
+        return null;
+    }
+    
+    @Override
+    default boolean nsfw() {
+        // TODO: Wait for confirmation from maxg about this flag, currently TBD
+        return false;
+    }
+    
+    @Override
+    default int rateLimitPerUser() {
+        // TODO: Wait for confirmation from maxg about this, currently TBD
+        return 0;
     }
 }
