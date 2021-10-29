@@ -86,10 +86,4 @@ public class VoiceChannelImpl implements VoiceChannel, RequiresCatnip {
     public String toString() {
         return String.format("VoiceChannel (%s)", name);
     }
-    
-    @Nullable
-    @Override
-    public String topic() {
-        return null;
-    }
 }
