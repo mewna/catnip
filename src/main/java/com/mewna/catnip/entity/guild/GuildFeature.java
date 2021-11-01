@@ -139,8 +139,8 @@ public enum GuildFeature {
      */
     ROLE_SUBSCRIPTIONS_ENABLED,
     /**
-     * See https://github.com/mewna/catnip/issues/613.
-     */    
+     * Needs {@link Guild#PremiumTier TIER_3}
+     */
     ANIMATED_BANNER,
     /**
      * When no other feature matches.
