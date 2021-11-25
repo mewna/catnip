@@ -250,6 +250,19 @@ public enum GatewayIntent {
             TYPING_START
     )),
     
+    /**
+     * <ul>
+     *     <li>{@link DiscordEvent#GUILD_SCHEDULED_EVENT_CREATE}</li>
+     *     <li>{@link DiscordEvent#GUILD_SCHEDULED_EVENT_UPDATE}</li>
+     *     <li>{@link DiscordEvent#GUILD_SCHEDULED_EVENT_DELETE}</li>
+     * </ul>
+     */
+    GUILD_SCHEDULED_EVENTS(1 << 16, false, List.of(
+            GUILD_SCHEDULED_EVENT_CREATE,
+            GUILD_SCHEDULED_EVENT_UPDATE,
+            GUILD_SCHEDULED_EVENT_DELETE
+    )),
+    
     ;
     
     public static final Set<GatewayIntent> ALL_INTENTS = Set.of(values());

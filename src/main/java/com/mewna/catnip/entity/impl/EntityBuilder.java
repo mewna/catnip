@@ -40,6 +40,10 @@ import com.mewna.catnip.entity.guild.Invite.InviteChannel;
 import com.mewna.catnip.entity.guild.Invite.InviteGuild;
 import com.mewna.catnip.entity.guild.Invite.Inviter;
 import com.mewna.catnip.entity.guild.PermissionOverride.OverrideType;
+import com.mewna.catnip.entity.guild.ScheduledEvent.EntityMetadata;
+import com.mewna.catnip.entity.guild.ScheduledEvent.EventEntityType;
+import com.mewna.catnip.entity.guild.ScheduledEvent.EventStatus;
+import com.mewna.catnip.entity.guild.ScheduledEvent.PrivacyLevel;
 import com.mewna.catnip.entity.guild.audit.*;
 import com.mewna.catnip.entity.impl.channel.*;
 import com.mewna.catnip.entity.impl.channel.ThreadChannelImpl.ThreadMemberImpl;
@@ -48,6 +52,7 @@ import com.mewna.catnip.entity.impl.guild.*;
 import com.mewna.catnip.entity.impl.guild.InviteImpl.InviteChannelImpl;
 import com.mewna.catnip.entity.impl.guild.InviteImpl.InviteGuildImpl;
 import com.mewna.catnip.entity.impl.guild.InviteImpl.InviterImpl;
+import com.mewna.catnip.entity.impl.guild.ScheduledEventImpl.EntityMetadataImpl;
 import com.mewna.catnip.entity.impl.guild.audit.*;
 import com.mewna.catnip.entity.impl.interaction.CustomIdInteractionDataImpl;
 import com.mewna.catnip.entity.impl.interaction.InteractionMemberImpl;
@@ -102,7 +107,7 @@ import static com.mewna.catnip.util.JsonUtil.*;
  * @author natanbc
  * @since 9/2/18.
  */
-@SuppressWarnings({"WeakerAccess", "OverlyCoupledClass", "DuplicatedCode"})
+@SuppressWarnings({"WeakerAccess", "OverlyCoupledClass", "DuplicatedCode", "ClassCanBeRecord"})
 public final class EntityBuilder {
     private final Catnip catnip;
     
@@ -1793,6 +1798,37 @@ public final class EntityBuilder {
                 .memberCount(data.getInt("member_count"))
                 .addedMembers(toList(data.getArray("added_members", new JsonArray()), this::createThreadMember))
                 .removedMembers(toStringList(data.getArray("removed_members", new JsonArray())))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public ScheduledEvent createScheduledEvent(@Nonnull final JsonObject data) {
+        return delegate(ScheduledEvent.class, ScheduledEventImpl.builder()
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .guildIdAsLong(Long.parseUnsignedLong(data.getString("guild_id")))
+                .channelIdAsLong(Long.parseUnsignedLong(data.getString("channel_id", "0")))
+                .creatorIdAsLong(Long.parseUnsignedLong(data.getString("creator_id", "0")))
+                .name(data.getString("name"))
+                .description(data.getString("description"))
+                .scheduledStartTimeRaw(data.getString("scheduled_start_time"))
+                .scheduledEndTimeRaw(data.getString("scheduled_end_time"))
+                .privacyLevel(PrivacyLevel.byKey(data.getInt("privacy_level")))
+                .status(EventStatus.byKey(data.getInt("status")))
+                .entityType(EventEntityType.byKey(data.getInt("entity_type")))
+                .entityId(data.getString("entity_id"))
+                .entityMetadata(createScheduledEventEntityMetadata(data.getObject("entity_metadata")))
+                .creator(data.has("creator") ? createUser(data.getObject("creator")) : null)
+                .userCount(data.getInt("user_count", 0))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public EntityMetadata createScheduledEventEntityMetadata(@Nonnull final JsonObject data) {
+        return delegate(EntityMetadata.class, EntityMetadataImpl.builder()
+                .speakerIds(data.has("speaker_ids") ? toStringList(data.getArray("speaker_ids")) : List.of())
+                .location(data.getString("location"))
                 .build());
     }
 }
