@@ -428,6 +428,9 @@ public final class EntityBuilder {
             case NEWS_THREAD, PUBLIC_THREAD, PRIVATE_THREAD -> {
                 return createThreadChannel(guildId, data);
             }
+            case STAGE -> {
+                return createStageChannel(guildId, data);
+            }
             default -> throw new UnsupportedOperationException("Unsupported channel type " + type);
         }
     }
@@ -1793,6 +1796,23 @@ public final class EntityBuilder {
                 .memberCount(data.getInt("member_count"))
                 .addedMembers(toList(data.getArray("added_members", new JsonArray()), this::createThreadMember))
                 .removedMembers(toStringList(data.getArray("removed_members", new JsonArray())))
+                .build());
+    }
+    
+    @Nonnull
+    @CheckReturnValue
+    public StageChannel createStageChannel(@Nonnull final String guildId, @Nonnull final JsonObject data) {
+        final String parentId = data.getString("parent_id");
+        return delegate(StageChannel.class, StageChannelImpl.builder()
+                .catnip(catnip)
+                .idAsLong(Long.parseUnsignedLong(data.getString("id")))
+                .name(data.getString("name"))
+                .guildIdAsLong(Long.parseUnsignedLong(guildId))
+                .position(data.getInt("position", -1))
+                .parentIdAsLong(parentId == null ? 0 : Long.parseUnsignedLong(parentId))
+                .overrides(toList(data.getArray("permission_overwrites"), this::createPermissionOverride))
+                .bitrate(data.getInt("bitrate", 0))
+                .userLimit(data.getInt("user_limit", 0))
                 .build());
     }
 }
