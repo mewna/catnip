@@ -58,6 +58,8 @@ public enum MessageType {
     REPLY(19),
     INTERACTION(20),
     THREAD_STARTER_MESSAGE(21),
+    GUILD_INVITE_REMINDER(22),
+    CONTEXT_MENU_COMMAND(23),
     ;
     @Getter
     private final int id;
