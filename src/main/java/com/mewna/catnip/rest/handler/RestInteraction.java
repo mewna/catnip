@@ -234,14 +234,14 @@ public class RestInteraction extends RestHandler {
     }
     
     public Single<ApplicationCommand> createGlobalApplicationCommand(@Nonnull final ApplicationCommandType type,
-                                                                     @Nonnull final String name, @Nonnull final String description,
+                                                                     @Nonnull final String name, @Nullable final String description,
                                                                      @Nonnull final Collection<ApplicationCommandOption> options) {
         return Single.fromObservable(createGlobalApplicationCommandRaw(type, name, description, options)
                 .map(entityBuilder()::createApplicationCommand));
     }
     
     public Observable<JsonObject> createGlobalApplicationCommandRaw(@Nonnull final ApplicationCommandType type,
-                                                                    @Nonnull final String name, @Nonnull final String description,
+                                                                    @Nonnull final String name, @Nullable final String description,
                                                                     @Nonnull final Collection<ApplicationCommandOption> options) {
         final JsonObject body = createCommandBody(type, name, description, options);
         return catnip().requester().queue(new OutboundRequest(Routes.CREATE_GLOBAL_APPLICATION_COMMAND
@@ -249,7 +249,7 @@ public class RestInteraction extends RestHandler {
     }
     
     public Single<ApplicationCommand> editGlobalApplicationCommand(@Nonnull final ApplicationCommandType type,
-                                                                   @Nonnull final String name, @Nonnull final String description,
+                                                                   @Nonnull final String name, @Nullable final String description,
                                                                    @Nonnull final String commandId,
                                                                    @Nonnull final Collection<ApplicationCommandOption> options) {
         return Single.fromObservable(editGlobalApplicationCommandRaw(type, name, description, commandId, options)
@@ -257,7 +257,7 @@ public class RestInteraction extends RestHandler {
     }
     
     public Observable<JsonObject> editGlobalApplicationCommandRaw(@Nonnull final ApplicationCommandType type,
-                                                                  @Nonnull final String name, @Nonnull final String description,
+                                                                  @Nonnull final String name, @Nullable final String description,
                                                                   @Nonnull final String commandId,
                                                                   @Nonnull final Collection<ApplicationCommandOption> options) {
         final var body = createCommandBody(type, name, description, options);
@@ -286,7 +286,7 @@ public class RestInteraction extends RestHandler {
     
     public Single<ApplicationCommand> createGuildApplicationCommand(@Nonnull final ApplicationCommandType type,
                                                                     @Nonnull final String guildId, @Nonnull final String name,
-                                                                    @Nonnull final String description,
+                                                                    @Nullable final String description,
                                                                     @Nonnull final Collection<ApplicationCommandOption> options) {
         return Single.fromObservable(createGuildApplicationCommandRaw(type, guildId, name, description, options)
                 .map(entityBuilder()::createApplicationCommand));
@@ -294,7 +294,7 @@ public class RestInteraction extends RestHandler {
     
     public Observable<JsonObject> createGuildApplicationCommandRaw(@Nonnull final ApplicationCommandType type,
                                                                    @Nonnull final String guildId, @Nonnull final String name,
-                                                                   @Nonnull final String description,
+                                                                   @Nullable final String description,
                                                                    @Nonnull final Collection<ApplicationCommandOption> options) {
         final var body = createCommandBody(type, name, description, options);
         return catnip().requester().queue(new OutboundRequest(Routes.CREATE_GUILD_APPLICATION_COMMAND
@@ -303,7 +303,7 @@ public class RestInteraction extends RestHandler {
     
     public Single<ApplicationCommand> editGuildApplicationCommand(@Nonnull final ApplicationCommandType type,
                                                                   @Nonnull final String guildId, @Nonnull final String name,
-                                                                  @Nonnull final String description,
+                                                                  @Nullable final String description,
                                                                   @Nonnull final String commandId,
                                                                   @Nonnull final Collection<ApplicationCommandOption> options) {
         return Single.fromObservable(editGuildApplicationCommandRaw(type, guildId, name, description, commandId, options)
@@ -312,7 +312,7 @@ public class RestInteraction extends RestHandler {
     
     public Observable<JsonObject> editGuildApplicationCommandRaw(@Nonnull final ApplicationCommandType type,
                                                                  @Nonnull final String guildId, @Nonnull final String name,
-                                                                 @Nonnull final String description,
+                                                                 @Nullable final String description,
                                                                  @Nonnull final String commandId,
                                                                  @Nonnull final Collection<ApplicationCommandOption> options) {
         final var body = createCommandBody(type, name, description, options);
@@ -400,11 +400,16 @@ public class RestInteraction extends RestHandler {
     }
     
     private JsonObject createCommandBody(@Nonnull final ApplicationCommandType type, @Nonnull final String name,
-                                         @Nonnull final String description, @Nonnull final Collection<ApplicationCommandOption> options) {
+                                         @Nullable final String description, @Nonnull final Collection<ApplicationCommandOption> options) {
         final var builder = JsonObject.builder();
         if(type == ApplicationCommandType.CHAT_INPUT) {
             if(!name.matches("^[\\w-]{1,32}$") || !name.toLowerCase(Locale.ROOT).equals(name)) {
                 throw new IllegalArgumentException("Name must match ^[\\w-]{1,32}$ and must be lowercase!");
+            }
+        }
+        if(type == ApplicationCommandType.USER || type == ApplicationCommandType.MESSAGE) {
+            if(description != null) {
+                throw new IllegalArgumentException("Context menu commands must not have a description");
             }
         }
         builder.value("name", name);
