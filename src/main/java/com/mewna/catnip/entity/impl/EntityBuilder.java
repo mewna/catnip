@@ -773,6 +773,7 @@ public final class EntityBuilder {
                 .selfMute(data.getBoolean("self_mute"))
                 .suppress(data.getBoolean("suppress"))
                 .selfStream(data.getBoolean("self_stream", false))
+                .requestToSpeakTimestampRaw(data.getString("request_to_speak_timestamp", null))
                 .build());
     }
     

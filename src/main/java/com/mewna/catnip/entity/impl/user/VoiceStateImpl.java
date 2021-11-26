@@ -58,6 +58,7 @@ public class VoiceStateImpl implements VoiceState, RequiresCatnip {
     private boolean selfMute;
     private boolean suppress;
     private boolean selfStream;
+    private String requestToSpeakTimestampRaw;
     
     public void catnip(@Nonnull final Catnip catnip) {
         this.catnip = catnip;

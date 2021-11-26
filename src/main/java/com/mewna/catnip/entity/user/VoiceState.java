@@ -32,12 +32,14 @@ import com.mewna.catnip.entity.channel.VoiceChannel;
 import com.mewna.catnip.entity.guild.Member;
 import com.mewna.catnip.entity.partials.GuildEntity;
 import com.mewna.catnip.entity.partials.HasChannel;
+import com.mewna.catnip.entity.partials.Timestamped;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Maybe;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.time.OffsetDateTime;
 
 /**
  * A user's voice state.
@@ -46,7 +48,7 @@ import javax.annotation.Nullable;
  * @since 9/21/18.
  */
 @SuppressWarnings({"unused", "RedundantSuppression"})
-public interface VoiceState extends GuildEntity, HasChannel {
+public interface VoiceState extends GuildEntity, HasChannel, Timestamped {
     /**
      * @return The guild this voice state is for, if applicable.
      */
@@ -141,4 +143,14 @@ public interface VoiceState extends GuildEntity, HasChannel {
      */
     @CheckReturnValue
     boolean selfStream();
+    
+    @Nullable
+    @CheckReturnValue
+    default OffsetDateTime requestToSpeakTimestamp() {
+        return parseTimestamp(requestToSpeakTimestampRaw());
+    }
+    
+    @Nullable
+    @CheckReturnValue
+    String requestToSpeakTimestampRaw();
 }
