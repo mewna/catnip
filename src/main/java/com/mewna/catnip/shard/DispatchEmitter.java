@@ -323,6 +323,11 @@ public final class DispatchEmitter {
                     Raw.APPLICATION_COMMAND_UPDATE,
                     Raw.APPLICATION_COMMAND_DELETE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createApplicationCommand(data));
             
+            // Guild events
+            case Raw.GUILD_SCHEDULED_EVENT_CREATE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createScheduledEvent(data));
+            case Raw.GUILD_SCHEDULED_EVENT_UPDATE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createScheduledEvent(data));
+            case Raw.GUILD_SCHEDULED_EVENT_DELETE -> catnip.dispatchManager().dispatchEvent(type, catnip.entityBuilder().createScheduledEvent(data));
+            
             // Other
             case Raw.GUILD_MEMBERS_CHUNK -> {
                 // End-users don't really have a use for an event here;
