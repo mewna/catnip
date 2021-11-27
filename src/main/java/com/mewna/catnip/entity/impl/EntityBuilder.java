@@ -1575,16 +1575,22 @@ public final class EntityBuilder {
     @CheckReturnValue
     public ApplicationCommandOptionChoice<?> createApplicationCommandOptionChoice(@Nonnull final JsonObject data) {
         final Object innerValue = data.get("value");
-        if(innerValue instanceof String) {
+        if(innerValue instanceof String s) {
             return delegate(ApplicationCommandOptionStringChoice.class, ApplicationCommandOptionStringChoiceImpl.builder()
                     .name(data.getString("name"))
-                    .value(data.getString("value"))
+                    .value(s)
                     .build());
-        } else if(innerValue instanceof Integer) {
+        } else if(innerValue instanceof Integer i) {
             return delegate(ApplicationCommandOptionIntegerChoice.class, ApplicationCommandOptionIntegerChoiceImpl.builder()
                     .catnip(catnip)
                     .name(data.getString("name"))
-                    .value(data.getInt("value"))
+                    .value(i)
+                    .build());
+        } else if(innerValue instanceof Double d) {
+            return delegate(ApplicationCommandOptionDoubleChoice.class, ApplicationCommandOptionDoubleChoiceImpl.builder()
+                    .catnip(catnip)
+                    .name(data.getString("name"))
+                    .value(d)
                     .build());
         } else {
             throw new IllegalArgumentException("Unknown value type: " + innerValue.getClass().getName());

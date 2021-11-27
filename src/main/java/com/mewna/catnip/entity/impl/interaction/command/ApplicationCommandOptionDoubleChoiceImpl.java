@@ -25,22 +25,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.mewna.catnip.entity.interaction.command;
+package com.mewna.catnip.entity.impl.interaction.command;
 
-import com.grack.nanojson.JsonObject;
-import com.mewna.catnip.entity.partials.HasName;
+import com.mewna.catnip.Catnip;
+import com.mewna.catnip.entity.RequiresCatnip;
+import com.mewna.catnip.entity.interaction.command.ApplicationCommandOptionDoubleChoice;
+import lombok.*;
+import lombok.experimental.Accessors;
+
+import javax.annotation.Nonnull;
 
 /**
  * @author amy
- * @since 12/10/20.
+ * @since 11/27/21.
  */
-public interface ApplicationCommandOptionChoice<T> extends HasName {
-    T value();
+@Getter
+@Setter
+@Builder
+@Accessors(fluent = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class ApplicationCommandOptionDoubleChoiceImpl implements ApplicationCommandOptionDoubleChoice, RequiresCatnip {
+    private transient Catnip catnip;
     
-    default JsonObject toJson() {
-        final var builder = JsonObject.builder();
-        builder.value("name", name());
-        builder.value("value", value());
-        return builder.done();
+    private String name;
+    private Double value;
+    
+    @Override
+    public void catnip(@Nonnull final Catnip catnip) {
+        this.catnip = catnip;
     }
 }

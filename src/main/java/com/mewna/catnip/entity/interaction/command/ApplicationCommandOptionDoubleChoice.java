@@ -27,20 +27,9 @@
 
 package com.mewna.catnip.entity.interaction.command;
 
-import com.grack.nanojson.JsonObject;
-import com.mewna.catnip.entity.partials.HasName;
-
 /**
  * @author amy
- * @since 12/10/20.
+ * @since 11/27/21.
  */
-public interface ApplicationCommandOptionChoice<T> extends HasName {
-    T value();
-    
-    default JsonObject toJson() {
-        final var builder = JsonObject.builder();
-        builder.value("name", name());
-        builder.value("value", value());
-        return builder.done();
-    }
+public interface ApplicationCommandOptionDoubleChoice extends ApplicationCommandOptionChoice<Double> {
 }
