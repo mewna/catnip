@@ -363,8 +363,8 @@ public final class CatnipImpl implements Catnip {
                     .flatMap(gateway -> {
                         logAdapter().info("Token validated!");
                         clientIdAsLong = Catnip.parseIdFromToken(token);
-                        // return checkIntentsAndLog();
-                        return Single.just((Catnip) this);
+                        return checkIntentsAndLog();
+                        // return Single.just((Catnip) this);
                     }).doOnError(e -> {
                         logAdapter().warn("Couldn't validate token!", e);
                         throw new RuntimeException(e);
@@ -385,17 +385,25 @@ public final class CatnipImpl implements Catnip {
     
     private Single<Catnip> checkIntentsAndLog() {
         return rest.user().getCurrentApplicationInformation().map(info -> {
-            if(!info.flags().contains(ApplicationFlag.GATEWAY_GUILD_MEMBERS) && options.intents().contains(GatewayIntent.GUILD_MEMBERS)) {
+            final var hasMembersIntent = info.flags().contains(ApplicationFlag.GATEWAY_GUILD_MEMBERS) || info.flags().contains(ApplicationFlag.GATEWAY_GUILD_MEMBERS_LIMITED);
+            final var hasPresenceIntent = info.flags().contains(ApplicationFlag.GATEWAY_PRESENCE) || info.flags().contains(ApplicationFlag.GATEWAY_PRESENCE_LIMITED);
+            if(!hasMembersIntent || !hasPresenceIntent) {
+                logAdapter().error("#########################################");
+            }
+            if(!hasMembersIntent && options.intents().contains(GatewayIntent.GUILD_MEMBERS)) {
                 logAdapter().error("GUILD_MEMBERS intent passed but is not enabled in the developer dashboard, this will fail!");
                 logAdapter().error("Please go enable those intents first, and THEN try running your bot.");
                 logAdapter().error("Click here to go to the dashboard: https://discord.com/developers/applications/{}",
                         Catnip.parseIdFromToken(options.token()));
             }
-            if(!info.flags().contains(ApplicationFlag.GATEWAY_GUILD_MEMBERS) && options.intents().contains(GatewayIntent.GUILD_PRESENCES)) {
+            if(!hasPresenceIntent && options.intents().contains(GatewayIntent.GUILD_PRESENCES)) {
                 logAdapter().error("GUILD_PRESENCES intent passed but is not enabled in the developer dashboard, this will fail!");
                 logAdapter().error("Please go enable those intents first, and THEN try running your bot.");
                 logAdapter().error("Click here to go to the dashboard: https://discord.com/developers/applications/{}",
                         Catnip.parseIdFromToken(options.token()));
+            }
+            if(!hasMembersIntent || !hasPresenceIntent) {
+                logAdapter().error("#########################################");
             }
             return this;
         });
