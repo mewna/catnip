@@ -254,7 +254,7 @@ public class DefaultShardManager extends AbstractShardManager {
             connectNextShard();
         } else {
             //noinspection ResultOfMethodCallIgnored
-            Single.zip(conditions().stream().map(e -> e.preshard(id)).collect(Collectors.toUnmodifiableList()),
+            Single.zip(conditions().stream().map(e -> e.preshard(id)).toList(),
                     // Yikes
                     data -> Arrays.stream(data).allMatch(e -> e == Boolean.TRUE))
                     .subscribe(res -> {
