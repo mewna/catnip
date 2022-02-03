@@ -808,6 +808,12 @@ public interface Catnip extends AutoCloseable {
     /**
      * Validates an ed25519 signature for interactions.
      *
+     * @param signature The signature to validate. This is the
+     *                  {@code x-signature-ed25519} header.
+     * @param ts        The timestamp of the request. This is the
+     *                  {@code x-signature-timestamp} heaqder.
+     * @param data      The data to validate. This is the body of the request.
+     *
      * @return Whether or not the signature is valid.
      */
     default boolean validateSignature(@Nonnull final String signature, @Nonnull final String ts, @Nonnull final String data) {
