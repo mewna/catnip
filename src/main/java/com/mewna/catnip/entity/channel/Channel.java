@@ -164,7 +164,7 @@ public interface Channel extends Snowflake {
      */
     @CheckReturnValue
     default boolean isGuildMessageChannel() {
-        return type().guild() && type().message();
+        return type().guild() && this instanceof MessageChannel;
     }
     
     /**
@@ -268,74 +268,71 @@ public interface Channel extends Snowflake {
         /**
          * A text channel in a guild.
          */
-        TEXT(0, true, true),
-        
+        TEXT(0, true),
+
         /**
          * A DM with a single user.
          */
-        DM(1, false, true),
-        
+        DM(1, false),
+
         /**
          * A voice channel in a guild.
          */
-        VOICE(2, true, false),
-        
+        VOICE(2, true),
+
         /**
          * A DM with multiple users.
          */
-        GROUP_DM(3, false, true),
-        
+        GROUP_DM(3, false),
+
         /**
          * A guild channel category with zero or more child channels.
          */
-        CATEGORY(4, true, false),
-        
+        CATEGORY(4, true),
+
         /**
          * A news channel in a guild. See discordapp/discord-api-docs#881
          */
-        NEWS(5, true, true),
-        
+        NEWS(5, true),
+
         /**
          * A store channel in a guild. Used for literally what it sounds like.
          * Requires an application with a valid SKU. Not officially announced,
          * but there is some discussion about it in discordapp/discord-api-docs#881.
          */
-        STORE(6, true, false),
-        
+        STORE(6, true),
+
         // Note: Channel types 7 -> 9 never really existed in a meaningful form, afaik.
-        
+
         /**
          * A thread in an announcement? channel.
          */
-        NEWS_THREAD(10, true, true),
-        
+        NEWS_THREAD(10, true),
+
         /**
          * A public thread.
          */
-        PUBLIC_THREAD(11, true, true),
-        
+        PUBLIC_THREAD(11, true),
+
         /**
          * A private thread.
          */
-        PRIVATE_THREAD(12, true, true),
-    
+        PRIVATE_THREAD(12, true),
+
         /**
          * A stage channel.
          */
-        STAGE(13, true, false),
+        STAGE(13, true),
         ;
-        
+
         @Getter
         private final int key;
         @Getter
         private final boolean guild;
-        @Getter
-        private final boolean message;
-        
-        ChannelType(final int key, final boolean guild, boolean message) {
+    
+        ChannelType(final int key, final boolean guild) {
             this.key = key;
             this.guild = guild;
-            this.message = message;
         }
         
         @Nonnull
