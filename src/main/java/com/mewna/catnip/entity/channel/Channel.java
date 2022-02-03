@@ -269,62 +269,62 @@ public interface Channel extends Snowflake {
          * A text channel in a guild.
          */
         TEXT(0, true),
-
+        
         /**
          * A DM with a single user.
          */
         DM(1, false),
-
+        
         /**
          * A voice channel in a guild.
          */
         VOICE(2, true),
-
+        
         /**
          * A DM with multiple users.
          */
         GROUP_DM(3, false),
-
+        
         /**
          * A guild channel category with zero or more child channels.
          */
         CATEGORY(4, true),
-
+        
         /**
          * A news channel in a guild. See discordapp/discord-api-docs#881
          */
         NEWS(5, true),
-
+        
         /**
          * A store channel in a guild. Used for literally what it sounds like.
          * Requires an application with a valid SKU. Not officially announced,
          * but there is some discussion about it in discordapp/discord-api-docs#881.
          */
         STORE(6, true),
-
+        
         // Note: Channel types 7 -> 9 never really existed in a meaningful form, afaik.
-
+        
         /**
          * A thread in an announcement? channel.
          */
         NEWS_THREAD(10, true),
-
+        
         /**
          * A public thread.
          */
         PUBLIC_THREAD(11, true),
-
+        
         /**
          * A private thread.
          */
         PRIVATE_THREAD(12, true),
-
+        
         /**
          * A stage channel.
          */
         STAGE(13, true),
         ;
-
+        
         @Getter
         private final int key;
         @Getter
