@@ -143,6 +143,11 @@ public enum GuildFeature {
      */
     ANIMATED_BANNER,
     /**
+     * Needs {@link Guild#PremiumTier TIER_3}
+     * See https://github.com/Discord-Datamining/Discord-Datamining/commit/4c6e7180e67fa439c0a550afe016d418c21146b9
+     */
+    CHANNEL_BANNER,
+    /**
      * When no other feature matches.
      */
     UNKNOWN_FEATURE,

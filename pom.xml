@@ -14,7 +14,7 @@
 
         <lombok.version>1.18.20</lombok.version>
         <rxjava.version>3.1.3</rxjava.version>
-        <slf4j.version>1.7.32</slf4j.version>
+        <slf4j.version>1.7.33</slf4j.version>
         <commons.lang.version>3.12.0</commons.lang.version>
         <commons.codec.version>1.15</commons.codec.version>
         <jsr305.version>3.0.2</jsr305.version>
@@ -24,9 +24,9 @@
         <koloboke-impl.version>1.0.0</koloboke-impl.version>
         <emoji-java.version>5.1.1</emoji-java.version>
 
-        <junit.version>5.8.1</junit.version>
-        <mockito.version>4.1.0</mockito.version>
-        <logback.version>1.2.7</logback.version>
+        <junit.version>5.8.2</junit.version>
+        <mockito.version>4.2.0</mockito.version>
+        <logback.version>1.2.10</logback.version>
         <javautil.version>1.34.0</javautil.version>
     </properties>
 
@@ -130,12 +130,12 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.69</version>
+            <version>1.70</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk15on</artifactId>
-            <version>1.69</version>
+            <version>1.70</version>
         </dependency>
 
         <!-- Emoji detection for creation -->
@@ -179,7 +179,7 @@
                     <target>17</target>
                     <useIncrementalCompilation>false</useIncrementalCompilation>
                 </configuration>
-                <version>3.8.1</version>
+                <version>3.9.0</version>
             </plugin>
 
             <plugin>
