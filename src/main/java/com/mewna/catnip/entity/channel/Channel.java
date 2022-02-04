@@ -164,7 +164,7 @@ public interface Channel extends Snowflake {
      */
     @CheckReturnValue
     default boolean isGuildMessageChannel() {
-        return isText() || isNews();
+        return type().guild() && this instanceof MessageChannel;
     }
     
     /**
@@ -318,7 +318,7 @@ public interface Channel extends Snowflake {
          * A private thread.
          */
         PRIVATE_THREAD(12, true),
-    
+        
         /**
          * A stage channel.
          */
@@ -329,7 +329,7 @@ public interface Channel extends Snowflake {
         private final int key;
         @Getter
         private final boolean guild;
-        
+    
         ChannelType(final int key, final boolean guild) {
             this.key = key;
             this.guild = guild;
