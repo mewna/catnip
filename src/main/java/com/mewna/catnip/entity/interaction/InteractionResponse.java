@@ -45,7 +45,7 @@ public interface InteractionResponse {
     default JsonObject toJson(@Nonnull final Catnip catnip) {
         final var builder = JsonObject.builder();
         builder.value("type", type().key());
-        builder.value(data().toJson(catnip));
+        builder.value("data", data().toJson(catnip));
         return builder.done();
     }
 }
