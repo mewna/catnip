@@ -110,6 +110,10 @@ public enum GuildFeature {
      * Needs {@link #MONETIZATION_ENABLED} and valid payout informations on developer team
      */
     TICKETED_EVENTS_ENABLED,
+    /**
+     * See https://github.com/Discord-Datamining/Discord-Datamining/commit/927edd4a616f0ca487a9dc49ea8975a8abf1674b#commitcomment-66577069
+     */
+    @Deprecated
     MONETIZATION_ENABLED,
     MORE_STICKERS,
     /**
@@ -139,11 +143,11 @@ public enum GuildFeature {
      */
     ROLE_SUBSCRIPTIONS_ENABLED,
     /**
-     * Needs {@link Guild#PremiumTier TIER_3}
+     * Needs {@link PremiumTier TIER_3}
      */
     ANIMATED_BANNER,
     /**
-     * Needs {@link Guild#PremiumTier TIER_3}
+     * Needs {@link PremiumTier TIER_3}
      * See https://github.com/Discord-Datamining/Discord-Datamining/commit/4c6e7180e67fa439c0a550afe016d418c21146b9
      */
     CHANNEL_BANNER,
