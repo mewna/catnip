@@ -31,11 +31,21 @@ import com.mewna.catnip.Catnip;
 import com.mewna.catnip.entity.RequiresCatnip;
 import com.mewna.catnip.entity.channel.StageChannel;
 import com.mewna.catnip.entity.channel.VoiceChannel;
+import com.mewna.catnip.entity.channel.Webhook;
 import com.mewna.catnip.entity.guild.PermissionOverride;
+import com.mewna.catnip.entity.message.Embed;
+import com.mewna.catnip.entity.message.Message;
+import com.mewna.catnip.entity.message.MessageOptions;
+import com.mewna.catnip.entity.misc.Emoji;
+import com.mewna.catnip.util.pagination.MessagePaginator;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
 import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -84,6 +94,131 @@ public class StageChannelImpl implements StageChannel, RequiresCatnip {
     
     @Override
     public String toString() {
-        return String.format("VoiceChannel (%s)", name);
+        return String.format("StageChannel (%s)", name);
+    }
+    
+    @Nonnull
+    @Override
+    public Single<Message> sendMessage(@Nonnull final String content) {
+        throw new UnsupportedOperationException("Not available on stage channels.");
+    }
+    
+    @Nonnull
+    @Override
+    public Single<Message> sendMessage(@Nonnull final Embed embed) {
+        throw new UnsupportedOperationException("Not available on stage channels.");
+    }
+    
+    @Nonnull
+    @Override
+    public Single<Message> sendMessage(@Nonnull final Message message) {
+        throw new UnsupportedOperationException("Not available on stage channels.");
+    }
+    
+    @Nonnull
+    @Override
+    public Single<Message> sendMessage(@Nonnull final MessageOptions options) {
+        throw new UnsupportedOperationException("Not available on stage channels.");
+    }
+    
+    @Nonnull
+    @Override
+    public Single<Message> editMessage(@Nonnull final String messageId, @Nonnull final String content) {
+        throw new UnsupportedOperationException("Not available on stage channels.");
+    }
+    
+    @Nonnull
+    @Override
+    public Single<Message> editMessage(@Nonnull final String messageId, @Nonnull final Embed embed) {
+        throw new UnsupportedOperationException("Not available on stage channels.");
+    }
+    
+    @Nonnull
+    @Override
+    public Single<Message> editMessage(@Nonnull final String messageId, @Nonnull final Message message) {
+        throw new UnsupportedOperationException("Not available on stage channels.");
+    }
+    
+    @Nonnull
+    @Override
+    public Completable deleteMessage(@Nonnull final String messageId, @Nullable final String reason) {
+        throw new UnsupportedOperationException("Not available on stage channels.");
+    }
+    
+    @Nonnull
+    @Override
+    public Completable deleteMessage(@Nonnull final String messageId) {
+        throw new UnsupportedOperationException("Not available on stage channels.");
+    }
+    
+    @Nonnull
+    @Override
+    public Completable addReaction(@Nonnull final String messageId, @Nonnull final String emoji) {
+        throw new UnsupportedOperationException("Not available on stage channels.");
+    }
+    
+    @Nonnull
+    @Override
+    public Completable addReaction(@Nonnull final String messageId, @Nonnull final Emoji emoji) {
+        throw new UnsupportedOperationException("Not available on stage channels.");
+    }
+    
+    @Nonnull
+    @Override
+    public Completable deleteOwnReaction(@Nonnull final String messageId, @Nonnull final String emoji) {
+        throw new UnsupportedOperationException("Not available on stage channels.");
+    }
+    
+    @Nonnull
+    @Override
+    public Completable deleteOwnReaction(@Nonnull final String messageId, @Nonnull final Emoji emoji) {
+        throw new UnsupportedOperationException("Not available on stage channels.");
+    }
+    
+    @Nonnull
+    @Override
+    public Completable deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId, @Nonnull final String emoji) {
+        throw new UnsupportedOperationException("Not available on stage channels.");
+    }
+    
+    @Nonnull
+    @Override
+    public Completable deleteUserReaction(@Nonnull final String messageId, @Nonnull final String userId, @Nonnull final Emoji emoji) {
+        throw new UnsupportedOperationException("Not available on stage channels.");
+    }
+    
+    @Nonnull
+    @Override
+    public Completable bulkRemoveReaction(@Nonnull final String messageId) {
+        throw new UnsupportedOperationException("Not available on stage channels.");
+    }
+    
+    @Nonnull
+    @Override
+    public Completable triggerTypingIndicator() {
+        throw new UnsupportedOperationException("Not available on stage channels.");
+    }
+    
+    @Nonnull
+    @Override
+    public Single<Message> fetchMessage(@Nonnull final String messageId) {
+        throw new UnsupportedOperationException("Not available on stage channels.");
+    }
+    
+    @Nonnull
+    @Override
+    public MessagePaginator fetchMessages() {
+        throw new UnsupportedOperationException("Not available on stage channels.");
+    }
+    
+    @Nonnull
+    @Override
+    public Observable<Webhook> fetchWebhooks() {
+        throw new UnsupportedOperationException("Not available on stage channels.");
+    }
+    
+    @Override
+    public boolean isGuildMessageChannel() {
+        return false;
     }
 }
