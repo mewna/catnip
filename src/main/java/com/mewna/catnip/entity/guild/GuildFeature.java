@@ -146,6 +146,9 @@ public enum GuildFeature {
      * Needs {@link PremiumTier TIER_3}
      */
     ANIMATED_BANNER,
+    MEMBER_PROFILES,
+    TEXT_IN_VOICE_ENABLED,
+    PREMIUM_TIER_3_OVERRIDE,
     /**
      * Needs {@link PremiumTier TIER_3}
      * See https://github.com/Discord-Datamining/Discord-Datamining/commit/4c6e7180e67fa439c0a550afe016d418c21146b9
