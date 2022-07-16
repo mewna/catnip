@@ -93,7 +93,7 @@ public class MemberData {
     public static MemberData blockingOf(@Nonnull final Member member) {
         final VoiceState voiceState = member.voiceState().blockingGet();
         return new MemberData()
-                .roles(member.roleIds())
+                .roles(new HashSet<>(member.roleIds()))
                 .deaf(voiceState != null ? member.deaf().blockingGet() : null)
                 .mute(voiceState != null ? member.mute().blockingGet() : null)
                 .nickname(member.nick())
