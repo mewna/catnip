@@ -232,9 +232,9 @@ public final class CatnipImpl implements Catnip {
     @Override
     public void shutdown() {
         logAdapter().info("Shutting down!");
-        dispatchManager().close();
         shardManager().shutdown();
         extensionManager.shutdown();
+        dispatchManager().close();
         // Will let the keepalive thread halt
         latch.countDown();
     }
