@@ -32,6 +32,7 @@ import com.mewna.catnip.entity.misc.GatewayInfo;
 import com.mewna.catnip.shard.CatnipShard;
 import com.mewna.catnip.shard.CatnipShardImpl;
 import com.mewna.catnip.shard.LifecycleEvent.Raw;
+import com.mewna.catnip.shard.LifecycleState;
 import com.mewna.catnip.shard.event.MessageConsumer;
 import com.mewna.catnip.util.task.QueueTask;
 import com.mewna.catnip.util.task.ShardConnectTask;
@@ -283,6 +284,28 @@ public class DefaultShardManager extends AbstractShardManager {
         consumers.forEach(MessageConsumer::close);
         consumers.clear();
         shards.values().forEach(CatnipShard::disconnect);
+        // Spin waiting for shards to disconnect
+        final var blockingStates = Set.of(
+                LifecycleState.CONNECTING,
+                LifecycleState.CONNECTED,
+                LifecycleState.IDENTIFYING,
+                LifecycleState.RESUMING,
+                LifecycleState.LOGGED_IN
+        );
+        var cycles = 0;
+        while(shards.values().stream().anyMatch(shard -> shard.isConnected() || blockingStates.contains(shard.lifecycleState()))) {
+            catnip().logAdapter().debug("Waiting for shards to disconnect...");
+            try {
+                //noinspection BusyWait
+                Thread.sleep(50L);
+                ++cycles;
+                if(cycles >= 100) {
+                    catnip().logAdapter().error("Shards took too long to disconnect (probably ~5s), giving up!");
+                    break;
+                }
+            } catch(final InterruptedException ignored) {
+            }
+        }
         shards.clear();
     }
 }
