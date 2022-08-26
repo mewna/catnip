@@ -253,11 +253,12 @@ public abstract class AbstractRequester implements Requester {
         if(statusCode == 429) {
             if(catnip.options().logLifecycleEvents()) {
                 catnip.logAdapter().warn(
-                        "Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}",
+                        "Hit 429! Route: {}, X-Ratelimit-Global: {}, X-Ratelimit-Limit: {}, X-Ratelimit-Reset: {}, Retry-After: {}",
                         route.baseRoute(),
                         headers.firstValue("X-Ratelimit-Global").orElse(null),
                         headers.firstValue("X-Ratelimit-Limit").orElse(null),
-                        headers.firstValue("X-Ratelimit-Reset").orElse(null)
+                        headers.firstValue("X-Ratelimit-Reset").orElse(null),
+                        headers.firstValue("Retry-After").orElse(null)
                 );
             }
             catnip.dispatchManager().dispatchEvent(Raw.REST_RATELIMIT_HIT,
