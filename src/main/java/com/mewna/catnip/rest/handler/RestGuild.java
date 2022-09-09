@@ -77,6 +77,16 @@ public class RestGuild extends RestHandler {
     
     @Nonnull
     @CheckReturnValue
+    public Observable<Member> addGuildMember(@Nonnull final String guildId, @Nonnull final String memberId,
+                                             @Nonnull final MemberAddOptions options) {
+        return catnip().requester()
+                .queue(new OutboundRequest(Routes.ADD_GUILD_MEMBER.withMajorParam(guildId),
+                        Map.of("user", memberId), options.toJson()))
+                .map(payload -> entityBuilder().createMember(guildId, payload.object()));
+    }
+    
+    @Nonnull
+    @CheckReturnValue
     public Completable modifyGuildMember(@Nonnull final String guildId, @Nonnull final String memberId,
                                          @Nonnull final MemberData data, @Nullable final String reason) {
         return Completable.fromObservable(catnip().requester()
