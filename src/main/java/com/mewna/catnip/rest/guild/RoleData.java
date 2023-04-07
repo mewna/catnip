@@ -48,7 +48,7 @@ import java.util.function.LongUnaryOperator;
 @SuppressWarnings("WeakerAccess")
 public class RoleData implements JsonConvertible {
     private final int id;
-    private final boolean publicRole;
+    protected boolean publicRole;
     private Long permissions;
     private String name;
     private Integer color;

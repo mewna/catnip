@@ -48,6 +48,11 @@ public final class PermissionUtil {
     private PermissionUtil() {
     }
     
+    public boolean isPresent(final long permissions) {
+        final long value = 1;
+        return (permissions & value) == value;
+    }
+    
     private static long basePermissions(final Permissable holder) {
         final Catnip catnip = holder.catnip();
         final Guild guild = catnip.cache().guild(holder.guildId()).blockingGet();

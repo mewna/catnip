@@ -34,9 +34,11 @@ import com.grack.nanojson.JsonParserException;
 
 public class ResponsePayload {
     private final String body;
-    
+    private final String jsonString;
     public ResponsePayload(final String body) {
+        
         this.body = body;
+        this.jsonString=body;
     }
     
     public String string() {
@@ -45,7 +47,7 @@ public class ResponsePayload {
     
     public JsonObject object() {
         try {
-            return JsonParser.object().from(body);
+            return JsonParser.object().from(jsonString);
         } catch(final JsonParserException e) {
             throw new IllegalStateException(e);
         }
@@ -53,7 +55,7 @@ public class ResponsePayload {
     
     public JsonArray array() {
         try {
-            return JsonParser.array().from(body);
+            return JsonParser.array().from(jsonString);
         } catch(final JsonParserException e) {
             throw new IllegalStateException(e);
         }
