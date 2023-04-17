@@ -1,3 +1,7 @@
+# PROJECT STATUS
+
+**This project is no longer maintained.** I don't have time to maintain it anymore, and I don't really use Discord's API much anymore anyway. If you want to maintain this library, please see issue [#729](https://github.com/mewna/catnip/issues/729).
+
 # catnip
 
 ![Github Actions -- tests](https://github.com/mewna/catnip/workflows/Run%20all%20tests/badge.svg)
