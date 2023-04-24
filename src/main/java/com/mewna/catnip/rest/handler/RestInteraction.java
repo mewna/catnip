@@ -221,11 +221,11 @@ public class RestInteraction extends RestHandler {
     
     // Global commands
     
-    public Observable<ApplicationCommand> getGlobalApplicationCommands() {
-        return getGlobalApplicationCommandsRaw()
-                .map(e -> JsonUtil.mapObjectContents(entityBuilder()::createApplicationCommand).apply(e))
-                .flatMapIterable(e -> e);
-    }
+//    public Observable<ApplicationCommand> getGlobalApplicationCommands() {
+//        return getGlobalApplicationCommandsRaw()
+//                .map(e -> JsonUtil.mapObjectContents(entityBuilder()::createApplicationCommand).apply(e))
+//                .flatMapIterable(e -> e);
+//    }
     
     public Observable<JsonArray> getGlobalApplicationCommandsRaw() {
         return catnip().requester().queue(new OutboundRequest(Routes.GET_GLOBAL_APPLICATION_COMMANDS.withMajorParam(catnip().clientId()),
@@ -233,28 +233,28 @@ public class RestInteraction extends RestHandler {
                 .map(ResponsePayload::array);
     }
     
-    public Single<ApplicationCommand> createGlobalApplicationCommand(@Nonnull final ApplicationCommandType type,
-                                                                     @Nonnull final String name, @Nullable final String description,
-                                                                     @Nonnull final Collection<ApplicationCommandOption> options) {
-        return Single.fromObservable(createGlobalApplicationCommandRaw(type, name, description, options)
-                .map(entityBuilder()::createApplicationCommand));
-    }
+//    public Single<ApplicationCommand> createGlobalApplicationCommand(@Nonnull final ApplicationCommandType type,
+//                                                                     @Nonnull final String name, @Nullable final String description,
+//                                                                     @Nonnull final Collection<ApplicationCommandOption> options) {
+//        return Single.fromObservable(createGlobalApplicationCommandRaw(type, name, description, options)
+//                .map(entityBuilder()::createApplicationCommand));
+//    }
     
-    public Observable<JsonObject> createGlobalApplicationCommandRaw(@Nonnull final ApplicationCommandType type,
-                                                                    @Nonnull final String name, @Nullable final String description,
-                                                                    @Nonnull final Collection<ApplicationCommandOption> options) {
-        final JsonObject body = createCommandBody(type, name, description, options);
-        return catnip().requester().queue(new OutboundRequest(Routes.CREATE_GLOBAL_APPLICATION_COMMAND
-                .withMajorParam(catnip().clientId()), Map.of()).object(body)).map(ResponsePayload::object);
-    }
-    
-    public Single<ApplicationCommand> editGlobalApplicationCommand(@Nonnull final ApplicationCommandType type,
-                                                                   @Nonnull final String name, @Nullable final String description,
-                                                                   @Nonnull final String commandId,
-                                                                   @Nonnull final Collection<ApplicationCommandOption> options) {
-        return Single.fromObservable(editGlobalApplicationCommandRaw(type, name, description, commandId, options)
-                .map(entityBuilder()::createApplicationCommand));
-    }
+//    public Observable<JsonObject> createGlobalApplicationCommandRaw(@Nonnull final ApplicationCommandType type,
+//                                                                    @Nonnull final String name, @Nullable final String description,
+//                                                                    @Nonnull final Collection<ApplicationCommandOption> options) {
+//        final JsonObject body = createCommandBody(type, name, description, options);
+//        return catnip().requester().queue(new OutboundRequest(Routes.CREATE_GLOBAL_APPLICATION_COMMAND
+//                .withMajorParam(catnip().clientId()), Map.of()).object(body)).map(ResponsePayload::object);
+//    }
+//
+//    public Single<ApplicationCommand> editGlobalApplicationCommand(@Nonnull final ApplicationCommandType type,
+//                                                                   @Nonnull final String name, @Nullable final String description,
+//                                                                   @Nonnull final String commandId,
+//                                                                   @Nonnull final Collection<ApplicationCommandOption> options) {
+//        return Single.fromObservable(editGlobalApplicationCommandRaw(type, name, description, commandId, options)
+//                .map(entityBuilder()::createApplicationCommand));
+//    }
     
     public Observable<JsonObject> editGlobalApplicationCommandRaw(@Nonnull final ApplicationCommandType type,
                                                                   @Nonnull final String name, @Nullable final String description,
@@ -399,8 +399,8 @@ public class RestInteraction extends RestHandler {
         return builder.done();
     }
     
-    private JsonObject createCommandBody(@Nonnull final ApplicationCommandType type, @Nonnull final String name,
-                                         @Nullable final String description, @Nonnull final Collection<ApplicationCommandOption> options) {
+    JsonObject createCommandBody(@Nonnull final ApplicationCommandType type, @Nonnull final String name,
+                                 @Nullable final String description, @Nonnull final Collection<ApplicationCommandOption> options) {
         final var builder = JsonObject.builder();
         if(type == ApplicationCommandType.CHAT_INPUT) {
             if(!name.matches("^[\\w-]{1,32}$") || !name.toLowerCase(Locale.ROOT).equals(name)) {

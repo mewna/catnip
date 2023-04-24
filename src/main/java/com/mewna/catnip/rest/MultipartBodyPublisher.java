@@ -22,34 +22,35 @@ import java.util.*;
  */
 
 @SuppressWarnings("UnusedReturnValue")
+
 public class MultipartBodyPublisher {
-    private final Collection<PartsSpecification> partsSpecificationList = new ArrayList<>();
+    private final Collection<PartsSpecification> partsList = new ArrayList<>();
     @Getter
     private final String boundary = UUID.randomUUID().toString();
     
     public BodyPublisher build() {
-        if(partsSpecificationList.isEmpty()) {
+        if(partsList.isEmpty()) {
             throw new IllegalStateException("Must have at least one part to build multipart message.");
         }
         addFinalBoundary();
         return BodyPublishers.ofByteArrays(PartsIterator::new);
     }
+    private void addFinalBoundary() {
+        partsList.add(new PartsSpecification(Type.FINAL_BOUNDARY, null));
+    }
     
     @ParametersAreNonnullByDefault
     public MultipartBodyPublisher addPart(final String name, final String value) {
-        partsSpecificationList.add(new PartsSpecification(Type.STRING, name).value(value.getBytes(StandardCharsets.UTF_8)));
+        partsList.add(new PartsSpecification(Type.STRING, name).value(value.getBytes(StandardCharsets.UTF_8)));
         return this;
     }
     
     @ParametersAreNonnullByDefault
     public MultipartBodyPublisher addPart(final String name, final String filename, final byte[] value) {
-        partsSpecificationList.add(new PartsSpecification(Type.FILE, name).filename(filename).value(value));
+        partsList.add(new PartsSpecification(Type.FILE, name).filename(filename).value(value));
         return this;
     }
     
-    private void addFinalBoundary() {
-        partsSpecificationList.add(new PartsSpecification(Type.FINAL_BOUNDARY, null));
-    }
     
     public enum Type {
         STRING, FILE, FINAL_BOUNDARY
@@ -63,7 +64,8 @@ public class MultipartBodyPublisher {
         protected final String name;
         protected byte[] value;
         protected String filename;
-        
+        protected String contentType;
+
         public String toString() {
             if(type == Type.FINAL_BOUNDARY) {
                 return "--" + boundary + "--";
@@ -81,7 +83,7 @@ public class MultipartBodyPublisher {
         private boolean done;
         
         PartsIterator() {
-            parts = partsSpecificationList.iterator();
+            parts = partsList.iterator();
         }
         
         @Override
@@ -107,17 +109,26 @@ public class MultipartBodyPublisher {
             }
             return next.remove(0);
         }
-        
-        private void computeNext() {
-            if(!parts.hasNext()) {
-                return;
-            }
-            final var part = parts.next();
+    
+        private void processNextPart(PartsSpecification part, List<byte[]> next) {
             next.add(part.toString().getBytes(StandardCharsets.UTF_8));
             if(part.type != Type.FINAL_BOUNDARY) {
                 next.add(part.value);
                 next.add(new byte[] {'\r', '\n'});
             }
         }
+        
+        private void computeNext() {
+            if(!parts.hasNext()) {
+                return;
+            }
+            final var part = parts.next();
+            processNextPart(part, next);
+        }
+//            next.add(part.toString().getBytes(StandardCharsets.UTF_8));
+//            if(part.type != Type.FINAL_BOUNDARY) {
+//                next.add(part.value);
+//                next.add(new byte[] {'\r', '\n'});
+//            }
+        }
     }
-}
